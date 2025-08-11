@@ -1,0 +1,998 @@
+﻿
+@{
+}
+
+<style type="text/css">
+    body {
+        color: #566787;
+        background: #f5f5f5;
+        /* font-family: 'Varela Round', sans-serif; */
+        /* font-size: 13px; */
+    }
+
+    .table-wrapper {
+        background: #fff;
+        padding: 20px 25px;
+        margin: 30px auto;
+        border-radius: 3px;
+        box-shadow: 0 1px 1px rgba(0,0,0,.05);
+    }
+
+       /*  .table-wrapper .btn {
+            float: right;
+            color: #333;
+            background-color: #fff;
+            border-radius: 3px;
+            border: none;
+            outline: none !important;
+            margin-left: 10px;
+        }
+
+            .table-wrapper .btn:hover {
+                color: #333;
+                background: #f2f2f2;
+            }
+
+            .table-wrapper .btn.btn-primary {
+                color: #fff;
+                background: #03A9F4;
+            }
+
+                .table-wrapper .btn.btn-primary:hover {
+                    background: #03a3e7;
+                } */
+
+    /* .table-title .btn { */
+    /*     font-size: 17px; */
+    /*     border: none; */
+    /* } */
+
+        /* .table-title .btn i { */
+        /*     float: left; */
+        /*     font-size: 21px; */
+        /*     margin-right: 5px; */
+        /* } */
+
+        /* .table-title .btn span { */
+        /*     float: left; */
+        /*     margin-top: 2px; */
+        /*     height: 21px; */
+        /* } */
+
+    .table-title {
+        color: #fff;
+        background: #4b5366;
+        padding: 16px 25px;
+        margin: -20px -25px 10px;
+        border-radius: 3px 3px 0 0;
+    }
+
+        .table-title h2 {
+            margin: 5px 0 0;
+            font-size: 24px;
+        }
+
+    .show-entries select.form-control {
+        width: 60px;
+        margin: 0 5px;
+    }
+
+    .table-filter .filter-group {
+        float: right;
+        margin-left: 15px;
+    }
+
+    .table-filter input, .table-filter select {
+        height: 34px;
+        border-radius: 3px;
+        border-color: #ddd;
+        box-shadow: none;
+    }
+
+    .table-filter {
+        padding: 5px 0 15px;
+        border-bottom: 1px solid #e9e9e9;
+        margin-bottom: 5px;
+    }
+
+        .table-filter .btn {
+            height: 34px;
+        }
+
+        .table-filter label {
+            font-weight: normal;
+            margin-left: 10px;
+        }
+
+        .table-filter select, .table-filter input {
+            display: inline-block;
+            margin-left: 5px;
+        }
+
+        .table-filter input {
+            width: 200px;
+            display: inline-block;
+        }
+
+    .filter-group select.form-control {
+        width: 110px;
+    }
+
+    .filter-icon {
+        float: right;
+        margin-top: 7px;
+    }
+
+        .filter-icon i {
+            font-size: 18px;
+            opacity: 0.7;
+        }
+
+    table.table tr th, table.table tr td {
+        border-color: #e9e9e9;
+        padding: 12px 15px;
+        vertical-align: middle;
+    }
+
+       /*  table.table tr th:first-child {
+            width: 150px;
+        }
+
+        table.table tr th:last-child {
+            width: 80px;
+        } */
+
+    table.table-striped tbody tr:nth-of-type(odd) {
+        background-color: #fcfcfc;
+    }
+
+    table.table-striped.table-hover tbody tr:hover {
+        background: #f5f5f5;
+    }
+
+    table.table th i {
+        font-size: 13px;
+        margin: 0 5px;
+        cursor: pointer;
+    }
+
+    table.table td a {
+        font-weight: bold;
+        color: #566787;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+        table.table td a:hover {
+            color: #2196F3;
+        }
+
+        table.table td a.view {
+            width: 30px;
+            height: 30px;
+            color: #2196F3;
+            border: 2px solid;
+            border-radius: 30px;
+            text-align: center;
+        }
+
+            table.table td a.view i {
+                font-size: 22px;
+                margin: 2px 0 0 1px;
+            }
+
+    table.table .avatar {
+        border-radius: 50%;
+        vertical-align: middle;
+        margin-right: 10px;
+    }
+
+    .status {
+        font-size: 30px;
+        margin: 2px 2px 0 0;
+        display: inline-block;
+        vertical-align: middle;
+        line-height: 10px;
+    }
+
+    .text-success {
+        color: #10c469;
+    }
+
+    .text-info {
+        color: #62c9e8;
+    }
+
+    .text-warning {
+        color: #FFC107;
+    }
+
+    .text-danger {
+        color: #ff5b5b;
+    }
+
+    .pagination {
+        float: right;
+        margin: 0 0 5px;
+    }
+
+        .pagination li a {
+            border: none;
+            font-size: 13px;
+            min-width: 30px;
+            min-height: 30px;
+            color: #999;
+            margin: 0 2px;
+            line-height: 30px;
+            border-radius: 2px !important;
+            text-align: center;
+            padding: 0 6px;
+        }
+
+            .pagination li a:hover {
+                color: #666;
+            }
+
+        .pagination li.active a {
+            background: #03A9F4;
+        }
+
+            .pagination li.active a:hover {
+                background: #0397d6;
+            }
+
+        .pagination li.disabled i {
+            color: #ccc;
+        }
+
+        .pagination li i {
+            font-size: 16px;
+            padding-top: 6px
+        }
+
+    .hint-text {
+        float: left;
+        margin-top: 10px;
+        font-size: 13px;
+    }
+
+    div.dt-buttons {
+        float: right;
+    }
+
+
+
+    .panel-focus {
+        background-color: #198754 !important;
+    }
+
+    .panel {
+        background-color: #6c757d !important;
+    }
+
+    .panel-dtl-focus {
+        background-color: white !important;
+    }
+
+        .panel-dtl-focus span {
+            color: black;
+            background-color: #white;
+        }
+
+        .panel-dtl-focus div.timeline-body {
+            color: black;
+            background-color: white;
+        }
+
+        .panel-dtl-focus div.timeline-footer {
+            color: black;
+            background-color: #white;
+        }
+
+    .panel-dtl {
+        background-color: #e9ecef !important;
+    }
+
+        .panel-dtl span {
+            color : grey;
+            background-color: #e9ecef;
+        }
+
+        .panel-dtl div.timeline-body {
+            color: grey;
+            background-color: #e9ecef;
+        }
+
+        .panel-dtl div.timeline-footer {
+            color: grey;
+            background-color: #e9ecef;
+        }
+
+</style>
+
+<div class="container-fluid">
+    <div class="table-wrapper">
+        <div class="table-title">
+            <div class="row">
+                <div class="col-sm-4">
+                    <h2>NEW GRN <b></b></h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12 col-md-8">
+                <div class="card card-success">
+                    <div class="card-header " id="pnlGRNH">
+                        <h3 class="card-title">1. Receive Info</h3>
+                    </div>
+                    <div class="card-body" id="pnlGRND">
+                        @* <form action="javascript:loadList()"> *@
+                        <div class="row" style="padding:5px;">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Loader</label>
+                                    <input id="txtLoader" type="button" class="form-control" style="" placeholder="Loader" onclick="showLoaderForm()" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>GRN Batch No</label>
+                                    <input id="txtGRN" type="text" class="form-control" style="" placeholder="" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label></label>
+                                    <div class="row">
+                                        <div class="col-sm-12 col-md-6">
+                                            <div class="custom-control custom-checkbox">
+                                                <input class="custom-control-input" type="checkbox" id="chkPrint">
+                                                <label for="chkPrint" class="custom-control-label">Print QR</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-12 col-md-6">
+                                            <div class="custom-control custom-checkbox">
+                                                <input class="custom-control-input" type="checkbox" id="chkLoadToLoader">
+                                                <label for="chkLoadToLoader" class="custom-control-label">Continue Load to Loader</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" style="padding:5px;">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Supplier Name</label>
+                                    <input id="txtSupplierName" type="text" class="form-control" style="" placeholder="" onclick="" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Supplier Ref No</label>
+                                    <input id="txtSupplierRefNo" type="text" class="form-control" style="" placeholder="" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" style="padding:5px;">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Item</label>
+                                    <input id="txtItem" type="button" class="form-control" style="" placeholder="" onclick="showItemForm()" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Qty</label>
+                                    <input id="txtQty" type="number" class="form-control" style="" placeholder="" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" style="padding:5px;">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Expiry Date</label>
+                                    <input id="dtpExDate" name="DateFrom" type="date" class="form-control" placeholder="Expiry Date" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group"> 
+                                    <label>Remark</label>
+                                    <input id="txtRemark" type="text" class="form-control" style="" placeholder="" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" style="padding:5px;">
+                            <div class="col-sm-12" style="">
+                                <button type="button" class="btn btn-block btn-success" style="width:100%;" onclick="addReceive()" id="btnAdd"><i class="bi bi-plus"></i> Add</button>
+                            </div>
+                        </div>
+                        <input type="hidden" id="txtItemId">
+                        <input type="hidden" id="txtLoaderId">
+                        @* </form> *@
+                    </div>
+                </div>
+
+                <hr />
+
+                <table class="table table-striped table-hover" id="listTable">
+                    <thead>
+                        <tr>
+                            <th>GRN No</th>
+                            <th>Item</th>
+                            <th>Qty</th>
+                            <th>Reel Code</th>
+                            <th>Created</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                </table>
+
+            </div>
+            <div class="col-sm-12 col-md-4">
+                <div class="card card-success">
+                    <div class="card-header " id="pnlPLCH">
+                        <h3 class="card-title">2. Loader Response</h3>
+                    </div>
+                    <div class="card-body" id="pnlPLCD">
+                        <div class="timeline">
+                            @* STEP 1 *@
+                            <div class="time-label">
+                                <span class="bg-red">STEP 1 :: Check Loader Status <i class="bi bi-check-circle-fill"></i></span>
+                            </div>
+                            <div>
+                                <i class="fas fa-envelope bg-blue"></i>
+                                <div class="timeline-item">
+                                    <div class="timeline-body" style="height:80px;">
+                                        <p style="text-align:center;">IS READY !</p>
+                                    </div>
+                                    <div class="timeline-footer" style="border-top:1px solid rgba(0,0,0,.125);">
+                                        <span style="color:dimgrey; font-size:15px;"> - </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @* STEP 2 *@
+                            <div class="time-label">
+                                <span class="bg-red">STEP 2 :: Reading Reel Info ... </span>
+                            </div>
+                            <div>
+                                <i class="fas fa-envelope bg-blue"></i>
+                                <div class="timeline-item">
+                                    <div class="timeline-body" style="height:150px;">
+                                        <p>
+                                            Item :
+                                        </p>
+                                        <p>
+                                            Reel ID :
+                                        </p>
+                                        <p>
+                                            Actual Height :
+                                        </p>                                        
+                                    </div>
+                                    <div class="timeline-footer" style="border-top:1px solid rgba(0,0,0,.125);">
+                                        <span style="color:dimgrey; font-size:15px;"> - </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @* STEP 2 *@
+                            <div class="time-label">
+                                <span class="bg-red">DONE</span>
+                            </div>
+                            <div>
+                                <i class="fas fa-envelope bg-blue"></i>
+                                <div class="timeline-item">
+                                    <div class="timeline-body" style="height:80px;">
+                                        <p style="text-align:center;">Waiting save new GRN ... </p>
+                                    </div>
+                                    @* <div class="timeline-footer" style="border-top:1px solid rgba(0,0,0,.125);">
+                                        <span style="color:dimgrey; font-size:15px;">No Error </span>
+                                    </div> *@
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog modal-lg">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Select Item</h4>
+            </div>
+            <div class="modal-body">
+                <table id="itemTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Item Code</th>
+                            <th>UOM</th>
+                            <th>Description</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="loaderModal" role="dialog">
+    <div class="modal-dialog modal-lg">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="card card-success">
+                    <div class="card-header">
+                        <h3 class="card-title">Scan Loader Code</h3>
+                    </div>
+                    <div class="card-body">
+                        <input id="txtScanLoader" class="form-control form-control-lg" type="text" placeholder="Scan Loader ... ">
+                        <hr />
+                        <p>Or select loader from list : </p>
+                        <select class="form-control" id="selLoader">
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" onclick="addLoader(1, '','')">Done</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="cancelLoaderForm()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <link href="~/css/datatables.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/datatables.min.js"></script>
+    <script src="~/js/sweetalert2.all.min.js"></script>
+
+    <!-- DataTables Buttons -->
+    <script src="https://cdn.datatables.net/buttons/1.6.2/js/dataTables.buttons.min.js"></script>
+    <!-- JSZip for Excel/CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <!-- HTML5 Export Buttons -->
+    <script src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.html5.min.js"></script>
+
+    <script type="text/javascript">
+
+        const scanLoaderEle = document.getElementById('txtScanLoader');
+
+        scanLoaderEle.addEventListener('keyup', function(event) {
+          // Check if the pressed key is "Enter" (key code 13 or key property "Enter")
+          if (event.key === 'Enter') {
+
+            const inputValue = this.value;
+            // alert('Enter key pressed! Value: ');
+
+            var code = inputValue;
+            $.ajax({
+                url: "/Loader/GetLoaderInfo_ReadyToLoad?req=" + code,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    //console.log(result);
+                    swal.close();
+                    if (result.success == true) {
+                        addLoader(0, result.data.loader_Id, result.data.loaderCode);
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+          }
+        });
+
+        $(document).ready(function () {
+            $("#txtGRN").val('-');
+            resetColorForm(1);
+
+            $('#listTable').DataTable({
+                searching: true,
+                responsive: true,
+                dom: 'Bfrtip', // 'B' for Buttons, 'f' for filtering, 'r' for processing display, 't' for table, 'i' for information, 'p' for pagination
+                buttons: [
+                    'excelHtml5',
+                ],
+                "order": [[ 4, 'desc' ]],
+                 paging: false,
+            });
+
+            loadLoaderList();
+            loadItemList();
+
+        });
+
+        function loadItemList() {
+            $.ajax({
+                url: "/Item/GetActiveItemList/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    //console.log(result);
+                    swal.close()
+                    if (result.success == true) {
+                        $('#itemTable').DataTable( {
+                            dom: 'frtip',
+                            ordering: false,
+                            data: result.data,
+                            paging: true,
+                            pageLength: 25,
+                            lengthMenu: [25, 50, 100, 250, 500],
+                            columns: [
+                                { data: 'itemCode' },
+                                { data: 'uom' },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        return '<p><span>' + row.description + '</span><br/>' +
+                                        '<span style="font-size:13px;color:grey;">' + row.desc2 + '</span></p>';
+                                    }
+                                },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
+                                        'onclick="addtemForm(\'' + row.item_Id + '\', \'' + row.itemCode + '\')">' +
+                                        '<span><i class="bi bi-plus""></i>  Add</span></button> ' +
+                                        '</div>';
+                                    }
+                                }
+                            ],
+                        });
+
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+        }
+
+        function loadLoaderList() {
+            $.ajax({
+                url: "/Loader/GetLoaderList_ReadyToLoad/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    //console.log(result);
+                    swal.close();
+                    if (result.success == true) {
+
+                        // Get the select element
+                        const selLoader = document.getElementById('selLoader');
+                        for (const opt of result.data)
+                        {
+                            const el = document.createElement("option");
+                            el.textContent = opt.loaderCode;
+                            el.value = opt.loader_Id;
+                            selLoader.appendChild(el);
+                        }
+                        
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+        }
+
+        function showLoaderForm() {
+            $("#loaderModal").modal("toggle");
+        }
+
+        function addLoader(_type, id, code) {
+            if (_type == 1) {
+                const selLoader = document.getElementById('selLoader');
+                const idx = selLoader.selectedIndex;
+                const selectedOption = selLoader.options[idx];
+                id = selectedOption.value;
+                code = selectedOption.text;
+
+
+                $.ajax({
+                    url: "/Loader/GetLoaderInfo_ReadyToLoad?req=" + code,
+                    type: "GET",
+                    dataType: 'JSON',
+                    // data: JSON.stringify(jsonInput),
+                    contentType: 'application/json; charset=utf-8',
+                    beforeSend: function () {
+                        Swal.fire({
+                            text: 'Please Wait',
+                            width: '300px',
+
+                            allowEscapeKey: false,
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                        });
+                        Swal.showLoading()
+                    },
+                    success: function (result) {
+                        //console.log(result);
+                        swal.close();
+                        if (result.success == true) {
+                            // continue
+                        }
+                        else {
+                            swal.fire({
+                                icon: 'error',
+                                title: "Wait",
+                                text: result.errMessage
+                            });
+                        }
+                    },
+                    error: function (error) {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: error.val
+                        });
+                    }
+                });
+
+            }
+
+            var grn = $("#txtGRN").val();
+            if (grn == "-") {
+                const date = new Date();
+                const year = date.getFullYear();
+                const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-indexed
+                const day = date.getDate().toString().padStart(2, '0');
+                const HH = date.getHours().toString().padStart(2, '0');
+                const mm = date.getMinutes().toString().padStart(2, '0');
+                const ss = date.getSeconds().toString().padStart(2, '0');
+
+                const formattedDate = `${year}${month}${day}${HH}${mm}`;
+                $("#txtGRN").val(formattedDate);
+            }
+
+            $("#txtLoader").val(code);
+            $("#txtLoaderId").val(id);
+            $("#loaderModal").modal("toggle");
+        }
+
+        function cancelLoaderForm() {
+            $("#loaderModal").modal("toggle");
+        }
+
+        function showItemForm() {
+            $("#myModal").modal("toggle");
+        }
+
+        function addtemForm(id, code) {
+            $("#txtItem").val(code);
+            $("#txtItemId").val(id);
+            $("#myModal").modal("toggle");
+
+            const txtQty = document.getElementById('txtQty');
+            txtQty.focus();
+        }
+
+        function insertItemRow(item, qty, reelCode, cre) {
+            var table = new DataTable('#listTable');
+            table.rows.add([
+                [$("#txtGRN").val(), item, qty, reelCode, cre, '<button class="btn btn-warning">Edit</button><button class="btn btn-error">Reprint</button>']
+            ]).draw();
+
+        }
+
+        function readyNewReceive() {
+            $("#txtItem").val('');
+            $("#txtItemId").val('');
+            // $("#txtQty").val('');
+            $("#myModal").modal("toggle");
+        }
+
+        function resetColorForm(isGRN) {
+            if (isGRN == 1) {
+                $("#pnlGRNH").addClass("panel-focus");
+                $("#pnlGRND").addClass("panel-dtl-focus");
+                $("#pnlPLCH").addClass("panel");
+                $("#pnlPLCD").addClass("panel-dtl");
+
+                $('#txtLoader').prop('disabled', false);
+                $('#txtSupplierName').prop('disabled', false);
+                $('#txtSupplierRefNo').prop('disabled', false);
+                $('#txtItem').prop('disabled', false);
+                $('#txtQty').prop('disabled', false);
+                $('#txtRemark').prop('disabled', false);
+                $('#txtGRN').prop('disabled', false);
+                $('#btnAdd').prop('disabled', false);
+
+                const btnAdd = document.getElementById('btnAdd');
+                btnAdd.style.backgroundColor = '#198754';
+            }
+            else {
+                $("#pnlGRNH").removeClass("panel-focus");
+                $("#pnlGRND").removeClass("panel-dtl-focus");
+                $("#pnlPLCH").removeClass("panel");
+                $("#pnlPLCD").removeClass("panel-dtl");
+
+                $("#pnlPLCH").addClass("panel-focus");
+                $("#pnlPLCD").addClass("panel-dtl-focus");
+                $("#pnlGRNH").addClass("panel");
+                $("#pnlGRND").addClass("panel-dtl");
+
+                $('#txtLoader').prop('disabled', true);
+                $('#txtSupplierName').prop('disabled', true);
+                $('#txtSupplierRefNo').prop('disabled', true);
+                $('#txtItem').prop('disabled', true);
+                $('#txtQty').prop('disabled', true);
+                $('#txtRemark').prop('disabled', true);
+                $('#txtGRN').prop('disabled', true);
+
+                $('#btnAdd').prop('disabled', true);
+
+                const btnAdd = document.getElementById('btnAdd');
+                btnAdd.style.backgroundColor = 'grey';
+            }
+
+        }
+
+        function addReceive() {
+
+            var data = {
+                GRNBatchNo: $("#txtGRN").val(),
+                Item_Id: $("#txtItemId").val(),
+                Qty: $("#txtQty").val(),
+                ExpiryDate: $("#dtpExDate").val(),
+                Remark: $("#txtRemark").val()
+            }
+
+            //console.log(JSON.stringify(data));
+
+            $.ajax({
+                url: '/GRN/SaveGRNDtl',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    // console.log(result);
+                    if (result.success == true) {
+                        Swal.close(); // Close the loading alert
+                        insertItemRow(result.data.itemCode, result.data.qty, result.data.reelCode, result.data.createdDateDisplay);
+
+                        const chkPrint = document.getElementById('chkPrint');
+                        const chkLoadToLoader = document.getElementById('chkLoadToLoader');
+                        if (chkPrint.checked) {
+                            // print sticker ~
+                        }
+
+                        if (chkLoadToLoader.checked) {
+                            // need call PLC
+                            resetColorForm(0);
+                            loadPLC();
+
+                        } else {
+                            // continue new Item
+                            readyNewReceive();
+                        }
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+
+            // console.log(id);
+        }
+
+        function loadPLC() {
+
+        }
+
+    </script>
+}

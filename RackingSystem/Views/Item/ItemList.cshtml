@@ -1,0 +1,456 @@
+﻿
+@{
+}
+
+<style>
+    .table-title {
+        color: #fff;
+        background: #4b5366;
+        /*     padding: 16px 25px;
+            margin: -20px -25px 10px; */
+        border-radius: 3px 3px 0 0;
+    }
+
+        .table-title h2 {
+            margin: 5px 0 0;
+            font-size: 24px;
+        }
+
+</style>
+
+<br />
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-outline ">
+                <div class="card-header table-title">
+                    <div class="card-title">                        
+                        <h2>Item List <b></b></h2>
+                    </div>
+                    <div class="card-tools">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-warning">Import</button>
+                            <button type="button" class="btn btn-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="true">
+                                <span class="visually-hidden">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(114.5px, 40px, 0px);">
+                                <li><a class="dropdown-item" href="#">Download Template</a></li>
+                                <li><a class="dropdown-item" href="#">Import Item from Excel</a></li>
+                            </ul>
+                        </div>
+                        <button type="button" class="btn btn-success" onclick="newItemForm()">
+                            Add New Item
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table table-striped table-bordered table-responsive text-nowrap">
+                        <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Item Code</th>
+                                    <th>UOM</th>
+                                    <th>Description</th>
+                                    <th>Is Active</th>
+                                    <th>FinishGood?</th>
+                                    <th>Height</th>
+                                    <th>Width</th>
+                                    <th>Max Height</th>
+                                    <th>Alarm?</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Update Item</h4>
+            </div>
+            @* <form action="/bin/SaveBin" method="post"> *@
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" for="txtCode">Item Code</label>
+                    <input type="text" class="form-control" name="ItemCode" id="txtCode" aria-describedby="Item Code">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="txtUOM">UOM</label>
+                    <input type="text" class="form-control" name="UOM" id="txtUOM" aria-describedby="UOM">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="txtDesc">Description</label>
+                    <input type="text" class="form-control" name="Description" id="txtDesc" aria-describedby="Description">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="txtDesc2">Desc2</label>
+                    <input type="text" class="form-control" name="Desc2" id="txtDesc2" aria-describedby="Desc2">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="txtHeight">Height</label>
+                    <input type="number" class="form-control" name="Height" id="txtHeight" aria-describedby="Height">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="txtWidth">Width</label>
+                    <input type="number" class="form-control" name="Width" id="txtWidth" aria-describedby="Width">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="txtMaxHeight">Max Height</label>
+                    <input type="number" class="form-control" name="MaxHeight" id="txtMaxHeight" aria-describedby="Max Height">
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="chkIsActive">
+                    <label class="form-check-label" for="chkIsActive">Is Active</label>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="chkIsFinishGood">
+                    <label class="form-check-label" for="chkIsFinishGood">Is Finish Good</label>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="chkAlarmOverMaxHeight">
+                    <label class="form-check-label" for="chkAlarmOverMaxHeight">Alarm Over Max Height</label>
+                </div>
+
+                <input type="hidden" id="txtId">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="saveItem()">Save</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="cancelForm()">Cancel</button>
+            </div>
+            @* </form> *@
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <link href="~/css/datatables.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/datatables.min.js"></script>
+    <script src="~/js/sweetalert2.all.min.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            loadList();
+        });
+
+        function loadList() {
+            $.ajax({
+                url: "/Item/GetItemList/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    console.log(result);
+                    swal.close()
+                    if (result.success == true) {
+                        $('#listTable').DataTable( {
+                            data: result.data,
+                            paging: true,
+                            pageLength: 50,
+                            lengthMenu: [50, 100, 250, 500, 1000],
+                            columns: [
+                                { data: 'itemCode' },
+                                { data: 'uom' },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        return '<p style="margin:0;"><span>' + row.description + '</span><br/>' +
+                                        '<span style="font-size:13px;color:grey;">' + row.desc2 + '</span></p>';
+                                    }
+                                },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        if (row.isActive == true) {
+                                            return '<span><i class="bi bi-check-square" style="color: darkgreen;"></i></span>'
+                                        }
+                                        else {
+                                            return '<span><i class="bi bi-app""></i></span>'
+                                        }
+                                    }
+                                },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        if (row.isFinishGood == true) {
+                                            return '<span><i class="bi bi-check-square" style="color: darkgreen;"></i></span>'
+                                        }
+                                        else {
+                                            return '<span><i class="bi bi-app""></i></span>'
+                                        }
+                                    }
+                                },
+                                { data: 'height' },
+                                { data: 'width' },
+                                { data: 'maxHeight' },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        if (row.alarmOverMaxHeight == true) {
+                                            return '<span><i class="bi bi-check-square"></i></span>'
+                                        }
+                                        else {
+                                            return '<span><i class="bi bi-app""></i></span>'
+                                        }
+                                    }
+                                },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
+                                        'onclick="editItemForm(\'' + row.item_Id + '\', \'' + row.itemCode + '\', \'' + row.uom + '\', \'' + row.description + '\', \'' + row.desc2 + '\', ' + 
+                                        '\'' + row.height + '\', \'' + row.width + '\', \'' + row.maxHeight + '\', ' +
+                                        '\'' + row.isActive + '\', \'' + row.isFinishGood + '\', \'' + row.alarmOverMaxHeight + '\')">' +
+                                        '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
+                                         
+                                        '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.item_Id + '\', \'' + row.itemCode + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
+                                    }
+                                }
+                            ],
+                        });
+
+
+
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+        }
+
+        function newItemForm() {
+            $("#txtId").val("0");
+            $("#txtCode").val("");
+            $("#txtUOM").val("");
+            $("#txtDesc").val("");
+            $("#txtDesc2").val("");
+            $("#txtHeight").val("");
+            $("#txtWidth").val("");
+            $("#txtMaxHeight").val("");
+            document.getElementById("chkIsActive").checked = true;
+            document.getElementById("chkIsFinishGood").checked = true;
+            document.getElementById("chkAlarmOverMaxHeight").checked = true;
+            $("#myModal").modal("show");
+        }
+
+        function editItemForm(id, code, uom, desc, desc2, h, w, maxh, isAct, isFG, alm) {
+            $("#txtId").val(id);
+            $("#txtCode").val(code);
+            $("#txtUOM").val(uom);
+            $("#txtDesc").val(desc);
+            $("#txtDesc2").val(desc2);
+            $("#txtHeight").val(h);
+            $("#txtWidth").val(w);
+            $("#txtMaxHeight").val(maxh);
+            if (isAct == "true") {
+                document.getElementById("chkIsActive").checked = true;
+            }
+            else {
+                document.getElementById("chkIsActive").checked = false;
+            }
+            if (isFG == "true") {
+                document.getElementById("chkIsFinishGood").checked = true;
+            }
+            else {
+                document.getElementById("chkIsFinishGood").checked = false;
+            }
+            if (alm == "true") {
+                document.getElementById("chkAlarmOverMaxHeight").checked = true;
+            }
+            else {
+                document.getElementById("chkAlarmOverMaxHeight").checked = false;
+            }
+            $("#myModal").modal("show");
+        }
+
+        function cancelForm() {
+            $("#myModal").modal("toggle");
+        }
+
+        function saveItem() {
+            const chkIsAct = document.querySelector('#chkIsActive');
+            const chkIsFinishGood = document.querySelector('#chkIsFinishGood');
+            const chkAlarmOverMaxHeight = document.querySelector('#chkAlarmOverMaxHeight');
+
+            var data = {
+                Item_Id: $("#txtId").val(),
+                ItemCode: $("#txtCode").val(),
+                UOM: $("#txtUOM").val(),
+                Description: $("#txtDesc").val(),
+                Desc2: $("#txtDesc2").val(),
+                Height: $("#txtHeight").val(),
+                Width: $("#txtWidth").val(),
+                MaxHeight: $("#txtMaxHeight").val(),
+                IsActive: chkIsAct.checked ? true : false,
+                IsFinishGood: chkIsFinishGood.checked ? true : false,
+                AlarmOverMaxHeight: chkAlarmOverMaxHeight.checked ? true : false
+            }
+
+            //console.log(JSON.stringify(data));
+
+            $.ajax({
+                url: '/Item/SaveItem',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    // console.log(result);
+                    if (result.success == true) {
+                        $("#myModal").modal("toggle");
+                        swal.fire({
+                            icon: 'success',
+                            title: "Success Update",
+                            text: "",
+                            didClose: () => {
+                              window.location.reload();
+                            }
+                        });
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+
+            // console.log(id);
+        }
+
+        function deleteItem(id, ItemCode) {
+
+            swal.fire({
+                title: "Are you sure want to delete?",
+                text: "You will not be able to recover this record!",
+                inputAttributes: {
+                    autocapitalize: 'off'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'ok',
+                cancelButtonText: 'cancel',
+                allowOutsideClick: false
+              }).then(function(r) {
+                if (r.isConfirmed == true) {
+
+                    var data = {
+                        Item_Id: id,
+                        ItemCode: ItemCode
+                    }
+
+                    $.ajax({
+                        url: '/Item/DeleteItem',
+                        type: 'DELETE',
+                        data: JSON.stringify(data),
+                        dataType: 'json',
+                        contentType: 'application/json; charset=utf-8',
+                        beforeSend: function () {
+                            Swal.fire({
+                                text: 'Please Wait',
+                                width: '300px',
+
+                                allowEscapeKey: false,
+                                allowOutsideClick: false,
+                                showConfirmButton: false,
+                            });
+                            Swal.showLoading()
+                        },
+                        success: function (result) {
+                            if (result.success == true) {
+                                $("#myModal").modal("toggle");
+                                swal.fire({
+                                    icon: 'success',
+                                    title: "Success Deleted",
+                                    text: "",
+                                    didClose: () => {
+                                      window.location.reload();
+                                    }
+                                });
+                            }
+                            else {
+                                swal.fire({
+                                    icon: 'error',
+                                    title: "Wait",
+                                    text: result.errMessage
+                                });
+                            }
+                        },
+                        error: function (error) {
+                            console.log(error);
+                            swal.fire({
+                                icon: 'error',
+                                title: "Wait",
+                                text: error.val
+                            });
+                        }
+                    });
+
+                } else {
+                    return;
+                }
+              });
+
+        }
+
+    </script>
+}

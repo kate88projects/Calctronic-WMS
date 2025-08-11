@@ -1,0 +1,397 @@
+﻿
+@{
+}
+
+<style type="text/css">
+    body {
+        color: #566787;
+        background: #f5f5f5;
+        /* font-family: 'Varela Round', sans-serif; */
+        /* font-size: 13px; */
+    }
+
+    .table-wrapper {
+        background: #fff;
+        padding: 20px 25px;
+        margin: 30px auto;
+        border-radius: 3px;
+        box-shadow: 0 1px 1px rgba(0,0,0,.05);
+    }
+
+     .table-wrapper .btn {
+                float: right;
+                color: #333;
+                background-color: #fff;
+                border-radius: 3px;
+                border: none;
+                outline: none !important;
+                margin-left: 10px;
+            }
+
+                .table-wrapper .btn:hover {
+                    color: #333;
+                    background: #f2f2f2;
+                }
+
+                .table-wrapper .btn.btn-primary {
+                    color: #fff;
+                    background: #03A9F4;
+                }
+
+                    .table-wrapper .btn.btn-primary:hover {
+                        background: #03a3e7;
+                    } 
+
+    .table-title .btn {
+        font-size: 17px;
+        border: none;
+    }
+
+    .table-title .btn i {
+        float: left;
+        font-size: 21px;
+        margin-right: 5px;
+    }
+
+    .table-title .btn span {
+        float: left;
+        margin-top: 2px;
+        height: 21px;
+    }
+
+    .table-title {
+        color: #fff;
+        background: #4b5366;
+        padding: 16px 25px;
+        margin: -20px -25px 10px;
+        border-radius: 3px 3px 0 0;
+    }
+
+        .table-title h2 {
+            margin: 5px 0 0;
+            font-size: 24px;
+        }
+
+    .show-entries select.form-control {
+        width: 60px;
+        margin: 0 5px;
+    }
+
+    .table-filter .filter-group {
+        float: right;
+        margin-left: 15px;
+    }
+
+    .table-filter input, .table-filter select {
+        height: 34px;
+        border-radius: 3px;
+        border-color: #ddd;
+        box-shadow: none;
+    }
+
+    .table-filter {
+        padding: 5px 0 15px;
+        border-bottom: 1px solid #e9e9e9;
+        margin-bottom: 5px;
+    }
+
+        .table-filter .btn {
+            height: 34px;
+        }
+
+        .table-filter label {
+            font-weight: normal;
+            margin-left: 10px;
+        }
+
+        .table-filter select, .table-filter input {
+            display: inline-block;
+            margin-left: 5px;
+        }
+
+        .table-filter input {
+            width: 200px;
+            display: inline-block;
+        }
+
+    .filter-group select.form-control {
+        width: 110px;
+    }
+
+    .filter-icon {
+        float: right;
+        margin-top: 7px;
+    }
+
+        .filter-icon i {
+            font-size: 18px;
+            opacity: 0.7;
+        }
+
+    /* .table > :not(caption) > * > * {
+        padding: 0 !important;
+    } */
+
+    .tblRow {
+        padding: 0 !important;
+    }
+
+    .tblCol1 {
+        width: 10%;
+    }
+
+    .tblCol2 {
+        width: 80%;
+    }
+
+    .tblCol3 {
+        width: 10%;
+    }
+
+</style>
+
+<div class="container-fluid">
+    <div class="table-wrapper">
+        <div class="table-title">
+            <div class="row">
+                <div class="col-sm-4">
+                    <h2>Racking Status <b></b></h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="padding:5px;">
+            <div class="col-sm-4" style="">
+
+            </div>
+            <div class="col-sm-4" style="">
+
+            </div>
+            <div class="col-sm-4" style="">
+                <div class="row">
+                    <div class="col-3" style="padding:0;">
+                        @* <select id="selDateType" name="DateType" class="form-control">
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select> *@
+                        <label>Column : </label>
+                    </div>
+                    <div class="col-5" style="padding:0;">
+                        <input id="txtCol" name="txtCol" type="number" class="form-control" style="" placeholder="Column No" />
+                    </div>
+                    <div class="col-4" style="padding:0;">
+                        <button type="button" class="btn btn-primary" style="width:100%;" onclick="loadList()"><i class="bi bi-search"></i> </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr />
+
+        <div class="row">
+            <div class="col-2">
+                <div class="card card-success">
+                   @*  <div class="card-header " >
+                        <h3 class="card-title">Bin Info</h3>
+                    </div> *@
+                    <div class="card-body"  >
+                        <div class="row" style="padding:5px;">
+                            <div class="col-4">
+                                <span style="font-size:10px;color:lightgreen;"><i class="bi-circle-fill"></i></span>
+                            </div>
+                            <div class="col-8">
+                                <label>Active Bin</label>
+                            </div>
+                        </div>
+                        <div class="row" style="padding:5px;">
+                            <div class="col-4">
+                                <span style="font-size:10px;color:red;"><i class="bi-exclamation-circle-fill"></i></span>
+                            </div>
+                            <div class="col-8">
+                                <label>Inactive Bin</label>
+                            </div>
+                        </div>
+                        <div class="row" style="padding:5px;">
+                            <div class="col-4">
+                                <img src="../assets/img/lock.png" style="width:12px;height:12px;" />
+                            </div>
+                            <div class="col-8">
+                                <label>For Empty Tray</label>
+                            </div>
+                        </div>
+                        <div class="row" style="padding:5px;">
+                            <div class="col-4">
+                                <img src="../assets/img/tray_icon_136086.png" style="width:25px;height:25px;" />
+                            </div>
+                            <div class="col-8">
+                                <label>Has Empty Tray</label>
+                            </div>
+                        </div>
+                        <div class="row" style="padding:5px;">
+                            <div class="col-4">
+                                <img src="../assets/img/tray_full_icon_138077.png" style="width:25px;height:25px;" />
+                            </div>
+                            <div class="col-8">
+                                <label>Tray with Reel</label>
+                            </div>
+                        </div>
+                        <div class="row" style="padding:5px;">
+                            <div class="col-4">
+                                <span style="font-size:15px;">2</span>
+                            </div>
+                            <div class="col-8">
+                                <label>Tray with Reel - 2nd level</label>
+                            </div>
+                        </div>
+                        <div class="row" style="padding:5px;">
+                            <div class="col-4">
+                                <span style="font-size:15px;">3</span>
+                            </div>
+                            <div class="col-8">
+                                <label>Tray with Reel - 3rd level</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-2">
+                <table class="table table-striped table-hover" id="list1Table">
+                    <tbody id="list1TableBody"></tbody>
+                </table>
+            </div>
+            <div class="col-2">
+                <table class="table table-striped table-hover" id="list2Table">
+                    <tbody id="list2TableBody"></tbody>
+                </table>
+            </div>
+            <div class="col-2">
+                <table class="table table-striped table-hover" id="list3Table">
+                    <tbody id="list3TableBody"></tbody>
+                </table>
+            </div>
+            <div class="col-2">
+                <table class="table table-striped table-hover" id="list4Table">
+                    <tbody id="list4TableBody"></tbody>
+                </table>
+            </div>
+            <div class="col-2">
+                <table class="table table-striped table-hover" id="list5Table">
+                    <tbody id="list5TableBody"></tbody>
+                </table>
+            </div>
+        </div>
+        
+    </div>
+
+</div>
+
+@section Scripts
+{
+    <link href="~/css/datatables.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/datatables.min.js"></script>
+    <script src="~/js/sweetalert2.all.min.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $('#txtCol').val(1);
+            loadList();
+        });
+
+        function loadList() {
+            var col = $('#txtCol').val();
+            $.ajax({
+                url: "/Bin/GetBinStatus_ByColumn?req=" + col,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    // console.log(result);
+                    swal.close();
+                    if (result.success == true) {
+
+                        var idx = 1;
+                        for (let iC = 1; iC <= 5; iC++) {
+                            const tbl = document.getElementById('list' + iC + 'Table');
+                            const tableBody = document.getElementById('list' + iC + 'TableBody');
+                            tableBody.innerHTML = '';
+
+                            for (let i = 0; i < 50; i++) { // Example: Add 5 rows
+                                const newRow = tbl.insertRow(); // or document.createElement('tr');
+                                const cell1 = newRow.insertCell(); // or document.createElement('td');
+                                cell1.innerHTML = '<span style="font-size:10px;">' + result.data[idx - 1].binCode + '</span>';
+                                $(cell1).addClass("tblRow tblCol1");
+                                const cell2 = newRow.insertCell(); // or document.createElement('td');
+                                if (result.data[idx - 1].hasReel) {
+                                    if (result.data[idx - 1].reelNo == 0) {
+                                        cell2.innerHTML = '<img src="../assets/img/tray_full_icon_138077.png" style="display:flex;justify-self: center; height:25px;" />';
+                                    }
+                                    else {
+                                        cell2.innerHTML = '<span style="display:flex;justify-self: center; font-size:15px;">2</span>';
+                                    }
+                                }
+                                else {
+                                    if (result.data[idx - 1].hasEmptyTray) {
+                                        cell2.innerHTML = '<img src="../assets/img/tray_icon_136086.png" style="display:flex;justify-self: center;width:25px;height:25px;" />';
+                                    }
+                                    else {
+                                        cell2.innerHTML = '';
+                                    }
+                                }
+                                $(cell2).addClass("tblRow tblCol2");
+                                const cell3 = newRow.insertCell(); // or document.createElement('td');
+                                if (result.data[idx - 1].isActive) {
+                                    cell3.innerHTML = '<span style="font-size:10px;color:lightgreen;"><i class="bi-circle-fill"></i></span>';
+                                }
+                                else {
+                                    cell3.innerHTML = '<span style="font-size:10px;color:red;"><i class="bi-exclamation-circle-fill"></i></span>';
+                                }
+                                if (result.data[idx - 1].forEmptyTray) {
+                                        cell3.innerHTML = cell3.innerHTML + '<img src="../assets/img/lock.png" style="width:12px;height:12px;" />';
+                                }
+                                else {
+                                    // cell3.innerHTML = '<span style="font-size:10px;color:red;"><i class="bi-exclamation-circle-fill"></i></span>';
+                                }
+                                $(cell3).addClass("tblRow tblCol3");
+
+                                idx = idx + 1;
+                            }   
+                        }
+
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+
+        }
+
+
+    </script>
+}

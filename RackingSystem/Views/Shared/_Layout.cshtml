@@ -1,0 +1,262 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - WMS</title>
+
+    <!-- Default from Visual Studio -->
+    @*<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/RackingSystem.styles.css" asp-append-version="true" /> *@
+
+    <!-- Theme Color -->
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#007bff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
+
+    <!-- Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
+
+    <link rel="stylesheet"
+          href="~/css/overlayscrollbars.min.css"
+          crossorigin="anonymous" />
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap-font/bootstrap-icons.min.css"
+          crossorigin="anonymous" />
+
+    <!--begin::Required Plugin(AdminLTE)-->
+    <link rel="stylesheet" href="../css/adminlte.css" />
+    <!--end::Required Plugin(AdminLTE)-->
+
+    <style type="text/css">
+        html * {
+            /* font-size: 1em !important; */
+            /* color: #000 !important; */
+            font-family: Varela Round !important;
+        }
+    </style>
+</head>
+
+<body class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
+
+    <!--begin::App Wrapper-->
+    <div class="app-wrapper">
+        <!--begin::Header-->
+        <nav class="app-header navbar navbar-expand bg-body">
+            <!--begin::Container-->
+            <div class="container-fluid">
+                <!--begin::Start Navbar Links-->
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button">
+                            <i class="bi bi-list"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item d-none d-md-block"><a href="#" class="nav-link">Home</a></li>
+                </ul>
+                <!--end::Start Navbar Links-->
+
+            </div>
+            <!--end::Container-->
+        </nav>
+        <!--end::Header-->
+        <!--begin::Sidebar-->
+        <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+            <!--begin::Sidebar Brand-->
+            <div class="sidebar-brand">
+                <!--begin::Brand Link-->
+                <a href="./index.html" class="brand-link">
+                    <!--begin::Brand Image-->
+                    <img src="../assets/img/AdminLTELogo.png"
+                         alt="AdminLTE Logo"
+                         class="brand-image opacity-75 shadow" />
+                    <!--end::Brand Image-->
+                    <!--begin::Brand Text-->
+                    <span class="brand-text fw-light">Warehouse Management System</span>
+                    <!--end::Brand Text-->
+                </a>
+                <!--end::Brand Link-->
+            </div>
+            <!--end::Sidebar Brand-->
+            <!--begin::Sidebar Wrapper-->
+            <div class="sidebar-wrapper">
+                <nav class="mt-2">
+                    <!--begin::Sidebar Menu-->
+                    <ul class="nav sidebar-menu flex-column"
+                        data-lte-toggle="treeview"
+                        role="navigation"
+                        aria-label="Main navigation"
+                        data-accordion="false"
+                        id="navigation">
+                        <li class="nav-item menu-open">
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a asp-action="Dashboard1" asp-controller="Dashboard" class="nav-link active">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>Dashboard</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-header">MAINTENANCES</li>
+                        <li class="nav-item">
+                            <a asp-action="SlotList" asp-controller="Slot" class="nav-link">
+                                <i class="nav-icon bi bi-circle"></i>
+                                <p>Slot List</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-action="ItemList" asp-controller="Item" class="nav-link">
+                                <i class="nav-icon bi bi-circle"></i>
+                                <p>Item List</p>
+                            </a>
+                        </li>
+                        <li class="nav-header">BOM</li>
+                        <li class="nav-item">
+                            <a href="./docs/introduction.html" class="nav-link">
+                                <i class="nav-icon bi bi-circle"></i>
+                                <p>BOM List</p>
+                            </a>
+                        </li>
+                        <li class="nav-header">GRN</li>
+                        <li class="nav-item">
+                            <a asp-action="NewGRN" asp-controller="GRN" class="nav-link">
+                                <i class="nav-icon bi bi-circle"></i>
+                                <p>New Receive</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-action="GRNDetailList" asp-controller="GRN" class="nav-link">
+                                <i class="nav-icon bi bi-circle"></i>
+                                <p>GRN List</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-action="GRNDetailList" asp-controller="GRN" class="nav-link">
+                                <i class="nav-icon bi bi-circle"></i>
+                                <p>Reprint Reel Sticker</p>
+                            </a>
+                        </li>
+                        <li class="nav-header">JOB ORDER</li>
+                        <li class="nav-item">
+                            <a href="./docs/introduction.html" class="nav-link">
+                                <i class="nav-icon bi bi-circle"></i>
+                                <p>JO List</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="./docs/introduction.html" class="nav-link">
+                                <i class="nav-icon bi bi-circle"></i>
+                                <p>JO Schedule</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="./docs/introduction.html" class="nav-link">
+                                <i class="nav-icon bi bi-circle"></i>
+                                <p>Emergency Job</p>
+                            </a>
+                        </li>
+                        <li class="nav-header">RACKING</li>
+                        <li class="nav-item">
+                            <a asp-action="ReelList" asp-controller="Reel" class="nav-link">
+                                <i class="nav-icon bi bi-circle"></i>
+                                <p>Available Reel List</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-action="SlotStatus" asp-controller="Slot" class="nav-link">
+                                <i class="nav-icon bi bi-circle"></i>
+                                <p>Racking Status</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="./docs/introduction.html" class="nav-link">
+                                <i class="nav-icon bi bi-circle"></i>
+                                <p>Set Empty Tray</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="./docs/introduction.html" class="nav-link">
+                                <i class="nav-icon bi bi-circle"></i>
+                                <p>Simulation</p>
+                            </a>
+                        </li>
+                        <li class="nav-header">SETTINGS</li>
+                        @* <li class="nav-item">
+                            <a href="./docs/introduction.html" class="nav-link">
+                                <i class="nav-icon bi bi-circle"></i>
+                                <p>Doc Format List</p>
+                            </a>
+                        </li> *@
+                        <li class="nav-item">
+                            <a href="./docs/introduction.html" class="nav-link">
+                                <i class="nav-icon bi bi-circle"></i>
+                                <p>User List</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="./docs/introduction.html" class="nav-link">
+                                <i class="nav-icon bi bi-circle"></i>
+                                <p>User Access Right</p>
+                            </a>
+                        </li>
+                    </ul>
+                    <!--end::Sidebar Menu-->
+                </nav>
+            </div>
+            <!--end::Sidebar Wrapper-->
+        </aside>
+        <!--end::Sidebar-->
+        <!--begin::App Main-->
+        <main class="app-main">
+            @RenderBody()
+        </main>
+        <!--end::App Main-->
+        <!--begin::Footer-->
+        <footer class="app-footer">
+            <!--begin::To the end-->
+            @* <div class="float-end d-none d-sm-inline">Anything you want</div> *@
+            <!--end::To the end-->
+            <!--begin::Copyright-->
+            <strong>
+                Copyright &copy; 2025&nbsp;
+                <!--<a href="https://adminlte.io" class="text-decoration-none">Flex Software Consulting Sdn Bhd</a>-->
+            </strong> 
+            <!--end::Copyright-->
+        </footer>
+        <!--end::Footer-->
+    </div>
+    <!--end::App Wrapper-->
+
+    
+    <!--end::Third Party Plugin(OverlayScrollbars)--><!--begin::Required Plugin(popperjs for Bootstrap 5)-->
+    <script src="~/lib/popper/popper.js"></script>
+    <script type="module" src="~/js/adminlte.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script type="text/javascript">
+            $(document).ready(function() {
+                $.ajax({
+                    url: '/Account/getSession',
+                    type: 'GET',
+                    success: function(data) {
+                        // console.log(data);
+                        if (data == "") {
+                            window.location.href = '@Url.Action("Login", "Account")';
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error fetching data:', error);
+                    }
+                });
+        });
+    </script>
+
+</body>
+</html>
