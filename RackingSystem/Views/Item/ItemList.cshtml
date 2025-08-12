@@ -54,9 +54,9 @@
                                     <th>Description</th>
                                     <th>Is Active</th>
                                     <th>FinishGood?</th>
-                                    <th>Height</th>
-                                    <th>Width</th>
-                                    <th>Max Height</th>
+                                    <th>Thickness (mm)</th>
+                                    <th>Width (inch)</th>
+                                    <th>Max Thickness (mm)</th>
                                     <th>Alarm?</th>
                                     <th>Action</th>
                                 </tr>
@@ -96,16 +96,16 @@
                     <input type="text" class="form-control" name="Desc2" id="txtDesc2" aria-describedby="Desc2">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" for="txtHeight">Height</label>
-                    <input type="number" class="form-control" name="Height" id="txtHeight" aria-describedby="Height">
+                    <label class="form-label" for="txtThickness">Thickness (mm)</label>
+                    <input type="number" class="form-control" name="Thickness" id="txtThickness" aria-describedby="Thickness">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" for="txtWidth">Width</label>
+                    <label class="form-label" for="txtWidth">Width (inch)</label>
                     <input type="number" class="form-control" name="Width" id="txtWidth" aria-describedby="Width">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" for="txtMaxHeight">Max Height</label>
-                    <input type="number" class="form-control" name="MaxHeight" id="txtMaxHeight" aria-describedby="Max Height">
+                    <label class="form-label" for="txtMaxThickness">Max Thickness (mm)</label>
+                    <input type="number" class="form-control" name="MaxThickness" id="txtMaxThickness" aria-describedby="Max Thickness">
                 </div>
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="chkIsActive">
@@ -116,8 +116,8 @@
                     <label class="form-check-label" for="chkIsFinishGood">Is Finish Good</label>
                 </div>
                 <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkAlarmOverMaxHeight">
-                    <label class="form-check-label" for="chkAlarmOverMaxHeight">Alarm Over Max Height</label>
+                    <input type="checkbox" class="form-check-input" id="chkAlarmOverMaxThickness">
+                    <label class="form-check-label" for="chkAlarmOverMaxThickness">Alarm Over Max Thickness</label>
                 </div>
 
                 <input type="hidden" id="txtId">
@@ -207,13 +207,13 @@
                                         }
                                     }
                                 },
-                                { data: 'height' },
+                                { data: 'thickness' },
                                 { data: 'width' },
-                                { data: 'maxHeight' },
+                                { data: 'maxThickness' },
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
-                                        if (row.alarmOverMaxHeight == true) {
+                                        if (row.alarmOverMaxThickness == true) {
                                             return '<span><i class="bi bi-check-square"></i></span>'
                                         }
                                         else {
@@ -226,8 +226,8 @@
                                     render: function (data, type, row, meta) {
                                         return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
                                         'onclick="editItemForm(\'' + row.item_Id + '\', \'' + row.itemCode + '\', \'' + row.uom + '\', \'' + row.description + '\', \'' + row.desc2 + '\', ' + 
-                                        '\'' + row.height + '\', \'' + row.width + '\', \'' + row.maxHeight + '\', ' +
-                                        '\'' + row.isActive + '\', \'' + row.isFinishGood + '\', \'' + row.alarmOverMaxHeight + '\')">' +
+                                        '\'' + row.thickness + '\', \'' + row.width + '\', \'' + row.maxThickness + '\', ' +
+                                        '\'' + row.isActive + '\', \'' + row.isFinishGood + '\', \'' + row.alarmOverMaxThickness + '\')">' +
                                         '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
                                          
                                         '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.item_Id + '\', \'' + row.itemCode + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
@@ -263,12 +263,12 @@
             $("#txtUOM").val("");
             $("#txtDesc").val("");
             $("#txtDesc2").val("");
-            $("#txtHeight").val("");
+            $("#txtThickness").val("");
             $("#txtWidth").val("");
-            $("#txtMaxHeight").val("");
+            $("#txtMaxThickness").val("");
             document.getElementById("chkIsActive").checked = true;
             document.getElementById("chkIsFinishGood").checked = true;
-            document.getElementById("chkAlarmOverMaxHeight").checked = true;
+            document.getElementById("chkAlarmOverMaxThickness").checked = true;
             $("#myModal").modal("show");
         }
 
@@ -278,9 +278,9 @@
             $("#txtUOM").val(uom);
             $("#txtDesc").val(desc);
             $("#txtDesc2").val(desc2);
-            $("#txtHeight").val(h);
+            $("#txtThickness").val(h);
             $("#txtWidth").val(w);
-            $("#txtMaxHeight").val(maxh);
+            $("#txtMaxThickness").val(maxh);
             if (isAct == "true") {
                 document.getElementById("chkIsActive").checked = true;
             }
@@ -294,10 +294,10 @@
                 document.getElementById("chkIsFinishGood").checked = false;
             }
             if (alm == "true") {
-                document.getElementById("chkAlarmOverMaxHeight").checked = true;
+                document.getElementById("chkAlarmOverMaxThickness").checked = true;
             }
             else {
-                document.getElementById("chkAlarmOverMaxHeight").checked = false;
+                document.getElementById("chkAlarmOverMaxThickness").checked = false;
             }
             $("#myModal").modal("show");
         }
@@ -309,7 +309,7 @@
         function saveItem() {
             const chkIsAct = document.querySelector('#chkIsActive');
             const chkIsFinishGood = document.querySelector('#chkIsFinishGood');
-            const chkAlarmOverMaxHeight = document.querySelector('#chkAlarmOverMaxHeight');
+            const chkAlarmOverMaxThickness = document.querySelector('#chkAlarmOverMaxThickness');
 
             var data = {
                 Item_Id: $("#txtId").val(),
@@ -317,12 +317,12 @@
                 UOM: $("#txtUOM").val(),
                 Description: $("#txtDesc").val(),
                 Desc2: $("#txtDesc2").val(),
-                Height: $("#txtHeight").val(),
+                Thickness: $("#txtThickness").val(),
                 Width: $("#txtWidth").val(),
-                MaxHeight: $("#txtMaxHeight").val(),
+                MaxThickness: $("#txtMaxThickness").val(),
                 IsActive: chkIsAct.checked ? true : false,
                 IsFinishGood: chkIsFinishGood.checked ? true : false,
-                AlarmOverMaxHeight: chkAlarmOverMaxHeight.checked ? true : false
+                AlarmOverMaxThickness: chkAlarmOverMaxThickness.checked ? true : false
             }
 
             //console.log(JSON.stringify(data));

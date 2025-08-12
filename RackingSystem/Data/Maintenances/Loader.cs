@@ -12,6 +12,10 @@ namespace RackingSystem.Data.Maintenances
         public string LoaderCode { get; set; } = "";
 
         [Required]
+        [MaxLength(255)]
+        public string Description { get; set; } = "";
+
+        [Required]
         public bool IsActive { get; set; } = true;
 
         [MaxLength(20)]

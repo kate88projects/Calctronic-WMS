@@ -19,6 +19,9 @@
     <!-- Fonts -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
 
+    <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js" integrity="sha384-SlE991lGASHoBfWbelyBPLsUlwY1GwNDJo3jSJO04KZ33K2bwfV9YBauFfnzvynJ" crossorigin="anonymous"></script>
+
+
     <link rel="stylesheet"
           href="~/css/overlayscrollbars.min.css"
           crossorigin="anonymous" />
@@ -30,6 +33,7 @@
     <!--begin::Required Plugin(AdminLTE)-->
     <link rel="stylesheet" href="../css/adminlte.css" />
     <!--end::Required Plugin(AdminLTE)-->
+
 
     <style type="text/css">
         html * {
@@ -70,12 +74,12 @@
                 <!--begin::Brand Link-->
                 <a href="./index.html" class="brand-link">
                     <!--begin::Brand Image-->
-                    <img src="../assets/img/AdminLTELogo.png"
+                    @* <img src="../assets/img/AdminLTELogo.png"
                          alt="AdminLTE Logo"
-                         class="brand-image opacity-75 shadow" />
+                         class="brand-image opacity-75 shadow" /> *@
                     <!--end::Brand Image-->
                     <!--begin::Brand Text-->
-                    <span class="brand-text fw-light">Warehouse Management System</span>
+                    <span class="brand-text fw-light">WMS</span>
                     <!--end::Brand Text-->
                 </a>
                 <!--end::Brand Link-->
@@ -101,108 +105,217 @@
                                 </li>
                             </ul>
                         </li>
-                        <li class="nav-header">MAINTENANCES</li>
+
                         <li class="nav-item">
-                            <a asp-action="SlotList" asp-controller="Slot" class="nav-link">
-                                <i class="nav-icon bi bi-circle"></i>
-                                <p>Slot List</p>
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon bi bi-ui-checks-grid"></i>
+                                <p>
+                                    MAINTENANCES
+                                    <i class="nav-arrow bi bi-chevron-right"></i>
+                                </p>
                             </a>
+                            <ul class="nav nav-treeview" style="display: block;">
+                                <li class="nav-item">
+                                    <a asp-action="SlotList" asp-controller="Slot" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>Loader List</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-action="SlotList" asp-controller="Slot" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>Trolley List</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-action="SlotList" asp-controller="Slot" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>Trolley Slot List</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-action="SlotList" asp-controller="Slot" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>Slot List</p>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
+
                         <li class="nav-item">
-                            <a asp-action="ItemList" asp-controller="Item" class="nav-link">
-                                <i class="nav-icon bi bi-circle"></i>
-                                <p>Item List</p>
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon bi bi-box-seam-fill"></i>
+                                <p>
+                                    STOCK
+                                    <i class="nav-arrow bi bi-chevron-right"></i>
+                                </p>
                             </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a asp-action="ItemList" asp-controller="Item" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>Item Group List</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-action="ItemList" asp-controller="Item" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>Item List</p>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
-                        <li class="nav-header">BOM</li>
+
                         <li class="nav-item">
-                            <a href="./docs/introduction.html" class="nav-link">
-                                <i class="nav-icon bi bi-circle"></i>
-                                <p>BOM List</p>
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon bi bi-diagram-3"></i>
+                                <p>
+                                    BOM
+                                    <i class="nav-arrow bi bi-chevron-right"></i>
+                                </p>
                             </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="./docs/introduction.html" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>BOM List</p>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
-                        <li class="nav-header">GRN</li>
+
                         <li class="nav-item">
-                            <a asp-action="NewGRN" asp-controller="GRN" class="nav-link">
-                                <i class="nav-icon bi bi-circle"></i>
-                                <p>New Receive</p>
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon bi bi-truck"></i>
+                                <p>
+                                    GRN
+                                    <i class="nav-arrow bi bi-chevron-right"></i>
+                                </p>
                             </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a asp-action="NewGRN" asp-controller="GRN" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>New Receive</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-action="GRNDetailList" asp-controller="GRN" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>GRN List</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-action="GRNDetailList" asp-controller="GRN" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>Reprint Reel Sticker</p>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
+
                         <li class="nav-item">
-                            <a asp-action="GRNDetailList" asp-controller="GRN" class="nav-link">
-                                <i class="nav-icon bi bi-circle"></i>
-                                <p>GRN List</p>
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon bi bi-cart-plus"></i>
+                                <p>
+                                    JOB ORDER
+                                    <i class="nav-arrow bi bi-chevron-right"></i>
+                                </p>
                             </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="./docs/introduction.html" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>JO List</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="./docs/introduction.html" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>JO Schedule</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="./docs/introduction.html" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>Emergency Job</p>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
+
                         <li class="nav-item">
-                            <a asp-action="GRNDetailList" asp-controller="GRN" class="nav-link">
-                                <i class="nav-icon bi bi-circle"></i>
-                                <p>Reprint Reel Sticker</p>
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon bi bi-hdd-rack"></i>
+                                <p>
+                                    RACKING
+                                    <i class="nav-arrow bi bi-chevron-right"></i>
+                                </p>
                             </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a asp-action="ReelList" asp-controller="Reel" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>Available Reel List</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a asp-action="SlotStatus" asp-controller="Slot" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>Racking Status</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="./docs/introduction.html" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>Set Empty Tray</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="./docs/introduction.html" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>Simulation</p>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
-                        <li class="nav-header">JOB ORDER</li>
+
                         <li class="nav-item">
-                            <a href="./docs/introduction.html" class="nav-link">
-                                <i class="nav-icon bi bi-circle"></i>
-                                <p>JO List</p>
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon bi bi-gear"></i>
+                                <p>
+                                    SETTINGS
+                                    <i class="nav-arrow bi bi-chevron-right"></i>
+                                </p>
                             </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="./docs/introduction.html" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>User List</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="./docs/introduction.html" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>User Access Right</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="./docs/introduction.html" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>Reel Height</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="./docs/introduction.html" class="nav-link">
+                                        <i class="nav-icon bi bi-circle"></i>
+                                        <p>Slot Usage</p>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
-                        <li class="nav-item">
-                            <a href="./docs/introduction.html" class="nav-link">
-                                <i class="nav-icon bi bi-circle"></i>
-                                <p>JO Schedule</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="./docs/introduction.html" class="nav-link">
-                                <i class="nav-icon bi bi-circle"></i>
-                                <p>Emergency Job</p>
-                            </a>
-                        </li>
-                        <li class="nav-header">RACKING</li>
-                        <li class="nav-item">
-                            <a asp-action="ReelList" asp-controller="Reel" class="nav-link">
-                                <i class="nav-icon bi bi-circle"></i>
-                                <p>Available Reel List</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a asp-action="SlotStatus" asp-controller="Slot" class="nav-link">
-                                <i class="nav-icon bi bi-circle"></i>
-                                <p>Racking Status</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="./docs/introduction.html" class="nav-link">
-                                <i class="nav-icon bi bi-circle"></i>
-                                <p>Set Empty Tray</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="./docs/introduction.html" class="nav-link">
-                                <i class="nav-icon bi bi-circle"></i>
-                                <p>Simulation</p>
-                            </a>
-                        </li>
-                        <li class="nav-header">SETTINGS</li>
-                        @* <li class="nav-item">
-                            <a href="./docs/introduction.html" class="nav-link">
-                                <i class="nav-icon bi bi-circle"></i>
-                                <p>Doc Format List</p>
-                            </a>
-                        </li> *@
-                        <li class="nav-item">
-                            <a href="./docs/introduction.html" class="nav-link">
-                                <i class="nav-icon bi bi-circle"></i>
-                                <p>User List</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="./docs/introduction.html" class="nav-link">
-                                <i class="nav-icon bi bi-circle"></i>
-                                <p>User Access Right</p>
-                            </a>
-                        </li>
+
                     </ul>
                     <!--end::Sidebar Menu-->
                 </nav>

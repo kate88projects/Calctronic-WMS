@@ -16,12 +16,12 @@
 
         public bool IsFinishGood { get; set; } = true;
 
-        public int? Height { get; set; } = 0;
+        public int? Thickness { get; set; } = 0;
 
         public int? Width { get; set; } = 0;
 
-        public int? MaxHeight { get; set; } = 0;
+        public int? MaxThickness { get; set; } = 0;
 
-        public bool AlarmOverMaxHeight { get; set; } = true;
+        public bool AlarmOverMaxThickness { get; set; } = true;
     }
 }

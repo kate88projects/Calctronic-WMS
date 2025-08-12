@@ -66,9 +66,9 @@ namespace RackingSystem.Services.ItemServices
                     result.errMessage = "Please insert Description.";
                     return result;
                 }
-                if (itemReq.Height == null)
+                if (itemReq.Thickness == null)
                 {
-                    result.errMessage = "Please insert Height.";
+                    result.errMessage = "Please insert Thickness.";
                     return result;
                 }
                 if (itemReq.Width == null)
@@ -76,9 +76,9 @@ namespace RackingSystem.Services.ItemServices
                     result.errMessage = "Please insert Width.";
                     return result;
                 }
-                if (itemReq.MaxHeight == null)
+                if (itemReq.MaxThickness == null)
                 {
-                    result.errMessage = "Please insert Max Height.";
+                    result.errMessage = "Please insert Max Thickness.";
                     return result;
                 }
                 if (itemReq.Item_Id == 0)
@@ -111,10 +111,10 @@ namespace RackingSystem.Services.ItemServices
                         Desc2 = itemReq.Desc2 ?? "",
                         IsActive = itemReq.IsActive,
                         IsFinishGood = itemReq.IsFinishGood,
-                        Height = itemReq.Height ?? 0,
+                        Thickness = itemReq.Thickness ?? 0,
                         Width = itemReq.Width ?? 0,
-                        MaxHeight = itemReq.MaxHeight ?? 0,
-                        AlarmOverMaxHeight = itemReq.AlarmOverMaxHeight,
+                        MaxThickness = itemReq.MaxThickness ?? 0,
+                        AlarmOverMaxThickness = itemReq.AlarmOverMaxThickness,
                     };
                     _dbContext.Item.Add(_item);
                 }
@@ -132,10 +132,10 @@ namespace RackingSystem.Services.ItemServices
                     _item.Desc2 = itemReq.Desc2 ?? "";
                     _item.IsActive = itemReq.IsActive;
                     _item.IsFinishGood = itemReq.IsFinishGood;
-                    _item.Height = itemReq.Height ?? 0;
+                    _item.Thickness = itemReq.Thickness ?? 0;
                     _item.Width = itemReq.Width ?? 0;
-                    _item.MaxHeight = itemReq.MaxHeight ?? 0;
-                    _item.AlarmOverMaxHeight = itemReq.AlarmOverMaxHeight;
+                    _item.MaxThickness = itemReq.MaxThickness ?? 0;
+                    _item.AlarmOverMaxThickness = itemReq.AlarmOverMaxThickness;
                     _dbContext.Item.Update(_item);
                 }
                 await _dbContext.SaveChangesAsync();
