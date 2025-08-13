@@ -8,10 +8,10 @@ namespace RackingSystem.Data.Maintenances
         public long SlotCalculation_Id { get; set; }
 
         [Required]
-        public int Thickness { get; set; } = 0;
+        public int MaxThickness { get; set; } = 0;
 
         [Required]
-        public int Width { get; set; } = 0;
+        public int ReserveSlot { get; set; } = 0;
 
     }
 }

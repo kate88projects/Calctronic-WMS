@@ -16,6 +16,101 @@
             font-size: 24px;
         }
 
+    .show-entries select.form-control {
+        width: 60px;
+        margin: 0 5px;
+    }
+
+    .table-filter .filter-group {
+        float: right;
+        margin-left: 15px;
+    }
+
+    .table-filter input, .table-filter select {
+        height: 34px;
+        border-radius: 3px;
+        border-color: #ddd;
+        box-shadow: none;
+    }
+
+    .table-filter {
+        /* padding: 5px 0 15px;
+        border-bottom: 1px solid #e9e9e9;
+        margin-bottom: 5px; */
+    }
+
+        .table-filter .btn {
+            height: 34px;
+        }
+
+        .table-filter label {
+            font-weight: normal;
+            margin-left: 10px;
+        }
+
+        .table-filter select, .table-filter input {
+            display: inline-block;
+            margin-left: 5px;
+        }
+
+        .table-filter input {
+            width: 200px;
+            display: inline-block;
+        }
+
+    .filter-group select.form-control {
+        width: 110px;
+    }
+
+    .filter-icon {
+        float: right;
+        margin-top: 7px;
+    }
+
+        .filter-icon i {
+            font-size: 18px;
+            opacity: 0.7;
+        }
+
+    .pagination {
+        float: right;
+        margin: 0 0 5px;
+    }
+
+        .pagination li a {
+            border: none;
+            font-size: 13px;
+            min-width: 30px;
+            min-height: 30px;
+            color: #999;
+            margin: 0 2px;
+            line-height: 30px;
+            border-radius: 2px !important;
+            text-align: center;
+            padding: 0 6px;
+        }
+
+            .pagination li a:hover {
+                color: #666;
+            }
+
+        .pagination li.active a {
+            background: #03A9F4;
+        }
+
+            .pagination li.active a:hover {
+                background: #0397d6;
+            }
+
+        .pagination li.disabled i {
+            color: #ccc;
+        }
+
+        .pagination li i {
+            font-size: 16px;
+            padding-top: 6px
+        }
+
 </style>
 
 <br />
@@ -45,6 +140,41 @@
                     </div>
                 </div>
                 <div class="card-body">
+                    <div class="row" style="padding:5px;">
+                        <div class="col-sm-3" style="">
+                            <input id="txtItemCode" name="ItemCode" type="text" class="form-control" style="" placeholder="Item" />
+                        </div>
+                        <div class="col-sm-3" style="">
+                            <input id="txtItemDesc" name="ItemDesc" type="text" class="form-control" style="" placeholder="Item Desc / Desc2" />
+                        </div>
+                        <div class="col-sm-3" style="">
+                            <input id="txtItemGroup" name="ItemGroup" type="text" class="form-control" style="" placeholder="Item Group" />
+                        </div>
+                        <div class="col-sm-2" style="">
+                            <input id="txtThickness" name="Thickness" type="text" class="form-control" style="" placeholder="Thickness" />
+                        </div>
+                        <div class="col-sm-1" style="">
+                            <button type="button" class="btn btn-primary" style="width:100%;" onclick="loadList(1)"><i class="bi bi-search"></i> </button>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="table-filter">
+                        <div class="row" style="padding-left:5px;">
+                            <div class="col-sm-12">
+                                <div class="show-entries">
+                                    <label>Show</label>
+                                    <select id="selpageSize" name="pageSize" class="form-control">
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                        <option value="200">250</option>
+                                    </select>
+                                    <span>entries</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="table table-striped table-bordered table-responsive text-nowrap">
                         <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
                             <thead>
@@ -52,10 +182,11 @@
                                     <th>Item Code</th>
                                     <th>UOM</th>
                                     <th>Description</th>
+                                    <th>Item Group</th>
                                     <th>Is Active</th>
                                     <th>FinishGood?</th>
-                                    <th>Thickness (mm)</th>
-                                    <th>Width (inch)</th>
+                                    <th>Dimension</th>
+                                    @* <th>Width (inch)</th> *@
                                     <th>Max Thickness (mm)</th>
                                     <th>Alarm?</th>
                                     <th>Action</th>
@@ -63,6 +194,17 @@
                             </thead>
                         </table>
                     </div>
+
+                    <div class="clearfix">
+                        <div class="hint-text">Showing <b id="lblCurCount">0</b> out of <b id="lblTotal">0</b> entries</div>
+                        <ul class="pagination" id="ulPagination">
+                        </ul>
+                        <input type="hidden" id="txtCurPage">
+                        <input type="hidden" id="txtTotalRecord">
+                        <input type="hidden" id="txtPageSize">
+                        <input type="hidden" id="txtTotalPage">
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -96,17 +238,27 @@
                     <input type="text" class="form-control" name="Desc2" id="txtDesc2" aria-describedby="Desc2">
                 </div>
                 <div class="mb-3">
+                    <label class="form-label" for="selItemGroup">Item Group</label>
+                    <select class="form-control" id="selItemGroup">
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="selReelDimension">Reel Thickness (mm)</label>
+                    <select class="form-control" id="selReelDimension">
+                    </select>
+                </div>
+               @*  <div class="mb-3">
                     <label class="form-label" for="txtThickness">Thickness (mm)</label>
-                    <input type="number" class="form-control" name="Thickness" id="txtThickness" aria-describedby="Thickness">
+                    <input type="number" class="form-control" name="Thickness" id="txtThickness" aria-describedby="Thickness" disabled>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="txtWidth">Width (inch)</label>
-                    <input type="number" class="form-control" name="Width" id="txtWidth" aria-describedby="Width">
+                    <input type="number" class="form-control" name="Width" id="txtWidth" aria-describedby="Width" disabled>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="txtMaxThickness">Max Thickness (mm)</label>
-                    <input type="number" class="form-control" name="MaxThickness" id="txtMaxThickness" aria-describedby="Max Thickness">
-                </div>
+                    <input type="number" class="form-control" name="MaxThickness" id="txtMaxThickness" aria-describedby="Max Thickness" disabled>
+                </div> *@
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="chkIsActive">
                     <label class="form-check-label" for="chkIsActive">Is Active</label>
@@ -143,15 +295,59 @@
 
     <script type="text/javascript">
 
-        $(document).ready(function () {
-
-            loadList();
+        $(document).ready(function() {
+            $('#txtTotalRecord').val(0);
+            $('#txtTotalPage').val(1);
+            loadList(1);
+            loadItemGroupList();
+            loadReelDList();
         });
 
-        function loadList() {
+        function prevPage() {
+            var curPage = $("#txtCurPage").val();
+            if (curPage == 1) {
+                return;
+            }
+            loadList(curPage - 1);
+        }
+
+        function nextPage() {
+            var curPage = Number($("#txtCurPage").val());
+            var ttl = Number($("#txtTotalRecord").val());
+            var pageSize = Number($("#txtPageSize").val());
+            var ttlPage = Number($("#txtTotalPage").val());
+            // var ttlPage = ttl / pageSize;
+            // if ((ttl % pageSize) > 0) {
+            //     ttlPage = ttlPage + 1;
+            // }
+            if ((curPage + 1) > ttlPage) {
+                return;
+            }
+            loadList(curPage + 1);
+        }
+
+        function loadList(page) {
+            $('#txtCurPage').val(page);
+            $('#txtPageSize').val($("#selpageSize").val());
+            var ttlPage = $("#txtTotalPage").val();
+            for (var j = 1; j <= ttlPage; j++) {
+                $('#btnP' + j).removeClass('active');
+            }
+            $('#btnP' + page).addClass('active');
+
+            var data = {
+                ItemCode: $("#txtItemCode").val(),
+                ItemDesc: $("#txtItemDesc").val(),
+                ItemGroup: $("#txtItemGroup").val(),
+                Thickness: $("#txtThickness").val(),
+                page: page,
+                pageSize: $("#selpageSize").val(),
+            };
+
             $.ajax({
                 url: "/Item/GetItemList/",
-                type: "GET",
+                type: "POST",
+                data: JSON.stringify(data),
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -164,17 +360,20 @@
                         allowOutsideClick: false,
                         showConfirmButton: false,
                     });
-                    Swal.showLoading()
+                    Swal.showLoading();
                 },
                 success: function (result) {
-                    console.log(result);
+                    // console.log(result);
                     swal.close()
                     if (result.success == true) {
-                        $('#listTable').DataTable( {
+                        $('#listTable').DataTable({
                             data: result.data,
-                            paging: true,
-                            pageLength: 50,
-                            lengthMenu: [50, 100, 250, 500, 1000],
+                            paging: false,
+                            searching: false,
+                            "info": false,
+                            // pageLength: $("#selpageSize").val(),
+                            // lengthMenu: [50, 100, 250, 500, 1000],
+                            "bDestroy": true,
                             columns: [
                                 { data: 'itemCode' },
                                 { data: 'uom' },
@@ -182,9 +381,10 @@
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         return '<p style="margin:0;"><span>' + row.description + '</span><br/>' +
-                                        '<span style="font-size:13px;color:grey;">' + row.desc2 + '</span></p>';
+                                                '<span style="font-size:13px;color:grey;">' + row.desc2 + '</span></p>';
                                     }
                                 },
+                                { data: 'itemGroupCode' },
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
@@ -207,8 +407,12 @@
                                         }
                                     }
                                 },
-                                { data: 'thickness' },
-                                { data: 'width' },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                            return '<p style="margin:0;"><span>' + row.thickness + ' mm X ' + row.width + ' inch</span></p>'
+                                    }
+                                },
                                 { data: 'maxThickness' },
                                 {
                                     data: null,
@@ -225,18 +429,156 @@
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
-                                        'onclick="editItemForm(\'' + row.item_Id + '\', \'' + row.itemCode + '\', \'' + row.uom + '\', \'' + row.description + '\', \'' + row.desc2 + '\', ' + 
-                                        '\'' + row.thickness + '\', \'' + row.width + '\', \'' + row.maxThickness + '\', ' +
+                                        'onclick="editItemForm(\'' + row.item_Id + '\', \'' + row.itemCode + '\', \'' + row.uom + '\', \'' + row.description + '\', \'' + row.desc2 + '\', ' +
+                                        '\'' + row.itemGroup_Id + '\', \'' + row.reelDimension_Id + '\', ' +
+                                        // '\'' + row.thickness + '\', \'' + row.width + '\', \'' + row.maxThickness + '\', ' +
                                         '\'' + row.isActive + '\', \'' + row.isFinishGood + '\', \'' + row.alarmOverMaxThickness + '\')">' +
                                         '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
                                          
                                         '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.item_Id + '\', \'' + row.itemCode + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
                                     }
                                 }
-                            ],
+                            ]
                         });
 
+                        // if is page 1 then need regenerate pagination, else just show current entry
+                        var curCnt = 0;
+                        if (result.totalRecords > 0) {
+                            curCnt = (page) * $("#selpageSize").val();
+                            if (curCnt > result.totalRecords) {
+                                curCnt = result.totalRecords;
+                            }
+                        }
+                        $('#lblCurCount').html(curCnt);
+                        
+                        if (page == 1) {
+                            $('#lblTotal').html(result.totalRecords);
+                            $('#ulPagination').html('');
 
+                            var pageSize = $("#selpageSize").val();
+                            const myDiv = document.getElementById('ulPagination');
+                            var ttlPage = result.totalRecords / pageSize;
+                            if ((result.totalRecords % pageSize) > 0) {
+                                ttlPage = ttlPage + 1;
+                            }
+                            $('#txtTotalRecord').val(result.totalRecords);
+                            $('#txtTotalPage').val(ttlPage);
+
+                            myDiv.innerHTML += '<li class="page-item disabled"><a href="javascript:prevPage()">Previous</a></li>';
+                            for (var i = 1; i <= ttlPage; i++) {
+                                if (i == 1) {
+                                       myDiv.innerHTML += '<li class="page-item active" id="btnP'+ i +'"><a href="javascript:loadList('+ i +')" class="page-link">'+ i +'</a></li>';
+                                }
+                                else {
+                                       myDiv.innerHTML += '<li class="page-item" id="btnP'+ i +'"><a href="javascript:loadList('+ i +')" class="page-link">'+ i +'</a></li>';
+                                }
+                            }
+                            myDiv.innerHTML += '<li class="page-item disabled"><a href="javascript:nextPage()">Next</a></li>';
+                        }
+
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+        }
+
+        function loadItemGroupList() {
+            $.ajax({
+                url: "/Item/GetActiveItemGroupList/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading();
+                },
+                success: function (result) {
+                    // console.log(result);
+                    swal.close()
+                    if (result.success == true) {
+
+                        // Get the select element
+                        const selLoader = document.getElementById('selItemGroup');
+                        for (const opt of result.data)
+                        {
+                            const el = document.createElement("option");
+                            el.textContent = opt.itemGroupCode;
+                            el.value = opt.itemGroup_Id;
+                            selLoader.appendChild(el);
+                        }
+
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+        }
+
+        function loadReelDList() {
+            $.ajax({
+                url: "/Setting/GetReelDimensionList/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading();
+                },
+                success: function (result) {
+                    // console.log(result);
+                    swal.close()
+                    if (result.success == true) {
+
+                        // Get the select element
+                        const selLoader = document.getElementById('selReelDimension');
+                        for (const opt of result.data)
+                        {
+                            const el = document.createElement("option");
+                            el.textContent = opt.thickness;
+                            el.value = opt.reelDimension_Id;
+                            selLoader.appendChild(el);
+                        }
 
                     }
                     else {
@@ -263,24 +605,28 @@
             $("#txtUOM").val("");
             $("#txtDesc").val("");
             $("#txtDesc2").val("");
-            $("#txtThickness").val("");
-            $("#txtWidth").val("");
-            $("#txtMaxThickness").val("");
+            $("#selItemGroup").val("0");
+            $("#selReelDimension").val("0");
+            // $("#txtThickness").val("");
+            // $("#txtWidth").val("");
+            // $("#txtMaxThickness").val("");
             document.getElementById("chkIsActive").checked = true;
             document.getElementById("chkIsFinishGood").checked = true;
             document.getElementById("chkAlarmOverMaxThickness").checked = true;
             $("#myModal").modal("show");
         }
 
-        function editItemForm(id, code, uom, desc, desc2, h, w, maxh, isAct, isFG, alm) {
+        function editItemForm(id, code, uom, desc, desc2, ig, rd, isAct, isFG, alm) {
             $("#txtId").val(id);
             $("#txtCode").val(code);
             $("#txtUOM").val(uom);
             $("#txtDesc").val(desc);
             $("#txtDesc2").val(desc2);
-            $("#txtThickness").val(h);
-            $("#txtWidth").val(w);
-            $("#txtMaxThickness").val(maxh);
+            $("#selItemGroup").val(ig);
+            $("#selReelDimension").val(rd);
+            // $("#txtThickness").val(h);
+            // $("#txtWidth").val(w);
+            // $("#txtMaxThickness").val(maxh);
             if (isAct == "true") {
                 document.getElementById("chkIsActive").checked = true;
             }
@@ -317,9 +663,11 @@
                 UOM: $("#txtUOM").val(),
                 Description: $("#txtDesc").val(),
                 Desc2: $("#txtDesc2").val(),
-                Thickness: $("#txtThickness").val(),
-                Width: $("#txtWidth").val(),
-                MaxThickness: $("#txtMaxThickness").val(),
+                ItemGroup_Id: $("#selItemGroup").val(),
+                ReelDimension_Id: $("#selReelDimension").val(),
+                // Thickness: $("#txtThickness").val(),
+                // Width: $("#txtWidth").val(),
+                // MaxThickness: $("#txtMaxThickness").val(),
                 IsActive: chkIsAct.checked ? true : false,
                 IsFinishGood: chkIsFinishGood.checked ? true : false,
                 AlarmOverMaxThickness: chkAlarmOverMaxThickness.checked ? true : false
@@ -417,7 +765,7 @@
                         },
                         success: function (result) {
                             if (result.success == true) {
-                                $("#myModal").modal("toggle");
+                                // $("#myModal").modal("toggle");
                                 swal.fire({
                                     icon: 'success',
                                     title: "Success Deleted",

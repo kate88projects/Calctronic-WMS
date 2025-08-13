@@ -12,6 +12,7 @@ using RackingSystem.Services.GRNServices;
 using RackingSystem.Services.ItemServices;
 using RackingSystem.Services.LoaderServices;
 using RackingSystem.Services.ReelServices;
+using RackingSystem.Services.SettingServices;
 using RackingSystem.Services.SlotServices;
 using System.Text;
 
@@ -47,6 +48,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 builder.Services.AddRazorPages();
+builder.Services.AddScoped<ISettingService, SettingService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ISlotService, SlotService>();
 builder.Services.AddScoped<IItemService, ItemService>();

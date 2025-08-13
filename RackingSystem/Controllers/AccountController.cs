@@ -7,6 +7,9 @@ using RackingSystem.Models.User;
 using Microsoft.AspNetCore.Identity;
 using RackingSystem.Data.Maintenances;
 using RackingSystem.Services.AccountServices;
+using RackingSystem.Models.Setting;
+using RackingSystem.Models;
+using RackingSystem.Models.Loader;
 
 namespace RackingSystem.Controllers
 {
@@ -37,16 +40,15 @@ namespace RackingSystem.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginDTO model)
+        public async Task<IActionResult> LoginAccount([FromBody] LoginDTO req)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
+            //if (!ModelState.IsValid)
+            //{
+            //    return View(model);
+            //}
 
             //var result2 = await _signInManager.PasswordSignInAsync(model.Username, model.Password, false, false);
-            var result = await _service.Login(model);
+            var result = await _service.Login(req);
             if (result.success)
             {
                 string json = JsonConvert.SerializeObject(result.data);
@@ -59,12 +61,9 @@ namespace RackingSystem.Controllers
                 //var claimsIdn = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 //await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdn));
                 //HttpContext.User = new ClaimsPrincipal(claimsIdn);
-
-                return RedirectToAction("Index", "Home");
             }
 
-            ModelState.AddModelError(string.Empty, "Wrong username or password.");
-            return View(model);
+            return new JsonResult(result);
         }
 
         [HttpPost]
@@ -73,5 +72,41 @@ namespace RackingSystem.Controllers
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login", "Account");
         }
+
+        public IActionResult UserList()
+        {
+            ViewData["Title"] = "User List";
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<ServiceResponseModel<List<UserListDTO>>> GetUserList()
+        {
+            ServiceResponseModel<List<UserListDTO>> result = await _service.GetUserList();
+            return result;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveUser([FromBody] UserDTO itemReq)
+        {
+            ServiceResponseModel<UserDTO> result = await _service.SaveUser(itemReq);
+            return new JsonResult(result);
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteUser([FromBody] UserDTO itemReq)
+        {
+            ServiceResponseModel<UserDTO> result = await _service.DeleteUser(itemReq);
+            return new JsonResult(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetUserPassword([FromBody] UserDTO itemReq)
+        {
+            ServiceResponseModel<UserDTO> result = await _service.ResetUserPassword(itemReq);
+            return new JsonResult(result);
+        }
+
+
     }
 }

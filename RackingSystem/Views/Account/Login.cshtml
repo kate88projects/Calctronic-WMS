@@ -60,14 +60,14 @@
         <div class="card">
             <div class="card-body login-card-body">
                 <p class="login-box-msg">Sign in to start your session</p>
-                <form id="formAuthentication" asp-action="Login" method="post">
-                    @Html.AntiForgeryToken()
+                @* <form id="formAuthentication" asp-action="Login" method="post"> *@
+                    @* @Html.AntiForgeryToken() *@
                     <div class="input-group mb-3">
-                        <input type="email" id="Username" name="Username" class="form-control" placeholder="Email" aria-label="Email">
+                        <input type="text" id="txtUsername" name="Username" class="form-control" placeholder="Email" aria-label="Email">
                         <div class="input-group-text"><span class="bi bi-envelope"></span></div>
                     </div>
                     <div class="input-group mb-3">
-                        <input id="Password" name="Password" type="password" class="form-control" placeholder="Password" aria-label="Password">
+                        <input id="txtPassword" name="Password" type="password" class="form-control" placeholder="Password" aria-label="Password">
                         <div class="input-group-text"><span class="bi bi-lock-fill"></span></div>
                     </div>
                     <!--begin::Row-->
@@ -81,13 +81,13 @@
                         <!-- /.col -->
                         <div class="col-4">
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary">Sign In</button>
+                            <button type="submit" class="btn btn-primary" onclick="login()">Sign In</button>
                             </div>
                         </div>
                         <!-- /.col -->
                     </div>
                     <!--end::Row-->
-                </form>
+                @* </form> *@
             </div>
             <!-- /.login-card-body -->
         </div>
@@ -105,7 +105,11 @@
     <!--end::Required Plugin(Bootstrap 5)--><!--begin::Required Plugin(AdminLTE)-->
     <script src="../js/adminlte.js"></script>
     <!--end::Required Plugin(AdminLTE)--><!--begin::OverlayScrollbars Configure-->
-    <script>
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/sweetalert2.all.min.js"></script>
+    <script> 
+
         const SELECTOR_SIDEBAR_WRAPPER = '.sidebar-wrapper';
         const Default = {
           scrollbarTheme: 'os-theme-light',
@@ -124,6 +128,56 @@
             });
           }
         });
+
+
+        function login() {
+
+                    var data = {
+                        Username: $('#txtUsername').val(),
+                        Password: $('#txtPassword').val(),
+                    }
+
+                    $.ajax({
+                        url: '/Account/LoginAccount',
+                        type: 'POST',
+                        data: JSON.stringify(data),
+                        dataType: 'json',
+                        contentType: 'application/json; charset=utf-8',
+                        beforeSend: function () {
+                            Swal.fire({
+                                text: 'Please Wait',
+                                width: '300px',
+
+                                allowEscapeKey: false,
+                                allowOutsideClick: false,
+                                showConfirmButton: false,
+                            });
+                            Swal.showLoading()
+                        },
+                        success: function (result) {
+                            if (result.success == true) {
+                                 window.location.href = "/Home/Index";
+                            }
+                            else {
+                                swal.fire({
+                                    icon: 'error',
+                                    title: "Wait",
+                                    text: result.errMessage
+                                });
+                            }
+                        },
+                        error: function (error) {
+                            console.log(error);
+                            swal.fire({
+                                icon: 'error',
+                                title: "Wait",
+                                text: error.val
+                            });
+                        }
+                    });
+
+        }
+
     </script>
     <!--end::OverlayScrollbars Configure-->
     <!--end::Script-->

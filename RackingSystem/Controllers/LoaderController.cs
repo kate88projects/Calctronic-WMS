@@ -3,6 +3,7 @@ using RackingSystem.Data;
 using RackingSystem.Models;
 using RackingSystem.Services.LoaderServices;
 using RackingSystem.Models.Loader;
+using RackingSystem.Models.Item;
 
 namespace RackingSystem.Controllers
 {
@@ -27,6 +28,20 @@ namespace RackingSystem.Controllers
         {
             ServiceResponseModel<List<LoaderListDTO>> result = await _loaderService.GetLoaderList();
             return result;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveLoader([FromBody] LoaderDTO req)
+        {
+            ServiceResponseModel<LoaderDTO> result = await _loaderService.SaveLoader(req);
+            return new JsonResult(result);
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteLoader([FromBody] LoaderDTO req)
+        {
+            ServiceResponseModel<LoaderDTO> result = await _loaderService.DeleteLoader(req);
+            return new JsonResult(result);
         }
 
         [HttpGet]

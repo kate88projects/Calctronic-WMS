@@ -2,43 +2,11 @@
 @{
 }
 <style type="text/css">
-    body {
-        color: #566787;
-        background: #f5f5f5; 
-        /* font-family: 'Varela Round', sans-serif; */
-        /* font-size: 13px; */
-    }
-
-    .table-wrapper {
-        background: #fff;
-        padding: 20px 25px;
-        margin: 30px auto;
-        border-radius: 3px;
-        box-shadow: 0 1px 1px rgba(0,0,0,.05);
-    }
-
-    .table-title .btn {
-        font-size: 17px;
-        border: none;
-    }
-
-        .table-title .btn i {
-            float: left;
-            font-size: 21px;
-            margin-right: 5px;
-        }
-
-        .table-title .btn span {
-            float: left;
-            margin-top: 2px;
-            height: 21px;
-        }
-
     .table-title {
         color: #fff;
         background: #4b5366;
-        padding: 16px 25px;
-        margin: -20px -25px 10px;
+        /*     padding: 16px 25px;
+                margin: -20px -25px 10px; */
         border-radius: 3px 3px 0 0;
     }
 
@@ -65,9 +33,9 @@
     }
 
     .table-filter {
-        padding: 5px 0 15px;
-        border-bottom: 1px solid #e9e9e9;
-        margin-bottom: 5px;
+        /* padding: 5px 0 15px;
+            border-bottom: 1px solid #e9e9e9;
+            margin-bottom: 5px; */
     }
 
         .table-filter .btn {
@@ -103,72 +71,44 @@
             opacity: 0.7;
         }
 
-    table.table tr th, table.table tr td {
-        border-color: #e9e9e9;
-        padding: 12px 15px;
-        vertical-align: middle;
+    .pagination {
+        float: right;
+        margin: 0 0 5px;
     }
 
-        table.table tr th:first-child {
-            width: 150px;
-        }
-
-        table.table tr th:last-child {
-            width: 80px;
-        }
-
-    table.table-striped tbody tr:nth-of-type(odd) {
-        background-color: #fcfcfc;
-    }
-
-    table.table-striped.table-hover tbody tr:hover {
-        background: #f5f5f5;
-    }
-
-    table.table th i {
-        font-size: 13px;
-        margin: 0 5px;
-        cursor: pointer;
-    }
-
-    table.table td a {
-        font-weight: bold;
-        color: #566787;
-        display: inline-block;
-        text-decoration: none;
-    }
-
-        table.table td a:hover {
-            color: #2196F3;
-        }
-
-        table.table td a.view {
-            width: 30px;
-            height: 30px;
-            color: #2196F3;
-            border: 2px solid;
-            border-radius: 30px;
+        .pagination li a {
+            border: none;
+            font-size: 13px;
+            min-width: 30px;
+            min-height: 30px;
+            color: #999;
+            margin: 0 2px;
+            line-height: 30px;
+            border-radius: 2px !important;
             text-align: center;
+            padding: 0 6px;
         }
 
-            table.table td a.view i {
-                font-size: 22px;
-                margin: 2px 0 0 1px;
+            .pagination li a:hover {
+                color: #666;
             }
 
-    table.table .avatar {
-        border-radius: 50%;
-        vertical-align: middle;
-        margin-right: 10px;
-    }
+        .pagination li.active a {
+            background: #03A9F4;
+        }
 
-    .status {
-        font-size: 30px;
-        margin: 2px 2px 0 0;
-        display: inline-block;
-        vertical-align: middle;
-        line-height: 10px;
-    }
+            .pagination li.active a:hover {
+                background: #0397d6;
+            }
+
+        .pagination li.disabled i {
+            color: #ccc;
+        }
+
+        .pagination li i {
+            font-size: 16px;
+            padding-top: 6px
+        }
 
     .text-success {
         color: #10c469;
@@ -236,94 +176,94 @@
 <br />
 
 <div class="container-fluid">
-    <div class="table-wrapper">
-        <div class="table-title">
-            <div class="row">
-                <div class="col-sm-12">
-                    <h2>GRN <b>List</b></h2>
-                </div>
-            </div>
-        </div>
-
-        @* <form action="javascript:loadList()"> *@
-        <div class="row" style="padding:5px;">
-            <div class="col-sm-2" style="">
-                <input id="txtGRN" name="GRNBatchNo" type="text" class="form-control" style="" placeholder="GRN No" />
-            </div>
-            <div class="col-sm-2" style="">
-                <input id="txtItemCode" name="ItemCode" type="text" class="form-control" style="" placeholder="Item" />
-            </div>
-            <div class="col-sm-2" style="">
-                <input id="txtReelCode" name="ReelCode" type="text" class="form-control" style="" placeholder="Reel Code" />
-            </div>
-            <div class="col-sm-5" style="">
-                <div class="row">
-                    <div class="col-4" style="padding:0;">
-                        <select id="selDateType" name="DateType" class="form-control">
-                            <option value="C">Created Date</option>
-                            <option value="U">Updated Date</option>
-                        </select>
-                    </div>
-                    <div class="col-4" style="padding:0;">
-                        <input id="dtpDateFrom" name="DateFrom" type="date" class="form-control" placeholder="Date From" />
-                    </div>
-                    <div class="col-4" style="padding:0;">
-                        <input id="dtpDateTo" name="DateTo" type="date" class="form-control" placeholder="Date To" />
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-outline ">
+                <div class="card-header table-title">
+                    <div class="card-title">
+                        <h2>GRN List <b></b></h2>
                     </div>
                 </div>
-            </div>
-            <div class="col-sm-1" style="">
-                <button type="button" class="btn btn-primary" style="width:100%;" onclick="loadList(1)"><i class="bi bi-search"></i> </button>
-            </div>
-        </div>
-        <hr />
-        <div class="table-filter">
-            <div class="row" style="padding-left:5px;">
-                <div class="col-sm-12">
-                    <div class="show-entries">
-                        <span>Show</span>
-                        <select id="selpageSize" name="pageSize" class="form-control">
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                            <option value="200">250</option>
-                        </select>
-                        <span>entries</span>
+                <div class="card-body">
+                    <div class="row" style="padding:5px;">
+                        <div class="col-sm-2" style="">
+                            <input id="txtGRN" name="GRNBatchNo" type="text" class="form-control" style="" placeholder="GRN No" />
+                        </div>
+                        <div class="col-sm-2" style="">
+                            <input id="txtItemCode" name="ItemCode" type="text" class="form-control" style="" placeholder="Item" />
+                        </div>
+                        <div class="col-sm-2" style="">
+                            <input id="txtReelCode" name="ReelCode" type="text" class="form-control" style="" placeholder="Reel Code" />
+                        </div>
+                        <div class="col-sm-5" style="">
+                            <div class="row">
+                                <div class="col-4" style="padding:0;">
+                                    <select id="selDateType" name="DateType" class="form-control">
+                                        <option value="C">Created Date</option>
+                                        <option value="U">Updated Date</option>
+                                    </select>
+                                </div>
+                                <div class="col-4" style="padding:0;">
+                                    <input id="dtpDateFrom" name="DateFrom" type="date" class="form-control" placeholder="Date From" />
+                                </div>
+                                <div class="col-4" style="padding:0;">
+                                    <input id="dtpDateTo" name="DateTo" type="date" class="form-control" placeholder="Date To" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-1" style="">
+                            <button type="button" class="btn btn-primary" style="width:100%;" onclick="loadList(1)"><i class="bi bi-search"></i> </button>
+                        </div>
                     </div>
+                    <hr />
+                    <div class="table-filter">
+                        <div class="row" style="padding-left:5px;">
+                            <div class="col-sm-12">
+                                <div class="show-entries">
+                                    <label>Show</label>
+                                    <select id="selpageSize" name="pageSize" class="form-control">
+                                        <option value="10">10</option>
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                        <option value="200">250</option>
+                                    </select>
+                                    <span>entries</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table table-striped table-bordered table-responsive text-nowrap">
+                        <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>GRN No</th>
+                                    <th>Item</th>
+                                    <th>Qty</th>
+                                    <th>Reel Code</th>
+                                    <th>Created / Updated</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+
+                    <div class="clearfix">
+                        <div class="hint-text">Showing <b id="lblCurCount">0</b> out of <b id="lblTotal">0</b> entries</div>
+                        <ul class="pagination" id="ulPagination">
+                        </ul>
+                        <input type="hidden" id="txtCurPage">
+                        <input type="hidden" id="txtTotalRecord">
+                        <input type="hidden" id="txtPageSize">
+                        <input type="hidden" id="txtTotalPage">
+                    </div>
+
                 </div>
             </div>
-        </div>
-        @* </form> *@
-
-        <table class="table table-striped table-hover" id="listTable">
-            <thead>
-                <tr>
-                    <th>GRN No</th>
-                    <th>Item</th>
-                    <th>Qty</th>
-                    <th>Reel Code</th>
-                    <th>Created / Updated</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-        </table>
-
-        <div class="clearfix">
-            <div class="hint-text">Showing <b id="lblCurCount">0</b> out of <b id="lblTotal">0</b> entries</div>
-            <ul class="pagination" id="ulPagination">
-                @* <li class="page-item disabled"><a href="#">Previous</a></li>
-                <li class="page-item"><a href="#" class="page-link">1</a></li>
-                <li class="page-item"><a href="#" class="page-link">2</a></li>
-                <li class="page-item"><a href="#" class="page-link">3</a></li>
-                <li class="page-item active"><a href="#" class="page-link">4</a></li>
-                <li class="page-item"><a href="#" class="page-link">5</a></li>
-                <li class="page-item"><a href="#" class="page-link">6</a></li>
-                <li class="page-item"><a href="#" class="page-link">7</a></li>
-                <li class="page-item"><a href="#" class="page-link">Next</a></li> *@
-            </ul>
         </div>
     </div>
-
 </div>
+
 
 @section Scripts
 {
@@ -337,6 +277,9 @@
     <script type="text/javascript">
 
         $(document).ready(function () {
+            $('#txtTotalRecord').val(0);
+            $('#txtTotalPage').val(1);
+
             var now = new Date();
 
             var day = ("0" + now.getDate()).slice(-2);
@@ -350,8 +293,37 @@
             loadList(1);
         });
 
+        function prevPage() {
+            var curPage = $("#txtCurPage").val();
+            if (curPage == 1) {
+                return;
+            }
+            loadList(curPage - 1);
+        }
+
+        function nextPage() {
+            var curPage = Number($("#txtCurPage").val());
+            var ttl = Number($("#txtTotalRecord").val());
+            var pageSize = Number($("#txtPageSize").val());
+            var ttlPage = Number($("#txtTotalPage").val());
+            // var ttlPage = ttl / pageSize;
+            // if ((ttl % pageSize) > 0) {
+            //     ttlPage = ttlPage + 1;
+            // }
+            if ((curPage + 1) > ttlPage) {
+                return;
+            }
+            loadList(curPage + 1);
+        }
+
         function loadList(page) {
-            // console.log('start');
+            $('#txtCurPage').val(page);
+            $('#txtPageSize').val($("#selpageSize").val());
+            var ttlPage = $("#txtTotalPage").val();
+            for (var j = 1; j <= ttlPage; j++) {
+                $('#btnP' + j).removeClass('active');
+            }
+            $('#btnP' + page).addClass('active');
 
             var data = {
                 GRNBatchNo: $("#txtGRN").val(),
@@ -382,7 +354,7 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
-                    console.log(result);
+                    // console.log(result);
                     swal.close()
                     if (result.success == true) {
                         $('#listTable').DataTable( {
@@ -391,8 +363,8 @@
                             searching: false,
                             "info": false,
                             pageLength: $("#selpageSize").val(),
-                            "bDestroy": true,
                             // lengthMenu: [50, 100, 250, 500, 1000],
+                            "bDestroy": true,
                             columns: [
                                 { data: 'grnBatchNo' },
                                 {
@@ -428,10 +400,41 @@
                             ],
                         });
 
-                        if (result.totalRecords >= 0) {
-                            $('#lblCurCount').html($("#selpageSize").val());
-                            $('#lblTotal').html(result.totalRecords);
+                        // if is page 1 then need regenerate pagination, else just show current entry
+                        var curCnt = 0;
+                        if (result.totalRecords > 0) {
+                            curCnt = (page) * $("#selpageSize").val();
+                            if (curCnt > result.totalRecords) {
+                                curCnt = result.totalRecords;
+                            }
                         }
+                        $('#lblCurCount').html(curCnt);
+
+                        if (page == 1) {
+                            $('#lblTotal').html(result.totalRecords);
+                            $('#ulPagination').html('');
+
+                            var pageSize = $("#selpageSize").val();
+                            const myDiv = document.getElementById('ulPagination');
+                            var ttlPage = result.totalRecords / pageSize;
+                            if ((result.totalRecords % pageSize) > 0) {
+                                ttlPage = ttlPage + 1;
+                            }
+                            $('#txtTotalRecord').val(result.totalRecords);
+                            $('#txtTotalPage').val(ttlPage);
+
+                            myDiv.innerHTML += '<li class="page-item disabled"><a href="javascript:prevPage()">Previous</a></li>';
+                            for (var i = 1; i <= ttlPage; i++) {
+                                if (i == 1) {
+                                       myDiv.innerHTML += '<li class="page-item active" id="btnP'+ i +'"><a href="javascript:loadList('+ i +')" class="page-link">'+ i +'</a></li>';
+                                }
+                                else {
+                                       myDiv.innerHTML += '<li class="page-item" id="btnP'+ i +'"><a href="javascript:loadList('+ i +')" class="page-link">'+ i +'</a></li>';
+                                }
+                            }
+                            myDiv.innerHTML += '<li class="page-item disabled"><a href="javascript:nextPage()">Next</a></li>';
+                        }
+
 
                     }
                     else {

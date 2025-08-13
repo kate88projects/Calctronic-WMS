@@ -1,20 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace RackingSystem.Data.Maintenances
+﻿namespace RackingSystem.Models.Setting
 {
-    public class ReelDimension
+    public class ReelDimensionListDTO
     {
-        [Key]
         public long ReelDimension_Id { get; set; }
 
-        [Required]
         public int Thickness { get; set; } = 0;
 
-        [Required]
         public int Width { get; set; } = 0;
 
-        [Required]
         public int MaxThickness { get; set; } = 0;
+
+        public string Description { get; set; } = "";
 
     }
 }

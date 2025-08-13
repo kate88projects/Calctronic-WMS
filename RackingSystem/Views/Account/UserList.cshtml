@@ -1,10 +1,12 @@
-﻿
+﻿@{
+}
+
 <style>
     .table-title {
         color: #fff;
         background: #4b5366;
         /*     padding: 16px 25px;
-                margin: -20px -25px 10px; */
+                    margin: -20px -25px 10px; */
         border-radius: 3px 3px 0 0;
     }
 
@@ -13,6 +15,9 @@
             font-size: 24px;
         }
 
+    .pnlHide {
+        display: none;
+    }
 </style>
 
 <br />
@@ -23,11 +28,11 @@
             <div class="card card-outline ">
                 <div class="card-header table-title">
                     <div class="card-title">
-                        <h2>Loader List <b></b></h2>
+                        <h2>Reel Dimension Setting <b></b></h2>
                     </div>
                     <div class="card-tools">
                         <button type="button" class="btn btn-success" onclick="newItemForm()">
-                            Add New Loader
+                            Add New User
                         </button>
                     </div>
                 </div>
@@ -36,12 +41,10 @@
                         <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
                             <thead>
                                 <tr>
-                                    <th>Loader Code</th>
-                                    <th>Description</th>
+                                    <th>Username</th>
+                                    <th>Fullname</th>
+                                    <th>Email</th>
                                     <th>Is Active</th>
-                                    <th>Status</th>
-                                    <th>Total Column</th>
-                                    <th>Column Height</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -59,25 +62,31 @@
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Update Loader</h4>
+                <h4 class="modal-title">Update Dimension</h4>
             </div>
             @* <form action="/bin/SaveBin" method="post"> *@
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label" for="txtCode">Loader Code</label>
-                    <input type="text" class="form-control" name="LoaderCode" id="txtCode" aria-describedby="Loader Code">
+                    <label class="form-label" for="txtUsername">Username</label>
+                    <input type="text" class="form-control" name="Username" id="txtUsername" aria-describedby="Username">
+                </div>
+
+                <div class="mb-3" id="pnlPassword">
+                    <label class="form-label" for="txtPassword">Password</label>
+                    <input type="password" class="form-control" name="Password" id="txtPassword" aria-describedby="Password">
+                </div>
+                <div class="mb-3" id="pnlConfirmPassword">
+                    <label class="form-label" for="txtConfirmPassword">Confirm Password</label>
+                    <input type="password" class="form-control" name="ConfirmPassword" id="txtConfirmPassword" aria-describedby="ConfirmPassword">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="txtFullname">Fullname</label>
+                    <input type="text" class="form-control" name="Fullname" id="txtFullname" aria-describedby="Fullname">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" for="txtDesc">Description</label>
-                    <input type="text" class="form-control" name="Description" id="txtDesc" aria-describedby="Description">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtTotalCol">Total Column</label>
-                    <input type="number" class="form-control" name="TotalCol" id="txtTotalCol" aria-describedby="TotalCol">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtColHeight">Column Height</label>
-                    <input type="number" class="form-control" name="ColHeight" id="txtColHeight" aria-describedby="ColHeight">
+                    <label class="form-label" for="txtEmail">Email</label>
+                    <input type="text" class="form-control" name="Email" id="txtEmail" aria-describedby="Email">
                 </div>
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="chkIsActive">
@@ -90,6 +99,41 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" onclick="saveItem()">Save</button>
                 <button type="button" class="btn btn-outline-secondary" onclick="cancelForm()">Cancel</button>
+            </div>
+            @* </form> *@
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="myResetModal" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Update Dimension</h4>
+            </div>
+            @* <form action="/bin/SaveBin" method="post"> *@
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" for="txtUsername2">Username</label>
+                    <input type="text" class="form-control" name="Username" id="txtUsername2" aria-describedby="Username" disabled>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="txtPassword2">Password</label>
+                    <input type="password" class="form-control" name="Password" id="txtPassword2" aria-describedby="Password">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="txtConfirmPassword2">Confirm Password</label>
+                    <input type="password" class="form-control" name="ConfirmPassword" id="txtConfirmPassword2" aria-describedby="ConfirmPassword">
+                </div>
+
+                <input type="hidden" id="txtId2">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="resetPassword()">Save</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="cancelResetForm()">Cancel</button>
             </div>
             @* </form> *@
         </div>
@@ -114,7 +158,7 @@
 
         function loadList() {
             $.ajax({
-                url: "/Loader/GetLoaderList/",
+                url: "/Account/GetUserList/",
                 type: "GET",
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
@@ -140,8 +184,9 @@
                             pageLength: 50,
                             lengthMenu: [50, 100, 250, 500, 1000],
                             columns: [
-                                { data: 'loaderCode' },
-                                { data: 'description' },
+                                { data: 'username' },
+                                { data: 'fullname' },
+                                { data: 'email' },
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
@@ -153,19 +198,19 @@
                                         }
                                     }
                                 },
-                                { data: 'status' },
-                                { data: 'totalCol' },
-                                { data: 'colHeight' },
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
-                                        'onclick="editItemForm(\'' + row.loader_Id + '\', \'' + row.loaderCode + '\', \'' + row.description + '\', ' +
-                                        '\'' + row.totalCol + '\', \'' + row.colHeight + '\', ' +
-                                        '\'' + row.isActive + '\' )">' +
+                                        'onclick="editItemForm(\'' + row.id + '\', ' +
+                                        '\'' + row.username + '\', \'' + row.fullname + '\', \'' + row.email + '\', \'' + row.isActive + '\' )">' +
                                         '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
 
-                                        '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.loader_Id + '\', \'' + row.loaderCode + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
+                                        '<button class="btn btn-warning d-grid" style="margin-right:10px;"' +
+                                        'onclick="resetPassForm(\'' + row.id + '\', \'' + row.username + '\')">' +
+                                        '<span><i class="bi bi-lock""></i>  Reset Password</span></button>' +
+
+                                        '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.id + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
                                     }
                                 }
                             ],
@@ -193,50 +238,171 @@
         }
 
         function newItemForm() {
-            $("#txtId").val("0");
-            $("#txtCode").val("");
-            $("#txtDesc").val("");
-            $("#txtTotalCol").val("");
-            $("#txtColHeight").val("");
+            $("#txtId").val("");
+            $("#txtUsername").val("");
+            $("#txtPassword").val("");
+            $("#txtConfirmPassword").val("");
+            $("#txtFullname").val("");
+            $("#txtEmail").val("");
             document.getElementById("chkIsActive").checked = true;
             $("#myModal").modal("show");
+
+            $('#pnlPassword').removeClass('pnlHide');
+            $('#pnlConfirmPassword').removeClass('pnlHide');
         }
 
-        function editItemForm(id, code, desc, c, ch, isAct) {
+        function editItemForm(id, un, fn, e, isAct) {
             $("#txtId").val(id);
-            $("#txtCode").val(code);
-            $("#txtDesc").val(desc);
-            $("#txtTotalCol").val(c);
-            $("#txtColHeight").val(ch);
+            $("#txtUsername").val(un);
+            $("#txtPassword").val("");
+            $("#txtConfirmPassword").val("");
+            $("#txtFullname").val(fn);
+            $("#txtEmail").val(e);
             if (isAct == "true") {
                 document.getElementById("chkIsActive").checked = true;
             }
             else {
                 document.getElementById("chkIsActive").checked = false;
             }
+            $('#pnlPassword').addClass('pnlHide');
+            $('#pnlConfirmPassword').addClass('pnlHide');
             $("#myModal").modal("show");
+        }
+
+        function resetPassForm(id, un) {
+            $("#txtId2").val(id);
+            $("#txtUsername2").val(un);
+            $("#txtPassword2").val("");
+            $("#txtConfirmPassword2").val("");
+            $("#myResetModal").modal("show");
         }
 
         function cancelForm() {
             $("#myModal").modal("toggle");
         }
 
-        function saveItem() {
-            const chkIsAct = document.querySelector('#chkIsActive');
+        function cancelResetForm() {
+            $("#myResetModal").modal("toggle");
+        }
+
+        function resetPassword() {
+
+            var err = "";
+            if ($("#txtPassword2").val() != $("#txtConfirmPassword2").val()) {
+                err = "Password and Confirm Password are not match.";
+            }
+            if (err != "") {
+                swal.fire({
+                    icon: 'error',
+                    title: "Wait",
+                    text: err
+                });
+                return;
+            }
 
             var data = {
-                Loader_Id: $("#txtId").val(),
-                LoaderCode: $("#txtCode").val(),
-                Description: $("#txtDesc").val(),
-                TotalCol: $("#txtTotalCol").val(),
-                ColHeight: $("#txtColHeight").val(),
-                IsActive: chkIsAct.checked ? true : false,
+                Id: $("#txtId2").val(),
+                Username: $("#txtUsername2").val(),
+                Password: $("#txtPassword2").val(),
+                ConfirmPassword: $("#txtConfirmPassword2").val(),
+                Fullname: '',
+                Email: ''
             }
 
             //console.log(JSON.stringify(data));
 
             $.ajax({
-                url: '/Loader/SaveLoader',
+                url: '/Account/ResetUserPassword',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    // console.log(result);
+                    if (result.success == true) {
+                        // $("#myModal").modal("toggle");
+                        swal.fire({
+                            icon: 'success',
+                            title: "Success Update",
+                            text: "",
+                            didClose: () => {
+                              window.location.reload();
+                            }
+                        });
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+
+            // console.log(id);
+        }
+
+        function saveItem() {
+            const chkIsAct = document.querySelector('#chkIsActive');
+
+            var err = "";
+            if ($("#txtUsername").val() == "") {
+               err = "Please insert Username.";
+            }
+            if ($("#txtId").val() == "") {
+                if ($("#txtPassword").val() != $("#txtConfirmPassword").val()) {
+                    err = "Password and Confirm Password are not match.";
+                }
+            }
+            if ($("#txtFullname").val() == "") {
+               err = "Please insert Fullname.";
+            }
+            if ($("#txtEmail").val() == "") {
+               err = "Please insert Email.";
+            }
+            if (err != "") {
+                swal.fire({
+                    icon: 'error',
+                    title: "Wait",
+                    text: err
+                });
+                return;
+            }
+
+            var data = {
+                Id: $("#txtId").val(),
+                Username: $("#txtUsername").val(),
+                Password: $("#txtPassword").val(),
+                ConfirmPassword: $("#txtConfirmPassword").val(),
+                Fullname: $("#txtFullname").val(),
+                Email: $("#txtEmail").val(),
+                IsActive: chkIsAct.checked ? true : false
+            }
+
+            //console.log(JSON.stringify(data));
+
+            $.ajax({
+                url: '/Account/SaveUser',
                 type: 'POST',
                 data: JSON.stringify(data),
                 dataType: 'JSON',
@@ -286,7 +452,7 @@
             // console.log(id);
         }
 
-        function deleteItem(id, code) {
+        function deleteItem(id) {
 
             swal.fire({
                 title: "Are you sure want to delete?",
@@ -302,12 +468,11 @@
                 if (r.isConfirmed == true) {
 
                     var data = {
-                        Loader_Id: id,
-                        LoaderCode: code
+                        Id: id,
                     }
 
                     $.ajax({
-                        url: '/Loader/DeleteLoader',
+                        url: '/Account/DeleteUser',
                         type: 'DELETE',
                         data: JSON.stringify(data),
                         dataType: 'json',
@@ -325,7 +490,6 @@
                         },
                         success: function (result) {
                             if (result.success == true) {
-                                // $("#myModal").modal("toggle");
                                 swal.fire({
                                     icon: 'success',
                                     title: "Success Deleted",

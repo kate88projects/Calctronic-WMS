@@ -8,6 +8,8 @@ namespace RackingSystem.Models.Loader
 
         public string LoaderCode { get; set; } = "";
 
+        public string Description { get; set; } = "";
+
         public bool IsActive { get; set; } = true;
 
         public string Status { get; set; } = "";

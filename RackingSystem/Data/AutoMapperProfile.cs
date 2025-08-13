@@ -7,6 +7,7 @@ using RackingSystem.Models.Item;
 using RackingSystem.Models.Loader;
 using RackingSystem.Models.Reel;
 using RackingSystem.Models.Trolley;
+using RackingSystem.Models.Setting;
 
 namespace RackingSystem.Data
 {
@@ -16,7 +17,13 @@ namespace RackingSystem.Data
         {
             CreateMap<Slot, SlotListDTO>();
             CreateMap<Item, ItemListDTO>();
+            CreateMap<ItemGroup, ItemGroupListDTO>();
             CreateMap<Reel, ReelListDTO>();
+
+            CreateMap<ReelDimension, ReelDimensionDTO>();
+            CreateMap<ReelDimension, ReelDimensionListDTO>();
+            CreateMap<SlotCalculation, SlotCalculationDTO>();
+            CreateMap<SlotCalculation, SlotCalculationListDTO>();
 
             CreateMap<Loader, LoaderDTO>();
             CreateMap<Loader, LoaderListDTO>();

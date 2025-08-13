@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using RackingSystem.Data.GRN;
 using RackingSystem.Data.Maintenances;
 using RackingSystem.Models.GRN;
+using RackingSystem.Models.Item;
 
 namespace RackingSystem.Data
 {
@@ -22,16 +23,26 @@ namespace RackingSystem.Data
                 .Property(e => e.FullName)
                 .HasMaxLength(500);
 
+            modelBuilder.Entity<User>()
+                .Property(e => e.IsActive);
+
             modelBuilder.Entity<GRNDtlListDTO>(entity =>
                 entity.HasKey(e => e.GRNDetail_Id));
+
+            modelBuilder.Entity<ItemListDTO>(entity =>
+                entity.HasKey(e => e.Item_Id));
         }
 
         public DbSet<Configuration> Configuration { get; set; }
         public DbSet<DocFormat> DocFormat { get; set; }
         public DbSet<DocFormatDetail> DocFormatDetail { get; set; }
 
+        public DbSet<ReelDimension> ReelDimension { get; set; }
+        public DbSet<SlotCalculation> SlotCalculation { get; set; }
+
         public DbSet<Slot> Slot { get; set; }
         public DbSet<Reel> Reel { get; set; }
+        public DbSet<ItemGroup> ItemGroup { get; set; }
         public DbSet<Item> Item { get; set; }
         public DbSet<Loader> Loader { get; set; }
         public DbSet<Trolley> Trolley { get; set; }
@@ -39,6 +50,7 @@ namespace RackingSystem.Data
 
         public DbSet<GRNDetail> GRNDetail { get; set; }
 
+        public DbSet<ItemListDTO> SP_ItemSearchList { get; set; }
         public DbSet<GRNDtlListDTO> SP_GRNDTLSearchList { get; set; }
     }
 }

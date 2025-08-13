@@ -1,4 +1,6 @@
-﻿
+﻿@{
+}
+
 <style>
     .table-title {
         color: #fff;
@@ -23,11 +25,11 @@
             <div class="card card-outline ">
                 <div class="card-header table-title">
                     <div class="card-title">
-                        <h2>Loader List <b></b></h2>
+                        <h2>Item Group List <b></b></h2>
                     </div>
                     <div class="card-tools">
                         <button type="button" class="btn btn-success" onclick="newItemForm()">
-                            Add New Loader
+                            Add New Item Group
                         </button>
                     </div>
                 </div>
@@ -36,12 +38,9 @@
                         <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
                             <thead>
                                 <tr>
-                                    <th>Loader Code</th>
+                                    <th>Item Group Code</th>
                                     <th>Description</th>
                                     <th>Is Active</th>
-                                    <th>Status</th>
-                                    <th>Total Column</th>
-                                    <th>Column Height</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -59,25 +58,17 @@
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Update Loader</h4>
+                <h4 class="modal-title">Update Item Group</h4>
             </div>
             @* <form action="/bin/SaveBin" method="post"> *@
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label" for="txtCode">Loader Code</label>
-                    <input type="text" class="form-control" name="LoaderCode" id="txtCode" aria-describedby="Loader Code">
+                    <label class="form-label" for="txtCode">Item Group Code</label>
+                    <input type="text" class="form-control" name="ItemCode" id="txtCode" aria-describedby="Item Code">
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="txtDesc">Description</label>
                     <input type="text" class="form-control" name="Description" id="txtDesc" aria-describedby="Description">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtTotalCol">Total Column</label>
-                    <input type="number" class="form-control" name="TotalCol" id="txtTotalCol" aria-describedby="TotalCol">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtColHeight">Column Height</label>
-                    <input type="number" class="form-control" name="ColHeight" id="txtColHeight" aria-describedby="ColHeight">
                 </div>
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="chkIsActive">
@@ -114,7 +105,7 @@
 
         function loadList() {
             $.ajax({
-                url: "/Loader/GetLoaderList/",
+                url: "/Item/GetItemGroupList/",
                 type: "GET",
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
@@ -140,7 +131,7 @@
                             pageLength: 50,
                             lengthMenu: [50, 100, 250, 500, 1000],
                             columns: [
-                                { data: 'loaderCode' },
+                                { data: 'itemGroupCode' },
                                 { data: 'description' },
                                 {
                                     data: null,
@@ -153,19 +144,15 @@
                                         }
                                     }
                                 },
-                                { data: 'status' },
-                                { data: 'totalCol' },
-                                { data: 'colHeight' },
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
-                                        'onclick="editItemForm(\'' + row.loader_Id + '\', \'' + row.loaderCode + '\', \'' + row.description + '\', ' +
-                                        '\'' + row.totalCol + '\', \'' + row.colHeight + '\', ' +
-                                        '\'' + row.isActive + '\' )">' +
+                                        'onclick="editItemForm(\'' + row.itemGroup_Id + '\', \'' + row.itemGroupCode + '\', \'' + row.description + '\', ' +
+                                        '\'' + row.isActive + '\')">' +
                                         '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
 
-                                        '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.loader_Id + '\', \'' + row.loaderCode + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
+                                        '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.itemGroup_Id + '\', \'' + row.itemGroupCode + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
                                     }
                                 }
                             ],
@@ -196,18 +183,14 @@
             $("#txtId").val("0");
             $("#txtCode").val("");
             $("#txtDesc").val("");
-            $("#txtTotalCol").val("");
-            $("#txtColHeight").val("");
             document.getElementById("chkIsActive").checked = true;
             $("#myModal").modal("show");
         }
 
-        function editItemForm(id, code, desc, c, ch, isAct) {
+        function editItemForm(id, code, desc, isAct) {
             $("#txtId").val(id);
             $("#txtCode").val(code);
             $("#txtDesc").val(desc);
-            $("#txtTotalCol").val(c);
-            $("#txtColHeight").val(ch);
             if (isAct == "true") {
                 document.getElementById("chkIsActive").checked = true;
             }
@@ -225,18 +208,16 @@
             const chkIsAct = document.querySelector('#chkIsActive');
 
             var data = {
-                Loader_Id: $("#txtId").val(),
-                LoaderCode: $("#txtCode").val(),
+                ItemGroup_Id: $("#txtId").val(),
+                ItemGroupCode: $("#txtCode").val(),
                 Description: $("#txtDesc").val(),
-                TotalCol: $("#txtTotalCol").val(),
-                ColHeight: $("#txtColHeight").val(),
                 IsActive: chkIsAct.checked ? true : false,
             }
 
             //console.log(JSON.stringify(data));
 
             $.ajax({
-                url: '/Loader/SaveLoader',
+                url: '/Item/SaveItemGroup',
                 type: 'POST',
                 data: JSON.stringify(data),
                 dataType: 'JSON',
@@ -302,12 +283,12 @@
                 if (r.isConfirmed == true) {
 
                     var data = {
-                        Loader_Id: id,
-                        LoaderCode: code
+                        ItemGroup_Id: id,
+                        ItemGroupCode: code
                     }
 
                     $.ajax({
-                        url: '/Loader/DeleteLoader',
+                        url: '/Item/DeleteItemGroup',
                         type: 'DELETE',
                         data: JSON.stringify(data),
                         dataType: 'json',

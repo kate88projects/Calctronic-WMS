@@ -1,4 +1,8 @@
 ﻿
+@{
+}
+
+
 <style>
     .table-title {
         color: #fff;
@@ -23,11 +27,11 @@
             <div class="card card-outline ">
                 <div class="card-header table-title">
                     <div class="card-title">
-                        <h2>Loader List <b></b></h2>
+                        <h2>Reel Dimension Setting <b></b></h2>
                     </div>
                     <div class="card-tools">
                         <button type="button" class="btn btn-success" onclick="newItemForm()">
-                            Add New Loader
+                            Add New Dimension
                         </button>
                     </div>
                 </div>
@@ -36,12 +40,9 @@
                         <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
                             <thead>
                                 <tr>
-                                    <th>Loader Code</th>
-                                    <th>Description</th>
-                                    <th>Is Active</th>
-                                    <th>Status</th>
-                                    <th>Total Column</th>
-                                    <th>Column Height</th>
+                                    <th>Thickness (mm)</th>
+                                    <th>Width (inch)</th>
+                                    <th>Max Thickness (mm)</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -59,29 +60,21 @@
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Update Loader</h4>
+                <h4 class="modal-title">Update Dimension</h4>
             </div>
             @* <form action="/bin/SaveBin" method="post"> *@
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label" for="txtCode">Loader Code</label>
-                    <input type="text" class="form-control" name="LoaderCode" id="txtCode" aria-describedby="Loader Code">
+                    <label class="form-label" for="txtThickness">Thickness (mm)</label>
+                    <input type="number" class="form-control" name="Thickness" id="txtThickness" aria-describedby="Thickness">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" for="txtDesc">Description</label>
-                    <input type="text" class="form-control" name="Description" id="txtDesc" aria-describedby="Description">
+                    <label class="form-label" for="txtWidth">Width (inch)</label>
+                    <input type="number" class="form-control" name="Width" id="txtWidth" aria-describedby="Width">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" for="txtTotalCol">Total Column</label>
-                    <input type="number" class="form-control" name="TotalCol" id="txtTotalCol" aria-describedby="TotalCol">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtColHeight">Column Height</label>
-                    <input type="number" class="form-control" name="ColHeight" id="txtColHeight" aria-describedby="ColHeight">
-                </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkIsActive">
-                    <label class="form-check-label" for="chkIsActive">Is Active</label>
+                    <label class="form-label" for="txtMaxThickness">Max Thickness (mm)</label>
+                    <input type="number" class="form-control" name="MaxThickness" id="txtMaxThickness" aria-describedby="Max Thickness">
                 </div>
 
                 <input type="hidden" id="txtId">
@@ -114,7 +107,7 @@
 
         function loadList() {
             $.ajax({
-                url: "/Loader/GetLoaderList/",
+                url: "/Setting/GetReelDimensionList/",
                 type: "GET",
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
@@ -140,32 +133,18 @@
                             pageLength: 50,
                             lengthMenu: [50, 100, 250, 500, 1000],
                             columns: [
-                                { data: 'loaderCode' },
-                                { data: 'description' },
-                                {
-                                    data: null,
-                                    render: function (data, type, row, meta) {
-                                        if (row.isActive == true) {
-                                            return '<span><i class="bi bi-check-square" style="color: darkgreen;"></i></span>'
-                                        }
-                                        else {
-                                            return '<span><i class="bi bi-app""></i></span>'
-                                        }
-                                    }
-                                },
-                                { data: 'status' },
-                                { data: 'totalCol' },
-                                { data: 'colHeight' },
+                                { data: 'thickness' },
+                                { data: 'width' },
+                                { data: 'maxThickness' },
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
-                                        'onclick="editItemForm(\'' + row.loader_Id + '\', \'' + row.loaderCode + '\', \'' + row.description + '\', ' +
-                                        '\'' + row.totalCol + '\', \'' + row.colHeight + '\', ' +
-                                        '\'' + row.isActive + '\' )">' +
+                                        'onclick="editItemForm(\'' + row.reelDimension_Id + '\', ' +
+                                        '\'' + row.thickness + '\', \'' + row.width + '\', \'' + row.maxThickness + '\' )">' +
                                         '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
 
-                                        '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.loader_Id + '\', \'' + row.loaderCode + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
+                                        '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.reelDimension_Id + '\', \'' + row.thickness + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
                                     }
                                 }
                             ],
@@ -194,26 +173,17 @@
 
         function newItemForm() {
             $("#txtId").val("0");
-            $("#txtCode").val("");
-            $("#txtDesc").val("");
-            $("#txtTotalCol").val("");
-            $("#txtColHeight").val("");
-            document.getElementById("chkIsActive").checked = true;
+            $("#txtThickness").val("");
+            $("#txtWidth").val("");
+            $("#txtMaxThickness").val("");
             $("#myModal").modal("show");
         }
 
-        function editItemForm(id, code, desc, c, ch, isAct) {
+        function editItemForm(id, h, w, maxh) {
             $("#txtId").val(id);
-            $("#txtCode").val(code);
-            $("#txtDesc").val(desc);
-            $("#txtTotalCol").val(c);
-            $("#txtColHeight").val(ch);
-            if (isAct == "true") {
-                document.getElementById("chkIsActive").checked = true;
-            }
-            else {
-                document.getElementById("chkIsActive").checked = false;
-            }
+            $("#txtThickness").val(h);
+            $("#txtWidth").val(w);
+            $("#txtMaxThickness").val(maxh);
             $("#myModal").modal("show");
         }
 
@@ -222,21 +192,18 @@
         }
 
         function saveItem() {
-            const chkIsAct = document.querySelector('#chkIsActive');
 
             var data = {
-                Loader_Id: $("#txtId").val(),
-                LoaderCode: $("#txtCode").val(),
-                Description: $("#txtDesc").val(),
-                TotalCol: $("#txtTotalCol").val(),
-                ColHeight: $("#txtColHeight").val(),
-                IsActive: chkIsAct.checked ? true : false,
+                ReelDimension_Id: $("#txtId").val(),
+                Thickness: $("#txtThickness").val(),
+                Width: $("#txtWidth").val(),
+                MaxThickness: $("#txtMaxThickness").val(),
             }
 
             //console.log(JSON.stringify(data));
 
             $.ajax({
-                url: '/Loader/SaveLoader',
+                url: '/Setting/SaveReelDimension',
                 type: 'POST',
                 data: JSON.stringify(data),
                 dataType: 'JSON',
@@ -286,7 +253,7 @@
             // console.log(id);
         }
 
-        function deleteItem(id, code) {
+        function deleteItem(id, h) {
 
             swal.fire({
                 title: "Are you sure want to delete?",
@@ -302,12 +269,11 @@
                 if (r.isConfirmed == true) {
 
                     var data = {
-                        Loader_Id: id,
-                        LoaderCode: code
+                        ReelDimension_Id: id,
                     }
 
                     $.ajax({
-                        url: '/Loader/DeleteLoader',
+                        url: '/Setting/DeleteReelDimension',
                         type: 'DELETE',
                         data: JSON.stringify(data),
                         dataType: 'json',
@@ -325,7 +291,6 @@
                         },
                         success: function (result) {
                             if (result.success == true) {
-                                // $("#myModal").modal("toggle");
                                 swal.fire({
                                     icon: 'success',
                                     title: "Success Deleted",

@@ -23,18 +23,24 @@ namespace RackingSystem.Data.Maintenances
         public string Desc2 { get; set; } = "";
 
         [Required]
+        public long ItemGroup_Id { get; set; }
+
+        [Required]
         public bool IsActive { get; set; } = true;
 
         [Required]
         public bool IsFinishGood { get; set; } = true;
 
         [Required]
-        public int Thickness { get; set; } = 0;
+        public long ReelDimension_Id { get; set; }
 
-        public int Width { get; set; } = 0;
+        //[Required]
+        //public int Thickness { get; set; } = 0;
 
-        [Required]
-        public int MaxThickness { get; set; } = 0;
+        //public int Width { get; set; } = 0;
+
+        //[Required]
+        //public int MaxThickness { get; set; } = 0;
 
         [Required]
         public bool AlarmOverMaxThickness { get; set; } = true;
