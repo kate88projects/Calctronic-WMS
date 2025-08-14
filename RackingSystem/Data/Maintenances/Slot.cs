@@ -15,10 +15,10 @@ namespace RackingSystem.Data.Maintenances
         public bool IsActive { get; set; } = true;
 
         [Required]
-        public bool ForEmptyTray { get; set; } = false;
+        public bool ForEmptyDrawer { get; set; } = false;
 
         [Required]
-        public bool HasEmptyTray { get; set; } = false;
+        public bool HasEmptyDrawer { get; set; } = false;
 
         [Required]
         public bool HasReel { get; set; } = false;
