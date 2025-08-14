@@ -10,9 +10,9 @@ namespace RackingSystem.Models.Slot
 
         public bool IsActive { get; set; } = true;
 
-        public bool ForEmptyTray { get; set; } = false;
+        public bool ForEmptyDrawer { get; set; } = false;
 
-        public bool HasEmptyTray { get; set; } = false;
+        public bool HasEmptyDrawer { get; set; } = false;
 
         public bool HasReel { get; set; } = false;
         public string ReelNo { get; set; } = "";

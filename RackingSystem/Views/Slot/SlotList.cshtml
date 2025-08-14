@@ -15,6 +15,21 @@
             font-size: 24px;
         }
 
+        .error-message {
+            color: red;
+            font-size: 0.875rem; /* Smaller font size */
+            margin-top: 5px;
+        }
+
+        /* Highlight invalid fields with a red border */
+        .is-invalid {
+            border-color: red;
+        }
+
+        /* Optional: Style for valid fields if needed */
+        .is-valid {
+            border-color: green;
+        }
 </style>
 
 <br />
@@ -34,9 +49,10 @@
                                 <span class="visually-hidden">Toggle Dropdown</span>
                             </button>
                             <ul class="dropdown-menu" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(114.5px, 40px, 0px);">
-                                <li><a class="dropdown-item" href="#">Download Template</a></li>
-                                <li><a class="dropdown-item" href="#">Import Item from Excel</a></li>
+                                <li><a class="dropdown-item" href="#" id="dTemp" onclick="downloadTemp()">Download Template</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="triggerFileInput()">Import Item from Excel</a></li>
                             </ul>
+                            <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleFileUpload(event)">
                         </div>
                         <button type="button" class="btn btn-success" onclick="newSlotColForm()">
                             Add New Slot Column
@@ -55,8 +71,12 @@
                                     <th>Column No</th>
                                     <th>Row No</th>
                                     <th>Is Active</th>
-                                    <th>Has Empty Tray</th>
-                                    <th>Has Reel</th>
+                                    @* <th>Has Empty Tray</th>
+                                    <th>Has Reel</th> *@
+                                    <th>X Pulse</th>
+                                    <th>Y Pulse</th>
+                                    <th>Qr-X Pulse</th>
+                                    <th>Qr-Y Pulse</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -66,6 +86,24 @@
             </div>
         </div>
     </div>
+</div>
+
+<div class="modal fade" id="columnMatchingModal">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="columnMatchingLabel">Map CSV Columns to Data Table Columns</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="csvColumns">
+        <div id="csvColumns"></div> 
+        <div id="dataTableColumns"></div> 
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="processAndSubmitData()">Submit</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="modal fade" id="myModal" role="dialog">
@@ -81,15 +119,39 @@
                     <div class="mb-3">
                         <label class="form-label" for="txtCode">Slot Code</label>
                         <input type="text" class="form-control" name="SlotCode" id="txtCode" aria-describedby="Slot Code">
+                        <div id="txtCodeError" class="error-message"></div>
                         @* <span asp-validation-for="SlotCode" class="text-danger"></span> *@
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="txtColNo">Column No</label>
                         <input type="text" class="form-control" name="ColNo" id="txtColNo" aria-describedby="Column No">
+                        <div id="txtColNoError" class="error-message"></div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label" for="txtRowNo">Row No</label>
                         <input type="text" class="form-control" name="RowNo" id="txtRowNo" aria-describedby="Row No">
+                        <div id="txtRowNoError" class="error-message"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="txtXPulse">X Pulse</label>
+                        <input type="number" class="form-control" name="XPulse" id="txtXPulse" aria-describedby="X Pulse" min="1">
+                        <div id="txtXPulseError" class="error-message"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="txtYPulse">Y Pulse</label>
+                        <input type="number" class="form-control" name="YPulse" id="txtYPulse" aria-describedby="Y Pulse" min="1">
+                        <div id="txtYPulseError" class="error-message"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="txtQrXPulse">Qr-X Pulse</label>
+                        <input type="number" class="form-control" name="QrXPulse" id="txtQrXPulse" aria-describedby="QR-X Pulse" min="1">
+                        <div id="txtQrXPulseError" class="error-message"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="txtQrYPulse">Qr-Y Pulse</label>
+                        <input type="number" class="form-control" name="QrYPulse" id="txtQrYPulse" aria-describedby="Qr-Y Pulse" min="1">
+                        <div id="txtQrYPulseError" class="error-message"></div>
                     </div>
                     <div class="mb-3 form-check">
                         <input type="checkbox" class="form-check-input" id="chkIsActive">
@@ -101,7 +163,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" onclick="saveSlot()">Save</button> 
-                    <button type="button" class="btn btn-outline-secondary" onclick="cancelForm()">Cancel</button>
+                    <button type="button" class="btn btn-outline-secondary" onclick="cancelForm('myModal')">Cancel</button>
                 </div>
             @* </form> *@
         </div>
@@ -119,23 +181,99 @@
             @* <form action="/Slot/SaveSlot" method="post"> *@
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label" for="txtCode">Slot Code Format</label>
-                    <input type="text" class="form-control" name="SlotCode" id="txtCode" aria-describedby="Slot Code">
+                    <label class="form-label" for="txtCodeFormat">Slot Code Format</label>
+                    <input type="text" class="form-control" name="SlotCodeFormat" id="txtCodeFormat" aria-describedby="Slot Code Format">
+                    <div id="txtCodeFormatError" class="error-message"></div>
                     @* <span asp-validation-for="SlotCode" class="text-danger"></span> *@
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtCode">Slot Code Number From</label>
-                    <input type="number" class="form-control" name="SlotCode" id="txtCode" aria-describedby="Slot Code">
-                    @* <span asp-validation-for="SlotCode" class="text-danger"></span> *@
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label" for="txtColFrom">Column No From</label>
+                        <input type="number" class="form-control" name="ColNo" id="txtColFrom" aria-describedby="Slot Code">
+                        <div id="txtColFromError" class="error-message"></div>
+                        @* <span asp-validation-for="SlotCode" class="text-danger"></span> *@
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="txtTotalCol">Total Column</label>
+                        <input type="number" class="form-control" name="TotalCol" id="txtTotalCol" aria-describedby="Total Col">
+                        <div id="txtTotalColError" class="error-message"></div>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtColNo">Column No</label>
-                    <input type="number" class="form-control" name="ColNo" id="txtColNo" aria-describedby="Column No">
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label" for="txtRowFrom">Row No From</label>
+                        <input type="number" class="form-control" name="RowNo" id="txtRowFrom" aria-describedby="Row No">
+                        <div id="txtRowFromError" class="error-message"></div>
+
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="txtTotalRow">Total Row</label>
+                        <input type="number" class="form-control" name="TotalRow" id="txtTotalRow" aria-describedby="Total Row">
+                        <div id="txtTotalRowError" class="error-message"></div>
+
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtRowNo">Total Row</label>
-                    <input type="number" class="form-control" name="RowNo" id="txtRowNo" aria-describedby="Row No">
+               
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label" for="txtStartXPulse">X Pulse</label>
+                        <input type="number" class="form-control" name="XPulse" id="txtStartXPulse" aria-describedby="X Pulse">
+                        <div id="txtStartXPulseError" class="error-message"></div>
+
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="txtXPulseIncrement">X Pulse Increment</label>
+                        <input type="number" class="form-control" name="XPulseIncrement" id="txtXPulseIncrement" aria-describedby="X Pulse Increment">
+                        <div id="txtXPulseIncrementError" class="error-message"></div>
+
+                    </div>
                 </div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label" for="txtStartYPulse">Y Pulse</label>
+                        <input type="number" class="form-control" name="YPulse" id="txtStartYPulse" aria-describedby="Y Pulse">
+                        <div id="txtStartYPulseError" class="error-message"></div>
+
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="txtYPulseIncrement">Y Pulse Increment</label>
+                        <input type="number" class="form-control" name="YPulseIncrement" id="txtYPulseIncrement" aria-describedby="Y Pulse Increment">
+                        <div id="txtYPulseIncrementError" class="error-message"></div>
+
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label" for="txtStartQrXPulse">Qr-X Pulse</label>
+                        <input type="number" class="form-control" name="QrXPulse" id="txtStartQrXPulse" aria-describedby="QR-X Pulse">
+                        <div id="txtStartQrXPulseError" class="error-message"></div>
+
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="txtQrXPulseIncrement">Qr-X Pulse Increment</label>
+                        <input type="number" class="form-control" name="QrXPulseIncrement" id="txtQrXPulseIncrement" aria-describedby="Qr-X Pulse Increment">
+                        <div id="txtQrXPulseIncrementError" class="error-message"></div>
+
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label" for="txtStartQrYPulse">Qr-Y Pulse</label>
+                        <input type="number" class="form-control" name="QrYPulse" id="txtStartQrYPulse" aria-describedby="QR-Y Pulse">
+                        <div id="txtStartQrYPulseError" class="error-message"></div>
+
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="txtQrYPulseIncrement">Qr-Y Pulse Increment</label>
+                        <input type="number" class="form-control" name="QrYPulseIncrement" id="txtQrYPulseIncrement" aria-describedby="Qr-Y Pulse Increment">
+                        <div id="txtQrYPulseIncrementError" class="error-message"></div>
+
+                    </div>
+                </div>
+                
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="chkIsActive">
                     <label class="form-check-label" for="chkIsActive">Is Active</label>
@@ -145,8 +283,8 @@
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="saveSlot()">Save</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="cancelForm()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveRangeOfSlot()">Save</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="cancelForm('colModal')">Cancel</button>
             </div>
             @* </form> *@
         </div>
@@ -161,8 +299,17 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/datatables.min.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+
+
 
     <script type="text/javascript">
+
+    let uploadedFileContent = null;
+    let uploadedFileExtension = null;
+
 
         $(document).ready(function () {
 
@@ -212,32 +359,37 @@
                                         }
                                     }
                                 },
+                                // {
+                                //     data: null,
+                                //     render: function (data, type, row, meta) {
+                                //         if (row.hasEmptyDrawer == true) {
+                                //             return '<span><i class="bi bi-check-square"></i></span>'
+                                //         }
+                                //         else {
+                                //             return '<span><i class="bi bi-app""></i></span>'
+                                //         }
+                                //     }
+                                // },
+                                // {
+                                //     data: null,
+                                //     render: function (data, type, row, meta) {
+                                //         if (row.hasReel == true) {
+                                //             return '<span><i class="bi bi-check-square"></i></span>'
+                                //         }
+                                //         else {
+                                //             return '<span><i class="bi bi-app""></i></span>'
+                                //         }
+                                //     }
+                                // },
+                                { data: 'xPulse' },
+                                { data: 'yPulse' },
+                                { data: 'qrxPulse' },
+                                { data: 'qryPulse' },
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
-                                        if (row.hasEmptyTray == true) {
-                                            return '<span><i class="bi bi-check-square"></i></span>'
-                                        }
-                                        else {
-                                            return '<span><i class="bi bi-app""></i></span>'
-                                        }
-                                    }
-                                },
-                                {
-                                    data: null,
-                                    render: function (data, type, row, meta) {
-                                        if (row.hasReel == true) {
-                                            return '<span><i class="bi bi-check-square"></i></span>'
-                                        }
-                                        else {
-                                            return '<span><i class="bi bi-app""></i></span>'
-                                        }
-                                    }
-                                },
-                                {
-                                    data: null,
-                                    render: function (data, type, row, meta) {
-                                        return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;" onclick="editSlotForm(\'' + row.slot_Id + '\', \'' + row.slotCode + '\', \'' + row.colNo + '\', \'' + row.rowNo + '\', \'' + row.isActive + '\')"><span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
+                                        return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;" onclick="editSlotForm(\'' + row.slot_Id + '\', \'' + row.slotCode + '\', \'' + row.colNo + '\', \'' + row.rowNo + '\', \'' + row.isActive + '\', \''
+                                                    + row.xPulse + '\', \'' + row.yPulse + '\', \'' + row.qrxPulse + '\', \'' + row.qryPulse + '\')"><span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
                                                 '<button class="btn btn-danger deactivate-account" onclick="deleteSlot(\'' + row.slot_Id + '\', \'' + row.slotCode + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
                                     }
                                 }
@@ -270,6 +422,10 @@
             $("#txtCode").val("");
             $("#txtColNo").val("");
             $("#txtRowNo").val("");
+            $("#txtXPulse").val("");
+            $("#txtYPulse").val("");
+            $("#txtQrXPulse").val("");
+            $("#txtQrYPulse").val("");
             document.getElementById("chkIsActive").checked = true;
             $("#myModal").modal("show");
         }
@@ -283,11 +439,16 @@
             $("#colModal").modal("show");
         }
 
-        function editSlotForm(id, slotCode, colNo, rowNo, isAct) {
+        function editSlotForm(id, slotCode, colNo, rowNo, isAct, xPulse, yPulse, qrxPulse, qryPulse) {
             $("#txtId").val(id);
             $("#txtCode").val(slotCode);
             $("#txtColNo").val(colNo);
             $("#txtRowNo").val(rowNo);
+            $("#txtXPulse").val(xPulse);
+            $("#txtYPulse").val(yPulse);
+            $("#txtQrXPulse").val(qrxPulse);
+            $("#txtQrYPulse").val(qryPulse);
+
             if (isAct == "true") {
                 document.getElementById("chkIsActive").checked = true;
             }
@@ -297,72 +458,102 @@
             $("#myModal").modal("show");
         }
 
-        function cancelForm() {
-            $("#myModal").modal("toggle");
+        function cancelForm(modalId) {
+            $('#' + modalId).modal("toggle");
+            var fields;
+            
+            if (modalId == "colModal") {
+                fields = ['txtCodeFormat', 'txtColFrom', 'txtTotalCol', 'txtRowFrom', 'txtTotalRow', 'txtStartXPulse', 'txtXPulseIncrement', 'txtStartYPulse', 'txtYPulseIncrement', 'txtStartQrXPulse', 'txtQrXPulseIncrement', 'txtStartQrYPulse', 'txtQrYPulseIncrement'];
+            } 
+            else {
+                fields = ['txtCode', 'txtColNo', 'txtRowNo', 'txtXPulse', 'txtYPulse', 'txtQrXPulse', 'txtQrYPulse'];
+            }
+            removeErrMsg(fields, true);
         }
 
         function saveSlot() {
             const chkIsAct = document.querySelector('#chkIsActive');
 
-            var data = {
-                Slot_Id: $("#txtId").val(),
-                SlotCode: $("#txtCode").val(),
-                ColNo: $("#txtColNo").val(),
-                RowNo: $("#txtRowNo").val(),
-                IsActive: chkIsAct.checked ? true : false
-            }
+            const fields = [
+                { id: 'txtCode', name: 'Slot Code', required: true, numeric: false },
+                { id: 'txtColNo', name: 'Column No', required: true, numeric: true, min: 1 },
+                { id: 'txtRowNo', name: 'Row No', required: true, numeric: true, min: 1 },
+                { id: 'txtXPulse', name: 'X Pulse', required: true, numeric: true, min: 1 },
+                { id: 'txtYPulse', name: 'Y Pulse', required: true, numeric: true, min: 1 },
+                { id: 'txtQrXPulse', name: 'Qr-X Pulse', required: true, numeric: true, min: 1 },
+                { id: 'txtQrYPulse', name: 'Qr-Y Pulse', required: true, numeric: true, min: 1 },
+            ];
+            
+            // if (!/^\d+$/.test($("#txtXPulse").val()) || !/^\d+$/.test($("#txtYPulse").val()) || !/^\d+$/.test($("#txtQrXPulse").val())  || !/^\d+$/.test($("#txtQrYPulse").val())  ) 
+            // {
+            //     console.log("All Pulse must be integer.");
+            //     swal.fire({
+            //         icon: 'error',
+            //         title: "Wait",
+            //         text: "All Pulse must be integer."
+            //     });
+            // }
 
-            //console.log(JSON.stringify(data));
+            if (validateColModal(fields)) {
+                var data = {
+                    Slot_Id: $("#txtId").val(),
+                    SlotCode: $("#txtCode").val(),
+                    ColNo: $("#txtColNo").val(),
+                    RowNo: $("#txtRowNo").val(),
+                    XPulse: $("#txtXPulse").val(),
+                    YPulse: $("#txtYPulse").val(),
+                    QRXPulse: $("#txtQrXPulse").val(),
+                    QRYPulse: $("#txtQrYPulse").val(),
+                    IsActive: chkIsAct.checked ? true : false
+                }
 
-            $.ajax({
-                url: '/Slot/SaveSlot',
-                type: 'POST',
-                data: JSON.stringify(data),
-                dataType: 'JSON',
-                contentType: 'application/json; charset=utf-8',
-                beforeSend: function () {
-                    Swal.fire({
-                        text: 'Please Wait',
-                        width: '300px',
+                $.ajax({
+                    url: '/Slot/SaveSlot',
+                    type: 'POST',
+                    data: JSON.stringify(data),
+                    dataType: 'JSON',
+                    contentType: 'application/json; charset=utf-8',
+                    beforeSend: function () {
+                        Swal.fire({
+                            text: 'Please Wait',
+                            width: '300px',
 
-                        allowEscapeKey: false,
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
-                    });
-                    Swal.showLoading()
-                },
-                success: function (result) {
-                    // console.log(result);
-                    if (result.success == true) {
-                        $("#myModal").modal("toggle");
-                        swal.fire({
-                            icon: 'success',
-                            title: "Success Update",
-                            text: "",
-                            didClose: () => {
-                              window.location.reload();
-                            }
+                            allowEscapeKey: false,
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
                         });
-                    }
-                    else {
+                        Swal.showLoading()
+                    },
+                    success: function (result) {
+                        if (result.success == true) {
+                            $("#myModal").modal("toggle");
+                            swal.fire({
+                                icon: 'success',
+                                title: "Success Update",
+                                text: "",
+                                didClose: () => {
+                                  window.location.reload();
+                                }
+                            });
+                        }
+                        else {
+                            swal.fire({
+                                icon: 'error',
+                                title: "Wait",
+                                text: result.errMessage
+                            });
+                        }
+                    },
+                    error: function (error) {
+                        console.log(error);
                         swal.fire({
                             icon: 'error',
                             title: "Wait",
-                            text: result.errMessage
+                            text: error.val
                         });
                     }
-                },
-                error: function (error) {
-                    console.log(error);
-                    swal.fire({
-                        icon: 'error',
-                        title: "Wait",
-                        text: error.val
-                    });
-                }
-            });
-
-            // console.log(id);
+                });
+            }
         }
 
         function deleteSlot(id, slotCode) {
@@ -407,7 +598,6 @@
                         },
                         success: function (result) {
                             if (result.success == true) {
-                                $("#myModal").modal("toggle");
                                 swal.fire({
                                     icon: 'success',
                                     title: "Success Deleted",
@@ -440,6 +630,453 @@
                 }
               });
 
+        }
+
+        function validateColModal(fields) {
+            // Remove all previous errors
+            removeErrMsg(fields.map(f => f.id));
+
+            let isValid = true;
+
+            fields.forEach(field => {
+                const value = document.getElementById(field.id).value.trim();
+
+                if (field.required && value === '') {
+                    showError(field.id, `Please enter a ${field.name}.`);
+                    isValid = false;
+                    return;
+                }
+
+                if (field.numeric && (isNaN(value) || Number(value) < (field.min || 0))) {
+                    showError(field.id, `Please enter a valid ${field.name} (number >= ${field.min || 0}).`);
+                    isValid = false;
+                }
+            });
+
+            return isValid;
+        }
+
+        // Show error message and highlight invalid fields
+        function showError(fieldId, message) {
+            document.getElementById(fieldId).classList.add('is-invalid');
+            document.getElementById(fieldId + 'Error').textContent = message;
+        }
+
+        function removeErrMsg(fields, clearValue = false) {
+            fields.forEach(function(field) {
+                document.getElementById(field).classList.remove('is-invalid');
+                document.getElementById(field).classList.remove('is-valid');
+                document.getElementById(field + 'Error').textContent = '';
+                if (clearValue) document.getElementById(field).value = '';
+            });
+        }
+
+        function saveRangeOfSlot() {
+            const chkIsAct = document.querySelector('#chkIsActive');
+
+            const fields = [
+                { id: 'txtCodeFormat', name: 'Slot Code Format', required: true, numeric: false },
+                { id: 'txtColFrom', name: 'Column No From', required: true, numeric: true, min: 1 },
+                { id: 'txtTotalCol', name: 'Total Column', required: true, numeric: true, min: 1 },
+                { id: 'txtRowFrom', name: 'Row No From', required: true, numeric: true, min: 1 },
+                { id: 'txtTotalRow', name: 'Total Row', required: true, numeric: true, min: 1 },
+                { id: 'txtStartXPulse', name: 'X Pulse', required: true, numeric: true, min: 1 },
+                { id: 'txtXPulseIncrement', name: 'X Pulse Increment', required: true, numeric: true, min: 1 },
+                { id: 'txtStartYPulse', name: 'Y Pulse', required: true, numeric: true, min: 1 },
+                { id: 'txtYPulseIncrement', name: 'Y Pulse Increment', required: true, numeric: true, min: 1 },
+                { id: 'txtStartQrXPulse', name: 'Qr-X Pulse', required: true, numeric: true, min: 1 },
+                { id: 'txtQrXPulseIncrement', name: 'Qr-X Pulse Increment', required: true, numeric: true, min: 1 },
+                { id: 'txtStartQrYPulse', name: 'Qr-Y Pulse', required: true, numeric: true, min: 1 },
+                { id: 'txtQrYPulseIncrement', name: 'Qr-Y Pulse Increment', required: true, numeric: true, min: 1 },
+            ];
+
+            if (validateColModal(fields)) {
+                var data = {
+                    SlotFormat: $('#txtCodeFormat').val(),
+                    StartCol: $("#txtColFrom").val(),
+                    TotalCols: $("#txtTotalCol").val(),
+                    StartRow: $("#txtRowFrom").val(),
+                    TotalRows: $("#txtTotalRow").val(),
+                    XPulse: $("#txtStartXPulse").val(),
+                    XPulseIncrement: $("#txtXPulseIncrement").val(),
+                    YPulse: $("#txtStartYPulse").val(),
+                    YPulseIncrement: $("#txtYPulseIncrement").val(),
+                    QRXPulse: $("#txtStartQrXPulse").val(),
+                    QRXPulseIncrement: $("#txtQrXPulseIncrement").val(),
+                    QRYPulse: $("#txtStartQrYPulse").val(),
+                    QRYPulseIncrement: $("#txtQrYPulseIncrement").val(),
+                    IsActive: chkIsAct.checked ? true : false
+                };
+
+            console.log(data);
+
+            $.ajax({
+                url: '/Slot/SaveRangeOfSlot',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                        $("#colModal").modal("toggle");
+                        swal.fire({
+                            icon: 'success',
+                            title: "Success Update",
+                            text: "",
+                            didClose: () => {
+                              window.location.reload();
+                            }
+                        });
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+          }
+
+        }
+
+        //download template method
+        function downloadTemp() {
+            var book = XLSX.utils.book_new();
+            book.Props = {
+                Title: "Template",
+                Subject: "Slot List",
+                Author: "Flex Software Consulting Sdn Bhd",
+                CreatedDate: new Date()
+            };
+
+            var book_header = [
+                ['Slot Code', 'Column No', 'Row No', 'Has Empty Tray', 'Has Reel', 'Is Active', 'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse'] 
+            ];
+
+            var booksheet = XLSX.utils.aoa_to_sheet(book_header);
+            XLSX.utils.book_append_sheet(book, booksheet, "Sheet1");
+            XLSX.writeFile(book, "SlotListTemplate.xlsx");
+        }
+
+        //import excel method
+        function triggerFileInput() {
+            document.getElementById('fileInput').click();
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) 
+            {
+                const reader = new FileReader();
+                const fileExtension = file.name.split('.').pop().toLowerCase();
+                if (fileExtension === 'csv' || fileExtension === 'xlsx' || fileExtension === 'xls') {
+                    reader.onload = function(e) {
+                        const content = e.target.result;
+                        processFileContent(content, fileExtension);
+                    };
+            
+                    if (fileExtension === 'csv') {
+                        reader.readAsText(file);
+                    } else {
+                        reader.readAsArrayBuffer(file); 
+                    }
+                }
+                else {
+                    alert("Only CSV, XLSX, and XLS files are supported.");
+                }
+            }
+        }
+
+        function processFileContent(content, fileExtension) {
+            try {
+                let data;
+        
+                if (fileExtension === 'csv') {
+                    data = XLSX.read(content, { type: 'string', codepage: 65001 });
+                    data = XLSX.utils.sheet_to_json(data.Sheets[data.SheetNames[0]], { header: 1 });
+                } else {
+                    const workbook = XLSX.read(content, { type: 'array' });
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                }
+
+                if (!data || data.length === 0) {
+                    alert("The uploaded file appears to be empty or malformed.");
+                    return;
+                }
+
+                const columns = data[0]; 
+                if (columns.length === 0) {
+                    alert("No headers found in the file.");
+                    return;
+                }
+
+                uploadedFileContent = content;
+                uploadedFileExtension = fileExtension;
+                showColumnMapping(columns);
+            } catch (error) {
+                console.error("Error processing the file:", error);
+                alert("Failed to process the uploaded file.");
+            }
+        }
+
+        function showColumnMapping(columns) {
+            const dataTableColumns = ['Slot Code', 'Column No', 'Row No', 'Has Empty Tray', 'Has Reel', 'Is Active', 'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse']; 
+            let columnDropdowns = '';
+    
+            const isMatch = (col1, col2) => {
+                const col1Str = String(col1).toLowerCase().replace(/\s+/g, '');
+                const col2Str = String(col2).toLowerCase().replace(/\s+/g, '');
+                return col1Str === col2Str;
+            };
+
+            columns.forEach((column, index) => {
+                const matchedCol = dataTableColumns.find(col => isMatch(col, column));
+
+                columnDropdowns += `
+                    <div class="row align-items-center mb-3">
+                        <div class="col-4">
+                            <label class="form-label mb-0">File Column: <strong>${column}</strong></label>
+                        </div>
+                        <div class="col-6">
+                            <select class="form-select column-mapping" 
+                                    data-col="${column}" 
+                                    id="column${index}">
+                                <option value="">Select Matching Column</option>
+                                ${dataTableColumns.map(col => `
+                                    <option value="${col}" ${matchedCol === col ? 'selected' : ''}>${col}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                    </div>`;
+            });
+
+            document.getElementById('csvColumns').innerHTML = columnDropdowns;
+            $('#columnMatchingModal').modal("show");
+        }
+
+        function captureUserMappings() {
+            const mappings = {};
+            document.querySelectorAll('.column-mapping').forEach((selectElement, index) => {
+                const selectedValue = selectElement.value; 
+                const columnName = selectElement.getAttribute('data-col');
+                if (selectedValue) {
+                    mappings[columnName] = selectedValue;
+                    console.log(`Mapping column "${columnName}" to "${selectedValue}"`);
+                } else {
+                    console.log(`No selection for column: ${columnName}`);
+                }
+            });
+            return mappings;
+
+        }
+
+        function processAndSubmitData() {
+            let data;
+            let workbook;
+            let sheet;
+            userMappings = captureUserMappings();
+            content = uploadedFileContent;
+            fileExtension = uploadedFileExtension;
+
+            try {
+                if (fileExtension === 'csv') {
+                    workbook = XLSX.read(content, { type: 'string', codepage: 65001 });
+                } else {
+                    workbook = XLSX.read(content, { type: 'array' });
+                }
+
+                sheet = workbook.Sheets[workbook.SheetNames[0]];
+                data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+                const columns = data[0]; 
+                const slotsData = data.slice(1).map(row => {
+                    return {
+                        SlotId: 0,
+                        SlotCode: row[columns.indexOf(normalizeString(userMappings, 'Slot Code'))],
+                        ColNo: row[columns.indexOf(normalizeString(userMappings, 'Column No'))],
+                        RowNo: row[columns.indexOf(normalizeString(userMappings, 'Row No'))],
+                        HasEmptyTray: row[columns.indexOf(normalizeString(userMappings, 'Has Empty Tray'))] === 1,
+                        HasReel: row[columns.indexOf(normalizeString(userMappings, 'Has Reel'))] === 1,
+                        XPulse: row[columns.indexOf(normalizeString(userMappings, 'X Pulse'))],
+                        YPulse: row[columns.indexOf(normalizeString(userMappings, 'Y Pulse'))],
+                        QRXPulse: row[columns.indexOf(normalizeString(userMappings, 'Qr-X Pulse'))],
+                        QRYPulse: row[columns.indexOf(normalizeString(userMappings, 'Qr-Y Pulse'))],
+                        IsActive: row[columns.indexOf(normalizeString(userMappings, 'Is Active'))] === 'TRUE' || 
+                                  row[columns.indexOf(normalizeString(userMappings, 'Is Active'))] === 'true' || 
+                                  row[columns.indexOf(normalizeString(userMappings, 'Is Active'))] === '1' || 
+                                  row[columns.indexOf(normalizeString(userMappings, 'Is Active'))] === 1
+                    };
+                });
+
+                saveExcelSlots(slotsData, content); 
+
+            } catch (error) {
+                console.error("Error processing the file:", error);
+                alert("Failed to process the uploaded file.");
+            }
+        }
+
+        function normalizeString(userMappings, str) {
+            var rValue = str;
+
+            if (userMappings != null)
+            {
+                rValue = userMappings[str];
+            }
+
+            return rValue;
+        }
+
+        function saveExcelSlots(slotsData, bookBuffer) {
+            console.log("save process here: ", slotsData);
+
+            if (slotsData != null)
+            {
+                $.ajax({
+                    url: '/Slot/SaveExcelSlot', 
+                    type: 'POST',
+                    data: JSON.stringify(slotsData),
+                    dataType: 'JSON',
+                    contentType: 'application/json; charset=utf-8',
+                    beforeSend: function () {
+                        Swal.fire({
+                            text: 'Please Wait',
+                            width: '300px',
+
+                            allowEscapeKey: false,
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                        });
+                        Swal.showLoading()
+                    },
+                    success: function(response) {
+                        if (response.success == true) {
+                            swal.fire({
+                                icon: 'success',
+                                title: "Success Update",
+                                text: "",
+                                didClose: () => {
+                                    window.location.reload();
+                                }
+                            });
+                        } else {
+                           if (response.data && response.data.length > 0) {
+                               console.log("errorsline: ", response.data);
+
+                               markErrorsInSheet(bookBuffer, response.data);
+
+                               // const book = XLSX.utils.book_new();
+                               // XLSX.utils.book_append_sheet(book, sheet, "Sheet1");
+                               // XLSX.writeFile(book, "SlotList.xlsx");
+
+                               swal.fire({
+                                  icon: 'warning',
+                                  title: "Validation Issues Found",
+                                  text: "Download returned file to review and fix errors."
+                               });
+
+                           } else {
+                               swal.fire({
+                                  icon: 'error',
+                                  title: "Wait",
+                                  text: response.errMessage
+                               });
+                           }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.log(error);
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: error.val
+                        });
+                    }
+                });
+            }
+        }
+
+        async function markErrorsInSheet(bookBuffer, errorRows) {
+              const workbook = new ExcelJS.Workbook();
+              await workbook.xlsx.load(bookBuffer);
+              const worksheet = workbook.getWorksheet(1); 
+              const columnsToHighlight = [1, 2, 3, 11];
+
+              // let colorIndex = 0;
+              // const highlightColors = [
+              //     'FFCCCC', 
+              //     'FFE5CC', 
+              //     'FFFFCC', 
+              //   ];
+
+              // Add "Error" header 
+              const headerRow = worksheet.getRow(1);
+              headerRow.getCell(11).value = 'Error'; // Column K = 11
+              headerRow.commit();
+
+              const errorMap = new Map();
+              errorRows.forEach(e => errorMap.set(e.slotCode, e.errorMsg));
+
+              worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
+                if (rowNumber === 1) return; //skip header row
+
+                const slotCode = row.getCell(1).value; 
+
+                if (errorMap.has(slotCode)) {
+                  const errorMsg = errorMap.get(slotCode);
+
+                  // const fillColor = highlightColors[colorIndex % highlightColors.length];
+                  // colorIndex++;
+                  columnsToHighlight.forEach(colNum => {
+                    const cell = row.getCell(colNum);
+                    cell.fill = { 
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FFCCCC' }
+                    };
+                  });
+
+                  row.getCell(11).value = errorMsg;
+                }
+              });
+
+              // Export updated file
+              const updatedBuffer = await workbook.xlsx.writeBuffer();
+              const blob = new Blob([updatedBuffer], {
+                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+              });
+
+              const link = document.createElement("a");
+              link.href = URL.createObjectURL(blob);
+              link.download = "SlotList_Errors.xlsx";
+              link.click();
+
+              Swal.fire({
+                icon: 'warning',
+                title: "Validation Issues Found",
+                text: "Download returned file to review and fix errors."
+              });
         }
 
     </script>

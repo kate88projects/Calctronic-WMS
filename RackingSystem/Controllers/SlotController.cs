@@ -72,5 +72,22 @@ namespace RackingSystem.Controllers
             return result;
         }
 
+        [HttpPost]
+        [Consumes("application/json")]
+        public async Task<IActionResult> SaveExcelSlot([FromBody] List<SlotListDTO> slots)
+        {
+            ServiceResponseModel<List<SlotListDTO>> result = await _slotService.SaveExcelSlot(slots);
+
+            return new JsonResult(result);
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveRangeOfSlot([FromBody] SlotRangeDTO slotRanges)
+        {
+            ServiceResponseModel<SlotRangeDTO> result = await _slotService.SaveRangeOfSlot(slotRanges);
+            return new JsonResult(result);
+        }
+
     }
 }
