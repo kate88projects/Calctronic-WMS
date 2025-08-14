@@ -331,5 +331,68 @@ namespace RackingSystem.Services.SettingServices
             return result;
         }
 
+        public async Task<ServiceResponseModel<List<SlotColumnSettingDTO>>> GetSlotColumnSetting()
+        {
+            ServiceResponseModel<List<SlotColumnSettingDTO>> result = new ServiceResponseModel<List<SlotColumnSettingDTO>>();
+
+            try
+            {
+                var itemList = await _dbContext.SlotColumnSetting.OrderBy(x => x.ColNo).ToListAsync();
+                var itemListDTO = _mapper.Map<List<SlotColumnSettingDTO>>(itemList).ToList();
+                result.success = true;
+                result.data = itemListDTO;
+                result.totalRecords = itemListDTO.Count;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceResponseModel<SlotColumnSettingDTO>> SaveSlotColumnSetting(List<SlotColumnSettingDTO> req)
+        {
+            ServiceResponseModel<SlotColumnSettingDTO> result = new ServiceResponseModel<SlotColumnSettingDTO>();
+
+            try
+            {
+                // 1. checking Data
+                if (req == null)
+                {
+                    result.errMessage = "Please refresh list.";
+                    return result;
+                }
+
+                // 2. save Data
+                foreach (var item in req)
+                {
+                    SlotColumnSetting? _r = _dbContext.SlotColumnSetting.Find(item.SlotColumnSetting_Id);
+                    if (_r == null)
+                    {
+                        result.errMessage = "Cannot find this dimension, please refresh the list.";
+                        return result;
+                    }
+                    _r.EmptyDrawer_IN_Idx = item.EmptyDrawer_IN_Idx;
+                    _r.EmptyDrawer_OUT_Idx = item.EmptyDrawer_OUT_Idx;
+                    _r.Reel_IN_Idx = item.Reel_IN_Idx;
+                    _r.Reel_OUT_Idx = item.Reel_OUT_Idx;
+                    _dbContext.SlotColumnSetting.Update(_r);
+                    await _dbContext.SaveChangesAsync();
+                } 
+
+                result.success = true;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
     }
 }

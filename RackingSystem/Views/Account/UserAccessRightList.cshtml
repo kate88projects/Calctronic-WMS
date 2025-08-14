@@ -6,7 +6,7 @@
         color: #fff;
         background: #4b5366;
         /*     padding: 16px 25px;
-                    margin: -20px -25px 10px; */
+                        margin: -20px -25px 10px; */
         border-radius: 3px 3px 0 0;
     }
 
@@ -28,11 +28,11 @@
             <div class="card card-outline ">
                 <div class="card-header table-title">
                     <div class="card-title">
-                        <h2>User List <b></b></h2>
+                        <h2>User Access Right List <b></b></h2>
                     </div>
                     <div class="card-tools">
                         <button type="button" class="btn btn-success" onclick="newItemForm()">
-                            Add New User
+                            Update User UAC
                         </button>
                     </div>
                 </div>
@@ -43,7 +43,6 @@
                                 <tr>
                                     <th>Username</th>
                                     <th>Fullname</th>
-                                    <th>Email</th>
                                     <th>Is Active</th>
                                     <th>Action</th>
                                 </tr>
@@ -105,41 +104,6 @@
     </div>
 </div>
 
-<div class="modal fade" id="myResetModal" role="dialog">
-    <div class="modal-dialog">
-
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Update Dimension</h4>
-            </div>
-            @* <form action="/bin/SaveBin" method="post"> *@
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label" for="txtUsername2">Username</label>
-                    <input type="text" class="form-control" name="Username" id="txtUsername2" aria-describedby="Username" disabled>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtPassword2">Password</label>
-                    <input type="password" class="form-control" name="Password" id="txtPassword2" aria-describedby="Password">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtConfirmPassword2">Confirm Password</label>
-                    <input type="password" class="form-control" name="ConfirmPassword" id="txtConfirmPassword2" aria-describedby="ConfirmPassword">
-                </div>
-
-                <input type="hidden" id="txtId2">
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="resetPassword()">Save</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="cancelResetForm()">Cancel</button>
-            </div>
-            @* </form> *@
-        </div>
-    </div>
-</div>
-
 @section Scripts
 {
     <link href="~/css/datatables.min.css" rel="stylesheet">
@@ -152,7 +116,6 @@
     <script type="text/javascript">
 
         $(document).ready(function () {
-
             loadList();
         });
 
@@ -186,7 +149,6 @@
                             columns: [
                                 { data: 'username' },
                                 { data: 'fullname' },
-                                { data: 'email' },
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
@@ -202,15 +164,11 @@
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
-                                        'onclick="editItemForm(\'' + row.id + '\', ' +
+                                        'onclick="updateForm(\'' + row.id + '\', ' +
                                         '\'' + row.username + '\', \'' + row.fullname + '\', \'' + row.email + '\', \'' + row.isActive + '\' )">' +
                                         '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
 
-                                        '<button class="btn btn-warning d-grid" style="margin-right:10px;"' +
-                                        'onclick="resetPassForm(\'' + row.id + '\', \'' + row.username + '\')">' +
-                                        '<span><i class="bi bi-lock""></i>  Reset Password</span></button>' +
-
-                                        '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.id + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
+                                        '</div>';
                                     }
                                 }
                             ],
@@ -237,21 +195,7 @@
             });
         }
 
-        function newItemForm() {
-            $("#txtId").val("");
-            $("#txtUsername").val("");
-            $("#txtPassword").val("");
-            $("#txtConfirmPassword").val("");
-            $("#txtFullname").val("");
-            $("#txtEmail").val("");
-            document.getElementById("chkIsActive").checked = true;
-            $("#myModal").modal("show");
-
-            $('#pnlPassword').removeClass('pnlHide');
-            $('#pnlConfirmPassword').removeClass('pnlHide');
-        }
-
-        function editItemForm(id, un, fn, e, isAct) {
+        function updateForm(id, un, fn, e, isAct) {
             $("#txtId").val(id);
             $("#txtUsername").val(un);
             $("#txtPassword").val("");
@@ -269,97 +213,8 @@
             $("#myModal").modal("show");
         }
 
-        function resetPassForm(id, un) {
-            $("#txtId2").val(id);
-            $("#txtUsername2").val(un);
-            $("#txtPassword2").val("");
-            $("#txtConfirmPassword2").val("");
-            $("#myResetModal").modal("show");
-        }
-
         function cancelForm() {
             $("#myModal").modal("toggle");
-        }
-
-        function cancelResetForm() {
-            $("#myResetModal").modal("toggle");
-        }
-
-        function resetPassword() {
-
-            var err = "";
-            if ($("#txtPassword2").val() != $("#txtConfirmPassword2").val()) {
-                err = "Password and Confirm Password are not match.";
-            }
-            if (err != "") {
-                swal.fire({
-                    icon: 'error',
-                    title: "Wait",
-                    text: err
-                });
-                return;
-            }
-
-            var data = {
-                Id: $("#txtId2").val(),
-                Username: $("#txtUsername2").val(),
-                Password: $("#txtPassword2").val(),
-                ConfirmPassword: $("#txtConfirmPassword2").val(),
-                Fullname: '',
-                Email: ''
-            }
-
-            //console.log(JSON.stringify(data));
-
-            $.ajax({
-                url: '/Account/ResetUserPassword',
-                type: 'POST',
-                data: JSON.stringify(data),
-                dataType: 'JSON',
-                contentType: 'application/json; charset=utf-8',
-                beforeSend: function () {
-                    Swal.fire({
-                        text: 'Please Wait',
-                        width: '300px',
-
-                        allowEscapeKey: false,
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
-                    });
-                    Swal.showLoading()
-                },
-                success: function (result) {
-                    // console.log(result);
-                    if (result.success == true) {
-                        // $("#myModal").modal("toggle");
-                        swal.fire({
-                            icon: 'success',
-                            title: "Success Update",
-                            text: "",
-                            didClose: () => {
-                              window.location.reload();
-                            }
-                        });
-                    }
-                    else {
-                        swal.fire({
-                            icon: 'error',
-                            title: "Wait",
-                            text: result.errMessage
-                        });
-                    }
-                },
-                error: function (error) {
-                    console.log(error);
-                    swal.fire({
-                        icon: 'error',
-                        title: "Wait",
-                        text: error.val
-                    });
-                }
-            });
-
-            // console.log(id);
         }
 
         function saveItem() {
@@ -450,78 +305,6 @@
             });
 
             // console.log(id);
-        }
-
-        function deleteItem(id) {
-
-            swal.fire({
-                title: "Are you sure want to delete?",
-                text: "You will not be able to recover this record!",
-                inputAttributes: {
-                    autocapitalize: 'off'
-                },
-                showCancelButton: true,
-                confirmButtonText: 'ok',
-                cancelButtonText: 'cancel',
-                allowOutsideClick: false
-              }).then(function(r) {
-                if (r.isConfirmed == true) {
-
-                    var data = {
-                        Id: id,
-                    }
-
-                    $.ajax({
-                        url: '/Account/DeleteUser',
-                        type: 'DELETE',
-                        data: JSON.stringify(data),
-                        dataType: 'json',
-                        contentType: 'application/json; charset=utf-8',
-                        beforeSend: function () {
-                            Swal.fire({
-                                text: 'Please Wait',
-                                width: '300px',
-
-                                allowEscapeKey: false,
-                                allowOutsideClick: false,
-                                showConfirmButton: false,
-                            });
-                            Swal.showLoading()
-                        },
-                        success: function (result) {
-                            if (result.success == true) {
-                                swal.fire({
-                                    icon: 'success',
-                                    title: "Success Deleted",
-                                    text: "",
-                                    didClose: () => {
-                                      window.location.reload();
-                                    }
-                                });
-                            }
-                            else {
-                                swal.fire({
-                                    icon: 'error',
-                                    title: "Wait",
-                                    text: result.errMessage
-                                });
-                            }
-                        },
-                        error: function (error) {
-                            console.log(error);
-                            swal.fire({
-                                icon: 'error',
-                                title: "Wait",
-                                text: error.val
-                            });
-                        }
-                    });
-
-                } else {
-                    return;
-                }
-              });
-
         }
 
     </script>

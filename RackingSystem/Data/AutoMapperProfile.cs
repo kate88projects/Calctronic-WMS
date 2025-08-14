@@ -24,6 +24,7 @@ namespace RackingSystem.Data
             CreateMap<ReelDimension, ReelDimensionListDTO>();
             CreateMap<SlotCalculation, SlotCalculationDTO>();
             CreateMap<SlotCalculation, SlotCalculationListDTO>();
+            CreateMap<SlotColumnSetting, SlotColumnSettingDTO>();
 
             CreateMap<Loader, LoaderDTO>();
             CreateMap<Loader, LoaderListDTO>();

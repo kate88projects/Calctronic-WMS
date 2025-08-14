@@ -6,6 +6,7 @@ namespace RackingSystem.Controllers
     {
         public IActionResult Dashboard1()
         {
+            ViewData["ActiveTab"] = "Dashboard1";
             ViewData["Title"] = "Dashboard";
             return View();
         }

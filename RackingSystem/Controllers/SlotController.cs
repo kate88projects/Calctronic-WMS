@@ -10,6 +10,8 @@ using RackingSystem.Data;
 using RackingSystem.Models.Slot;
 using RackingSystem.Models;
 using RackingSystem.Services.SlotServices;
+using Newtonsoft.Json;
+using RackingSystem.Models.User;
 
 namespace RackingSystem.Controllers
 {
@@ -26,6 +28,16 @@ namespace RackingSystem.Controllers
 
         public IActionResult SlotList()
         {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpRACKING";
+            ViewData["ActiveTab"] = "SlotList";
             ViewData["Title"] = "Slot List";
             return View();
         }
@@ -53,6 +65,16 @@ namespace RackingSystem.Controllers
 
         public IActionResult SlotStatus()
         {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpRACKING";
+            ViewData["ActiveTab"] = "SlotStatus";
             ViewData["Title"] = "Slot Status";
             return View();
         }
@@ -86,6 +108,36 @@ namespace RackingSystem.Controllers
         public async Task<IActionResult> SaveRangeOfSlot([FromBody] SlotRangeDTO slotRanges)
         {
             ServiceResponseModel<SlotRangeDTO> result = await _slotService.SaveRangeOfSlot(slotRanges);
+            return new JsonResult(result);
+        }
+
+        public IActionResult SlotSimulation()
+        {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpRACKING";
+            ViewData["ActiveTab"] = "SlotSimulation";
+            ViewData["Title"] = "Slot Simulation";
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetFreeSlot_ByColumn_ASC([FromBody] SlotFreeReqDTO slotReq)
+        {
+            ServiceResponseModel<SlotFreeDTO> result = await _slotService.GetFreeSlot_ByColumn_ASC(slotReq);
+            return new JsonResult(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateSlotStatus([FromBody] SlotStatusReqDTO slotReq)
+        {
+            ServiceResponseModel<SlotDTO> result = await _slotService.UpdateSlotStatus(slotReq);
             return new JsonResult(result);
         }
 

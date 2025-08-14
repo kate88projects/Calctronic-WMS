@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using RackingSystem.Data;
 using RackingSystem.Data.Maintenances;
@@ -203,27 +204,6 @@ namespace RackingSystem.Services.SlotServices
             return result;
         }
 
-        public async Task<ServiceResponseModel<List<SlotListDTO>>> GetSlotStatus_ByColumn(int req)
-        {
-            ServiceResponseModel<List<SlotListDTO>> result = new ServiceResponseModel<List<SlotListDTO>>();
-
-            try
-            {
-                var slotList = await _dbContext.Slot.Where(x => x.ColNo == req).OrderBy(x => x.RowNo).ToListAsync();
-                var slotListDTO = _mapper.Map<List<SlotListDTO>>(slotList).ToList();
-                result.success = true;
-                result.data = slotListDTO;
-                return result;
-            }
-            catch (Exception ex)
-            {
-                result.errMessage = ex.Message;
-                result.errStackTrace = ex.StackTrace ?? "";
-            }
-
-            return result;
-        }
-
         public async Task<ServiceResponseModel<List<SlotListDTO>>> SaveExcelSlot(List<SlotListDTO> slots)
         {
             ServiceResponseModel<List<SlotListDTO>> result = new ServiceResponseModel<List<SlotListDTO>>();
@@ -390,5 +370,92 @@ namespace RackingSystem.Services.SlotServices
 
             return slotcode;
         }
+
+        public async Task<ServiceResponseModel<List<SlotListDTO>>> GetSlotStatus_ByColumn(int req)
+        {
+            ServiceResponseModel<List<SlotListDTO>> result = new ServiceResponseModel<List<SlotListDTO>>();
+
+            try
+            {
+                var slotList = await _dbContext.Slot.Where(x => x.ColNo == req).OrderBy(x => x.RowNo).ToListAsync();
+                var slotListDTO = _mapper.Map<List<SlotListDTO>>(slotList).ToList();
+                result.success = true;
+                result.data = slotListDTO;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceResponseModel<SlotFreeDTO>> GetFreeSlot_ByColumn_ASC(SlotFreeReqDTO req)
+        {
+            ServiceResponseModel<SlotFreeDTO> result = new ServiceResponseModel<SlotFreeDTO>();
+
+            try
+            {
+                var parameters = new[]
+                {
+                    new SqlParameter("@TotalSlot", req.TotalSlot),
+                    new SqlParameter("@ColNo", req.ColNo),
+                };
+
+                string sql = "EXECUTE dbo.Slot_GET_FREESLOTBYCOL_ASC @TotalSlot,@ColNo ";
+                var listDTO = await _dbContext.SP_SlotGetFreeSlotByCol_ASC.FromSqlRaw(sql, parameters).ToListAsync();
+
+                result.success = true;
+                result.data = listDTO.First();
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceResponseModel<SlotDTO>> UpdateSlotStatus(SlotStatusReqDTO slotReq)
+        {
+            ServiceResponseModel<SlotDTO> result = new ServiceResponseModel<SlotDTO>();
+
+            try
+            {
+                // 1. checking Data
+                if (slotReq == null)
+                {
+                    result.errMessage = "Please select Slot.";
+                    return result;
+                }
+
+                Slot? _slot = _dbContext.Slot.Find(slotReq.Slot_Id);
+                if (_slot == null)
+                {
+                    result.errMessage = "Cannot find this slot, please refresh the list.";
+                    return result;
+                }
+                _slot.IsActive = slotReq.IsActive;
+                _slot.ForEmptyTray = slotReq.ForEmptyTray;
+                _slot.HasEmptyTray = slotReq.HasEmptyTray;
+                _slot.HasReel = slotReq.HasReel;
+                _slot.ReelNo = slotReq.ReelNo;
+                _dbContext.Slot.Update(_slot);
+                await _dbContext.SaveChangesAsync();
+
+                result.success = true;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
     }
 }

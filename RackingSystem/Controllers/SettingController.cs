@@ -5,6 +5,9 @@ using RackingSystem.Data;
 using RackingSystem.Services.SettingServices;
 using RackingSystem.Models.Setting;
 using RackingSystem.Services.ItemServices;
+using RackingSystem.Data.Maintenances;
+using Newtonsoft.Json;
+using RackingSystem.Models.User;
 
 namespace RackingSystem.Controllers
 {
@@ -21,6 +24,16 @@ namespace RackingSystem.Controllers
 
         public IActionResult ReelDimensionList()
         {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpSETTINGS";
+            ViewData["ActiveTab"] = "ReelDimensionList";
             ViewData["Title"] = "Reel Dimension";
             return View();
         }
@@ -55,6 +68,16 @@ namespace RackingSystem.Controllers
 
         public IActionResult SlotCalculationList()
         {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpSETTINGS";
+            ViewData["ActiveTab"] = "SlotCalculationList";
             ViewData["Title"] = "Slot Calculation";
             return View();
         }
@@ -77,6 +100,36 @@ namespace RackingSystem.Controllers
         public async Task<IActionResult> DeleteSlotCalculation([FromBody] SlotCalculationDTO itemReq)
         {
             ServiceResponseModel<SlotCalculationDTO> result = await _setService.DeleteSlotCalculation(itemReq);
+            return new JsonResult(result);
+        }
+
+        public IActionResult SlotColumnSetting()
+        {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpSETTINGS";
+            ViewData["ActiveTab"] = "SlotColumnSetting";
+            ViewData["Title"] = "Slot Column Setting";
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<ServiceResponseModel<List<SlotColumnSettingDTO>>> GetSlotColumnSetting()
+        {
+            ServiceResponseModel<List<SlotColumnSettingDTO>> result = await _setService.GetSlotColumnSetting();
+            return result;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveSlotColumnSetting([FromBody] List<SlotColumnSettingDTO> req)
+        {
+            ServiceResponseModel<SlotColumnSettingDTO> result = await _setService.SaveSlotColumnSetting(req);
             return new JsonResult(result);
         }
 

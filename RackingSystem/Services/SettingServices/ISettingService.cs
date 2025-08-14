@@ -13,5 +13,8 @@ namespace RackingSystem.Services.SettingServices
         public Task<ServiceResponseModel<List<SlotCalculationListDTO>>> GetSlotCalculationList();
         public Task<ServiceResponseModel<SlotCalculationDTO>> SaveSlotCalculation(SlotCalculationDTO req);
         public Task<ServiceResponseModel<SlotCalculationDTO>> DeleteSlotCalculation(SlotCalculationDTO itemReq);
+
+        public Task<ServiceResponseModel<List<SlotColumnSettingDTO>>> GetSlotColumnSetting();
+        public Task<ServiceResponseModel<SlotColumnSettingDTO>> SaveSlotColumnSetting(List<SlotColumnSettingDTO> req);
     }
 }

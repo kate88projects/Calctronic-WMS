@@ -5,6 +5,7 @@ using RackingSystem.Data.GRN;
 using RackingSystem.Data.Maintenances;
 using RackingSystem.Models.GRN;
 using RackingSystem.Models.Item;
+using RackingSystem.Models.Slot;
 
 namespace RackingSystem.Data
 {
@@ -31,14 +32,19 @@ namespace RackingSystem.Data
 
             modelBuilder.Entity<ItemListDTO>(entity =>
                 entity.HasKey(e => e.Item_Id));
+
+            modelBuilder.Entity<SlotFreeDTO>(entity =>
+                entity.HasNoKey());
         }
 
         public DbSet<Configuration> Configuration { get; set; }
         public DbSet<DocFormat> DocFormat { get; set; }
         public DbSet<DocFormatDetail> DocFormatDetail { get; set; }
 
+        public DbSet<UserAccessRight> UserAccessRight { get; set; }
         public DbSet<ReelDimension> ReelDimension { get; set; }
         public DbSet<SlotCalculation> SlotCalculation { get; set; }
+        public DbSet<SlotColumnSetting> SlotColumnSetting { get; set; }
 
         public DbSet<Slot> Slot { get; set; }
         public DbSet<Reel> Reel { get; set; }
@@ -52,5 +58,7 @@ namespace RackingSystem.Data
 
         public DbSet<ItemListDTO> SP_ItemSearchList { get; set; }
         public DbSet<GRNDtlListDTO> SP_GRNDTLSearchList { get; set; }
+
+        public DbSet<SlotFreeDTO> SP_SlotGetFreeSlotByCol_ASC { get; set; }
     }
 }

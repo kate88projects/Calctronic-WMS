@@ -31,6 +31,7 @@ namespace RackingSystem.Controllers
 
         public IActionResult Login()
         {
+            ViewBag.PermissionList = new List<int>();
             string s = HttpContext.Session.GetString("xSession") ?? "";
             if (s != "")
             {
@@ -75,6 +76,16 @@ namespace RackingSystem.Controllers
 
         public IActionResult UserList()
         {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpSETTINGS";
+            ViewData["ActiveTab"] = "UserList";
             ViewData["Title"] = "User List";
             return View();
         }
@@ -105,6 +116,22 @@ namespace RackingSystem.Controllers
         {
             ServiceResponseModel<UserDTO> result = await _service.ResetUserPassword(itemReq);
             return new JsonResult(result);
+        }
+
+        public IActionResult UserAccessRightList()
+        {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpSETTINGS";
+            ViewData["ActiveTab"] = "UserAccessRightList";
+            ViewData["Title"] = "User Access Right List";
+            return View();
         }
 
 

@@ -1,0 +1,240 @@
+﻿@{
+}
+
+
+<style>
+    .table-title {
+        color: #fff;
+        background: #4b5366;
+        /*     padding: 16px 25px;
+                        margin: -20px -25px 10px; */
+        border-radius: 3px 3px 0 0;
+    }
+
+        .table-title h2 {
+            margin: 5px 0 0;
+            font-size: 24px;
+        }
+
+</style>
+
+<br />
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-outline ">
+                <div class="card-header table-title">
+                    <div class="card-title">
+                        <h2>Slot Column Setting <b></b></h2>
+                    </div>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-success" onclick="updateSetting()">
+                            Update Setting
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table table-striped table-bordered table-responsive text-nowrap">
+                        <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Column No</th>
+                                    <th>Empty Drawer IN Idx</th>
+                                    <th>Empty Drawer OUT Idx</th>
+                                    <th>Reel IN Idx</th>
+                                    <th>Reel OUT Idx</th>
+                                    @* <th>Action</th> *@
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+                <input type="hidden" id="txtTotalCol">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <link href="~/css/datatables.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/datatables.min.js"></script>
+    <script src="~/js/sweetalert2.all.min.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $('#txtTotalCol').val(0);
+            loadList();
+        });
+
+        function loadList() {
+            $.ajax({
+                url: "/Setting/GetSlotColumnSetting/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    // console.log(result);
+                    swal.close()
+                    if (result.success == true) {
+                        $('#listTable').DataTable( {
+                            data: result.data,
+                            paging: true,
+                            pageLength: 50,
+                            lengthMenu: [50, 100, 250, 500, 1000],
+                            columns: [
+                                { data: 'colNo' },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        const rowIndex = meta.row;
+                                        return '<input type="hidden" id="txtId' + rowIndex + '" value="' + row.slotColumnSetting_Id + '">' +
+                                        '<input type="number" class="form-control" id="txtEDIn' + rowIndex + '" value="' + row.emptyDrawer_IN_Idx + '">';
+                                    }
+                                },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        const rowIndex = meta.row;
+                                        return '<input type="number" class="form-control" id="txtEDOut' + rowIndex + '" value="' + row.emptyDrawer_OUT_Idx + '">';
+                                    }
+                                },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        const rowIndex = meta.row;
+                                        return '<input type="number" class="form-control" id="txtRIn' + rowIndex + '" value="' + row.reel_IN_Idx + '">';
+                                    }
+                                },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        const rowIndex = meta.row;
+                                        return '<input type="number" class="form-control" id="txtROut' + rowIndex + '" value="' + row.reel_OUT_Idx + '">';
+                                    }
+                                },
+                                // {
+                                //     data: null,
+                                //     render: function (data, type, row, meta) {
+                                //         return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
+                                //         'onclick="editItemForm(\'' + row.slotColumnSetting_Id + '\', ' +
+                                //         '\'' + row.maxThickness + '\', \'' + row.reserveSlot + '\', \'' + row.maxThickness + '\', \'' + row.reserveSlot + '\' )">' +
+                                //         '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
+
+                                //         '</div>';
+                                //     }
+                                // }
+                            ],
+                        });
+
+                        $('#txtTotalCol').val(result.totalRecords);
+
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+        }
+
+        function updateSetting() {
+
+            var iR = Number($('#txtTotalCol').val());
+            var dataList = [];
+
+            for (var i = 0; i < iR; i++) {
+                var data = {
+                    SlotColumnSetting_Id: $("#txtId" + i).val(),
+                    ColNo: (i + 1),
+                    EmptyDrawer_IN_Idx: $("#txtEDIn" + i).val(),
+                    EmptyDrawer_OUT_Idx: $("#txtEDOut" + i).val(),
+                    Reel_IN_Idx: $("#txtRIn" + i).val(),
+                    Reel_OUT_Idx: $("#txtROut" + i).val(),
+                }
+                dataList.push(data);
+            }
+
+            // console.log(JSON.stringify(dataList));
+
+            $.ajax({
+                url: '/Setting/SaveSlotColumnSetting',
+                type: 'POST',
+                data: JSON.stringify(dataList),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    // console.log(result);
+                    if (result.success == true) {
+                        $("#myModal").modal("toggle");
+                        swal.fire({
+                            icon: 'success',
+                            title: "Success Update",
+                            text: "",
+                            didClose: () => {
+                              window.location.reload();
+                            }
+                        });
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+
+            // console.log(id);
+        }
+
+    </script>
+}

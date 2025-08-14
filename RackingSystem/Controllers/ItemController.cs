@@ -6,6 +6,8 @@ using RackingSystem.Services.ItemServices;
 using RackingSystem.Models.Item;
 using Microsoft.CodeAnalysis.Elfie.Model.Tree;
 using RackingSystem.Models.GRN;
+using Newtonsoft.Json;
+using RackingSystem.Models.User;
 
 namespace RackingSystem.Controllers
 {
@@ -22,6 +24,16 @@ namespace RackingSystem.Controllers
 
         public IActionResult ItemList()
         {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpSTOCK";
+            ViewData["ActiveTab"] = "ItemList";
             ViewData["Title"] = "Item List";
             return View();
         }
@@ -79,6 +91,16 @@ namespace RackingSystem.Controllers
 
         public IActionResult ItemGroupList()
         {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpSTOCK";
+            ViewData["ActiveTab"] = "ItemGroupList";
             ViewData["Title"] = "Item Group List";
             return View();
         }

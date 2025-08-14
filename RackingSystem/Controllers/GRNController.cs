@@ -4,6 +4,8 @@ using RackingSystem.Models.Slot;
 using RackingSystem.Models;
 using RackingSystem.Services.GRNServices;
 using RackingSystem.Models.GRN;
+using Newtonsoft.Json;
+using RackingSystem.Models.User;
 
 namespace RackingSystem.Controllers
 {
@@ -20,6 +22,16 @@ namespace RackingSystem.Controllers
 
         public IActionResult NewGRN()
         {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpGRN";
+            ViewData["ActiveTab"] = "NewGRN";
             ViewData["Title"] = "New GRN";
             return View();
         }
@@ -39,6 +51,16 @@ namespace RackingSystem.Controllers
 
         public IActionResult GRNDetailList()
         {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpGRN";
+            ViewData["ActiveTab"] = "GRNDetailList";
             ViewData["Title"] = "GRN List";
             return View();
         }

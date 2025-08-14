@@ -73,6 +73,8 @@ namespace RackingSystem.Services.AccountServices
                 }
             }
 
+            var uacIdList = _dbContext.UserAccessRight.Where(x => x.User_Id == rUser.Id).Select(x => x.UAC_Id).ToList();
+
             var authClaims = new List<Claim>
                 {
                     new Claim(JwtRegisteredClaimNames.Sub, rUser.UserName!),
@@ -92,7 +94,8 @@ namespace RackingSystem.Services.AccountServices
             {
                 Fullname = rUser.FullName,
                 Username = rUser.UserName ?? "",
-                Token = tokenR
+                Token = tokenR,
+                UACIdList = uacIdList
             };
             return response;
 
