@@ -18,12 +18,12 @@
 
 
     <link rel="stylesheet"
-          href="~/css/overlayscrollbars.min.css"
-          crossorigin="anonymous" />
+    href="~/css/overlayscrollbars.min.css"
+    crossorigin="anonymous" />
 
     <link rel="stylesheet"
-          href="~/lib/bootstrap-font/bootstrap-icons.min.css"
-          crossorigin="anonymous" />
+    href="~/lib/bootstrap-font/bootstrap-icons.min.css"
+    crossorigin="anonymous" />
 
     <!--begin::Required Plugin(AdminLTE)-->
     <link rel="stylesheet" href="../css/adminlte.css" />
@@ -32,9 +32,9 @@
 
     <style type="text/css">
         html * {
-            /* font-size: 1em !important; */
-            /* color: #000 !important; */
-            font-family: Varela Round !important;
+        /* font-size: 1em !important; */
+        /* color: #000 !important; */
+        font-family: Varela Round !important;
         }
     </style>
 </head>
@@ -80,11 +80,11 @@
                 <nav class="mt-2">
                     <!--begin::Sidebar Menu-->
                     <ul class="nav sidebar-menu flex-column"
-                        data-lte-toggle="treeview"
-                        role="navigation"
-                        aria-label="Main navigation"
-                        data-accordion="false"
-                        id="navigation">
+                    data-lte-toggle="treeview"
+                    role="navigation"
+                    aria-label="Main navigation"
+                    data-accordion="false"
+                    id="navigation">
                         <li class="nav-item">
                             <a asp-action="Dashboard1" asp-controller="Dashboard" class="nav-link">
                                 <i class="nav-icon bi bi-pie-chart"></i>
@@ -92,83 +92,89 @@
                             </a>
                         </li>
 
-                        <li class="nav-item" id="grpMM">
-                            <a href="javascript:none" class="nav-link">
-                                <i class="nav-icon bi bi-ui-checks-grid"></i>
-                                <p>
-                                    MAINTENANCES
-                                    <i class="nav-arrow bi bi-chevron-right"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                @if (ViewBag.PermissionList.Contains(1) == true)
-                                {
-                                    <li class="nav-item">
-                                        <a asp-action="LoaderList" asp-controller="Loader" class="nav-link">
-                                            <i class="nav-icon bi bi-circle"></i>
-                                            <p>Loader List</p>
-                                        </a>
-                                    </li>
-                                }
-                                @if (ViewBag.PermissionList.Contains(2) == true)
-                                {
-                                    <li class="nav-item">
-                                        <a asp-action="SlotList" asp-controller="Slot" class="nav-link">
-                                            <i class="nav-icon bi bi-circle"></i>
-                                            <p>Trolley List</p>
-                                        </a>
-                                    </li>
-                                }
-                                @if (ViewBag.PermissionList.Contains(3) == true)
-                                {
-                                    <li class="nav-item">
-                                        <a asp-action="SlotList" asp-controller="Slot" class="nav-link">
-                                            <i class="nav-icon bi bi-circle"></i>
-                                            <p>Trolley Slot List</p>
-                                        </a>
-                                    </li>
-                                }
-                                @if (ViewBag.PermissionList.Contains(4) == true)
-                                {
-                                    <li class="nav-item">
-                                        <a asp-action="SlotList" asp-controller="Slot" class="nav-link">
-                                            <i class="nav-icon bi bi-circle"></i>
-                                            <p>Slot List</p>
-                                        </a>
-                                    </li>
-                                }
-                            </ul>
-                        </li>
+                        @if (ViewBag.PermissionList.Contains(1) || ViewBag.PermissionList.Contains(2) || ViewBag.PermissionList.Contains(3) || ViewBag.PermissionList.Contains(4))
+                        {
+                            <li class="nav-item" id="grpMM">
+                                <a href="javascript:none" class="nav-link">
+                                    <i class="nav-icon bi bi-ui-checks-grid"></i>
+                                    <p>
+                                        MAINTENANCES
+                                        <i class="nav-arrow bi bi-chevron-right"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    @if (ViewBag.PermissionList.Contains(1) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="LoaderList" asp-controller="Loader" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>Loader List</p>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (ViewBag.PermissionList.Contains(2) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="SlotList" asp-controller="Slot" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>Trolley List</p>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (ViewBag.PermissionList.Contains(3) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="SlotList" asp-controller="Slot" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>Trolley Slot List</p>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (ViewBag.PermissionList.Contains(4) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="SlotList" asp-controller="Slot" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>Slot List</p>
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+                        }
 
-                        <li class="nav-item" id="grpSTOCK">
-                            <a href="javascript:none" class="nav-link">
-                                <i class="nav-icon bi bi-box-seam-fill"></i>
-                                <p>
-                                    STOCK
-                                    <i class="nav-arrow bi bi-chevron-right"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                @if (ViewBag.PermissionList.Contains(20) == true)
-                                {
-                                    <li class="nav-item">
-                                        <a asp-action="ItemGroupList" asp-controller="Item" class="nav-link">
-                                            <i class="nav-icon bi bi-circle"></i>
-                                            <p>Item Group List</p>
-                                        </a>
-                                    </li>
-                                }
-                                @if (ViewBag.PermissionList.Contains(21) == true)
-                                {
-                                    <li class="nav-item">
-                                        <a asp-action="ItemList" asp-controller="Item" class="nav-link">
-                                            <i class="nav-icon bi bi-circle"></i>
-                                            <p>Item List</p>
-                                        </a>
-                                    </li>
-                                }
-                            </ul>
-                        </li>
+                        @if (ViewBag.PermissionList.Contains(20) || ViewBag.PermissionList.Contains(21))
+                        {
+                            <li class="nav-item" id="grpSTOCK">
+                                <a href="javascript:none" class="nav-link">
+                                    <i class="nav-icon bi bi-box-seam-fill"></i>
+                                    <p>
+                                        STOCK
+                                        <i class="nav-arrow bi bi-chevron-right"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    @if (ViewBag.PermissionList.Contains(20) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="ItemGroupList" asp-controller="Item" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>Item Group List</p>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (ViewBag.PermissionList.Contains(21) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="ItemList" asp-controller="Item" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>Item List</p>
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+                        }
 
                         @* <li class="nav-item" id="grpBOM">
                             <a href="javascript:none" class="nav-link">
@@ -188,44 +194,47 @@
                             </ul>
                         </li> *@
 
-                        <li class="nav-item" id="grpGRN">
-                            <a href="javascript:none" class="nav-link">
-                                <i class="nav-icon bi bi-truck"></i>
-                                <p>
-                                    GRN
-                                    <i class="nav-arrow bi bi-chevron-right"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                @if (ViewBag.PermissionList.Contains(60) == true)
-                                {
-                                    <li class="nav-item">
-                                        <a asp-action="NewGRN" asp-controller="GRN" class="nav-link">
-                                            <i class="nav-icon bi bi-circle"></i>
-                                            <p>New Receive</p>
-                                        </a>
-                                    </li>
-                                }
-                                @if (ViewBag.PermissionList.Contains(61) == true)
-                                {
-                                    <li class="nav-item">
-                                        <a asp-action="GRNDetailList" asp-controller="GRN" class="nav-link">
-                                            <i class="nav-icon bi bi-circle"></i>
-                                            <p>GRN List</p>
-                                        </a>
-                                    </li>
-                                }
-                                @if (ViewBag.PermissionList.Contains(62) == true)
-                                {
-                                    <li class="nav-item">
-                                        <a asp-action="GRNDetailList" asp-controller="GRN" class="nav-link">
-                                            <i class="nav-icon bi bi-circle"></i>
-                                            <p>Reprint Reel Sticker</p>
-                                        </a>
-                                    </li>
-                                }
-                            </ul>
-                        </li>
+                        @if (ViewBag.PermissionList.Contains(60) || ViewBag.PermissionList.Contains(61) || ViewBag.PermissionList.Contains(62))
+                        {
+                            <li class="nav-item" id="grpGRN">
+                                <a href="javascript:none" class="nav-link">
+                                    <i class="nav-icon bi bi-truck"></i>
+                                    <p>
+                                        GRN
+                                        <i class="nav-arrow bi bi-chevron-right"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    @if (ViewBag.PermissionList.Contains(60) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="NewGRN" asp-controller="GRN" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>New Receive</p>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (ViewBag.PermissionList.Contains(61) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="GRNDetailList" asp-controller="GRN" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>GRN List</p>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (ViewBag.PermissionList.Contains(62) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="GRNDetailList" asp-controller="GRN" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>Reprint Reel Sticker</p>
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+                        }
 
                         @* <li class="nav-item" id="grpJO">
                             <a href="javascript:none" class="nav-link">
@@ -257,110 +266,119 @@
                             </ul>
                         </li> *@
 
-                        <li class="nav-item" id="grpRACKING">
-                            <a href="javascript:none" class="nav-link">
-                                <i class="nav-icon bi bi-hdd-rack"></i>
-                                <p>
-                                    RACKING
-                                    <i class="nav-arrow bi bi-chevron-right"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                @if (ViewBag.PermissionList.Contains(100) == true)
-                                {
-                                    <li class="nav-item">
-                                        <a asp-action="ReelList" asp-controller="Reel" class="nav-link">
-                                            <i class="nav-icon bi bi-circle"></i>
-                                            <p>Available Reel List</p>
-                                        </a>
-                                    </li>
-                                }
-                                @if (ViewBag.PermissionList.Contains(101) == true)
-                                {
-                                    <li class="nav-item">
-                                        <a asp-action="SlotStatus" asp-controller="Slot" class="nav-link">
-                                            <i class="nav-icon bi bi-circle"></i>
-                                            <p>Racking Status</p>
-                                        </a>
-                                    </li>
-                                }
-                                @if (ViewBag.PermissionList.Contains(102) == true)
-                                {
-                                    <li class="nav-item">
-                                        <a href="./docs/introduction.html" class="nav-link">
-                                            <i class="nav-icon bi bi-circle"></i>
-                                            <p>Set Empty Drawer</p>
-                                        </a>
-                                    </li>
-                                }
-                                @if (ViewBag.PermissionList.Contains(103) == true)
-                                {
-                                    <li class="nav-item">
-                                        <a asp-action="SlotSimulation" asp-controller="Slot" class="nav-link">
-                                            <i class="nav-icon bi bi-circle"></i>
-                                            <p>Simulation</p>
-                                        </a>
-                                    </li>
-                                }
-                            </ul>
-                        </li>
+                        @if (ViewBag.PermissionList.Contains(100) || ViewBag.PermissionList.Contains(101) || ViewBag.PermissionList.Contains(102) || ViewBag.PermissionList.Contains(103))
+                        {
+                            <li class="nav-item" id="grpRACKING">
+                                <a href="javascript:none" class="nav-link">
+                                    <i class="nav-icon bi bi-hdd-rack"></i>
+                                    <p>
+                                        RACKING
+                                        <i class="nav-arrow bi bi-chevron-right"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    @if (ViewBag.PermissionList.Contains(100) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="ReelList" asp-controller="Reel" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>Available Reel List</p>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (ViewBag.PermissionList.Contains(101) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="SlotStatus" asp-controller="Slot" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>Racking Status</p>
+                                            </a>
+                                        </li>
+                                    }
+                                    @* @if (ViewBag.PermissionList.Contains(102) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a href="./docs/introduction.html" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>Set Empty Drawer</p>
+                                            </a>
+                                        </li>
+                                    } *@
+                                    @if (ViewBag.PermissionList.Contains(103) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="SlotSimulation" asp-controller="Slot" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>Simulation</p>
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+                        }
 
-                        <li class="nav-item" id="grpSETTINGS">
-                            <a href="javascript:none" class="nav-link">
-                                <i class="nav-icon bi bi-gear"></i>
-                                <p>
-                                    SETTINGS
-                                    <i class="nav-arrow bi bi-chevron-right"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                @if (ViewBag.PermissionList.Contains(121) == true)
-                                {
-                                    <li class="nav-item ">
-                                        <a asp-action="UserList" asp-controller="Account" class="nav-link">
-                                            <i class="nav-icon bi bi-circle"></i>
-                                            <p>User List</p>
-                                        </a>
-                                    </li>
-                                }
-                                @if (ViewBag.PermissionList.Contains(122) == true)
-                                {
-                                    <li class="nav-item">
-                                        <a asp-action="UserAccessRightList" asp-controller="Account" class="nav-link">
-                                            <i class="nav-icon bi bi-circle"></i>
-                                            <p>User Access Right</p>
-                                        </a>
-                                    </li>
-                                }
-                                @if (ViewBag.PermissionList.Contains(123) == true)
-                                {
-                                    <li class="nav-item ">
-                                        <a asp-action="ReelDimensionList" asp-controller="Setting" class="nav-link">
-                                            <i class="nav-icon bi bi-circle"></i>
-                                            <p>Reel Height</p>
-                                        </a>
-                                    </li>
-                                }
-                                @if (ViewBag.PermissionList.Contains(124) == true)
-                                {
-                                    <li class="nav-item ">
-                                        <a asp-action="SlotCalculationList" asp-controller="Setting" class="nav-link">
-                                            <i class="nav-icon bi bi-circle"></i>
-                                            <p>Slot Usage</p>
-                                        </a>
-                                    </li>
-                                }
-                                @if (ViewBag.PermissionList.Contains(125) == true)
-                                {
-                                    <li class="nav-item ">
-                                        <a asp-action="SlotColumnSetting" asp-controller="Setting" class="nav-link">
-                                            <i class="nav-icon bi bi-circle"></i>
-                                            <p>Slot Column</p>
-                                        </a>
-                                    </li>
-                                }
-                            </ul>
-                        </li>
+
+                        @if (ViewBag.PermissionList.Contains(121) || ViewBag.PermissionList.Contains(122) || ViewBag.PermissionList.Contains(123) || 
+                        ViewBag.PermissionList.Contains(124) || ViewBag.PermissionList.Contains(125))
+                        {
+                            <li class="nav-item" id="grpSETTINGS">
+                                <a href="javascript:none" class="nav-link">
+                                    <i class="nav-icon bi bi-gear"></i>
+                                    <p>
+                                        SETTINGS
+                                        <i class="nav-arrow bi bi-chevron-right"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    @if (ViewBag.PermissionList.Contains(121) == true)
+                                    {
+                                        <li class="nav-item ">
+                                            <a asp-action="UserList" asp-controller="Account" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>User List</p>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (ViewBag.PermissionList.Contains(122) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="UserAccessRightList" asp-controller="Account" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>User Access Right</p>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (ViewBag.PermissionList.Contains(123) == true)
+                                    {
+                                        <li class="nav-item ">
+                                            <a asp-action="ReelDimensionList" asp-controller="Setting" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>Reel Height</p>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (ViewBag.PermissionList.Contains(124) == true)
+                                    {
+                                        <li class="nav-item ">
+                                            <a asp-action="SlotCalculationList" asp-controller="Setting" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>Slot Usage</p>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (ViewBag.PermissionList.Contains(125) == true)
+                                    {
+                                        <li class="nav-item ">
+                                            <a asp-action="SlotColumnSetting" asp-controller="Setting" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>Slot Column</p>
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+                        }
+
 
                     </ul>
                     <!--end::Sidebar Menu-->

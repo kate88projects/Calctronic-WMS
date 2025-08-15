@@ -2,6 +2,7 @@
 using RackingSystem.Data;
 using RackingSystem.Data.Maintenances;
 using RackingSystem.General;
+using System;
 
 namespace RackingSystem.Services
 {
@@ -71,6 +72,28 @@ namespace RackingSystem.Services
                     context.Configuration.Add(config);
                     await context.SaveChangesAsync();
                 }
+
+                // Auto add user access right for admin
+                var admin = await userMng.FindByEmailAsync(adminEmail);
+                if (admin != null)
+                {
+                    foreach (EnumUAC uac in Enum.GetValues(typeof(EnumUAC)))
+                    {
+                        if (context.UserAccessRight.Where(x => x.User_Id == admin.Id && x.UAC_Id == (int)uac).Any() == false)
+                        {
+                            var uacDB = new UserAccessRight()
+                            {
+                                UAC = uac.ToString(),
+                                UAC_Id = (int)uac,
+                                User_Id = admin.Id
+                            };
+                            context.UserAccessRight.Add(uacDB);
+                        }
+                        await context.SaveChangesAsync();
+                    }
+                }
+
+
 
             }
             catch (Exception ex)

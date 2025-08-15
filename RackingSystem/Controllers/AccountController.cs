@@ -134,6 +134,20 @@ namespace RackingSystem.Controllers
             return View();
         }
 
+        [HttpGet]
+        public async Task<ServiceResponseModel<List<UserListDTO>>> GetUserAccessRightList()
+        {
+            ServiceResponseModel<List<UserListDTO>> result = await _service.GetUserAccessRightList();
+            return result;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveUserAccessRight([FromBody] UserAccessRightReqDTO itemReq)
+        {
+            ServiceResponseModel<UserAccessRightReqDTO> result = await _service.SaveUserAccessRight(itemReq);
+            return new JsonResult(result);
+        }
+
 
     }
 }

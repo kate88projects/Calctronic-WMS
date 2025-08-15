@@ -212,7 +212,7 @@
                                 <img src="../assets/img/lock.png" style="width:12px;height:12px;" />
                             </div>
                             <div class="col-8">
-                                <label>For Empty Tray</label>
+                                <label>For Empty Drawer</label>
                             </div>
                         </div>
                         <div class="row" style="padding:5px;">
@@ -228,7 +228,7 @@
                                 <img src="../assets/img/tray_full_icon_138077.png" style="width:25px;height:25px;" />
                             </div>
                             <div class="col-8">
-                                <label>Tray with Reel</label>
+                                <label>Drawer with Reel</label>
                             </div>
                         </div>
                         <div class="row" style="padding:5px;">
@@ -236,7 +236,7 @@
                                 <span style="font-size:15px;">2</span>
                             </div>
                             <div class="col-8">
-                                <label>Tray with Reel - 2nd level</label>
+                                <label>Drawer with Reel - 2nd level</label>
                             </div>
                         </div>
                         <div class="row" style="padding:5px;">
@@ -244,7 +244,7 @@
                                 <span style="font-size:15px;">3</span>
                             </div>
                             <div class="col-8">
-                                <label>Tray with Reel - 3rd level</label>
+                                <label>Drawer with Reel - 3rd level</label>
                             </div>
                         </div>
                     </div>
@@ -278,7 +278,8 @@
             <div class="col-2">
                 <input id="txtTotalRow" name="txtTotalRow" type="number" class="form-control" style="" placeholder="Total Row" />
                 @* <input id="txtSort" name="txtSort" type="text" class="form-control" style="" placeholder="Sorting" /> *@
-                <button type="button" class="btn btn-success" style="width:100%;" onclick="simulateResult()"><i class="bi bi-arrow-clockwise"></i> </button>
+                <button type="button" class="btn btn-warning" style="width:100%;" onclick="simulateResult()"><i class="bi bi-arrow-clockwise"></i> ASC</button>
+                <button type="button" class="btn btn-warning" style="width:100%;" onclick="simulateResultDesc()"><i class="bi bi-arrow-clockwise"></i> DESC</button>
                 <br />
                 <p id="txtResult"></p>
             </div>
@@ -308,11 +309,11 @@
                 </div>
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="chkForEmptyTray">
-                    <label class="form-check-label" for="chkForEmptyTray">For Empty Tray</label>
+                    <label class="form-check-label" for="chkForEmptyTray">For Empty Drawer</label>
                 </div>
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="chkHasEmptyTray">
-                    <label class="form-check-label" for="chkHasEmptyTray">Has Empty Tray</label>
+                    <label class="form-check-label" for="chkHasEmptyTray">Has Empty Drawer</label>
                 </div>
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="chkHasReel">
@@ -386,7 +387,7 @@
                                 const cell1 = newRow.insertCell(); // or document.createElement('td');
                                 cell1.innerHTML = '<a style="font-size:10px;" ' +
                                 'href="javascript:updateForm(\'' + result.data[idx - 1].slot_Id + '\',\'' + result.data[idx - 1].rowNo + '\',\'' + result.data[idx - 1].isActive + '\', ' +
-                                '\'' + result.data[idx - 1].forEmptyTray + '\',\'' + result.data[idx - 1].hasEmptyTray + '\',\'' + result.data[idx - 1].hasReel + '\',\'' + result.data[idx - 1].reelNo + '\',)" >' + result.data[idx - 1].rowNo + '</a>';
+                                '\'' + result.data[idx - 1].forEmptyDrawer + '\',\'' + result.data[idx - 1].hasEmptyDrawer + '\',\'' + result.data[idx - 1].hasReel + '\',\'' + result.data[idx - 1].reelNo + '\',)" >' + result.data[idx - 1].rowNo + '</a>';
                                 $(cell1).addClass("tblRow tblCol1");
                                 const cell2 = newRow.insertCell(); // or document.createElement('td');
                                 if (result.data[idx - 1].hasReel) {
@@ -398,7 +399,7 @@
                                     }
                                 }
                                 else {
-                                    if (result.data[idx - 1].hasEmptyTray) {
+                                    if (result.data[idx - 1].hasEmptyDrawer) {
                                         cell2.innerHTML = '<img src="../assets/img/tray_icon_136086.png" style="display:flex;justify-self: center;width:25px;height:25px;" />';
                                     }
                                     else {
@@ -413,7 +414,7 @@
                                 else {
                                     cell3.innerHTML = '<span style="font-size:10px;color:red;"><i class="bi-exclamation-circle-fill"></i></span>';
                                 }
-                                if (result.data[idx - 1].forEmptyTray) {
+                                if (result.data[idx - 1].forEmptyDrawer) {
                                         cell3.innerHTML = cell3.innerHTML + '<img src="../assets/img/lock.png" style="width:12px;height:12px;" />';
                                 }
                                 else {
@@ -475,7 +476,59 @@
                     swal.close();
                     if (result.success == true) {
                           const myDiv = document.getElementById('txtResult');
-                          myDiv.innerHTML = result.data.row1 + ' || ' + result.data.row2 + ' || ' + result.data.row3;
+                          myDiv.innerHTML = result.data.row1 + ' || ' + result.data.row2 + ' || ' + result.data.row3 + ' || ' + result.data.row4;
+
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+
+        }
+
+        function simulateResultDesc() {
+
+            var data = {
+                ColNo: $("#txtCol").val(),
+                TotalSlot: $("#txtTotalRow").val(),
+                SortExp: '',
+            };
+
+            $.ajax({
+                url: "/Slot/GetFreeSlot_ByColumn_DESC",
+                type: "POST",
+                dataType: 'JSON',
+                data: JSON.stringify(data),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    console.log(result);
+                    swal.close();
+                    if (result.success == true) {
+                          const myDiv = document.getElementById('txtResult');
+                          myDiv.innerHTML = result.data.row1 + ' || ' + result.data.row2 + ' || ' + result.data.row3 + ' || ' + result.data.row4;
 
                     }
                     else {
@@ -537,8 +590,8 @@
             var data = {
                 Slot_Id: $("#txtId").val(),
                 IsActive: chkIsAct.checked ? true : false,
-                ForEmptyTray: chkForEmptyTray.checked ? true : false,
-                HasEmptyTray: chkHasEmptyTray.checked ? true : false,
+                ForEmptyDrawer: chkForEmptyTray.checked ? true : false,
+                HasEmptyDrawer: chkHasEmptyTray.checked ? true : false,
                 HasReel: chkHasReel.checked ? true : false,
                 ReelNo: $("#txtReelNo").val(),
                 RowNo: $("#txtRowNo").val(),
@@ -595,6 +648,10 @@
             });
 
             // console.log(id);
+        }
+
+        function cancelForm() {
+            $("#myModal").modal("toggle");
         }
 
 

@@ -12,5 +12,8 @@ namespace RackingSystem.Services.AccountServices
         public Task<ServiceResponseModel<UserDTO>> DeleteUser(UserDTO req);
         public Task<ServiceResponseModel<UserDTO>> ResetUserPassword(UserDTO req);
 
+        public Task<ServiceResponseModel<List<UserListDTO>>> GetUserAccessRightList();
+        public Task<ServiceResponseModel<UserAccessRightReqDTO>> SaveUserAccessRight(UserAccessRightReqDTO req);
+
     }
 }

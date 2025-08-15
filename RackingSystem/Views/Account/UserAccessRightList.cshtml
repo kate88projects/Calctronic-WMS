@@ -2,6 +2,10 @@
 }
 
 <style>
+    tr:hover td {
+        background-color: #F8F6F0;
+    }
+
     .table-title {
         color: #fff;
         background: #4b5366;
@@ -18,6 +22,12 @@
     .pnlHide {
         display: none;
     }
+
+    .checkboxes ul, .checkboxes li {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
 </style>
 
 <br />
@@ -31,9 +41,9 @@
                         <h2>User Access Right List <b></b></h2>
                     </div>
                     <div class="card-tools">
-                        <button type="button" class="btn btn-success" onclick="newItemForm()">
+                        @* <button type="button" class="btn btn-success" onclick="newItemForm()">
                             Update User UAC
-                        </button>
+                        </button> *@
                     </div>
                 </div>
                 <div class="card-body">
@@ -56,47 +66,206 @@
 </div>
 
 <div class="modal fade" id="myModal" role="dialog">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
 
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Update Dimension</h4>
+                <h4 class="modal-title">Update User Access Right</h4>
             </div>
             @* <form action="/bin/SaveBin" method="post"> *@
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label" for="txtUsername">Username</label>
-                    <input type="text" class="form-control" name="Username" id="txtUsername" aria-describedby="Username">
-                </div>
-
-                <div class="mb-3" id="pnlPassword">
-                    <label class="form-label" for="txtPassword">Password</label>
-                    <input type="password" class="form-control" name="Password" id="txtPassword" aria-describedby="Password">
-                </div>
-                <div class="mb-3" id="pnlConfirmPassword">
-                    <label class="form-label" for="txtConfirmPassword">Confirm Password</label>
-                    <input type="password" class="form-control" name="ConfirmPassword" id="txtConfirmPassword" aria-describedby="ConfirmPassword">
-                </div>
-
-                <div class="mb-3">
                     <label class="form-label" for="txtFullname">Fullname</label>
-                    <input type="text" class="form-control" name="Fullname" id="txtFullname" aria-describedby="Fullname">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtEmail">Email</label>
-                    <input type="text" class="form-control" name="Email" id="txtEmail" aria-describedby="Email">
-                </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkIsActive">
-                    <label class="form-check-label" for="chkIsActive">Is Active</label>
+                    <input type="text" class="form-control" name="Fullname" id="txtFullname" aria-describedby="Fullname" disabled>
                 </div>
 
+                <div class="row">
+                    <label class="col-sm-3 col-form-label">Permissions </label>
+                    @*Maintenance*@
+                    <div id="maintenanceGroup">
+                        <input type="checkbox" name="maintenance" id="txtMaintenance" />
+                        <label for="txtMaintenance"> Maintenance</label>
+
+                        <div class="row">
+                            <label class="col-sm-3 col-form-label" style="padding:0;"> </label>
+                            <div class="col-sm-3" style="padding:0;">
+                                <ul class="checkboxes">
+                                    <li>
+                                        <input class="chkMaintenance" type="checkbox" id="txtLoaderList" value="1" />
+                                        <label for="txtLoaderList" style="">Loader List </label>
+                                    </li>
+                                    <li>
+                                        <input class="chkMaintenance" type="checkbox" id="txtSlotList" value="4" />
+                                        <label for="txtSlotList" style="">Slot List </label>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-sm-3" style="padding:0;">
+                                <ul class="checkboxes">
+                                    <li>
+                                        <input class="chkMaintenance" type="checkbox" id="txtTrolleyList" value="2" />
+                                        <label for="txtTrolleyList" style="">Trolley List </label>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-sm-3" style="padding:0;">
+                                <ul class="checkboxes">
+                                    <li>
+                                        <input class="chkMaintenance" type="checkbox" id="txtTrolleySlotList" value="3" />
+                                        <label for="txtTrolleySlotList">Trolley Slot List </label>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    @*STOCK*@
+                    <div id="stockGroup">
+                        <input type="checkbox" name="stock" id="txtStock" />
+                        <label for="txtStock">Stock </label>
+
+                        <div class="row">
+                            <label class="col-sm-3 col-form-label" style="padding:0;"> </label>
+                            <div class="col-sm-3" style="padding:0;">
+                                <ul class="checkboxes">
+                                    <li>
+                                        <input class="chkStock" type="checkbox" id="txtItemGroupList" value="20" />
+                                        <label for="txtItemGroupList" style="">Item Group List </label>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-sm-3" style="padding:0;">
+                                <ul class="checkboxes">
+                                    <li>
+                                        <input class="chkStock" type="checkbox" id="txtItemList" value="21" />
+                                        <label for="txtItemList" style="">Item List </label>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    @*GRN*@
+                    <div id="grnGroup">
+                        <input type="checkbox" name="grn" id="txtGRN" />
+                        <label for="txtGRN">GRN </label>
+
+                        <div class="row">
+                            <label class="col-sm-3 col-form-label" style="padding:0;"> </label>
+                            <div class="col-sm-3" style="padding:0;">
+                                <ul class="checkboxes">
+                                    <li>
+                                        <input class="chkGRN" type="checkbox" id="txtNewReceive" value="60" />
+                                        <label for="txtNewReceive" style="">NewReceive </label>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-sm-3" style="padding:0;">
+                                <ul class="checkboxes">
+                                    <li>
+                                        <input class="chkGRN" type="checkbox" id="txtGRNDtlList" value="61" />
+                                        <label for="txtGRNDtlList" style="">GRN Dtl List </label>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-sm-3" style="padding:0;">
+                                <ul class="checkboxes">
+                                    <li>
+                                        <input class="chkGRN" type="checkbox" id="txtReprintList" value="62" />
+                                        <label for="txtReprintList">Reprint List </label>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    @*Racking*@
+                    <div id="rackingGroup">
+                        <input type="checkbox" name="racking" id="txtRacking" />
+                        <label for="txtRacking">Racking </label>
+
+                        <div class="row">
+                            <label class="col-sm-3 col-form-label" style="padding:0;"> </label>
+                            <div class="col-sm-3" style="padding:0;">
+                                <ul class="checkboxes">
+                                    <li>
+                                        <input class="chkRacking" type="checkbox" id="txtAvailableReelList" value="100" />
+                                        <label for="txtAvailableReelList" style="">Available Reel List </label>
+                                    </li>
+                                    <li>
+                                        <input class="chkRacking" type="checkbox" id="txtRackingStatus" value="101" />
+                                        <label for="txtRackingStatus" style="">Racking Status </label>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-sm-3" style="padding:0;">
+                                <ul class="checkboxes">
+                                    <li>
+                                        <input class="chkRacking" type="checkbox" id="txtSetEmptyDrawer" value="102" />
+                                        <label for="txtSetEmptyDrawer" style="">Set Empty Drawer </label>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-sm-3" style="padding:0;">
+                                <ul class="checkboxes">
+                                    <li>
+                                        <input class="chkRacking" type="checkbox" id="txtSimulation" value="103" />
+                                        <label for="txtSimulation">Simulation </label>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    @*Setting*@
+                    <div id="settingGroup">
+                        <input type="checkbox" name="setting" id="txtSetting" />
+                        <label for="txtSetting">Setting </label>
+
+                        <div class="row">
+                            <label class="col-sm-3 col-form-label" style="padding:0;"> </label>
+                            <div class="col-sm-3" style="padding:0;">
+                                <ul class="checkboxes">
+                                    <li>
+                                        <input class="chkSetting" type="checkbox" id="txtUserList" value="121" />
+                                        <label for="txtUserList" style="">UserList </label>
+                                    </li>
+                                    <li>
+                                        <input class="chkSetting" type="checkbox" id="txtUserAccessRight" value="122" />
+                                        <label for="txtUserAccessRight" style="">User Access Right </label>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-sm-3" style="padding:0;">
+                                <ul class="checkboxes">
+                                    <li>
+                                        <input class="chkSetting" type="checkbox" id="txtSlotCalculation" value="124" />
+                                        <label for="txtSlotCalculation" style="">Slot Usage </label>
+                                    </li>
+                                    <li>
+                                        <input class="chkSetting" type="checkbox" id="txtSlotColumn" value="125" />
+                                        <label for="txtSlotColumn" style="">Slot Column </label>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-sm-3" style="padding:0;">
+                                <ul class="checkboxes">
+                                    <li>
+                                        <input class="chkSetting" type="checkbox" id="txtReelHeight" value="123" />
+                                        <label for="txtReelHeight" style="">Reel Height </label>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
                 <input type="hidden" id="txtId">
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="saveItem()">Save</button>
+                <button type="button" class="btn btn-primary" onclick="savePermission()">Save</button>
                 <button type="button" class="btn btn-outline-secondary" onclick="cancelForm()">Cancel</button>
             </div>
             @* </form> *@
@@ -116,12 +285,13 @@
     <script type="text/javascript">
 
         $(document).ready(function () {
+            checkGroup();
             loadList();
         });
 
         function loadList() {
             $.ajax({
-                url: "/Account/GetUserList/",
+                url: "/Account/GetUserAccessRightList/",
                 type: "GET",
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
@@ -164,8 +334,7 @@
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
-                                        'onclick="updateForm(\'' + row.id + '\', ' +
-                                        '\'' + row.username + '\', \'' + row.fullname + '\', \'' + row.email + '\', \'' + row.isActive + '\' )">' +
+                                        'onclick="showForm(\'' + row.id + '\', \'' + row.fullname + '\', \'' + row.uacIdList + '\' )">' +
                                         '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
 
                                         '</div>';
@@ -195,21 +364,10 @@
             });
         }
 
-        function updateForm(id, un, fn, e, isAct) {
+        function showForm(id, fn, permissions) {
             $("#txtId").val(id);
-            $("#txtUsername").val(un);
-            $("#txtPassword").val("");
-            $("#txtConfirmPassword").val("");
             $("#txtFullname").val(fn);
-            $("#txtEmail").val(e);
-            if (isAct == "true") {
-                document.getElementById("chkIsActive").checked = true;
-            }
-            else {
-                document.getElementById("chkIsActive").checked = false;
-            }
-            $('#pnlPassword').addClass('pnlHide');
-            $('#pnlConfirmPassword').addClass('pnlHide');
+            getPermission(permissions);
             $("#myModal").modal("show");
         }
 
@@ -217,47 +375,114 @@
             $("#myModal").modal("toggle");
         }
 
-        function saveItem() {
-            const chkIsAct = document.querySelector('#chkIsActive');
+        function isNumeric(n) {
+            return !isNaN(parseFloat(n)) && isFinite(n);
+        }
 
-            var err = "";
-            if ($("#txtUsername").val() == "") {
-               err = "Please insert Username.";
-            }
-            if ($("#txtId").val() == "") {
-                if ($("#txtPassword").val() != $("#txtConfirmPassword").val()) {
-                    err = "Password and Confirm Password are not match.";
+        function getPermission(permissions) {
+
+            var chkPermission = permissions; // permissions.match(/\.\d+/g);
+            var inputs = document.getElementsByTagName('input');
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i].type.toLowerCase() == 'checkbox') {
+                    if (isNumeric($(inputs[i]).val())) {
+                        if (chkPermission != null) {
+                            if (chkPermission.includes(inputs[i].value)) {
+                                $(inputs[i]).prop('checked', true);
+                            }
+                            else {
+                                $(inputs[i]).prop('checked', false);
+                            }
+                        }
+                        else {
+                            $(inputs[i]).prop('checked', false);
+                        }
+                    }
                 }
             }
-            if ($("#txtFullname").val() == "") {
-               err = "Please insert Fullname.";
+
+            // Maintenance
+            if (!$(this).is(":checked")) {
+                $("#txtMaintenance").prop('checked', false);
             }
-            if ($("#txtEmail").val() == "") {
-               err = "Please insert Email.";
+            if ($(".chkMaintenance:checked").length == $(".chkMaintenance").length) {
+                $("#txtMaintenance").prop('checked', true);
             }
-            if (err != "") {
-                swal.fire({
-                    icon: 'error',
-                    title: "Wait",
-                    text: err
-                });
-                return;
+
+            // Stock
+            if (!$(this).is(":checked")) {
+                $("#txtStock").prop('checked', false);
+            }
+            if ($(".chkStock:checked").length == $(".chkStock").length) {
+                $("#txtStock").prop('checked', true);
+            }
+
+            // BOM
+            if (!$(this).is(":checked")) {
+                $("#txtBOM").prop('checked', false);
+            }
+            if ($(".chkBOM:checked").length == $(".chkBOM").length) {
+                $("#txtBOM").prop('checked', true);
+            }
+
+            // GRN
+            if (!$(this).is(":checked")) {
+                $("#txtGRN").prop('checked', false);
+            }
+            if ($(".chkGRN:checked").length == $(".chkGRN").length) {
+                $("#txtGRN").prop('checked', true);
+            }
+
+            // JO
+            if (!$(this).is(":checked")) {
+               $("#txtJO").prop('checked', false);
+            }
+            if ($(".chkJO:checked").length == $(".chkJO").length) {
+                $("#txtJO").prop('checked', true);
+            }
+
+            // Racking
+            if (!$(this).is(":checked")) {
+                $("#txtRacking").prop('checked', false);
+            }
+            if ($(".chkRacking:checked").length == $(".chkRacking").length) {
+                $("#txtRacking").prop('checked', true);
+            }
+
+            // Setting
+            if (!$(this).is(":checked")) {
+                $("#txtSetting").prop('checked', false);
+            }
+            if ($(".chkSetting:checked").length == $(".chkSetting").length) {
+                $("#txtSetting").prop('checked', true);
+            }
+
+        }
+
+        function savePermission() {
+            var permissions = [];
+
+            var inputs = document.getElementsByTagName('input');
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i].type.toLowerCase() == 'checkbox') {
+                    if (isNumeric($(inputs[i]).val())) {
+                        if ($(inputs[i]).is(':checked')) {
+                            // permissions += $(inputs[i]).val() + ',';
+                            permissions.push($(inputs[i]).val());
+                        }
+                    }
+                }
             }
 
             var data = {
-                Id: $("#txtId").val(),
-                Username: $("#txtUsername").val(),
-                Password: $("#txtPassword").val(),
-                ConfirmPassword: $("#txtConfirmPassword").val(),
-                Fullname: $("#txtFullname").val(),
-                Email: $("#txtEmail").val(),
-                IsActive: chkIsAct.checked ? true : false
+                User_Id: $("#txtId").val(),
+                UACIdList: permissions
             }
 
             //console.log(JSON.stringify(data));
 
             $.ajax({
-                url: '/Account/SaveUser',
+                url: '/Account/SaveUserAccessRight',
                 type: 'POST',
                 data: JSON.stringify(data),
                 dataType: 'JSON',
@@ -305,6 +530,148 @@
             });
 
             // console.log(id);
+        }
+
+        function checkGroup() {
+
+            // Maintenance
+            $("#txtMaintenance").click(function () {
+                if ($("#txtMaintenance").is(':checked')) {
+                    $("#maintenanceGroup input[type=checkbox]").prop('checked', true);
+                }
+                else {
+                    $("#maintenanceGroup input[type=checkbox]").prop('checked', false);
+                }
+            })
+
+            $(".chkMaintenance").on("change", function () {
+                if (!$(this).is(":checked")) {
+                    $("#txtMaintenance").prop('checked', false);
+                }
+                if ($(".chkMaintenance:checked").length == $(".chkMaintenance").length) {
+                    $("#txtMaintenance").prop('checked', true);
+                }
+
+            });
+
+            // Stock
+            $("#txtStock").click(function () {
+                if ($("#txtStock").is(':checked')) {
+                    $("#stockGroup input[type=checkbox]").prop('checked', true);
+                }
+                else {
+                    $("#stockGroup input[type=checkbox]").prop('checked', false);
+                }
+            })
+
+            $(".chkStock").on("change", function () {
+                if (!$(this).is(":checked")) {
+                    $("#txtStock").prop('checked', false);
+                }
+                if ($(".chkStock:checked").length == $(".chkStock").length) {
+                    $("#txtStock").prop('checked', true);
+                }
+
+            });
+
+            // GRN
+            $("#txtGRN").click(function () {
+                if ($("#txtGRN").is(':checked')) {
+                    $("#grnGroup input[type=checkbox]").prop('checked', true);
+                }
+                else {
+                    $("#grnGroup input[type=checkbox]").prop('checked', false);
+                }
+            })
+
+            $(".chkGRN").on("change", function () {
+                if (!$(this).is(":checked")) {
+                    $("#txtGRN").prop('checked', false);
+                }
+                if ($(".chkGRN:checked").length == $(".chkGRN").length) {
+                    $("#txtGRN").prop('checked', true);
+                }
+
+            });
+
+            // Racking
+            $("#txtRacking").click(function () {
+                if ($("#txtRacking").is(':checked')) {
+                    $("#rackingGroup input[type=checkbox]").prop('checked', true);
+                }
+                else {
+                    $("#rackingGroup input[type=checkbox]").prop('checked', false);
+                }
+            })
+
+            $(".chkRacking").on("change", function () {
+                if (!$(this).is(":checked")) {
+                    $("#txtRacking").prop('checked', false);
+                }
+                if ($(".chkRacking:checked").length == $(".chkRacking").length) {
+                    $("#txtRacking").prop('checked', true);
+                }
+
+            });
+
+            // Setting
+            $("#txtSetting").click(function () {
+                if ($("#txtSetting").is(':checked')) {
+                    $("#settingGroup input[type=checkbox]").prop('checked', true);
+                }
+                else {
+                    $("#settingGroup input[type=checkbox]").prop('checked', false);
+                }
+            })
+
+            $(".chkSetting").on("change", function () {
+                if (!$(this).is(":checked")) {
+                    $("#txtSetting").prop('checked', false);
+                }
+                if ($(".chkSetting:checked").length == $(".chkSetting").length) {
+                    $("#txtSetting").prop('checked', true);
+                }
+
+            });
+
+        }
+
+        function checkInput() {
+            var groupNameInput = document.getElementById("txtGroupName");
+            var groupDescInput = document.getElementById("txtGroupDesc");
+            var remarkInput = document.getElementById("txtRemark");
+
+            var groupName = groupNameInput.value;
+            var groupDesc = groupDescInput.value;
+            var remark = remarkInput.value;
+            var chkInput = true;
+
+            // max length
+            if (groupName.length > 50) {
+                swal.fire({
+                    icon: 'error',
+                    title: "Wait",
+                    text: "Your Group Name length is more than than 50, please try again",
+                });
+                chkInput = false;
+            }
+            else if (groupDesc.length > 100) {
+                swal.fire({
+                    icon: 'error',
+                    title: "Wait",
+                    text: "Your Group Desc length is more than than 100, please try again",
+                });
+                chkInput = false;
+            }
+            else if (remark.length > 500) {
+                swal.fire({
+                    icon: 'error',
+                    title: "Wait",
+                    text: "Your Remark length is more than than 500, please try again",
+                });
+                chkInput = false;
+            }
+            return chkInput;
         }
 
     </script>

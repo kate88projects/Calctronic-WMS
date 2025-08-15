@@ -135,6 +135,13 @@ namespace RackingSystem.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> GetFreeSlot_ByColumn_DESC([FromBody] SlotFreeReqDTO slotReq)
+        {
+            ServiceResponseModel<SlotFreeDTO> result = await _slotService.GetFreeSlot_ByColumn_DESC(slotReq);
+            return new JsonResult(result);
+        }
+
+        [HttpPost]
         public async Task<IActionResult> UpdateSlotStatus([FromBody] SlotStatusReqDTO slotReq)
         {
             ServiceResponseModel<SlotDTO> result = await _slotService.UpdateSlotStatus(slotReq);

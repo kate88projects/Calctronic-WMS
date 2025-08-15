@@ -429,13 +429,13 @@
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
-                                        'onclick="editItemForm(\'' + row.item_Id + '\', \'' + row.itemCode + '\', \'' + row.uom + '\', \'' + row.description + '\', \'' + row.desc2 + '\', ' +
+                                        'onclick="editItemForm(\'' + row.item_Id + '\', \'' + row.itemCode.replace("'", "[1]").replace('"', '[2]')  + '\', \'' + row.uom + '\', \'' + row.description + '\', \'' + row.desc2 + '\', ' +
                                         '\'' + row.itemGroup_Id + '\', \'' + row.reelDimension_Id + '\', ' +
                                         // '\'' + row.thickness + '\', \'' + row.width + '\', \'' + row.maxThickness + '\', ' +
                                         '\'' + row.isActive + '\', \'' + row.isFinishGood + '\', \'' + row.alarmOverMaxThickness + '\')">' +
                                         '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
-                                         
-                                        '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.item_Id + '\', \'' + row.itemCode + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
+
+                                        '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.item_Id + '\', \'' + row.itemCode.replace("'", "[1]").replace('"', '[2]')  + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
                                     }
                                 }
                             ]
@@ -617,6 +617,8 @@
         }
 
         function editItemForm(id, code, uom, desc, desc2, ig, rd, isAct, isFG, alm) {
+            code = code.replace("[1]", "'");
+            code = code.replace("[2]", '"');
             $("#txtId").val(id);
             $("#txtCode").val(code);
             $("#txtUOM").val(uom);
@@ -727,6 +729,8 @@
         }
 
         function deleteItem(id, ItemCode) {
+            ItemCode = ItemCode.replace("[1]", "'");
+            ItemCode = ItemCode.replace("[2]", '"');
 
             swal.fire({
                 title: "Are you sure want to delete?",

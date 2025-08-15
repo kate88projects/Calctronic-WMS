@@ -419,6 +419,33 @@ namespace RackingSystem.Services.SlotServices
             return result;
         }
 
+        public async Task<ServiceResponseModel<SlotFreeDTO>> GetFreeSlot_ByColumn_DESC(SlotFreeReqDTO req)
+        {
+            ServiceResponseModel<SlotFreeDTO> result = new ServiceResponseModel<SlotFreeDTO>();
+
+            try
+            {
+                var parameters = new[]
+                {
+                    new SqlParameter("@TotalSlot", req.TotalSlot),
+                    new SqlParameter("@ColNo", req.ColNo),
+                };
+
+                string sql = "EXECUTE dbo.Slot_GET_FREESLOTBYCOL_DESC @TotalSlot,@ColNo ";
+                var listDTO = await _dbContext.SP_SlotGetFreeSlotByCol_DESC.FromSqlRaw(sql, parameters).ToListAsync();
+
+                result.success = true;
+                result.data = listDTO.First();
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
         public async Task<ServiceResponseModel<SlotDTO>> UpdateSlotStatus(SlotStatusReqDTO slotReq)
         {
             ServiceResponseModel<SlotDTO> result = new ServiceResponseModel<SlotDTO>();
@@ -439,8 +466,8 @@ namespace RackingSystem.Services.SlotServices
                     return result;
                 }
                 _slot.IsActive = slotReq.IsActive;
-                _slot.ForEmptyTray = slotReq.ForEmptyTray;
-                _slot.HasEmptyTray = slotReq.HasEmptyTray;
+                _slot.ForEmptyDrawer = slotReq.ForEmptyDrawer;
+                _slot.HasEmptyDrawer = slotReq.HasEmptyDrawer;
                 _slot.HasReel = slotReq.HasReel;
                 _slot.ReelNo = slotReq.ReelNo;
                 _dbContext.Slot.Update(_slot);

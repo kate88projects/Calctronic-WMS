@@ -12,6 +12,9 @@ using RackingSystem.Data;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Components.Web;
+using System;
+using RackingSystem.General;
 
 namespace RackingSystem.Services.AccountServices
 {
@@ -357,6 +360,104 @@ namespace RackingSystem.Services.AccountServices
                     }
                 }
 
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceResponseModel<List<UserListDTO>>> GetUserAccessRightList()
+        {
+            ServiceResponseModel<List<UserListDTO>> result = new ServiceResponseModel<List<UserListDTO>>();
+
+            try
+            {
+                var users = await _userManager.Users.ToListAsync();
+                List<UserListDTO> listDTO = new List<UserListDTO>();
+                foreach (var user in users)
+                {
+                    if (user.UserName == "calctronic@gmail.com") { continue; }
+
+                    var uacIdList = _dbContext.UserAccessRight.Where(x => x.User_Id == user.Id).Select(x => x.UAC_Id).ToList();
+
+                    listDTO.Add(new UserListDTO
+                    {
+                        Id = user.Id,
+                        Username = user.UserName ?? "",
+                        Fullname = user.FullName,
+                        Email = user.Email ?? "",
+                        IsActive = user.IsActive,
+                        UACIdList = uacIdList,
+                    });
+                }
+                result.success = true;
+                result.data = listDTO;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceResponseModel<UserAccessRightReqDTO>> SaveUserAccessRight(UserAccessRightReqDTO req)
+        {
+            ServiceResponseModel<UserAccessRightReqDTO> result = new ServiceResponseModel<UserAccessRightReqDTO>();
+
+            try
+            {
+                // 1. checking Data
+                if (req == null)
+                {
+                    result.errMessage = "Please refresh list.";
+                    return result;
+                }
+
+                // 2. save Data
+                User? user = _dbContext.Users.Find(req.User_Id);
+                if (user == null)
+                {
+                    result.errMessage = "Cannot find this user, please refresh the list.";
+                    return result;
+                }
+
+                var existList = _dbContext.UserAccessRight.Where(x => x.User_Id == req.User_Id).ToList();
+
+                // remove uac
+                for (int i = existList.Count - 1; i >= 0; i--)
+                {
+                    var e = existList[i];
+                    if (req.UACIdList.Contains(e.UAC_Id) == false)
+                    {
+                        _dbContext.UserAccessRight.Remove(e);
+                    }
+                }
+
+                // add new uac
+                foreach (int uacId in req.UACIdList)
+                {
+                    if (existList.Where(x => x.UAC_Id == uacId).Any() == false)
+                    {
+                        string enumName = Enum.GetName(typeof(EnumUAC), uacId) ?? "";
+                        var uac = new UserAccessRight()
+                        {
+                            UAC = enumName,
+                            UAC_Id = uacId,
+                            User_Id = req.User_Id,
+                        };
+                        _dbContext.UserAccessRight.Add(uac);
+                    }
+                }
+                await _dbContext.SaveChangesAsync();
+
+                result.success = true;
             }
             catch (Exception ex)
             {

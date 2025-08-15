@@ -60,5 +60,6 @@ namespace RackingSystem.Data
         public DbSet<GRNDtlListDTO> SP_GRNDTLSearchList { get; set; }
 
         public DbSet<SlotFreeDTO> SP_SlotGetFreeSlotByCol_ASC { get; set; }
+        public DbSet<SlotFreeDTO> SP_SlotGetFreeSlotByCol_DESC { get; set; }
     }
 }
