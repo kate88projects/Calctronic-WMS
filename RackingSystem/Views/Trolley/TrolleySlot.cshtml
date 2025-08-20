@@ -1,6 +1,7 @@
-﻿@model RackingSystem.Models.Slot.SlotDTO
+﻿@model RackingSystem.Models.Trolley.TrolleySlotDTO
 @{
 }
+
 <style>
     .table-title {
         color: #fff;
@@ -30,7 +31,6 @@
     .text-link {
         color: blue;
         cursor: pointer;
-        /* text-decoration: underline; */
         display: block;
         text-align: right;
         margin-bottom: 10px;
@@ -43,12 +43,11 @@
         background-color: #f9f9f9;
         border: 1px solid #ccc;
     }
-
+        
     .modal-body {
       max-height: calc(100vh - 200px); 
       overflow-y: auto;
     }
-
 </style>
 
 <br />
@@ -59,7 +58,7 @@
             <div class="card card-outline ">
                 <div class="card-header table-title">
                     <div class="card-title">
-                        <h2>Slot List <b></b></h2>
+                        <h2>Trolley Slot List <b></b></h2>
                     </div>
                     <div class="card-tools">
                         <div class="btn-group">
@@ -68,9 +67,9 @@
                                 <span class="visually-hidden">Toggle Dropdown</span>
                             </button>
                             <ul class="dropdown-menu" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(114.5px, 40px, 0px);">
-                                <li><a class="dropdown-item" href="#" id="dTemp" onclick="downloadTemp('slots')">Download Slot List Template</a></li>
-                                <li><a class="dropdown-item" href="#" id="dTemp" onclick="downloadTemp('pulses')">Download Update Pulses Template</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="triggerFileInput('importSlot')">Import Item from Excel</a></li>
+                                <li><a class="dropdown-item" href="#" id="dTemp" onclick="downloadTemp('slots')">Download Trolley Slot List Template</a></li>
+                                <li><a class="dropdown-item" href="#" id="dTemp" onclick="downloadTemp('pulses')">Download Update Trolley Pulses Template</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="triggerFileInput('importSlot')">Import Slot from Excel</a></li>
                             </ul>
                             <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleFileUpload(event)">
                         </div>
@@ -78,10 +77,10 @@
                             Update Pulses By Excel
                         </button>
                         <button type="button" class="btn btn-success" onclick="newSlotColForm()">
-                            Add New Slot Column
+                            Add New Trolley Slot Column
                         </button>
                         <button type="button" class="btn btn-success" onclick="newSlotForm()">
-                            Add New Slot
+                            Add New Trolley Slot
                         </button>
                     </div>
                 </div>
@@ -90,13 +89,13 @@
                         <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
                             <thead>
                                 <tr>
-                                    <th>Slot Code</th>
+                                    @* <th>Trolley</th> *@
+                                    <th>Trolley Slot Code</th>
                                     <th>Column No</th>
                                     <th>Row No</th>
+                                    @* <th>Reel No</th> *@
                                     <th>Is Active</th>
                                     <th>Is Left</th>
-                                    @* <th>Has Empty Tray</th>
-                                    <th>Has Reel</th> *@
                                     <th>X Pulse</th>
                                     <th>Y Pulse</th>
                                     <th>Qr-X Pulse</th>
@@ -142,10 +141,16 @@
             @* <form action="/Slot/SaveSlot" method="post"> *@
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label" for="txtCode">Slot Code</label>
+                        <label class="form-label" for="ddTrolley">Trolley</label>
+                        <select class="form-select" aria-label="Default select example" name="Trolley" id="ddTrolley">
+                            @* <option selected>Please choose trolley</option> *@
+                        </select>
+                        <div id="ddTrolleyError" class="error-message"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="txtCode">Trolley Slot Code</label>
                         <input type="text" class="form-control" name="SlotCode" id="txtCode" aria-describedby="Slot Code">
                         <div id="txtCodeError" class="error-message"></div>
-                        @* <span asp-validation-for="SlotCode" class="text-danger"></span> *@
                     </div>
                     <div class="row mb-3">
                         <div class="col">
@@ -188,7 +193,7 @@
                         <div class="row mb-3">
                             <div class="col">
                                 <label class="form-label" for="txtAddPulse1">Additional Pulse 1</label>
-                                <input type="number" class="form-control" name="AddPulse1" id="txtAddPulse1" aria-describedby="Additional Pulse 1" min="1">
+                                <input type="number" class="form-control" name="AddPulse1" id="txtAddPulse1" aria-describedby="Additional Pulse 1" min="1" pattern="\d*">
                                 <div id="txtAddPulse1Error" class="error-message"></div>
                             </div>
                             <div class="col">
@@ -249,18 +254,22 @@
 <div class="modal fade" id="colModal" role="dialog">
     <div class="modal-dialog modal-lg">
 
-        <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Update Slot</h4>
             </div>
-            @* <form action="/Slot/SaveSlot" method="post"> *@
-            <div class="modal-body" style="max-height: calc(100vh - 200px); overflow-y: auto;">
-                <div class="mb-3">
-                    <label class="form-label" for="txtCodeFormat">Slot Code Format</label>
-                    <input type="text" class="form-control" name="SlotCodeFormat" id="txtCodeFormat" aria-describedby="Slot Code Format">
-                    <div id="txtCodeFormatError" class="error-message"></div>
-                    @* <span asp-validation-for="SlotCode" class="text-danger"></span> *@
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label" for="ddTrolley1">Trolley</label>
+                        <select class="form-select" aria-label="Default select example" name="Trolley" id="ddTrolley1"></select>
+                        <div id="ddTrolley1Error" class="error-message"></div>
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="txtCodeFormat">Trolley Slot Code Format</label>
+                        <input type="text" class="form-control" name="SlotCodeFormat" id="txtCodeFormat" aria-describedby="Slot Code Format">
+                        <div id="txtCodeFormatError" class="error-message"></div>
+                    </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col">
@@ -286,12 +295,12 @@
                         <div id="txtTotalRowError" class="error-message"></div>
                     </div>
                 </div>
+               
                 <div class="row mb-3">
                     <div class="col">
                         <label class="form-label" for="txtStartXPulse">X Pulse</label>
                         <input type="number" class="form-control" name="XPulse" id="txtStartXPulse" aria-describedby="X Pulse">
                         <div id="txtStartXPulseError" class="error-message"></div>
-
                     </div>
                     <div class="col">
                         <label class="form-label" for="txtXPulseIncrement">X Pulse Increment</label>
@@ -415,53 +424,51 @@
                 </div>
 
                 <span id="textlink2" class="text-link" tabindex="0" onclick="customPulses('colModal', true)"><i class="fas fa-plus-circle"></i> Additional Pulses</span>
-                
+
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="chkIsActive">
                     <label class="form-check-label" for="chkIsActive">Is Active</label>
                 </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkIsLeft">
-                    <label class="form-check-label" for="chkIsLeft">Is Left</label>
-                </div>
-
+                <div class="col form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="chkIsLeft">
+                        <label class="form-check-label" for="chkIsLeft">Is Left</label>
+                    </div>
+                    
                 <input type="hidden" id="txtId">
+                @* <input type="hidden" id="txtTrolleyId"> *@
 
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" onclick="saveRangeOfSlot()">Save</button>
                 <button type="button" class="btn btn-outline-secondary" onclick="cancelForm('colModal')">Cancel</button>
             </div>
-            @* </form> *@
         </div>
     </div>
 </div>
 
+
 @section Scripts
 {
-    <link href="~/css/datatables.min.css" rel="stylesheet">
+	<link href="~/css/datatables.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/datatables.min.js"></script>
-    <script src="~/js/sweetalert2.all.min.js"></script>
+    <script src="~/js/sweetalert2.all.min.js"></script>    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
 
-    <script type="text/javascript">
-
-    let uploadedFileContent = null;
-    let uploadedFileExtension = null;
-
-
+	<script type="text/javascript">
         $(document).ready(function () {
 
             loadList();
         });
 
+        var trolleyCodeList = [];
+
         function loadList() {
             $.ajax({
-                url: "/Slot/GetSlotList/",
+                url: "/Trolley/GetTrolleySlotList/",
                 type: "GET",
                 dataType: 'JSON',
                 contentType: 'application/json; charset=utf-8',
@@ -479,15 +486,19 @@
                 success: function (result) {
                     swal.close()
                     if (result.success == true) {
+                        getDropdownTrolley();
+
                         $('#listTable').DataTable( {
                             data: result.data,
                             paging: true,
                             pageLength: 50,
                             lengthMenu: [50, 100, 250, 500, 1000],
                             columns: [
-                                { data: 'slotCode' },
+                                // { data: 'trolleyCode' },
+                                { data: 'trolleySlotCode' },
                                 { data: 'colNo' },
                                 { data: 'rowNo' },
+                                // { data: 'reelNo'},
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
@@ -510,28 +521,6 @@
                                         }
                                     }
                                 },
-                                // {
-                                //     data: null,
-                                //     render: function (data, type, row, meta) {
-                                //         if (row.hasEmptyDrawer == true) {
-                                //             return '<span><i class="bi bi-check-square"></i></span>'
-                                //         }
-                                //         else {
-                                //             return '<span><i class="bi bi-app""></i></span>'
-                                //         }
-                                //     }
-                                // },
-                                // {
-                                //     data: null,
-                                //     render: function (data, type, row, meta) {
-                                //         if (row.hasReel == true) {
-                                //             return '<span><i class="bi bi-check-square"></i></span>'
-                                //         }
-                                //         else {
-                                //             return '<span><i class="bi bi-app""></i></span>'
-                                //         }
-                                //     }
-                                // },
                                 { data: 'xPulse' },
                                 { data: 'yPulse' },
                                 { data: 'qrxPulse' },
@@ -539,12 +528,12 @@
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
-                                        const rowData = JSON.stringify(row).replace(/"/g, "&quot;");  //replace all double quotes with HTML entity  //custom data attribute >> data-*
+                                        const rawData = JSON.stringify(row).replace(/"/g, "&quot;");
                                         return `<div style="display:flex;">
-                                                    <button class="btn btn-success d-grid edit-slot-btn" style="margin-right: 10px;" data-row="${rowData}"> 
+                                                    <button class="btn btn-success d-grid edit-slot-btn" style="margin-right:10px;" data-row="${rawData}">
                                                         <span><i class="bi bi-pencil-square"></i>Edit</span>
                                                     </button>
-                                                    <button class="btn btn-danger delete-slot-bin" data-id="${row.slot_Id}" data-code="${row.slotCode}">
+                                                    <button class="btn btn-danger deactivate-account delete-slot-btn" data-id="${row.trolleySlot_Id}" data-code=${row.trolleySlotCode}">
                                                         <span><i class="bi bi-trash"></i>Delete</span>
                                                     </button>
                                                 </div>`;
@@ -576,6 +565,7 @@
 
         function newSlotForm() {
             $("#txtId").val("0");
+            $('#ddTrolley').val("");
             $("#txtCode").val("");
             $("#txtColNo").val("");
             $("#txtRowNo").val("");
@@ -583,62 +573,242 @@
             $("#txtYPulse").val("");
             $("#txtQrXPulse").val("");
             $("#txtQrYPulse").val("");
-            $('#txtAddPulse1').val("");
-            $('#txtAddPulse2').val("");
-            $('#txtAddPulse3').val("");
-            $('#txtAddPulse4').val("");
-            $('#txtAddPulse5').val("");
-            $('#txtAddPulse6').val("");
             document.getElementById("chkIsActive").checked = true;
-            document.getElementById("chkIsLeft").checked = false;
+            // getDropdownTrolley();
             $("#myModal").modal("show");
         }
 
         function newSlotColForm() {
-            // $("#txtId").val("0");
-            // $("#txtCode").val("");
-            // $("#txtColNo").val("");
-            // $("#txtRowNo").val("");
-            // document.getElementById("chkIsActive").checked = true;
             $("#colModal").modal("show");
         }
 
-        $('#listTable').on('click', '.edit-slot-btn', function () {
-            const row = JSON.parse($(this).attr('data-row'));
-            editSlotForm(row);
-        });
+        function getDropdownTrolley()
+        {
+            $.ajax({
+                url: "/Trolley/GetTrolleyList/",
+                type: "GET",
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    if (result.success == true) {
 
-        function editSlotForm(row){
-            var hasValue = false;
+                        trolleyCodeList = result.data.map(function (t) {
+                            return {
+                                trolleyId: t.trolley_Id,
+                                trolleyCode: t.trolleyCode,
+                            };
+                        });
 
-            $("#txtId").val(row.slot_Id);
-            $("#txtCode").val(row.slotCode);
-            $("#txtColNo").val(row.colNo);
-            $("#txtRowNo").val(row.rowNo);
-            $("#txtXPulse").val(row.xPulse);
-            $("#txtYPulse").val(row.yPulse);
-            $("#txtQrXPulse").val(row.qrxPulse);
-            $("#txtQrYPulse").val(row.qryPulse);
+                        const dropdownIds = ['ddTrolley', 'ddTrolley1'];
+                        dropdownIds.forEach(function (id) {
+                            const dropdown = document.getElementById(id);
+                            dropdown.innerHTML = "";
 
-            var addPulseFields = [
-                { field: "#txtAddPulse1", value: row.add1Pulse },
-                { field: "#txtAddPulse2", value: row.add2Pulse },
-                { field: "#txtAddPulse3", value: row.add3Pulse },
-                { field: "#txtAddPulse4", value: row.add4Pulse },
-                { field: "#txtAddPulse5", value: row.add5Pulse },
-                { field: "#txtAddPulse6", value: row.add6Pulse }
-            ];
+                            const defaultOption = document.createElement("option");
+                            defaultOption.value = "";
+                            defaultOption.textContent = "Select a trolley";
+                            defaultOption.disabled = true;
+                            defaultOption.selected = true;
+                            dropdown.appendChild(defaultOption);
 
-            addPulseFields.forEach(function(item) {
-                $(item.field).val(item.value > 0 ? item.value : "");
-                if (item.value > 0) hasValue = true; 
+                            result.data.forEach(function (t) {
+                                const option = document.createElement("option");
+                                option.value = t.trolley_Id;
+                                option.textContent = t.trolleyCode;
+                                dropdown.appendChild(option);
+                            });
+                        });
+
+
+                        // var dropdown = document.getElementById("ddTrolley");
+                        // dropdown.innerHTML = "";
+
+                        // var defaultOption = document.createElement("option");
+                        // defaultOption.value = "";
+                        // defaultOption.textContent = "Select a trolley";
+                        // defaultOption.disabled = true;
+                        // defaultOption.selected = true;
+                        // dropdown.appendChild(defaultOption);
+
+                        // result.data.forEach(function (t) {
+                        //     var option = document.createElement("option");
+                        //     option.value = t.trolley_Id;
+                        //     option.textContent = t.trolleyCode;
+                        //     dropdown.appendChild(option);
+                        // });
+                    } else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
             });
+        }
 
-            document.getElementById("chkIsActive").checked = row.isActive === true || row.isActive === "true";
-            document.getElementById("chkIsLeft").checked = row.isLeft === true || row.isLeft === "true";
-            if (hasValue) customPulses('myModal', true);
+        function cancelForm(modalId) {
+            $('#' + modalId).modal("toggle");
 
-            $("#myModal").modal("show");
+            var fields;
+            if (modalId == "colModal") {
+                fields = ['txtCodeFormat', 'txtColFrom', 'txtTotalCol', 'txtRowFrom', 'txtTotalRow', 'txtStartXPulse', 'txtXPulseIncrement', 'txtStartYPulse', 'txtYPulseIncrement', 'txtStartQrXPulse', 'txtQrXPulseIncrement', 'txtStartQrYPulse', 'txtQrYPulseIncrement'];
+            } 
+            else {
+                fields = ['ddTrolley', 'txtCode', 'txtColNo', 'txtRowNo', 'txtXPulse', 'txtYPulse', 'txtQrXPulse', 'txtQrYPulse', 'txtAddPulse1', 'txtAddPulse2', 'txtAddPulse3', 'txtAddPulse4', 'txtAddPulse5', 'txtAddPulse6'];
+            }
+            removeErrMsg(fields, true);
+            customPulses(modalId);
+        }
+
+        function validateColModal(fields) {
+            removeErrMsg(fields.map(f => f.id));
+            let isValid = true;
+
+            fields.forEach(field => {
+                const value = document.getElementById(field.id).value.trim();
+
+                if (field.required && value === '') {
+                    if (field.dropdown)
+                    {
+                        showError(field.id, `Please choose a ${field.name}.`);
+                        isValid = false;
+                    }
+                    else 
+                    {
+                        if (!field.allowEmpty)
+                        {
+                            showError(field.id, `Please enter a ${field.name}.`);
+                            isValid = false;
+                        }
+                    }
+                    return;
+                }
+
+                if (field.numeric && (isNaN(value.trim()) || Number(value) < (field.min))) {
+                    showError(field.id, `Please enter a valid ${field.name} (number >= ${field.min}).`);
+                    isValid = false;
+                }
+            });
+            return isValid;
+        }
+
+        function showError(fieldId, message) {
+            document.getElementById(fieldId).classList.add('is-invalid');
+            document.getElementById(fieldId + 'Error').textContent = message;
+        }
+
+        function removeErrMsg(fields, clearValue = false) {
+            if (fields != null)
+            {
+                if (!Array.isArray(fields)) {
+                    fields = [fields];
+                }
+
+                fields.forEach(function(field) {
+                    document.getElementById(field).classList.remove('is-invalid');
+                    document.getElementById(field).classList.remove('is-valid');
+                    document.getElementById(field + 'Error').textContent = '';
+                    if (clearValue) document.getElementById(field).value = '';
+                });
+            }
+        }
+
+        function saveSlot() {
+            const fields = [
+                { id: 'ddTrolley', name: 'Trolley', required: true, numeric: false, dropdown: true },
+                { id: 'txtCode', name: 'Slot Code', required: true, numeric: false },
+                { id: 'txtColNo', name: 'Column No', required: true, numeric: true, min: 1 },
+                { id: 'txtRowNo', name: 'Row No', required: true, numeric: true, min: 1 },
+                { id: 'txtXPulse', name: 'X Pulse', required: true, numeric: true, min: 0 },
+                { id: 'txtYPulse', name: 'Y Pulse', required: true, numeric: true, min: 0 },
+                { id: 'txtQrXPulse', name: 'Qr-X Pulse', required: true, numeric: true, min: 0 },
+                { id: 'txtQrYPulse', name: 'Qr-Y Pulse', required: true, numeric: true, min: 0 },
+                { id: 'txtAddPulse1', name: 'Additional Pulse 1', required: true, numeric: true, min: 0, allowEmpty: true },
+                { id: 'txtAddPulse2', name: 'Additional Pulse 2', required: true, numeric: true, min: 0, allowEmpty: true },
+                { id: 'txtAddPulse3', name: 'Additional Pulse 3', required: true, numeric: true, min: 0, allowEmpty: true },
+                { id: 'txtAddPulse4', name: 'Additional Pulse 4', required: true, numeric: true, min: 0, allowEmpty: true },
+                { id: 'txtAddPulse5', name: 'Additional Pulse 5', required: true, numeric: true, min: 0, allowEmpty: true },
+                { id: 'txtAddPulse6', name: 'Additional Pulse 6', required: true, numeric: true, min: 0, allowEmpty: true },
+            ];
+          
+            if (validateColModal(fields)) {
+                var data = {
+                    Trolley_Id: $('#ddTrolley').val(),
+                    TrolleySlot_Id: parseInt($("#txtId").val()) || 0,
+                    TrolleySlotCode: $("#txtCode").val(),
+                    ColNo: parseInt($("#txtColNo").val()) || 0,
+                    RowNo: parseInt($("#txtRowNo").val()) || 0,
+                    XPulse: parseInt($("#txtXPulse").val()) || 0,
+                    YPulse: parseInt($("#txtYPulse").val()) || 0,
+                    QRXPulse: parseInt($("#txtQrXPulse").val()) || 0,
+                    QRYPulse: parseInt($("#txtQrYPulse").val()) || 0,
+                    Add1Pulse: parseInt($('#txtAddPulse1').val()) || 0,
+                    Add2Pulse: parseInt($('#txtAddPulse2').val()) || 0,
+                    Add3Pulse: parseInt($('#txtAddPulse3').val()) || 0,
+                    Add4Pulse: parseInt($('#txtAddPulse4').val()) || 0,
+                    Add5Pulse: parseInt($('#txtAddPulse5').val()) || 0,
+                    Add6Pulse: parseInt($('#txtAddPulse6').val()) || 0,
+                    IsActive: $('#myModal').find('#chkIsActive').prop("checked"),
+                    IsLeft: $('#myModal').find('#chkIsLeft').prop("checked")
+                };
+
+                console.log(data);
+
+                $.ajax({
+                    url: '/Trolley/SaveTrolleySlot',
+                    type: 'POST',
+                    data: JSON.stringify(data),
+                    dataType: 'JSON',
+                    contentType: 'application/json; charset=utf-8',
+                    beforeSend: function () {
+                        Swal.fire({
+                            text: 'Please Wait',
+                            width: '300px',
+
+                            allowEscapeKey: false,
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                        });
+                        Swal.showLoading()
+                    },
+                    success: function (result) {
+                        if (result.success == true) {
+                            $("#myModal").modal("toggle");
+                            swal.fire({
+                                icon: 'success',
+                                title: "Success Update",
+                                text: "",
+                                didClose: () => {
+                                  window.location.reload();
+                                }
+                            });
+                        }
+                        else {
+                            swal.fire({
+                                icon: 'error',
+                                title: "Wait",
+                                text: result.errMessage
+                            });
+                        }
+                    },
+                    error: function (error) {
+                        console.log(error);
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: error.val
+                        });
+                    }
+                });
+            }
         }
 
         function customPulses(modalId, isChange) {
@@ -698,121 +868,53 @@
             }
         }
 
-        function cancelForm(modalId) {
-            $('#' + modalId).modal("toggle");
-            var fields;
-            
-            if (modalId == "colModal") {
-                fields = ['txtCodeFormat', 'txtColFrom', 'txtTotalCol', 'txtRowFrom', 'txtTotalRow', 'txtStartXPulse', 'txtXPulseIncrement', 'txtStartYPulse', 'txtYPulseIncrement', 'txtStartQrXPulse', 'txtQrXPulseIncrement', 'txtStartQrYPulse', 'txtQrYPulseIncrement'];
-            } 
-            else {
-                fields = ['txtCode', 'txtColNo', 'txtRowNo', 'txtXPulse', 'txtYPulse', 'txtQrXPulse', 'txtQrYPulse', 'txtAddPulse1', 'txtAddPulse2', 'txtAddPulse3', 'txtAddPulse4', 'txtAddPulse5', 'txtAddPulse6'];
-            }
-            removeErrMsg(fields, true);
-            customPulses(modalId);
-        }
+        $('#listTable').on('click', '.edit-slot-btn', function () {
+            const row = JSON.parse($(this).attr('data-row'));
+            editSlotForm(row);
+        });
 
-        function saveSlot() {
-            // let addPulseFields; 
-            // addPulseFields = [
-            //     { id: 'txtAddPulse1', name: 'Additional Pulse 1', required: true, numeric: true, min: 0 },
-            //     { id: 'txtAddPulse2', name: 'Additional Pulse 2', required: true, numeric: true, min: 0 },
-            //     { id: 'txtAddPulse3', name: 'Additional Pulse 3', required: true, numeric: true, min: 0 },
-            //     { id: 'txtAddPulse4', name: 'Additional Pulse 4', required: true, numeric: true, min: 0 },
-            //     { id: 'txtAddPulse5', name: 'Additional Pulse 5', required: true, numeric: true, min: 0 },
-            //     { id: 'txtAddPulse6', name: 'Additional Pulse 6', required: true, numeric: true, min: 0 },
-            // ];
+        async function editSlotForm(row) {
+            var hasValue = false;
 
-            // const isHidden = document.querySelector('#additional').classList.contains('hidden');
-            const fields = [
-                { id: 'txtCode', name: 'Slot Code', required: true, numeric: false },
-                { id: 'txtColNo', name: 'Column No', required: true, numeric: true, min: 1 },
-                { id: 'txtRowNo', name: 'Row No', required: true, numeric: true, min: 1 },
-                { id: 'txtXPulse', name: 'X Pulse', required: true, numeric: true, min: 1 },
-                { id: 'txtYPulse', name: 'Y Pulse', required: true, numeric: true, min: 1 },
-                { id: 'txtQrXPulse', name: 'Qr-X Pulse', required: true, numeric: true, min: 1 },
-                { id: 'txtQrYPulse', name: 'Qr-Y Pulse', required: true, numeric: true, min: 1 },
-                // ...(!isHidden ? addPulseFields : [])
+            $('#ddTrolley').val(row.trolley_Id);
+            $('#txtId').val(row.trolleySlot_Id);
+            $('#txtCode').val(row.trolleySlotCode);
+            $('#txtColNo').val(row.colNo);
+            $("#txtRowNo").val(row.rowNo);
+            $("#txtXPulse").val(row.xPulse);
+            $("#txtYPulse").val(row.yPulse);
+            $("#txtQrXPulse").val(row.qrxPulse);
+            $("#txtQrYPulse").val(row.qryPulse);
+
+            var addPulseFields = [
+                { field: "#txtAddPulse1", value: row.add1Pulse },
+                { field: "#txtAddPulse2", value: row.add2Pulse },
+                { field: "#txtAddPulse3", value: row.add3Pulse },
+                { field: "#txtAddPulse4", value: row.add4Pulse },
+                { field: "#txtAddPulse5", value: row.add5Pulse },
+                { field: "#txtAddPulse6", value: row.add6Pulse },
             ];
 
-            if (validateColModal(fields)) {
-                var data = {
-                    Slot_Id: Number($("#txtId").val()) || 0,
-                    SlotCode: $("#txtCode").val(),
-                    ColNo: parseInt($("#txtColNo").val()) || 0,
-                    RowNo: parseInt($("#txtRowNo").val()) || 0,
-                    XPulse: parseInt($("#txtXPulse").val()) || 0,
-                    YPulse: parseInt($("#txtYPulse").val()) || 0,
-                    QRXPulse: parseInt($("#txtQrXPulse").val()) || 0,
-                    QRYPulse: parseInt($("#txtQrYPulse").val()) || 0,
-                    Add1Pulse: parseInt($('#txtAddPulse1').val()) || 0,
-                    Add2Pulse: parseInt($('#txtAddPulse2').val()) || 0,
-                    Add3Pulse: parseInt($('#txtAddPulse3').val()) || 0,
-                    Add4Pulse: parseInt($('#txtAddPulse4').val()) || 0,
-                    Add5Pulse: parseInt($('#txtAddPulse5').val()) || 0,
-                    Add6Pulse: parseInt($('#txtAddPulse6').val()) || 0,
-                    IsActive: $('#myModal').find('#chkIsActive').prop("checked"),
-                    IsLeft: $('#myModal').find('#chkIsLeft').prop("checked")
-                };
+            addPulseFields.forEach(function(item) {
+                $(item.field).val(item.value > 0 ? item.value : "");
+                if (item.value > 0) hasValue = true; 
+            });
 
-                // console.log(data);
+            document.getElementById("chkIsActive").checked = row.isActive === true || row.isActive === "true";
+            document.getElementById("chkIsLeft").checked = row.isLeft === true || row.isLeft === "true";
+            if (hasValue) customPulses('myModal', true);
 
-                $.ajax({
-                    url: '/Slot/SaveSlot',
-                    type: 'POST',
-                    data: JSON.stringify(data),
-                    dataType: 'JSON',
-                    contentType: 'application/json; charset=utf-8',
-                    beforeSend: function () {
-                        Swal.fire({
-                            text: 'Please Wait',
-                            width: '300px',
-
-                            allowEscapeKey: false,
-                            allowOutsideClick: false,
-                            showConfirmButton: false,
-                        });
-                        Swal.showLoading()
-                    },
-                    success: function (result) {
-                        if (result.success == true) {
-                            $("#myModal").modal("toggle");
-                            swal.fire({
-                                icon: 'success',
-                                title: "Success Update",
-                                text: "",
-                                didClose: () => {
-                                  window.location.reload();
-                                }
-                            });
-                        }
-                        else {
-                            swal.fire({
-                                icon: 'error',
-                                title: "Wait",
-                                text: result.errMessage
-                            });
-                        }
-                    },
-                    error: function (error) {
-                        console.log(error);
-                        swal.fire({
-                            icon: 'error',
-                            title: "Wait",
-                            text: error.val
-                        });
-                    }
-                });
-            }
+            $("#myModal").modal("show");
         }
 
-        $('#listTable').on('click', '.delete-slot-bin', function () {
-             const id = $(this).attr('data-id');
-             const slotCode = $(this).attr('data-code');
-             deleteSlot(id, slotCode);
+        $('#listTable').on('click', '.delete-slot-btn', function () {
+            const id = $(this).attr('data-id');
+            const slotCode = $(this).attr('data-code');
+            deleteSlot(id, slotCode);
         });
 
         function deleteSlot(id, slotCode) {
+            console.log(id, slotCode);
             swal.fire({
                 title: "Are you sure want to delete?",
                 text: "You will not be able to recover this record!",
@@ -825,17 +927,16 @@
                 allowOutsideClick: false
               }).then(function(r) {
                 if (r.isConfirmed == true) {
-
                     var data = {
-                        Slot_Id: id,
-                        SlotCode: slotCode,
+                        TrolleySlot_Id: id,
+                        TrolleySlotCode: slotCode,
                         ColNo: 0,
                         RowNo: 0,
                         IsActive: false
                     }
 
                     $.ajax({
-                        url: '/Slot/DeleteSlot',
+                        url: '/Trolley/DeleteTrolleySlot',
                         type: 'DELETE',
                         data: JSON.stringify(data),
                         dataType: 'json',
@@ -884,88 +985,46 @@
                     return;
                 }
               });
-
-        }
-
-        function validateColModal(fields) {
-            // Remove all previous errors
-            removeErrMsg(fields.map(f => f.id));
-
-            let isValid = true;
-            fields.forEach(field => {
-                const value = document.getElementById(field.id).value.trim();
-                if (field.required && value === '') {
-                    showError(field.id, `Please enter a ${field.name}.`);
-                    isValid = false;
-                    return;
-                }
-
-                if (field.numeric && (isNaN(value) || Number(value) < (field.min || 0))) {
-                    showError(field.id, `Please enter a valid ${field.name} (number >= ${field.min || 0}).`);
-                    isValid = false;
-                }
-            });
-
-            return isValid;
-        }
-
-        // Show error message and highlight invalid fields
-        function showError(fieldId, message) {
-            document.getElementById(fieldId).classList.add('is-invalid');
-            document.getElementById(fieldId + 'Error').textContent = message;
-        }
-
-        function removeErrMsg(fields, clearValue = false) {
-            if (!Array.isArray(fields)) {
-                fields = [fields];
-            }
-
-            fields.forEach(function(field) {
-                document.getElementById(field).classList.remove('is-invalid');
-                document.getElementById(field).classList.remove('is-valid');
-                document.getElementById(field + 'Error').textContent = '';
-                if (clearValue) document.getElementById(field).value = '';
-            });
         }
 
         function saveRangeOfSlot() {
-            // let addPulseFields;
-            // addPulseFields = [
-            //     { id: 'txtStartAddPulse1', name: 'Additional Pulse 1', required: true, numeric: true, min: 1 },
-            //     { id: 'txtAddPulse1Inc', name: 'Additional Pulse 1 Increment', required: true, numeric: true, min: 1 },
-            //     { id: 'txtStartAddPulse2', name: 'Additional Pulse 2', required: true, numeric: true, min: 1 },
-            //     { id: 'txtAddPulse2Inc', name: 'Additional Pulse 2 Increment', required: true, numeric: true, min: 1 },
-            //     { id: 'txtStartAddPulse3', name: 'Additional Pulse 3', required: true, numeric: true, min: 1 },
-            //     { id: 'txtAddPulse3Inc', name: 'Additional Pulse 3 Increment', required: true, numeric: true, min: 1 },
-            //     { id: 'txtStartAddPulse4', name: 'Additional Pulse 4', required: true, numeric: true, min: 1 },
-            //     { id: 'txtAddPulse4Inc', name: 'Additional Pulse 4 Increment', required: true, numeric: true, min: 1 },
-            //     { id: 'txtStartAddPulse5', name: 'Additional Pulse 5', required: true, numeric: true, min: 1 },
-            //     { id: 'txtAddPulse5Inc', name: 'Additional Pulse 5 Increment', required: true, numeric: true, min: 1 },
-            //     { id: 'txtStartAddPulse6', name: 'Additional Pulse 6', required: true, numeric: true, min: 1 },
-            //     { id: 'txtAddPulse6Inc', name: 'Additional Pulse 6 Increment', required: true, numeric: true, min: 1 },
-            // ];
-
-            // const isHidden = document.querySelector('#additional2').classList.contains('hidden');
+            let addPulseFields;
             const fields = [
+                { id: 'ddTrolley1', name: 'Trolley', required: true, numeric: false, dropdown: true },
                 { id: 'txtCodeFormat', name: 'Slot Code Format', required: true, numeric: false },
                 { id: 'txtColFrom', name: 'Column No From', required: true, numeric: true, min: 1 },
                 { id: 'txtTotalCol', name: 'Total Column', required: true, numeric: true, min: 1 },
                 { id: 'txtRowFrom', name: 'Row No From', required: true, numeric: true, min: 1 },
                 { id: 'txtTotalRow', name: 'Total Row', required: true, numeric: true, min: 1 },
-                { id: 'txtStartXPulse', name: 'X Pulse', required: true, numeric: true, min: 1 },
-                { id: 'txtXPulseIncrement', name: 'X Pulse Increment', required: true, numeric: true, min: 1 },
-                { id: 'txtStartYPulse', name: 'Y Pulse', required: true, numeric: true, min: 1 },
-                { id: 'txtYPulseIncrement', name: 'Y Pulse Increment', required: true, numeric: true, min: 1 },
-                { id: 'txtStartQrXPulse', name: 'Qr-X Pulse', required: true, numeric: true, min: 1 },
-                { id: 'txtQrXPulseIncrement', name: 'Qr-X Pulse Increment', required: true, numeric: true, min: 1 },
-                { id: 'txtStartQrYPulse', name: 'Qr-Y Pulse', required: true, numeric: true, min: 1 },
-                { id: 'txtQrYPulseIncrement', name: 'Qr-Y Pulse Increment', required: true, numeric: true, min: 1 },
-                // ...(!isHidden ? addPulseFields : [])
+                { id: 'txtStartXPulse', name: 'X Pulse', required: true, numeric: true, min: 0 },
+                { id: 'txtXPulseIncrement', name: 'X Pulse Increment', required: true, numeric: true, min: 0 },
+                { id: 'txtStartYPulse', name: 'Y Pulse', required: true, numeric: true, min: 0 },
+                { id: 'txtYPulseIncrement', name: 'Y Pulse Increment', required: true, numeric: true, min: 0 },
+                { id: 'txtStartQrXPulse', name: 'Qr-X Pulse', required: true, numeric: true, min: 0 },
+                { id: 'txtQrXPulseIncrement', name: 'Qr-X Pulse Increment', required: true, numeric: true, min: 0 },
+                { id: 'txtStartQrYPulse', name: 'Qr-Y Pulse', required: true, numeric: true, min: 0 },
+                { id: 'txtQrYPulseIncrement', name: 'Qr-Y Pulse Increment', required: true, numeric: true, min: 0 },
+                { id: 'txtStartAddPulse1', name: 'Additional Pulse 1', required: true, numeric: true, min: 0, allowEmpty: true },
+                { id: 'txtAddPulse1Inc', name: 'Additional Pulse 1 Increment', required: true, numeric: true, min: 0, allowEmpty: true },
+                { id: 'txtStartAddPulse2', name: 'Additional Pulse 2', required: true, numeric: true, min: 0, allowEmpty: true },
+                { id: 'txtAddPulse2Inc', name: 'Additional Pulse 2 Increment', required: true, numeric: true, min: 0, allowEmpty: true },
+                { id: 'txtStartAddPulse3', name: 'Additional Pulse 3', required: true, numeric: true, min: 0, allowEmpty: true },
+                { id: 'txtAddPulse3Inc', name: 'Additional Pulse 3 Increment', required: true, numeric: true, min: 0, allowEmpty: true },
+                { id: 'txtStartAddPulse4', name: 'Additional Pulse 4', required: true, numeric: true, min: 0, allowEmpty: true },
+                { id: 'txtAddPulse4Inc', name: 'Additional Pulse 4 Increment', required: true, numeric: true, min: 0, allowEmpty: true },
+                { id: 'txtStartAddPulse5', name: 'Additional Pulse 5', required: true, numeric: true, min: 0, allowEmpty: true },
+                { id: 'txtAddPulse5Inc', name: 'Additional Pulse 5 Increment', required: true, numeric: true, min: 0, allowEmpty: true },
+                { id: 'txtStartAddPulse6', name: 'Additional Pulse 6', required: true, numeric: true, min: 0, allowEmpty: true },
+                { id: 'txtAddPulse6Inc', name: 'Additional Pulse 6 Increment', required: true, numeric: true, min: 0, allowEmpty: true },
             ];
+
+            console.log("here");
 
             if (validateColModal(fields)) {
                 var data = {
-                    SlotFormat: $('#txtCodeFormat').val(),
+                    Trolley_Id: parseInt($('#ddTrolley1').val()),
+                    TrolleySlot_Id: parseInt($("#txtId").val()) || 0,
+                    TrolleySlotFormat: $('#txtCodeFormat').val(),
                     StartCol: parseInt($("#txtColFrom").val()) || 0,
                     TotalCols: parseInt($("#txtTotalCol").val()) || 0,
                     StartRow: parseInt($("#txtRowFrom").val()) || 0,
@@ -994,56 +1053,56 @@
                     IsLeft: $('#colModal').find('#chkIsLeft').prop("checked"),
                 };
 
-            $.ajax({
-                url: '/Slot/SaveRangeOfSlot',
-                type: 'POST',
-                data: JSON.stringify(data),
-                dataType: 'JSON',
-                contentType: 'application/json; charset=utf-8',
-                beforeSend: function () {
-                    Swal.fire({
-                        text: 'Please Wait',
-                        width: '300px',
-                        allowEscapeKey: false,
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
-                    });
-                    Swal.showLoading()
-                },
-                success: function (result) {
-                    if (result.success == true) {
-                        $("#colModal").modal("toggle");
-                        swal.fire({
-                            icon: 'success',
-                            title: "Success Update",
-                            text: "",
-                            didClose: () => {
-                              window.location.reload();
-                            }
+                console.log(data);
+                $.ajax({
+                    url: '/Trolley/SaveRangeOfTrolleySlot',
+                    type: 'POST',
+                    data: JSON.stringify(data),
+                    dataType: 'JSON',
+                    contentType: 'application/json; charset=utf-8',
+                    beforeSend: function () {
+                        Swal.fire({
+                            text: 'Please Wait',
+                            width: '300px',
+
+                            allowEscapeKey: false,
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
                         });
-                    }
-                    else {
+                        Swal.showLoading()
+                    },
+                    success: function (result) {
+                        if (result.success == true) {
+                            $("#myModal").modal("toggle");
+                            swal.fire({
+                                icon: 'success',
+                                title: "Success Update",
+                                text: "",
+                                didClose: () => {
+                                    window.location.reload();
+                                }
+                            });
+                        }
+                        else {
+                            swal.fire({
+                                icon: 'error',
+                                title: "Wait",
+                                text: result.errMessage
+                            });
+                        }
+                    },
+                    error: function (error) {
+                        console.log(error);
                         swal.fire({
                             icon: 'error',
                             title: "Wait",
-                            text: result.errMessage
+                            text: error.val
                         });
                     }
-                },
-                error: function (error) {
-                    console.log(error);
-                    swal.fire({
-                        icon: 'error',
-                        title: "Wait",
-                        text: error.val
-                    });
-                }
-            });
-          }
-
+                });
+            }
         }
 
-        //download template method
         function downloadTemp(type) {
             var book = XLSX.utils.book_new();
             book.Props = {
@@ -1054,23 +1113,22 @@
             };
 
             var book_header = type === "slots" ? [
-                ['Slot Code', 'Column No', 'Row No', 'Has Empty Tray', 'Has Reel', 'Is Active', 'Is Left', 'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse', 
+                ['Trolley Code', 'Trolley Slot Code', 'Column No', 'Row No', 'Is Active', 'Is Left', 'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse', 
                 'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6']
             ] 
             : [
-                ['Slot Code', 'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse', 
+                ['Trolley Slot Code', 'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse', 
                 'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6']
             ];
 
             var booksheet = XLSX.utils.aoa_to_sheet(book_header);
             XLSX.utils.book_append_sheet(book, booksheet, "Sheet1");
-            XLSX.writeFile(book, type === "slots" ? "SlotListTemplate.xlsx" : "PulsesTemplate.xlsx");
+            XLSX.writeFile(book, type === "slots" ? "TrolleySlotListTemplate.xlsx" : "TrolleySlotPulsesTemplate.xlsx");
         }
 
-        //import excel method
         function triggerFileInput(source) {
             const input = document.getElementById('fileInput');
-            input.value = "";  //reset input so select on same file can trigger change
+            input.value = ""; 
             input.dataset.source = source;
             input.click();
         }
@@ -1127,11 +1185,8 @@
 
                 uploadedFileContent = content;
                 uploadedFileExtension = fileExtension;
-
-                console.log(uploadedFileContent);
-                console.log(uploadedFileExtension);
-
                 showColumnMapping(columns, source);
+
             } catch (error) {
                 console.error("Error processing the file:", error);
                 alert("Failed to process the uploaded file.");
@@ -1142,12 +1197,12 @@
             let dataTableColumns;
 
             if (source == "importSlot") {
-                dataTableColumns = ['Slot Code', 'Column No', 'Row No', 'Has Empty Tray', 'Has Reel', 'Is Active', 'Is Left', 'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse',
+                dataTableColumns = ['Trolley Code', 'Trolley Slot Code', 'Column No', 'Row No', 'Is Active', 'Is Left', 'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse',
                                      'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6'];
                 $('#updateType').val("slots");
             }
             else {
-                dataTableColumns = ['Slot Code',  'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse',
+                dataTableColumns = ['Trolley Slot Code',  'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse',
                                      'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6'];
                 $('#updateType').val("pluses"); 
             }
@@ -1223,7 +1278,7 @@
                 if (updateType === "slots")
                 {
                     const fieldNames = [
-                        'Slot Code', 'Column No', 'Row No', 'Has Empty Tray', 'Has Reel', 'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse',
+                        'Trolley Code', 'Trolley Slot Code', 'Column No', 'Row No', 'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse',
                         'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6',
                         'Is Active', 'Is Left'
                     ];
@@ -1235,13 +1290,13 @@
                         val === true || val === 1 || val === '1' || val === 'true' || val === 'TRUE';
 
                     slotsData = data.slice(1).map(row => {
+                        var trolley = trolleyCodeList.find(x => x.trolleyCode == row[0]);
+
                         return {
-                            SlotId: 0,
-                            SlotCode: row[colIndex['Slot Code']],
+                            Trolley_Id: trolley.trolleyId,
+                            TrolleySlotCode: row[colIndex['Trolley Slot Code']],
                             ColNo: row[colIndex['Column No']],
                             RowNo: row[colIndex['Row No']],
-                            HasEmptyTray: parseBool(row[colIndex['Has Empty Tray']]),
-                            HasReel: parseBool(row[colIndex['Has Reel']]),
                             XPulse: row[colIndex['X Pulse']],
                             YPulse: row[colIndex['Y Pulse']],
                             QRXPulse: row[colIndex['Qr-X Pulse']],
@@ -1259,7 +1314,7 @@
                 }
                 else {
                     const fieldNames = [
-                        'Slot Code','X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse',
+                        'Trolley Slot Code','X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse',
                         'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6',
                         'Is Active', 'Is Left'
                     ];
@@ -1272,8 +1327,7 @@
 
                     slotsData = data.slice(1).map(row => {
                         return {
-                            // SlotId: 0,
-                            SlotCode: row[colIndex['Slot Code']],
+                            TrolleySlotCode: row[colIndex['Trolley Slot Code']],
                             XPulse: row[colIndex['X Pulse']],
                             YPulse: row[colIndex['Y Pulse']],
                             QRXPulse: row[colIndex['Qr-X Pulse']],
@@ -1290,6 +1344,7 @@
                     });
                 }
 
+                console.log(slotsData);
                 saveExcelSlots(slotsData, content, updateType); 
 
             } catch (error) {
@@ -1310,7 +1365,7 @@
         }
 
         function saveExcelSlots(slotsData, bookBuffer, source) {
-            const url = source == "slots" ? '/Slot/SaveExcelSlot' : '/Slot/UpdateExcelPulses';
+            const url = source == "slots" ? '/Trolley/SaveExcelTrolleySlot' : '/Trolley/UpdateExcelTSPulses';
             if (slotsData != null)
             {
                 $.ajax({
@@ -1375,7 +1430,7 @@
               const workbook = new ExcelJS.Workbook();
               await workbook.xlsx.load(bookBuffer);
               const worksheet = workbook.getWorksheet(1); 
-              const columnsToHighlight = updateType === "slots" ? [1, 2, 3, 18] : [1, 12];
+              const columnsToHighlight = updateType === "slots" ? [2, 3, 4, 17] : [1, 12];
 
               // let colorIndex = 0;
               // const highlightColors = [
@@ -1386,39 +1441,32 @@
 
               // Add "Error" header 
               const headerRow = worksheet.getRow(1);
-              const errIdx = updateType === "slots" ? 18 : 12;
+              const errIdx = updateType === "slots" ? 17 : 12;
               headerRow.getCell(errIdx).value = 'Error';
               headerRow.commit();
 
-              const errorMap = new Map();
-              errorRows.forEach(e => errorMap.set(e.slotCode, e.errorMsg));
-              console.log(errorRows);
-
               worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
-                if (rowNumber === 1) return; //skip header row
-
-                const slotCode = row.getCell(1).value; 
-
-                if (errorMap.has(slotCode)) {
-                  const errorMsg = errorMap.get(slotCode);
+                if (rowNumber === 1) return; 
+                const errorRow = errorRows[rowNumber - 2];
+                console.log(errorRow);
 
                   // const fillColor = highlightColors[colorIndex % highlightColors.length];
                   // colorIndex++;
                   console.log("error index" , errIdx);
                   console.log(columnsToHighlight);
 
-                  columnsToHighlight.forEach(colNum => {
-                    const cell = row.getCell(colNum);
-                    console.log("colNumber:", colNum);
-                    cell.fill = { 
-                        type: 'pattern',
-                        pattern: 'solid',
-                        fgColor: { argb: 'FFCCCC' }
-                    };
-                  });
-
-                  row.getCell(errIdx).value = errorMsg;
-                }
+                  if (errorRow && errorRow.errorMsg != "")
+                  {
+                      columnsToHighlight.forEach(colNum => {
+                            const cell = row.getCell(colNum);
+                            cell.fill = { 
+                                type: 'pattern',
+                                pattern: 'solid',
+                                fgColor: { argb: 'FFCCCC' }
+                            };
+                        });
+                     row.getCell(errIdx).value = errorRow.errorMsg;
+                  }
               });
 
               // Export updated file
@@ -1429,7 +1477,7 @@
 
               const link = document.createElement("a");
               link.href = URL.createObjectURL(blob);
-              link.download = "SlotList_Errors.xlsx";
+              link.download = "TrolleySlotList_Errors.xlsx";
               link.click();
 
               Swal.fire({
@@ -1438,6 +1486,6 @@
                 text: "Review on returned file and fix errors."
               });
         }
-
-    </script>
+	</script>
 }
+

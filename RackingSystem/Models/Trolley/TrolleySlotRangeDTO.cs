@@ -1,8 +1,9 @@
-﻿namespace RackingSystem.Models.Slot
+﻿namespace RackingSystem.Models.Trolley
 {
-    public class SlotRangeDTO
+    public class TrolleySlotRangeDTO
     {
-        public string SlotFormat { get; set; }
+        public long Trolley_Id { get; set; }
+        public string TrolleySlotFormat { get; set; }
         public int StartCol { get; set; } = 0;
         public int TotalCols { get; set; } = 0;
         public int StartRow { get; set; } = 0;
@@ -17,7 +18,7 @@
         public int QRYPulseIncrement { get; set; } = 0;
         public bool IsActive { get; set; } = true;
         public bool IsLeft { get; set; } = true;
-        public bool HasEmptyDrawer { get; set; } = false;
+        //public bool HasEmptyDrawer { get; set; } = false;
         public bool HasReel { get; set; } = false;
         public int Add1Pulse { get; set; } = 0;
         public int Add1PulseIncrement { get; set; } = 0;
@@ -31,6 +32,5 @@
         public int Add5PulseIncrement { get; set; } = 0;
         public int Add6Pulse { get; set; } = 0;
         public int Add6PulseIncrement { get; set; } = 0;
-
     }
 }

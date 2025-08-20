@@ -84,7 +84,7 @@ namespace RackingSystem.Controllers
         {
             if (req == null)
             {
-                ServiceResponseModel<List<SlotListDTO>> rErr = new ServiceResponseModel<List<SlotListDTO>> ();
+                ServiceResponseModel<List<SlotListDTO>> rErr = new ServiceResponseModel<List<SlotListDTO>>();
                 rErr.errMessage = "Please insert column.";
                 return rErr;
             }
@@ -148,5 +148,11 @@ namespace RackingSystem.Controllers
             return new JsonResult(result);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> UpdateExcelPulses([FromBody] List<SlotListDTO> slotPulses)
+        {
+            ServiceResponseModel<List<SlotListDTO>> result = await _slotService.UpdateExcelPulses(slotPulses);
+            return new JsonResult(result);
+        }
     }
 }

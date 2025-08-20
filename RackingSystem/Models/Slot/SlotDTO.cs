@@ -31,6 +31,7 @@ namespace RackingSystem.Models.Slot
         public int Add4Pulse { get; set; } = 0;
         public int Add5Pulse { get; set; } = 0;
         public int Add6Pulse { get; set; } = 0;
+        public bool IsLeft { get; set; } = false;
 
     }
 }

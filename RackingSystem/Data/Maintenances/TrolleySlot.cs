@@ -5,7 +5,7 @@ namespace RackingSystem.Data.Maintenances
     public class TrolleySlot
     {
         [Key]
-        public long TrolleyBin_Id { get; set; }
+        public long TrolleySlot_Id { get; set; }
 
         [Required]
         public long Trolley_Id { get; set; }
@@ -16,6 +16,9 @@ namespace RackingSystem.Data.Maintenances
 
         [Required]
         public bool IsActive { get; set; } = true;
+
+        [Required]
+        public bool IsLeft { get; set; } = false;
 
         [Required]
         public bool HasReel { get; set; } = false;

@@ -14,6 +14,7 @@ using RackingSystem.Services.LoaderServices;
 using RackingSystem.Services.ReelServices;
 using RackingSystem.Services.SettingServices;
 using RackingSystem.Services.SlotServices;
+using RackingSystem.Services.TrolleyServices;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -51,6 +52,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddScoped<ISettingService, SettingService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<ISlotService, SlotService>();
+builder.Services.AddScoped<ITrolleyService, TrolleyService>();
 builder.Services.AddScoped<IItemService, ItemService>();
 builder.Services.AddScoped<IReelService, ReelService>();
 builder.Services.AddScoped<ILoaderService, LoaderService>();

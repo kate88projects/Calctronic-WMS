@@ -29,6 +29,7 @@ namespace RackingSystem.Data
             CreateMap<Loader, LoaderDTO>();
             CreateMap<Loader, LoaderListDTO>();
             CreateMap<Trolley, TrolleyListDTO>();
+            CreateMap<TrolleySlot, TrolleySlotDTO>();
 
             CreateMap<GRNDetail, GRNDtlListDTO>();
         }

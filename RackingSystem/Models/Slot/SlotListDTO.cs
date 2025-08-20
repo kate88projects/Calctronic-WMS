@@ -33,6 +33,7 @@ namespace RackingSystem.Models.Slot
         public int Add6Pulse { get; set; } = 0;
 
         public string? ErrorMsg { get; set; }
+        public bool IsLeft { get; set; } = false;
 
     }
 }
