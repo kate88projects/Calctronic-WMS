@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using RackingSystem.Data.GRN;
+using RackingSystem.Data.Log;
 using RackingSystem.Data.Maintenances;
 using RackingSystem.Models.GRN;
 using RackingSystem.Models.Item;
@@ -50,12 +51,21 @@ namespace RackingSystem.Data
         public DbSet<Reel> Reel { get; set; }
         public DbSet<ItemGroup> ItemGroup { get; set; }
         public DbSet<Item> Item { get; set; }
+
         public DbSet<Loader> Loader { get; set; }
+        public DbSet<LoaderColumn> LoaderColumn { get; set; }
+        public DbSet<LoaderReel> LoaderReel { get; set; }
+
         public DbSet<Trolley> Trolley { get; set; }
         public DbSet<TrolleySlot> TrolleySlot { get; set; }
 
         public DbSet<GRNDetail> GRNDetail { get; set; }
 
+
+        // ------------        Log       ------------
+        public DbSet<PLCLoaderLog> PLCLoaderLog { get; set; }
+
+        // ------------ Stored Procedure ------------
         public DbSet<ItemListDTO> SP_ItemSearchList { get; set; }
         public DbSet<GRNDtlListDTO> SP_GRNDTLSearchList { get; set; }
 

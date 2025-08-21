@@ -78,7 +78,8 @@ namespace RackingSystem.Services.GRNServices
                 reel.Qty = req.Qty;
                 reel.ExpiryDate = req.ExpiryDate ?? DateTime.Now;
                 reel.IsReady = true;
-                reel.Status = EnumReelStatus.Waiting.ToString();
+                reel.StatusIdx = (int)EnumReelStatus.WaitingLoader;
+                reel.Status = EnumReelStatus.WaitingLoader.ToString();
                 reel.ActualHeight = 0;
                 reel.CreatedDate = DateTime.Now;
                 _dbContext.Reel.Add(reel);

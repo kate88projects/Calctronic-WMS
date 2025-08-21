@@ -93,8 +93,47 @@ namespace RackingSystem.Services
                     }
                 }
 
-
-
+                // Set Default PLC IP Loader in Configuration
+                if (context.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IP_Loader.ToString()).Any() == false)
+                {
+                    var config = new Configuration
+                    {
+                        ConfigTitle = EnumConfiguration.PLC_IP_Loader.ToString(),
+                        ConfigValue = "192.168.1.15",
+                    };
+                    context.Configuration.Add(config);
+                    await context.SaveChangesAsync();
+                }
+                if (context.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_Port_Loader.ToString()).Any() == false)
+                {
+                    var config = new Configuration
+                    {
+                        ConfigTitle = EnumConfiguration.PLC_Port_Loader.ToString(),
+                        ConfigValue = "502",
+                    };
+                    context.Configuration.Add(config);
+                    await context.SaveChangesAsync();
+                }
+                if (context.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IP_Rack.ToString()).Any() == false)
+                {
+                    var config = new Configuration
+                    {
+                        ConfigTitle = EnumConfiguration.PLC_IP_Rack.ToString(),
+                        ConfigValue = "192.168.1.15",
+                    };
+                    context.Configuration.Add(config);
+                    await context.SaveChangesAsync();
+                }
+                if (context.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_Port_Rack.ToString()).Any() == false)
+                {
+                    var config = new Configuration
+                    {
+                        ConfigTitle = EnumConfiguration.PLC_Port_Rack.ToString(),
+                        ConfigValue = "502",
+                    };
+                    context.Configuration.Add(config);
+                    await context.SaveChangesAsync();
+                }
             }
             catch (Exception ex)
             {

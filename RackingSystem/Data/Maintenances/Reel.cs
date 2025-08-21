@@ -23,6 +23,9 @@ namespace RackingSystem.Data.Maintenances
         [Required]
         public bool IsReady { get; set; } = false;
 
+        [Required]
+        public int StatusIdx { get; set; } = 1;
+
         [MaxLength(20)]
         public string Status { get; set; } = "";
 

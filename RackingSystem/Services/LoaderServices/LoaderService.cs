@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using RackingSystem.General;
 using RackingSystem.Data.Maintenances;
 using RackingSystem.Models.Item;
+using System.Drawing;
 
 namespace RackingSystem.Services.LoaderServices
 {
@@ -92,6 +93,18 @@ namespace RackingSystem.Services.LoaderServices
                         ColHeight = req.ColHeight
                     };
                     _dbContext.Loader.Add(_loader);
+                    await _dbContext.SaveChangesAsync();
+
+                    for (var iCol = 1; iCol <= req.TotalCol; iCol++)
+                    {
+                        LoaderColumn _loaderCol = new LoaderColumn()
+                        {
+                            Loader_Id = _loader.Loader_Id,
+                            ColNo = iCol,
+                            BalanceHeight = req.ColHeight,
+                        };
+                        _dbContext.LoaderColumn.Add(_loaderCol);
+                    }
                 }
                 else
                 {
@@ -101,12 +114,54 @@ namespace RackingSystem.Services.LoaderServices
                         result.errMessage = "Cannot find this loader, please refresh the list.";
                         return result;
                     }
+                    var oldColH = _loader.ColHeight;
+                    var oldTtlCol = _loader.TotalCol;
+                    if (oldTtlCol > req.TotalCol)
+                    {
+                        var loadColUsed = _dbContext.LoaderColumn.Where(x => x.Loader_Id == _loader.Loader_Id && x.BalanceHeight != oldColH).ToList();
+                        if (loadColUsed.Count > 0)
+                        {
+                            result.errMessage = "Loader is on service, cannot change Total Column.";
+                            return result;
+                        }
+                    }
                     _loader.LoaderCode = req.LoaderCode;
                     _loader.Description = req.Description;
                     _loader.IsActive = req.IsActive;
                     _loader.TotalCol = req.TotalCol;
                     _loader.ColHeight = req.ColHeight;
                     _dbContext.Loader.Update(_loader);
+                    await _dbContext.SaveChangesAsync();
+
+                    if (oldTtlCol > req.TotalCol)
+                    {
+                        var loadColExist = _dbContext.LoaderColumn.Where(x => x.Loader_Id == _loader.Loader_Id).ToList();
+
+                        for (var iCol = loadColExist.Count; iCol >= 1; iCol--)
+                        {
+                            if (loadColExist[iCol].ColNo > req.TotalCol)
+                            {
+                                _dbContext.LoaderColumn.Remove(loadColExist[iCol]);
+                            }
+                        }
+                    }
+                    else if (oldTtlCol < req.TotalCol)
+                    {
+                        for (var iCol = req.TotalCol; iCol >= 1; iCol--)
+                        {
+                            var loadColExist = _dbContext.LoaderColumn.Where(x => x.Loader_Id == _loader.Loader_Id && x.ColNo == iCol).ToList();
+                            if (loadColExist.Count == 0)
+                            {
+                                LoaderColumn _loaderCol = new LoaderColumn()
+                                {
+                                    Loader_Id = _loader.Loader_Id,
+                                    ColNo = iCol,
+                                    BalanceHeight = req.ColHeight,
+                                };
+                                _dbContext.LoaderColumn.Add(_loaderCol);
+                            }
+                        }
+                    }
                 }
                 await _dbContext.SaveChangesAsync();
 
@@ -147,6 +202,14 @@ namespace RackingSystem.Services.LoaderServices
                     result.errMessage = "Cannot find this loader, please refresh the list.";
                     return result;
                 }
+
+                var loadColExist = _dbContext.LoaderColumn.Where(x => x.Loader_Id == _item.Loader_Id).ToList();
+                for (var iCol = loadColExist.Count; iCol >= 1; iCol--)
+                {
+                    _dbContext.LoaderColumn.Remove(loadColExist[iCol]);
+                }
+                await _dbContext.SaveChangesAsync();
+
                 _dbContext.Loader.Remove(_item);
                 await _dbContext.SaveChangesAsync();
 

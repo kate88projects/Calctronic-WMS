@@ -308,6 +308,29 @@
             background-color: #e9ecef;
         }
 
+    .titleDisable {
+        background-color: #e9ecef !important;
+    }
+
+    .titleDisable span {
+        background-color: #e9ecef !important;
+        color: darkgray;
+    }
+
+    .bodyDisable i {
+        background-color: #e9ecef !important;
+    }
+
+    .bodyDisable div.timeline-body {
+        color: grey;
+        background-color: #e9ecef;
+    }
+
+    .bodyDisable div.timeline-footer {
+        color: grey;
+        background-color: #e9ecef;
+    }
+
 </style>
 
 <div class="container-fluid">
@@ -345,16 +368,22 @@
                                 <div class="form-group">
                                     <label></label>
                                     <div class="row">
-                                        <div class="col-sm-12 col-md-6">
+                                        <div class="col-sm-12 col-md-4">
                                             <div class="custom-control custom-checkbox">
                                                 <input class="custom-control-input" type="checkbox" id="chkPrint">
                                                 <label for="chkPrint" class="custom-control-label">Print QR</label>
                                             </div>
                                         </div>
-                                        <div class="col-sm-12 col-md-6">
+                                        <div class="col-sm-12 col-md-4">
+                                            <div class="custom-control custom-checkbox">
+                                                <input class="custom-control-input" type="checkbox" id="chkPrintItem">
+                                                <label for="chkPrintItem" class="custom-control-label">Print Item</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-12 col-md-4">
                                             <div class="custom-control custom-checkbox">
                                                 <input class="custom-control-input" type="checkbox" id="chkLoadToLoader">
-                                                <label for="chkLoadToLoader" class="custom-control-label">Continue Load to Loader</label>
+                                                <label for="chkLoadToLoader" class="custom-control-label">Start Loader</label>
                                             </div>
                                         </div>
                                     </div>
@@ -438,11 +467,11 @@
                     <div class="card-body" id="pnlPLCD">
                         <div class="timeline">
                             @* STEP 1 *@
-                            <div class="time-label">
-                                <span class="bg-red">STEP 1 :: Check Loader Status <i class="bi bi-check-circle-fill"></i></span>
+                            <div class="time-label" id="pnl1_title">
+                                <span class="bg-red">STEP 1 :: Check Loader Status @* <i class="bi bi-check-circle-fill"></i> *@</span>
                             </div>
-                            <div>
-                                <i class="fas fa-envelope bg-blue"></i>
+                            <div id="pnl1_body">
+                                <i class="timeline-icon bi bi-flag text-bg-success"></i>
                                 <div class="timeline-item">
                                     <div class="timeline-body" style="height:80px;">
                                         <p style="text-align:center;">IS READY !</p>
@@ -454,11 +483,11 @@
                             </div>
 
                             @* STEP 2 *@
-                            <div class="time-label">
+                            <div class="time-label" id="pnl2_title">
                                 <span class="bg-red">STEP 2 :: Reading Reel Info ... </span>
                             </div>
-                            <div>
-                                <i class="fas fa-envelope bg-blue"></i>
+                            <div id="pnl2_body">
+                                <i class="timeline-icon bi bi-flag text-bg-success"></i>
                                 <div class="timeline-item">
                                     <div class="timeline-body" style="height:150px;">
                                         <p>
@@ -477,12 +506,12 @@
                                 </div>
                             </div>
 
-                            @* STEP 2 *@
-                            <div class="time-label">
+                            @* STEP 3 *@
+                            <div class="time-label" id="pnlLast_title">
                                 <span class="bg-red">DONE</span>
                             </div>
-                            <div>
-                                <i class="fas fa-envelope bg-blue"></i>
+                            <div id="pnlLast_body">
+                                <i class="timeline-icon bi bi-flag text-bg-success"></i>
                                 <div class="timeline-item">
                                     <div class="timeline-body" style="height:80px;">
                                         <p style="text-align:center;">Waiting save new GRN ... </p>
@@ -626,7 +655,7 @@
 
         $(document).ready(function () {
             $("#txtGRN").val('-');
-            resetColorForm(1);
+            resetColorForm(0);
 
             $('#listTable').DataTable({
                 searching: true,
@@ -642,6 +671,7 @@
             loadLoaderList();
             loadItemList();
 
+            loadPLC(1);
         });
 
         function loadItemList() {
@@ -918,6 +948,29 @@
 
         }
 
+        function resetColorPLCForm(idx) {
+            $("#pnl1_title").addClass("titleDisable");
+            $("#pnl1_body").addClass("bodyDisable");
+            $("#pnl2_title").addClass("titleDisable");
+            $("#pnl2_body").addClass("bodyDisable");
+            $("#pnlLast_title").addClass("titleDisable");
+            $("#pnlLast_body").addClass("bodyDisable");
+
+            if (idx == 1) {
+                $("#pnl1_title").removeClass("titleDisable");
+                $("#pnl1_body").removeClass("bodyDisable");
+            }
+            else if (idx == 2) {
+                $("#pnl2_title").removeClass("titleDisable");
+                $("#pnl2_body").removeClass("bodyDisable");
+            }
+            else {
+                $("#pnlLast_title").removeClass("titleDisable");
+                $("#pnlLast_body").removeClass("bodyDisable");
+            }
+
+        }
+
         function addReceive() {
 
             var data = {
@@ -990,8 +1043,19 @@
             // console.log(id);
         }
 
-        function loadPLC() {
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
 
+        async function loadPLC() {
+
+            resetColorPLCForm(1);
+            await delay(3000)
+
+            resetColorPLCForm(2);
+            await delay(3000)
+
+            resetColorPLCForm(3);
         }
 
     </script>

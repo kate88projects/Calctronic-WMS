@@ -2,10 +2,10 @@
 {
     public enum EnumReelStatus
     {
-        Waiting,
-        InLoader,
-        IsReady,
-        OnHold,
-        Out,
+        WaitingLoader = 1,
+        InLoader = 2,
+        IsReady = 3,
+        OnHold = 4,
+        Out = 5,
     }
 }
