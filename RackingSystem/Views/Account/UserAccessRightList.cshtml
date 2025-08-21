@@ -100,7 +100,7 @@
                                         <label for="txtSlotList" style="">Slot List </label>
                                     </li>
                                 </ul>
-                            </div>
+                </div>
                             <div class="col-sm-3" style="padding:0;">
                                 <ul class="checkboxes">
                                     <li>
@@ -108,7 +108,7 @@
                                         <label for="txtTrolleyList" style="">Trolley List </label>
                                     </li>
                                 </ul>
-                            </div>
+                </div>
                             <div class="col-sm-3" style="padding:0;">
                                 <ul class="checkboxes">
                                     <li>
@@ -134,7 +134,7 @@
                                         <label for="txtItemGroupList" style="">Item Group List </label>
                                     </li>
                                 </ul>
-                            </div>
+                </div>
                             <div class="col-sm-3" style="padding:0;">
                                 <ul class="checkboxes">
                                     <li>
@@ -142,8 +142,11 @@
                                         <label for="txtItemList" style="">Item List </label>
                                     </li>
                                 </ul>
-                            </div>
-                        </div>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="chkIsActive">
+                    <label class="form-check-label" for="chkIsActive">Is Active</label>
+                </div>
                     </div>
 
                     @*GRN*@
@@ -366,6 +369,9 @@
 
         function showForm(id, fn, permissions) {
             $("#txtId").val(id);
+            $("#txtUsername").val(un);
+            $("#txtPassword").val("");
+            $("#txtConfirmPassword").val("");
             $("#txtFullname").val(fn);
             getPermission(permissions);
             $("#myModal").modal("show");
@@ -393,8 +399,8 @@
                             else {
                                 $(inputs[i]).prop('checked', false);
                             }
-                        }
-                        else {
+            }
+            else {
                             $(inputs[i]).prop('checked', false);
                         }
                     }
@@ -431,7 +437,7 @@
             }
             if ($(".chkGRN:checked").length == $(".chkGRN").length) {
                 $("#txtGRN").prop('checked', true);
-            }
+        }
 
             // JO
             if (!$(this).is(":checked")) {
@@ -439,7 +445,7 @@
             }
             if ($(".chkJO:checked").length == $(".chkJO").length) {
                 $("#txtJO").prop('checked', true);
-            }
+        }
 
             // Racking
             if (!$(this).is(":checked")) {
@@ -457,7 +463,7 @@
                 $("#txtSetting").prop('checked', true);
             }
 
-        }
+                }
 
         function savePermission() {
             var permissions = [];
@@ -469,9 +475,20 @@
                         if ($(inputs[i]).is(':checked')) {
                             // permissions += $(inputs[i]).val() + ',';
                             permissions.push($(inputs[i]).val());
-                        }
-                    }
-                }
+            }
+            if ($("#txtFullname").val() == "") {
+               err = "Please insert Fullname.";
+            }
+            if ($("#txtEmail").val() == "") {
+               err = "Please insert Email.";
+            }
+            if (err != "") {
+                swal.fire({
+                    icon: 'error',
+                    title: "Wait",
+                    text: err
+                });
+                return;
             }
 
             var data = {

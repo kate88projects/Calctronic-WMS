@@ -68,8 +68,5 @@ namespace RackingSystem.Data
         // ------------ Stored Procedure ------------
         public DbSet<ItemListDTO> SP_ItemSearchList { get; set; }
         public DbSet<GRNDtlListDTO> SP_GRNDTLSearchList { get; set; }
-
-        public DbSet<SlotFreeDTO> SP_SlotGetFreeSlotByCol_ASC { get; set; }
-        public DbSet<SlotFreeDTO> SP_SlotGetFreeSlotByCol_DESC { get; set; }
     }
 }
