@@ -7,6 +7,7 @@ using RackingSystem.Data.Maintenances;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using RackingSystem.Models.GRN;
+using RackingSystem.Models.Slot;
 
 namespace RackingSystem.Services.ItemServices
 {
@@ -425,6 +426,108 @@ namespace RackingSystem.Services.ItemServices
                 result.success = true;
                 result.data = itemListDTO;
                 return result;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceResponseModel<List<ItemExcelReqDTO>>> SaveExcelItem(List<ItemExcelReqDTO> items)
+        {
+            ServiceResponseModel<List<ItemExcelReqDTO>> result = new ServiceResponseModel<List<ItemExcelReqDTO>>();
+            List<ItemExcelReqDTO> errorsLine = new List<ItemExcelReqDTO>(); // Change List<object> to List<SlotListDTO>
+
+            try
+            {
+                if (items != null)
+                {
+                    foreach (var itm in items)
+                    {
+                        bool isError = false;
+
+                        Item? iExist = _dbContext.Item.FirstOrDefault(x => x.ItemCode == itm.ItemCode);
+                        ItemGroup? igExist = null;
+                        if (!string.IsNullOrEmpty(itm.ItemGroupCode))
+                        {
+                            igExist = _dbContext.ItemGroup.FirstOrDefault(x => x.ItemGroupCode == itm.ItemGroupCode);
+                        }
+                        ReelDimension? rExist = _dbContext.ReelDimension.FirstOrDefault(x => x.Thickness == itm.Thickness);
+
+                        if (iExist != null)
+                        {
+                            result.errMessage = $"Item code: {itm.ItemCode} has been used";
+                            itm.ErrorMsg = result.errMessage;
+                            isError = true;
+                        }
+                        if (string.IsNullOrEmpty(itm.ItemCode))
+                        {
+                            result.errMessage = $"Item Code cannot be empty.";
+                            itm.ErrorMsg = result.errMessage;
+                            isError = true;
+                        }
+                        if (string.IsNullOrEmpty(itm.UOM))
+                        {
+                            result.errMessage = $"UOM cannot be empty.";
+                            itm.ErrorMsg = result.errMessage;
+                            isError = true;
+                        }                        
+                        if (!string.IsNullOrEmpty(itm.ItemGroupCode))
+                        {
+                            if (igExist == null)
+                            {
+                                result.errMessage = $"Item Code: {itm.ItemCode} Item Group {itm.ItemGroupCode} has not found.";
+                                itm.ErrorMsg = result.errMessage;
+                                isError = true;
+                            }
+                        }
+                        if (rExist == null)
+                        {
+                            result.errMessage = $"Item Code: {itm.ItemCode} Thickness {itm.Thickness} has not found.";
+                            itm.ErrorMsg = result.errMessage;
+                            isError = true;
+                        }
+
+                        if (!isError)
+                        {
+                            Item _item = new Item()
+                            {
+                                ItemCode = itm.ItemCode,
+                                UOM = itm.UOM,
+                                Description = itm.Description,
+                                Desc2 = itm.Desc2,
+                                IsActive = itm.IsActive,
+                                IsFinishGood = itm.IsFinishGood,
+                                AlarmOverMaxThickness = itm.AlarmOverMaxThickness,
+                                ReelDimension_Id = rExist.ReelDimension_Id,
+                            };
+                            if (!string.IsNullOrEmpty(itm.ItemGroupCode))
+                            {
+                                _item.ItemGroup_Id = igExist.ItemGroup_Id;
+                            }
+                            _dbContext.Item.Add(_item);
+                        }
+                        else
+                        {
+                            errorsLine.Add(itm);
+                        }
+                    }
+
+                    if (errorsLine.Any())
+                    {
+                        result.success = false;
+                        result.errMessage = "Some rows failed validation.";
+                        result.data = errorsLine;
+                    }
+                    else
+                    {
+                        await _dbContext.SaveChangesAsync();
+                        result.success = true;
+                    }
+                }
             }
             catch (Exception ex)
             {

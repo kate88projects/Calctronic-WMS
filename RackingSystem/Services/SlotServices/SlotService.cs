@@ -152,7 +152,7 @@ namespace RackingSystem.Services.SlotServices
                         ColNo = slotReq.ColNo,
                         RowNo = slotReq.RowNo,
                         IsActive = slotReq.IsActive,
-                        HasEmptyDrawer = slotReq.HasEmptyDrawer,
+                        HasEmptyTray = slotReq.HasEmptyTray,
                         HasReel = slotReq.HasReel,
                         XPulse = slotReq.XPulse,
                         YPulse = slotReq.YPulse,
@@ -284,7 +284,7 @@ namespace RackingSystem.Services.SlotServices
                                 RowNo = slot.RowNo,
                                 IsActive = slot.IsActive,
                                 IsLeft = slot.IsLeft,
-                                HasEmptyDrawer = slot.HasEmptyDrawer,
+                                HasEmptyTray = slot.HasEmptyTray,
                                 HasReel = slot.HasReel,
                                 XPulse = slot.XPulse,
                                 YPulse = slot.YPulse,
@@ -376,7 +376,7 @@ namespace RackingSystem.Services.SlotServices
                             ColNo = i,
                             RowNo = j,
                             IsActive = slotRanges.IsActive,
-                            HasEmptyDrawer = slotRanges.HasEmptyDrawer,
+                            HasEmptyTray = slotRanges.HasEmptyTray,
                             HasReel = slotRanges.HasReel,
                             XPulse = currentXPulse,
                             YPulse = currentYPulse,
@@ -535,8 +535,8 @@ namespace RackingSystem.Services.SlotServices
                     return result;
                 }
                 _slot.IsActive = slotReq.IsActive;
-                _slot.ForEmptyDrawer = slotReq.ForEmptyDrawer;
-                _slot.HasEmptyDrawer = slotReq.HasEmptyDrawer;
+                _slot.ForEmptyTray = slotReq.ForEmptyTray;
+                _slot.HasEmptyTray = slotReq.HasEmptyTray;
                 _slot.HasReel = slotReq.HasReel;
                 _slot.ReelNo = slotReq.ReelNo;
                 _dbContext.Slot.Update(_slot);

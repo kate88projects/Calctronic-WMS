@@ -18,6 +18,21 @@
     .pnlHide {
         display: none;
     }
+
+    .error-message {
+        color: red;
+        font-size: 0.875rem;
+        margin-top: 5px;
+    }
+
+    .is-invalid {
+        border-color: red;
+    }
+
+    .is-valid {
+        border-color: green;
+    }
+
 </style>
 
 <br />
@@ -62,31 +77,36 @@
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Update Dimension</h4>
+                <h4 class="modal-title">Update User</h4>
             </div>
             @* <form action="/bin/SaveBin" method="post"> *@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label" for="txtUsername">Username</label>
-                    <input type="text" class="form-control" name="Username" id="txtUsername" aria-describedby="Username">
+                    <input type="text" class="form-control" name="Username" id="txtUsername" aria-describedby="Username" maxlength="50">
+                    <div id="txtUsernameError" class="error-message"></div>
                 </div>
 
                 <div class="mb-3" id="pnlPassword">
                     <label class="form-label" for="txtPassword">Password</label>
-                    <input type="password" class="form-control" name="Password" id="txtPassword" aria-describedby="Password">
+                    <input type="password" class="form-control" name="Password" id="txtPassword" aria-describedby="Password" maxlength="50">
+                    <div id="txtPasswordError" class="error-message"></div>
                 </div>
                 <div class="mb-3" id="pnlConfirmPassword">
                     <label class="form-label" for="txtConfirmPassword">Confirm Password</label>
-                    <input type="password" class="form-control" name="ConfirmPassword" id="txtConfirmPassword" aria-describedby="ConfirmPassword">
+                    <input type="password" class="form-control" name="ConfirmPassword" id="txtConfirmPassword" aria-describedby="ConfirmPassword" maxlength="50">
+                    <div id="txtConfirmPasswordError" class="error-message"></div>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label" for="txtFullname">Fullname</label>
-                    <input type="text" class="form-control" name="Fullname" id="txtFullname" aria-describedby="Fullname">
+                    <input type="text" class="form-control" name="Fullname" id="txtFullname" aria-describedby="Fullname" maxlength="255">
+                    <div id="txtFullnameError" class="error-message"></div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="txtEmail">Email</label>
-                    <input type="text" class="form-control" name="Email" id="txtEmail" aria-describedby="Email">
+                    <input type="text" class="form-control" name="Email" id="txtEmail" aria-describedby="Email" maxlength="50">
+                    <div id="txtEmailError" class="error-message"></div>
                 </div>
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="chkIsActive">
@@ -121,11 +141,13 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="txtPassword2">Password</label>
-                    <input type="password" class="form-control" name="Password" id="txtPassword2" aria-describedby="Password">
+                    <input type="password" class="form-control" name="Password" id="txtPassword2" aria-describedby="Password" maxlength="50">
+                    <div id="txtPassword2Error" class="error-message"></div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="txtConfirmPassword2">Confirm Password</label>
-                    <input type="password" class="form-control" name="ConfirmPassword" id="txtConfirmPassword2" aria-describedby="ConfirmPassword">
+                    <input type="password" class="form-control" name="ConfirmPassword" id="txtConfirmPassword2" aria-describedby="ConfirmPassword" maxlength="50">
+                    <div id="txtConfirmPassword2Error" class="error-message"></div>
                 </div>
 
                 <input type="hidden" id="txtId2">
@@ -172,7 +194,7 @@
                         allowOutsideClick: false,
                         showConfirmButton: false,
                     });
-                    Swal.showLoading()
+                    Swal.showLoading();
                 },
                 success: function (result) {
                     console.log(result);
@@ -201,16 +223,23 @@
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
-                                        return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
-                                        'onclick="editItemForm(\'' + row.id + '\', ' +
-                                        '\'' + row.username + '\', \'' + row.fullname + '\', \'' + row.email + '\', \'' + row.isActive + '\' )">' +
-                                        '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
+                                        const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
+                                        return `<div style="display:flex;"><button class="btn btn-success d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
+                                        <span><i class="bi bi-pencil-square""></i>  Edit</span></button>
+                                        <button class="btn btn-success d-grid edit-Pass-btn" style="margin-right:10px;" data-row="${rowData}">
+                                        <span><i class="bi bi-lock""></i>  Reset Password</span></button>
+                                        <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.id}" data-code="${row.username}"><span><i class="bi bi-trash""></i>  Delete</span></button></div>`;
 
-                                        '<button class="btn btn-warning d-grid" style="margin-right:10px;"' +
-                                        'onclick="resetPassForm(\'' + row.id + '\', \'' + row.username + '\')">' +
-                                        '<span><i class="bi bi-lock""></i>  Reset Password</span></button>' +
+                                        // return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
+                                        // 'onclick="editItemForm(\'' + row.id + '\', ' +
+                                        // '\'' + row.username + '\', \'' + row.fullname + '\', \'' + row.email + '\', \'' + row.isActive + '\' )">' +
+                                        // '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
 
-                                        '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.id + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
+                                        // '<button class="btn btn-warning d-grid" style="margin-right:10px;"' +
+                                        // 'onclick="resetPassForm(\'' + row.id + '\', \'' + row.username + '\')">' +
+                                        // '<span><i class="bi bi-lock""></i>  Reset Password</span></button>' +
+
+                                        // '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.id + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
                                     }
                                 }
                             ],
@@ -238,6 +267,7 @@
         }
 
         function newItemForm() {
+            removeErrMsg([]);
             $("#txtId").val("");
             $("#txtUsername").val("");
             $("#txtPassword").val("");
@@ -251,14 +281,20 @@
             $('#pnlConfirmPassword').removeClass('pnlHide');
         }
 
-        function editItemForm(id, un, fn, e, isAct) {
-            $("#txtId").val(id);
-            $("#txtUsername").val(un);
+        $('#listTable').on('click', '.edit-btn', function () {
+            const row = JSON.parse($(this).attr('data-row'));
+            editItemForm(row);
+        });
+
+        function editItemForm(row) {
+            removeErrMsg([]);
+            $("#txtId").val(row.id);
+            $("#txtUsername").val(row.username);
             $("#txtPassword").val("");
             $("#txtConfirmPassword").val("");
-            $("#txtFullname").val(fn);
-            $("#txtEmail").val(e);
-            if (isAct == "true") {
+            $("#txtFullname").val(row.fullname);
+            $("#txtEmail").val(row.email);
+            if (row.isActive == true) {
                 document.getElementById("chkIsActive").checked = true;
             }
             else {
@@ -269,9 +305,15 @@
             $("#myModal").modal("show");
         }
 
-        function resetPassForm(id, un) {
-            $("#txtId2").val(id);
-            $("#txtUsername2").val(un);
+        $('#listTable').on('click', '.edit-Pass-btn', function () {
+            const row = JSON.parse($(this).attr('data-row'));
+            resetPassForm(row);
+        });
+
+        function resetPassForm(row) {
+            removeErrMsg2([]);
+            $("#txtId2").val(row.id);
+            $("#txtUsername2").val(row.username);
             $("#txtPassword2").val("");
             $("#txtConfirmPassword2").val("");
             $("#myResetModal").modal("show");
@@ -285,18 +327,45 @@
             $("#myResetModal").modal("toggle");
         }
 
-        function resetPassword() {
+        function removeErrMsg2(fields, clearValue = false) {
+            fields = [ 'txtPassword2', 'txtConfirmPassword2' ];
+            if (!Array.isArray(fields)) {
+                fields = [fields];
+            }
 
-            var err = "";
+            fields.forEach(function(field) {
+                document.getElementById(field).classList.remove('is-invalid');
+                document.getElementById(field).classList.remove('is-valid');
+                document.getElementById(field + 'Error').textContent = '';
+                if (clearValue) document.getElementById(field).value = '';
+            });
+        }
+
+        function checkInput2() {
+            let isValid = true;
+            if ($("#txtPassword2").val() == "") {
+                showError("txtPassword2", `Please enter Password.`);
+                isValid = false;
+            }
+
+            if ($("#txtConfirmPassword2").val() == "") {
+                showError("txtConfirmPassword2", `Please enter Confirm Password.`);
+                isValid = false;
+            }
+
             if ($("#txtPassword2").val() != $("#txtConfirmPassword2").val()) {
                 err = "Password and Confirm Password are not match.";
+                showError("#txtPassword2", err);
+                isValid = false;
+                showError("#txtConfirmPassword2", err);
+                isValid = false;
             }
-            if (err != "") {
-                swal.fire({
-                    icon: 'error',
-                    title: "Wait",
-                    text: err
-                });
+            return isValid;
+        }
+
+        function resetPassword() {
+            removeErrMsg2([]);
+            if (checkInput2() == false) {
                 return;
             }
 
@@ -326,7 +395,7 @@
                         allowOutsideClick: false,
                         showConfirmButton: false,
                     });
-                    Swal.showLoading()
+                    Swal.showLoading();
                 },
                 success: function (result) {
                     // console.log(result);
@@ -362,32 +431,72 @@
             // console.log(id);
         }
 
-        function saveItem() {
-            const chkIsAct = document.querySelector('#chkIsActive');
+        // Show error message and highlight invalid fields
+        function showError(fieldId, message) {
+            document.getElementById(fieldId).classList.add('is-invalid');
+            document.getElementById(fieldId + 'Error').textContent = message;
+        }
 
-            var err = "";
-            if ($("#txtUsername").val() == "") {
-               err = "Please insert Username.";
+        function removeErrMsg(fields, clearValue = false) {
+            fields = ['txtUsername', 'txtPassword', 'txtConfirmPassword', 'txtFullname', 'txtEmail' ];
+            if (!Array.isArray(fields)) {
+                fields = [fields];
+            }
+
+            fields.forEach(function(field) {
+                document.getElementById(field).classList.remove('is-invalid');
+                document.getElementById(field).classList.remove('is-valid');
+                document.getElementById(field + 'Error').textContent = '';
+                if (clearValue) document.getElementById(field).value = '';
+            });
+        }
+
+        function checkInput() {
+            let isValid = true;
+            var txt = document.getElementById("txtUsername");
+            if (txt.value == "") {
+                showError(txt.id, `Please enter Username.`);
+                isValid = false;
             }
             if ($("#txtId").val() == "") {
+                if ($("#txtPassword").val() == "") {
+                    showError("txtPassword", `Please enter Password.`);
+                    isValid = false;
+                }
+
+                if ($("#txtConfirmPassword").val() == "") {
+                    showError("txtConfirmPassword", `Please enter Confirm Password.`);
+                    isValid = false;
+                }
+
                 if ($("#txtPassword").val() != $("#txtConfirmPassword").val()) {
                     err = "Password and Confirm Password are not match.";
+                    showError("txtPassword", err);
+                    isValid = false;
+                    showError("txtConfirmPassword", err);
+                    isValid = false;
                 }
             }
-            if ($("#txtFullname").val() == "") {
-               err = "Please insert Fullname.";
+            txt = document.getElementById("txtFullname");
+            if (txt.value == "") {
+                showError(txt.id, `Please enter Fullname.`);
+                isValid = false;
             }
-            if ($("#txtEmail").val() == "") {
-               err = "Please insert Email.";
+            txt = document.getElementById("txtEmail");
+            if (txt.value == "") {
+                showError(txt.id, `Please enter Email.`);
+                isValid = false;
             }
-            if (err != "") {
-                swal.fire({
-                    icon: 'error',
-                    title: "Wait",
-                    text: err
-                });
+            return isValid;
+        }
+
+        function saveItem() {
+            removeErrMsg([]);
+            if (checkInput() == false) {
                 return;
             }
+
+            const chkIsAct = document.querySelector('#chkIsActive');
 
             var data = {
                 Id: $("#txtId").val(),
@@ -416,7 +525,7 @@
                         allowOutsideClick: false,
                         showConfirmButton: false,
                     });
-                    Swal.showLoading()
+                    Swal.showLoading();
                 },
                 success: function (result) {
                     // console.log(result);
@@ -452,7 +561,13 @@
             // console.log(id);
         }
 
-        function deleteItem(id) {
+        $('#listTable').on('click', '.delete-btn', function () {
+                const id = $(this).attr('data-id');
+                const code = $(this).attr('data-code');
+                deleteItem(id, code);
+        });
+
+        function deleteItem(id, code) {
 
             swal.fire({
                 title: "Are you sure want to delete?",

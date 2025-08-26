@@ -331,6 +331,20 @@
         background-color: #e9ecef;
     }
 
+    .error-message {
+        color: red;
+        font-size: 0.875rem;
+        margin-top: 5px;
+    }
+
+    .is-invalid {
+        border-color: red;
+    }
+
+    .is-valid {
+        border-color: green;
+    }
+
 </style>
 
 <div class="container-fluid">
@@ -355,13 +369,15 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label>Loader</label>
-                                    <input id="txtLoader" type="button" class="form-control" style="" placeholder="Loader" onclick="showLoaderForm()" />
+                                    <input id="txtLoader" type="button" class="form-control" style="" placeholder="Loader" onclick="showLoaderForm()" /> 
+                                    <div id="txtLoaderError" class="error-message"></div>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label>GRN Batch No</label>
-                                    <input id="txtGRN" type="text" class="form-control" style="" placeholder="" />
+                                    <input id="txtGRN" type="text" class="form-control" style="" placeholder="" maxlength="50" />
+                                    <div id="txtGRNError" class="error-message"></div>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -394,13 +410,15 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Supplier Name</label>
-                                    <input id="txtSupplierName" type="text" class="form-control" style="" placeholder="" onclick="" />
+                                    <input id="txtSupplierName" type="text" class="form-control" style="" placeholder="" onclick="" maxlength="255" />
+                                    <div id="txtSupplierNameError" class="error-message"></div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Supplier Ref No</label>
-                                    <input id="txtSupplierRefNo" type="text" class="form-control" style="" placeholder="" />
+                                    <input id="txtSupplierRefNo" type="text" class="form-control" style="" placeholder="" maxlength="50" />
+                                    <div id="txtSupplierRefNoError" class="error-message"></div>
                                 </div>
                             </div>
                         </div>
@@ -409,12 +427,14 @@
                                 <div class="form-group">
                                     <label>Item</label>
                                     <input id="txtItem" type="button" class="form-control" style="" placeholder="" onclick="showItemForm()" />
+                                    <div id="txtItemError" class="error-message"></div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Qty</label>
                                     <input id="txtQty" type="number" class="form-control" style="" placeholder="" />
+                                    <div id="txtQtyError" class="error-message"></div>
                                 </div>
                             </div>
                         </div>
@@ -423,12 +443,14 @@
                                 <div class="form-group">
                                     <label>Expiry Date</label>
                                     <input id="dtpExDate" name="DateFrom" type="date" class="form-control" placeholder="Expiry Date" />
+                                    <div id="dtpExDateError" class="error-message"></div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group"> 
                                     <label>Remark</label>
-                                    <input id="txtRemark" type="text" class="form-control" style="" placeholder="" />
+                                    <input id="txtRemark" type="text" class="form-control" style="" placeholder="" maxlength="255" />
+                                    <div id="txtRemarkError" class="error-message"></div>
                                 </div>
                             </div>
                         </div>
@@ -471,7 +493,7 @@
                                 <span class="bg-red">STEP 1 :: Check Loader Status @* <i class="bi bi-check-circle-fill"></i> *@</span>
                             </div>
                             <div id="pnl1_body">
-                                <i class="timeline-icon bi bi-flag text-bg-success"></i>
+                                <i class="timeline-icon bi bi-person text-bg-success"></i>
                                 <div class="timeline-item">
                                     <div class="timeline-body" style="height:80px;">
                                         <p style="text-align:center;">IS READY !</p>
@@ -487,7 +509,7 @@
                                 <span class="bg-red">STEP 2 :: Reading Reel Info ... </span>
                             </div>
                             <div id="pnl2_body">
-                                <i class="timeline-icon bi bi-flag text-bg-success"></i>
+                                <i class="timeline-icon bi bi-info text-bg-success"></i>
                                 <div class="timeline-item">
                                     <div class="timeline-body" style="height:150px;">
                                         <p>
@@ -655,7 +677,7 @@
 
         $(document).ready(function () {
             $("#txtGRN").val('-');
-            resetColorForm(0);
+            resetColorForm(1);
 
             $('#listTable').DataTable({
                 searching: true,
@@ -671,7 +693,7 @@
             loadLoaderList();
             loadItemList();
 
-            loadPLC(1);
+            // loadPLC(1);
         });
 
         function loadItemList() {
@@ -716,10 +738,15 @@
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
-                                        return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
-                                        'onclick="addtemForm(\'' + row.item_Id + '\', \'' + row.itemCode + '\')">' +
-                                        '<span><i class="bi bi-plus""></i>  Add</span></button> ' +
-                                        '</div>';
+                                        const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
+                                        return `<div style="display:flex;"><button class="btn btn-success d-grid addItem-btn" style="margin-right:10px;"
+                                        data-row="${rowData}">
+                                        <span><i class="bi bi-plus""></i>  Add</span></button>
+                                        </div>`;
+                                        // return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
+                                        // 'onclick="addtemForm(\'' + row.item_Id + '\', \'' + row.itemCode + '\')">' +
+                                        // '<span><i class="bi bi-plus""></i>  Add</span></button> ' +
+                                        // '</div>';
                                     }
                                 }
                             ],
@@ -760,10 +787,10 @@
                         allowOutsideClick: false,
                         showConfirmButton: false,
                     });
-                    Swal.showLoading()
+                    Swal.showLoading();
                 },
                 success: function (result) {
-                    //console.log(result);
+                    console.log(result);
                     swal.close();
                     if (result.success == true) {
 
@@ -878,13 +905,83 @@
             $("#myModal").modal("toggle");
         }
 
-        function addtemForm(id, code) {
-            $("#txtItem").val(code);
-            $("#txtItemId").val(id);
+        $('#itemTable').on('click', '.addItem-btn', function () {
+            const row = JSON.parse($(this).attr('data-row'));
+            addtemForm(row);
+        });
+
+        function addtemForm(row) {
+            $("#txtItem").val(row.itemCode);
+            $("#txtItemId").val(row.item_Id);
             $("#myModal").modal("toggle");
 
             const txtQty = document.getElementById('txtQty');
             txtQty.focus();
+        }
+
+        // Show error message and highlight invalid fields
+        function showError(fieldId, message) {
+            document.getElementById(fieldId).classList.add('is-invalid');
+            document.getElementById(fieldId + 'Error').textContent = message;
+        }
+
+        function removeErrMsg(fields, clearValue = false) {
+            fields = ['txtLoader', 'txtGRN', 'txtSupplierName', 'txtSupplierRefNo', 'txtItem', 'txtQty', 'dtpExDate', 'txtRemark' ];
+            if (!Array.isArray(fields)) {
+                fields = [fields];
+            }
+
+            fields.forEach(function(field) {
+                document.getElementById(field).classList.remove('is-invalid');
+                document.getElementById(field).classList.remove('is-valid');
+                document.getElementById(field + 'Error').textContent = '';
+                if (clearValue) document.getElementById(field).value = '';
+            });
+        }
+
+        function checkInput() {
+            let isValid = true;
+            var txt = document.getElementById("txtLoader");
+            if (txt.value == "") {
+                showError(txt.id, `Please select Loader.`);
+                isValid = false;
+            }
+            txt = document.getElementById("txtGRN");
+            if (txt.value == "") {
+                showError(txt.id, `Please enter GRN No.`);
+                isValid = false;
+            }
+            txt = document.getElementById("txtSupplierName");
+            if (txt.value == "") {
+                showError(txt.id, `Please enter Supplier Name.`);
+                isValid = false;
+            }
+            txt = document.getElementById("txtSupplierRefNo");
+            if (txt.value == "") {
+                showError(txt.id, `Please enter Supplier Ref No.`);
+                isValid = false;
+            }
+            txt = document.getElementById("txtItem");
+            if (txt.value == "") {
+                showError(txt.id, `Please select Item.`);
+                isValid = false;
+            }
+            txt = document.getElementById("txtQty");
+            if (txt.value == "") {
+                showError(txt.id, `Please enter Qty.`);
+                isValid = false;
+            }
+            txt = document.getElementById("dtpExDate");
+            if (txt.value == "") {
+                showError(txt.id, `Please enter Exipry Date.`);
+                isValid = false;
+            }
+            // txt = document.getElementById("txtRemark");
+            // if (txt.value == "") {
+            //     showError(txt.id, `Please enter Remark.`);
+            //     isValid = false;
+            // }
+            return isValid;
         }
 
         function insertItemRow(item, qty, reelCode, cre) {
@@ -972,6 +1069,11 @@
         }
 
         function addReceive() {
+            removeErrMsg([]);
+            if (checkInput() == false) {
+                return;
+            }
+
 
             var data = {
                 GRNBatchNo: $("#txtGRN").val(),
@@ -1049,7 +1151,57 @@
 
         async function loadPLC() {
 
+                    console.log("aaa");
             resetColorPLCForm(1);
+            $.ajax({
+                url: "/api/PLCLoader/GetLoaderId/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    console.log(result);
+                    swal.close();
+                    if (result.success == true) {
+
+                        // Get the select element
+                        const selLoader = document.getElementById('selLoader');
+                        for (const opt of result.data)
+                        {
+                            const el = document.createElement("option");
+                            el.textContent = opt.loaderCode;
+                            el.value = opt.loader_Id;
+                            selLoader.appendChild(el);
+                        }
+
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
             await delay(3000)
 
             resetColorPLCForm(2);

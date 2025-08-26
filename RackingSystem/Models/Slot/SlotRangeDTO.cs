@@ -17,7 +17,7 @@
         public int QRYPulseIncrement { get; set; } = 0;
         public bool IsActive { get; set; } = true;
         public bool IsLeft { get; set; } = true;
-        public bool HasEmptyDrawer { get; set; } = false;
+        public bool HasEmptyTray { get; set; } = false;
         public bool HasReel { get; set; } = false;
         public int Add1Pulse { get; set; } = 0;
         public int Add1PulseIncrement { get; set; } = 0;

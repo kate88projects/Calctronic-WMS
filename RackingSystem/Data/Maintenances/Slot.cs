@@ -18,10 +18,10 @@ namespace RackingSystem.Data.Maintenances
         public bool IsLeft { get; set; } = false;
 
         [Required]
-        public bool ForEmptyDrawer { get; set; } = false;
+        public bool ForEmptyTray { get; set; } = false;
 
         [Required]
-        public bool HasEmptyDrawer { get; set; } = false;
+        public bool HasEmptyTray { get; set; } = false;
 
         [Required]
         public bool HasReel { get; set; } = false;

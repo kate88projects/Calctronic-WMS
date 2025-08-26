@@ -82,6 +82,10 @@ namespace RackingSystem.Services.LoaderServices
                 // 2. save Data
                 if (req.Loader_Id == 0)
                 {
+                    if (string.IsNullOrEmpty(req.Status))
+                    {
+                        req.Status = EnumLoaderStatus.ReadyToLoad.ToString();
+                    }
                     Loader _loader = new Loader()
                     {
                         LoaderCode = req.LoaderCode,
@@ -90,7 +94,8 @@ namespace RackingSystem.Services.LoaderServices
                         Status = req.Status ?? EnumLoaderStatus.ReadyToLoad.ToString(),
                         Remark = req.Remark ?? "",
                         TotalCol = req.TotalCol,
-                        ColHeight = req.ColHeight
+                        ColHeight = req.ColHeight,
+                        IPAddr = req.IPAddr,
                     };
                     _dbContext.Loader.Add(_loader);
                     await _dbContext.SaveChangesAsync();
@@ -130,6 +135,7 @@ namespace RackingSystem.Services.LoaderServices
                     _loader.IsActive = req.IsActive;
                     _loader.TotalCol = req.TotalCol;
                     _loader.ColHeight = req.ColHeight;
+                    _loader.IPAddr = req.IPAddr;
                     _dbContext.Loader.Update(_loader);
                     await _dbContext.SaveChangesAsync();
 
@@ -137,7 +143,7 @@ namespace RackingSystem.Services.LoaderServices
                     {
                         var loadColExist = _dbContext.LoaderColumn.Where(x => x.Loader_Id == _loader.Loader_Id).ToList();
 
-                        for (var iCol = loadColExist.Count; iCol >= 1; iCol--)
+                        for (var iCol = loadColExist.Count - 1; iCol >= 0; iCol--)
                         {
                             if (loadColExist[iCol].ColNo > req.TotalCol)
                             {
@@ -147,7 +153,7 @@ namespace RackingSystem.Services.LoaderServices
                     }
                     else if (oldTtlCol < req.TotalCol)
                     {
-                        for (var iCol = req.TotalCol; iCol >= 1; iCol--)
+                        for (var iCol = 1; iCol <= req.TotalCol; iCol++)
                         {
                             var loadColExist = _dbContext.LoaderColumn.Where(x => x.Loader_Id == _loader.Loader_Id && x.ColNo == iCol).ToList();
                             if (loadColExist.Count == 0)
@@ -204,7 +210,7 @@ namespace RackingSystem.Services.LoaderServices
                 }
 
                 var loadColExist = _dbContext.LoaderColumn.Where(x => x.Loader_Id == _item.Loader_Id).ToList();
-                for (var iCol = loadColExist.Count; iCol >= 1; iCol--)
+                for (var iCol = loadColExist.Count - 1; iCol >= 0; iCol--)
                 {
                     _dbContext.LoaderColumn.Remove(loadColExist[iCol]);
                 }

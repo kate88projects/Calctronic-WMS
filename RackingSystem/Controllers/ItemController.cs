@@ -133,5 +133,15 @@ namespace RackingSystem.Controllers
             return result;
         }
 
+        [HttpPost]
+        [Consumes("application/json")]
+        public async Task<IActionResult> SaveExcelItem([FromBody] List<ItemExcelReqDTO> slots)
+        {
+            ServiceResponseModel<List<ItemExcelReqDTO>> result = await _itemService.SaveExcelItem(slots);
+
+            return new JsonResult(result);
+
+        }
+
     }
 }

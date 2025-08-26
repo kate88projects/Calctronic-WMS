@@ -9,7 +9,7 @@ using System;
 
 namespace RackingSystem.Controllers.API
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class SlotController : ControllerBase

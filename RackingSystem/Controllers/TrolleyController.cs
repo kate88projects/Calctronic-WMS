@@ -30,7 +30,7 @@ namespace RackingSystem.Controllers
                 ViewBag.PermissionList = data.UACIdList;
             }
 
-            ViewData["ActiveGroup"] = "grpRACKING";
+            ViewData["ActiveGroup"] = "grpMM";
             ViewData["ActiveTab"] = "TrolleyList";
             ViewData["Title"] = "Trolley List";
             return View();
@@ -68,7 +68,7 @@ namespace RackingSystem.Controllers
                 ViewBag.PermissionList = data.UACIdList;
             }
 
-            ViewData["ActiveGroup"] = "grpRACKING";
+            ViewData["ActiveGroup"] = "grpMM";
             ViewData["ActiveTab"] = "TrolleySlot";
             ViewData["Title"] = "Trolley Slot";
             return View();

@@ -28,6 +28,22 @@
         padding: 0;
         list-style: none;
     }
+    
+    .error-message {
+        color: red;
+        font-size: 0.875rem;
+        margin-top: 5px;
+    }
+
+    .is-invalid {
+        border-color: red;
+    }
+
+    .is-valid {
+        border-color: green;
+    }
+
+
 </style>
 
 <br />
@@ -274,6 +290,7 @@
             @* </form> *@
         </div>
     </div>
+    </div>
 </div>
 
 @section Scripts
@@ -308,7 +325,7 @@
                         allowOutsideClick: false,
                         showConfirmButton: false,
                     });
-                    Swal.showLoading()
+                    Swal.showLoading();
                 },
                 success: function (result) {
                     console.log(result);
@@ -336,11 +353,15 @@
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
-                                        return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
-                                        'onclick="showForm(\'' + row.id + '\', \'' + row.fullname + '\', \'' + row.uacIdList + '\' )">' +
-                                        '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
+                                        const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
+                                        return `<div style="display:flex;"><button class="btn btn-success d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
+                                        <span><i class="bi bi-pencil-square""></i>  Edit</span></button></div>`;
 
-                                        '</div>';
+                                        // return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
+                                        // 'onclick="showForm(\'' + row.id + '\', \'' + row.fullname + '\', \'' + row.uacIdList + '\' )">' +
+                                        // '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
+
+                                        // '</div>';
                                     }
                                 }
                             ],
@@ -367,13 +388,18 @@
             });
         }
 
-        function showForm(id, fn, permissions) {
-            $("#txtId").val(id);
-            $("#txtUsername").val(un);
+        $('#listTable').on('click', '.edit-btn', function () {
+            const row = JSON.parse($(this).attr('data-row'));
+            showForm(row);
+        });
+
+        function showForm(row) {
+            $("#txtId").val(row.id);
+            $("#txtUsername").val(row.username);
             $("#txtPassword").val("");
             $("#txtConfirmPassword").val("");
-            $("#txtFullname").val(fn);
-            getPermission(permissions);
+            $("#txtFullname").val(row.fullname);
+            getPermission(row.uacIdList);
             $("#myModal").modal("show");
         }
 
@@ -393,7 +419,7 @@
                 if (inputs[i].type.toLowerCase() == 'checkbox') {
                     if (isNumeric($(inputs[i]).val())) {
                         if (chkPermission != null) {
-                            if (chkPermission.includes(inputs[i].value)) {
+                            if (chkPermission.includes(Number(inputs[i].value))) {
                                 $(inputs[i]).prop('checked', true);
                             }
                             else {
@@ -475,20 +501,9 @@
                         if ($(inputs[i]).is(':checked')) {
                             // permissions += $(inputs[i]).val() + ',';
                             permissions.push($(inputs[i]).val());
-            }
-            if ($("#txtFullname").val() == "") {
-               err = "Please insert Fullname.";
-            }
-            if ($("#txtEmail").val() == "") {
-               err = "Please insert Email.";
-            }
-            if (err != "") {
-                swal.fire({
-                    icon: 'error',
-                    title: "Wait",
-                    text: err
-                });
-                return;
+                        }
+                    }
+                }
             }
 
             var data = {
@@ -651,44 +666,6 @@
 
             });
 
-        }
-
-        function checkInput() {
-            var groupNameInput = document.getElementById("txtGroupName");
-            var groupDescInput = document.getElementById("txtGroupDesc");
-            var remarkInput = document.getElementById("txtRemark");
-
-            var groupName = groupNameInput.value;
-            var groupDesc = groupDescInput.value;
-            var remark = remarkInput.value;
-            var chkInput = true;
-
-            // max length
-            if (groupName.length > 50) {
-                swal.fire({
-                    icon: 'error',
-                    title: "Wait",
-                    text: "Your Group Name length is more than than 50, please try again",
-                });
-                chkInput = false;
-            }
-            else if (groupDesc.length > 100) {
-                swal.fire({
-                    icon: 'error',
-                    title: "Wait",
-                    text: "Your Group Desc length is more than than 100, please try again",
-                });
-                chkInput = false;
-            }
-            else if (remark.length > 500) {
-                swal.fire({
-                    icon: 'error',
-                    title: "Wait",
-                    text: "Your Remark length is more than than 500, please try again",
-                });
-                chkInput = false;
-            }
-            return chkInput;
         }
 
     </script>

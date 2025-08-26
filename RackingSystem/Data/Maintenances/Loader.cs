@@ -30,5 +30,8 @@ namespace RackingSystem.Data.Maintenances
         [Required]
         public int ColHeight { get; set; } = 0;
 
+        [MaxLength(50)]
+        public string IPAddr { get; set; } = "";
+
     }
 }

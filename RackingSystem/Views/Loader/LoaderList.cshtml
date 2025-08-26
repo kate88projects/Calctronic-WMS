@@ -13,6 +13,20 @@
             font-size: 24px;
         }
 
+    .error-message {
+        color: red;
+        font-size: 0.875rem;
+        margin-top: 5px;
+    }
+
+    .is-invalid {
+        border-color: red;
+    }
+
+    .is-valid {
+        border-color: green;
+    }
+
 </style>
 
 <br />
@@ -42,6 +56,7 @@
                                     <th>Status</th>
                                     <th>Total Column</th>
                                     <th>Column Height</th>
+                                    <th>IP Address</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -64,20 +79,29 @@
             @* <form action="/bin/SaveBin" method="post"> *@
             <div class="modal-body">
                 <div class="mb-3">
-                    <label class="form-label" for="txtCode">Loader Code</label>
-                    <input type="text" class="form-control" name="LoaderCode" id="txtCode" aria-describedby="Loader Code">
+                    <label class="form-label" for="txtCode">Loader Code (ID)</label>
+                    <input type="text" class="form-control" name="LoaderCode" id="txtCode" aria-describedby="Loader Code" maxlength="50">
+                    <div id="txtCodeError" class="error-message"></div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="txtDesc">Description</label>
-                    <input type="text" class="form-control" name="Description" id="txtDesc" aria-describedby="Description">
+                    <input type="text" class="form-control" name="Description" id="txtDesc" aria-describedby="Description" maxlength="255">
+                    <div id="txtDescError" class="error-message"></div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="txtTotalCol">Total Column</label>
                     <input type="number" class="form-control" name="TotalCol" id="txtTotalCol" aria-describedby="TotalCol">
+                    <div id="txtTotalColError" class="error-message"></div>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" for="txtColHeight">Column Height</label>
+                    <label class="form-label" for="txtColHeight">Column Height (mm)</label>
                     <input type="number" class="form-control" name="ColHeight" id="txtColHeight" aria-describedby="ColHeight">
+                    <div id="txtColHeightError" class="error-message"></div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="txtIPAddr">IP Address</label>
+                    <input type="text" class="form-control" name="IPAddr" id="txtIPAddr" aria-describedby="IP Address" maxlength="50">
+                    <div id="txtIPAddrError" class="error-message"></div>
                 </div>
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="chkIsActive">
@@ -128,7 +152,7 @@
                         allowOutsideClick: false,
                         showConfirmButton: false,
                     });
-                    Swal.showLoading()
+                    Swal.showLoading();
                 },
                 success: function (result) {
                     console.log(result);
@@ -156,16 +180,22 @@
                                 { data: 'status' },
                                 { data: 'totalCol' },
                                 { data: 'colHeight' },
+                                { data: 'ipAddr' },
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
-                                        return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
-                                        'onclick="editItemForm(\'' + row.loader_Id + '\', \'' + row.loaderCode + '\', \'' + row.description + '\', ' +
-                                        '\'' + row.totalCol + '\', \'' + row.colHeight + '\', ' +
-                                        '\'' + row.isActive + '\' )">' +
-                                        '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
+                                        const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
+                                        return `<div style="display:flex;"><button class="btn btn-success d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
+                                        <span><i class="bi bi-pencil-square""></i>  Edit</span></button>
+                                        <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.loader_Id}" data-code="${row.loaderCode}"><span><i class="bi bi-trash""></i>  Delete</span></button></div>`;
 
-                                        '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.loader_Id + '\', \'' + row.loaderCode + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
+                                        // return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
+                                        // 'onclick="editItemForm(\'' + row.loader_Id + '\', \'' + row.loaderCode + '\', \'' + row.description + '\', ' +
+                                        // '\'' + row.totalCol + '\', \'' + row.colHeight + '\', ' +
+                                        // '\'' + row.isActive + '\', \'' + row.ipAddr + '\' )">' +
+                                        // '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
+
+                                        // '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.loader_Id + '\', \'' + row.loaderCode + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
                                     }
                                 }
                             ],
@@ -193,22 +223,31 @@
         }
 
         function newItemForm() {
+            removeErrMsg([]);
             $("#txtId").val("0");
             $("#txtCode").val("");
             $("#txtDesc").val("");
             $("#txtTotalCol").val("");
             $("#txtColHeight").val("");
+            $("#txtIPAddr").val("");
             document.getElementById("chkIsActive").checked = true;
             $("#myModal").modal("show");
         }
 
-        function editItemForm(id, code, desc, c, ch, isAct) {
-            $("#txtId").val(id);
-            $("#txtCode").val(code);
-            $("#txtDesc").val(desc);
-            $("#txtTotalCol").val(c);
-            $("#txtColHeight").val(ch);
-            if (isAct == "true") {
+        $('#listTable').on('click', '.edit-btn', function () {
+            const row = JSON.parse($(this).attr('data-row'));
+            editItemForm(row);
+        });
+
+        function editItemForm(row) {
+            removeErrMsg([]);
+            $("#txtId").val(row.loader_Id);
+            $("#txtCode").val(row.loaderCode);
+            $("#txtDesc").val(row.description);
+            $("#txtTotalCol").val(row.totalCol);
+            $("#txtColHeight").val(row.colHeight);
+            $("#txtIPAddr").val(row.ipAddr);
+            if (row.isActive == "true") {
                 document.getElementById("chkIsActive").checked = true;
             }
             else {
@@ -221,7 +260,59 @@
             $("#myModal").modal("toggle");
         }
 
+
+        // Show error message and highlight invalid fields
+        function showError(fieldId, message) {
+            document.getElementById(fieldId).classList.add('is-invalid');
+            document.getElementById(fieldId + 'Error').textContent = message;
+        }
+
+        function removeErrMsg(fields, clearValue = false) {
+            fields = ['txtCode', 'txtDesc', 'txtTotalCol', 'txtColHeight', 'txtIPAddr' ];
+            if (!Array.isArray(fields)) {
+                fields = [fields];
+            }
+
+            fields.forEach(function(field) {
+                document.getElementById(field).classList.remove('is-invalid');
+                document.getElementById(field).classList.remove('is-valid');
+                document.getElementById(field + 'Error').textContent = '';
+                if (clearValue) document.getElementById(field).value = '';
+            });
+        }
+
+        function checkInput() {
+            let isValid = true;
+            var txt = document.getElementById("txtCode");
+            if (txt.value == "") {
+                showError(txt.id, `Please enter Loader Code.`);
+                isValid = false;
+            }
+            // txt = document.getElementById("txtDesc");
+            txt = document.getElementById("txtTotalCol");
+            if (txt.value == "") {
+                showError(txt.id, `Please enter Total Column.`);
+                isValid = false;
+            }
+            txt = document.getElementById("txtColHeight");
+            if (txt.value == "") {
+                showError(txt.id, `Please enter Column Height.`);
+                isValid = false;
+            }
+            txt = document.getElementById("txtIPAddr");
+            if (txt.value == "") {
+                showError(txt.id, `Please enter IP Address.`);
+                isValid = false;
+            }
+            return isValid;
+        }
+
         function saveItem() {
+            removeErrMsg([]);
+            if (checkInput() == false) {
+                return;
+            }
+
             const chkIsAct = document.querySelector('#chkIsActive');
 
             var data = {
@@ -230,6 +321,7 @@
                 Description: $("#txtDesc").val(),
                 TotalCol: $("#txtTotalCol").val(),
                 ColHeight: $("#txtColHeight").val(),
+                IPAddr: $("#txtIPAddr").val(),
                 IsActive: chkIsAct.checked ? true : false,
             }
 
@@ -285,6 +377,12 @@
 
             // console.log(id);
         }
+
+        $('#listTable').on('click', '.delete-btn', function () {
+                const id = $(this).attr('data-id');
+                const code = $(this).attr('data-code');
+                deleteItem(id, code);
+        });
 
         function deleteItem(id, code) {
 

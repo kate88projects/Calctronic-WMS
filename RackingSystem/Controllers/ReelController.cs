@@ -4,6 +4,8 @@ using RackingSystem.Data;
 using RackingSystem.Models;
 using RackingSystem.Services.ReelServices;
 using RackingSystem.Models.Reel;
+using Newtonsoft.Json;
+using RackingSystem.Models.User;
 
 namespace RackingSystem.Controllers
 {
@@ -20,6 +22,16 @@ namespace RackingSystem.Controllers
 
         public IActionResult ReelList()
         {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpRACKING";
+            ViewData["ActiveTab"] = "ReelList";
             ViewData["Title"] = "Reel List";
             return View();
         }

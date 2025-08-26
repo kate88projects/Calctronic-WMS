@@ -36,7 +36,7 @@ namespace RackingSystem.Controllers
                 ViewBag.PermissionList = data.UACIdList;
             }
 
-            ViewData["ActiveGroup"] = "grpRACKING";
+            ViewData["ActiveGroup"] = "grpMM";
             ViewData["ActiveTab"] = "SlotList";
             ViewData["Title"] = "Slot List";
             return View();

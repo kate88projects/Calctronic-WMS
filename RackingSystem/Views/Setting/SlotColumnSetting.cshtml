@@ -16,6 +16,20 @@
             font-size: 24px;
         }
 
+    .error-message {
+        color: red;
+        font-size: 0.875rem;
+        margin-top: 5px;
+    }
+
+    .is-invalid {
+        border-color: red;
+    }
+
+    .is-valid {
+        border-color: green;
+    }
+
 </style>
 
 <br />
@@ -107,28 +121,32 @@
                                     render: function (data, type, row, meta) {
                                         const rowIndex = meta.row;
                                         return '<input type="hidden" id="txtId' + rowIndex + '" value="' + row.slotColumnSetting_Id + '">' +
-                                        '<input type="number" class="form-control" id="txtEDIn' + rowIndex + '" value="' + row.emptyDrawer_IN_Idx + '">';
+                                        '<input type="number" class="form-control" id="txtEDIn' + rowIndex + '" value="' + row.emptyDrawer_IN_Idx + '">' +
+                                        '<div id="txtEDIn' + rowIndex + 'Error" class="error-message"></div>';
                                     }
                                 },
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         const rowIndex = meta.row;
-                                        return '<input type="number" class="form-control" id="txtEDOut' + rowIndex + '" value="' + row.emptyDrawer_OUT_Idx + '">';
+                                        return '<input type="number" class="form-control" id="txtEDOut' + rowIndex + '" value="' + row.emptyDrawer_OUT_Idx + '">' +
+                                        '<div id="txtEDOut' + rowIndex + 'Error" class="error-message"></div>';
                                     }
                                 },
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         const rowIndex = meta.row;
-                                        return '<input type="number" class="form-control" id="txtRIn' + rowIndex + '" value="' + row.reel_IN_Idx + '">';
+                                        return '<input type="number" class="form-control" id="txtRIn' + rowIndex + '" value="' + row.reel_IN_Idx + '">' +
+                                        '<div id="txtRIn' + rowIndex + 'Error" class="error-message"></div>';
                                     }
                                 },
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         const rowIndex = meta.row;
-                                        return '<input type="number" class="form-control" id="txtROut' + rowIndex + '" value="' + row.reel_OUT_Idx + '">';
+                                        return '<input type="number" class="form-control" id="txtROut' + rowIndex + '" value="' + row.reel_OUT_Idx + '">' +
+                                        '<div id="txtROut' + rowIndex + 'Error" class="error-message"></div>';
                                     }
                                 },
                                 // {
@@ -166,10 +184,70 @@
             });
         }
 
-        function updateSetting() {
+        // Show error message and highlight invalid fields
+        function showError(fieldId, message) {
+            document.getElementById(fieldId).classList.add('is-invalid');
+            document.getElementById(fieldId + 'Error').textContent = message;
+        }
 
+        function removeErrMsg(iR) {
+            for (var i = 0; i < iR; i++) {
+                document.getElementById("txtEDIn" + i).classList.remove('is-invalid');
+                document.getElementById("txtEDIn" + i).classList.remove('is-valid');
+                document.getElementById("txtEDIn" + i + 'Error').textContent = '';
+
+                document.getElementById("txtEDOut" + i).classList.remove('is-invalid');
+                document.getElementById("txtEDOut" + i).classList.remove('is-valid');
+                document.getElementById("txtEDOut" + i + 'Error').textContent = '';
+
+                document.getElementById("txtRIn" + i).classList.remove('is-invalid');
+                document.getElementById("txtRIn" + i).classList.remove('is-valid');
+                document.getElementById("txtRIn" + i + 'Error').textContent = '';
+
+                document.getElementById("txtROut" + i).classList.remove('is-invalid');
+                document.getElementById("txtROut" + i).classList.remove('is-valid');
+                document.getElementById("txtROut" + i + 'Error').textContent = '';
+                // if (clearValue) document.getElementById(field).value = '';
+            }
+        }
+
+        function checkInput(iR) {
+            let isValid = true;
+            for (var i = 0; i < iR; i++) {
+
+                var txt = document.getElementById("txtEDIn" + i);
+                if (txt.value == "") {
+                    showError(txt.id, `Please enter Empty Drawer IN Priority.`);
+                    isValid = false;
+                }
+                txt = document.getElementById("txtEDOut" + i);
+                if (txt.value == "") {
+                    showError(txt.id, `Please enter Empty Drawer OUT Priority.`);
+                    isValid = false;
+                }
+                txt = document.getElementById("txtRIn" + i);
+                if (txt.value == "") {
+                    showError(txt.id, `Please enter Reel IN Priority.`);
+                    isValid = false;
+                }
+                txt = document.getElementById("txtROut" + i);
+                if (txt.value == "") {
+                    showError(txt.id, `Please enter Reel OUT Priority.`);
+                    isValid = false;
+                }
+
+            }
+            return isValid;
+        }
+
+        function updateSetting() {
             var iR = Number($('#txtTotalCol').val());
             var dataList = [];
+
+            removeErrMsg(iR);
+            if (checkInput(iR) == false) {
+                return;
+            }
 
             for (var i = 0; i < iR; i++) {
                 var data = {

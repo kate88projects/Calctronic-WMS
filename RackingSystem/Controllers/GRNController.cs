@@ -6,6 +6,11 @@ using RackingSystem.Services.GRNServices;
 using RackingSystem.Models.GRN;
 using Newtonsoft.Json;
 using RackingSystem.Models.User;
+using EasyModbus;
+using Microsoft.EntityFrameworkCore;
+using RackingSystem.General;
+using RackingSystem.Helpers;
+using System.Reflection;
 
 namespace RackingSystem.Controllers
 {

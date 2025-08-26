@@ -17,5 +17,7 @@
         public int TotalCol { get; set; } = 0;
 
         public int ColHeight { get; set; } = 0;
+
+        public string IPAddr { get; set; } = "";
     }
 }

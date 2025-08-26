@@ -111,6 +111,20 @@
             padding-top: 6px
         }
 
+    .error-message {
+        color: red;
+        font-size: 0.875rem;
+        margin-top: 5px;
+    }
+
+    .is-invalid {
+        border-color: red;
+    }
+
+    .is-valid {
+        border-color: green;
+    }
+
 </style>
 
 <br />
@@ -130,9 +144,10 @@
                                 <span class="visually-hidden">Toggle Dropdown</span>
                             </button>
                             <ul class="dropdown-menu" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(114.5px, 40px, 0px);">
-                                <li><a class="dropdown-item" href="#">Download Template</a></li>
-                                <li><a class="dropdown-item" href="#">Import Item from Excel</a></li>
+                                <li><a class="dropdown-item" onclick="downloadTemp()">Download Template</a></li>
+                                <li><a class="dropdown-item" onclick="triggerFileInput()">Import Item from Excel</a></li>
                             </ul>
+                            <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleFileUpload(event)">
                         </div>
                         <button type="button" class="btn btn-success" onclick="newItemForm()">
                             Add New Item
@@ -223,29 +238,35 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label" for="txtCode">Item Code</label>
-                    <input type="text" class="form-control" name="ItemCode" id="txtCode" aria-describedby="Item Code">
+                    <input type="text" class="form-control" name="ItemCode" id="txtCode" aria-describedby="Item Code" maxlength="50">
+                    <div id="txtCodeError" class="error-message"></div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="txtUOM">UOM</label>
-                    <input type="text" class="form-control" name="UOM" id="txtUOM" aria-describedby="UOM">
+                    <input type="text" class="form-control" name="UOM" id="txtUOM" aria-describedby="UOM" maxlength="50">
+                    <div id="txtUOMError" class="error-message"></div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="txtDesc">Description</label>
-                    <input type="text" class="form-control" name="Description" id="txtDesc" aria-describedby="Description">
+                    <input type="text" class="form-control" name="Description" id="txtDesc" aria-describedby="Description" maxlength="255">
+                    <div id="txtDescError" class="error-message"></div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="txtDesc2">Desc2</label>
-                    <input type="text" class="form-control" name="Desc2" id="txtDesc2" aria-describedby="Desc2">
+                    <input type="text" class="form-control" name="Desc2" id="txtDesc2" aria-describedby="Desc2" maxlength="255">
+                    <div id="txtDesc2Error" class="error-message"></div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="selItemGroup">Item Group</label>
                     <select class="form-control" id="selItemGroup">
                     </select>
+                    <div id="selItemGroupError" class="error-message"></div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="selReelDimension">Reel Thickness (mm)</label>
                     <select class="form-control" id="selReelDimension">
                     </select>
+                    <div id="selReelDimensionError" class="error-message"></div>
                 </div>
                @*  <div class="mb-3">
                     <label class="form-label" for="txtThickness">Thickness (mm)</label>
@@ -284,6 +305,24 @@
     </div>
 </div>
 
+<div class="modal fade" id="columnMatchingModal">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="columnMatchingLabel">Map CSV Columns to Data Table Columns</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="csvColumns">
+                <div id="csvColumns"></div>
+                <div id="dataTableColumns"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="processAndSubmitData()">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts
 {
     <link href="~/css/datatables.min.css" rel="stylesheet">
@@ -293,7 +332,13 @@
     <script src="~/js/datatables.min.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
 
+    <script src="~/js/xlsx.full.min.js"></script>
+    <script src="~/js/exceljs.min.js"></script>
+
     <script type="text/javascript">
+
+        let uploadedFileContent = null;
+        let uploadedFileExtension = null;
 
         $(document).ready(function() {
             $('#txtTotalRecord').val(0);
@@ -428,14 +473,19 @@
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
-                                        return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
-                                        'onclick="editItemForm(\'' + row.item_Id + '\', \'' + row.itemCode.replace("'", "[1]").replace('"', '[2]')  + '\', \'' + row.uom + '\', \'' + row.description + '\', \'' + row.desc2 + '\', ' +
-                                        '\'' + row.itemGroup_Id + '\', \'' + row.reelDimension_Id + '\', ' +
-                                        // '\'' + row.thickness + '\', \'' + row.width + '\', \'' + row.maxThickness + '\', ' +
-                                        '\'' + row.isActive + '\', \'' + row.isFinishGood + '\', \'' + row.alarmOverMaxThickness + '\')">' +
-                                        '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
+                                        const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
+                                        return `<div style="display:flex;"><button class="btn btn-success d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
+                                        <span><i class="bi bi-pencil-square""></i>  Edit</span></button>
+                                        <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.item_Id}" data-code="${row.itemCode}"><span><i class="bi bi-trash""></i>  Delete</span></button></div>`;
 
-                                        '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.item_Id + '\', \'' + row.itemCode.replace("'", "[1]").replace('"', '[2]')  + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
+                                        // return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
+                                        // 'onclick="editItemForm(\'' + row.item_Id + '\', \'' + row.itemCode.replace("'", "[1]").replace('"', '[2]')  + '\', \'' + row.uom + '\', \'' + row.description + '\', \'' + row.desc2 + '\', ' +
+                                        // '\'' + row.itemGroup_Id + '\', \'' + row.reelDimension_Id + '\', ' +
+                                        // // '\'' + row.thickness + '\', \'' + row.width + '\', \'' + row.maxThickness + '\', ' +
+                                        // '\'' + row.isActive + '\', \'' + row.isFinishGood + '\', \'' + row.alarmOverMaxThickness + '\')">' +
+                                        // '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
+
+                                        // '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.item_Id + '\', \'' + row.itemCode.replace("'", "[1]").replace('"', '[2]')  + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
                                     }
                                 }
                             ]
@@ -600,6 +650,7 @@
         }
 
         function newItemForm() {
+            removeErrMsg([]);
             $("#txtId").val("0");
             $("#txtCode").val("");
             $("#txtUOM").val("");
@@ -616,32 +667,37 @@
             $("#myModal").modal("show");
         }
 
-        function editItemForm(id, code, uom, desc, desc2, ig, rd, isAct, isFG, alm) {
-            code = code.replace("[1]", "'");
-            code = code.replace("[2]", '"');
-            $("#txtId").val(id);
-            $("#txtCode").val(code);
-            $("#txtUOM").val(uom);
-            $("#txtDesc").val(desc);
-            $("#txtDesc2").val(desc2);
-            $("#selItemGroup").val(ig);
-            $("#selReelDimension").val(rd);
+        $('#listTable').on('click', '.edit-btn', function () {
+            const row = JSON.parse($(this).attr('data-row'));
+            editItemForm(row);
+        });
+
+        function editItemForm(row) {
+            console.log(row.isActive);
+            removeErrMsg([]);
+            $("#txtId").val(row.item_Id);
+            $("#txtCode").val(row.itemCode);
+            $("#txtUOM").val(row.uom);
+            $("#txtDesc").val(row.description);
+            $("#txtDesc2").val(row.desc2);
+            $("#selItemGroup").val(row.itemGroup_Id);
+            $("#selReelDimension").val(row.reelDimension_Id);
             // $("#txtThickness").val(h);
             // $("#txtWidth").val(w);
             // $("#txtMaxThickness").val(maxh);
-            if (isAct == "true") {
+            if (row.isActive == "true") {
                 document.getElementById("chkIsActive").checked = true;
             }
             else {
                 document.getElementById("chkIsActive").checked = false;
             }
-            if (isFG == "true") {
+            if (row.isFinishGood == "true") {
                 document.getElementById("chkIsFinishGood").checked = true;
             }
             else {
                 document.getElementById("chkIsFinishGood").checked = false;
             }
-            if (alm == "true") {
+            if (row.alarmOverMaxThickness == "true") {
                 document.getElementById("chkAlarmOverMaxThickness").checked = true;
             }
             else {
@@ -654,7 +710,62 @@
             $("#myModal").modal("toggle");
         }
 
+        // Show error message and highlight invalid fields
+        function showError(fieldId, message) {
+            document.getElementById(fieldId).classList.add('is-invalid');
+            document.getElementById(fieldId + 'Error').textContent = message;
+        }
+
+        function removeErrMsg(fields, clearValue = false) {
+            fields = ['txtCode', 'txtUOM', 'txtDesc', 'txtDesc2', 'selItemGroup', 'selReelDimension' ];
+            if (!Array.isArray(fields)) {
+                fields = [fields];
+            }
+
+            fields.forEach(function(field) {
+                document.getElementById(field).classList.remove('is-invalid');
+                document.getElementById(field).classList.remove('is-valid');
+                document.getElementById(field + 'Error').textContent = '';
+                if (clearValue) document.getElementById(field).value = '';
+            });
+        }
+
+        function checkInput() {
+            let isValid = true;
+            var txt = document.getElementById("txtCode");
+            if (txt.value == "") {
+                showError(txt.id, `Please enter Item Code.`);
+                isValid = false;
+            }
+            txt = document.getElementById("txtUOM");
+            if (txt.value == "") {
+                showError(txt.id, `Please enter UOM.`);
+                isValid = false;
+            }
+            txt = document.getElementById("txtDesc");
+            if (txt.value == "") {
+                showError(txt.id, `Please enter Description.`);
+                isValid = false;
+            }
+            txt = document.getElementById("selItemGroup");
+            if (txt.value == "") {
+                showError(txt.id, `Please select Item Group.`);
+                isValid = false;
+            }
+            txt = document.getElementById("selReelDimension");
+            if (txt.value == "") {
+                showError(txt.id, `Please select Reel Dimension.`);
+                isValid = false;
+            }
+            return isValid;
+        }
+
         function saveItem() {
+            removeErrMsg([]);
+            if (checkInput() == false) {
+                return;
+            }
+
             const chkIsAct = document.querySelector('#chkIsActive');
             const chkIsFinishGood = document.querySelector('#chkIsFinishGood');
             const chkAlarmOverMaxThickness = document.querySelector('#chkAlarmOverMaxThickness');
@@ -728,9 +839,13 @@
             // console.log(id);
         }
 
+        $('#listTable').on('click', '.delete-btn', function () {
+                const id = $(this).attr('data-id');
+                const code = $(this).attr('data-code');
+                deleteItem(id, code);
+        });
+
         function deleteItem(id, ItemCode) {
-            ItemCode = ItemCode.replace("[1]", "'");
-            ItemCode = ItemCode.replace("[2]", '"');
 
             swal.fire({
                 title: "Are you sure want to delete?",
@@ -802,6 +917,358 @@
                 }
               });
 
+        }
+
+        //download template method
+        function downloadTemp() {
+            var book = XLSX.utils.book_new();
+            book.Props = {
+                Title: "Template",
+                Subject: "Item",
+                Author: "Flex Software Consulting Sdn Bhd",
+                CreatedDate: new Date()
+            };
+
+            var book_header = [
+                ['Item Code', 'UOM', 'Description', 'Description 2', 'Item Group Code',
+                'Is Active', 'Is Finish Good', 'Reel Thickness', 'Alarm Over Max Thickness' ]
+            ];
+
+            var booksheet = XLSX.utils.aoa_to_sheet(book_header);
+            XLSX.utils.book_append_sheet(book, booksheet, "Sheet1");
+            XLSX.writeFile(book, "ImportItemTemplate.xlsx");
+        }
+
+        //import excel method
+        function triggerFileInput() {
+            const input = document.getElementById('fileInput');
+            input.value = "";  //reset input so select on same file can trigger change
+            input.click();
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+
+            if (file)
+            {
+                const reader = new FileReader();
+                const fileExtension = file.name.split('.').pop().toLowerCase();
+                if (fileExtension === 'csv' || fileExtension === 'xlsx' || fileExtension === 'xls') {
+                    reader.onload = function(e) {
+                        const content = e.target.result;
+                        processFileContent(content, fileExtension);
+                    };
+
+                    if (fileExtension === 'csv') {
+                        reader.readAsText(file);
+                    } else {
+                        reader.readAsArrayBuffer(file);
+                    }
+                }
+                else {
+                    alert("Only CSV, XLSX, and XLS files are supported.");
+                }
+            }
+        }
+
+        function processFileContent(content, fileExtension) {
+            try {
+                let data;
+
+                if (fileExtension === 'csv') {
+                    data = XLSX.read(content, { type: 'string', codepage: 65001 });
+                    data = XLSX.utils.sheet_to_json(data.Sheets[data.SheetNames[0]], { header: 1 });
+                } else {
+                    const workbook = XLSX.read(content, { type: 'array' });
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                }
+
+                if (!data || data.length === 0) {
+                    alert("The uploaded file appears to be empty or malformed.");
+                    return;
+                }
+
+                const columns = data[0];
+                if (columns.length === 0) {
+                    alert("No headers found in the file.");
+                    return;
+                }
+
+                uploadedFileContent = content;
+                uploadedFileExtension = fileExtension;
+
+                console.log(uploadedFileContent);
+                console.log(uploadedFileExtension);
+
+                showColumnMapping(columns);
+            } catch (error) {
+                console.error("Error processing the file:", error);
+                alert("Failed to process the uploaded file.");
+            }
+        }
+
+        function showColumnMapping(columns) {
+            let dataTableColumns;
+
+            dataTableColumns = ['Item Code', 'UOM', 'Description', 'Description 2', 'Item Group Code',
+                'Is Active', 'Is Finish Good', 'Reel Thickness', 'Alarm Over Max Thickness'];
+
+            let columnDropdowns = '';
+
+            const isMatch = (col1, col2) => {
+                const col1Str = String(col1).toLowerCase().replace(/\s+/g, '');
+                const col2Str = String(col2).toLowerCase().replace(/\s+/g, '');
+                return col1Str === col2Str;
+            };
+
+            columns.forEach((column, index) => {
+                const matchedCol = dataTableColumns.find(col => isMatch(col, column));
+
+                columnDropdowns += `
+                    <div class="row align-items-center mb-3">
+                        <div class="col-4">
+                            <label class="form-label mb-0">File Column: <strong>${column}</strong></label>
+                        </div>
+                        <div class="col-6">
+                            <select class="form-select column-mapping"
+                                    data-col="${column}"
+                                    id="column${index}">
+                                <option value="">Select Matching Column</option>
+                                ${dataTableColumns.map(col => `
+                                    <option value="${col}" ${matchedCol === col ? 'selected' : ''}>${col}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                    </div>`;
+            });
+
+            document.getElementById('csvColumns').innerHTML = columnDropdowns;
+            $('#columnMatchingModal').modal("show");
+        }
+
+        function captureUserMappings() {
+            const mappings = {};
+            document.querySelectorAll('.column-mapping').forEach((selectElement, index) => {
+                const selectedValue = selectElement.value;
+                const columnName = selectElement.getAttribute('data-col');
+                if (selectedValue) {
+                    mappings[columnName] = selectedValue;
+                } else {
+                    console.log(`No selection for column: ${columnName}`);
+                }
+            });
+            return mappings;
+        }
+
+        function processAndSubmitData() {
+            let workbook;
+            let itemsData;
+            userMappings = captureUserMappings();
+            content = uploadedFileContent;
+            fileExtension = uploadedFileExtension;
+
+            try {
+                if (fileExtension === 'csv') {
+                    workbook = XLSX.read(content, { type: 'string', codepage: 65001 });
+                } else {
+                    workbook = XLSX.read(content, { type: 'array' });
+                }
+
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+                const columns = data[0];
+                const colIndex = {};
+
+                const fieldNames = [
+                    'Item Code', 'UOM', 'Description', 'Description 2', 'Item Group Code',
+                    'Is Active', 'Is Finish Good', 'Reel Thickness', 'Alarm Over Max Thickness'
+                ];
+                fieldNames.forEach(field => {
+                    colIndex[field] = columns.indexOf(normalizeString(userMappings, field));
+                });
+
+                const parseBool = val =>
+                    val === true || val === 1 || val === '1' || val === 'true' || val === 'TRUE';
+
+                itemsData = data.slice(1).map(row => {
+                    return {
+                        Item_Id: 0,
+                        ItemCode: row[colIndex['Item Code']],
+                        UOM: row[colIndex['UOM']],
+                        Description: row[colIndex['Description']],
+                        Desc2: row[colIndex['Description 2']],
+
+                        ItemGroupCode: row[colIndex['Item Group Code']],
+                        Thickness: row[colIndex['Reel Thickness']],
+
+                        IsActive: parseBool(row[colIndex['Is Active']]),
+                        IsFinishGood: parseBool(row[colIndex['Is Finish Good']]),
+                        AlarmOverMaxThickness: parseBool(row[colIndex['Alarm Over Max Thickness']]),
+                        }
+                });
+
+                saveExcelItems(itemsData, content);
+
+            } catch (error) {
+                console.error("Error processing the file:", error);
+                alert("Failed to process the uploaded file.");
+            }
+        }
+
+        function normalizeString(userMappings, str) {
+            var rValue = str;
+
+            if (userMappings != null)
+            {
+                rValue = userMappings[str];
+            }
+
+            return rValue;
+        }
+
+        function saveExcelItems(data, bookBuffer) {
+            const url = '/Item/SaveExcelItem';
+            if (data != null)
+            {
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: JSON.stringify(data),
+                    dataType: 'JSON',
+                    contentType: 'application/json; charset=utf-8',
+                    beforeSend: function () {
+                        Swal.fire({
+                            text: 'Please Wait',
+                            width: '300px',
+
+                            allowEscapeKey: false,
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                        });
+                        Swal.showLoading()
+                    },
+                    success: function(response) {
+                        if (response.success == true) {
+                            swal.fire({
+                                icon: 'success',
+                                title: "Success Update",
+                                text: "",
+                                didClose: () => {
+                                    window.location.reload();
+                                }
+                            });
+                        } else {
+                            if (response.data && response.data.length > 0) {
+                                markErrorsInSheet(bookBuffer, response.data);
+                                swal.fire({
+                                    icon: 'warning',
+                                    title: "Validation Issues Found",
+                                    text: "Review on returned file and fix errors."
+                                });
+                                $('#columnMatchingModal').modal("toggle");
+
+                            } else {
+                                swal.fire({
+                                    icon: 'error',
+                                    title: "Wait",
+                                    text: response.errMessage
+                                });
+                            }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.log(error);
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: error.val
+                        });
+                    }
+                });
+            }
+        }
+
+        async function markErrorsInSheet(bookBuffer, errorRows) {
+                const workbook = new ExcelJS.Workbook();
+                await workbook.xlsx.load(bookBuffer);
+                const worksheet = workbook.getWorksheet(1);
+                const columnsToHighlight = [1, 2, 5, 8];
+
+                // const fieldNames = [
+                //     'Item Code', 'UOM', 'Description', 'Description 2', 'Item Group Code',
+                //     'Is Active', 'Is Finish Good', 'Reel Thickness', 'Alarm Over Max Thickness'
+                // ];
+                // let colorIndex = 0;
+                // const highlightColors = [
+                //     'FFCCCC',
+                //     'FFE5CC',
+                //     'FFFFCC',
+                //   ];
+
+                // Add "Error" header
+                const headerRow = worksheet.getRow(1);
+                const errIdx = 10;
+                headerRow.getCell(errIdx).value = 'Error';
+                headerRow.commit();
+
+                const errorMap = new Map();
+                errorRows.forEach(e => errorMap.set(e.itemCode, e.errorMsg));
+                console.log(errorRows);
+
+                worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
+                if (rowNumber === 1) return; //skip header row
+
+                const itemCode = row.getCell(1).value;
+
+                if (errorMap.has(itemCode)) {
+                    const errorMsg = errorMap.get(itemCode);
+
+                    // const fillColor = highlightColors[colorIndex % highlightColors.length];
+                    // colorIndex++;
+                    console.log("error index" , errIdx);
+                    console.log(columnsToHighlight);
+
+                    columnsToHighlight.forEach(colNum => {
+                    const cell = row.getCell(colNum);
+                    console.log("colNumber:", colNum);
+                    cell.fill = {
+                        type: 'pattern',
+                        pattern: 'solid',
+                        fgColor: { argb: 'FFCCCC' }
+                    };
+                    });
+
+                    row.getCell(errIdx).value = errorMsg;
+                }
+                });
+
+                // Export updated file
+                const updatedBuffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([updatedBuffer], {
+                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                });
+
+                const date = new Date();
+                const year = date.getFullYear();
+                const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-indexed
+                const day = date.getDate().toString().padStart(2, '0');
+                const HH = date.getHours().toString().padStart(2, '0');
+                const mm = date.getMinutes().toString().padStart(2, '0');
+                const ss = date.getSeconds().toString().padStart(2, '0');
+                const formattedDate = `${year}${month}${day}${HH}${mm}`;
+
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = "ItemList_Errors_" + formattedDate + ".xlsx";
+                link.click();
+
+                Swal.fire({
+                icon: 'warning',
+                title: "Validation Issues Found",
+                text: "Review on returned file and fix errors."
+                });
         }
 
     </script>

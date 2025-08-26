@@ -24,29 +24,23 @@ namespace RackingSystem.Controllers.API
             _dbContext = dbContext;
         }
 
-        [HttpGet]
-        public ServiceResponseModel<bool> GetLoaderId()
+        [HttpGet("GetLoaderId/{loaderId}")]
+        public ServiceResponseModel<bool> GetLoaderId(long loaderId)
         {
             ServiceResponseModel<bool> result = new ServiceResponseModel<bool>();
             string methodName = "GetLoaderId";
 
             try
             {
-                var configIP = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IP_Loader.ToString()).First();
-                if (configIP == null)
+                var loader = _dbContext.Loader.Find(loaderId);
+                if (loader == null)
                 {
-                    result.errMessage = "Configuration IP Loader has not yet set.";
-                    return result;
-                }
-                var configPort = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_Port_Loader.ToString()).First();
-                if (configPort == null)
-                {
-                    result.errMessage = "Configuration Port Loader has not yet set.";
+                    result.errMessage = "Loader not found.";
                     return result;
                 }
 
-                string plcIp = configIP.ConfigValue;
-                int port = Convert.ToInt32(configPort.ConfigValue);
+                string plcIp = loader.IPAddr;
+                int port = 502;
 
                 ModbusClient modbusClient = new ModbusClient(plcIp, port);
                 modbusClient.Connect();
@@ -89,23 +83,8 @@ namespace RackingSystem.Controllers.API
 
             try
             {
-                var configIP = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IP_Loader.ToString()).First();
-                if (configIP == null)
-                {
-                    result.errMessage = "Configuration IP Loader has not yet set.";
-                    result.data = "";
-                    return result;
-                }
-                var configPort = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_Port_Loader.ToString()).First();
-                if (configPort == null)
-                {
-                    result.errMessage = "Configuration Port Loader has not yet set.";
-                    result.data = "";
-                    return result;
-                }
-
                 // 1. check db for available height
-                var loader = _dbContext.Loader.Where(x => x.Loader_Id == loaderId).FirstOrDefault();
+                var loader = _dbContext.Loader.Find(loaderId);
                 if (loader == null)
                 {
                     result.errMessage = "Loader is not found.";
@@ -134,8 +113,8 @@ namespace RackingSystem.Controllers.API
                 }
 
                 // 2. check plc is quandrant absense
-                string plcIp = configIP.ConfigValue;
-                int port = Convert.ToInt32(configPort.ConfigValue);
+                string plcIp = loader.IPAddr;
+                int port = 502;
 
                 ModbusClient modbusClient = new ModbusClient(plcIp, port);
                 modbusClient.Connect();
@@ -197,23 +176,8 @@ namespace RackingSystem.Controllers.API
 
             try
             {
-                var configIP = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IP_Loader.ToString()).First();
-                if (configIP == null)
-                {
-                    result.errMessage = "Configuration IP Loader has not yet set.";
-                    result.data = "";
-                    return result;
-                }
-                var configPort = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_Port_Loader.ToString()).First();
-                if (configPort == null)
-                {
-                    result.errMessage = "Configuration Port Loader has not yet set.";
-                    result.data = "";
-                    return result;
-                }
-
                 // 1. check db for available height
-                var loader = _dbContext.Loader.Where(x => x.Loader_Id == loaderId).FirstOrDefault();
+                var loader = _dbContext.Loader.Find(loaderId);
                 if (loader == null)
                 {
                     result.errMessage = "Loader is not found.";

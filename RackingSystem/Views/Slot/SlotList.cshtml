@@ -1,6 +1,5 @@
-﻿@model RackingSystem.Models.Slot.SlotDTO
-@{
-}
+﻿
+
 <style>
     .table-title {
         color: #fff;
@@ -70,7 +69,7 @@
                             <ul class="dropdown-menu" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(114.5px, 40px, 0px);">
                                 <li><a class="dropdown-item" href="#" id="dTemp" onclick="downloadTemp('slots')">Download Slot List Template</a></li>
                                 <li><a class="dropdown-item" href="#" id="dTemp" onclick="downloadTemp('pulses')">Download Update Pulses Template</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="triggerFileInput('importSlot')">Import Item from Excel</a></li>
+                                <li><a class="dropdown-item" href="#" onclick="triggerFileInput('importSlot')">Import Slot from Excel</a></li>
                             </ul>
                             <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleFileUpload(event)">
                         </div>
@@ -439,19 +438,20 @@
 
 @section Scripts
 {
-    <link href="~/css/datatables.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+    <link href="../css/datatables.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/sweetalert2.min.css">
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/js/datatables.min.js"></script>
-    <script src="~/js/sweetalert2.all.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+    <script src="../lib/jquery/dist/jquery.min.js"></script>
+    <script src="../js/datatables.min.js"></script>
+    <script src="../js/sweetalert2.all.min.js"></script>
+
+    <script src="../js/xlsx.full.min.js"></script>
+    <script src="../js/exceljs.min.js"></script>
 
     <script type="text/javascript">
 
-    let uploadedFileContent = null;
-    let uploadedFileExtension = null;
+        let uploadedFileContent = null;
+        let uploadedFileExtension = null;
 
 
         $(document).ready(function () {
@@ -513,7 +513,7 @@
                                 // {
                                 //     data: null,
                                 //     render: function (data, type, row, meta) {
-                                //         if (row.hasEmptyDrawer == true) {
+                                    //         if (row.hasEmptyTray == true) {
                                 //             return '<span><i class="bi bi-check-square"></i></span>'
                                 //         }
                                 //         else {
@@ -541,7 +541,7 @@
                                     render: function (data, type, row, meta) {
                                         const rowData = JSON.stringify(row).replace(/"/g, "&quot;");  //replace all double quotes with HTML entity  //custom data attribute >> data-*
                                         return `<div style="display:flex;">
-                                                    <button class="btn btn-success d-grid edit-slot-btn" style="margin-right: 10px;" data-row="${rowData}"> 
+                                                    <button class="btn btn-success d-grid edit-slot-btn" style="margin-right: 10px;" data-row="${rowData}">
                                                         <span><i class="bi bi-pencil-square"></i>Edit</span>
                                                     </button>
                                                     <button class="btn btn-danger delete-slot-bin" data-id="${row.slot_Id}" data-code="${row.slotCode}">
@@ -631,7 +631,7 @@
 
             addPulseFields.forEach(function(item) {
                 $(item.field).val(item.value > 0 ? item.value : "");
-                if (item.value > 0) hasValue = true; 
+                if (item.value > 0) hasValue = true;
             });
 
             document.getElementById("chkIsActive").checked = row.isActive === true || row.isActive === "true";
@@ -660,13 +660,13 @@
                     container.classList.remove("hidden");
                     text.innerHTML = '<i class="fas fa-minus-circle"></i> Additional Pulses';
                 }
-                
+
                 if (modalId == "myModal") {
                     for (let i = 1; i <= 6; i++) {
                         removeErrMsg(`txtAddPulse${i}`);
                     }
                 }
-                else 
+                else
                 {
                     for (let i = 1; i <= 6; i++) {
                         removeErrMsg(`txtStartAddPulse${i}`);
@@ -675,18 +675,18 @@
                 }
 
             } else {
-                
+
                 container.classList.add("hidden");
                 text.innerHTML = '<i class="fas fa-plus-circle"></i> Additional Pulses';
-                
-                
+
+
                 if (modalId == "myModal") {
                     for (let i = 1; i <= 6; i++) {
                         const field = document.getElementById(`txtAddPulse${i}`);
                         if (field) field.value = "";
                     }
                 }
-                else 
+                else
                 {
                     for (let i = 1; i <= 6; i++) {
                         const field = document.getElementById(`txtStartAddPulse${i}`);
@@ -701,10 +701,10 @@
         function cancelForm(modalId) {
             $('#' + modalId).modal("toggle");
             var fields;
-            
+
             if (modalId == "colModal") {
                 fields = ['txtCodeFormat', 'txtColFrom', 'txtTotalCol', 'txtRowFrom', 'txtTotalRow', 'txtStartXPulse', 'txtXPulseIncrement', 'txtStartYPulse', 'txtYPulseIncrement', 'txtStartQrXPulse', 'txtQrXPulseIncrement', 'txtStartQrYPulse', 'txtQrYPulseIncrement'];
-            } 
+            }
             else {
                 fields = ['txtCode', 'txtColNo', 'txtRowNo', 'txtXPulse', 'txtYPulse', 'txtQrXPulse', 'txtQrYPulse', 'txtAddPulse1', 'txtAddPulse2', 'txtAddPulse3', 'txtAddPulse4', 'txtAddPulse5', 'txtAddPulse6'];
             }
@@ -713,7 +713,7 @@
         }
 
         function saveSlot() {
-            // let addPulseFields; 
+            // let addPulseFields;
             // addPulseFields = [
             //     { id: 'txtAddPulse1', name: 'Additional Pulse 1', required: true, numeric: true, min: 0 },
             //     { id: 'txtAddPulse2', name: 'Additional Pulse 2', required: true, numeric: true, min: 0 },
@@ -782,7 +782,7 @@
                                 title: "Success Update",
                                 text: "",
                                 didClose: () => {
-                                  window.location.reload();
+                                    window.location.reload();
                                 }
                             });
                         }
@@ -807,9 +807,9 @@
         }
 
         $('#listTable').on('click', '.delete-slot-bin', function () {
-             const id = $(this).attr('data-id');
-             const slotCode = $(this).attr('data-code');
-             deleteSlot(id, slotCode);
+                const id = $(this).attr('data-id');
+                const slotCode = $(this).attr('data-code');
+                deleteSlot(id, slotCode);
         });
 
         function deleteSlot(id, slotCode) {
@@ -823,7 +823,7 @@
                 confirmButtonText: 'ok',
                 cancelButtonText: 'cancel',
                 allowOutsideClick: false
-              }).then(function(r) {
+                }).then(function(r) {
                 if (r.isConfirmed == true) {
 
                     var data = {
@@ -858,7 +858,7 @@
                                     title: "Success Deleted",
                                     text: "",
                                     didClose: () => {
-                                      window.location.reload();
+                                        window.location.reload();
                                     }
                                 });
                             }
@@ -883,7 +883,7 @@
                 } else {
                     return;
                 }
-              });
+                });
 
         }
 
@@ -1018,7 +1018,7 @@
                             title: "Success Update",
                             text: "",
                             didClose: () => {
-                              window.location.reload();
+                                window.location.reload();
                             }
                         });
                     }
@@ -1039,7 +1039,7 @@
                     });
                 }
             });
-          }
+            }
 
         }
 
@@ -1054,11 +1054,11 @@
             };
 
             var book_header = type === "slots" ? [
-                ['Slot Code', 'Column No', 'Row No', 'Has Empty Tray', 'Has Reel', 'Is Active', 'Is Left', 'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse', 
+                ['Slot Code', 'Column No', 'Row No', 'Has Empty Tray', 'Has Reel', 'Is Active', 'Is Left', 'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse',
                 'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6']
-            ] 
+            ]
             : [
-                ['Slot Code', 'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse', 
+                ['Slot Code', 'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse',
                 'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6']
             ];
 
@@ -1079,7 +1079,7 @@
             const file = event.target.files[0];
             const source = event.target.dataset.source;
 
-            if (file) 
+            if (file)
             {
                 const reader = new FileReader();
                 const fileExtension = file.name.split('.').pop().toLowerCase();
@@ -1088,11 +1088,11 @@
                         const content = e.target.result;
                         processFileContent(content, fileExtension, source);
                     };
-            
+
                     if (fileExtension === 'csv') {
                         reader.readAsText(file);
                     } else {
-                        reader.readAsArrayBuffer(file); 
+                        reader.readAsArrayBuffer(file);
                     }
                 }
                 else {
@@ -1104,7 +1104,7 @@
         function processFileContent(content, fileExtension, source) {
             try {
                 let data;
-        
+
                 if (fileExtension === 'csv') {
                     data = XLSX.read(content, { type: 'string', codepage: 65001 });
                     data = XLSX.utils.sheet_to_json(data.Sheets[data.SheetNames[0]], { header: 1 });
@@ -1119,7 +1119,7 @@
                     return;
                 }
 
-                const columns = data[0]; 
+                const columns = data[0];
                 if (columns.length === 0) {
                     alert("No headers found in the file.");
                     return;
@@ -1143,17 +1143,17 @@
 
             if (source == "importSlot") {
                 dataTableColumns = ['Slot Code', 'Column No', 'Row No', 'Has Empty Tray', 'Has Reel', 'Is Active', 'Is Left', 'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse',
-                                     'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6'];
+                                        'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6'];
                 $('#updateType').val("slots");
             }
             else {
                 dataTableColumns = ['Slot Code',  'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse',
-                                     'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6'];
-                $('#updateType').val("pluses"); 
+                                        'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6'];
+                $('#updateType').val("pluses");
             }
 
             let columnDropdowns = '';
-    
+
             const isMatch = (col1, col2) => {
                 const col1Str = String(col1).toLowerCase().replace(/\s+/g, '');
                 const col2Str = String(col2).toLowerCase().replace(/\s+/g, '');
@@ -1169,8 +1169,8 @@
                             <label class="form-label mb-0">File Column: <strong>${column}</strong></label>
                         </div>
                         <div class="col-6">
-                            <select class="form-select column-mapping" 
-                                    data-col="${column}" 
+                            <select class="form-select column-mapping"
+                                    data-col="${column}"
                                     id="column${index}">
                                 <option value="">Select Matching Column</option>
                                 ${dataTableColumns.map(col => `
@@ -1188,7 +1188,7 @@
         function captureUserMappings() {
             const mappings = {};
             document.querySelectorAll('.column-mapping').forEach((selectElement, index) => {
-                const selectedValue = selectElement.value; 
+                const selectedValue = selectElement.value;
                 const columnName = selectElement.getAttribute('data-col');
                 if (selectedValue) {
                     mappings[columnName] = selectedValue;
@@ -1217,7 +1217,7 @@
                 const sheet = workbook.Sheets[workbook.SheetNames[0]];
                 const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-                const columns = data[0]; 
+                const columns = data[0];
                 const colIndex = {};
 
                 if (updateType === "slots")
@@ -1290,7 +1290,7 @@
                     });
                 }
 
-                saveExcelSlots(slotsData, content, updateType); 
+                saveExcelSlots(slotsData, content, updateType);
 
             } catch (error) {
                 console.error("Error processing the file:", error);
@@ -1314,7 +1314,7 @@
             if (slotsData != null)
             {
                 $.ajax({
-                    url: url, 
+                    url: url,
                     type: 'POST',
                     data: JSON.stringify(slotsData),
                     dataType: 'JSON',
@@ -1341,22 +1341,22 @@
                                 }
                             });
                         } else {
-                           if (response.data && response.data.length > 0) {
-                               markErrorsInSheet(bookBuffer, response.data, source);
-                               swal.fire({
-                                  icon: 'warning',
-                                  title: "Validation Issues Found",
-                                  text: "Review on returned file and fix errors."
-                               });
-                               $('#columnMatchingModal').modal("toggle");
+                            if (response.data && response.data.length > 0) {
+                                markErrorsInSheet(bookBuffer, response.data, source);
+                                swal.fire({
+                                    icon: 'warning',
+                                    title: "Validation Issues Found",
+                                    text: "Review on returned file and fix errors."
+                                });
+                                $('#columnMatchingModal').modal("toggle");
 
-                           } else {
-                               swal.fire({
-                                  icon: 'error',
-                                  title: "Wait",
-                                  text: response.errMessage
-                               });
-                           }
+                            } else {
+                                swal.fire({
+                                    icon: 'error',
+                                    title: "Wait",
+                                    text: response.errMessage
+                                });
+                            }
                         }
                     },
                     error: function(xhr, status, error) {
@@ -1372,72 +1372,73 @@
         }
 
         async function markErrorsInSheet(bookBuffer, errorRows, updateType) {
-              const workbook = new ExcelJS.Workbook();
-              await workbook.xlsx.load(bookBuffer);
-              const worksheet = workbook.getWorksheet(1); 
-              const columnsToHighlight = updateType === "slots" ? [1, 2, 3, 18] : [1, 12];
+                const workbook = new ExcelJS.Workbook();
+                await workbook.xlsx.load(bookBuffer);
+                const worksheet = workbook.getWorksheet(1);
+                const columnsToHighlight = updateType === "slots" ? [1, 2, 3, 18] : [1, 12];
 
-              // let colorIndex = 0;
-              // const highlightColors = [
-              //     'FFCCCC', 
-              //     'FFE5CC', 
-              //     'FFFFCC', 
-              //   ];
+                // let colorIndex = 0;
+                // const highlightColors = [
+                //     'FFCCCC',
+                //     'FFE5CC',
+                //     'FFFFCC',
+                //   ];
 
-              // Add "Error" header 
-              const headerRow = worksheet.getRow(1);
-              const errIdx = updateType === "slots" ? 18 : 12;
-              headerRow.getCell(errIdx).value = 'Error';
-              headerRow.commit();
+                // Add "Error" header
+                const headerRow = worksheet.getRow(1);
+                const errIdx = updateType === "slots" ? 18 : 12;
+                headerRow.getCell(errIdx).value = 'Error';
+                headerRow.commit();
 
-              const errorMap = new Map();
-              errorRows.forEach(e => errorMap.set(e.slotCode, e.errorMsg));
-              console.log(errorRows);
+                const errorMap = new Map();
+                errorRows.forEach(e => errorMap.set(e.slotCode, e.errorMsg));
+                console.log(errorRows);
 
-              worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
+                worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
                 if (rowNumber === 1) return; //skip header row
 
-                const slotCode = row.getCell(1).value; 
+                const slotCode = row.getCell(1).value;
 
                 if (errorMap.has(slotCode)) {
-                  const errorMsg = errorMap.get(slotCode);
+                    const errorMsg = errorMap.get(slotCode);
 
-                  // const fillColor = highlightColors[colorIndex % highlightColors.length];
-                  // colorIndex++;
-                  console.log("error index" , errIdx);
-                  console.log(columnsToHighlight);
+                    // const fillColor = highlightColors[colorIndex % highlightColors.length];
+                    // colorIndex++;
+                    console.log("error index" , errIdx);
+                    console.log(columnsToHighlight);
 
-                  columnsToHighlight.forEach(colNum => {
+                    columnsToHighlight.forEach(colNum => {
                     const cell = row.getCell(colNum);
                     console.log("colNumber:", colNum);
-                    cell.fill = { 
+                    cell.fill = {
                         type: 'pattern',
                         pattern: 'solid',
                         fgColor: { argb: 'FFCCCC' }
                     };
-                  });
+                    });
 
-                  row.getCell(errIdx).value = errorMsg;
+                    row.getCell(errIdx).value = errorMsg;
                 }
-              });
+                });
 
-              // Export updated file
-              const updatedBuffer = await workbook.xlsx.writeBuffer();
-              const blob = new Blob([updatedBuffer], {
+                // Export updated file
+                const updatedBuffer = await workbook.xlsx.writeBuffer();
+                const blob = new Blob([updatedBuffer], {
                 type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-              });
+                });
 
-              const link = document.createElement("a");
-              link.href = URL.createObjectURL(blob);
-              link.download = "SlotList_Errors.xlsx";
-              link.click();
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = "SlotList_Errors.xlsx";
+                link.click();
 
-              Swal.fire({
+                Swal.fire({
                 icon: 'warning',
                 title: "Validation Issues Found",
                 text: "Review on returned file and fix errors."
-              });
+                });
         }
 
     </script>
+
 }

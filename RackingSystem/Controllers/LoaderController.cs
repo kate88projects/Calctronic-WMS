@@ -32,6 +32,7 @@ namespace RackingSystem.Controllers
 
             ViewData["ActiveGroup"] = "grpMM";
             ViewData["ActiveTab"] = "LoaderList";
+            ViewData["Title"] = "Loader List";
             return View();
         }
 

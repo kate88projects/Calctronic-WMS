@@ -1,8 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace RackingSystem.Models.Item
+﻿namespace RackingSystem.Models.Item
 {
-    public class ItemListDTO
+    public class ItemExcelReqDTO
     {
         public long Item_Id { get; set; } = 0;
 
@@ -35,5 +33,6 @@ namespace RackingSystem.Models.Item
 
         public int page { get; set; } = 1;
 
+        public string ErrorMsg { get; set; } = "";
     }
 }
