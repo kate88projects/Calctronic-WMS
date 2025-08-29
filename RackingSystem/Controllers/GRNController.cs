@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using RackingSystem.General;
 using RackingSystem.Helpers;
 using System.Reflection;
+using RackingSystem.Models.Loader;
 
 namespace RackingSystem.Controllers
 {
@@ -52,6 +53,13 @@ namespace RackingSystem.Controllers
             }
             ServiceResponseModel<GRNDtlDTO> result = await _grnService.SaveGRNDtl(req);
             return result;
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteGRNDtl([FromBody] GRNDtlDTO req)
+        {
+            ServiceResponseModel<GRNDtlDTO> result = await _grnService.DeleteGRNDtl(req);
+            return new JsonResult(result);
         }
 
         public IActionResult GRNDetailList()
@@ -98,6 +106,22 @@ namespace RackingSystem.Controllers
             ServiceResponseModel<List<GRNDtlListDTO>> result = await _grnService.GetGRNDetailList(req);
             result.totalRecords = ttl;
             return result;
+        }
+
+        public IActionResult NewAutoLoaderTask()
+        {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpGRN";
+            ViewData["ActiveTab"] = "NewAutoLoaderTask";
+            ViewData["Title"] = "New Auto Loader Task";
+            return View();
         }
 
     }

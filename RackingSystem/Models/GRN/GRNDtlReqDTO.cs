@@ -8,6 +8,10 @@ namespace RackingSystem.Models.GRN
 
         public string GRNBatchNo { get; set; } = "";
 
+        public string SupplierName { get; set; } = "";
+
+        public string SupplierRefNo { get; set; } = "";
+
         public long Item_Id { get; set; } = 0;
 
         public string ItemCode { get; set; } = "";
@@ -19,6 +23,8 @@ namespace RackingSystem.Models.GRN
         public string Remark { get; set; } = "";
 
         public string UserId { get; set; } = "";
+
+        public string ReelCode { get; set; } = "";
 
     }
 }

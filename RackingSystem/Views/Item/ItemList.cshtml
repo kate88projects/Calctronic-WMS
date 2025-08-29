@@ -673,7 +673,7 @@
         });
 
         function editItemForm(row) {
-            console.log(row.isActive);
+            // console.log(row.isActive);
             removeErrMsg([]);
             $("#txtId").val(row.item_Id);
             $("#txtCode").val(row.itemCode);
@@ -685,19 +685,19 @@
             // $("#txtThickness").val(h);
             // $("#txtWidth").val(w);
             // $("#txtMaxThickness").val(maxh);
-            if (row.isActive == "true") {
+            if (row.isActive === true) {
                 document.getElementById("chkIsActive").checked = true;
             }
             else {
                 document.getElementById("chkIsActive").checked = false;
             }
-            if (row.isFinishGood == "true") {
+            if (row.isFinishGood == true) {
                 document.getElementById("chkIsFinishGood").checked = true;
             }
             else {
                 document.getElementById("chkIsFinishGood").checked = false;
             }
-            if (row.alarmOverMaxThickness == "true") {
+            if (row.alarmOverMaxThickness == true) {
                 document.getElementById("chkAlarmOverMaxThickness").checked = true;
             }
             else {

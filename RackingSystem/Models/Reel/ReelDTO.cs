@@ -10,6 +10,14 @@ namespace RackingSystem.Models.Reel
 
         public long Item_Id { get; set; } = 0;
 
+        public string ItemCode { get; set; } = "";
+
+        public string UOM { get; set; } = "";
+
+        public string Description { get; set; } = "";
+
+        public int Thickness { get; set; } = 0;
+
         public int Qty { get; set; } = 0;
 
         public DateTime ExpiryDate { get; set; } = DateTime.Now;
@@ -22,8 +30,7 @@ namespace RackingSystem.Models.Reel
 
         public int ActualHeight { get; set; } = 0;
 
-        public string ItemCode { get; set; } = "";
-
         public DateTime CreatedDate { get; set; } = DateTime.Now;
+
     }
 }

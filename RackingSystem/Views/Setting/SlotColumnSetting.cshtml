@@ -57,7 +57,7 @@
                                     <th>Empty Drawer IN Idx</th>
                                     <th>Empty Drawer OUT Idx</th>
                                     <th>Reel IN Idx</th>
-                                    <th>Reel OUT Idx</th>
+                                    @* <th>Reel OUT Idx</th> *@
                                     @* <th>Action</th> *@
                                 </tr>
                             </thead>
@@ -141,14 +141,14 @@
                                         '<div id="txtRIn' + rowIndex + 'Error" class="error-message"></div>';
                                     }
                                 },
-                                {
-                                    data: null,
-                                    render: function (data, type, row, meta) {
-                                        const rowIndex = meta.row;
-                                        return '<input type="number" class="form-control" id="txtROut' + rowIndex + '" value="' + row.reel_OUT_Idx + '">' +
-                                        '<div id="txtROut' + rowIndex + 'Error" class="error-message"></div>';
-                                    }
-                                },
+                                // {
+                                //     data: null,
+                                //     render: function (data, type, row, meta) {
+                                //         const rowIndex = meta.row;
+                                //         return '<input type="number" class="form-control" id="txtROut' + rowIndex + '" value="' + row.reel_OUT_Idx + '">' +
+                                //         '<div id="txtROut' + rowIndex + 'Error" class="error-message"></div>';
+                                //     }
+                                // },
                                 // {
                                 //     data: null,
                                 //     render: function (data, type, row, meta) {
@@ -204,9 +204,9 @@
                 document.getElementById("txtRIn" + i).classList.remove('is-valid');
                 document.getElementById("txtRIn" + i + 'Error').textContent = '';
 
-                document.getElementById("txtROut" + i).classList.remove('is-invalid');
-                document.getElementById("txtROut" + i).classList.remove('is-valid');
-                document.getElementById("txtROut" + i + 'Error').textContent = '';
+                // document.getElementById("txtROut" + i).classList.remove('is-invalid');
+                // document.getElementById("txtROut" + i).classList.remove('is-valid');
+                // document.getElementById("txtROut" + i + 'Error').textContent = '';
                 // if (clearValue) document.getElementById(field).value = '';
             }
         }
@@ -230,11 +230,11 @@
                     showError(txt.id, `Please enter Reel IN Priority.`);
                     isValid = false;
                 }
-                txt = document.getElementById("txtROut" + i);
-                if (txt.value == "") {
-                    showError(txt.id, `Please enter Reel OUT Priority.`);
-                    isValid = false;
-                }
+                // txt = document.getElementById("txtROut" + i);
+                // if (txt.value == "") {
+                //     showError(txt.id, `Please enter Reel OUT Priority.`);
+                //     isValid = false;
+                // }
 
             }
             return isValid;
@@ -256,7 +256,7 @@
                     EmptyDrawer_IN_Idx: $("#txtEDIn" + i).val(),
                     EmptyDrawer_OUT_Idx: $("#txtEDOut" + i).val(),
                     Reel_IN_Idx: $("#txtRIn" + i).val(),
-                    Reel_OUT_Idx: $("#txtROut" + i).val(),
+                    // Reel_OUT_Idx: $("#txtROut" + i).val(),
                 }
                 dataList.push(data);
             }

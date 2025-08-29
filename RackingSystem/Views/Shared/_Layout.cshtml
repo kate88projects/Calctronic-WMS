@@ -1,4 +1,4 @@
-﻿@* <!DOCTYPE html> *@
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -108,7 +108,7 @@
                                         <li class="nav-item">
                                             <a asp-action="LoaderList" asp-controller="Loader" class="nav-link">
                                                 <i class="nav-icon bi bi-circle"></i>
-                                                <p>Loader List</p>
+                                                <p>Auto Loader List</p>
                                             </a>
                                         </li>
                                     }
@@ -135,7 +135,7 @@
                                         <li class="nav-item">
                                             <a asp-action="SlotList" asp-controller="Slot" class="nav-link">
                                                 <i class="nav-icon bi bi-circle"></i>
-                                                <p>Slot List</p>
+                                                <p>Slot Module List</p>
                                             </a>
                                         </li>
                                     }
@@ -208,6 +208,15 @@
                                     @if (ViewBag.PermissionList.Contains(60) == true)
                                     {
                                         <li class="nav-item">
+                                            <a asp-action="NewAutoLoaderTask" asp-controller="GRN" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>New Auto Loader Task</p>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (ViewBag.PermissionList.Contains(60) == true)
+                                    {
+                                        <li class="nav-item">
                                             <a asp-action="NewGRN" asp-controller="GRN" class="nav-link">
                                                 <i class="nav-icon bi bi-circle"></i>
                                                 <p>New Receive</p>
@@ -223,7 +232,7 @@
                                             </a>
                                         </li>
                                     }
-                                    @if (ViewBag.PermissionList.Contains(62) == true)
+                                   @*  @if (ViewBag.PermissionList.Contains(62) == true)
                                     {
                                         <li class="nav-item">
                                             <a asp-action="GRNDetailList" asp-controller="GRN" class="nav-link">
@@ -231,7 +240,7 @@
                                                 <p>Reprint Reel Sticker</p>
                                             </a>
                                         </li>
-                                    }
+                                    } *@
                                 </ul>
                             </li>
                         }

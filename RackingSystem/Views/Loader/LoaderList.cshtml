@@ -37,11 +37,11 @@
             <div class="card card-outline ">
                 <div class="card-header table-title">
                     <div class="card-title">
-                        <h2>Loader List <b></b></h2>
+                        <h2>Auto Loader List <b></b></h2>
                     </div>
                     <div class="card-tools">
                         <button type="button" class="btn btn-success" onclick="newItemForm()">
-                            Add New Loader
+                            Add New Auto Loader
                         </button>
                     </div>
                 </div>
@@ -50,7 +50,7 @@
                         <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
                             <thead>
                                 <tr>
-                                    <th>Loader Code</th>
+                                    <th>Auto Loader Code</th>
                                     <th>Description</th>
                                     <th>Is Active</th>
                                     <th>Status</th>
@@ -74,7 +74,7 @@
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Update Loader</h4>
+                <h4 class="modal-title">Update Auto Loader</h4>
             </div>
             @* <form action="/bin/SaveBin" method="post"> *@
             <div class="modal-body">
@@ -132,7 +132,6 @@
     <script type="text/javascript">
 
         $(document).ready(function () {
-
             loadList();
         });
 
@@ -156,7 +155,7 @@
                 },
                 success: function (result) {
                     console.log(result);
-                    swal.close()
+                    swal.close();
                     if (result.success == true) {
                         $('#listTable').DataTable( {
                             data: result.data,
@@ -198,11 +197,8 @@
                                         // '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.loader_Id + '\', \'' + row.loaderCode + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
                                     }
                                 }
-                            ],
+                            ]
                         });
-
-
-
                     }
                     else {
                         swal.fire({
@@ -247,7 +243,7 @@
             $("#txtTotalCol").val(row.totalCol);
             $("#txtColHeight").val(row.colHeight);
             $("#txtIPAddr").val(row.ipAddr);
-            if (row.isActive == "true") {
+            if (row.isActive == true) {
                 document.getElementById("chkIsActive").checked = true;
             }
             else {
@@ -285,7 +281,7 @@
             let isValid = true;
             var txt = document.getElementById("txtCode");
             if (txt.value == "") {
-                showError(txt.id, `Please enter Loader Code.`);
+                showError(txt.id, `Please enter Auto Loader Code.`);
                 isValid = false;
             }
             // txt = document.getElementById("txtDesc");
@@ -342,7 +338,7 @@
                         allowOutsideClick: false,
                         showConfirmButton: false,
                     });
-                    Swal.showLoading()
+                    Swal.showLoading();
                 },
                 success: function (result) {
                     // console.log(result);
@@ -419,7 +415,7 @@
                                 allowOutsideClick: false,
                                 showConfirmButton: false,
                             });
-                            Swal.showLoading()
+                            Swal.showLoading();
                         },
                         success: function (result) {
                             if (result.success == true) {

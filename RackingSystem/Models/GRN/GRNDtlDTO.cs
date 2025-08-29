@@ -1,10 +1,16 @@
-﻿namespace RackingSystem.Models.GRN
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace RackingSystem.Models.GRN
 {
     public class GRNDtlDTO
     {
         public Guid GRNDetail_Id { get; set; }
 
         public string GRNBatchNo { get; set; } = "";
+
+        public string SupplierName { get; set; } = "";
+
+        public string SupplierRefNo { get; set; } = "";
 
         public long Item_Id { get; set; } = 0;
 

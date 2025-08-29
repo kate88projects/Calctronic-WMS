@@ -38,7 +38,7 @@ namespace RackingSystem.Controllers
 
             ViewData["ActiveGroup"] = "grpMM";
             ViewData["ActiveTab"] = "SlotList";
-            ViewData["Title"] = "Slot List";
+            ViewData["Title"] = "Slot Module List";
             return View();
         }
 
