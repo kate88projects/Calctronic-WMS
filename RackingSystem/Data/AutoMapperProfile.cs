@@ -8,6 +8,7 @@ using RackingSystem.Models.Loader;
 using RackingSystem.Models.Reel;
 using RackingSystem.Models.Trolley;
 using RackingSystem.Models.Setting;
+using RackingSystem.Models.BOM;
 
 namespace RackingSystem.Data
 {
@@ -30,7 +31,8 @@ namespace RackingSystem.Data
             CreateMap<Loader, LoaderListDTO>();
             CreateMap<Trolley, TrolleyListDTO>();
             CreateMap<TrolleySlot, TrolleySlotDTO>();
-
+            CreateMap<BOM, BOMListDTO>();
+            CreateMap<BOMDetail, BOMDtlDTO>();
             CreateMap<GRNDetail, GRNDtlListDTO>();
         }
     }

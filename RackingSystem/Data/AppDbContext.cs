@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using RackingSystem.Data.GRN;
 using RackingSystem.Data.Log;
 using RackingSystem.Data.Maintenances;
+using RackingSystem.Models.BOM;
 using RackingSystem.Models.GRN;
 using RackingSystem.Models.Item;
 using RackingSystem.Models.Slot;
@@ -36,6 +37,9 @@ namespace RackingSystem.Data
 
             modelBuilder.Entity<SlotFreeDTO>(entity =>
                 entity.HasNoKey());
+
+            modelBuilder.Entity<Slot_DrawerFreeDTO>(entity =>
+                entity.HasNoKey());
         }
 
         public DbSet<Configuration> Configuration { get; set; }
@@ -58,7 +62,8 @@ namespace RackingSystem.Data
 
         public DbSet<Trolley> Trolley { get; set; }
         public DbSet<TrolleySlot> TrolleySlot { get; set; }
-
+        public DbSet<BOM> BOM { get; set; }
+        public DbSet<BOMDetail> BOMDetail { get; set; }
         public DbSet<GRNDetail> GRNDetail { get; set; }
 
 
@@ -71,5 +76,7 @@ namespace RackingSystem.Data
 
         public DbSet<SlotFreeDTO> SP_SlotGetFreeSlotByCol_ASC { get; set; }
         public DbSet<SlotFreeDTO> SP_SlotGetFreeSlotByCol_DESC { get; set; }
+        public DbSet<BOMListDTO> SP_BOMSearchList { get; set; }
+        public DbSet<Slot_DrawerFreeDTO> SP_SlotGetFreeSDrawerByCol { get; set; }
     }
 }

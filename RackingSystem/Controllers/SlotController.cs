@@ -154,5 +154,28 @@ namespace RackingSystem.Controllers
             ServiceResponseModel<List<SlotListDTO>> result = await _slotService.UpdateExcelPulses(slotPulses);
             return new JsonResult(result);
         }
+
+        public IActionResult SlotDrawer()
+        {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpMM";
+            ViewData["ActiveTab"] = "SlotDrawer";
+            ViewData["Title"] = "Empty Slot Drawer";
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetFreeSlot_Drawer_ByColumn()
+        {
+            ServiceResponseModel<List<Slot_DrawerFreeDTO>> result = await _slotService.GetFreeSlot_Drawer_ByColumn();
+            return new JsonResult(result);
+        }
     }
 }

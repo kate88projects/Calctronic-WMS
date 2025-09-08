@@ -176,24 +176,30 @@
                             </li>
                         }
 
-                        @* <li class="nav-item" id="grpBOM">
-                            <a href="javascript:none" class="nav-link">
-                                <i class="nav-icon bi bi-diagram-3"></i>
-                                <p>
-                                    BOM
-                                    <i class="nav-arrow bi bi-chevron-right"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="./docs/introduction.html" class="nav-link">
-                                        <i class="nav-icon bi bi-circle"></i>
-                                        <p>BOM List</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li> *@
-
+                        @if (ViewBag.PermissionList.Contains(40))
+                        {
+                            <li class="nav-item" id="grpBOM">
+                                <a href="javascript:none" class="nav-link">
+                                    <i class="nav-icon bi bi-diagram-3"></i>
+                                    <p>
+                                        BOM
+                                        <i class="nav-arrow bi bi-chevron-right"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    @if (ViewBag.PermissionList.Contains(40))
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="BOMList" asp-controller="BOM" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>BOM List</p>
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </li> 
+                        }
+                        
                         @if (ViewBag.PermissionList.Contains(60) || ViewBag.PermissionList.Contains(61) || ViewBag.PermissionList.Contains(62))
                         {
                             <li class="nav-item" id="grpGRN">
@@ -304,15 +310,15 @@
                                             </a>
                                         </li>
                                     }
-                                    @* @if (ViewBag.PermissionList.Contains(102) == true)
+                                    @if (ViewBag.PermissionList.Contains(102) == true)
                                     {
                                         <li class="nav-item">
-                                            <a href="./docs/introduction.html" class="nav-link">
+                                            <a asp-action="SlotDrawer" asp-controller="Slot" class="nav-link">
                                                 <i class="nav-icon bi bi-circle"></i>
-                                                <p>Set Empty Drawer</p>
+                                                <p>Empty Slot Drawer</p>
                                             </a>
                                         </li>
-                                    } *@
+                                    } 
                                     @if (ViewBag.PermissionList.Contains(103) == true)
                                     {
                                         <li class="nav-item">
