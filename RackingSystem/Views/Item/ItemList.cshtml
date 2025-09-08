@@ -211,7 +211,7 @@
                     </div>
 
                     <div class="clearfix">
-                        <div class="hint-text">Showing <b id="lblCurCount">0</b> out of <b id="lblTotal">0</b> entries</div>
+                        <div class="hint-text">Showing <b id="lblCurCount">0</b> of <b id="lblTotal">0</b> entries</div>
                         <ul class="pagination" id="ulPagination">
                         </ul>
                         <input type="hidden" id="txtCurPage">
@@ -493,14 +493,17 @@
 
                         // if is page 1 then need regenerate pagination, else just show current entry
                         var curCnt = 0;
-                        if (result.totalRecords > 0) {
-                            curCnt = (page) * $("#selpageSize").val();
-                            if (curCnt > result.totalRecords) {
-                                curCnt = result.totalRecords;
-                            }
+                        var pageSize = parseInt($("#selpageSize").val());
+                        var startEntry = ((page - 1) * pageSize) + 1;
+                        var ttlRecords = result.totalRecords === -1 ? $('#lblTotal').text() : result.totalRecords;
+                        var endEntry = Math.min(page * pageSize, ttlRecords);
+
+                        if (ttlRecords === 0 || startEntry > ttlRecords) {
+                            startEntry = 0;
+                            endEntry = 0;
                         }
-                        $('#lblCurCount').html(curCnt);
-                        
+                        $('#lblCurCount').html(`${startEntry} to ${endEntry}`);
+
                         if (page == 1) {
                             $('#lblTotal').html(result.totalRecords);
                             $('#ulPagination').html('');
@@ -508,6 +511,7 @@
                             var pageSize = $("#selpageSize").val();
                             const myDiv = document.getElementById('ulPagination');
                             var ttlPage = result.totalRecords / pageSize;
+
                             if ((result.totalRecords % pageSize) > 0) {
                                 ttlPage = ttlPage + 1;
                             }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,7 @@ using RackingSystem.Data;
 using RackingSystem.Data.Maintenances;
 using RackingSystem.Models;
 using RackingSystem.Models.Slot;
+using System.Drawing;
 using System.Reflection.Metadata;
 using System.Text.RegularExpressions;
 using static System.Reflection.Metadata.BlobBuilder;
@@ -61,38 +63,6 @@ namespace RackingSystem.Services.SlotServices
                     result.errMessage = "Please insert Slot Code.";
                     return result;
                 }
-                /*
-                if (slotReq.ColNo == null)
-                {
-                    result.errMessage = "Please insert Column No.";
-                    return result;
-                }
-                if (slotReq.RowNo == null)
-                {
-                    result.errMessage = "Please insert Row No.";
-                    return result;
-                }
-                if (slotReq.XPulse <= 0)
-                {
-                    result.errMessage = "Please insert X Pulse and negative value is not accepted";
-                    return result;
-                }
-                if (slotReq.YPulse <= 0)
-                {
-                    result.errMessage = "Please insert Y Pulse.";
-                    return result;
-                }
-                if (slotReq.QRXPulse <= 0)
-                {
-                    result.errMessage = "Please insert Qr-X Pulse.";
-                    return result;
-                }
-                if (slotReq.QRYPulse <= 0)
-                {
-                    result.errMessage = "Please insert Qr-Y Pulse.";
-                    return result;
-                }
-                */
                 var validatefield = new List<(int? value, string fieldName)>
                 {
                     (slotReq.ColNo, "Column No"),
@@ -101,17 +71,11 @@ namespace RackingSystem.Services.SlotServices
                     (slotReq.YPulse, "Y Pulse"),
                     (slotReq.QRXPulse, "Qr-X Pulse"),
                     (slotReq.QRYPulse, "Qr-Y Pulse"),
-                    //(slotReq.Add1Pulse, "Additional Pulse 1"),
-                    //(slotReq.Add2Pulse, "Additional Pulse 2"),
-                    //(slotReq.Add3Pulse, "Additional Pulse 3"),
-                    //(slotReq.Add4Pulse, "Additional Pulse 4"),
-                    //(slotReq.Add5Pulse, "Additional Pulse 5"),
-                    //(slotReq.Add6Pulse, "Additional Pulse 6"),
                 };
 
                 foreach (var (value, fieldName) in validatefield)
                 {
-                    if (!value.HasValue || value <= 0)
+                    if (!value.HasValue || value < 0)
                     {
                         result.errMessage = $"Please insert {fieldName}. Negative values are not allowed.";
                         return result;
@@ -143,6 +107,19 @@ namespace RackingSystem.Services.SlotServices
                     return result;
                 }
 
+                var match = Regex.Match(slotReq.SlotCode, @"^(\w+)c(\d{3})r(\d{3})$", RegexOptions.IgnoreCase);
+                if (match.Success)
+                {
+                    int colNoInput = int.Parse(match.Groups[2].Value);
+                    int rowNoInput = int.Parse(match.Groups[3].Value);
+
+                    if (slotReq.ColNo != colNoInput || slotReq.RowNo != rowNoInput)
+                    {
+                        result.errMessage = "The Slot Code does not match the Column No and Row No.";
+                        return result;
+                    }
+                }
+
                 // 2. save Data
                 if (slotReq.Slot_Id == 0)
                 {
@@ -152,7 +129,7 @@ namespace RackingSystem.Services.SlotServices
                         ColNo = slotReq.ColNo,
                         RowNo = slotReq.RowNo,
                         IsActive = slotReq.IsActive,
-                        HasEmptyTray = slotReq.HasEmptyTray,
+                        HasEmptyTray = true,
                         HasReel = slotReq.HasReel,
                         XPulse = slotReq.XPulse,
                         YPulse = slotReq.YPulse,
@@ -167,6 +144,24 @@ namespace RackingSystem.Services.SlotServices
                         IsLeft = slotReq.IsLeft,
                     };
                     _dbContext.Slot.Add(_slot);
+
+                    //check if previously have any same column no
+                    SlotColumnSetting? scSetting = _dbContext.SlotColumnSetting.FirstOrDefault(x => x.ColNo == slotReq.ColNo);
+                    if (scSetting == null)
+                    {
+                        var totalCount = (_dbContext.SlotColumnSetting.Count() == 0 ? 1 : _dbContext.SlotColumnSetting.Count());
+                        var latestSlotCol = _dbContext.SlotColumnSetting.OrderByDescending(s => s.SlotColumnSetting_Id).FirstOrDefault();
+
+                        SlotColumnSetting _slotCol = new SlotColumnSetting()
+                        {
+                            ColNo = slotReq.ColNo,
+                            EmptyDrawer_IN_Idx = latestSlotCol == null ? totalCount : latestSlotCol.EmptyDrawer_OUT_Idx + 1,
+                            EmptyDrawer_OUT_Idx = latestSlotCol == null ? totalCount : latestSlotCol.EmptyDrawer_OUT_Idx + 1,
+                            Reel_IN_Idx = 0,
+                            Reel_OUT_Idx = 0,
+                        };
+                        _dbContext.SlotColumnSetting.Add(_slotCol);
+                    }
                 }
                 else
                 {
@@ -176,6 +171,9 @@ namespace RackingSystem.Services.SlotServices
                         result.errMessage = "Cannot find this slot, please refresh the list.";
                         return result;
                     }
+                    var oldColNo = _slot.ColNo;
+                    var oldRowNo = _slot.RowNo;
+
                     _slot.SlotCode = slotReq.SlotCode;
                     _slot.ColNo = slotReq.ColNo;
                     _slot.RowNo = slotReq.RowNo;
@@ -192,9 +190,51 @@ namespace RackingSystem.Services.SlotServices
                     _slot.Add6Pulse = slotReq.Add6Pulse;
                     _slot.IsLeft = slotReq.IsLeft;
                     _dbContext.Slot.Update(_slot);
+
+                    SlotColumnSetting? _slotCol = _dbContext.SlotColumnSetting.FirstOrDefault(x => x.ColNo == oldColNo);
+                    if (_slotCol != null)
+                    {
+                        /*
+                        //check if the slotcol empty drawer is same as current update oldRowNo
+                        if (_slotCol.EmptyDrawer_IN_Idx == oldRowNo)
+                        {
+                            //if same, find other slot having same column, get the second lowest empty drawer inside(bcuz the lowest will be same as oldRowNo)
+                            var sameColSlot = _dbContext.Slot.Where(slot => slot.ColNo == oldColNo).OrderBy(slot => slot.RowNo).Skip(1).FirstOrDefault();
+                            if (sameColSlot != null && sameColSlot.RowNo > oldRowNo)
+                            {
+                                _slotCol.EmptyDrawer_IN_Idx = sameColSlot.RowNo;
+                                _slotCol.EmptyDrawer_OUT_Idx = sameColSlot.RowNo;
+                            }
+                            else
+                            {
+                                _dbContext.SlotColumnSetting.Remove(_slotCol);
+                            }
+                        }
+                        */
+                        var totalCount = _dbContext.Slot.Count(s => s.ColNo == oldColNo);
+                        if (totalCount - (oldColNo == slotReq.ColNo ? 0 : 1) <= 0)
+                        {
+                            _dbContext.SlotColumnSetting.Remove(_slotCol);
+                        }
+                    }
+
+                    //check if the same column no exist before
+                    SlotColumnSetting? _scExist = _dbContext.SlotColumnSetting.FirstOrDefault(x => x.ColNo == slotReq.ColNo);
+                    if (_scExist == null)
+                    {
+                        var latestSlotCol = _dbContext.SlotColumnSetting.OrderByDescending(s => s.SlotColumnSetting_Id).FirstOrDefault();
+                        SlotColumnSetting _slotColNew = new SlotColumnSetting()
+                        {
+                            ColNo = slotReq.ColNo,
+                            EmptyDrawer_IN_Idx = latestSlotCol == null ? _dbContext.SlotColumnSetting.Count() : latestSlotCol.EmptyDrawer_OUT_Idx + 1,
+                            EmptyDrawer_OUT_Idx = latestSlotCol == null ? _dbContext.SlotColumnSetting.Count() : latestSlotCol.EmptyDrawer_OUT_Idx + 1,
+                            Reel_IN_Idx = 0,
+                            Reel_OUT_Idx = 0,
+                        };
+                        _dbContext.SlotColumnSetting.Add(_slotColNew);
+                    }
                 }
                 await _dbContext.SaveChangesAsync();
-
                 result.success = true;
             }
             catch (Exception ex)
@@ -212,20 +252,12 @@ namespace RackingSystem.Services.SlotServices
 
             try
             {
-                // 1. checking Data
                 if (slotReq == null)
                 {
                     result.errMessage = "Please refresh the list.";
                     return result;
                 }
-                //Bin? binExist2 = _dbContext.Bin.FirstOrDefault(x => x.ColNo == binReq.ColNo && x.RowNo != binReq.RowNo && x.Bin_Id != binReq.Bin_Id);
-                //if (binExist2 != null)
-                //{
-                //    result.errMessage = "This Column No and Row No has been used.";
-                //    return result;
-                //}
 
-                // 2. save Data
                 Slot? _slot = _dbContext.Slot.Find(slotReq.Slot_Id);
                 if (_slot == null)
                 {
@@ -233,8 +265,33 @@ namespace RackingSystem.Services.SlotServices
                     return result;
                 }
                 _dbContext.Slot.Remove(_slot);
-                await _dbContext.SaveChangesAsync();
 
+                SlotColumnSetting? _slotCol = _dbContext.SlotColumnSetting.FirstOrDefault(x => x.ColNo == _slot.ColNo);
+                if (_slotCol != null)
+                {
+                    var totalCount = _dbContext.Slot.Count(s => s.ColNo == _slot.ColNo);
+                    if (totalCount - 1 <= 0)
+                    {
+                        _dbContext.SlotColumnSetting.Remove(_slotCol);
+                    }
+                    /*
+                    if (_slotCol.EmptyDrawer_IN_Idx == _slot.RowNo)
+                    {
+                        var sameColSlot = _dbContext.Slot.Where(slot => slot.ColNo == _slot.ColNo).OrderBy(slot => slot.RowNo).Skip(1).FirstOrDefault();
+                        if (sameColSlot != null && sameColSlot.RowNo > _slot.RowNo)
+                        {
+                            _slotCol.EmptyDrawer_IN_Idx = sameColSlot.RowNo;
+                            _slotCol.EmptyDrawer_OUT_Idx = sameColSlot.RowNo;
+                        }
+                        else
+                        {
+                            _dbContext.SlotColumnSetting.Remove(_slotCol);
+                        }
+                    }
+                    */
+                }
+
+                await _dbContext.SaveChangesAsync();
                 result.success = true;
             }
             catch (Exception ex)
@@ -250,6 +307,7 @@ namespace RackingSystem.Services.SlotServices
         {
             ServiceResponseModel<List<SlotListDTO>> result = new ServiceResponseModel<List<SlotListDTO>>();
             List<SlotListDTO> errorsLine = new List<SlotListDTO>(); // Change List<object> to List<SlotListDTO>
+            List<SlotColumnSetting> slotColumns = new List<SlotColumnSetting>();
 
             try
             {
@@ -275,6 +333,20 @@ namespace RackingSystem.Services.SlotServices
                             isError = true;
                         }
 
+                        var match = Regex.Match(slot.SlotCode, @"^(\w+)c(\d{3})r(\d{3})$", RegexOptions.IgnoreCase);
+                        if (match.Success)
+                        {
+                            int colNoInput = int.Parse(match.Groups[2].Value);
+                            int rowNoInput = int.Parse(match.Groups[3].Value);
+
+                            if (slot.ColNo != colNoInput || slot.RowNo != rowNoInput)
+                            {
+                                result.errMessage = "The Slot Code does not match the Column No and Row No.";
+                                slot.ErrorMsg = result.errMessage;
+                                isError = true;
+                            }
+                        }
+
                         if (!isError)
                         {
                             Slot _slot = new Slot()
@@ -284,7 +356,7 @@ namespace RackingSystem.Services.SlotServices
                                 RowNo = slot.RowNo,
                                 IsActive = slot.IsActive,
                                 IsLeft = slot.IsLeft,
-                                HasEmptyTray = slot.HasEmptyTray,
+                                HasEmptyTray = true,
                                 HasReel = slot.HasReel,
                                 XPulse = slot.XPulse,
                                 YPulse = slot.YPulse,
@@ -298,6 +370,22 @@ namespace RackingSystem.Services.SlotServices
                                 Add6Pulse = slot.Add6Pulse,
                             };
                             _dbContext.Slot.Add(_slot);
+
+                            if (!slotColumns.Any(x => x.ColNo == slot.ColNo))
+                            {
+                                var totalCount = (_dbContext.SlotColumnSetting.Count() == 0 ? 1 : _dbContext.SlotColumnSetting.Count()) + slotColumns.Count();
+                                var latestSlotCol = _dbContext.SlotColumnSetting.OrderByDescending(s => s.SlotColumnSetting_Id).FirstOrDefault();
+
+                                SlotColumnSetting _sCol = new SlotColumnSetting()
+                                {
+                                    ColNo = slot.ColNo,
+                                    EmptyDrawer_IN_Idx = latestSlotCol == null ? totalCount : latestSlotCol.EmptyDrawer_OUT_Idx + 1 + slotColumns.Count,
+                                    EmptyDrawer_OUT_Idx = latestSlotCol == null ? totalCount : latestSlotCol.EmptyDrawer_OUT_Idx + 1 + slotColumns.Count,
+                                    Reel_IN_Idx = 0,
+                                    Reel_OUT_Idx = 0,
+                                };
+                                slotColumns.Add(_sCol);
+                            }
                         }
                         else
                         {
@@ -313,6 +401,8 @@ namespace RackingSystem.Services.SlotServices
                     }
                     else
                     {
+                        _dbContext.SlotColumnSetting.AddRange(slotColumns);
+
                         await _dbContext.SaveChangesAsync();
                         result.success = true;
                     }
@@ -330,6 +420,7 @@ namespace RackingSystem.Services.SlotServices
         public async Task<ServiceResponseModel<SlotRangeDTO>> SaveRangeOfSlot(SlotRangeDTO slotRanges)
         {
             ServiceResponseModel<SlotRangeDTO> result = new ServiceResponseModel<SlotRangeDTO>();
+            List<SlotColumnSetting> slotColumns = new List<SlotColumnSetting>();
 
             try
             {
@@ -370,13 +461,26 @@ namespace RackingSystem.Services.SlotServices
                             return result;
                         }
 
+                        var match = Regex.Match(slotcode, @"^(\w+)c(\d{3})r(\d{3})$", RegexOptions.IgnoreCase);
+                        if (match.Success)
+                        {
+                            int colNoInput = int.Parse(match.Groups[2].Value);
+                            int rowNoInput = int.Parse(match.Groups[3].Value);
+
+                            if (i != colNoInput || j != rowNoInput)
+                            {
+                                result.errMessage = "The Slot Code does not match the Column No and Row No.";
+                                return result;
+                            }
+                        }
+
                         Slot _slot = new Slot()
                         {
                             SlotCode = slotcode,
                             ColNo = i,
                             RowNo = j,
                             IsActive = slotRanges.IsActive,
-                            HasEmptyTray = slotRanges.HasEmptyTray,
+                            HasEmptyTray = true,
                             HasReel = slotRanges.HasReel,
                             XPulse = currentXPulse,
                             YPulse = currentYPulse,
@@ -403,8 +507,26 @@ namespace RackingSystem.Services.SlotServices
                         currentAdd5Pulse += slotRanges.Add5PulseIncrement;
                         currentAdd6Pulse += slotRanges.Add6PulseIncrement;
 
+                        //insert into slot column setting
+                        if (!slotColumns.Any(x => x.ColNo == i))
+                        {
+                            var totalCount = (_dbContext.SlotColumnSetting.Count() == 0 ? 1 : _dbContext.SlotColumnSetting.Count()) + slotColumns.Count();
+                            var latestSlotCol = _dbContext.SlotColumnSetting.OrderByDescending(s => s.SlotColumnSetting_Id).FirstOrDefault();
+
+                            SlotColumnSetting _sCol = new SlotColumnSetting()
+                            {
+                                ColNo = i,
+                                EmptyDrawer_IN_Idx = latestSlotCol == null ? totalCount : latestSlotCol.EmptyDrawer_OUT_Idx + 1 + slotColumns.Count,
+                                EmptyDrawer_OUT_Idx = latestSlotCol == null ? totalCount : latestSlotCol.EmptyDrawer_OUT_Idx + 1 + slotColumns.Count,
+                                Reel_IN_Idx = 0,
+                                Reel_OUT_Idx = 0,
+                            };
+                            slotColumns.Add(_sCol);
+                        }
                     }
                 }
+
+                _dbContext.SlotColumnSetting.AddRange(slotColumns);
 
                 await _dbContext.SaveChangesAsync();
                 result.success = true;
@@ -654,6 +776,33 @@ namespace RackingSystem.Services.SlotServices
                 result.errStackTrace = ex.StackTrace ?? "";
             }
 
+            return result;
+        }
+
+        public async Task<ServiceResponseModel<List<Slot_DrawerFreeDTO>>> GetFreeSlot_Drawer_ByColumn()
+        {
+            ServiceResponseModel<List<Slot_DrawerFreeDTO>> result = new ServiceResponseModel<List<Slot_DrawerFreeDTO>>();
+
+            try
+            {
+                string sql = "EXECUTE dbo.Slot_GET_FREEDRAWERBYCOL";
+                var listDTO = await _dbContext.SP_SlotGetFreeSDrawerByCol.FromSqlRaw(sql).ToListAsync();
+                if (listDTO.Count == 0)
+                {
+                    result.success = false;
+                    result.errMessage = "No empty trays for this column.";
+                }
+                else
+                {
+                    result.success = true;
+                    result.data = listDTO;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
             return result;
         }
     }

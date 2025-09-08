@@ -139,6 +139,8 @@ namespace RackingSystem.Services.GRNServices
                     _grnDtl.Qty = req.Qty;
                     _grnDtl.ExpiryDate = req.ExpiryDate ?? DateTime.Now;
                     _grnDtl.Remark = req.Remark ?? "";
+                    _grnDtl.SupplierName = req.SupplierName;
+                    _grnDtl.SupplierRefNo = req.SupplierRefNo;
                     _dbContext.GRNDetail.Update(_grnDtl);
                 }
                 await _dbContext.SaveChangesAsync();

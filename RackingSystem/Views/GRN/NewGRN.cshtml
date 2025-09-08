@@ -827,7 +827,7 @@
         $(document).ready(function () {
             $("#txtGRN").val('-');
             resetColorPLCForm(0);
-            resetColorForm(0);
+            resetColorForm(1);
 
             $('#listTable').DataTable({
                 searching: true,
@@ -843,7 +843,7 @@
             loadLoaderList();
             loadItemList();
 
-            loadPLC(0);
+            // loadPLC(0);
         });
 
         function loadItemList() {
@@ -1423,8 +1423,14 @@
                 success: function (result) {
                     // console.log(result);
                     if (result.success == true) {
-                        Swal.close(); // Close the loading alert
-                        updateItemRow(result.data);
+                        //Swal.close(); // Close the loading alert
+                        swal.fire({
+                            icon: 'success',
+                            title: "Succes Save",
+                            text: "",
+                        });
+                        $('#myEditModal').modal("toggle");
+                        // updateItemRow(result.data);
                     }
                     else {
                         swal.fire({

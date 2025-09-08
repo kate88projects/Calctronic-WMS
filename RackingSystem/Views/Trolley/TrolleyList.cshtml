@@ -29,6 +29,9 @@
         border-color: green;
     }
 
+    .row .form-check {
+        margin-left: 10px;
+    }
 </style>
 
 <br />
@@ -53,11 +56,13 @@
                             <thead>
                                 <tr>
                                     <th>Universal Trolley Code</th>
+                                    <th>IP Address</th>
                                     <th>Remark</th>
                                     <th>Total Column</th>
                                     <th>Total Row</th>
                                     <th>Is Active</th>
-                                    <th>Status</th>
+                                    @* <th>Status</th> *@
+                                    <th>Side</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -81,25 +86,37 @@
                     <label class="form-label" for="txtCode">Universal Trolley Code</label>
                     <input type="text" class="form-control" name="LoaderCode" id="txtCode" aria-describedby="Trolley Code">
                     <div id="txtCodeError" class="error-message"></div>
-
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="txtIP">IP Address</label>
+                    <input type="text" class="form-control" name="IP" id="txtIP" aria-describedby="IP Address" oninput="formatIP(this)">
+                    <div id="txtIPError" class="error-message"></div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="txtTotalCol">Total Column</label>
                     <input type="number" class="form-control" name="TotalCol" id="txtTotalCol" aria-describedby="Total Column">
                     <div id="txtTotalColError" class="error-message"></div>
-
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="txtTotalRow">Total Row</label>
                     <input type="number" class="form-control" name="TotalRow" id="txtTotalRow" aria-describedby="Total Row">
                     <div id="txtTotalRowError" class="error-message"></div>
-
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="txtRemark">Remark</label>
                     <input type="text" class="form-control" name="Remark" id="txtRemark" aria-describedby="Remark">
                     <div id="txtRemarkError" class="error-message"></div>
-
+                </div>
+                <div class="mb-3 row">
+                    <label class="form-label">Select the Trolley side</label>
+                    <div class="col-3 form-check">
+                        <input class="form-check-input" type="radio" id="sideA" name="side" value="0" checked/>
+                        <label for="sideA">Side A</label>
+                    </div>
+                    <div class="col-3 form-check">
+                        <input class="form-check-input" type="radio" id="sideB" name="side" value="1" />
+                        <label for="sideB">Side B</label>
+                    </div>
                 </div>
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="chkIsActive">
@@ -154,7 +171,7 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
-                    console.log(result);
+                    console.log("result", result);
                     swal.close()
                     if (result.success == true) {
                         $('#listTable').DataTable( {
@@ -164,6 +181,7 @@
                             lengthMenu: [50, 100, 250, 500, 1000],
                             columns: [
                                 { data: 'trolleyCode' },
+                                { data: 'ipAddress' },
                                 { data: 'remark' },
                                 { data: 'totalCol' },
                                 { data: 'totalRow' },
@@ -178,24 +196,32 @@
                                         }
                                     }
                                 },
-                                { data: 'status' },
+                                // { data: 'status' },
+                                {   data: 'side', 
+                                    render: function(data, type, row, meta) {
+                                        const sideMap = {
+                                            0: 'A',
+                                            1: 'B'
+                                        };
+                                        return sideMap[data];
+                                    }
+                                }, 
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
-                                        return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
-                                        'onclick="editTrolleyForm(\'' + row.trolley_Id + '\', \'' + row.trolleyCode + '\', \'' + row.remark + '\', ' +
-                                        '\'' + row.totalCol + '\', \'' + row.totalRow + '\', ' +
-                                        '\'' + row.isActive + '\' )">' +
-                                        '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
-
-                                        '<button class="btn btn-danger deactivate-account" onclick="deleteTrolley(\'' + row.trolley_Id + '\', \'' + row.trolleyCode + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
+                                        const rawData = JSON.stringify(row).replace(/"/g, "&quot;");
+                                        return `<div style="display:flex;">
+                                                    <button class="btn btn-success d-grid edit-trolley-btn" style="margin-right:10px;" data-row="${rawData}">
+                                                        <span><i class="bi bi-pencil-square"></i>Edit</span>
+                                                    </button>
+                                                    <button class="btn btn-danger deactivate-account delete-trolley-btn" data-id="${row.trolley_Id}" data-code="${row.trolleyCode}">
+                                                        <span><i class="bi bi-trash"></i>Delete</span>
+                                                    </button>
+                                                </div>`;
                                     }
                                 }
                             ],
                         });
-
-
-
                     }
                     else {
                         swal.fire({
@@ -217,11 +243,14 @@
 
         function newTrolleyForm()
         {   
+            removeErrMsg(true);
             $("#txtId").val("0");
+            $('#txtIP').val("");
             $("#txtCode").val("");
             $("#txtTotalCol").val("");
             $("#txtTotalRow").val("");
             $("#txtRemark").val("");
+            document.getElementById("sideA").checked = true;
             document.getElementById("chkIsActive").checked = true;
             $("#myModal").modal("show");
         }
@@ -231,17 +260,28 @@
             removeErrMsg(true);
         }
 
-        function editTrolleyForm(id, trolleyCode, remark, totalCol, totalRow, isAct) {
-            $('#txtId').val(id);
-            $("#txtCode").val(trolleyCode);
-            $("#txtTotalCol").val(totalCol);
-            $("#txtTotalRow").val(totalRow);
-            $("#txtRemark").val(remark);
+        $('#listTable').on('click', '.edit-trolley-btn', function() {
+            const row = JSON.parse($(this).attr('data-row'));
+            editTrolleyForm(row);
+        });
 
-            if (isAct == "true") {
-                document.getElementById("chkIsActive").checked = true;
+        function editTrolleyForm(row) {
+            $('#txtId').val(row.trolley_Id);
+            $('#txtIP').val(row.ipAddress);
+            $("#txtCode").val(row.trolleyCode);
+            $("#txtTotalCol").val(row.totalCol);
+            $("#txtTotalRow").val(row.totalRow);
+            $("#txtRemark").val(row.remark);
+
+            if (row.side == "A") {
+                document.getElementById("sideA").checked = true;
+            } else {
+                document.getElementById("sideB").checked = true;
             }
-            else {
+
+            if (row.isActive == true) {
+                document.getElementById("chkIsActive").checked = true;
+            } else {
                 document.getElementById("chkIsActive").checked = false;
             }
             $("#myModal").modal("show");
@@ -250,6 +290,7 @@
         function removeErrMsg(clearValue = false) {
             const fields = [
                 { id: 'txtCode', name: 'Trolley Code', required: true, numeric: false },
+                { id: 'txtIP', name: 'IP Address', required: true, numeric: false },
                 { id: 'txtRemark', name: 'Remark', required: true, numeric: false },
                 { id: 'txtTotalCol', name: 'Total Column', required: true, numeric: true, min: 1 },
                 { id: 'txtTotalRow', name: 'Total Row', required: true, numeric: true, min: 1 },
@@ -280,6 +321,22 @@
             document.getElementById(fieldId + 'Error').textContent = message;
         }
 
+        function formatIP(input) {
+            let value = input.value.replace(/[^\d]/g, '');
+            // let formattedValue = '';
+            // for (let i = 0; i < value.length; i++) {
+            //     if (i > 0 && i % 3 === 0) {
+            //         formattedValue += '.';
+            //     }
+            //     formattedValue += value[i];
+            // }
+
+            // input.value = formattedValue;
+            if (input.value.length > 15) {
+                input.value = input.value.slice(0, 15);
+            }
+        }
+
         function validateTrolley() {
             //remove previous err msg
             removeErrMsg();
@@ -287,6 +344,7 @@
             let isValid = true;
             const fields = [
                 { id: 'txtCode', name: 'Trolley Code', required: true, numeric: false },
+                { id: 'txtIP', name: 'IP Address', required: true, numeric: false },
                 { id: 'txtRemark', name: 'Remark', required: true, numeric: false },
                 { id: 'txtTotalCol', name: 'Total Column', required: true, numeric: true, min: 1 },
                 { id: 'txtTotalRow', name: 'Total Row', required: true, numeric: true, min: 1 },
@@ -315,12 +373,14 @@
             if (validateTrolley())
             {
                 var data = {
-                    Trolley_Id: $('#txtId').val(),
+                    Trolley_Id: parseInt($('#txtId').val()) || 0,
                     TrolleyCode: $('#txtCode').val(),
+                    IPAddress: $('#txtIP').val(),
                     Remark: $('#txtRemark').val(),
-                    TotalCol: $('#txtTotalCol').val(),
-                    TotalRow: $('#txtTotalRow').val(),
+                    TotalCol: parseInt($('#txtTotalCol').val()) || 0,
+                    TotalRow: parseInt($('#txtTotalRow').val()) || 0,
                     IsActive: chkIsActive.checked ? true : false,
+                    Side: parseInt($("input[name='side']:checked").val()) || 0,
                 };
 
                 console.log(data);
@@ -372,6 +432,12 @@
                 });
             }
         }
+
+        $('#listTable').on('click', '.delete-trolley-btn', function() {
+            const id = $(this).attr('data-id');
+            const slotCode = $(this).attr('data-code');
+            deleteTrolley(id, slotCode);
+        });
 
         function deleteTrolley(id, trolleyCode) {
             swal.fire({

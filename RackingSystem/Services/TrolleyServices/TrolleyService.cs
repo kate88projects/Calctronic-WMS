@@ -7,6 +7,7 @@ using RackingSystem.Models;
 using RackingSystem.Models.Loader;
 using RackingSystem.Models.Slot;
 using RackingSystem.Models.Trolley;
+using System.Net;
 using System.Text.RegularExpressions;
 using static System.Reflection.Metadata.BlobBuilder;
 
@@ -53,17 +54,27 @@ namespace RackingSystem.Services.TrolleyServices
                 //validate
                 if (string.IsNullOrEmpty(trolley.TrolleyCode))
                 {
-                    result.errMessage = "Please Insert Trolley Code.";
+                    result.errMessage = "Please insert Trolley Code.";
                     return result;
                 }
                 if (trolley.TotalCol <= 0)
                 {
-                    result.errMessage = "Please Insert Total Column.";
+                    result.errMessage = "Please insert Total Column.";
                     return result;
                 }
                 if (trolley.TotalRow <= 0)
                 {
-                    result.errMessage = "Please Insert Total Row.";
+                    result.errMessage = "Please insert Total Row.";
+                    return result;
+                }
+                if (string.IsNullOrEmpty(trolley.IPAddress))
+                {
+                    result.errMessage = "Please insert IP Address.";
+                    return result;
+                }
+                if (!IPAddress.TryParse(trolley.IPAddress, out _)) //only verify on IPv4 and IPv6
+                {
+                    result.errMessage = "Invalid IP Address format. Please insert again.";
                     return result;
                 }
                 if (trolley.Trolley_Id == 0)
@@ -91,10 +102,12 @@ namespace RackingSystem.Services.TrolleyServices
                     Trolley _trolley = new Trolley()
                     {
                         TrolleyCode = trolley.TrolleyCode,
+                        IPAddress = trolley.IPAddress,
                         IsActive = trolley.IsActive,
                         Remark = trolley.Remark,
                         TotalCol = trolley.TotalCol,
                         TotalRow = trolley.TotalRow,
+                        Side = (int)trolley.Side,
                     };
                     _dbContext.Trolley.Add(_trolley);
 
@@ -108,10 +121,12 @@ namespace RackingSystem.Services.TrolleyServices
                         return result;
                     }
                     _trolley.TrolleyCode = trolley.TrolleyCode;
+                    _trolley.IPAddress = trolley.IPAddress;
                     _trolley.Remark = trolley.Remark;
                     _trolley.TotalCol = trolley.TotalCol;
                     _trolley.TotalRow = trolley.TotalRow;
                     _trolley.IsActive = trolley.IsActive;
+                    _trolley.Side = (int)trolley.Side;
                     _dbContext.Trolley.Update(_trolley);
                 }
                 
