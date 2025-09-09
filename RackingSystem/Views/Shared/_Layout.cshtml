@@ -12,10 +12,11 @@
     <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
 
     <!-- Fonts -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
+    @* <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round"> *@
+    <link href="~/css/roboto.css" rel="stylesheet" />
 
-    <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js" integrity="sha384-SlE991lGASHoBfWbelyBPLsUlwY1GwNDJo3jSJO04KZ33K2bwfV9YBauFfnzvynJ" crossorigin="anonymous"></script>
-
+    @* <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js" integrity="sha384-SlE991lGASHoBfWbelyBPLsUlwY1GwNDJo3jSJO04KZ33K2bwfV9YBauFfnzvynJ" crossorigin="anonymous"></script> *@
+    <script src="~/js/fontawesome-all.js"></script>
 
     <link rel="stylesheet"
     href="~/css/overlayscrollbars.min.css"
@@ -214,16 +215,16 @@
                                 <ul class="nav nav-treeview">
                                     @if (ViewBag.PermissionList.Contains(60) == true)
                                     {
-                                        <li class="nav-item">
+                                        @* <li class="nav-item">
                                             <a asp-action="NewAutoLoaderTask" asp-controller="GRN" class="nav-link">
                                                 <i class="nav-icon bi bi-circle"></i>
                                                 <p>New Auto Loader Task</p>
                                             </a>
-                                        </li>
+                                        </li> *@
                                         <li class="nav-item">
                                             <a asp-action="NewAutoLoaderTask2" asp-controller="GRN" class="nav-link">
                                                 <i class="nav-icon bi bi-circle"></i>
-                                                <p>New Auto Loader Task 2</p>
+                                                <p>New Loader Task</p>
                                             </a>
                                         </li>
                                     }
@@ -321,6 +322,32 @@
                                 </ul>
                             </li>
                         }
+
+
+                        @if (ViewBag.PermissionList.Contains(90))
+                        {
+                            <li class="nav-item" id="grpQ">
+                                <a href="javascript:none" class="nav-link">
+                                    <i class="nav-icon bi bi-diagram-3"></i>
+                                    <p>
+                                        QUEUE SYSTEM
+                                        <i class="nav-arrow bi bi-chevron-right"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    @if (ViewBag.PermissionList.Contains(90))
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="RackJobQueueList" asp-controller="RackJobQueue" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>Queue List</p>
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+                        }
+
 
                         @if (ViewBag.PermissionList.Contains(100) || ViewBag.PermissionList.Contains(101) || ViewBag.PermissionList.Contains(102) || ViewBag.PermissionList.Contains(103))
                         {

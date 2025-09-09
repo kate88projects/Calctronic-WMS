@@ -186,7 +186,7 @@
                         <button type="button" class="btn btn-danger" onclick="restartStep()">
                             NEW LOADER
                         </button>
-                        <button type="button" class="btn btn-warning" onclick="restartStep()">
+                        <button type="button" class="btn btn-warning" onclick="restartItem()">
                             CHANGE REEL
                         </button>
                     </div>
@@ -195,7 +195,7 @@
                     <div class="col-sm-12 col-md-3" style="padding-right:0px;">
                         <div class="card-body" style="background: #f2f2f2; width:100%; height:100%;padding-right:0px;">
                             <div class="container containerDtlHistory" style="min-height:100px;">
-                                <p>Universal Trolley ID : </p>
+                                <p>Auto Loader ID : </p>
                                 <input class="form-control" type="text" id="txtHLoader" disabled>
                                 <p>Column : </p>
                                 <input class="form-control" type="text" id="txtHCol" disabled>
@@ -205,7 +205,7 @@
                             <br />
                             <div class="container containerDtlHistory" style="min-height:100px;">
                                 <p>Reel ID : </p>
-                                <input class="form-control" type="text" id="txtHReelaID" disabled>
+                                <input class="form-control" type="text" id="txtHReelID" disabled>
                                 <p>Item : </p>
                                 <input class="form-control" type="text" id="txtHItem" disabled>
                                 <p>Ext. Height : </p>
@@ -255,7 +255,7 @@
                                                         <span class="error-message" id="err1"> aaa </span>
                                                     </p>
 
-                                                    <button class="btn btn-success" style="width:100%;" onclick="retry2()"> Next </button>
+                                                    <button class="btn btn-success" style="width:100%;" onclick="retry1()"> Next </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -285,8 +285,7 @@
                                                     <p id="pHeight2">
                                                         Est. Height :
                                                     </p>
-                                                    @* <button class="btn btn-warning" style="width:49%;" onclick="retry2()"> Rescan </button> *@
-                                                    <button class="btn btn-success" style="width:100%;" onclick="retry3()"> Next </button>
+                                                    <button class="btn btn-success" style="width:100%;" onclick="retry2()"> Next </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -521,7 +520,7 @@
             $("#txtScanItem").val('');
             $("#txtReelCode").val('');
 
-            $("#txtHReelaID").val('');
+            $("#txtHReelID").val('');
             $("#txtHItem").val('');
             $("#txtHExtH").val('');
             $("#txtHActH").val('');
@@ -530,9 +529,6 @@
         function restartStep() {
             resetColorPLCForm(1);
             newReel();
-
-            // direct show loader to let user select
-            $("#loaderModal").modal("toggle");
 
             $("#txtLoaderId").val('');
             $("#txtLoaderCode").val('');
@@ -545,10 +541,18 @@
             $("#txtHCol").val('');
             $("#txtHColBal").val('');
 
-            $("#txtHReelaID").val('');
+            $("#txtHReelID").val('');
             $("#txtHItem").val('');
             $("#txtHExtH").val('');
             $("#txtHActH").val('');
+
+            scanLoaderEle.focus();
+
+        }
+
+        function restartItem() {
+            resetColorPLCForm(2);
+            newReel();
 
             scanLoaderEle.focus();
         }
@@ -583,7 +587,7 @@
             $("#txtReelCode").val('');
             // $("#txtICol").val(1);
 
-            $("#txtHReelaID").val('');
+            $("#txtHReelID").val('');
             $("#txtHItem").val('');
             $("#txtHExtH").val('');
             $("#txtHActH").val('');
@@ -785,7 +789,7 @@
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-        function retry2() {
+        function retry1() {
             var loaderId = $("#txtLoaderId").val();
             if (loaderId == "") {
                 $('#pLoader1').html('Loader : <span class="error-message" id="err1"> Must select Auto Loader </span>');
@@ -807,11 +811,22 @@
             $('#pReel2').html("Reel ID : ");
             $('#pHeight2').html("Est. Height : ");
 
-            $("#txtHReelaID").val('');
+            $("#txtHReelID").val('');
             $("#txtHItem").val('');
             $("#txtHExtH").val('');
             $("#txtHActH").val('');
 
+        }
+
+        function retry2() {
+            var reelCode = $("#txtReelCode").val();
+            var scanCode = $("#txtScanItem").val();
+            if (reelCode.toUpperCase() != scanCode.toUpperCase()) {
+                $('#pItem2').html('Item : <span class="error-message" id="err2"> Please scan Reel. </span>');
+                return;
+            }
+
+            loadPLC(2)
         }
 
         function retry3() {
@@ -873,7 +888,6 @@
             if (idx == 1) {
                 resetColorPLCForm(1);
                 if (loaderId == "") {
-                    $('#spin1').addClass("err");
                     $('#pLoader1').html("Loader : ");
                     $('#err1').html("No loader is selected.");
                     $('#btnRetry1').removeClass("hidden");
@@ -890,9 +904,14 @@
             var reelCode = $("#txtReelCode").val();
 
             if (idx == 2) {
+                if (reelCode == "") {
+                    $('#pItem2').html('Item : <span class="error-message" id="err2"> Please scan Reel. </span>');
+                    return;
+                }
                 // await delay(3000);
                 var chkItem = await loadPLCCheckItem(loaderId, reelCode);
                 console.log('R2::' + chkItem);
+                idx = 3;
             }
 
             var iCol = $("#txtICol").val();
@@ -941,6 +960,14 @@
                     else {
                         if (realCol < iCol) {
                             $("#warnTurnModal").modal("toggle");
+                        }
+                        else {
+                            var chkColFork = await loadPLCCheckColFork(loaderId, iCol);
+                            if (chkColFork == false) {
+                            }
+                            else {
+                                $("#putModal").modal("toggle");
+                            }
                         }
                         // if (realCol < iCol) {
                         //     var turnCol = await loadPLCTurnColumn(loaderId, realCol);
@@ -1090,7 +1117,7 @@
 
                         $("#txtEstHeight").val(result.data.thickness);
 
-                        $('#txtHReelaID').val(result.data.reelCode);
+                        $('#txtHReelID').val(result.data.reelCode);
                         $('#txtHItem').val(result.data.itemCode);
                         $('#txtHExtH').val(result.data.thickness);
 
@@ -1330,6 +1357,9 @@
                     // swal.close();
                     if (result.success == true) {
                         $('#pTextLast').html("ALL DONE. Will continue next item after 2 seconds...");
+
+                        // update balance height
+                        $('#txtHColBal').val(result.data);
 
                         // continue new Item
                     }

@@ -72,5 +72,12 @@ namespace RackingSystem.Controllers
             return result;
         }
 
+        [HttpGet]
+        public async Task<ServiceResponseModel<List<LoaderListDTO>>> GetLoaderList_PendingToUnLoad()
+        {
+            ServiceResponseModel<List<LoaderListDTO>> result = await _loaderService.GetLoaderList_PendingToUnLoad();
+            return result;
+        }
+
     }
 }

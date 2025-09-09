@@ -764,11 +764,14 @@
     <script src="~/js/sweetalert2.all.min.js"></script>
 
     <!-- DataTables Buttons -->
-    <script src="https://cdn.datatables.net/buttons/1.6.2/js/dataTables.buttons.min.js"></script>
+    @* <script src="https://cdn.datatables.net/buttons/1.6.2/js/dataTables.buttons.min.js"></script> *@
+    <script src="~/js/datatables.buttons.min.js"></script>
     <!-- JSZip for Excel/CSV -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    @* <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script> *@
+    <script src="~/js/jszip.min.js"></script>
     <!-- HTML5 Export Buttons -->
-    <script src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.html5.min.js"></script>
+    @* <script src="https://cdn.datatables.net/buttons/1.6.2/js/buttons.html5.min.js"></script> *@
+    <script src="~/js/buttons.html5.min.js"></script>
 
     <script type="text/javascript">
 
@@ -1264,48 +1267,46 @@
                 $("#pnl1_body").removeClass("bodyDisable");
                 $('#err1').html("");
                 $("#spin1").removeClass("hidden");
-                $("#done1").addClass("hidden");
+                $('#btnRetry1').removeClass("hidden");
             }
             else if (idx == 2) {
                 $("#pnl2_title").removeClass("titleDisable");
                 $("#pnl2_body").removeClass("bodyDisable");
                 $('#err2').html("");
                 $("#spin2").removeClass("hidden");
-                $("#done2").addClass("hidden");
+                $('#btnRetry2').removeClass("hidden");
+                $('#done1').removeClass("hidden");
             }
             else if (idx == 3) {
                 $("#pnl3_title").removeClass("titleDisable");
                 $("#pnl3_body").removeClass("bodyDisable");
                 $('#err3').html("");
                 $("#spin3").removeClass("hidden");
-                $("#done3").addClass("hidden");
+                $("#spin3").removeClass("hidden");
+                $('#done1').removeClass("hidden");
+                $('#done2').removeClass("hidden");
             }
             else if (idx == 4) {
                 $("#pnl4_title").removeClass("titleDisable");
                 $("#pnl4_body").removeClass("bodyDisable");
                 $('#err4').html("");
                 $("#spin4").removeClass("hidden");
-                $("#done4").addClass("hidden");
+                $('#done1').removeClass("hidden");
+                $('#done2').removeClass("hidden");
+                $('#done3').removeClass("hidden");
             }
             else if (idx == 0) {
                 //
-                $('#spin1').addClass("hidden");
-                $("#spin2").addClass("hidden");
-                $("#spin3").addClass("hidden");
-                $("#spin4").addClass("hidden");
-                $("#spinLast").addClass("hidden");
-                $("#done1").removeClass("hidden");
-                $("#done2").removeClass("hidden");
-                $("#done3").removeClass("hidden");
-                $("#done4").removeClass("hidden");
-                $("#doneLast").removeClass("hidden");
             }
             else {
                 $("#pnlLast_title").removeClass("titleDisable");
                 $("#pnlLast_body").removeClass("bodyDisable");
                 $('#err5').html("");
                 $("#spinLast").removeClass("hidden");
-                $("#doneLast").addClass("hidden");
+                $('#done1').removeClass("hidden");
+                $('#done2').removeClass("hidden");
+                $('#done3').removeClass("hidden");
+                $('#done4').removeClass("hidden");
             }
 
         }
@@ -1454,13 +1455,13 @@
         }
 
         $('#listTable').on('click', '.delete-btn', function () {
-                const id = $(this).attr('data-id');
-                const code = $(this).attr('data-code');
-                deleteItem(id, code);
-        });
+            const id = $(this).attr('data-id');
+            const code = $(this).attr('data-code');
 
-        function deleteItem(id, code) {
-
+            // Find the row containing the clicked button
+            var row = $(this).closest('tr');
+            var table = $('#listTable').DataTable();
+                
             swal.fire({
                 title: "Are you sure want to delete?",
                 text: "You will not be able to recover this record!",
@@ -1471,9 +1472,8 @@
                 confirmButtonText: 'ok',
                 cancelButtonText: 'cancel',
                 allowOutsideClick: false
-              }).then(function(r) {
+            }).then(function(r) {
                 if (r.isConfirmed == true) {
-
                     var data = {
                         GRNDetail_Id: id,
                         ReelCode: code
@@ -1503,10 +1503,9 @@
                                     icon: 'success',
                                     title: "Success Deleted",
                                     text: "",
-                                    didClose: () => {
-                                      window.location.reload();
-                                    }
                                 });
+                                // Remove the row from the DataTable
+                                table.row(row).remove().draw();
                             }
                             else {
                                 swal.fire({
@@ -1526,12 +1525,9 @@
                         }
                     });
 
-                } else {
-                    return;
                 }
-              });
-
-        }
+            });
+        });
 
         function addReceive() {
             removeErrMsg([]);
@@ -1615,106 +1611,247 @@
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-       
+                function retry1() {
+            // $('#btnRetry1').addClass("hidden");
+            $('#pt1').html("STEP 1 :: Check Loader Status ... ");
+            $("#txtLoader").val('');
+            $("#txtLoaderId").val('');
+            $("#loaderModal").modal("toggle");
+        }
 
-        async function loadPLC(idx) {
-            if (idx == 0) {
-                $("#txtEstHeight").val(0);
-                $("#txtActHeight").val(0);
-                $("#txtICol").val(1);
+        function retry2() {
+            resetColorPLCForm(2);
+            $('#spin1').removeClass("err");
+            $("#txtEstHeight").val(0);
+            $("#txtActHeight").val(0);
+            $("#txtReelCode").val('');
+            // $("#txtICol").val(1);
+            $("#itemModal").modal("toggle");
+        }
+
+        function retry3() {
+            // $("#txtICol").val(1);
+            loadPLC(3);
+        }
+
+        function cont4() {
+            $("#putModal").modal("toggle");
+            loadPLC(4);
+        }
+
+        async function turnCol() {
+            $("#warnTurnModal").modal("toggle");
+            var loaderId = $("#txtLoaderId").val();
+            var iCol = $("#txtICol").val();
+            var realCol = await loadPLCGetCurrentColumn(loaderId);
+            if (Number(realCol) == 0) {
+                $('#btnRetry3').removeClass("hidden");
             }
-
-            var loaderId = 2; // $("#txtLoaderId").val();
-            var reelCode = 'A00000003'; // $("#txtReelCode").val();
-
-            // step 1 : check loader
-            if (idx <= 1) {
-                resetColorPLCForm(1);
-                if (loaderId == "") {
-                    $('#spin1').addClass("err");
-                    $('#pLoader1').html("Loader : unknown");
-                    $('#err1').html("No loader is selected.");
-                    $('#btnRetry1').removeClass("hidden");
-                    return;
+            else {
+                if (realCol < iCol) {
+                    var turnCol = await loadPLCTurnColumn(loaderId, Number(realCol));
+                    if (turnCol == false) {
+                        return;
+                    }
+                    realCol = Number(realCol) + 1;
+                }
+                if (realCol < iCol) {
+                    var turnCol = await loadPLCTurnColumn(loaderId, Number(realCol));
+                    if (turnCol == false) {
+                        return;
+                    }
+                    realCol = Number(realCol) + 1;
+                }
+                if (realCol < iCol) {
+                    var turnCol = await loadPLCTurnColumn(loaderId, Number(realCol));
+                    if (turnCol == false) {
+                        return;
+                    }
+                    realCol = Number(realCol) + 1;
                 }
 
+                // wait for fork is ready
                 await delay(3000);
+                var chkColFork = await loadPLCCheckColFork(loaderId, iCol);
+                if (chkColFork == false) {
+                    $('#btnRetry3').removeClass("hidden");
+                }
+                else {
+                    $('#pt3').html("STEP 3 :: DONE Ready Column ");
+                    $("#putModal").modal("toggle");
+                }
+            }
+        }
+
+        async function loadPLC(idx) {
+
+            var loaderId = $("#txtLoaderId").val();
+
+            // step 1 : check loader
+            if (idx == 1) {
+                resetColorPLCForm(1);
+                // if (loaderId == "") {
+                //     $('#spin1').addClass("err");
+                //     $('#pLoader1').html("Loader : ");
+                //     $('#err1').html("No loader is selected.");
+                //     $('#btnRetry1').removeClass("hidden");
+                //     return;
+                // }
+
+                // await delay(3000);
                 var chkLoader = await loadPLCCheckLoader(loaderId);
                 console.log('R1::' + chkLoader);
-                if (chkLoader == false) { return; }
+                if (chkLoader == false) {
+                    $('#btnRetry1').removeClass("hidden");
+                }
+                else {
+                    $('#pt1').html("STEP 1 :: DONE Check Loader ");
+
+                    resetColorPLCForm(2);
+                    $("#txtEstHeight").val(0);
+                    $("#txtActHeight").val(0);
+                    $("#txtReelCode").val('');
+                    // $("#txtICol").val(1);
+
+                    $("#itemModal").modal("toggle");
+                }
+                return;
             }
 
-            
-            if (idx <= 2) {
-                resetColorPLCForm(2);
-                await delay(3000);
+
+            var reelCode = $("#txtReelCode").val();
+
+            if (idx == 2) {
+                // await delay(3000);
                 var chkItem = await loadPLCCheckItem(loaderId, reelCode);
                 console.log('R2::' + chkItem);
-                if (chkItem == false) { return; }
+                if (chkItem == false) {
+                    $('#btnRetry2').removeClass("hidden");
+                    return;
+                }
+                else {
+                    $('#pt2').html("STEP 2 :: DONE Read Reel ");
+                    idx = 3
+                }
             }
 
             var iCol = $("#txtICol").val();
-            if (idx <= 3) {
+            if (idx == 3) {
                 resetColorPLCForm(3);
+                $('#pCol3').html("Checking Auto Loader Column : " + iCol);
                 await delay(3000);
                 var chkCol = await loadPLCCheckEstHeight(loaderId, reelCode, iCol);
                 console.log('R3.1::' + chkCol);
-                if (chkCol == false) {
-                await delay(3000);
-                    iCol = iCol + 1;
+                if (chkCol == false && iCol <= 4) {
+                    iCol = Number(iCol) + 1;
+                    $('#pCol3').html("Checking Auto Loader Column : " + iCol);
+                    await delay(1000);
                     chkCol = await loadPLCCheckEstHeight(loaderId, reelCode, iCol);
                     console.log('R3.2::' + chkCol);
                 }
-                if (chkCol == false) {
-                await delay(3000);
-                    iCol = iCol + 1;
+                if (chkCol == false && iCol <= 4) {
+                    iCol = Number(iCol) + 1;
+                    $('#pCol3').html("Checking Auto Loader Column : " + iCol);
+                    await delay(1000);
                     chkCol = await loadPLCCheckEstHeight(loaderId, reelCode, iCol);
                     console.log('R3.3::' + chkCol);
                 }
-                if (chkCol == false) {
-                await delay(3000);
-                    iCol = iCol + 1;
+                if (chkCol == false && iCol <= 4) {
+                    iCol = Number(iCol) + 1;
+                    $('#pCol3').html("Checking Auto Loader Column : " + iCol);
+                    await delay(1000);
                     chkCol = await loadPLCCheckEstHeight(loaderId, reelCode, iCol);
                     console.log('R3.4::' + chkCol);
                 }
-                if (chkCol == false) { return; }
                 console.log('R3.10::' + iCol);
+                if (chkCol == false) {
+                    $('#btnRetry3').removeClass("hidden");
+                }
+                else {
+                    $("#txtICol").val(iCol);
+
+                    // check is column correct, else need call turn
+                    // await delay(3000);
+                    var realCol = await loadPLCGetCurrentColumn(loaderId);
+                    if (realCol == 0) {
+                        $('#btnRetry3').removeClass("hidden");
+                    }
+                    else {
+                        if (realCol < iCol) {
+                            $("#warnTurnModal").modal("toggle");
+                        }
+                        // if (realCol < iCol) {
+                        //     var turnCol = await loadPLCTurnColumn(loaderId, realCol);
+                        //     if (turnCol == false) {
+                        //         return;
+                        //     }
+                        //     realCol = Number(realCol) + 1;
+                        // }
+                        // if (realCol < iCol) {
+                        //     var turnCol = await loadPLCTurnColumn(loaderId, realCol);
+                        //     if (turnCol == false) {
+                        //         return;
+                        //     }
+                        //     realCol = Number(realCol) + 1;
+                        // }
+                        // if (realCol < iCol) {
+                        //     var turnCol = await loadPLCTurnColumn(loaderId, realCol);
+                        //     if (turnCol == false) {
+                        //         return;
+                        //     }
+                        //     realCol = Number(realCol) + 1;
+                        // }
+
+                        // // wait for fork is ready
+                        // // await delay(3000);
+                        // var chkColFork = await loadPLCCheckColFork(loaderId, iCol);
+                        // if (chkColFork == false) {
+                        //     $('#btnRetry3').removeClass("hidden");
+                        // }
+                        // else {
+                        //     $("#putModal").modal("toggle");
+                        // }
+                    }
+                }
+                return;
                 // await delay(3000);
-                $("#txtICol").val() = iCol;
             }
 
-            if (idx <= 4) {
+            iCol = $("#txtICol").val();
+            if (idx == 4) {
                 resetColorPLCForm(4);
-                await delay(3000);
+                // await delay(1000);
                 var chkAct = await loadPLCActHeight(loaderId, reelCode, iCol);
-                console.log('R4::' + chkAct);                                                       
-                if (chkAct == false && iCol < 4) {
-                    iCol = iCol + 1;
-                    chkAct = await loadPLCActHeight(loaderId, reelCode, iCol);
-                    console.log('R4.2::' + chkAct);
+                console.log('R4::' + chkAct);
+                if (chkAct == false) {
+                    $('#btnRetry4').removeClass("hidden");
+                    return;
                 }
-                if (chkAct == false && iCol < 4) {
-                    iCol = iCol + 1;
-                    chkAct = await loadPLCActHeight(loaderId, reelCode, iCol);
-                    console.log('R4.3::' + chkAct);
+                else {
+                    $('#pt4').html("STEP 4 :: DONE Read Actual Height ");
+                    idx = 5;
                 }
-                if (chkAct == false && iCol < 4) {
-                    iCol = iCol + 1;
-                    chkAct = await loadPLCActHeight(loaderId, reelCode, iCol);
-                    console.log('R4.4::' + chkAct);
-                }
-                if (chkAct == false) { return; }
-                console.log('R4.10::' + chkAct);
-                // await delay(3000);
             }
 
-
-            if (idx <= 5) {
+            if (idx == 5) {
                 resetColorPLCForm(5);
-                await delay(3000);
                 var chkLast = await loadPLCUpdateDB(loaderId, reelCode, iCol);
                 console.log('R5::' + chkLast);
-                if (chkLast == false) { return; }
+                if (chkLast == false) {
+                    $('#btnRetry5').removeClass("hidden");
+                    return;
+                }
+                else {
+                    $('#ptLast').html("STEP 4 :: DONE Finalize ");
+                    await delay(3000);
+
+                    $("#txtScanItem").val('');
+
+                    resetColorPLCForm(2);
+                    newReel();
+
+                    $("#itemModal").modal("toggle");
+                }
                 // await delay(3000);
             }
 
@@ -1828,8 +1965,8 @@
                     // swal.close();
                     if (result.success == true) {
 
-                        $('#pItem3').html("Auto Loader Column : " + iCol);
-                        $('#err3').html("");
+                        $('#pCol3').html("Auto Loader Column : " + iCol);
+                        $('#errCol3').html("");
                         $('#spin3').removeClass("err");
                         $('#spin3').addClass("hidden");
                         $("#done3").removeClass("hidden");
@@ -1838,29 +1975,29 @@
 
                     }
                     else {
-                        if (iCol <= 4) {
+                        if (iCol < 4) {
                             $('#spin3').addClass("err");
-                            $('#pLoader3').html("Loader : Wait turn to next column ... ");
-                            $('#err3').html(result.errMessage);
+                            $('#pCol3').html("Loader : Wait turn to next column ... ");
+                            $('#errCol3').html(result.errMessage);
                         }
                         else {
                             $('#spin3').addClass("err");
-                            $('#pLoader3').html("Loader : All column is full, please change auto loader.");
-                            $('#err3').html(result.errMessage);
+                            $('#pCol3').html("Loader : All column is full, please change auto loader.");
+                            $('#errCol3').html(result.errMessage);
                         }
 
                     }
                 },
                 error: function (error) {
-                    if (iCol <= 4) {
+                    if (iCol < 4) {
                         $('#spin3').addClass("err");
-                        $('#pLoader3').html("Loader : Wait turn to next column ... ");
-                        $('#err3').html(error.message);
+                        $('#pCol3').html("Loader : Wait turn to next column ... ");
+                        $('#errCol3').html(error.message);
                     }
                     else {
                         $('#spin3').addClass("err");
-                        $('#pLoader3').html("Loader : All column is full, please change auto loader.");
-                        $('#err3').html(error.message);
+                        $('#pCol3').html("Loader : All column is full, please change auto loader.");
+                        $('#errCol3').html(error.message);
                     }
                 }
             });
@@ -1869,11 +2006,127 @@
             return fResult;
         }
 
+        async function loadPLCGetCurrentColumn(loaderId) {
+
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCLoader/GetCurrentColumn/" + loaderId,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    console.log('3.2::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                    }
+                    else {
+                        $('#spin3').addClass("err");
+                        $('#pCol3').html("Loader : Unable get current column ... ");
+                        $('#errCol3').html(result.errMessage);
+                    }
+                },
+                error: function (error) {
+                    $('#spin3').addClass("err");
+                    $('#pCol3').html("Loader : Unable get current column ... ");
+                    $('#errCol3').html(result.errMessage);
+                }
+            });
+
+            return fResult;
+        }
+
+        // step 3.2 : call PLC to turn
+        async function loadPLCTurnColumn(loaderId, iCol) {
+
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCLoader/TurnColumn/" + loaderId + "/" + iCol,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    console.log('3.3::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                    }
+                    else {
+                        $('#spin3').addClass("err");
+                        $('#pCol3').html("Loader : Unable to turn column ... ");
+                        $('#errCol3').html(result.errMessage);
+                    }
+                },
+                error: function (error) {
+                    $('#spin3').addClass("err");
+                    $('#pCol3').html("Loader : Unable to turn column ... ");
+                    $('#errCol3').html(result.errMessage);
+                }
+            });
+
+            return fResult;
+        }
+
+        // step 3.3 : check column height balance and change column
+        async function loadPLCCheckColFork(loaderId, iCol) {
+
+            var fResult = false;
+
+            await $.ajax({
+                    url: "/api/PLCLoader/GetForkReady/" + loaderId + "/" + iCol,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    console.log('3.3::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+
+                        $('#pFork3').html("Fork Status : Column " + iCol + " is READY.");
+                        $('#errFork3').html("");
+                        $('#spin3').removeClass("err");
+                        $('#spin3').addClass("hidden");
+                        $("#done3").removeClass("hidden");
+
+                        fResult = true;
+
+                    }
+                    else {
+                        $('#spin3').addClass("err");
+                        $('#pFork3').html("Fork Status : ");
+                        $('#errFork3').html(result.errMessage);
+                    }
+                },
+                error: function (error) {
+                    $('#spin3').addClass("err");
+                    $('#pFork3').html("Fork Status : ");
+                    $('#errFork3').html(error.message);
+                }
+            });
+
+            // console.log('3::' + fResult);
+            return fResult;
+        }
+
+        // step 4 : get actual height balance
         async function loadPLCActHeight(loaderId, reelCode, iCol) {
 
             var fResult = false;
 
-            // step 4 : get actual height balance
             await $.ajax({
                 url: "/api/PLCLoader/GetReelActualHeight/" + loaderId + "/" + iCol,
                 type: "GET",
@@ -1896,33 +2149,29 @@
                     }
                     else {
                         if (iCol < 4) {
+                            $('#pCol3').html("Auto Loader Column : " + (Number(iCol) + 1));
                             $('#spin4').addClass("err");
-                            $('#pLoader4').html("Loader : Wait turn to next column ... ");
+                            $('#pLoader4').html("Loader : ");
                             $('#pHeight4').html("Actual Height : " + result.data);
                             $('#err4').html(result.errMessage);
+
+                            $("#txtICol").val(Number(iCol) + 1);
+                            $("#warnTurnModal").modal("toggle");
                         }
                         else {
                             $('#spin4').addClass("err");
-                            $('#pLoader4').html("Loader : All column is full, please change auto loader.");
+                            $('#pLoader4').html("Loader : ");
                             $('#pHeight4').html("Actual Height : " + result.data);
-                            $('#err4').html(result.errMessage);
+                            $('#err4').html(result.errMessage + " All column is full, please change auto loader.");
 
                         }
                     }
                 },
                 error: function (error) {
-                    if (iCol < 4) {
-                        $('#spin4').addClass("err");
-                        $('#pLoader4').html("Loader : Wait turn to next column ... ");
-                        $('#pHeight4').html("Actual Height : ");
-                        $('#err4').html(error.message);
-                    }
-                    else {
-                        $('#spin4').addClass("err");
-                        $('#pLoader4').html("Loader : All column is full, please change auto loader.");
-                        $('#pHeight4').html("Actual Height : ");
-                        $('#err4').html(error.message);
-                    }
+                    $('#spin4').addClass("err");
+                    $('#pLoader4').html("Loader : ");
+                    $('#pHeight4').html("Actual Height : ");
+                    $('#err4').html(error.message);
                 }
             });
 
@@ -1947,11 +2196,10 @@
                     console.log('5::' + JSON.stringify(result));
                     // swal.close();
                     if (result.success == true) {
-                        $('#pTextLast').html("ALL DONE");
+                        $('#pTextLast').html("ALL DONE. Will continue next item after 2 seconds...");
                         $("#doneLast").removeClass("hidden");
 
                         // continue new Item
-                        readyNewReceive();
                     }
                     else {
                         $('#spinLast').addClass("err");
@@ -1966,6 +2214,7 @@
 
             return true;
         }
+
 
     </script>
 }

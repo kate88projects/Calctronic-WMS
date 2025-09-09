@@ -4,7 +4,7 @@
     {
         Draft,
         Cancelled,
-        Pending,
+        InQueue,
         Loading,
         Done,
     }

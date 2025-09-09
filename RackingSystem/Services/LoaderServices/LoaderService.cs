@@ -323,5 +323,26 @@ namespace RackingSystem.Services.LoaderServices
             return result;
         }
 
+        public async Task<ServiceResponseModel<List<LoaderListDTO>>> GetLoaderList_PendingToUnLoad()
+        {
+            ServiceResponseModel<List<LoaderListDTO>> result = new ServiceResponseModel<List<LoaderListDTO>>();
+
+            try
+            {
+                var loaderList = await _dbContext.Loader.Where(x => x.IsActive == true && x.Status == EnumLoaderStatus.Loaded.ToString()).OrderBy(x => x.LoaderCode).ToListAsync();
+                var loaderListDTO = _mapper.Map<List<LoaderListDTO>>(loaderList).ToList();
+                result.success = true;
+                result.data = loaderListDTO;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
     }
 }

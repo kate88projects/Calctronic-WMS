@@ -670,9 +670,9 @@ namespace RackingSystem.Controllers.API
         }
 
         [HttpGet("UpdateReelIntoLoader/{loaderId}/{colNo}/{reelCode}/{actHeight}")]
-        public async Task<ServiceResponseModel<string>> UpdateReelIntoLoader(long loaderId, int colNo, string reelCode, int actHeight)
+        public async Task<ServiceResponseModel<int>> UpdateReelIntoLoader(long loaderId, int colNo, string reelCode, int actHeight)
         {
-            ServiceResponseModel<string> result = new ServiceResponseModel<string>();
+            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             string methodName = "UpdateReelIntoLoader";
 
             try
@@ -682,28 +682,28 @@ namespace RackingSystem.Controllers.API
                 if (_loader == null)
                 {
                     result.errMessage = "Loader is not found.";
-                    result.data = "";
+                    result.data = 0;
                     return result;
                 }
                 var _loaderCol = _dbContext.LoaderColumn.Where(x => x.Loader_Id == loaderId && x.ColNo == colNo).FirstOrDefault();
                 if (_loaderCol == null)
                 {
                     result.errMessage = "Loader Column is not found.";
-                    result.data = "";
+                    result.data = 0;
                     return result;
                 }
                 var _reel = _dbContext.Reel.Where(x => x.ReelCode == reelCode).FirstOrDefault();
                 if (_reel == null)
                 {
                     result.errMessage = "Reel is not found.";
-                    result.data = "";
+                    result.data = 0;
                     return result;
                 }
                 var _item = _dbContext.Item.Find(_reel.Item_Id);
                 if (_item == null)
                 {
                     result.errMessage = "Item is not found.";
-                    result.data = "";
+                    result.data = 0;
                     return result;
                 }
 
@@ -722,8 +722,11 @@ namespace RackingSystem.Controllers.API
                 _dbContext.LoaderReel.Add(_loaderReel);
                 await _dbContext.SaveChangesAsync();
 
-                result.success = true;
+                _loader.Status = EnumLoaderStatus.Loaded.ToString();
+                await _dbContext.SaveChangesAsync();
 
+                result.success = true;
+                result.data = _loaderCol.BalanceHeight;
             }
             catch (Exception ex)
             {

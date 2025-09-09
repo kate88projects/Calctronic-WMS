@@ -17,6 +17,8 @@ namespace RackingSystem.Models.GRN
 
         public string ReelCode { get; set; } = "";
 
+        public string ReelStatus { get; set; } = "";
+
         public string Remark { get; set; } = "";
 
         public string SupplierName { get; set; } = "";

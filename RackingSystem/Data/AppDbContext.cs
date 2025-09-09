@@ -5,9 +5,11 @@ using RackingSystem.Data.GRN;
 using RackingSystem.Data.JO;
 using RackingSystem.Data.Log;
 using RackingSystem.Data.Maintenances;
+using RackingSystem.Data.RackJobQueue;
 using RackingSystem.Models.BOM;
 using RackingSystem.Models.GRN;
 using RackingSystem.Models.Item;
+using RackingSystem.Models.RackJobQueue;
 using RackingSystem.Models.Slot;
 
 namespace RackingSystem.Data
@@ -71,6 +73,9 @@ namespace RackingSystem.Data
         public DbSet<JobOrderDetail> JobOrderDetail { get; set; }
         public DbSet<JobOrderRaws> JobOrderRaws { get; set; }
 
+        public DbSet<RackJobQueue.RackJobQueue> RackJobQueue { get; set; }
+        public DbSet<RackJobQueueLog> RackJobQueueLog { get; set; }
+
         // ------------        Log       ------------
         public DbSet<PLCLoaderLog> PLCLoaderLog { get; set; }
 
@@ -82,5 +87,8 @@ namespace RackingSystem.Data
         public DbSet<SlotFreeDTO> SP_SlotGetFreeSlotByCol_DESC { get; set; }
         public DbSet<BOMListDTO> SP_BOMSearchList { get; set; }
         public DbSet<Slot_DrawerFreeDTO> SP_SlotGetFreeSDrawerByCol { get; set; }
+
+        public DbSet<QListDTO> SP_QueueList { get; set; }
+
     }
 }

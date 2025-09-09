@@ -1,0 +1,651 @@
+﻿
+@{
+}
+
+<style>
+    .table-title {
+        color: #fff;
+        background: #4b5366;
+        /*     padding: 16px 25px;
+                    margin: -20px -25px 10px; */
+        border-radius: 3px 3px 0 0;
+    }
+
+        .table-title h2 {
+            margin: 5px 0 0;
+            font-size: 24px;
+        }
+
+    .error-message {
+        color: red;
+        font-size: 0.875rem;
+        margin-top: 5px;
+    }
+
+    .is-invalid {
+        border-color: red;
+    }
+
+    .is-valid {
+        border-color: green;
+    }
+
+</style>
+
+<br />
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-outline ">
+                <div class="card-header table-title">
+                    <div class="card-title">
+                        <h2>Queue Management <b></b></h2>
+                    </div>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-success" onclick="newLoaderForm()">
+                            Add Loader
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="newJOForm()">
+                            Add Job Order
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table table-striped table-bordered table-responsive text-nowrap">
+                        <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Idx</th>
+                                    <th>Doc Type</th>
+                                    <th>Doc No</th>
+                                    <th>Total Lines</th>
+                                    <th>Remark</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="loaderModal" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add Loader</h4>
+            </div>
+            @* <form action="/bin/SaveBin" method="post"> *@
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" for="selLoader">Loader</label>
+                    <select class="form-control" id="selLoader"> </select>
+                    <div id="selLoaderError" class="error-message"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="saveLoader()">Save</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="cancelLoaderForm()">Cancel</button>
+            </div>
+            @* </form> *@
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="joModal" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add Loader</h4>
+            </div>
+            @* <form action="/bin/SaveBin" method="post"> *@
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" for="selJO">Loader</label>
+                    <select class="form-control" id="selJO"> </select>
+                    <div id="selJOError" class="error-message"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="saveJO()">Save</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="cancelJOForm()">Cancel</button>
+            </div>
+            @* </form> *@
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="qModal" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add Loader</h4>
+            </div>
+            @* <form action="/bin/SaveBin" method="post"> *@
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" for="txtDocNo">Loader / Doc No</label>
+                    <input type="number" class="form-control" name="Doc No" id="txtDocNo" aria-describedby="Doc No" disabled>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="txtQ">Loader</label>
+                    <input type="number" class="form-control" name="Q No" id="txtQ" aria-describedby="Q No">
+                    <div id="txtQError" class="error-message"></div>
+                </div>
+                <input type="hidden" id="txtDocId">
+                <input type="hidden" id="txtDocType">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="saveItem()">Save</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="cancelQForm()">Cancel</button>
+            </div>
+            @* </form> *@
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <link href="~/css/datatables.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/datatables.min.js"></script>
+    <script src="~/js/sweetalert2.all.min.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            loadList();
+        });
+
+        function loadList() {
+            $.ajax({
+                url: "/RackJobQueue/GetQueueList/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    console.log(result);
+                    swal.close()
+                    if (result.success == true) {
+                        $('#listTable').DataTable( {
+                            data: result.data,
+                            paging: true,
+                            pageLength: 50,
+                            lengthMenu: [50, 100, 250, 500, 1000],
+                            columns: [
+                                { data: 'idx' },
+                                { data: 'docType' },
+                                { data: 'docNo' },
+                                { data: 'totalLines' },
+                                { data: 'remark' },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
+                                        return `<div style="display:flex;"><button class="btn btn-success d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
+                                        <span><i class="bi bi-pencil-square""></i>  Change Q</span></button>
+                                        <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.doc_Id}" data-code="${row.docType}"><span><i class="bi bi-trash""></i>  Delete</span></button></div>`;
+                                    }
+                                }
+                            ],
+                        });
+
+
+
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+        }
+
+        function loadLoaderList() {
+            $.ajax({
+                url: "/Loader/GetLoaderList_PendingToUnLoad/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading();
+                },
+                success: function (result) {
+                    // console.log(result);
+                    swal.close();
+                    if (result.success == true) {
+
+                        // Get the select element
+                        const selLoader = document.getElementById('selLoader');
+                        selLoader.options.length = 0;
+                        for (const opt of result.data)
+                        {
+                            const el = document.createElement("option");
+                            el.textContent = opt.loaderCode;
+                            el.value = opt.loader_Id;
+                            selLoader.appendChild(el);
+                        }
+
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+        }
+
+        function loadJOList() {
+            $.ajax({
+                url: "/RackJobQueue/GetJOList_PendingToUnLoad/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading();
+                },
+                success: function (result) {
+                    // console.log(result);
+                    swal.close();
+                    if (result.success == true) {
+
+                        // Get the select element
+                        const selJO = document.getElementById('selJO');
+                        selJO.options.length = 0;
+                        for (const opt of result.data)
+                        {
+                            const el = document.createElement("option");
+                            el.textContent = opt.loaderCode;
+                            el.value = opt.loader_Id;
+                            selJO.appendChild(el);
+                        }
+
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+        }
+
+        function newLoaderForm() {
+            loadLoaderList();
+            removeLoaderErrMsg([]);
+            $("#selLoader").val("");
+            $("#loaderModal").modal("show");
+        }
+
+        function newJOForm() {
+            loadJOList();
+            removeJOErrMsg([]);
+            $("#selJO").val("");
+            $("#joModal").modal("show");
+        }
+
+        $('#listTable').on('click', '.edit-btn', function () {
+            const row = JSON.parse($(this).attr('data-row'));
+            editLoaderForm(row);
+        });
+
+        function editLoaderForm(row) {
+            $("#txtDocNo").val(row.docNo);
+            $("#txtQ").val(row.idx);
+            $("#txtDocId").val(row.doc_Id);
+            $("#txtDocType").val(row.docType);
+            $("#qModal").modal("show");
+        }
+
+        function cancelLoaderForm() {
+            $("#loaderModal").modal("toggle");
+        }
+
+        function cancelJOForm() {
+            $("#joModal").modal("toggle");
+        }
+
+        function cancelQForm() {
+            $("#qModal").modal("toggle");
+        }
+
+        // Show error message and highlight invalid fields
+        function showLoaderError(fieldId, message) {
+            document.getElementById(fieldId).classList.add('is-invalid');
+            document.getElementById(fieldId + 'Error').textContent = message;
+        }
+
+        function removeLoaderErrMsg(fields, clearValue = false) {
+            fields = ['selLoader' ];
+            if (!Array.isArray(fields)) {
+                fields = [fields];
+            }
+
+            fields.forEach(function(field) {
+                document.getElementById(field).classList.remove('is-invalid');
+                document.getElementById(field).classList.remove('is-valid');
+                document.getElementById(field + 'Error').textContent = '';
+                if (clearValue) document.getElementById(field).value = '';
+            });
+        }
+
+        function checkLoaderInput() {
+            let isValid = true;
+            var txt = document.getElementById("selLoader");
+            if (txt.value == "") {
+                showError(txt.id, `Please enter Auto Loader.`);
+                isValid = false;
+            }
+            return isValid;
+        }
+
+        // Show error message and highlight invalid fields
+        function showJOError(fieldId, message) {
+            document.getElementById(fieldId).classList.add('is-invalid');
+            document.getElementById(fieldId + 'Error').textContent = message;
+        }
+
+        function removeJOErrMsg(fields, clearValue = false) {
+            fields = ['selJO' ];
+            if (!Array.isArray(fields)) {
+                fields = [fields];
+            }
+
+            fields.forEach(function(field) {
+                document.getElementById(field).classList.remove('is-invalid');
+                document.getElementById(field).classList.remove('is-valid');
+                document.getElementById(field + 'Error').textContent = '';
+                if (clearValue) document.getElementById(field).value = '';
+            });
+        }
+
+        function checkJOInput() {
+            let isValid = true;
+            var txt = document.getElementById("selJO");
+            if (txt.value == "") {
+                showError(txt.id, `Please select Job Order.`);
+                isValid = false;
+            }
+            return isValid;
+        }
+
+        function saveLoader() {
+            removeLoaderErrMsg([]);
+            if (checkLoaderInput() == false) {
+                return;
+            }
+
+            var data = {
+                Doc_Id: $("#selLoader").val(),
+                DocType: 'Loader',
+            }
+
+            // console.log(JSON.stringify(data));
+
+            $.ajax({
+                url: '/RackJobQueue/AddQueue',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    // console.log(result);
+                    if (result.success == true) {
+                        $("#loaderModal").modal("toggle");
+                        swal.fire({
+                            icon: 'success',
+                            title: "Success Update",
+                            text: "",
+                            didClose: () => {
+                              window.location.reload();
+                            }
+                        });
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+
+            // console.log(id);
+        }
+
+        function saveJO() {
+            removeJOErrMsg([]);
+            if (checkJOInput() == false) {
+                return;
+            }
+
+            var data = {
+                Doc_Id: $("#selJO").val(),
+                DocType: 'JO',
+            }
+
+            // console.log(JSON.stringify(data));
+
+            $.ajax({
+                url: '/RackJobQueue/AddQueue',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    // console.log(result);
+                    if (result.success == true) {
+                        $("#joModal").modal("toggle");
+                        swal.fire({
+                            icon: 'success',
+                            title: "Success Update",
+                            text: "",
+                            didClose: () => {
+                              window.location.reload();
+                            }
+                        });
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+
+            // console.log(id);
+        }
+
+        $('#listTable').on('click', '.delete-btn', function () {
+                const id = $(this).attr('data-id');
+                const code = $(this).attr('data-code');
+                deleteQueue(id, code);
+        });
+
+        function deleteQueue(id, code) {
+
+            swal.fire({
+                title: "Are you sure want to delete?",
+                text: "You will not be able to recover this record!",
+                inputAttributes: {
+                    autocapitalize: 'off'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'ok',
+                cancelButtonText: 'cancel',
+                allowOutsideClick: false
+              }).then(function(r) {
+                if (r.isConfirmed == true) {
+
+                    var data = {
+                        Doc_Id: id,
+                        DocType: code
+                    }
+
+                    $.ajax({
+                        url: '/RackJobQueue/DeleteQueue',
+                        type: 'DELETE',
+                        data: JSON.stringify(data),
+                        dataType: 'json',
+                        contentType: 'application/json; charset=utf-8',
+                        beforeSend: function () {
+                            Swal.fire({
+                                text: 'Please Wait',
+                                width: '300px',
+
+                                allowEscapeKey: false,
+                                allowOutsideClick: false,
+                                showConfirmButton: false,
+                            });
+                            Swal.showLoading()
+                        },
+                        success: function (result) {
+                            if (result.success == true) {
+                                // $("#myModal").modal("toggle");
+                                swal.fire({
+                                    icon: 'success',
+                                    title: "Success Deleted",
+                                    text: "",
+                                    didClose: () => {
+                                      window.location.reload();
+                                    }
+                                });
+                            }
+                            else {
+                                swal.fire({
+                                    icon: 'error',
+                                    title: "Wait",
+                                    text: result.errMessage
+                                });
+                            }
+                        },
+                        error: function (error) {
+                            console.log(error);
+                            swal.fire({
+                                icon: 'error',
+                                title: "Wait",
+                                text: error.val
+                            });
+                        }
+                    });
+
+                } else {
+                    return;
+                }
+              });
+
+        }
+
+    </script>
+}

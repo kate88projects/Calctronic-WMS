@@ -241,6 +241,7 @@
                                     <th>Item</th>
                                     <th>Qty</th>
                                     <th>Reel Code</th>
+                                    <th>Reel Status</th>
                                     <th>Created / Updated</th>
                                     <th>Action</th>
                                 </tr>
@@ -377,6 +378,13 @@
                                 },
                                 { data: 'qty' },
                                 { data: 'reelCode' },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        return '<p style="margin:0;">' + row.reelStatus + '</p>';
+                                        // return '<p>' + row.createdDateDisplay + '</p><p>' + row.updatedDateDisplay + '</p>';
+                                    }
+                                },
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
