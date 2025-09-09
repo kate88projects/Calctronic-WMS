@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using RackingSystem.Data;
 using RackingSystem.Models;
 using RackingSystem.Models.BOM;
+using RackingSystem.Models.Item;
 using RackingSystem.Models.User;
 using RackingSystem.Services.BOMServices;
 using System.Drawing.Text;
@@ -92,6 +93,13 @@ namespace RackingSystem.Controllers
         {
             ServiceResponseModel<BOMListDTO> result = await _bomService.DeleteBOM(bom);
             return new JsonResult(result);
+        }
+
+        [HttpGet]
+        public async Task<ServiceResponseModel<List<BOMListReqDTO>>> GetActiveBOMList()
+        {
+            ServiceResponseModel<List<BOMListReqDTO>> result = await _bomService.GetActiveBOMList();
+            return result;
         }
     }
 }

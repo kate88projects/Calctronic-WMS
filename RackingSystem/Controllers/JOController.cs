@@ -7,6 +7,7 @@ using RackingSystem.Models.User;
 using RackingSystem.Services.GRNServices;
 using RackingSystem.Services.JOServices;
 using RackingSystem.Models.JO;
+using RackingSystem.Data.JO;
 
 namespace RackingSystem.Controllers
 {
@@ -68,5 +69,18 @@ namespace RackingSystem.Controllers
         //}
 
 
+        [HttpPost]
+        public async Task<IActionResult> SaveJob([FromBody] JOReqDTO job)
+        {
+            ServiceResponseModel<JOReqDTO> result = await _joService.SaveJob(job);
+            return new JsonResult(result);
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteJob([FromBody] JOListDTO job)
+        {
+            ServiceResponseModel<JOListDTO> result = await _joService.DeleteJob(job);
+            return new JsonResult(result);
+        }
     }
 }

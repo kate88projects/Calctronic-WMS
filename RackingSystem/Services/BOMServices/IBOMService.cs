@@ -13,5 +13,8 @@ namespace RackingSystem.Services.BOMServices
         public Task<ServiceResponseModel<BOMListDTO>> DeleteBOM(BOMListDTO bom);
         public Task<ServiceResponseModel<int>> GetBOMTotalCount(BOMSearchReqDTO req);
 
+        public Task<ServiceResponseModel<List<BOMListReqDTO>>> GetActiveBOMList();
+
+
     }
 }

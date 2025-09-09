@@ -108,7 +108,7 @@ namespace RackingSystem.Services.BOMServices
                     _dbContext.BOM.Add(_bom);
                     await _dbContext.SaveChangesAsync();
 
-                    Console.WriteLine($"Generated BOM Id: {_bom.BOM_Id}");
+                    //Console.WriteLine($"Generated BOM Id: {_bom.BOM_Id}");
 
                     foreach (var subitem in bom.SubItems)
                     {
@@ -151,19 +151,54 @@ namespace RackingSystem.Services.BOMServices
                     _bom.UpdatedDate = DateTime.Now;
                     _dbContext.BOM.Update(_bom);
 
+                    //remove the previous if not found on the latest detail
+                    var itemsToRemove = new List<BOMDetail>();
+                    foreach (var exist in existingDetails)
+                    {
+                        var updated = bom.SubItems.FirstOrDefault(s => s.BOMDetail_Id == exist.BOMDetail_Id);
+                        if (updated == null)
+                        {
+                            itemsToRemove.Add(exist);
+                        }
+                    }
+
+                    //update the latest detail
                     foreach (var subitem in bom.SubItems)
                     {
-                        BOMDetail? _bomDtl = existingDetails.FirstOrDefault(d => d.BOM_Id == subitem.BOM_Id && d.BOMDetail_Id == subitem.BOMDetail_Id);
-                        if (_bomDtl == null)
+                        if (subitem.BOMDetail_Id == 0)
                         {
-                            result.errMessage = "Cannot find the specified BOM Detail for update.";
-                            return result;
+                            BOMDetail _bomDtl = new BOMDetail()
+                            {
+                                BOM_Id = _bom.BOM_Id,
+                                Item_Id = subitem.Item_Id,
+                                Qty = subitem.Qty,
+                                Remark = subitem.Remark,
+                                CreatedBy = bom.CreatedBy,
+                                CreatedDate = DateTime.Now,
+                            };
+                            _dbContext.BOMDetail.Add(_bomDtl);
                         }
-                        _bomDtl.Qty = subitem.Qty;
-                        _bomDtl.Remark = subitem.Remark;
-                        _bomDtl.UpdatedBy = bom.CreatedBy;
-                        _bomDtl.UpdatedDate = DateTime.Now;
-                        _dbContext.BOMDetail.Update(_bomDtl);
+                        else
+                        {
+                            BOMDetail? _bomDtl = existingDetails.FirstOrDefault(d => d.BOM_Id == subitem.BOM_Id && d.BOMDetail_Id == subitem.BOMDetail_Id);
+                            if (_bomDtl == null)
+                            {
+                                result.errMessage = "Cannot find the specified BOM Detail for update.";
+                                return result;
+                            }
+
+                            _bomDtl.Item_Id = subitem.Item_Id;
+                            _bomDtl.Qty = subitem.Qty;
+                            _bomDtl.Remark = subitem.Remark;
+                            _bomDtl.UpdatedBy = bom.CreatedBy;
+                            _bomDtl.UpdatedDate = DateTime.Now;
+                            _dbContext.BOMDetail.Update(_bomDtl);
+                        }
+                    }
+
+                    if (itemsToRemove.Any())
+                    {
+                        _dbContext.BOMDetail.RemoveRange(itemsToRemove);
                     }
 
                     await _dbContext.SaveChangesAsync();
@@ -240,6 +275,39 @@ namespace RackingSystem.Services.BOMServices
                 result.success = true;
                 result.data = totalCount;
                 return result;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+            return result;
+        }
+
+        public async Task<ServiceResponseModel<List<BOMListReqDTO>>> GetActiveBOMList()
+        {
+            var result = new ServiceResponseModel<List<BOMListReqDTO>>();
+
+            try
+            {
+                //var bomList = await _dbContext.BOM.Where(x => x.IsActive == true).OrderBy(x => x.BOM_Id).ToListAsync();
+                //var bomListDTO = _mapper.Map<List<BOMListDTO>>(bomList);
+
+                var joinResult = await (
+                    from i in _dbContext.Item
+                    join b in _dbContext.BOM on i.Item_Id equals b.Item_Id
+                    where i.IsActive && i.IsFinishGood && b.IsActive
+                    select new BOMListReqDTO
+                    {
+                        Item_Id = i.Item_Id,
+                        ItemCode = i.ItemCode,
+                        BOM_Id = b.BOM_Id
+                    }).ToListAsync();
+
+                var dtoList = _mapper.Map<List<BOMListReqDTO>>(joinResult);
+
+                result.success = true;
+                result.data = dtoList;
             }
             catch (Exception ex)
             {
