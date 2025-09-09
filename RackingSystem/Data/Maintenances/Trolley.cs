@@ -12,6 +12,10 @@ namespace RackingSystem.Data.Maintenances
         public string TrolleyCode { get; set; } = "";
 
         [Required]
+        [MaxLength(15)]
+        public string IPAddress { get; set; } = "";
+
+        [Required]
         public bool IsActive { get; set; } = true;
 
         [MaxLength(20)]
@@ -25,6 +29,9 @@ namespace RackingSystem.Data.Maintenances
 
         [Required]
         public int TotalRow { get; set; } = 0;
+
+        [Required]
+        public int Side { get; set; } 
 
     }
 }
