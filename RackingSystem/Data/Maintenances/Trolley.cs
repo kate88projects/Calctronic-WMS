@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using RackingSystem.Models.Trolley;
+using System.ComponentModel.DataAnnotations;
 
 namespace RackingSystem.Data.Maintenances
 {

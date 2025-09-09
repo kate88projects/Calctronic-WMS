@@ -7,6 +7,7 @@ using RackingSystem.Models.Setting;
 using RackingSystem.Data.Maintenances;
 using RackingSystem.Models.Slot;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using RackingSystem.General;
 
 namespace RackingSystem.Services.SettingServices
 {
@@ -382,6 +383,84 @@ namespace RackingSystem.Services.SettingServices
                     _dbContext.SlotColumnSetting.Update(_r);
                     await _dbContext.SaveChangesAsync();
                 } 
+
+                result.success = true;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceResponseModel<List<GlobalSettingDTO>>> GetGlobalSettingList()
+        {
+            ServiceResponseModel<List<GlobalSettingDTO>> result = new ServiceResponseModel<List<GlobalSettingDTO>>();
+
+            try
+            {
+                List<GlobalSettingDTO> setListDTO = new List<GlobalSettingDTO>();
+                //string[] showList = { EnumConfiguration.PLC_IPAddr_Racking.ToString(), EnumConfiguration.Loader_ColMinReserve.ToString() };
+                var setList = await _dbContext.Configuration.OrderBy(x => x.ConfigTitle).ToListAsync();
+                foreach (var s in setList)
+                {
+                    if (s.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking.ToString())
+                    {
+                        setListDTO.Add(new GlobalSettingDTO
+                        {
+                            Configuration_Id = s.Configuration_Id,
+                            ConfigTitle = "PLC Rack - IP Address",
+                            ConfigValue = s.ConfigValue,
+                        });
+                    }
+                    if (s.ConfigTitle == EnumConfiguration.Loader_ColMinReserve.ToString())
+                    {
+                        setListDTO.Add(new GlobalSettingDTO
+                        {
+                            Configuration_Id = s.Configuration_Id,
+                            ConfigTitle = "Auto Loader - Column Min Balance Height",
+                            ConfigValue = s.ConfigValue,
+                        });
+                    }
+                }
+                result.success = true;
+                result.data = setListDTO;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceResponseModel<GlobalSettingDTO>> SaveGlobalSetting(GlobalSettingDTO req)
+        {
+            ServiceResponseModel<GlobalSettingDTO> result = new ServiceResponseModel<GlobalSettingDTO>();
+
+            try
+            {
+                // 1. checking Data
+                if (req == null)
+                {
+                    result.errMessage = "Please refresh list.";
+                    return result;
+                }
+
+                // 2. save Data
+                Configuration? _r = _dbContext.Configuration.Find(req.Configuration_Id);
+                if (_r == null)
+                {
+                    result.errMessage = "Cannot find this setting, please refresh the list.";
+                    return result;
+                }
+                _r.ConfigValue = req.ConfigValue;
+                _dbContext.Configuration.Update(_r);
+                await _dbContext.SaveChangesAsync();
 
                 result.success = true;
             }

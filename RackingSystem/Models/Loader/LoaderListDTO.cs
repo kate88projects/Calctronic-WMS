@@ -21,5 +21,14 @@ namespace RackingSystem.Models.Loader
         public int ColHeight { get; set; } = 0;
 
         public string IPAddr { get; set; } = "";
+
+        public List<LoaderColumnDTO> ColList = new List<LoaderColumnDTO>();
+        public List<int> ColBalList = new List<int>();
+
+        public int BalanceHeight { get; set; } = 0;
+
+        public int BalancePercentage { get; set; } = 0;
+        public int UsagePercentage { get; set; } = 0;
+
     }
 }

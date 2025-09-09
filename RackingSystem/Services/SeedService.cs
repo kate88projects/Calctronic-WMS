@@ -60,6 +60,23 @@ namespace RackingSystem.Services
                     await context.SaveChangesAsync();
                 }
 
+                // Add Doc Format for JobOrder
+                logger.LogInformation("Start Add Doc Format for JobOrder ... ");
+                if (context.DocFormat.Where(x => x.DocFormatType == EnumDocFormat.JO.ToString()).Any() == false)
+                {
+                    var docF = new DocFormat
+                    {
+                        DocFormatType = EnumDocFormat.Reel.ToString(),
+                        DocumentFormat = "JO{yyMM}<000000>",
+                        NumberLength = 8,
+                        NextRoundingNum = 1,
+                        IsActive = true,
+                        IsResetMonthly = true,
+                    };
+                    context.DocFormat.Add(docF);
+                    await context.SaveChangesAsync();
+                }
+
                 // Set Default Doc Format for Reel in Configuration
                 if (context.DocFormat.Where(x => x.DocFormatType == EnumDocFormat.Reel.ToString()).Any() && context.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.DocFormat_Reel.ToString()).Any() == false)
                 {
@@ -100,6 +117,18 @@ namespace RackingSystem.Services
                     {
                         ConfigTitle = EnumConfiguration.PLC_IPAddr_Racking.ToString(),
                         ConfigValue = "192.168.1.15",
+                    };
+                    context.Configuration.Add(config);
+                    await context.SaveChangesAsync();
+                }
+
+                // Set Default Loader reserve for min col height
+                if (context.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.Loader_ColMinReserve.ToString()).Any() == false)
+                {
+                    var config = new Configuration
+                    {
+                        ConfigTitle = EnumConfiguration.Loader_ColMinReserve.ToString(),
+                        ConfigValue = "7",
                     };
                     context.Configuration.Add(config);
                     await context.SaveChangesAsync();

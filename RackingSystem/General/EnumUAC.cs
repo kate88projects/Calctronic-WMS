@@ -17,8 +17,9 @@
         GRN_ReprintList_MENU = 62,
 
         JO_JOList_MENU = 80,
-        JO_Schedule_MENU = 81,
-        JO_Emergency_MENU = 82,
+        JO_Emergency_MENU = 81,
+
+        Q_List_MENU = 90,
 
         RACKING_AvailableReelList_MENU = 100,
         RACKING_RackingStatus_MENU = 101,
@@ -30,5 +31,6 @@
         SETTINGS_ReelHeight_MENU = 123,
         SETTINGS_SlotCalculation_MENU = 124,
         SETTINGS_SlotColumn_MENU = 125,
+        SETTINGS_GlobalSetting_MENU = 126,
     }
 }

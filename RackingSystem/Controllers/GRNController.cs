@@ -124,5 +124,21 @@ namespace RackingSystem.Controllers
             return View();
         }
 
+        public IActionResult NewAutoLoaderTask2()
+        {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpGRN";
+            ViewData["ActiveTab"] = "NewAutoLoaderTask";
+            ViewData["Title"] = "New Auto Loader Task";
+            return View();
+        }
+
     }
 }

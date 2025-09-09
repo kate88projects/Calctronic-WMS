@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using RackingSystem.Data.GRN;
+using RackingSystem.Data.JO;
 using RackingSystem.Data.Log;
 using RackingSystem.Data.Maintenances;
 using RackingSystem.Models.BOM;
@@ -66,6 +67,9 @@ namespace RackingSystem.Data
         public DbSet<BOMDetail> BOMDetail { get; set; }
         public DbSet<GRNDetail> GRNDetail { get; set; }
 
+        public DbSet<JobOrder> JobOrder { get; set; }
+        public DbSet<JobOrderDetail> JobOrderDetail { get; set; }
+        public DbSet<JobOrderRaws> JobOrderRaws { get; set; }
 
         // ------------        Log       ------------
         public DbSet<PLCLoaderLog> PLCLoaderLog { get; set; }

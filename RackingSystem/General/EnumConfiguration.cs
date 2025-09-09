@@ -7,5 +7,7 @@
 
         PLC_IPAddr_Racking,
 
+        Loader_ColMinReserve,
+s
     }
 }

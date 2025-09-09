@@ -133,5 +133,35 @@ namespace RackingSystem.Controllers
             return new JsonResult(result);
         }
 
+        public IActionResult GlobalSetting()
+        {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpSETTINGS";
+            ViewData["ActiveTab"] = "GlobalSetting";
+            ViewData["Title"] = "Global Setting";
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<ServiceResponseModel<List<GlobalSettingDTO>>> GetGlobalSettingList()
+        {
+            ServiceResponseModel<List<GlobalSettingDTO>> result = await _setService.GetGlobalSettingList();
+            return result;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveGlobalSetting([FromBody] GlobalSettingDTO req)
+        {
+            ServiceResponseModel<GlobalSettingDTO> result = await _setService.SaveGlobalSetting(req);
+            return new JsonResult(result);
+        }
+
     }
 }

@@ -16,5 +16,9 @@ namespace RackingSystem.Services.SettingServices
 
         public Task<ServiceResponseModel<List<SlotColumnSettingDTO>>> GetSlotColumnSetting();
         public Task<ServiceResponseModel<SlotColumnSettingDTO>> SaveSlotColumnSetting(List<SlotColumnSettingDTO> req);
+
+        public Task<ServiceResponseModel<List<GlobalSettingDTO>>> GetGlobalSettingList();
+        public Task<ServiceResponseModel<GlobalSettingDTO>> SaveGlobalSetting(GlobalSettingDTO req);
+
     }
 }

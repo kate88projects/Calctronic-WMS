@@ -199,7 +199,8 @@
                                 </ul>
                             </li> 
                         }
-                        
+
+
                         @if (ViewBag.PermissionList.Contains(60) || ViewBag.PermissionList.Contains(61) || ViewBag.PermissionList.Contains(62))
                         {
                             <li class="nav-item" id="grpGRN">
@@ -217,6 +218,12 @@
                                             <a asp-action="NewAutoLoaderTask" asp-controller="GRN" class="nav-link">
                                                 <i class="nav-icon bi bi-circle"></i>
                                                 <p>New Auto Loader Task</p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a asp-action="NewAutoLoaderTask2" asp-controller="GRN" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>New Auto Loader Task 2</p>
                                             </a>
                                         </li>
                                     }
@@ -281,6 +288,40 @@
                             </ul>
                         </li> *@
 
+                        
+                        @if (ViewBag.PermissionList.Contains(80) || ViewBag.PermissionList.Contains(81))
+                        {
+                            <li class="nav-item" id="grpJO">
+                                <a href="javascript:none" class="nav-link">
+                                    <i class="nav-icon bi bi-diagram-3"></i>
+                                    <p>
+                                        BOM
+                                        <i class="nav-arrow bi bi-chevron-right"></i>
+                                    </p>
+                                </a>
+                                <ul class="nav nav-treeview">
+                                    @if (ViewBag.PermissionList.Contains(80))
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="JOList" asp-controller="JO" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>JO List</p>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (ViewBag.PermissionList.Contains(81))
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="JOEmergencyList" asp-controller="JO" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>JO Emergency List</p>
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+                        }
+
                         @if (ViewBag.PermissionList.Contains(100) || ViewBag.PermissionList.Contains(101) || ViewBag.PermissionList.Contains(102) || ViewBag.PermissionList.Contains(103))
                         {
                             <li class="nav-item" id="grpRACKING">
@@ -334,7 +375,7 @@
 
 
                         @if (ViewBag.PermissionList.Contains(121) || ViewBag.PermissionList.Contains(122) || ViewBag.PermissionList.Contains(123) || 
-                        ViewBag.PermissionList.Contains(124) || ViewBag.PermissionList.Contains(125))
+                        ViewBag.PermissionList.Contains(124) || ViewBag.PermissionList.Contains(125) || ViewBag.PermissionList.Contains(126))
                         {
                             <li class="nav-item" id="grpSETTINGS">
                                 <a href="javascript:none" class="nav-link">
@@ -387,6 +428,15 @@
                                             <a asp-action="SlotColumnSetting" asp-controller="Setting" class="nav-link">
                                                 <i class="nav-icon bi bi-circle"></i>
                                                 <p>Slot Column</p>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (ViewBag.PermissionList.Contains(126) == true)
+                                    {
+                                        <li class="nav-item ">
+                                            <a asp-action="GlobalSetting" asp-controller="Setting" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>Global Setting</p>
                                             </a>
                                         </li>
                                     }

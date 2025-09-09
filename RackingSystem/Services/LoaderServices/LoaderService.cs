@@ -28,8 +28,43 @@ namespace RackingSystem.Services.LoaderServices
 
             try
             {
+                int minHeight = 0;
+                var configMinHeight = await _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.Loader_ColMinReserve.ToString()).FirstOrDefaultAsync();
+                if (configMinHeight != null)
+                {
+                    minHeight = Convert.ToInt16(configMinHeight.ConfigValue);
+                }
+
                 var loaderList = await _dbContext.Loader.OrderBy(x => x.LoaderCode).ToListAsync();
                 var loaderListDTO = _mapper.Map<List<LoaderListDTO>>(loaderList).ToList();
+                foreach (var loader in loaderListDTO)
+                {
+                    var colList = await _dbContext.LoaderColumn.Where(x => x.Loader_Id == loader.Loader_Id).OrderBy(x => x.ColNo).ToListAsync();
+                    var colListDTO = _mapper.Map<List<LoaderColumnDTO>>(colList).ToList();
+                    foreach( var col in colListDTO)
+                    {
+                        if (col.BalanceHeight <= minHeight && minHeight != 0)
+                        {
+                            col.BalancePercentage = 0;
+                            col.UsagePercentage = 100;
+                        }
+                        else
+                        {
+                            decimal point = Convert.ToDecimal(col.BalanceHeight) / Convert.ToDecimal(loader.ColHeight) * 100;
+                            col.BalancePercentage = Convert.ToInt16(point);
+                            col.UsagePercentage = 100 - col.BalancePercentage;
+                        }
+
+                        loader.BalanceHeight = loader.BalanceHeight + col.BalanceHeight;
+                        loader.BalancePercentage = loader.BalancePercentage + col.BalancePercentage;
+                        loader.UsagePercentage = loader.UsagePercentage + col.UsagePercentage;
+
+                        loader.ColBalList.Add(col.BalanceHeight);
+                    }
+                    loader.BalancePercentage = loader.BalancePercentage / loader.TotalCol;
+                    loader.UsagePercentage = loader.UsagePercentage / loader.TotalCol;
+                    loader.ColList = colListDTO;
+                }
                 result.success = true;
                 result.data = loaderListDTO;
                 return result;

@@ -28,7 +28,16 @@ namespace RackingSystem.Data
             CreateMap<SlotColumnSetting, SlotColumnSettingDTO>();
 
             CreateMap<Loader, LoaderDTO>();
-            CreateMap<Loader, LoaderListDTO>();
+            CreateMap<Loader, LoaderListDTO>()
+            .ForMember(dest => dest.ColList, opt => opt.Ignore())
+            .ForMember(dest => dest.ColBalList, opt => opt.Ignore())
+            .ForMember(dest => dest.BalancePercentage, opt => opt.Ignore())
+            .ForMember(dest => dest.BalanceHeight, opt => opt.Ignore())
+            .ForMember(dest => dest.BalancePercentage, opt => opt.Ignore())
+            .ForMember(dest => dest.UsagePercentage, opt => opt.Ignore());
+            CreateMap<LoaderColumn, LoaderColumnDTO>()
+            .ForMember(dest => dest.BalancePercentage, opt => opt.Ignore())
+            .ForMember(dest => dest.UsagePercentage, opt => opt.Ignore());
             CreateMap<Trolley, TrolleyListDTO>();
             CreateMap<TrolleySlot, TrolleySlotDTO>();
             CreateMap<BOM, BOMListDTO>();

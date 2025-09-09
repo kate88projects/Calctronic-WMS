@@ -6,6 +6,7 @@ using RackingSystem.Models.Loader;
 using RackingSystem.Models.Item;
 using Newtonsoft.Json;
 using RackingSystem.Models.User;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace RackingSystem.Controllers
 {
@@ -36,11 +37,11 @@ namespace RackingSystem.Controllers
             return View();
         }
 
-        [HttpGet]
-        public async Task<ServiceResponseModel<List<LoaderListDTO>>> GetLoaderList()
+        [HttpPost]
+        public async Task<IActionResult> GetLoaderList()
         {
             ServiceResponseModel<List<LoaderListDTO>> result = await _loaderService.GetLoaderList();
-            return result;
+            return new JsonResult(result);
         }
 
         [HttpPost]

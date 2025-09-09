@@ -11,6 +11,7 @@ using RackingSystem.Services.AccountServices;
 using RackingSystem.Services.BOMServices;
 using RackingSystem.Services.GRNServices;
 using RackingSystem.Services.ItemServices;
+using RackingSystem.Services.JOServices;
 using RackingSystem.Services.LoaderServices;
 using RackingSystem.Services.ReelServices;
 using RackingSystem.Services.SettingServices;
@@ -59,6 +60,7 @@ builder.Services.AddScoped<IReelService, ReelService>();
 builder.Services.AddScoped<ILoaderService, LoaderService>();
 builder.Services.AddScoped<IGRNService, GRNService>();
 builder.Services.AddScoped<IBOMService, BOMService>();
+builder.Services.AddScoped<IJOService, JOService>();
 
 builder.Services.AddAuthorization();
 

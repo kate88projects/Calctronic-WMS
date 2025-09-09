@@ -57,6 +57,7 @@
                                     <th>Total Column</th>
                                     <th>Column Height</th>
                                     <th>IP Address</th>
+                                    <th>Balance</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -138,7 +139,7 @@
         function loadList() {
             $.ajax({
                 url: "/Loader/GetLoaderList/",
-                type: "GET",
+                type: "POST",
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -180,6 +181,12 @@
                                 { data: 'totalCol' },
                                 { data: 'colHeight' },
                                 { data: 'ipAddr' },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        return `<span>${row.balancePercentage} %</span>`;
+                                    }
+                                },
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
