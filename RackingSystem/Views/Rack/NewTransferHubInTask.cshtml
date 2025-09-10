@@ -2,7 +2,6 @@
 @{
 }
 
-
 <style type="text/css">
     body {
         color: #566787;
@@ -23,7 +22,7 @@
         color: #fff;
         background: #4b5366;
         /*     padding: 16px 25px;
-                        margin: -20px -25px 10px; */
+                            margin: -20px -25px 10px; */
         border-radius: 3px 3px 0 0;
     }
 
@@ -37,7 +36,7 @@
         border-radius: 10px;
         overflow: hidden;
         background-color: white;
-        padding: 30px;       
+        padding: 30px;
     }
 
     .containerDtlHistory {
@@ -78,18 +77,18 @@
             color: #673ab7;
         }
 
-            .progressBar li::before {
-                width: 50px;
-                height: 50px;
-                line-height: 50px;
-                display: block;
-                font-size: 20px;
-                color: #fff;
-                background: lightgrey;
-                border-radius: 50%;
-                margin: 0 auto 10px auto;
-                padding: 2px;
-            }
+        .progressBar li::before {
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            display: block;
+            font-size: 20px;
+            color: #fff;
+            background: lightgrey;
+            border-radius: 50%;
+            margin: 0 auto 10px auto;
+            padding: 2px;
+        }
 
         .progressBar li::after {
             content: "";
@@ -135,8 +134,8 @@
             font-family: Arial;
         }
 
-       .progressBar #stepLast::after {
-           width: 0;
+        .progressBar #stepLast::after {
+            width: 0;
         }
 
     .form-group {
@@ -148,12 +147,12 @@
             margin: 30px 0;
         }
 
-        .form-group-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding-bottom: 10px;
-        }
+    .form-group-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 10px;
+    }
 
     .form-title {
         color: #673ab7;
@@ -177,6 +176,7 @@
         }
     }
 </style>
+
 
 <div class="container-fluid">
 
@@ -202,24 +202,30 @@
                 <div class="row">
                     <div class="col-sm-12 col-md-3" style="padding-right:0px;">
                         <div class="card-body" style="background: #f2f2f2; width:100%; height:100%;padding-right:0px;">
-                            <div class="container containerDtlHistory" style="min-height:100px;">
+                            <div class="container containerDtlHistory" style="min-height:50px;">
                                 <p>Auto Loader ID : </p>
                                 <input class="form-control" type="text" id="txtHLoader" disabled>
+                                <p>Lock Status : </p>
+                                <input class="form-control" type="text" id="txtHLoaderLock" disabled>
+                                <p>Gripper Status : </p>
+                                <input class="form-control" type="text" id="txtHGripper" disabled>
                                 <p>Column : </p>
                                 <input class="form-control" type="text" id="txtHCol" disabled>
-                                <p>Column Balance Height : </p>
-                                <input class="form-control" type="text" id="txtHColBal" disabled>
                             </div>
                             <br />
-                            <div class="container containerDtlHistory" style="min-height:100px;">
-                                <p>Reel ID : </p>
-                                <input class="form-control" type="text" id="txtHReelID" disabled>
+                            <div class="container containerDtlHistory" style="min-height:50px;">
+                                <p>Empty Tray : </p>
+                                <input class="form-control" type="text" id="txtHEmpty" disabled>
+                                <p>Reel : </p>
+                                <input class="form-control" type="text" id="txtHReel" disabled>
                                 <p>Item : </p>
                                 <input class="form-control" type="text" id="txtHItem" disabled>
-                                <p>Ext. Height : </p>
-                                <input class="form-control" type="text" id="txtHExtH" disabled>
                                 <p>Act. Height : </p>
                                 <input class="form-control" type="text" id="txtHActH" disabled>
+                                <p>To Slot : </p>
+                                <input class="form-control" type="text" id="txtHSlot" disabled>
+                                <p>Slot Take : </p>
+                                <input class="form-control" type="text" id="txtHSlotTake" disabled>
                             </div>
                         </div>
                     </div>
@@ -231,13 +237,13 @@
                                         Loader
                                     </li>
                                     <li id="step2">
-                                        Reel
+                                        Lock / Gripper
                                     </li>
                                     <li id="step3">
-                                        Column
+                                        Empty Tray
                                     </li>
                                     <li id="step4">
-                                        Put
+                                        Put Away
                                     </li>
                                     <li id="stepLast">
                                         Finalize
@@ -260,10 +266,10 @@
                                                     <br />
                                                     <p id="pLoader1">
                                                         Loader :
-                                                        <span class="error-message" id="err1"> aaa </span>
+                                                        <span class="error-message" id="err1"> </span>
                                                     </p>
 
-                                                    <button class="btn btn-success" style="width:100%;" onclick="retry1()"> Next </button>
+                                                    <button class="btn btn-success" style="width:100%;" onclick="next1()"> Next </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -271,29 +277,27 @@
                                 </div>
                                 <div class="form-group" id="sec2">
                                     <div class="row">
-                                        <h2 class="form-title">Step 2 :: Scan Reel ID </h2>
+                                        <h2 class="form-title">Step 2 :: Check Flexilock and Gripper </h2>
                                         <div class=" " id="pnl2_body">
                                             <div class="row">
                                                 <div class="col-sm-12 col-md-6" style="text-align: center;">
                                                     <img src="~/assets/img/qr-code (1).gif" style="width:50%;" />
                                                 </div>
                                                 <div class="col-sm-12 col-md-6">
-                                                    <div class="input-group">
-                                                        <input class="form-control" type="text" placeholder="Scan or Insert Reel ID ... " id="txtScanItem">
-                                                        <span class="input-group-text" onclick="clearItemScanCode()">X</span>
-                                                    </div>
-                                                    <br />
-                                                    <p id="pItem2">
-                                                        Item :
-                                                        <span style="color:red; font-size:15px;" id="err2"> </span>
+                                                    <p id="pFlexi1">
+                                                        Fork Status :
+                                                        <span style="color:red; font-size:15px;" id="errFlexi1"> </span>
                                                     </p>
-                                                    <p id="pReel2">
-                                                        Reel ID :
+                                                    <p id="pFlexi2">
+                                                        Fork Status :
+                                                        <span style="color:red; font-size:15px;" id="errFlexi2"> </span>
                                                     </p>
-                                                    <p id="pHeight2">
-                                                        Est. Height :
+                                                    <p id="pGripper2">
+                                                        Fork Status :
+                                                        <span style="color:red; font-size:15px;" id="errGripper2"> </span>
                                                     </p>
-                                                    <button class="btn btn-success" style="width:100%;" onclick="retry2()"> Next </button>
+                                                    <button class="btn btn-warning" onclick="retry2()" id="btnRetry2" style="width:49%;">Retry</button>
+                                                    <button class="btn btn-success" style="width:49%;" onclick="next2()"> Next </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -301,22 +305,23 @@
                                 </div>
                                 <div class="form-group" id="sec3">
                                     <div class="row">
-                                        <h2 class="form-title">Step 3 :: Check Column </h2>
+                                        <h2 class="form-title">Step 3 :: Get Empty Tray </h2>
                                         <div class=" " id="pnl3_body">
                                             <div class="row">
                                                 <div class="col-sm-12 col-md-6" style="text-align: center;">
                                                     <img src="~/assets/img/loading.gif" style="width:50%;" />
                                                 </div>
                                                 <div class="col-sm-12 col-md-6">
-                                                    <p id="pCol3">
-                                                        Available Column :
+                                                    <p id="pETray3">
+                                                        Empty Tray Slot :
                                                         <span style="color:red; font-size:15px;" id="errCol3"> </span>
                                                     </p>
-                                                    <p id="pFork3">
-                                                        Fork Status :
+                                                    <p id="pGetTray3">
+                                                        Get Tray Status :
                                                         <span style="color:red; font-size:15px;" id="errFork3"> </span>
                                                     </p>
-                                                    @* <button class="btn btn-success" style="width:49%;" onclick="retry3()"> Next </button> *@
+                                                    <button class="btn btn-warning" onclick="retry3()" id="btnRetry3" style="width:49%;">Retry</button>
+                                                    <button class="btn btn-success" style="width:49%;" onclick="next3()"> Next </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -324,22 +329,34 @@
                                 </div>
                                 <div class="form-group" id="sec4">
                                     <div class="row">
-                                        <h2 class="form-title">Step 4 :: Check Actual Height </h2>
+                                        <h2 class="form-title">Step 4 :: Scan Reel and Put Away </h2>
                                         <div class=" " id="pnl4_body">
                                             <div class="row">
                                                 <div class="col-sm-12 col-md-6" style="text-align: center;">
                                                     <img src="~/assets/img/3d-scanning.gif" style="width:50%;" />
                                                 </div>
                                                 <div class="col-sm-12 col-md-6">
-                                                    <p id="pLoader4">
-                                                        Auto Loader Column : 1 <span style="color:red; font-size:15px;" id="err4"> </span>
+                                                    <p id="pReel4">
+                                                        Reel ID : <span style="color:red; font-size:15px;" id="errReel4"> </span>
+                                                    </p>
+                                                    <p id="pItem4">
+                                                        Item Code : <span style="color:red; font-size:15px;" id="errItem4"> </span>
                                                     </p>
                                                     <p id="pHeight4">
                                                         Actual Height :
                                                     </p>
+                                                    <p id="pSlot4">
+                                                        Slot Code : <span style="color:red; font-size:15px;" id="errSlot4"> </span>
+                                                    </p>
+                                                    <p id="pSlotTake4">
+                                                        Slot Reserve : <span style="color:red; font-size:15px;" id="errSlotTake4"> </span>
+                                                    </p>
+                                                    <p id="pPutAway4">
+                                                        Put Away Status : <span style="color:red; font-size:15px;" id="errPutAway4"> </span>
+                                                    </p>
 
-                                                    <button class="btn btn-warning" onclick="loadPLC(4)" id="btnRetry4" style="width:49%;">Retry Read Height</button>
-                                                    <button class="btn btn-success" style="width:49%;" onclick="loadPLC(5)"> Next </button>
+                                                    <button class="btn btn-warning" onclick="retry4a()" id="btnRetry4a" style="width:49%;">Retry Scan Reel</button>
+                                                    <button class="btn btn-warning" onclick="retry4b()" id="btnRetry4b" style="width:49%;">Retry Put Away</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -356,7 +373,7 @@
                                                 <div class="col-sm-12 col-md-6">
                                                     <p style="text-align:center;" id="pTextLast">Waiting finish loading reel ...</p>
 
-                                                    <button class="btn btn-warning" onclick="loadPLC(5)" id="btnRetryLast" style="width:49%;">Retry Save</button>
+                                                    <button class="btn btn-warning" onclick="retryLast()" id="btnRetryLast" style="width:49%;">Retry Save</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -366,10 +383,14 @@
 
                             <input type="hidden" id="txtLoaderId">
                             <input type="hidden" id="txtLoaderCode">
-                            <input type="hidden" id="txtEstHeight">
-                            <input type="hidden" id="txtActHeight">
                             <input type="hidden" id="txtReelCode">
+                            <input type="hidden" id="txtActHeight">
                             <input type="hidden" id="txtICol">
+                            
+                            <input type="hidden" id="txtStep2">
+                            <input type="hidden" id="txtStep3">
+                            <input type="hidden" id="txtStep4">
+
                         </div>
                     </div>
                 </div>
@@ -391,25 +412,6 @@
                     <div class="col-6">
                         <p class="" style="font-size:2em;">Please make sure hands off and tap Start Turn Column button.</p>
                         <button class="btn btn-success" style="width: 100%; height: 150px;" onclick="turnCol()">Start Turn Column</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="putModal" role="dialog" data-bs-backdrop="static">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-body" style="padding: 50px;">
-                <div class="row">
-                    <div class="col-6">
-                        <img src="~/assets/img/3d-scanning.gif" style="width:100%;" />
-                    </div>
-                    <div class="col-6">
-                        <p class="" style="font-size:32px;">Please put Reel and tap Start button.</p>
-                        <button class="btn btn-success" style="width: 100%; height: 150px;" onclick="cont4()">Start</button>
                     </div>
                 </div>
             </div>
@@ -439,7 +441,7 @@
 
             var code = inputValue;
             $.ajax({
-                url: "/Loader/GetLoaderInfo_ReadyToLoad?req=" + code,
+                url: "/Loader/GetLoaderInfo_PendingToUnLoad?req=" + code,
                 type: "GET",
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
@@ -482,130 +484,72 @@
           }
         });
 
-        const scanItemEle = document.getElementById('txtScanItem');
-
-        scanItemEle.addEventListener('keyup', function(event) {
-          // Check if the pressed key is "Enter" (key code 13 or key property "Enter")
-          if (event.key === 'Enter') {
-
-                const inputValue = this.value;
-                // alert('Enter key pressed! Value: ');
-
-                $("#txtReelCode").val(inputValue);
-                $("#itemModal").modal("toggle");
-
-                loadPLC(2);
-          }
-        });
-
         $(document).ready(function () {
             resetColorPLCForm(1);
-            newReel();
-            loadLoaderList();
-
-            $("#txtLoaderId").val('');
-            $("#txtEstHeight").val(0);
-            $("#txtActHeight").val(0);
-            $("#txtReelCode").val('');
-            $("#txtICol").val(1);
-
-            scanLoaderEle.focus();
         });
 
-        function clearLoaderScanCode() {
-            scanLoaderEle.focus();
-            $("#txtScanLoader").val('');
-            $("#txtLoaderId").val('');
-            $("#txtLoaderCode").val('');
+        function addLoader(_type, id, code) {
+            if (_type == 1) {
+                const selLoader = document.getElementById('selLoader');
+                const idx = selLoader.selectedIndex;
+                const selectedOption = selLoader.options[idx];
+                id = selectedOption.value;
+                code = selectedOption.text;
 
-            $("#txtHLoader").val('');
-            $("#txtHCol").val('');
-            $("#txtHColBal").val('');
-        }
 
-        function clearItemScanCode() {
-            scanItemEle.focus();
-            $("#txtScanItem").val('');
-            $("#txtReelCode").val('');
+                $.ajax({
+                    url: "/Loader/GetLoaderInfo_PendingToUnLoad?req=" + code,
+                    type: "GET",
+                    dataType: 'JSON',
+                    // data: JSON.stringify(jsonInput),
+                    contentType: 'application/json; charset=utf-8',
+                    beforeSend: function () {
+                        Swal.fire({
+                            text: 'Please Wait',
+                            width: '300px',
 
-            $("#txtHReelID").val('');
-            $("#txtHItem").val('');
-            $("#txtHExtH").val('');
-            $("#txtHActH").val('');
-        }
+                            allowEscapeKey: false,
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                        });
+                        Swal.showLoading()
+                    },
+                    success: function (result) {
+                        //console.log(result);
+                        swal.close();
+                        if (result.success == true) {
+                        }
+                        else {
+                            swal.fire({
+                                icon: 'error',
+                                title: "Wait",
+                                text: result.errMessage
+                            });
+                            return;
+                        }
+                    },
+                    error: function (error) {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: error.val
+                        });
+                        return;
+                    }
+                });
 
-        function restartStep() {
-            resetColorPLCForm(1);
-            newReel();
-
-            $("#txtLoaderId").val('');
-            $("#txtLoaderCode").val('');
-            $("#txtEstHeight").val(0);
-            $("#txtActHeight").val(0);
-            $("#txtReelCode").val('');
-            $("#txtICol").val(1);
-
-            $("#txtHLoader").val('');
-            $("#txtHCol").val('');
-            $("#txtHColBal").val('');
-
-            $("#txtHReelID").val('');
-            $("#txtHItem").val('');
-            $("#txtHExtH").val('');
-            $("#txtHActH").val('');
-
-            scanLoaderEle.focus();
-
-        }
-
-        function restartItem() {
-            var loaderId = $("#txtLoaderId").val();
-            if (loaderId == "") {
-                restartStep();
-                return;
             }
 
-            resetColorPLCForm(2);
-            newReel();
+            // continue
+            $("#txtLoaderId").val(id);
+            $("#txtLoaderCode").val(code);
+            loadPLC(1);
 
-            scanLoaderEle.focus();
+            $("#txtHLoader").val(code);
         }
 
-        function newReel() {
-
-            $('#pt2').html("STEP 2 :: Waiting Scan Reel ... ");
-            $('#pt3').html("STEP 3 :: Checking column available ... ");
-            $('#pt4').html("STEP 4 :: Reading Reel Info ... ");
-            $('#ptLast').html("STEP 5 :: Keep Record and Finalyzing ... ");
-
-            $('#pItem2').html('Item : <span class="error-message" id="err2"></span>');
-            $('#pReel2').html("Reel ID : ");
-            $('#pHeight2').html("Est. Height : ");
-
-            $('#pCol3').html('Available Column :  <span class="error-message" id="errCol3"></span>');
-            $('#pFork3').html('Fork Status :  <span class="error-message" id="errFork3"></span>');
-
-            $('#pLoader4').html('Auto Loader Column :  <span class="error-message" id="err4"></span>');
-            $('#pHeight4').html("Actual Height : ");
-
-            $('#pTextLast').html("Waiting finish loading reel ... ");
-
-            $("#waiting2").removeClass("hidden");
-            $("#waiting3").removeClass("hidden");
-            $("#waiting4").removeClass("hidden");
-            $("#waitingLast").removeClass("hidden");
-
-            $("#txtScanItem").val('');
-            $("#txtEstHeight").val(0);
-            $("#txtActHeight").val(0);
-            $("#txtReelCode").val('');
-            // $("#txtICol").val(1);
-
-            $("#txtHReelID").val('');
-            $("#txtHItem").val('');
-            $("#txtHExtH").val('');
-            $("#txtHActH").val('');
-
+        function nextReel() {
+            next1();
         }
 
         function resetColorPLCForm(idx) {
@@ -627,7 +571,10 @@
             $("#step4").removeClass("active");
             $("#stepLast").removeClass("active");
 
-            $('#btnRetry4').addClass("hidden");
+            $('#btnRetry2').addClass("hidden");
+            $('#btnRetry3').addClass("hidden");
+            $('#btnRetry4a').addClass("hidden");
+            $('#btnRetry4b').addClass("hidden");
             $('#btnRetryLast').addClass("hidden");
 
             if (idx == 1) {
@@ -687,123 +634,11 @@
 
         }
 
-        function loadLoaderList() {
-            $.ajax({
-                url: "/Loader/GetLoaderList_ReadyToLoad/",
-                type: "GET",
-                dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
-                contentType: 'application/json; charset=utf-8',
-                beforeSend: function () {
-                    Swal.fire({
-                        text: 'Please Wait',
-                        width: '300px',
-
-                        allowEscapeKey: false,
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
-                    });
-                    Swal.showLoading();
-                },
-                success: function (result) {
-                    // console.log(result);
-                    swal.close();
-                    if (result.success == true) {
-
-                        // // Get the select element
-                        // const selLoader = document.getElementById('selLoader');
-                        // for (const opt of result.data)
-                        // {
-                        //     const el = document.createElement("option");
-                        //     el.textContent = opt.loaderCode;
-                        //     el.value = opt.loader_Id;
-                        //     selLoader.appendChild(el);
-                        // }
-
-                    }
-                    else {
-                        swal.fire({
-                            icon: 'error',
-                            title: "Wait",
-                            text: result.errMessage
-                        });
-                    }
-                },
-                error: function (error) {
-                    swal.fire({
-                        icon: 'error',
-                        title: "Wait",
-                        text: error.val
-                    });
-                }
-            });
-        }
-
-        function addLoader(_type, id, code) {
-            if (_type == 1) {
-                const selLoader = document.getElementById('selLoader');
-                const idx = selLoader.selectedIndex;
-                const selectedOption = selLoader.options[idx];
-                id = selectedOption.value;
-                code = selectedOption.text;
-
-
-                $.ajax({
-                    url: "/Loader/GetLoaderInfo_ReadyToLoad?req=" + code,
-                    type: "GET",
-                    dataType: 'JSON',
-                    // data: JSON.stringify(jsonInput),
-                    contentType: 'application/json; charset=utf-8',
-                    beforeSend: function () {
-                        Swal.fire({
-                            text: 'Please Wait',
-                            width: '300px',
-
-                            allowEscapeKey: false,
-                            allowOutsideClick: false,
-                            showConfirmButton: false,
-                        });
-                        Swal.showLoading()
-                    },
-                    success: function (result) {
-                        //console.log(result);
-                        swal.close();
-                        if (result.success == true) {
-                        }
-                        else {
-                            swal.fire({
-                                icon: 'error',
-                                title: "Wait",
-                                text: result.errMessage
-                            });
-                            return;
-                        }
-                    },
-                    error: function (error) {
-                        swal.fire({
-                            icon: 'error',
-                            title: "Wait",
-                            text: error.val
-                        });
-                        return;
-                    }
-                });
-
-            }
-
-            // continue
-            $("#txtLoaderId").val(id);
-            $("#txtLoaderCode").val(code);
-            loadPLC(1);
-
-            $("#txtHLoader").val(code);
-        }
-
         function delay(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-        function retry1() {
+        function next1() {
             var loaderId = $("#txtLoaderId").val();
             if (loaderId == "") {
                 $('#pLoader1').html('Loader : <span class="error-message" id="err1"> Must select Auto Loader </span>');
@@ -817,81 +652,95 @@
             }
 
             resetColorPLCForm(2);
-            $("#txtEstHeight").val(0);
-            $("#txtActHeight").val(0);
             $("#txtReelCode").val('');
+            $("#txtActHeight").val(0);
+            $("#txtStep2").val('');
+            $("#txtStep3").val('');
+            $("#txtStep4").val('');
 
-            $('#pItem2').html('Item : <span class="error-message" id="err2"></span>');
-            $('#pReel2').html("Reel ID : ");
-            $('#pHeight2').html("Est. Height : ");
+            $('#pFlexi1').html('Flexilock 1 : <span class="error-message" id="errFlexi1"></span>');
+            $('#pFlexi2').html('Flexilock 2 : <span class="error-message" id="errFlexi2"></span>');
+            $('#pGripper2').html('Gripper : <span class="error-message" id="errGripper2"></span>');
 
-            $("#txtHReelID").val('');
+            $("#txtHLoaderLock").val('');
+            $("#txtHGripper").val('');
+            $("#txtHCol").val('');
+
+            $("#txtHEmpty").val('');
             $("#txtHItem").val('');
-            $("#txtHExtH").val('');
             $("#txtHActH").val('');
+            $("#txtHSlot").val('');
+            $("#txtHSlotTake").val('');
 
+            loadPLC(2);
         }
 
-        function retry2() {
-            var reelCode = $("#txtReelCode").val();
-            var scanCode = $("#txtScanItem").val();
-            if (reelCode.toUpperCase() != scanCode.toUpperCase()) {
-                $('#pItem2').html('Item : <span class="error-message" id="err2"> Please scan Reel. </span>');
+        function next2() {
+            var step2 = $("#txtStep2").val();
+            if (step2 != "OK") {
                 return;
             }
 
-            loadPLC(3)
-        }
+            resetColorPLCForm(3);
+            $('#pETray3').html('Empty Tray Slot : <span class="error-message" id="errETray3"></span>');
+            $('#pGetTray3').html('Get Tray Status : <span class="error-message" id="errGetTray3"></span>');
 
-        function retry3() {
+            $("#txtHEmpty").val('');
+            $("#txtHItem").val('');
+            $("#txtHActH").val('');
+            $("#txtHSlot").val('');
+            $("#txtHSlotTake").val('');
+
             loadPLC(3);
         }
 
-        function cont4() {
-            $("#putModal").modal("toggle");
+        function next3() {
+            var step3 = $("#txtStep3").val();
+            if (step3 != "OK") {
+                return;
+            }
+
+            resetColorPLCForm(4);
+            $('#pReel4').html('Reel ID : <span class="error-message" id="errReel4"></span>');
+            $('#pItem4').html('Item Code : <span class="error-message" id="errItem4"></span>');
+            $('#pHeight4').html('Actual Height : ');
+            $('#pSlot4').html('Slot Code : <span class="error-message" id="errSlot4"></span>');
+            $('#pSlotTake4').html('Slot Reserve: <span class="error-message" id="errSlotTake4"></span>');
+
+            $("#txtHItem").val('');
+            $("#txtHActH").val('');
+            $("#txtHSlot").val('');
+            $("#txtHSlotTake").val('');
+
+            $("#txtReelCode").val('');
+            $("#txtActHeight").val('');
+
             loadPLC(4);
         }
 
-        async function turnCol() {
-            $("#warnTurnModal").modal("toggle");
-            var loaderId = $("#txtLoaderId").val();
-            var iCol = $("#txtICol").val();
-            var realCol = await loadPLCGetCurrentColumn(loaderId);
-            if (Number(realCol) == 0) {
-                $('#btnRetry3').removeClass("hidden");
-            }
-            else {
-                if (realCol < iCol) {
-                    var turnCol = await loadPLCTurnColumn(loaderId, Number(iCol));
-                    if (turnCol == false) {
-                        return;
-                    }
-                    realCol = iCol; // (realCol) + 1;
-                }
-                // if (realCol < iCol) {
-                //     var turnCol = await loadPLCTurnColumn(loaderId, Number(realCol));
-                //     if (turnCol == false) {
-                //         return;
-                //     }
-                //     realCol = Number(realCol) + 1;
-                // }
-                // if (realCol < iCol) {
-                //     var turnCol = await loadPLCTurnColumn(loaderId, Number(realCol));
-                //     if (turnCol == false) {
-                //         return;
-                //     }
-                //     realCol = Number(realCol) + 1;
-                // }
+        function retry2() {
+            $('#btnRetry2').addClass("hidden");
+            loadPLC(2);
+        }
 
-                // wait for fork is ready
-                // await delay(3000);
-                var chkColFork = await loadPLCCheckColFork(loaderId, iCol);
-                if (chkColFork == false) {
-                }
-                else {
-                    $("#putModal").modal("toggle");
-                }
-            }
+        function retry3() {
+            $('#btnRetry3').addClass("hidden");
+            loadPLC(3);
+        }
+        
+        function retry4a() {
+            $('#btnRetry4a').addClass("hidden");
+            loadPLC(41);
+        }
+
+        function retry4b() {
+            $('#btnRetry4b').addClass("hidden");
+            loadPLC(42);
+        }
+
+        function retryLast() {
+            $('#btnRetryLast').addClass("hidden");
+            loadPLC(5);
         }
 
         async function loadPLC(idx) {
@@ -904,7 +753,6 @@
                 if (loaderId == "") {
                     $('#pLoader1').html("Loader : ");
                     $('#err1').html("No loader is selected.");
-                    $('#btnRetry1').removeClass("hidden");
                     return;
                 }
 
@@ -914,136 +762,84 @@
                 return;
             }
 
-
-            var reelCode = $("#txtReelCode").val();
-
+            // step 2 : check flexilock and gripper
             if (idx == 2) {
-                if (reelCode == "") {
-                    $('#pItem2').html('Item : <span class="error-message" id="err2"> Please scan Reel. </span>');
-                    return;
+                var chkFlex = await loadPLCCheckFlexilock();
+                console.log('R2.1::' + chkFlex);
+                var chkGripper = await loadPLCCheckGripper();
+                console.log('R2.2::' + chkGripper);
+                if (chkFlex == true && chkGripper == true) {
+                    $("#txtStep2").val('OK');
                 }
-                // await delay(3000);
-                var chkItem = await loadPLCCheckItem(loaderId, reelCode);
-                console.log('R2::' + chkItem);
+                else {
+                    $('#btnRetry2').removeClass("hidden");
+                }
                 return;
             }
 
-            var iCol = $("#txtICol").val();
+            // step 3 : get Empty Tray Slot and call to get try
             if (idx == 3) {
-                resetColorPLCForm(3);
-                $('#pCol3').html("Checking Auto Loader Column : " + iCol);
-                // await delay(3000);
-                var chkCol = await loadPLCCheckEstHeight(loaderId, reelCode, iCol);
-                console.log('R3.1::' + chkCol);
-                if (chkCol == false && iCol <= 4) {
-                    iCol = Number(iCol) + 1;
-                    $('#pCol3').html("Checking Auto Loader Column : " + iCol);
-                    await delay(1000);
-                    chkCol = await loadPLCCheckEstHeight(loaderId, reelCode, iCol);
-                    console.log('R3.2::' + chkCol);
-                }
-                if (chkCol == false && iCol <= 4) {
-                    iCol = Number(iCol) + 1;
-                    $('#pCol3').html("Checking Auto Loader Column : " + iCol);
-                    await delay(1000);
-                    chkCol = await loadPLCCheckEstHeight(loaderId, reelCode, iCol);
-                    console.log('R3.3::' + chkCol);
-                }
-                if (chkCol == false && iCol <= 4) {
-                    iCol = Number(iCol) + 1;
-                    $('#pCol3').html("Checking Auto Loader Column : " + iCol);
-                    await delay(1000);
-                    chkCol = await loadPLCCheckEstHeight(loaderId, reelCode, iCol);
-                    console.log('R3.4::' + chkCol);
-                }
-                console.log('R3.10::' + iCol);
-                if (chkCol == false) {
-                    $('#btnRetry3').removeClass("hidden");
-                }
-                else {
-                    $("#txtICol").val(iCol);
-
-                    $("#txtHCol").val(iCol);
-
-                    // check is column correct, else need call turn
-                    // await delay(3000);
-                    var realCol = await loadPLCGetCurrentColumn(loaderId);
-                    if (realCol == 0) {
-                        $('#btnRetry3').removeClass("hidden");
+                var chkSlot = await loadPLCGetEmptyTraySlot();
+                console.log('R3.1::' + chkSlot);
+                if (chkSlot == true) {
+                    var getSlot = await loadPLCGetTray();
+                    console.log('R3.2::' + getSlot);
+                    if (chkSlot == true && getSlot == true) {
+                        $("#txtStep3").val('OK');
                     }
                     else {
-                        if (realCol < iCol) {
-                            $("#warnTurnModal").modal("toggle");
-                        }
-                        else {
-                            var chkColFork = await loadPLCCheckColFork(loaderId, iCol);
-                            if (chkColFork == false) {
-                            }
-                            else {
-                                $("#putModal").modal("toggle");
-                            }
-                        }
+                        $('#btnRetry3').removeClass("hidden");
                     }
                 }
+                else {
+                    $('#btnRetry3').removeClass("hidden");
+                }
                 return;
-                // await delay(3000);
             }
 
-            iCol = $("#txtICol").val();
-            if (idx == 4) {
-                if (loaderId == "" || reelCode == "") {
-                    swal.fire({
-                        icon: 'error',
-                        title: "Wait",
-                        text: "Please start from Step 1."
-                    });
-                    return;
-                }
-
-                resetColorPLCForm(4);
-                // await delay(1000);
-                var chkAct = await loadPLCActHeight(loaderId, reelCode, iCol);
-                console.log('R4::' + chkAct);
-                if (chkAct == "99") {
-                    // is success
+            // step 4 : Scan and Put Away
+            if (idx == 41) {
+                var chkReel = await loadPLCScanReel();
+                console.log('R4.1::' + chkReel);
+                if (chkReel == true) {
+                    var chkSlot = await loadPLCGetSlot();
+                    console.log('R4.2::' + chkSlot);
+                    if (chkSlot == true) {
+                        idx = 42;
+                    }
+                    else {
+                        $('#btnRetry4a').removeClass("hidden");
+                        return;
+                    }
                 }
                 else {
-                    $('#btnRetry4').removeClass("hidden");
-                }
-                return;
-            }
-
-            if (idx == 5) {
-                var h = $("#txtActHeight").val();
-                if (loaderId == "" || reelCode == "" || h =="" || h =="0") {
-                    swal.fire({
-                        icon: 'error',
-                        title: "Wait",
-                        text: "Please start from Step 1."
-                    });
+                    $('#btnRetry4a').removeClass("hidden");
                     return;
                 }
+            }
+            if (idx == 42) {
+                var chkPA= await loadPLCPutAway();
+                console.log('R4.1::' + chkPA);
+                if (chkPA == true) {
+                    $("#txtStep4").val("OK");
+                    await delay(3000);
+                    idx = 5;
+                }
+                else {
+                    $('#btnRetry4b').removeClass("hidden");
+                    return;
+                }
+            }
 
-                resetColorPLCForm(5);
-                var chkLast = await loadPLCUpdateDB(loaderId, reelCode, iCol);
-                console.log('R5::' + chkLast);
+            // step 5 : Scan and Put Away
+            if (idx == 5) {
+                var chkLast= await loadPLCFinal();
+                console.log('R4.1::' + chkLast);
                 if (chkLast == false) {
                     $('#btnRetryLast').removeClass("hidden");
                     return;
                 }
-                else {
-                    $('#ptLast').html("STEP 5 :: DONE Finalized ");
-                    await delay(3000);
-
-
-                    resetColorPLCForm(2);
-                    newReel();
-
-                }
-                // await delay(3000);
             }
-
-
         }
 
         async function loadPLCCheckLoader(loaderId) {
@@ -1079,13 +875,12 @@
             return fResult;
         }
 
-        async function loadPLCCheckItem(loaderId, reelCode) {
+        async function loadPLCCheckFlexilock() {
 
             var fResult = false;
 
-            // step 2 : scan item
             await $.ajax({
-                url: "/api/PLCLoader/VerifyItem/" + reelCode,
+                url: "/api/PLCHubIn/GetFlexilockStatus/",
                 type: "GET",
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
@@ -1097,39 +892,76 @@
                     console.log('2::' + JSON.stringify(result));
                     // swal.close();
                     if (result.success == true) {
-                        $('#pItem2').html("Item : " + result.data.itemCode + ' <span class="error-message" id="err2"></span>');
-                        $('#pReel2').html("Reel ID : " + result.data.reelCode);
-                        $('#pHeight2').html("Est. Height : " + result.data.thickness);
-
-                        $("#txtEstHeight").val(result.data.thickness);
-
-                        $('#txtHReelID').val(result.data.reelCode);
-                        $('#txtHItem').val(result.data.itemCode);
-                        $('#txtHExtH').val(result.data.thickness);
+                        $('#pFlexi1').html('Flexilock 1 : Right is locked. <span class="error-message" id="errFlexi1"></span>');
+                        $('#pFlexi2').html('Flexilock 2 : Left is locked. <span class="error-message" id="errFlexi2"></span>');
 
                         fResult = true;
                     }
                     else {
-                        $('#pItem2').html('Item : <span class="error-message" id="err2"> ' + result.errMessage + ' </span>');
-                        $('#err2').html(result.errMessage);
+                        if (result.data[0] != 2) {
+                            $('#pFlexi1').html('Flexilock 1 : <span class="error-message" id="errFlexi1"> ' + result.errMessage + ' </span>');
+                        }
+                        else {
+                            $('#pFlexi1').html('Flexilock 1 : Right is locked. <span class="error-message" id="errFlexi1"></span>');
+                        }
+                        if (result.data[1] != 2) {
+                            $('#pFlexi2').html('Flexilock 2 : <span class="error-message" id="errFlexi2"> ' + result.errMessage + ' </span>');
+                        }
+                        else {
+                            $('#pFlexi2').html('Flexilock 2 : Left is locked. <span class="error-message" id="errFlexi2"></span>');
+                        }
+
                     }
                 },
                 error: function (error) {
-                    $('#pItem2').html('Item : <span class="error-message" id="err2"> ' + error.val + ' </span>');
+                    $('#pFlexi1').html('Flexilock 1 : <span class="error-message" id="errFlexi1"> ' + error.val + ' </span>');
+                    $('#pFlexi2').html('Flexilock 2 : <span class="error-message" id="errFlexi2"></span>');
                 }
             });
 
             return fResult;
         }
 
-        async function loadPLCCheckEstHeight(loaderId, reelCode, iCol) {
-            var thickness = $("#txtEstHeight").val();
-            // step 3 : check column height balance and change column
+        async function loadPLCCheckGripper() {
 
             var fResult = false;
 
             await $.ajax({
-                url: "/api/PLCLoader/CheckColumnHeight/" + loaderId + "/" + iCol + "/" + thickness,
+                url: "/api/PLCHubIn/GetGripperStatus/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    console.log('2::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        $('#pGripper2').html('Gripper : Ready. <span class="error-message" id="errGripper2"></span>');
+
+                        fResult = true;
+                    }
+                    else {
+                        $('#pGripper2').html('Gripper : <span class="error-message" id="errFlexi1"> ' + result.errMessage + ' </span>');
+                    }
+                },
+                error: function (error) {
+                    $('#pGripper2').html('Gripper : <span class="error-message" id="errFlexi1"> ' + error.val + ' </span>');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCGetEmptyTraySlot() {
+
+            var fResult = false;
+
+            // step 2 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/GetEmptyTraySlot/",
                 type: "GET",
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
@@ -1141,44 +973,31 @@
                     console.log('3::' + JSON.stringify(result));
                     // swal.close();
                     if (result.success == true) {
+                        $('#pETray3').html("Empty Tray Slot : " + result.data.slotCode + ' <span class="error-message" id="errETray3"></span>');
 
-                        $('#pCol3').html("Auto Loader Column : " + iCol + '<span style="color:red; font-size:15px;" id="errCol3"> </span>');
-
-                        $('#txtHColBal').val(result.data);
+                        $("#txtHEmpty").val(result.data.slotCode);
 
                         fResult = true;
-
                     }
                     else {
-                        if (iCol < 4) {
-                            $('#pCol3').html('Auto Loader Column : <span style="color:red; font-size:15px;" id="errCol3">'+ result.errMessage + ' </span>');
-                        }
-                        else {
-                            $('#pCol3').html('Auto Loader Column : <span style="color:red; font-size:15px;" id="errCol3">All column is full. Please change loader. </span>');
-                        }
-
+                        $('#pETray3').html('Empty Tray Slot : <span class="error-message" id="errETray3"> ' + result.errMessage + ' </span>');
                     }
                 },
                 error: function (error) {
-                    if (iCol < 4) {
-                        $('#pCol3').html('Auto Loader Column : <span style="color:red; font-size:15px;" id="errCol3">'+ error.val + ' </span>');
-                    }
-                    else {
-                        $('#pCol3').html('Auto Loader Column : <span style="color:red; font-size:15px;" id="errCol3">All column is full. Please change loader. </span>');
-                    }
+                    $('#pETray3').html('Empty Tray Slot : <span class="error-message" id="errETray3"> ' + error.val + ' </span>');
                 }
             });
 
-            // console.log('3::' + fResult);
             return fResult;
         }
 
-        async function loadPLCGetCurrentColumn(loaderId) {
+        async function loadPLCGetTray() {
 
+            var eSlot = $("#txtHEmpty").val();
             var fResult = false;
 
             await $.ajax({
-                url: "/api/PLCLoader/GetCurrentColumn/" + loaderId,
+                url: "/api/PLCHubIn/RetrieveEmptyTray/" + eSlot,
                 type: "GET",
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
@@ -1187,30 +1006,32 @@
 
                 },
                 success: function (result) {
-                    console.log('3.2::' + JSON.stringify(result));
+                    console.log('3::' + JSON.stringify(result));
                     // swal.close();
                     if (result.success == true) {
+                        $('#pGetTray3').html('Get Tray Status : Done. <span class="error-message" id="errGetTray3"></span>');
+
                         fResult = true;
                     }
                     else {
-                        $('#pCol3').html("Auto Loader Column : " + result.errMessage + '<span style="color:red; font-size:15px;" id="errCol3"> </span>');
+                        $('#pGetTray3').html('Get Tray Status : <span class="error-message" id="errGetTray3"> ' + result.errMessage + ' </span>');
                     }
                 },
                 error: function (error) {
-                    $('#pCol3').html("Auto Loader Column : " + error.val + '<span style="color:red; font-size:15px;" id="errCol3"> </span>');
+                    $('#pGetTray3').html('Get Tray Status : <span class="error-message" id="errGetTray3"> ' + error.val + ' </span>');
                 }
             });
 
             return fResult;
         }
 
-        // step 3.2 : call PLC to turn
-        async function loadPLCTurnColumn(loaderId, iCol) {
+        async function loadPLCScanReel() {
 
             var fResult = false;
 
+            // step 2 : scan item
             await $.ajax({
-                url: "/api/PLCLoader/TurnColumn/" + loaderId + "/" + iCol,
+                url: "/api/PLCHubIn/GetReelID/",
                 type: "GET",
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
@@ -1219,30 +1040,40 @@
 
                 },
                 success: function (result) {
-                    console.log('3.3::' + JSON.stringify(result));
+                    console.log('3::' + JSON.stringify(result));
                     // swal.close();
                     if (result.success == true) {
+                        $('#pReel4').html("Reel ID : " + result.data.reelCode + ' <span class="error-message" id="errReel4"></span>');
+
+                        $("#txtHReel").val(result.data.reelCode);
+                        $("#txtHItem").val(result.data.itemCode);
+                        $("#txtHActH").val(result.data.actualHeight);
+
+                        $("#txtReelCode").val(result.data.reelCode);
+                        $("#txtActHeight").val(result.data.actualHeight);
+
                         fResult = true;
                     }
                     else {
-                        $('#pCol3').html("Auto Loader Column : " + result.errMessage + '<span style="color:red; font-size:15px;" id="errCol3"> </span>');
+                        $('#pReel4').html('Reel ID : <span class="error-message" id="errReel4"> ' + result.errMessage + ' </span>');
                     }
                 },
                 error: function (error) {
-                    $('#pCol3').html("Auto Loader Column : " + error.val + '<span style="color:red; font-size:15px;" id="errCol3"> </span>');
+                    $('#pReel4').html('Reel ID : <span class="error-message" id="errReel4"> ' + error.val + ' </span>');
                 }
             });
 
             return fResult;
         }
 
-        // step 3.3 : check column height balance and change column
-        async function loadPLCCheckColFork(loaderId, iCol) {
+        async function loadPLCGetSlot() {
 
+            var actH = $("#txtActHeight").val();
             var fResult = false;
 
+            // step 4 : scan item
             await $.ajax({
-                    url: "/api/PLCLoader/GetForkReady/" + loaderId + "/" + iCol,
+                url: "/api/PLCHubIn/GetBottomSlot/" + actH,
                 type: "GET",
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
@@ -1251,34 +1082,38 @@
 
                 },
                 success: function (result) {
-                    console.log('3.3::' + JSON.stringify(result));
+                    console.log('3::' + JSON.stringify(result));
                     // swal.close();
                     if (result.success == true) {
-                        $('#pFork3').html("Fork Status : Column " + iCol + ' is READY.<span style="color:red; font-size:15px;" id="errFork3"> </span>');
+                        $('#pSlot4').html("Slot Code : " + result.data.slotCode + ' <span class="error-message" id="errSlot4"></span>');
+                        $('#pSlotTake4').html("Slot Reserve : " + result.data.totalSlot + ' <span class="error-message" id="errSlotTake4"></span>');
+
+                        $("#txtHSlot").val(result.data.slotCode);
+                        $("#txtHSlotTake").val(result.data.totalSlot);
 
                         fResult = true;
-
                     }
                     else {
-                        $('#pFork3').html('Fork Status : <span style="color:red; font-size:15px;" id="errFork3">'+ result.errMessage + ' </span>');
+                        $('#pSlot4').html('Slot Code: <span class="error-message" id="errSlot4"> ' + result.errMessage + ' </span>');
                     }
                 },
                 error: function (error) {
-                    $('#pFork3').html('Auto Loader Column : <span style="color:red; font-size:15px;" id="errFork3">'+ error.val + ' </span>');
+                    $('#pSlot4').html('Slot Code : <span class="error-message" id="errSlot4"> ' + error.val + ' </span>');
                 }
             });
 
-            // console.log('3::' + fResult);
             return fResult;
         }
 
-        // step 4 : get actual height balance
-        async function loadPLCActHeight(loaderId, reelCode, iCol) {
+        async function loadPLCPutAway() {
 
-            var fResult = 0;
+            var sCode = $("#txtHSlot").val();
+            var sTake = $("#txtHSlotTake").val();
+            var fResult = false;
 
+            // step 4 : scan item
             await $.ajax({
-                url: "/api/PLCLoader/GetReelActualHeight/" + loaderId + "/" + iCol,
+                url: "/api/PLCHubIn/PutAway/" + sCode + "/" + sTake,
                 type: "GET",
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
@@ -1287,56 +1122,38 @@
 
                 },
                 success: function (result) {
-                    console.log('4::' + JSON.stringify(result));
+                    console.log('3::' + JSON.stringify(result));
                     // swal.close();
                     if (result.success == true) {
-                        $("#txtActHeight").val(result.data[1]);
-                        $('#pLoader4').html("Auto Loader Column : " + iCol + ' <span style="color:red; font-size:15px;" id="err4"> </span>');
-                        $('#pHeight4').html("Actual Height : " + result.data[1]);
+                        $('#pPutAway4').html('Put Away Status : Done <span class="error-message" id="errPutAway4"></span>');
 
-                        $('#txtHActH').val(result.data[1]);
 
-                        fResult = 99;
+                        fResult = true;
                     }
                     else {
-                        fResult = result.data[0];
-                        if (result.data[0] == "1") {
-                            $('#pLoader4').html("Auto Loader Column : " + iCol + ' - <span style="color:red; font-size:15px;" id="err4">' + result.errMessage + '</span>');
-                            $('#pHeight4').html("Actual Height : " + result.data[1]);
-                        }
-                        else {
-                            if (iCol < 4) {
-                                $('#pCol3').html("Auto Loader Column : " + (Number(iCol) + 1));
-                                $('#pLoader4').html("Auto Loader Column : " + iCol + ' - <span style="color:red; font-size:15px;" id="err4">' + result.errMessage + '</span>');
-                                $('#pHeight4').html("Actual Height : " + result.data[1]);
-
-                                $("#txtICol").val(Number(iCol) + 1);
-                                $('#txtHCol').val(Number(iCol) + 1);
-                                $("#warnTurnModal").modal("toggle");
-                            }
-                            else {
-                                $('#pLoader4').html("Auto Loader Column : " + iCol + ' - <span style="color:red; font-size:15px;" id="err4">All column is full, please change auto loader. </span>');
-                                $('#pHeight4').html("Actual Height : " + result.data[1]);
-                            }
-                        }
+                        $('#pPutAway4').html('Put Away Status : <span class="error-message" id="errPutAway4"> ' + result.errMessage + ' </span>');
                     }
                 },
                 error: function (error) {
-                    $('#pLoader4').html("Auto Loader Column : " + iCol + '<span style="color:red; font-size:15px;" id="err4">' + error.val + '</span>');
-                    $('#pHeight4').html("Actual Height : ");
+                    $('#pPutAway4').html('Put Away Status : <span class="error-message" id="errPutAway4"> ' + error.val + ' </span>');
                 }
             });
 
             return fResult;
         }
 
-        async function loadPLCUpdateDB(loaderId, reelCode, iCol) {
-            var actHeight = $("#txtActHeight").val();
-            // console.log('5::' + actHeight);
+        async function loadPLCFinal() {
 
-            // step 5 : Save data
-            $.ajax({
-                url: "/api/PLCLoader/UpdateReelIntoLoader/" + loaderId + "/" + iCol + "/" + reelCode + "/" + actHeight,
+            var lId = $("#txtLoaderId").val();
+            var col = $("#txtICol").val();
+            var rCode = $("#txtReelCode").val();
+            var sCode = $("#txtHSlot").val();
+            var sTake = $("#txtHSlotTake").val();
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/UpdateReelIntoRack/" + lId + "/" + col + "/" + rCode + "/" + sCode + "/" + sTake,
                 type: "GET",
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
@@ -1348,12 +1165,23 @@
                     console.log('5::' + JSON.stringify(result));
                     // swal.close();
                     if (result.success == true) {
-                        $('#pTextLast').html("ALL DONE. Will continue next item after 2 seconds...");
+                        if (result.data == 2) {
+                            $("#txtICol").val("1");
+                            $('#pTextLast').html("ALL Reel is DONE put away. Please End Task.");
+                        }
+                        else if (result.data == 1) {
+                            var iCol = $("#txtICol").val();
+                            $("#txtICol").val(Number(iCol) + 1);
+                            $("#warnTurnModal").modal("toggle");
+                            $('#pTextLast').html("ALL DONE. Will continue next item after 2 seconds...");
+                        }
+                        else {
+                            nextReel();
+                            $('#pTextLast').html("ALL DONE. Will continue next item after 2 seconds...");
+                        }
 
-                        // update balance height
-                        $('#txtHColBal').val(result.data);
 
-                        // continue new Item
+                        fResult = true;
                     }
                     else {
                         $('#pTextLast').html('<span style="color:red; font-size:15px;">' + result.errMessage+ '</span>');
@@ -1364,7 +1192,35 @@
                 }
             });
 
-            return true;
+            return fResult;
+        }
+
+        async function turnCol() {
+            $("#warnTurnModal").modal("toggle");
+            var loaderId = $("#txtLoaderId").val();
+            var iCol = $("#txtICol").val();
+            var realCol = await loadPLCGetCurrentColumn(loaderId);
+            if (Number(realCol) == 0) {
+                $('#btnRetry3').removeClass("hidden");
+            }
+            else {
+                if (realCol < iCol) {
+                    var turnCol = await loadPLCTurnColumn(loaderId, Number(iCol));
+                    if (turnCol == false) {
+                        return;
+                    }
+                    realCol = iCol; // (realCol) + 1;
+                }
+
+                // wait for fork is ready
+                // await delay(3000);
+                var chkColFork = await loadPLCCheckColFork(loaderId, iCol);
+                if (chkColFork == false) {
+                }
+                else {
+                    nextReel();
+                }
+            }
         }
 
         async function endTask() {
@@ -1426,6 +1282,7 @@
 
             return true;
         }
+
 
     </script>
 }

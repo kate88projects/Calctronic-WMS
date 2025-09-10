@@ -16,6 +16,7 @@ namespace RackingSystem.Data
     {
         public AutoMapperProfile()
         {
+            CreateMap<Slot, SlotDTO>();
             CreateMap<Slot, SlotListDTO>();
             CreateMap<Item, ItemListDTO>();
             CreateMap<ItemGroup, ItemGroupListDTO>();

@@ -271,7 +271,8 @@ namespace RackingSystem.Services.LoaderServices
 
             try
             {
-                var loaderList = await _dbContext.Loader.Where(x => x.IsActive == true && x.Status == EnumLoaderStatus.ReadyToLoad.ToString()).OrderBy(x => x.LoaderCode).ToListAsync();
+                var loaderList = await _dbContext.Loader.Where(x => x.IsActive == true && (x.Status == EnumLoaderStatus.ReadyToLoad.ToString() || x.Status == EnumLoaderStatus.Loaded.ToString()))
+                    .OrderBy(x => x.LoaderCode).ToListAsync();
                 var loaderListDTO = _mapper.Map<List<LoaderListDTO>>(loaderList).ToList();
                 result.success = true;
                 result.data = loaderListDTO;
@@ -286,7 +287,7 @@ namespace RackingSystem.Services.LoaderServices
             return result;
         }
 
-        public async Task<ServiceResponseModel<LoaderDTO>> GetLoaderInfo(string req, bool checkStatus, EnumLoaderStatus loaderStatus)
+        public async Task<ServiceResponseModel<LoaderDTO>> GetLoaderInfo(string req, bool checkStatus, EnumLoaderStatus loaderStatus1, EnumLoaderStatus? loaderStatus2)
         {
             ServiceResponseModel<LoaderDTO> result = new ServiceResponseModel<LoaderDTO>();
 
@@ -296,16 +297,27 @@ namespace RackingSystem.Services.LoaderServices
 
                 if (loaderInfo == null)
                 {
-                    result.errMessage = "Cannot find this laoder [" + req + "].";
+                    result.errMessage = "Cannot find this Auto Loader [" + req + "].";
                     return result;
                 }
 
                 if (checkStatus)
                 {
-                    if (loaderInfo.Status != loaderStatus.ToString())
+                    if (loaderStatus2 != null)
                     {
-                        result.errMessage = "This laoder is not [" + loaderStatus.ToString() + "].";
-                        return result;
+                        if (loaderInfo.Status != loaderStatus1.ToString() && loaderInfo.Status != loaderStatus2.ToString())
+                        {
+                            result.errMessage = "This Auto Loader is in [" + loaderInfo.Status + "].";
+                            return result;
+                        }
+                    }
+                    else
+                    {
+                        if (loaderInfo.Status != loaderStatus1.ToString())
+                        {
+                            result.errMessage = "This Auto Loader is not [" + loaderStatus1.ToString() + "].";
+                            return result;
+                        }
                     }
                 }
 

@@ -14,6 +14,7 @@ using RackingSystem.Services.ItemServices;
 using RackingSystem.Services.JOServices;
 using RackingSystem.Services.LoaderServices;
 using RackingSystem.Services.RackJobQueueServices;
+using RackingSystem.Services.RackServices;
 using RackingSystem.Services.ReelServices;
 using RackingSystem.Services.SettingServices;
 using RackingSystem.Services.SlotServices;
@@ -63,6 +64,7 @@ builder.Services.AddScoped<IGRNService, GRNService>();
 builder.Services.AddScoped<IBOMService, BOMService>();
 builder.Services.AddScoped<IJOService, JOService>();
 builder.Services.AddScoped<IRackJobQueueService, RackJobQueueService>();
+builder.Services.AddScoped<IRackService, RackService>();
 
 builder.Services.AddAuthorization();
 

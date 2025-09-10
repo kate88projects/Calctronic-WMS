@@ -20,7 +20,7 @@ namespace RackingSystem.Controllers
             _reelService = reelService;
         }
 
-        public IActionResult ReelList()
+        public IActionResult AvailableReelList()
         {
             ViewBag.PermissionList = new List<int>();
             string s = HttpContext.Session.GetString("xSession") ?? "";
@@ -31,15 +31,15 @@ namespace RackingSystem.Controllers
             }
 
             ViewData["ActiveGroup"] = "grpRACKING";
-            ViewData["ActiveTab"] = "ReelList";
-            ViewData["Title"] = "Reel List";
+            ViewData["ActiveTab"] = "AvailableReelList";
+            ViewData["Title"] = "Available Reel List";
             return View();
         }
 
         [HttpGet]
-        public async Task<ServiceResponseModel<List<ReelListDTO>>> GetReelist()
+        public async Task<ServiceResponseModel<List<ReelListDTO>>> GetAvailableReelList()
         {
-            ServiceResponseModel<List<ReelListDTO>> result = await _reelService.GetReelList();
+            ServiceResponseModel<List<ReelListDTO>> result = await _reelService.GetAvailableReelList();
             return result;
         }
 

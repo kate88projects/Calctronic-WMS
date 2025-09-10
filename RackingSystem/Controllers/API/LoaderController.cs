@@ -30,7 +30,7 @@ namespace RackingSystem.Controllers.API
         [HttpGet]
         public async Task<ServiceResponseModel<LoaderDTO>> GetLoaderInfo_ReadyToLoad(string req)
         {
-            ServiceResponseModel<LoaderDTO> result = await _loaderService.GetLoaderInfo(req, true, General.EnumLoaderStatus.ReadyToLoad);
+            ServiceResponseModel<LoaderDTO> result = await _loaderService.GetLoaderInfo(req, true, General.EnumLoaderStatus.ReadyToLoad, General.EnumLoaderStatus.Loaded);
             return result;
         }
 

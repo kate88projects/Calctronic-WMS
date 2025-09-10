@@ -223,7 +223,7 @@
                                         </li> *@
                                         <li class="nav-item">
                                             <a asp-action="NewAutoLoaderTask2" asp-controller="GRN" class="nav-link">
-                                                <i class="nav-icon bi bi-circle"></i>
+                                                <i class="nav-icon bi bi-asterisk"></i>
                                                 <p>New Loader Task</p>
                                             </a>
                                         </li>
@@ -363,7 +363,7 @@
                                     @if (ViewBag.PermissionList.Contains(100) == true)
                                     {
                                         <li class="nav-item">
-                                            <a asp-action="ReelList" asp-controller="Reel" class="nav-link">
+                                            <a asp-action="AvailableReelList" asp-controller="Reel" class="nav-link">
                                                 <i class="nav-icon bi bi-circle"></i>
                                                 <p>Available Reel List</p>
                                             </a>
@@ -396,6 +396,12 @@
                                             </a>
                                         </li>
                                     }
+                                    <li class="nav-item">
+                                        <a asp-action="NewTransferHubInTask" asp-controller="Rack" class="nav-link">
+                                            <i class="nav-icon bi bi-asterisk"></i>
+                                            <p>Transfer Hub In Task</p>
+                                        </a>
+                                    </li>
                                 </ul>
                             </li>
                         }

@@ -6,5 +6,6 @@ namespace RackingSystem.Services.ReelServices
     public interface IReelService
     {
         public Task<ServiceResponseModel<List<ReelListDTO>>> GetReelList();
+        public Task<ServiceResponseModel<List<ReelListDTO>>> GetAvailableReelList();
     }
 }

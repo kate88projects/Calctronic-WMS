@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
 }
 
 <style>
@@ -7,7 +6,7 @@
         color: #fff;
         background: #4b5366;
         /*     padding: 16px 25px;
-            margin: -20px -25px 10px; */
+                margin: -20px -25px 10px; */
         border-radius: 3px 3px 0 0;
     }
 
@@ -40,7 +39,7 @@
                                     <th>Status</th>
                                     <th>Actual Height</th>
                                     <th>Created Date</th>
-                                    <th>Action</th>
+                                    @* <th>Action</th> *@
                                 </tr>
                             </thead>
                         </table>
@@ -102,14 +101,14 @@
                                 { data: 'status' },
                                 { data: 'actualHeight' },
                                 { data: 'createdDate' },
-                                {
-                                    data: null,
-                                    render: function (data, type, row, meta) {
-                                        return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;" onclick="updateStatusForm(\'' + row.reel_Id + '\', \'' + row.reelCode + '\', \'' + row.status + '\')"><span><i class="bi bi-pencil-square""></i>  Update Status</span></button>' +
-                                                '<div style="display:flex;"><button class="btn btn-warning d-grid" style="margin-right:10px;" onclick="updateQtyForm(\'' + row.reel_Id + '\', \'' + row.reelCode + '\', \'' + row.qty + '\')"><span><i class="bi bi-pencil-square""></i>  Update Qty</span></button>';
-                                                // '<button class="btn btn-danger deactivate-account" onclick="deleteReel(\'' + row.reel_Id + '\', \'' + row.reelCode + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
-                                    }
-                                }
+                                // {
+                                //     data: null,
+                                //     render: function (data, type, row, meta) {
+                                //         return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;" onclick="updateStatusForm(\'' + row.reel_Id + '\', \'' + row.reelCode + '\', \'' + row.status + '\')"><span><i class="bi bi-pencil-square""></i>  Update Status</span></button>' +
+                                //                 '<div style="display:flex;"><button class="btn btn-warning d-grid" style="margin-right:10px;" onclick="updateQtyForm(\'' + row.reel_Id + '\', \'' + row.reelCode + '\', \'' + row.qty + '\')"><span><i class="bi bi-pencil-square""></i>  Update Qty</span></button>';
+                                //                 // '<button class="btn btn-danger deactivate-account" onclick="deleteReel(\'' + row.reel_Id + '\', \'' + row.reelCode + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
+                                //     }
+                                // }
                             ],
                         });
 

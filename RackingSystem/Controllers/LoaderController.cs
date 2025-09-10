@@ -7,6 +7,7 @@ using RackingSystem.Models.Item;
 using Newtonsoft.Json;
 using RackingSystem.Models.User;
 using Microsoft.AspNetCore.Http.HttpResults;
+using RackingSystem.General;
 
 namespace RackingSystem.Controllers
 {
@@ -68,7 +69,7 @@ namespace RackingSystem.Controllers
         [HttpGet]
         public async Task<ServiceResponseModel<LoaderDTO>> GetLoaderInfo_ReadyToLoad(string req)
         {
-             ServiceResponseModel<LoaderDTO> result = await _loaderService.GetLoaderInfo(req, true, General.EnumLoaderStatus.ReadyToLoad);
+             ServiceResponseModel<LoaderDTO> result = await _loaderService.GetLoaderInfo(req, true, EnumLoaderStatus.ReadyToLoad, EnumLoaderStatus.Loaded);
             return result;
         }
 
@@ -76,6 +77,13 @@ namespace RackingSystem.Controllers
         public async Task<ServiceResponseModel<List<LoaderListDTO>>> GetLoaderList_PendingToUnLoad()
         {
             ServiceResponseModel<List<LoaderListDTO>> result = await _loaderService.GetLoaderList_PendingToUnLoad();
+            return result;
+        }
+
+        [HttpGet]
+        public async Task<ServiceResponseModel<LoaderDTO>> GetLoaderInfo_PendingToUnLoad(string req)
+        {
+            ServiceResponseModel<LoaderDTO> result = await _loaderService.GetLoaderInfo(req, true, EnumLoaderStatus.Loaded, null);
             return result;
         }
 

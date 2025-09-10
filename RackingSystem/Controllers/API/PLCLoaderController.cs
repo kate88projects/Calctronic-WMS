@@ -599,9 +599,10 @@ namespace RackingSystem.Controllers.API
         }
 
         [HttpGet("GetReelActualHeight/{loaderId}/{colNo}")]
-        public ServiceResponseModel<int> GetReelActualHeight(long loaderId, int colNo)
+        public ServiceResponseModel<List<int>> GetReelActualHeight(long loaderId, int colNo)
         {
-            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
+            ServiceResponseModel<List<int>> result = new ServiceResponseModel<List<int>>();
+            result.data = new List<int>();
             string methodName = "GetReelHeight";
 
             try
@@ -610,20 +611,27 @@ namespace RackingSystem.Controllers.API
                 if (_loader == null)
                 {
                     result.errMessage = "Loader not found.";
+                    result.data.Add(1);
+                    result.data.Add(0);
                     return result;
                 }
                 var _loaderCol = _dbContext.LoaderColumn.Where(x => x.Loader_Id == loaderId && x.ColNo == colNo).FirstOrDefault();
                 if (_loaderCol == null)
                 {
                     result.errMessage = "Loader Column is not found.";
-                    result.data = 0;
+                    result.data.Add(1);
+                    result.data.Add(0);
                     return result;
                 }
 
                 // *** testing
-                result.errMessage = "Loader Column [" + colNo + "] is full.";
                 result.success = false;
-                result.data = 15;
+                result.errMessage = "Cannot get Actual Height, please try again.";
+                result.data.Add(1);
+                result.data.Add(0);
+                result.errMessage = "Loader Column [" + colNo + "] is full.";
+                result.data.Add(2);
+                result.data.Add(15);
                 return result;
                 // *** testing
 
@@ -644,12 +652,16 @@ namespace RackingSystem.Controllers.API
                 for (int i = 0; i < registers.Length; i++)
                 {
                     PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
-                    decimalText = getDecimalText(registers[i]);
-                    height = registers[i]; 
+                    //decimalText = getDecimalText(registers[i]);
+                    byte[] bytes = BitConverter.GetBytes(registers[i]);
+                    float floatValue = BitConverter.ToSingle(bytes, 0);
+                    float roundedValue = (float)((int)(floatValue * 1000)) / 1000;
+                    height = Convert.ToInt32(roundedValue); 
                 }
 
                 result.success = _loaderCol.BalanceHeight >= height;
-                result.data = height;
+                result.data.Add(_loaderCol.BalanceHeight >= height ? 0 : 2);
+                result.data.Add(height);
                 if (_loaderCol.BalanceHeight < height)
                 {
                     result.errMessage = "Loader Column [" + colNo + "] is full.";
@@ -731,6 +743,67 @@ namespace RackingSystem.Controllers.API
             catch (Exception ex)
             {
                 //PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        [HttpGet("EndTask/{loaderId}")]
+        public ServiceResponseModel<int> EndTask(long loaderId)
+        {
+            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
+            string methodName = "EndTask";
+
+            try
+            {
+                // 1. check db for available height
+                var _loader = _dbContext.Loader.Find(loaderId);
+                if (_loader == null)
+                {
+                    result.errMessage = "Loader is not found.";
+                    result.data = 0;
+                    return result;
+                }
+
+                // *** testing
+                result.success = true;
+                result.data = 1;
+                return result;
+                // *** testing
+
+                // 2. check plc which column is ready
+                int value = 0;
+                string plcIp = _loader.IPAddr;
+                int port = 502;
+
+                ModbusClient modbusClient = new ModbusClient(plcIp, port);
+                modbusClient.Connect();
+
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+
+                int startAddress = 4317;
+                int numRegisters = 1;
+
+                int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+
+                for (int i = 0; i < registers.Length; i++)
+                {
+                    PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                    value = registers[i];
+                }
+
+                result.success = true;
+                result.data = registers[0];
+
+                modbusClient.Disconnect();
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");
+
+            }
+            catch (Exception ex)
+            {
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
             }

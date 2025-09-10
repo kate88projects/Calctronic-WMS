@@ -39,5 +39,30 @@ namespace RackingSystem.Services.ReelServices
             return result;
         }
 
+        public async Task<ServiceResponseModel<List<ReelListDTO>>> GetAvailableReelList()
+        {
+            ServiceResponseModel<List<ReelListDTO>> result = new ServiceResponseModel<List<ReelListDTO>>();
+
+            try
+            {
+                List<int> aStatus = new List<int>();
+                aStatus.Add(1);
+                aStatus.Add(2);
+                aStatus.Add(3);
+                var reelList = await _dbContext.Reel.Where(x => aStatus.Contains(x.StatusIdx)).OrderBy(x => x.ReelCode).ToListAsync();
+                var reelListDTO = _mapper.Map<List<ReelListDTO>>(reelList).ToList();
+                result.success = true;
+                result.data = reelListDTO;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
     }
 }
