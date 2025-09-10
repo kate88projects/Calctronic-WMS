@@ -43,6 +43,7 @@ namespace RackingSystem.Data
             CreateMap<TrolleySlot, TrolleySlotDTO>();
             CreateMap<BOM, BOMListDTO>();
             CreateMap<BOMDetail, BOMDtlDTO>();
+            CreateMap<BOMDetail, BOMListReqDTO>();
             CreateMap<GRNDetail, GRNDtlListDTO>();
         }
     }

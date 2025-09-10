@@ -165,7 +165,7 @@
                             <input id="txtItemCode" name="ItemCode" type="text" class="form-control" placeholder="Item" />
                         </div>
                         <div class="col-sm-3">
-                            <input id="txtCreatedBy" name="CreatedBy" type="text" class="form-control" placeholder="Created By" />
+                            <input id="txtCreatedBySearch" name="CreatedBy" type="text" class="form-control" placeholder="Created By" />
                         </div>
                         <div class="col-sm-1 d-flex"> @* col-sm-6 d-flex justify-content-end *@
                             <button type="button" class="btn btn-primary" style="width: 100%; " onclick="loadList(1)"><i class="bi bi-search"></i> </button>
@@ -366,7 +366,7 @@
 
             var data = {
                 ItemCode: $('#txtItemCode').val(),
-                CreatedBy: $('#txtCreatedBy').val(),
+                CreatedBy: $('#txtCreatedBySearch').val(),
                 page: page, 
                 pageSize: $('#selpageSize').val(),
             };
@@ -713,8 +713,8 @@
                 });
             });
 
-            const container = document.getElementById('newModal');
-            console.log("after container", container);
+            // const container = document.getElementById('newModal');
+            // console.log("after container", container);
             if (isValid) {
                var bomData = {
                     BOM_Id: parseInt($('#txtBomId').val()) || 0,
