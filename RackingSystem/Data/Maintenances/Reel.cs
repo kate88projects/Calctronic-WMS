@@ -40,5 +40,7 @@ namespace RackingSystem.Data.Maintenances
 
         [Required]
         public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+        public long Slot_Id { get; set; }
     }
 }

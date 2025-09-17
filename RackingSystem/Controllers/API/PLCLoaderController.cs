@@ -452,8 +452,8 @@ namespace RackingSystem.Controllers.API
             return result;
         }
 
-        [HttpGet("TurnColumn/{loaderId}/{curCol}")]
-        public ServiceResponseModel<int> TurnColumn(long loaderId, int curCol)
+        [HttpGet("TurnColumn/{loaderId}/{iCol}")]
+        public ServiceResponseModel<int> TurnColumn(long loaderId, int iCol)
         {
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             string methodName = "TurnColumn";
@@ -469,11 +469,11 @@ namespace RackingSystem.Controllers.API
                     return result;
                 }
 
-                // *** testing
-                result.success = true;
-                result.data = 1;
-                return result;
-                // *** testing
+                //// *** testing
+                //result.success = true;
+                //result.data = 1;
+                //return result;
+                //// *** testing
 
                 // 2. check plc which column is ready
                 int plcActualHeight = 0;
@@ -486,15 +486,11 @@ namespace RackingSystem.Controllers.API
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
                 int startAddress = 4314;
-                if (curCol + 1 == 2)
-                {
-                    startAddress = 4314;
-                }
-                else if (curCol + 1 == 3)
+                if (iCol == 3)
                 {
                     startAddress = 4315;
                 }
-                else if (curCol + 1 == 4)
+                else if (iCol == 4)
                 {
                     startAddress = 4316;
                 }
@@ -540,11 +536,11 @@ namespace RackingSystem.Controllers.API
                     return result;
                 }
 
-                // *** testing
-                result.success = true;
-                result.data = 1;
-                return result;
-                // *** testing
+                //// *** testing
+                //result.success = true;
+                //result.data = 1;
+                //return result;
+                //// *** testing
 
                 int value = 0;
                 DateTime dtRun = DateTime.Now;
@@ -624,16 +620,16 @@ namespace RackingSystem.Controllers.API
                     return result;
                 }
 
-                // *** testing
-                result.success = false;
-                result.errMessage = "Cannot get Actual Height, please try again.";
-                result.data.Add(1);
-                result.data.Add(0);
-                result.errMessage = "Loader Column [" + colNo + "] is full.";
-                result.data.Add(2);
-                result.data.Add(15);
-                return result;
-                // *** testing
+                //// *** testing
+                //result.success = false;
+                //result.errMessage = "Cannot get Actual Height, please try again.";
+                //result.data.Add(1);
+                //result.data.Add(0);
+                //result.errMessage = "Loader Column [" + colNo + "] is full.";
+                //result.data.Add(2);
+                //result.data.Add(15);
+                //return result;
+                //// *** testing
 
                 string decimalText = "";
                 int height = 0;
@@ -767,11 +763,11 @@ namespace RackingSystem.Controllers.API
                     return result;
                 }
 
-                // *** testing
-                result.success = true;
-                result.data = 1;
-                return result;
-                // *** testing
+                //// *** testing
+                //result.success = true;
+                //result.data = 1;
+                //return result;
+                //// *** testing
 
                 // 2. check plc which column is ready
                 int value = 0;

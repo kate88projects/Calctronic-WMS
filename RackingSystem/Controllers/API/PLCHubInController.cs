@@ -256,7 +256,7 @@ namespace RackingSystem.Controllers.API
         }
 
         [HttpGet("RetrieveEmptyTray/{slotCode}")]
-        public ServiceResponseModel<int> RetrieveEmptyTray(string slotCode)
+        public async Task<ServiceResponseModel<int>> RetrieveEmptyTray(string slotCode)
         {
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             string methodName = "RetrieveEmptyTray";
@@ -280,6 +280,9 @@ namespace RackingSystem.Controllers.API
                 }
 
                 // *** testing
+                slot.HasEmptyTray = false;
+                await _dbContext.SaveChangesAsync();
+
                 result.success = true;
                 result.data = 1;
                 return result;
@@ -634,19 +637,165 @@ namespace RackingSystem.Controllers.API
             return result;
         }
 
-        [HttpGet("UpdateReelIntoRack/{loaderId}/{colNo}/{reelCode}/{slotCode}/{slotReserve}")]
-        public async Task<ServiceResponseModel<int>> UpdateReelIntoRack(long loaderId, int colNo, string reelCode, int actHeight)
+        [HttpGet("GetPickStatus")]
+        public ServiceResponseModel<int> GetPickStatus()
+        {
+            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
+            result.data = 0;
+            string methodName = "GetPickStatus";
+
+            try
+            {
+                var config = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking.ToString()).FirstOrDefault();
+                if (config == null)
+                {
+                    result.errMessage = "Please set IP Address. ";
+                    result.data = 0;
+                    return result;
+                }
+
+                // *** testing
+                result.success = true;
+                result.errMessage = "Done Picked.";
+                result.data = 0;
+                return result;
+                // *** testing
+
+                string decimalText = "";
+                string value = "";
+
+                string plcIp = config.ConfigValue;
+                int port = 502;
+
+                ModbusClient modbusClient = new ModbusClient(plcIp, port);
+                modbusClient.Connect();
+
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+
+                int startAddress = 4228;
+                int numRegisters = 1;
+                int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                for (int i = 0; i < registers.Length; i++)
+                {
+                    PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                    decimalText = getDecimalText(registers[i]);
+                    value = decimalText;
+                }
+
+                result.success = value == "1";
+                result.data = Convert.ToInt32(value);
+                if (value == "1")
+                {
+                    result.errMessage = "Done Picked.";
+                }
+                else
+                {
+                    result.errMessage = "Error";
+                }
+
+                modbusClient.Disconnect();
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");
+
+            }
+            catch (Exception ex)
+            {
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        [HttpGet("GetPlaceStatus")]
+        public ServiceResponseModel<int> GetPlaceStatus()
+        {
+            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
+            result.data = 0;
+            string methodName = "GetPlaceStatus";
+
+            try
+            {
+                var config = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking.ToString()).FirstOrDefault();
+                if (config == null)
+                {
+                    result.errMessage = "Please set IP Address. ";
+                    result.data = 0;
+                    return result;
+                }
+
+                // *** testing
+                result.success = true;
+                result.errMessage = "Done Placed.";
+                result.data = 0;
+                return result;
+                // *** testing
+
+                string decimalText = "";
+                string value = "";
+
+                string plcIp = config.ConfigValue;
+                int port = 502;
+
+                ModbusClient modbusClient = new ModbusClient(plcIp, port);
+                modbusClient.Connect();
+
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+
+                int startAddress = 4229;
+                int numRegisters = 1;
+                int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                for (int i = 0; i < registers.Length; i++)
+                {
+                    PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                    decimalText = getDecimalText(registers[i]);
+                    value = decimalText;
+                }
+
+                result.success = value == "1";
+                result.data = Convert.ToInt32(value);
+                if (value == "1")
+                {
+                    result.errMessage = "Done Placed.";
+                }
+                else
+                {
+                    result.errMessage = "Error";
+                }
+
+                modbusClient.Disconnect();
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");
+
+            }
+            catch (Exception ex)
+            {
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        [HttpGet("UpdateReelIntoRack/{loaderId}/{colNo}/{reelId}/{slotCode}/{slotReserve}")]
+        public async Task<ServiceResponseModel<int>> UpdateReelIntoRack(long loaderId, int colNo, string reelId, string slotCode, int slotReserve)
         {
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             string methodName = "UpdateReelIntoLoader";
 
             try
             {
-                // 1. check db for available height
                 var _loader = _dbContext.Loader.Find(loaderId);
                 if (_loader == null)
                 {
                     result.errMessage = "Loader is not found.";
+                    result.data = 0;
+                    return result;
+                }
+                var _reel = _dbContext.Reel.Where(x => x.Reel_Id.ToString() == reelId).FirstOrDefault();
+                if (_reel == null)
+                {
+                    result.errMessage = "Reel is not found.";
                     result.data = 0;
                     return result;
                 }
@@ -657,41 +806,91 @@ namespace RackingSystem.Controllers.API
                     result.data = 0;
                     return result;
                 }
-                var _reel = _dbContext.Reel.Where(x => x.ReelCode == reelCode).FirstOrDefault();
-                if (_reel == null)
+                var _loaderReel = _dbContext.LoaderReel.Where(x => x.Reel_Id.ToString() == reelId).FirstOrDefault();
+                if (_loaderReel == null)
                 {
-                    result.errMessage = "Reel is not found.";
+                    result.errMessage = "Loader Reel is not found.";
                     result.data = 0;
                     return result;
                 }
-                var _item = _dbContext.Item.Find(_reel.Item_Id);
-                if (_item == null)
+                var _slot = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
+                if (_slot == null)
                 {
-                    result.errMessage = "Item is not found.";
+                    result.errMessage = "Slot is not found.";
                     result.data = 0;
                     return result;
                 }
 
-                _reel.StatusIdx = (int)EnumReelStatus.InLoader;
-                _reel.Status = EnumReelStatus.InLoader.ToString();
-                _reel.ActualHeight = actHeight;
+                // 1.1 update reel status
+                _reel.StatusIdx = (int)EnumReelStatus.IsReady;
+                _reel.Status = EnumReelStatus.IsReady.ToString();
                 await _dbContext.SaveChangesAsync();
 
-                _loaderCol.BalanceHeight = _loaderCol.BalanceHeight - actHeight;
+                // 2. update loader columne balance height
+                _loaderCol.BalanceHeight = _loaderCol.BalanceHeight + _reel.ActualHeight;
                 await _dbContext.SaveChangesAsync();
 
-                LoaderReel _loaderReel = new LoaderReel();
-                _loaderReel.Loader_Id = loaderId;
-                _loaderReel.ColNo = colNo;
-                _loaderReel.Reel_Id = _reel.Reel_Id;
-                _dbContext.LoaderReel.Add(_loaderReel);
+                // 3. remove reel from loaderreel
+                _dbContext.LoaderReel.Remove(_loaderReel);
                 await _dbContext.SaveChangesAsync();
 
-                _loader.Status = EnumLoaderStatus.Loaded.ToString();
+                // 4. update slot set reelId
+                _slot.Reel_Id = _reel.Reel_Id;
+                _slot.ReelNo = "0";
+                _slot.HasReel = true;
+                _slot.HasEmptyTray = false;
                 await _dbContext.SaveChangesAsync();
+
+                // 5. update other slot if is reserved
+                if (slotReserve > 1)
+                {
+                    for (int iR = 1; iR < slotReserve; iR++)
+                    {
+                        var _slotO = _dbContext.Slot.Where(x => x.ColNo == _slot.ColNo && x.RowNo == (_slot.RowNo - iR)).FirstOrDefault();
+                        if (_slotO == null)
+                        {
+                            result.errMessage = "Other Slot is not found.";
+                            result.data = 0;
+                            return result;
+                        }
+                        _slotO.ReelNo = iR.ToString();
+                        _slotO.HasReel = true;
+                        _slotO.HasEmptyTray = false;
+                        await _dbContext.SaveChangesAsync();
+                    }
+                }
+
+
+                // 1.2 update slot id
+                _reel.Slot_Id = _slot.Slot_Id;
+                await _dbContext.SaveChangesAsync();
+
+                // 6. Checking loader all column status and update
+                int r = 0;
+                var colBal = _dbContext.LoaderReel.Where(x => x.Loader_Id == loaderId).FirstOrDefault();
+                if (colBal == null)
+                {
+                    // means all is out
+                    r = 2;
+                }
+                else
+                {
+                    var colCurBal = _dbContext.LoaderReel.Where(x => x.Loader_Id == loaderId && x.ColNo == colNo).FirstOrDefault();
+                    if (colBal == null)
+                    {
+                        // means cur col all is out
+                        r = 1;
+                    }
+                }
+
+                if (r == 2)
+                {
+                    _loader.Status = EnumLoaderStatus.ReadyToLoad.ToString();
+                    await _dbContext.SaveChangesAsync();
+                }
 
                 result.success = true;
-                result.data = _loaderCol.BalanceHeight;
+                result.data = r;
             }
             catch (Exception ex)
             {

@@ -32,6 +32,7 @@
         }
 
     .containerDtl {
+        height: 100%;
         width: 100%;
         border-radius: 10px;
         overflow: hidden;
@@ -191,9 +192,6 @@
                         <button type="button" class="btn btn-danger" onclick="restartStep()">
                             NEW LOADER
                         </button>
-                        <button type="button" class="btn btn-warning" onclick="restartItem()">
-                            CHANGE REEL
-                        </button>
                         <button type="button" class="btn btn-success" onclick="endTask()">
                             END TASK
                         </button>
@@ -281,7 +279,7 @@
                                         <div class=" " id="pnl2_body">
                                             <div class="row">
                                                 <div class="col-sm-12 col-md-6" style="text-align: center;">
-                                                    <img src="~/assets/img/qr-code (1).gif" style="width:50%;" />
+                                                    <img src="~/assets/img/vpn.gif" style="width:50%;" />
                                                 </div>
                                                 <div class="col-sm-12 col-md-6">
                                                     <p id="pFlexi1">
@@ -309,7 +307,7 @@
                                         <div class=" " id="pnl3_body">
                                             <div class="row">
                                                 <div class="col-sm-12 col-md-6" style="text-align: center;">
-                                                    <img src="~/assets/img/loading.gif" style="width:50%;" />
+                                                    <img src="~/assets/img/shower-tray.gif" style="width:50%;" />
                                                 </div>
                                                 <div class="col-sm-12 col-md-6">
                                                     <p id="pETray3">
@@ -351,12 +349,30 @@
                                                     <p id="pSlotTake4">
                                                         Slot Reserve : <span style="color:red; font-size:15px;" id="errSlotTake4"> </span>
                                                     </p>
+                                                    <button class="btn btn-warning" onclick="retry4a()" id="btnRetry4a" style="width:49%;">Retry Scan Reel</button>
+                                                </div>
+                                            </div>
+                                            <hr />
+                                            <div class="row">
+                                                <div class="col-sm-12 col-md-6" style="text-align: center;">
+                                                    <img src="~/assets/img/box.gif" style="width:50%;" />
+                                                </div>
+                                                <div class="col-sm-12 col-md-6">
+                                                    <br />
+                                                    <p id="pPick4">
+                                                        Pick Reel from Auto Loader Status : <span style="color:red; font-size:15px;" id="errPick4"> </span>
+                                                    </p>
+                                                    <button class="btn btn-warning" onclick="retry4b()" id="btnRetry4b" style="width:49%;">Retry Pick</button>
+                                                    <hr />
+                                                    <p id="pPlace4">
+                                                        Place to Tray Status : <span style="color:red; font-size:15px;" id="errPlace4"> </span>
+                                                    </p>
+                                                    <button class="btn btn-warning" onclick="retry4c()" id="btnRetry4c" style="width:49%;">Retry Place</button>
+                                                    <hr />
                                                     <p id="pPutAway4">
                                                         Put Away Status : <span style="color:red; font-size:15px;" id="errPutAway4"> </span>
                                                     </p>
-
-                                                    <button class="btn btn-warning" onclick="retry4a()" id="btnRetry4a" style="width:49%;">Retry Scan Reel</button>
-                                                    <button class="btn btn-warning" onclick="retry4b()" id="btnRetry4b" style="width:49%;">Retry Put Away</button>
+                                                    <button class="btn btn-warning" onclick="retry4d()" id="btnRetry4d" style="width:49%;">Retry Put Away</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -383,6 +399,7 @@
 
                             <input type="hidden" id="txtLoaderId">
                             <input type="hidden" id="txtLoaderCode">
+                            <input type="hidden" id="txtReelId">
                             <input type="hidden" id="txtReelCode">
                             <input type="hidden" id="txtActHeight">
                             <input type="hidden" id="txtICol">
@@ -485,6 +502,7 @@
         });
 
         $(document).ready(function () {
+            $("#txtICol").val('1');
             resetColorPLCForm(1);
         });
 
@@ -546,6 +564,38 @@
             loadPLC(1);
 
             $("#txtHLoader").val(code);
+        }
+
+        function restartStep() {
+            resetColorPLCForm(1);
+
+            $("#txtScanLoader").val('');
+            $('#pLoader1').html('Loader : <span class="error-message" id="err1"> </span>');
+
+            $("#txtLoaderId").val('');
+            $("#txtLoaderCode").val('');
+            $("#txtReelId").val('');
+            $("#txtReelCode").val('');
+            $("#txtActHeight").val(0);
+            $("#txtICol").val(1);
+            $("#txtStep2").val('');
+            $("#txtStep3").val('');
+            $("#txtStep4").val('');
+
+            $("#txtHLoader").val('');
+            $("#txtHLoaderLock").val('');
+            $("#txtHGripper").val('');
+            $("#txtHCol").val('');
+
+            $("#txtHEmpty").val('');
+            $("#txtHReel").val('');
+            $("#txtHItem").val('');
+            $("#txtHActH").val('');
+            $("#txtHSlot").val('');
+            $("#txtHSlotTake").val('');
+
+            scanLoaderEle.focus();
+
         }
 
         function nextReel() {
@@ -652,6 +702,7 @@
             }
 
             resetColorPLCForm(2);
+            $("#txtReelId").val('');
             $("#txtReelCode").val('');
             $("#txtActHeight").val(0);
             $("#txtStep2").val('');
@@ -707,15 +758,20 @@
             $('#pSlot4').html('Slot Code : <span class="error-message" id="errSlot4"></span>');
             $('#pSlotTake4').html('Slot Reserve: <span class="error-message" id="errSlotTake4"></span>');
 
+            $('#pPick4').html('Pick Reel from Auto Loader Status : <span class="error-message" id="errPick4"></span>');
+            $('#pPlace4').html('Place to Tray Status : <span class="error-message" id="errPlace4"></span>');
+            $('#pPutAway4').html('Put Away Status : <span class="error-message" id="errPutAway4"></span>');
+
             $("#txtHItem").val('');
             $("#txtHActH").val('');
             $("#txtHSlot").val('');
             $("#txtHSlotTake").val('');
 
+            $("#txtReelId").val('');
             $("#txtReelCode").val('');
             $("#txtActHeight").val('');
 
-            loadPLC(4);
+            loadPLC(41);
         }
 
         function retry2() {
@@ -733,9 +789,9 @@
             loadPLC(41);
         }
 
-        function retry4b() {
-            $('#btnRetry4b').addClass("hidden");
-            loadPLC(42);
+        function retry4d() {
+            $('#btnRetry4d').addClass("hidden");
+            loadPLC(44);
         }
 
         function retryLast() {
@@ -805,7 +861,7 @@
                     var chkSlot = await loadPLCGetSlot();
                     console.log('R4.2::' + chkSlot);
                     if (chkSlot == true) {
-                        idx = 42;
+                        idx = 44;
                     }
                     else {
                         $('#btnRetry4a').removeClass("hidden");
@@ -817,7 +873,7 @@
                     return;
                 }
             }
-            if (idx == 42) {
+            if (idx == 44) {
                 var chkPA= await loadPLCPutAway();
                 console.log('R4.1::' + chkPA);
                 if (chkPA == true) {
@@ -833,6 +889,7 @@
 
             // step 5 : Scan and Put Away
             if (idx == 5) {
+                resetColorPLCForm(5);
                 var chkLast= await loadPLCFinal();
                 console.log('R4.1::' + chkLast);
                 if (chkLast == false) {
@@ -895,6 +952,8 @@
                         $('#pFlexi1').html('Flexilock 1 : Right is locked. <span class="error-message" id="errFlexi1"></span>');
                         $('#pFlexi2').html('Flexilock 2 : Left is locked. <span class="error-message" id="errFlexi2"></span>');
 
+                        $("#txtHLoaderLock").val('Right is locked. Left is locked.');
+
                         fResult = true;
                     }
                     else {
@@ -941,6 +1000,8 @@
                     if (result.success == true) {
                         $('#pGripper2').html('Gripper : Ready. <span class="error-message" id="errGripper2"></span>');
 
+                        $("#txtHGripper").val('Ready.');
+                        $("#txtHCol").val($("#txtICol").val());
                         fResult = true;
                     }
                     else {
@@ -1040,15 +1101,18 @@
 
                 },
                 success: function (result) {
-                    console.log('3::' + JSON.stringify(result));
+                    console.log('4::' + JSON.stringify(result));
                     // swal.close();
                     if (result.success == true) {
                         $('#pReel4').html("Reel ID : " + result.data.reelCode + ' <span class="error-message" id="errReel4"></span>');
+                        $('#pItem4').html("Item Code : " + result.data.itemCode + ' <span class="error-message" id="errItem4"></span>');
+                        $('#pHeight4').html("Actual Height : " + result.data.actualHeight + ' ');
 
                         $("#txtHReel").val(result.data.reelCode);
                         $("#txtHItem").val(result.data.itemCode);
                         $("#txtHActH").val(result.data.actualHeight);
 
+                        $("#txtReelId").val(result.data.reel_Id);
                         $("#txtReelCode").val(result.data.reelCode);
                         $("#txtActHeight").val(result.data.actualHeight);
 
@@ -1105,6 +1169,81 @@
             return fResult;
         }
 
+        async function loadPLCPickFromLoader() {
+
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/GetPickStatus/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    console.log('3::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        $('#pPick4').html('Pick Reel from Auto Loader Status : Done <span class="error-message" id="errPick4"></span>');
+                        $('#pPlace4').html('Place to Tray Status : Done <span class="error-message" id="errPlace4"></span>');
+                        $('#pPutAway4').html('Put Away Status : Done <span class="error-message" id="errPutAway4"></span>');
+
+                        fResult = true;
+                    }
+                    else {
+                        $('#pPutAway4').html('Put Away Status : <span class="error-message" id="errPutAway4"> ' + result.errMessage + ' </span>');
+                    }
+                },
+                error: function (error) {
+                    $('#pPutAway4').html('Put Away Status : <span class="error-message" id="errPutAway4"> ' + error.val + ' </span>');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCPutAway() {
+
+            var sCode = $("#txtHSlot").val();
+            var sTake = $("#txtHSlotTake").val();
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/PutAway/" + sCode + "/" + sTake,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    console.log('3::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        $('#pPick4').html('Pick Reel from Auto Loader Status : Done <span class="error-message" id="errPick4"></span>');
+                        $('#pPlace4').html('Place to Tray Status : Done <span class="error-message" id="errPlace4"></span>');
+                        $('#pPutAway4').html('Put Away Status : Done <span class="error-message" id="errPutAway4"></span>');
+
+
+                        fResult = true;
+                    }
+                    else {
+                        $('#pPutAway4').html('Put Away Status : <span class="error-message" id="errPutAway4"> ' + result.errMessage + ' </span>');
+                    }
+                },
+                error: function (error) {
+                    $('#pPutAway4').html('Put Away Status : <span class="error-message" id="errPutAway4"> ' + error.val + ' </span>');
+                }
+            });
+
+            return fResult;
+        }
+
         async function loadPLCPutAway() {
 
             var sCode = $("#txtHSlot").val();
@@ -1146,14 +1285,14 @@
 
             var lId = $("#txtLoaderId").val();
             var col = $("#txtICol").val();
-            var rCode = $("#txtReelCode").val();
+            var rId = $("#txtReelId").val();
             var sCode = $("#txtHSlot").val();
             var sTake = $("#txtHSlotTake").val();
             var fResult = false;
 
             // step 4 : scan item
             await $.ajax({
-                url: "/api/PLCHubIn/UpdateReelIntoRack/" + lId + "/" + col + "/" + rCode + "/" + sCode + "/" + sTake,
+                url: "/api/PLCHubIn/UpdateReelIntoRack/" + lId + "/" + col + "/" + rId + "/" + sCode + "/" + sTake,
                 type: "GET",
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),

@@ -2,6 +2,7 @@
 @{
 }
 
+
 <style type="text/css">
     body {
         color: #566787;
@@ -22,7 +23,7 @@
         color: #fff;
         background: #4b5366;
         /*     padding: 16px 25px;
-                    margin: -20px -25px 10px; */
+                        margin: -20px -25px 10px; */
         border-radius: 3px 3px 0 0;
     }
 
@@ -31,359 +32,222 @@
             font-size: 24px;
         }
 
-    .text-success {
-        color: #10c469;
+    .containerDtl {
+        height: 100%;
+        width: 100%;
+        border-radius: 10px;
+        overflow: hidden;
+        background-color: white;
+        padding: 30px;       
     }
 
-    .text-info {
-        color: #62c9e8;
+    .containerDtlHistory {
+        width: 100%;
+        border-radius: 10px;
+        overflow: hidden;
+        background-color: white;
+        padding: 30px;
     }
 
-    .text-warning {
-        color: #FFC107;
+        .containerDtlHistory p {
+            margin-bottom: 0;
+        }
+
+        .containerDtlHistory input {
+            /* padding: 10px 0; */
+            margin-bottom: 10px;
+        }
+
+    .progressBar {
+        margin-bottom: 30px;
+        overflow: hidden;
+        color: lightgray;
     }
 
-    .text-danger {
-        color: #ff5b5b;
-    }
-
-    .pagination {
-        float: right;
-        margin: 0 0 5px;
-    }
-
-        .pagination li a {
-            border: none;
-            font-size: 13px;
-            min-width: 30px;
-            min-height: 30px;
-            color: #999;
-            margin: 0 2px;
-            line-height: 30px;
-            border-radius: 2px !important;
+        .progressBar li {
+            list-style-type: none;
+            font-size: 15px;
+            width: 20%;
+            float: left;
+            font-weight: 400;
             text-align: center;
-            padding: 0 6px;
+            position: relative;
+            z-index: 1;
         }
 
-            .pagination li a:hover {
-                color: #666;
+        .progressBar .active {
+            color: #673ab7;
+        }
+
+            .progressBar li::before {
+                width: 50px;
+                height: 50px;
+                line-height: 50px;
+                display: block;
+                font-size: 20px;
+                color: #fff;
+                background: lightgrey;
+                border-radius: 50%;
+                margin: 0 auto 10px auto;
+                padding: 2px;
             }
 
-        .pagination li.active a {
-            background: #03A9F4;
+        .progressBar li::after {
+            content: "";
+            width: 100%;
+            height: 2px;
+            background: lightgrey;
+            position: absolute;
+            left: 50px;
+            top: 25px;
+            z-index: -1;
         }
 
-            .pagination li.active a:hover {
-                background: #0397d6;
-            }
-
-        .pagination li.disabled i {
-            color: #ccc;
+        .progressBar li.active::before {
+            background: #673ab7;
         }
 
-        .pagination li i {
-            font-size: 16px;
-            padding-top: 6px
+        .progressBar li.next::after {
+            background: #673ab7;
         }
 
-    .hint-text {
-        float: left;
-        margin-top: 10px;
-        font-size: 13px;
+        .progressBar #step1::before {
+            content: "1";
+            font-family: Arial;
+        }
+
+        .progressBar #step2::before {
+            content: "2";
+            font-family: Arial;
+        }
+
+        .progressBar #step3::before {
+            content: "3";
+            font-family: Arial;
+        }
+
+        .progressBar #step4::before {
+            content: "4";
+            font-family: Arial;
+        }
+
+        .progressBar #stepLast::before {
+            content: "5";
+            font-family: Arial;
+        }
+
+       .progressBar #stepLast::after {
+           width: 0;
+        }
+
+    .form-group {
+        display: none;
     }
 
-    div.dt-buttons {
-        float: right;
-    }
-
-
-
-    .panel-focus {
-        background-color: #198754 !important;
-    }
-
-    .panel {
-        background-color: #6c757d !important;
-    }
-
-    .panel-dtl-focus {
-        background-color: white !important;
-    }
-
-        .panel-dtl-focus span {
-            color: black;
-            background-color: #white;
+        .form-group.form-active {
+            display: block;
+            margin: 30px 0;
         }
 
-        .panel-dtl-focus div.timeline-body {
-            color: black;
-            background-color: white;
+        .form-group-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 10px;
         }
 
-        .panel-dtl-focus div.timeline-footer {
-            color: black;
-            background-color: #white;
-        }
-
-    .panel-dtl {
-        background-color: #e9ecef !important;
-    }
-
-        .panel-dtl span {
-            color: grey;
-            background-color: #e9ecef;
-        }
-
-        .panel-dtl div.timeline-body {
-            color: grey;
-            background-color: #e9ecef;
-        }
-
-        .panel-dtl div.timeline-footer {
-            color: grey;
-            background-color: #e9ecef;
-        }
-
-    .titleDisable {
-        /* background-color: #e9ecef !important; */
-    }
-
-        .titleDisable span {
-            /* background-color: #e9ecef !important; */
-            color: darkgray;
-        }
-
-    .bodyDisable i {
-        background-color: darkgreen !important;
-    }
-
-    .bodyDisable p {
-        color: grey;
-        /* background-color: #e9ecef; */
-    }
-
-    .bodyDisable div.timeline-footer {
-        color: grey;
-        background-color: #e9ecef;
+    .form-title {
+        color: #673ab7;
+        text-align: center;
+        font-size: 28px;
+        margin: 20px 0;
     }
 
     .error-message {
         color: red;
-        font-size: 0.875rem;
-        margin-top: 5px;
-    }
-
-    .is-invalid {
-        border-color: red;
-    }
-
-    .is-valid {
-        border-color: green;
+        /* font-size: 0.875rem; */
     }
 
     .hidden {
         display: none;
     }
 
-    .fa-cog {
-        /* margin-top: 5px;
-            margin-left: 16px;
-            margin-right: 10px; */
-        /* font-size:20px; */
-        color: #198754;
-        animation: rotate 3s linear infinite;
-    }
-
-    .err .fa-cog {
-        color: red;
-        animation: rotate 3s linear infinite;
-    }
-
-    @@keyframes rotate {
-        from {
-            transform: rotate(0deg);
-        }
-
-        to {
-            transform: rotate(360deg);
+    @@media (min-width: 1380px) {
+        .progressBar li::after {
+            left: 100px;
         }
     }
 
-    .container {
-        max-width: 1080px;
-        margin: 50px auto;
-        padding: 0 20px;
+    .gauge {
         position: relative;
+        border-radius: 50%/100% 100% 0 0;
+        background-color: var(--color, #a22);
+        overflow: hidden;
     }
 
-        .container .center-line {
+        .gauge:before {
+            content: "";
+            display: block;
+            padding-top: 50%; /* ratio of 2:1*/
+        }
+
+        .gauge .chart {
+            overflow: hidden;
+        }
+
+        .gauge .mask {
             position: absolute;
-            height: 100%;
-            width: 4px;
-            background: #fff;
-            left: 50%;
-            top: 20px;
-            transform: translateX(-50%);
+            left: 20%;
+            right: 20%;
+            bottom: 0;
+            top: 40%;
+            background-color: #fff;
+            border-radius: 50%/100% 100% 0 0;
         }
 
-        .container .row {
-            display: flex;
+        .gauge .percentage {
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            bottom: 0;
+            right: -1px;
+            background-color: var(--background, #aaa);
+            transform: rotate(var(--rotation));
+            transform-origin: bottom center;
+            transition-duration: 600;
         }
 
-        .container .first {
-            justify-content: flex-start;
+        .gauge:hover {
+            --rotation: 100deg;
         }
 
-        .container .second {
-            justify-content: flex-end;
-        }
-
-        .container .row section {
-            background: #fff;
-            border-radius: 5px;
-            width: calc(50% - 40px);
-            padding: 20px;
-            position: relative;
-        }
-
-            .container .row section::before {
-                position: absolute;
-                content: "";
-                height: 15px;
-                width: 15px;
-                background: #fff;
-                top: 28px;
-                z-index: -1;
-                transform: rotate(45deg);
-            }
-
-    .first section::before {
-        right: -7px;
-    }
-
-    .second section::before {
-        left: -7px;
-    }
-
-    .row section .icon,
-    .center-line .scroll-icon {
-        position: absolute;
-        background: white;
-        height: 40px;
-        width: 40px;
-        text-align: center;
-        line-height: 40px;
-        border-radius: 50%;
-        color: #2D9596;
-        font-size: 17px;
-        /* box-shadow: 0 0 0 4px #fff, inset 0 2px 0 rgba(0,0,0,0.08), 0 3px 0 4px rgba(0,0,0,0.05); */
-    }
-
-    .center-line .scroll-icon {
-        bottom: 0px;
-        left: 50%;
-        font-size: 25px;
-        transform: translateX(-50%);
-    }
-
-    .first section .icon {
-        top: 15px;
-        right: -60px;
-    }
-
-    .second section .icon {
-        top: 15px;
-        left: -60px;
-    }
-
-    .row section .details,
-    .row section .bottom {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-        .row section .details .title {
-            font-size: 22px;
-            font-weight: 600;
-        }
-
-    .row section p {
-        margin: 10px 0 17px 0;
-    }
-
-    .row section .bottom a {
-        text-decoration: none;
-        background: #2D9596;
-        color: #fff;
-        padding: 7px 15px;
-        border-radius: 5px;
-        font-weight: 400;
-        transition: all 0.3s ease;
-    }
-
-        .row section .bottom a:hover {
-            transform: scale(0.97);
-        }
-    /* Responsive Code */
-    @@media screen and (max-width: 790px) {
-        .container .center-line
-
-    {
-        left: 40px;
-    }
-
-    .container .row {
-        margin: 30px 0 3px 60px;
-    }
-
-        .container .row section {
+        .gauge .value {
+            position: absolute;
+            bottom: 0%;
+            left: 0;
             width: 100%;
+            text-align: center;
         }
 
-    .first section .icon {
-        left: -60px;
+        .gauge .min {
+            position: absolute;
+            bottom: 0;
+            left: 5%;
+        }
+
+        .gauge .max {
+            position: absolute;
+            bottom: 0;
+            right: 5%;
+        }
+
+    .text-bg-light {
+        background-color: grey !important;
     }
-
-    .first section::before {
-        left: -7px;
-    }
-
-    }
-    @@media screen and (max-width: 440px) {
-        .container .center-line, .row section::before, .row section .icon
-
-    {
-        display: none;
-    }
-
-    .container .row {
-        margin: 10px 0;
-    }
-
-    }
-
-
-    .hiddenBorder {
-        border: 0px;
-    }
-
-    section {
-        border: 5px solid #2D9596;
-    }
-
-    .bi-check-all {
-        /* margin-top: 5px;
-                margin-left: 16px;
-                        margin-right: 10px; */
-        font-size: 38px !important;
-        color: darkgreen !important;
-    }
-
 </style>
 
 <div class="container-fluid">
-    
+
     <div class="row">
         <div class="col-12">
             <div class="card card-outline ">
@@ -392,183 +256,242 @@
                         <h2>NEW Auto Loader Task <b></b></h2>
                     </div>
                     <div class="card-tools">
-                        <button type="button" class="btn btn-success" onclick="restartStep()">
-                            RESTART STEP
+                        <button type="button" class="btn btn-danger" onclick="restartStep()">
+                            NEW LOADER
+                        </button>
+                        <button type="button" class="btn btn-warning" onclick="restartItem()">
+                            CHANGE REEL
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="endTask()">
+                            END TASK
                         </button>
                     </div>
                 </div>
-                <div class="card-body" style="background: #f2f2f2;">
-                    <div class="container">
-                        <div class="center-line">
-                            <a href="#" class="scroll-icon"><i class="fas fa-caret-up"></i></a>
-                        </div>
-                        @* STEP 1 *@
-                        <div class="row first">
-                            <section id="sec1">
-                                @* <img class="icon" src="~/assets/img/barcode.gif" alt="Sample GIF" width="400" height="300" id="spin1"> *@
-                                <span id="spin1"><i class="icon fas fa-cog"></i></span> <i class="icon bi bi-check-all" id="done1"></i>
-                                <div class="details" id="pnl1_title">
-                                    <span class="title" id="pt1">STEP 1 :: Check Loader Status ... </span>
-                                </div>
-
-                                <div class=" " id="pnl1_body">
-                                    <p id="pLoader1">
-                                        Loader :
-                                        <span class="error-message" id="err1"> aaa </span>
-                                    </p>
-                                    <div class="bottom">
-                                        <a href="javascript:retry1();" id="btnRetry1">ReScan</a>
-                                    </div>
-                                </div>
-
-                            </section>
-                        </div>
-                        @* STEP 2 *@
-                        <div class="row second">
-                            <section id="sec2">
-                                <i class="icon bi bi-hourglass" id="waiting2"></i>
-                                <span id="spin2"><i class="icon fas fa-cog"></i></span> <i class="icon bi bi-check-all" id="done2"></i>
-                                <div class="details" id="pnl2_title">
-                                    <span class="title" id="pt2">STEP 2 :: Waiting Scan Reel ... </span>
-                                </div>
-                                <div class=" " id="pnl2_body">
-                                    <p id="pItem2">
-                                        Item :
-                                        <span style="color:red; font-size:15px;" id="err2"> </span>
-                                    </p>
-                                    <p id="pReel2">
-                                        Reel ID :
-                                    </p>
-                                    <p id="pHeight2">
-                                        Est. Height :
-                                    </p>
-
-                                    <div class="bottom">
-                                        <a href="javascript:retry2();" id="btnRetry2">ReScan</a>
-                                    </div>
-                                </div>
-
-                            </section>
-                        </div>
-                        @* STEP 3 *@
-                        <div class="row first">
-                            <section id="sec3">
-                                <i class="icon bi bi-hourglass" id="waiting3"></i>
-                                <span id="spin3"><i class="icon fas fa-cog"></i></span> <i class="icon bi bi-check-all" id="done3"></i>
-                                <div class="details" id="pnl3_title">
-                                    <span class="title" id="pt3">STEP 3 :: Checking column available ... </span>
-                                </div>
-                                <div class=" " id="pnl3_body">
-                                    <p id="pCol3">
-                                        Available Column :
-                                        <span style="color:red; font-size:15px;" id="errCol3"> </span>
-                                    </p>
-                                    <p id="pFork3">
-                                        Fork Status :
-                                        <span style="color:red; font-size:15px;" id="errFork3"> </span>
-                                    </p>
-                                    <br />
-                                    <div class="bottom">
-                                        <a href="javascript:retry3();" id="btnRetry3">Retry Check Column</a>
-                                    </div>
-                                </div>
-                            </section>
-                        </div>
-                        @* STEP 4 *@
-                        <div class="row second">
-                            <section id="sec4">
-                                <i class="icon bi bi-hourglass" id="waiting4"></i>
-                                <span id="spin4"><i class="icon fas fa-cog"></i></span> <i class="icon bi bi-check-all" id="done4"></i>
-                                <div class="details" id="pnl4_title">
-                                    <span class="title" id="pt4">STEP 4 :: Reading Reel Info ... </span>
-                                </div>
-                                <div class=" " id="pnl4_body">
-                                    <p id="pLoader4">
-                                        Auto Loader Column : 1 <span style="color:red; font-size:15px;" id="err4"> </span>
-                                    </p>
-                                    <p id="pHeight4">
-                                        Actual Height :
-                                    </p>
-
-                                    <div class="bottom">
-                                        <a href="javascript:loadPLC(4);" id="btnRetry4">Retry Read Height</a>
-                                    </div>
-                                </div>
-                            </section>
-                        </div>
-                        @* STEP 5 *@
-                        <div class="row first">
-                            <section id="secLast">
-                                <i class="icon bi bi-hourglass" id="waitingLast"></i>
-                                <span id="spinLast"><i class="icon fas fa-cog"></i></span> <i class="icon bi bi-check-all" id="doneLast"></i>
-                                <div class="details" id="pnlLast_title">
-                                    <span class="title" id="ptLast">STEP 5 :: Keep Record and Finalyzing ... </span>
-                                </div>
-                                <div class=" " id="pnlLast_body">
-                                    <p style="text-align:center;" id="pTextLast">Waiting finish loading reel ...</p>
-
-                                    <div class="bottom">
-                                        <a href="javascript:loadPLC(5);" id="btnRetryLast">Retry</a>
-                                    </div>
-                                </div>
-                            </section>
-                        </div>
-                    </div>
-                    <input type="hidden" id="txtLoaderId">
-                    <input type="hidden" id="txtEstHeight">
-                    <input type="hidden" id="txtActHeight">
-                    <input type="hidden" id="txtReelCode">
-                    <input type="hidden" id="txtICol">
-                </div>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<div class="modal fade" id="loaderModal" role="dialog">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-body" style="padding: 2em;">
                 <div class="row">
-                    <div class="col-6">
-                        <img src="~/assets/img/barcode.gif" style="width:100%;"/>
+                    <div class="col-sm-12 col-md-3" style="padding-right:0px;">
+                        <div class="card-body" style="background: #f2f2f2; width:100%; height:100%;padding-right:0px;">
+                            <div class="container containerDtlHistory" style="min-height:100px;">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <p class="text-center"><strong>Loader : 00AS01</strong></p>
+                                        <br />
+                                        <div class="progress-group">
+                                           <i class="bi bi-music-note" style="color: green;"></i> Column 1
+                                            <span class="float-end"><b>30</b>/110 mm</span>
+                                            <div class="progress progress-sm">
+                                                <div class="progress-bar text-bg-light" style="width: 80%"></div>
+                                            </div>
+                                        </div>
+                                        <br />
+                                        <div class="progress-group">
+                                            Column 2
+                                            <span class="float-end"><b>30</b>/110 mm</span>
+                                            <div class="progress progress-sm">
+                                                <div class="progress-bar text-bg-light" style="width: 10%"></div>
+                                            </div>
+                                        </div>
+                                        <br />
+                                        <div class="progress-group">
+                                            Column 3
+                                            <span class="float-end"><b>30</b>/110 mm</span>
+                                            <div class="progress progress-sm">
+                                                <div class="progress-bar text-bg-light" style="width: 0%"></div>
+                                            </div>
+                                        </div>
+                                        <br />
+                                        <div class="progress-group">
+                                            Column 4
+                                            <span class="float-end"><b>30</b>/110 mm</span>
+                                            <div class="progress progress-sm">
+                                                <div class="progress-bar text-bg-light" style="width: 50%"></div>
+                                            </div>
+                                        </div>
+                                        <hr />
+                                        <div style="width: 100%; display: flex; justify-content: center;">
+                                            <div class="gauge" style="width: 200px; --rotation:180deg; --color:#5cb85c; --background:#e9ecef;">
+                                                <div class="percentage"></div>
+                                                <div class="mask"></div>
+                                                <span class="value"><span style="font-size:12px;">Battery : </span>100%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @* <div class="col-12">
+                                        <p>Auto Loader ID : </p>
+                                        <input class="form-control" type="text" id="txtHLoader" disabled> 
+                                        <p>Column : </p>
+                                        <input class="form-control" type="text" id="txtHCol" disabled>
+                                        <p>Balance Height : </p>
+                                        <input class="form-control" type="text" id="txtHColBal" disabled>
+                                    </div>*@
+                                </div>
+                            </div>
+                            <br />
+                            <div class="container containerDtlHistory" style="min-height:100px;">
+                                <p>Reel ID : </p>
+                                <input class="form-control" type="text" id="txtHReelID" disabled>
+                                <p>Item : </p>
+                                <input class="form-control" type="text" id="txtHItem" disabled>
+                                <p>Ext. Height : </p>
+                                <input class="form-control" type="text" id="txtHExtH" disabled>
+                                <p>Act. Height : </p>
+                                <input class="form-control" type="text" id="txtHActH" disabled>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-6">
-                        <p class="" style="font-size:32px;text-align:center;">Start to Scan Loader Barcode / QR Code</p>
-                        <br />
-                        <input id="txtScanLoader" class="form-control form-control-lg" type="text" placeholder="Scan or Insert Loader ID ... ">
+                    <div class="col-sm-12 col-md-9" style="padding-left:0px;">
+                        <div class="card-body" style="background: #f2f2f2; height:100%;">
+                            <div class="container containerDtl" style="">
+                                <ul class="progressBar">
+                                    <li class="active" id="step1">
+                                        Loader
+                                    </li>
+                                    <li id="step2">
+                                        Reel
+                                    </li>
+                                    <li id="step3">
+                                        Column
+                                    </li>
+                                    <li id="step4">
+                                        Put
+                                    </li>
+                                    <li id="stepLast">
+                                        Finalize
+                                    </li>
+                                </ul>
+
+                                <div class="form-group" id="sec1">
+                                    <div class="row">
+                                        <h2 class="form-title">Step 1 :: Scan Loader </h2>
+                                        <div class=" " id="pnl1_body">
+                                            <div class="row">
+                                                <div class="col-sm-12 col-md-6" style="text-align: center;">
+                                                    <img src="~/assets/img/barcode.gif" style="width:50%;" />
+                                                </div>
+                                                <div class="col-sm-12 col-md-6">
+                                                    <div class="input-group">
+                                                        <input class="form-control" type="text" placeholder="Scan or Insert Loader ID ... " id="txtScanLoader">
+                                                        <span class="input-group-text" onclick="clearLoaderScanCode()">X</span>
+                                                    </div>
+                                                    <br />
+                                                    <p id="pLoader1">
+                                                        Loader :
+                                                        <span class="error-message" id="err1"> aaa </span>
+                                                    </p>
+
+                                                    <button class="btn btn-success" style="width:100%;" onclick="retry1()"> Next </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group" id="sec2">
+                                    <div class="row">
+                                        <h2 class="form-title">Step 2 :: Scan Reel ID </h2>
+                                        <div class=" " id="pnl2_body">
+                                            <div class="row">
+                                                <div class="col-sm-12 col-md-6" style="text-align: center;">
+                                                    <img src="~/assets/img/qr-code (1).gif" style="width:50%;" />
+                                                </div>
+                                                <div class="col-sm-12 col-md-6">
+                                                    <div class="input-group">
+                                                        <input class="form-control" type="text" placeholder="Scan or Insert Reel ID ... " id="txtScanItem">
+                                                        <span class="input-group-text" onclick="clearItemScanCode()">X</span>
+                                                    </div>
+                                                    <br />
+                                                    <p id="pItem2">
+                                                        Item :
+                                                        <span style="color:red; font-size:15px;" id="err2"> </span>
+                                                    </p>
+                                                    <p id="pReel2">
+                                                        Reel ID :
+                                                    </p>
+                                                    <p id="pHeight2">
+                                                        Est. Height :
+                                                    </p>
+                                                    <button class="btn btn-success" style="width:100%;" onclick="retry2()"> Next </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group" id="sec3">
+                                    <div class="row">
+                                        <h2 class="form-title">Step 3 :: Check Column </h2>
+                                        <div class=" " id="pnl3_body">
+                                            <div class="row">
+                                                <div class="col-sm-12 col-md-6" style="text-align: center;">
+                                                    <img src="~/assets/img/loading.gif" style="width:50%;" />
+                                                </div>
+                                                <div class="col-sm-12 col-md-6">
+                                                    <p id="pCol3">
+                                                        Available Column :
+                                                        <span style="color:red; font-size:15px;" id="errCol3"> </span>
+                                                    </p>
+                                                    <p id="pFork3">
+                                                        Fork Status :
+                                                        <span style="color:red; font-size:15px;" id="errFork3"> </span>
+                                                    </p>
+                                                    @* <button class="btn btn-success" style="width:49%;" onclick="retry3()"> Next </button> *@
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group" id="sec4">
+                                    <div class="row">
+                                        <h2 class="form-title">Step 4 :: Check Actual Height </h2>
+                                        <div class=" " id="pnl4_body">
+                                            <div class="row">
+                                                <div class="col-sm-12 col-md-6" style="text-align: center;">
+                                                    <img src="~/assets/img/3d-scanning.gif" style="width:50%;" />
+                                                </div>
+                                                <div class="col-sm-12 col-md-6">
+                                                    <p id="pLoader4">
+                                                        Auto Loader Column : 1 <span style="color:red; font-size:15px;" id="err4"> </span>
+                                                    </p>
+                                                    <p id="pHeight4">
+                                                        Actual Height :
+                                                    </p>
+
+                                                    <button class="btn btn-warning" onclick="loadPLC(4)" id="btnRetry4" style="width:49%;">Retry Read Height</button>
+                                                    <button class="btn btn-success" style="width:49%;" onclick="loadPLC(5)"> Next </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group" id="secLast">
+                                    <div class="row form-group-row">
+                                        <h2 class="form-title">Step 5 :: Finalizing </h2>
+                                        <div class=" " id="pnlLast_body">
+                                            <div class="row">
+                                                <div class="col-sm-12 col-md-6" style="text-align: center;">
+                                                    <img src="~/assets/img/padlock.gif" style="width:50%;" />
+                                                </div>
+                                                <div class="col-sm-12 col-md-6">
+                                                    <p style="text-align:center;" id="pTextLast">Waiting finish loading reel ...</p>
+
+                                                    <button class="btn btn-warning" onclick="loadPLC(5)" id="btnRetryLast" style="width:49%;">Retry Save</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <input type="hidden" id="txtLoaderId">
+                            <input type="hidden" id="txtLoaderCode">
+                            <input type="hidden" id="txtEstHeight">
+                            <input type="hidden" id="txtActHeight">
+                            <input type="hidden" id="txtReelCode">
+                            <input type="hidden" id="txtICol">
+                        </div>
                     </div>
                 </div>
             </div>
-            @* <div class="modal-footer">
-                <button type="button" class="btn btn-success" onclick="addLoader(1, '','')">Done</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="cancelLoaderForm()">Cancel</button>
-            </div> *@
         </div>
     </div>
-</div>
 
-<div class="modal fade" id="itemModal" role="dialog" @* data-bs-backdrop="static" *@>
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-body" style="padding: 50px;">
-                <div class="row">
-                    <div class="col-6">
-                        <img src="~/assets/img/qr-code (1).gif" style="width:100%;" />
-                    </div>
-                    <div class="col-6">
-                        <p class="" style="font-size:2em;">Start to Scan Reel ID</p>
-                        <input id="txtScanItem" class="form-control form-control-lg" type="text" placeholder="Scan or Insert Reel ID ... ">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <div class="modal fade" id="warnTurnModal" role="dialog" data-bs-backdrop="static">
@@ -654,19 +577,21 @@
                         addLoader(0, result.data.loader_Id, result.data.loaderCode);
                     }
                     else {
-                        swal.fire({
-                            icon: 'error',
-                            title: "Wait",
-                            text: result.errMessage
-                        });
+                        $('#pLoader1').html('Loader :  <span class="error-message" id="err1">' + result.errMessage + '</span>');
+                        // swal.fire({
+                        //     icon: 'error',
+                        //     title: "Wait",
+                        //     text: result.errMessage
+                        // });
                     }
                 },
                 error: function (error) {
-                    swal.fire({
-                        icon: 'error',
-                        title: "Wait",
-                        text: error.val
-                    });
+                    $('#pLoader1').html('Loader :  <span class="error-message" id="err1">' + error.val + '</span>');
+                    // swal.fire({
+                    //     icon: 'error',
+                    //     title: "Wait",
+                    //     text: error.val
+                    // });
                 }
             });
           }
@@ -693,29 +618,114 @@
             newReel();
             loadLoaderList();
 
-            // direct show loader to let user select
-            $("#loaderModal").modal("toggle");
-
             $("#txtLoaderId").val('');
             $("#txtEstHeight").val(0);
             $("#txtActHeight").val(0);
             $("#txtReelCode").val('');
             $("#txtICol").val(1);
+
+            scanLoaderEle.focus();
+
+                    var data=[{
+          type: "indicator",
+          mode: "gauge+number+delta",
+          value: 60,
+          title: {
+            text: 'Speed',
+            font: { size: 14 },
+            yanchor: 'bottom',
+            y: 10
+          },
+          delta: { increasing: { color: "white" } },
+          gauge: {
+            shape: 'angular',
+            axis: {
+              range: [0, 100],
+              visible: true,
+              tickwidth: 1,
+              tickcolor: "rgb(178, 178, 178)",
+              tickvals: [0, 100],
+              tickmode: 'array',
+              tickfont: {
+                size: '100px'
+              }
+            },
+            bar: { color: "rgb(237, 61, 61)", thickness: 1 },
+            bgcolor: "rgb(178, 178, 178)",
+            bordercolor: "rgb(178, 178, 178)",
+          }
+        }];
+
+        var layout = {
+          margin: {
+            l: 30,
+            r: 30,
+            b: 5,
+            t: 0,
+            pad: 0
+          }
+        };
+
+        Plotly.newPlot('myDiv', data, layout);
         });
+
+        function clearLoaderScanCode() {
+            scanLoaderEle.focus();
+            $("#txtScanLoader").val('');
+            $("#txtLoaderId").val('');
+            $("#txtLoaderCode").val('');
+
+            $("#txtHLoader").val('');
+            $("#txtHCol").val('');
+            $("#txtHColBal").val('');
+        }
+
+        function clearItemScanCode() {
+            scanItemEle.focus();
+            $("#txtScanItem").val('');
+            $("#txtReelCode").val('');
+
+            $("#txtHReelID").val('');
+            $("#txtHItem").val('');
+            $("#txtHExtH").val('');
+            $("#txtHActH").val('');
+        }
 
         function restartStep() {
             resetColorPLCForm(1);
             newReel();
-            loadLoaderList();
-
-            // direct show loader to let user select
-            $("#loaderModal").modal("toggle");
 
             $("#txtLoaderId").val('');
+            $("#txtLoaderCode").val('');
             $("#txtEstHeight").val(0);
             $("#txtActHeight").val(0);
             $("#txtReelCode").val('');
             $("#txtICol").val(1);
+
+            $("#txtHLoader").val('');
+            $("#txtHCol").val('');
+            $("#txtHColBal").val('');
+
+            $("#txtHReelID").val('');
+            $("#txtHItem").val('');
+            $("#txtHExtH").val('');
+            $("#txtHActH").val('');
+
+            scanLoaderEle.focus();
+
+        }
+
+        function restartItem() {
+            var loaderId = $("#txtLoaderId").val();
+            if (loaderId == "") {
+                restartStep();
+                return;
+            }
+
+            resetColorPLCForm(2);
+            newReel();
+
+            scanLoaderEle.focus();
         }
 
         function newReel() {
@@ -725,17 +735,14 @@
             $('#pt4').html("STEP 4 :: Reading Reel Info ... ");
             $('#ptLast').html("STEP 5 :: Keep Record and Finalyzing ... ");
 
-            $('#pItem2').html("Item : ");
-            $('#err2').html("");
+            $('#pItem2').html('Item : <span class="error-message" id="err2"></span>');
             $('#pReel2').html("Reel ID : ");
             $('#pHeight2').html("Est. Height : ");
 
-            $('#pCol3').html("Available Column : ");
-            $('#pFork3').html("Fork Status : ");
-            $('#errCol3').html("");
+            $('#pCol3').html('Available Column :  <span class="error-message" id="errCol3"></span>');
+            $('#pFork3').html('Fork Status :  <span class="error-message" id="errFork3"></span>');
 
-            $('#pLoader4').html("Auto Loader Column : ");
-            $('#err4').html("");
+            $('#pLoader4').html('Auto Loader Column :  <span class="error-message" id="err4"></span>');
             $('#pHeight4').html("Actual Height : ");
 
             $('#pTextLast').html("Waiting finish loading reel ... ");
@@ -745,94 +752,94 @@
             $("#waiting4").removeClass("hidden");
             $("#waitingLast").removeClass("hidden");
 
+            $("#txtScanItem").val('');
             $("#txtEstHeight").val(0);
             $("#txtActHeight").val(0);
             $("#txtReelCode").val('');
             // $("#txtICol").val(1);
+
+            $("#txtHReelID").val('');
+            $("#txtHItem").val('');
+            $("#txtHExtH").val('');
+            $("#txtHActH").val('');
+
         }
 
         function resetColorPLCForm(idx) {
-            $("#pnl1_title").addClass("titleDisable");
-            $("#pnl1_body").addClass("bodyDisable");
-            $("#pnl2_title").addClass("titleDisable");
-            $("#pnl2_body").addClass("bodyDisable");
-            $("#pnl3_title").addClass("titleDisable");
-            $("#pnl3_body").addClass("bodyDisable");
-            $("#pnl4_title").addClass("titleDisable");
-            $("#pnl4_body").addClass("bodyDisable");
-            $("#pnlLast_title").addClass("titleDisable");
-            $("#pnlLast_body").addClass("bodyDisable");
+            $("#sec1").removeClass("form-active");
+            $("#sec2").removeClass("form-active");
+            $("#sec3").removeClass("form-active");
+            $("#sec4").removeClass("form-active");
+            $("#secLast").removeClass("form-active");
 
-            $('#sec1').addClass("hiddenBorder");
-            $("#sec2").addClass("hiddenBorder");
-            $("#sec3").addClass("hiddenBorder");
-            $("#sec4").addClass("hiddenBorder");
-            $("#secLast").addClass("hiddenBorder");
-            $('#spin1').addClass("hidden");
-            $("#spin2").addClass("hidden");
-            $("#spin3").addClass("hidden");
-            $("#spin4").addClass("hidden");
-            $("#spinLast").addClass("hidden");
-            $('#done1').addClass("hidden");
-            $("#done2").addClass("hidden");
-            $("#done3").addClass("hidden");
-            $("#done4").addClass("hidden");
-            $("#doneLast").addClass("hidden");
-            $('#btnRetry1').addClass("hidden");
-            $("#btnRetry2").addClass("hidden");
-            $("#btnRetry3").addClass("hidden");
-            $("#btnRetry4").addClass("hidden");
-            $("#btnRetryLast").addClass("hidden");
+            $("#step1").removeClass("next");
+            $("#step2").removeClass("next");
+            $("#step3").removeClass("next");
+            $("#step4").removeClass("next");
+            $("#stepLast").removeClass("next");
+
+            $("#step1").removeClass("active");
+            $("#step2").removeClass("active");
+            $("#step3").removeClass("active");
+            $("#step4").removeClass("active");
+            $("#stepLast").removeClass("active");
+
+            $('#btnRetry4').addClass("hidden");
+            $('#btnRetryLast').addClass("hidden");
 
             if (idx == 1) {
-                $("#pnl1_title").removeClass("titleDisable");
-                $("#pnl1_body").removeClass("bodyDisable");
+                $("#sec1").addClass("form-active");
+                $("#step1").addClass("active");
+
                 $('#err1').html("");
-                $("#spin1").removeClass("hidden");
-                $('#btnRetry1').removeClass("hidden");
-                $("#sec1").removeClass("hiddenBorder");
             }
             else if (idx == 2) {
-                $("#pnl2_title").removeClass("titleDisable");
-                $("#pnl2_body").removeClass("bodyDisable");
+                $("#sec2").addClass("form-active");
+                $("#step1").addClass("next");
+                $("#step1").addClass("active");
+                $("#step2").addClass("active");
+
                 $('#err2').html("");
-                $("#spin2").removeClass("hidden");
-                $('#btnRetry2').removeClass("hidden");
-                $('#done1').removeClass("hidden");
-                $("#sec2").removeClass("hiddenBorder");
             }
             else if (idx == 3) {
-                $("#pnl3_title").removeClass("titleDisable");
-                $("#pnl3_body").removeClass("bodyDisable");
-                $('#err3').html("");
-                $("#spin3").removeClass("hidden");
-                $('#done1').removeClass("hidden");
-                $('#done2').removeClass("hidden");
-                $("#sec3").removeClass("hiddenBorder");
+                $("#sec3").addClass("form-active");
+                $("#step1").addClass("next");
+                $("#step2").addClass("next");
+                $("#step1").addClass("active");
+                $("#step2").addClass("active");
+                $("#step3").addClass("active");
+
+                $('#errCol3').html("");
+                $('#errFork3').html("");
             }
             else if (idx == 4) {
-                $("#pnl4_title").removeClass("titleDisable");
-                $("#pnl4_body").removeClass("bodyDisable");
+                $("#sec4").addClass("form-active");
+                $("#step1").addClass("next");
+                $("#step2").addClass("next");
+                $("#step3").addClass("next");
+                $("#step1").addClass("active");
+                $("#step2").addClass("active");
+                $("#step3").addClass("active");
+                $("#step4").addClass("active");
+
                 $('#err4').html("");
-                $("#spin4").removeClass("hidden");
-                $('#done1').removeClass("hidden");
-                $('#done2').removeClass("hidden");
-                $('#done3').removeClass("hidden");
-                $("#sec4").removeClass("hiddenBorder");
             }
             else if (idx == 0) {
                 //
             }
             else {
-                $("#pnlLast_title").removeClass("titleDisable");
-                $("#pnlLast_body").removeClass("bodyDisable");
+                $("#secLast").addClass("form-active");
+                $("#step1").addClass("next");
+                $("#step2").addClass("next");
+                $("#step3").addClass("next");
+                $("#step4").addClass("next");
+                $("#step1").addClass("active");
+                $("#step2").addClass("active");
+                $("#step3").addClass("active");
+                $("#step4").addClass("active");
+                $("#stepLast").addClass("active");
+
                 $('#err5').html("");
-                $("#spinLast").removeClass("hidden");
-                $('#done1').removeClass("hidden");
-                $('#done2').removeClass("hidden");
-                $('#done3').removeClass("hidden");
-                $('#done4').removeClass("hidden");
-                $("#secLast").removeClass("hiddenBorder");
             }
 
         }
@@ -889,10 +896,6 @@
             });
         }
 
-        function showLoaderForm() {
-            $("#loaderModal").modal("toggle");
-        }
-
         function addLoader(_type, id, code) {
             if (_type == 1) {
                 const selLoader = document.getElementById('selLoader');
@@ -946,15 +949,11 @@
             }
 
             // continue
-            $("#txtLoader").val(code);
             $("#txtLoaderId").val(id);
-            $("#loaderModal").modal("toggle");
-
+            $("#txtLoaderCode").val(code);
             loadPLC(1);
-        }
 
-        function cancelLoaderForm() {
-            $("#loaderModal").modal("toggle");
+            $("#txtHLoader").val(code);
         }
 
         function delay(ms) {
@@ -962,25 +961,46 @@
         }
 
         function retry1() {
-            // $('#btnRetry1').addClass("hidden");
-            $('#pt1').html("STEP 1 :: Check Loader Status ... ");
-            $("#txtLoader").val('');
-            $("#txtLoaderId").val('');
-            $("#loaderModal").modal("toggle");
-        }
+            var loaderId = $("#txtLoaderId").val();
+            if (loaderId == "") {
+                $('#pLoader1').html('Loader : <span class="error-message" id="err1"> Must select Auto Loader </span>');
+                return;
+            }
+            var loaderCode = $("#txtLoaderCode").val();
+            var scanCode = $("#txtScanLoader").val();
+            if (loaderCode.toUpperCase() != scanCode.toUpperCase()) {
+                $('#pLoader1').html('Loader : <span class="error-message" id="err1"> Please rescan the Loader </span>');
+                return;
+            }
 
-        function retry2() {
             resetColorPLCForm(2);
-            $('#spin1').removeClass("err");
             $("#txtEstHeight").val(0);
             $("#txtActHeight").val(0);
             $("#txtReelCode").val('');
-            // $("#txtICol").val(1);
-            $("#itemModal").modal("toggle");
+
+            $('#pItem2').html('Item : <span class="error-message" id="err2"></span>');
+            $('#pReel2').html("Reel ID : ");
+            $('#pHeight2').html("Est. Height : ");
+
+            $("#txtHReelID").val('');
+            $("#txtHItem").val('');
+            $("#txtHExtH").val('');
+            $("#txtHActH").val('');
+
+        }
+
+        function retry2() {
+            var reelCode = $("#txtReelCode").val();
+            var scanCode = $("#txtScanItem").val();
+            if (reelCode.toUpperCase() != scanCode.toUpperCase()) {
+                $('#pItem2').html('Item : <span class="error-message" id="err2"> Please scan Reel. </span>');
+                return;
+            }
+
+            loadPLC(3)
         }
 
         function retry3() {
-            // $("#txtICol").val(1);
             loadPLC(3);
         }
 
@@ -999,35 +1019,33 @@
             }
             else {
                 if (realCol < iCol) {
-                    var turnCol = await loadPLCTurnColumn(loaderId, Number(realCol));
+                    var turnCol = await loadPLCTurnColumn(loaderId, Number(iCol));
                     if (turnCol == false) {
                         return;
                     }
-                    realCol = Number(realCol) + 1;
+                    realCol = iCol; // (realCol) + 1;
                 }
-                if (realCol < iCol) {
-                    var turnCol = await loadPLCTurnColumn(loaderId, Number(realCol));
-                    if (turnCol == false) {
-                        return;
-                    }
-                    realCol = Number(realCol) + 1;
-                }
-                if (realCol < iCol) {
-                    var turnCol = await loadPLCTurnColumn(loaderId, Number(realCol));
-                    if (turnCol == false) {
-                        return;
-                    }
-                    realCol = Number(realCol) + 1;
-                }
+                // if (realCol < iCol) {
+                //     var turnCol = await loadPLCTurnColumn(loaderId, Number(realCol));
+                //     if (turnCol == false) {
+                //         return;
+                //     }
+                //     realCol = Number(realCol) + 1;
+                // }
+                // if (realCol < iCol) {
+                //     var turnCol = await loadPLCTurnColumn(loaderId, Number(realCol));
+                //     if (turnCol == false) {
+                //         return;
+                //     }
+                //     realCol = Number(realCol) + 1;
+                // }
 
                 // wait for fork is ready
-                await delay(3000);
+                // await delay(3000);
                 var chkColFork = await loadPLCCheckColFork(loaderId, iCol);
                 if (chkColFork == false) {
-                    $('#btnRetry3').removeClass("hidden");
                 }
                 else {
-                    $('#pt3').html("STEP 3 :: DONE Ready Column ");
                     $("#putModal").modal("toggle");
                 }
             }
@@ -1040,31 +1058,16 @@
             // step 1 : check loader
             if (idx == 1) {
                 resetColorPLCForm(1);
-                // if (loaderId == "") {
-                //     $('#spin1').addClass("err");
-                //     $('#pLoader1').html("Loader : ");
-                //     $('#err1').html("No loader is selected.");
-                //     $('#btnRetry1').removeClass("hidden");
-                //     return;
-                // }
+                if (loaderId == "") {
+                    $('#pLoader1').html("Loader : ");
+                    $('#err1').html("No loader is selected.");
+                    $('#btnRetry1').removeClass("hidden");
+                    return;
+                }
 
                 // await delay(3000);
                 var chkLoader = await loadPLCCheckLoader(loaderId);
                 console.log('R1::' + chkLoader);
-                if (chkLoader == false) {
-                    $('#btnRetry1').removeClass("hidden");
-                }
-                else {
-                    $('#pt1').html("STEP 1 :: DONE Check Loader ");
-
-                    resetColorPLCForm(2);
-                    $("#txtEstHeight").val(0);
-                    $("#txtActHeight").val(0);
-                    $("#txtReelCode").val('');
-                    // $("#txtICol").val(1);
-
-                    $("#itemModal").modal("toggle");
-                }
                 return;
             }
 
@@ -1072,24 +1075,21 @@
             var reelCode = $("#txtReelCode").val();
 
             if (idx == 2) {
+                if (reelCode == "") {
+                    $('#pItem2').html('Item : <span class="error-message" id="err2"> Please scan Reel. </span>');
+                    return;
+                }
                 // await delay(3000);
                 var chkItem = await loadPLCCheckItem(loaderId, reelCode);
                 console.log('R2::' + chkItem);
-                if (chkItem == false) {
-                    $('#btnRetry2').removeClass("hidden");
-                    return;
-                }
-                else {
-                    $('#pt2').html("STEP 2 :: DONE Read Reel ");
-                    idx = 3
-                }
+                return;
             }
 
             var iCol = $("#txtICol").val();
             if (idx == 3) {
                 resetColorPLCForm(3);
                 $('#pCol3').html("Checking Auto Loader Column : " + iCol);
-                await delay(3000);
+                // await delay(3000);
                 var chkCol = await loadPLCCheckEstHeight(loaderId, reelCode, iCol);
                 console.log('R3.1::' + chkCol);
                 if (chkCol == false && iCol <= 4) {
@@ -1120,6 +1120,8 @@
                 else {
                     $("#txtICol").val(iCol);
 
+                    $("#txtHCol").val(iCol);
+
                     // check is column correct, else need call turn
                     // await delay(3000);
                     var realCol = await loadPLCGetCurrentColumn(loaderId);
@@ -1130,37 +1132,14 @@
                         if (realCol < iCol) {
                             $("#warnTurnModal").modal("toggle");
                         }
-                        // if (realCol < iCol) {
-                        //     var turnCol = await loadPLCTurnColumn(loaderId, realCol);
-                        //     if (turnCol == false) {
-                        //         return;
-                        //     }
-                        //     realCol = Number(realCol) + 1;
-                        // }
-                        // if (realCol < iCol) {
-                        //     var turnCol = await loadPLCTurnColumn(loaderId, realCol);
-                        //     if (turnCol == false) {
-                        //         return;
-                        //     }
-                        //     realCol = Number(realCol) + 1;
-                        // }
-                        // if (realCol < iCol) {
-                        //     var turnCol = await loadPLCTurnColumn(loaderId, realCol);
-                        //     if (turnCol == false) {
-                        //         return;
-                        //     }
-                        //     realCol = Number(realCol) + 1;
-                        // }
-
-                        // // wait for fork is ready
-                        // // await delay(3000);
-                        // var chkColFork = await loadPLCCheckColFork(loaderId, iCol);
-                        // if (chkColFork == false) {
-                        //     $('#btnRetry3').removeClass("hidden");
-                        // }
-                        // else {
-                        //     $("#putModal").modal("toggle");
-                        // }   
+                        else {
+                            var chkColFork = await loadPLCCheckColFork(loaderId, iCol);
+                            if (chkColFork == false) {
+                            }
+                            else {
+                                $("#putModal").modal("toggle");
+                            }
+                        }
                     }
                 }
                 return;
@@ -1169,38 +1148,54 @@
 
             iCol = $("#txtICol").val();
             if (idx == 4) {
+                if (loaderId == "" || reelCode == "") {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: "Please start from Step 1."
+                    });
+                    return;
+                }
+
                 resetColorPLCForm(4);
                 // await delay(1000);
                 var chkAct = await loadPLCActHeight(loaderId, reelCode, iCol);
                 console.log('R4::' + chkAct);
-                if (chkAct == false) {
-                    $('#btnRetry4').removeClass("hidden");
-                    return;
+                if (chkAct == "99") {
+                    // is success
                 }
                 else {
-                    $('#pt4').html("STEP 4 :: DONE Read Actual Height ");
-                    idx = 5;
+                    $('#btnRetry4').removeClass("hidden");
                 }
+                return;
             }
 
             if (idx == 5) {
+                var h = $("#txtActHeight").val();
+                if (loaderId == "" || reelCode == "" || h =="" || h =="0") {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: "Please start from Step 1."
+                    });
+                    return;
+                }
+
                 resetColorPLCForm(5);
                 var chkLast = await loadPLCUpdateDB(loaderId, reelCode, iCol);
                 console.log('R5::' + chkLast);
                 if (chkLast == false) {
-                    $('#btnRetry5').removeClass("hidden");
+                    $('#btnRetryLast').removeClass("hidden");
                     return;
                 }
                 else {
-                    $('#ptLast').html("STEP 4 :: DONE Finalize ");
+                    $('#ptLast').html("STEP 5 :: DONE Finalized ");
                     await delay(3000);
 
-                    $("#txtScanItem").val('');
 
                     resetColorPLCForm(2);
                     newReel();
 
-                    $("#itemModal").modal("toggle");
                 }
                 // await delay(3000);
             }
@@ -1225,24 +1220,16 @@
                     console.log('1::' + JSON.stringify(result));
                     // swal.close();
                     if (result.success == true) {
-                        $('#pLoader1').html("Loader : " + result.data);
-                        $('#err1').html("");
-                        $('#spin1').removeClass("err");
-                        $('#spin1').addClass("hidden");
-                        $("#done1").removeClass("hidden");
+                        $('#pLoader1').html("Loader : " + result.data + ' <span class="error-message" id="err1"></span>');
 
                         fResult = true;
                     }
                     else {
-                        $('#spin1').addClass("err");
-                        $('#pLoader1').html("Loader : unknown");
-                        $('#err1').html(result.errMessage);
+                        $('#pLoader1').html('Loader : <span class="error-message" id="err1"> ' + result.errMessage + ' </span>');
                     }
                 },
                 error: function (error) {
-                    $('#spin1').addClass("err");
-                    $('#pLoader1').html("Loader : unknown");
-                    $('#err1').html(error.message);
+                    $('#pLoader1').html('Loader : <span class="error-message" id="err1"> ' + error.val + ' </span>');
                 }
             });
 
@@ -1267,28 +1254,25 @@
                     console.log('2::' + JSON.stringify(result));
                     // swal.close();
                     if (result.success == true) {
-                        $('#pItem2').html("Item : " + result.data.itemCode);
+                        $('#pItem2').html("Item : " + result.data.itemCode + ' <span class="error-message" id="err2"></span>');
                         $('#pReel2').html("Reel ID : " + result.data.reelCode);
                         $('#pHeight2').html("Est. Height : " + result.data.thickness);
-                        $('#err2').html("");
-                        $('#spin2').removeClass("err");
-                        $('#spin2').addClass("hidden");
-                        $("#done2").removeClass("hidden");
 
                         $("#txtEstHeight").val(result.data.thickness);
+
+                        $('#txtHReelID').val(result.data.reelCode);
+                        $('#txtHItem').val(result.data.itemCode);
+                        $('#txtHExtH').val(result.data.thickness);
 
                         fResult = true;
                     }
                     else {
-                        $('#spin2').addClass("err");
-                        $('#pLoader2').html("Loader : unknown");
+                        $('#pItem2').html('Item : <span class="error-message" id="err2"> ' + result.errMessage + ' </span>');
                         $('#err2').html(result.errMessage);
                     }
                 },
                 error: function (error) {
-                    $('#spin2').addClass("err");
-                    $('#pLoader2').html("Loader : unknown");
-                    $('#err2').html(error.message);
+                    $('#pItem2').html('Item : <span class="error-message" id="err2"> ' + error.val + ' </span>');
                 }
             });
 
@@ -1315,39 +1299,29 @@
                     // swal.close();
                     if (result.success == true) {
 
-                        $('#pCol3').html("Auto Loader Column : " + iCol);
-                        $('#errCol3').html("");
-                        $('#spin3').removeClass("err");
-                        $('#spin3').addClass("hidden");
-                        $("#done3").removeClass("hidden");
+                        $('#pCol3').html("Auto Loader Column : " + iCol + '<span style="color:red; font-size:15px;" id="errCol3"> </span>');
+
+                        $('#txtHColBal').val(result.data);
 
                         fResult = true;
 
                     }
                     else {
                         if (iCol < 4) {
-                            $('#spin3').addClass("err");
-                            $('#pCol3').html("Loader : Wait turn to next column ... ");
-                            $('#errCol3').html(result.errMessage);
+                            $('#pCol3').html('Auto Loader Column : <span style="color:red; font-size:15px;" id="errCol3">'+ result.errMessage + ' </span>');
                         }
                         else {
-                            $('#spin3').addClass("err");
-                            $('#pCol3').html("Loader : All column is full, please change auto loader.");
-                            $('#errCol3').html(result.errMessage);
+                            $('#pCol3').html('Auto Loader Column : <span style="color:red; font-size:15px;" id="errCol3">All column is full. Please change loader. </span>');
                         }
 
                     }
                 },
                 error: function (error) {
                     if (iCol < 4) {
-                        $('#spin3').addClass("err");
-                        $('#pCol3').html("Loader : Wait turn to next column ... ");
-                        $('#errCol3').html(error.message);
+                        $('#pCol3').html('Auto Loader Column : <span style="color:red; font-size:15px;" id="errCol3">'+ error.val + ' </span>');
                     }
                     else {
-                        $('#spin3').addClass("err");
-                        $('#pCol3').html("Loader : All column is full, please change auto loader.");
-                        $('#errCol3').html(error.message);
+                        $('#pCol3').html('Auto Loader Column : <span style="color:red; font-size:15px;" id="errCol3">All column is full. Please change loader. </span>');
                     }
                 }
             });
@@ -1376,15 +1350,11 @@
                         fResult = true;
                     }
                     else {
-                        $('#spin3').addClass("err");
-                        $('#pCol3').html("Loader : Unable get current column ... ");
-                        $('#errCol3').html(result.errMessage);
+                        $('#pCol3').html("Auto Loader Column : " + result.errMessage + '<span style="color:red; font-size:15px;" id="errCol3"> </span>');
                     }
                 },
                 error: function (error) {
-                    $('#spin3').addClass("err");
-                    $('#pCol3').html("Loader : Unable get current column ... ");
-                    $('#errCol3').html(result.errMessage);
+                    $('#pCol3').html("Auto Loader Column : " + error.val + '<span style="color:red; font-size:15px;" id="errCol3"> </span>');
                 }
             });
 
@@ -1412,15 +1382,11 @@
                         fResult = true;
                     }
                     else {
-                        $('#spin3').addClass("err");
-                        $('#pCol3').html("Loader : Unable to turn column ... ");
-                        $('#errCol3').html(result.errMessage);
+                        $('#pCol3').html("Auto Loader Column : " + result.errMessage + '<span style="color:red; font-size:15px;" id="errCol3"> </span>');
                     }
                 },
                 error: function (error) {
-                    $('#spin3').addClass("err");
-                    $('#pCol3').html("Loader : Unable to turn column ... ");
-                    $('#errCol3').html(result.errMessage);
+                    $('#pCol3').html("Auto Loader Column : " + error.val + '<span style="color:red; font-size:15px;" id="errCol3"> </span>');
                 }
             });
 
@@ -1445,26 +1411,17 @@
                     console.log('3.3::' + JSON.stringify(result));
                     // swal.close();
                     if (result.success == true) {
-
-                        $('#pFork3').html("Fork Status : Column " + iCol + " is READY.");
-                        $('#errFork3').html("");
-                        $('#spin3').removeClass("err");
-                        $('#spin3').addClass("hidden");
-                        $("#done3").removeClass("hidden");
+                        $('#pFork3').html("Fork Status : Column " + iCol + ' is READY.<span style="color:red; font-size:15px;" id="errFork3"> </span>');
 
                         fResult = true;
 
                     }
                     else {
-                        $('#spin3').addClass("err");
-                        $('#pFork3').html("Fork Status : ");
-                        $('#errFork3').html(result.errMessage);
+                        $('#pFork3').html('Fork Status : <span style="color:red; font-size:15px;" id="errFork3">'+ result.errMessage + ' </span>');
                     }
                 },
                 error: function (error) {
-                    $('#spin3').addClass("err");
-                    $('#pFork3').html("Fork Status : ");
-                    $('#errFork3').html(error.message);
+                    $('#pFork3').html('Auto Loader Column : <span style="color:red; font-size:15px;" id="errFork3">'+ error.val + ' </span>');
                 }
             });
 
@@ -1475,7 +1432,7 @@
         // step 4 : get actual height balance
         async function loadPLCActHeight(loaderId, reelCode, iCol) {
 
-            var fResult = false;
+            var fResult = 0;
 
             await $.ajax({
                 url: "/api/PLCLoader/GetReelActualHeight/" + loaderId + "/" + iCol,
@@ -1490,38 +1447,40 @@
                     console.log('4::' + JSON.stringify(result));
                     // swal.close();
                     if (result.success == true) {
-                        $("#txtActHeight").val(result.data);
-                        $('#pLoader4').html("Loader : " + iCol);
-                        $('#pHeight4').html("Actual Height : " + result.data);
-                        $("#done4").removeClass("hidden");
+                        $("#txtActHeight").val(result.data[1]);
+                        $('#pLoader4').html("Auto Loader Column : " + iCol + ' <span style="color:red; font-size:15px;" id="err4"> </span>');
+                        $('#pHeight4').html("Actual Height : " + result.data[1]);
 
-                        fResult = true;
+                        $('#txtHActH').val(result.data[1]);
+
+                        fResult = 99;
                     }
                     else {
-                        if (iCol < 4) {
-                            $('#pCol3').html("Auto Loader Column : " + (Number(iCol) + 1));
-                            $('#spin4').addClass("err");
-                            $('#pLoader4').html("Loader : ");
-                            $('#pHeight4').html("Actual Height : " + result.data);
-                            $('#err4').html(result.errMessage);
-                            
-                            $("#txtICol").val(Number(iCol) + 1);
-                            $("#warnTurnModal").modal("toggle");
+                        fResult = result.data[0];
+                        if (result.data[0] == "1") {
+                            $('#pLoader4').html("Auto Loader Column : " + iCol + ' - <span style="color:red; font-size:15px;" id="err4">' + result.errMessage + '</span>');
+                            $('#pHeight4').html("Actual Height : " + result.data[1]);
                         }
                         else {
-                            $('#spin4').addClass("err");
-                            $('#pLoader4').html("Loader : ");
-                            $('#pHeight4').html("Actual Height : " + result.data);
-                            $('#err4').html(result.errMessage + " All column is full, please change auto loader.");
+                            if (iCol < 4) {
+                                $('#pCol3').html("Auto Loader Column : " + (Number(iCol) + 1));
+                                $('#pLoader4').html("Auto Loader Column : " + iCol + ' - <span style="color:red; font-size:15px;" id="err4">' + result.errMessage + '</span>');
+                                $('#pHeight4').html("Actual Height : " + result.data[1]);
 
+                                $("#txtICol").val(Number(iCol) + 1);
+                                $('#txtHCol').val(Number(iCol) + 1);
+                                $("#warnTurnModal").modal("toggle");
+                            }
+                            else {
+                                $('#pLoader4').html("Auto Loader Column : " + iCol + ' - <span style="color:red; font-size:15px;" id="err4">All column is full, please change auto loader. </span>');
+                                $('#pHeight4').html("Actual Height : " + result.data[1]);
+                            }
                         }
                     }
                 },
                 error: function (error) {
-                    $('#spin4').addClass("err");
-                    $('#pLoader4').html("Loader : ");
+                    $('#pLoader4').html("Auto Loader Column : " + iCol + '<span style="color:red; font-size:15px;" id="err4">' + error.val + '</span>');
                     $('#pHeight4').html("Actual Height : ");
-                    $('#err4').html(error.message);
                 }
             });
 
@@ -1547,18 +1506,78 @@
                     // swal.close();
                     if (result.success == true) {
                         $('#pTextLast').html("ALL DONE. Will continue next item after 2 seconds...");
-                        $("#doneLast").removeClass("hidden");
+
+                        // update balance height
+                        $('#txtHColBal').val(result.data);
 
                         // continue new Item
                     }
                     else {
-                        $('#spinLast').addClass("err");
-                        $('#pTextLast').html(result.errMessage);
+                        $('#pTextLast').html('<span style="color:red; font-size:15px;">' + result.errMessage+ '</span>');
                     }
                 },
                 error: function (error) {
-                    $('#spinLast').addClass("err");
-                    $('#pTextLast').html(error.message);
+                    $('#pTextLast').html('<span style="color:red; font-size:15px;">' + error.val + '</span>');
+                }
+            });
+
+            return true;
+        }
+
+        async function endTask() {
+            var loaderId = $("#txtLoaderId").val();
+            if (loaderId == "") {
+                swal.fire({
+                    icon: 'error',
+                    title: "Wait",
+                    text: "No loader is selected."
+                });
+                return;
+            }
+
+            var chkEnd = await loadPLCEndTask(loaderId);
+            console.log('R10::' + chkEnd);
+            return;
+        }
+
+        async function loadPLCEndTask(loaderId) {
+
+            $.ajax({
+                url: "/api/PLCLoader/EndTask/" + loaderId,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    console.log('10::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        swal.fire({
+                            icon: 'success',
+                            title: "Success End Task",
+                            text: "",
+                            didClose: () => {
+                                window.location.reload();
+                            }
+                        });
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
                 }
             });
 

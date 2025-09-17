@@ -65,5 +65,6 @@ namespace RackingSystem.Data.Maintenances
         [Required]
         public int Add6Pulse { get; set; } = 0;
 
+        public Guid Reel_Id { get; set; }
     }
 }
