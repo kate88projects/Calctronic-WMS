@@ -19,5 +19,7 @@ namespace RackingSystem.Services.ItemServices
         public Task<ServiceResponseModel<List<ItemExcelReqDTO>>> SaveExcelItem(List<ItemExcelReqDTO> slots);
 
         public Task<ServiceResponseModel<List<ItemListDTO>>> GetActiveItemList();
+        public Task<ServiceResponseModel<List<ItemListDTO>>> GetFinishedItemList();
+        public Task<ServiceResponseModel<List<ItemListDTO>>> GetRawItemList();
     }
 }

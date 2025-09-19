@@ -19,6 +19,25 @@ namespace RackingSystem.Services.BOMServices
             _mapper = mapper;
         }
 
+        public async Task<ServiceResponseModel<BOMListDTO>> GetBOM(long BomId)
+        {
+            ServiceResponseModel<BOMListDTO> result = new ServiceResponseModel<BOMListDTO>();
+
+            try
+            {
+                var bomList = await _dbContext.BOM.Where(x => x.BOM_Id == BomId).FirstOrDefaultAsync();
+                var bomListDTO = _mapper.Map<BOMListDTO>(bomList);
+                result.success = true;
+                result.data = bomListDTO;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+            return result;
+        }
         public async Task<ServiceResponseModel<List<BOMListDTO>>> GetBOMList(BOMSearchReqDTO req)
         {
             ServiceResponseModel<List<BOMListDTO>> result = new ServiceResponseModel<List<BOMListDTO>>();

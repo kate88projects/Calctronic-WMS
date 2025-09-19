@@ -38,12 +38,13 @@ namespace RackingSystem.Controllers
             return View();
         }
 
-        //[HttpGet]
-        //public async Task<ServiceResponseModel<List<BOMListDTO>>> GetBOMList()
-        //{
-        //    ServiceResponseModel<List<BOMListDTO>> result = await _bomService.GetBOMList();
-        //    return result;
-        //}
+        [HttpGet]
+        public async Task<ServiceResponseModel<BOMListDTO>> GetBOM(long bomId)
+        {
+            ServiceResponseModel<BOMListDTO> result = await _bomService.GetBOM(bomId);
+            return result;
+        }
+
         [HttpPost]
         public async Task<ServiceResponseModel<List<BOMListDTO>>> GetBOMList([FromBody] BOMSearchReqDTO req)
         {
@@ -100,6 +101,34 @@ namespace RackingSystem.Controllers
         {
             ServiceResponseModel<List<BOMListReqDTO>> result = await _bomService.GetActiveBOMList();
             return result;
+        }
+
+        public IActionResult BOMDetails(int id, string mode)
+        {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpBOM";
+            ViewData["ActiveTab"] = "BOMDetails";
+            ViewData["Title"] = "BOM Details";
+            ViewBag.Mode = mode;
+
+            BOMListDTO bomData = new BOMListDTO();
+
+            if (id != 0)
+            {
+                var bom = GetBOM(id);
+                bom.Wait();
+                var bomHeader = bom.Result;
+                bomData = bomHeader.data ?? new BOMListDTO();
+            }
+
+            return View(bomData);
         }
     }
 }

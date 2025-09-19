@@ -45,6 +45,27 @@ namespace RackingSystem.Services.TrolleyServices
             return result;
         }
 
+        public async Task<ServiceResponseModel<List<TrolleyListDTO>>> GetActiveTrolleyList()
+        {
+            ServiceResponseModel<List<TrolleyListDTO>> result = new ServiceResponseModel<List<TrolleyListDTO>>();
+
+            try
+            {
+                var trolleyList = await _dbContext.Trolley.Where(x => x.IsActive == true).OrderBy(x => x.TrolleyCode).ToListAsync();
+                var trolleyListDTO = _mapper.Map<List<TrolleyListDTO>>(trolleyList).ToList();
+                result.success = true;
+                result.data = trolleyListDTO;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
         public async Task<ServiceResponseModel<TrolleyListDTO>> SaveTrolley(TrolleyListDTO trolley)
         {
             ServiceResponseModel<TrolleyListDTO> result = new ServiceResponseModel<TrolleyListDTO>();

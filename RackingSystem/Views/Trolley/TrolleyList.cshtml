@@ -105,7 +105,7 @@
                 <div class="mb-3">
                     <label class="form-label" for="txtRemark">Remark</label>
                     <input type="text" class="form-control" name="Remark" id="txtRemark" aria-describedby="Remark">
-                    <div id="txtRemarkError" class="error-message"></div>
+                    @* <div id="txtRemarkError" class="error-message"></div> *@
                 </div>
                 <div class="mb-3 row">
                     <label class="form-label">Select the Trolley side</label>
@@ -131,7 +131,7 @@
                 <button type="button" class="btn btn-outline-secondary" onclick="cancelForm()">Cancel</button>
             </div>
 
-             <input type="hidden" id="txtId">
+             @* <input type="hidden" id="txtId"> *@
 
         </div>
     </div>
@@ -291,7 +291,7 @@
             const fields = [
                 { id: 'txtCode', name: 'Trolley Code', required: true, numeric: false },
                 { id: 'txtIP', name: 'IP Address', required: true, numeric: false },
-                { id: 'txtRemark', name: 'Remark', required: true, numeric: false },
+                // { id: 'txtRemark', name: 'Remark', required: true, numeric: false },
                 { id: 'txtTotalCol', name: 'Total Column', required: true, numeric: true, min: 1 },
                 { id: 'txtTotalRow', name: 'Total Row', required: true, numeric: true, min: 1 },
             ];
@@ -345,7 +345,7 @@
             const fields = [
                 { id: 'txtCode', name: 'Trolley Code', required: true, numeric: false },
                 { id: 'txtIP', name: 'IP Address', required: true, numeric: false },
-                { id: 'txtRemark', name: 'Remark', required: true, numeric: false },
+                // { id: 'txtRemark', name: 'Remark', required: true, numeric: false },
                 { id: 'txtTotalCol', name: 'Total Column', required: true, numeric: true, min: 1 },
                 { id: 'txtTotalRow', name: 'Total Row', required: true, numeric: true, min: 1 },
             ];

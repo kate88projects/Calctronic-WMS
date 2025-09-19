@@ -143,5 +143,18 @@ namespace RackingSystem.Controllers
 
         }
 
+        [HttpGet]
+        public async Task<ServiceResponseModel<List<ItemListDTO>>> GetFinishedItemList()
+        {
+            ServiceResponseModel<List<ItemListDTO>> result = await _itemService.GetFinishedItemList();
+            return result;
+        }
+
+        [HttpGet]
+        public async Task<ServiceResponseModel<List<ItemListDTO>>> GetRawItemList()
+        {
+            ServiceResponseModel<List<ItemListDTO>> result = await _itemService.GetRawItemList();
+            return result;
+        }
     }
 }

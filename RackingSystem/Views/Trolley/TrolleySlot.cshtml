@@ -44,9 +44,23 @@
         border: 1px solid #ccc;
     }
         
+    #columnMatchingLabel {
+        text-align: center;
+        width: 100%;
+        font-weight: bold;
+    }
+
     .modal-body {
       max-height: calc(100vh - 200px); 
-      overflow-y: auto;
+      overflow-y: auto
+    }
+
+    .matching-btn {
+        justify-content: center;
+    }
+
+    .bi-upload {
+        padding-left: 10px;
     }
 </style>
 
@@ -89,7 +103,7 @@
                         <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
                             <thead>
                                 <tr>
-                                    @* <th>Trolley</th> *@
+                                    <th>Universal Trolley</th>
                                     <th>Universal Trolley Slot Code</th>
                                     <th>Column No</th>
                                     <th>Row No</th>
@@ -97,9 +111,9 @@
                                     <th>Is Active</th>
                                     <th>Is Left</th>
                                     <th>X Pulse</th>
-                                    <th>Y Pulse</th>
-                                    <th>Qr-X Pulse</th>
-                                    <th>Qr-Y Pulse</th>
+                                    <th>Z Pulse</th>
+                                    <th>QR-X Pulse</th>
+                                    <th>QR-Z Pulse</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -119,11 +133,13 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body" id="csvColumns">
-        <div id="csvColumns"></div> 
-        <div id="dataTableColumns"></div> 
+          <div class="row">
+              <div id="csvColumnContent"></div> 
+              <div id="dataTableColumns"></div> 
+          </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" onclick="processAndSubmitData()">Submit</button>
+      <div class="modal-footer matching-btn">
+        <button type="button" class="btn btn-primary" onclick="processAndSubmitData()">Submit<i class="bi bi-upload fs-5"></i></button>
       </div>
       <input type="hidden" id="updateType" />
     </div>
@@ -171,20 +187,20 @@
                             <div id="txtXPulseError" class="error-message"></div>
                         </div>
                         <div class="col">
-                            <label class="form-label" for="txtYPulse">Y Pulse</label>
-                            <input type="number" class="form-control" name="YPulse" id="txtYPulse" aria-describedby="Y Pulse" min="1">
+                            <label class="form-label" for="txtYPulse">Z Pulse</label>
+                            <input type="number" class="form-control" name="YPulse" id="txtYPulse" aria-describedby="Z Pulse" min="1">
                             <div id="txtYPulseError" class="error-message"></div>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col">
-                            <label class="form-label" for="txtQrXPulse">Qr-X Pulse</label>
-                            <input type="number" class="form-control" name="QrXPulse" id="txtQrXPulse" aria-describedby="QR-X Pulse" min="1">
+                            <label class="form-label" for="txtQrXPulse">QR-X Pulse</label>
+                            <input type="number" class="form-control" name="QrXPulse" id="txtQrXPulse" aria-describedby="Qr-X Pulse" min="1">
                             <div id="txtQrXPulseError" class="error-message"></div>
                         </div>
                         <div class="col">
-                            <label class="form-label" for="txtQrYPulse">Qr-Y Pulse</label>
-                            <input type="number" class="form-control" name="QrYPulse" id="txtQrYPulse" aria-describedby="Qr-Y Pulse" min="1">
+                            <label class="form-label" for="txtQrYPulse">QR-Z Pulse</label>
+                            <input type="number" class="form-control" name="QrYPulse" id="txtQrYPulse" aria-describedby="Qr-Z Pulse" min="1">
                             <div id="txtQrYPulseError" class="error-message"></div>
                         </div>
                     </div>
@@ -311,25 +327,25 @@
 
                 <div class="row mb-3">
                     <div class="col">
-                        <label class="form-label" for="txtStartYPulse">Y Pulse</label>
-                        <input type="number" class="form-control" name="YPulse" id="txtStartYPulse" aria-describedby="Y Pulse">
+                        <label class="form-label" for="txtStartYPulse">Z Pulse</label>
+                        <input type="number" class="form-control" name="YPulse" id="txtStartYPulse" aria-describedby="Z Pulse">
                         <div id="txtStartYPulseError" class="error-message"></div>
                     </div>
                     <div class="col">
-                        <label class="form-label" for="txtYPulseIncrement">Y Pulse Increment</label>
-                        <input type="number" class="form-control" name="YPulseIncrement" id="txtYPulseIncrement" aria-describedby="Y Pulse Increment">
+                        <label class="form-label" for="txtYPulseIncrement">Z Pulse Increment</label>
+                        <input type="number" class="form-control" name="YPulseIncrement" id="txtYPulseIncrement" aria-describedby="Z Pulse Increment">
                         <div id="txtYPulseIncrementError" class="error-message"></div>
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <div class="col">
-                        <label class="form-label" for="txtStartQrXPulse">Qr-X Pulse</label>
-                        <input type="number" class="form-control" name="QrXPulse" id="txtStartQrXPulse" aria-describedby="QR-X Pulse">
+                        <label class="form-label" for="txtStartQrXPulse">QR-X Pulse</label>
+                        <input type="number" class="form-control" name="QrXPulse" id="txtStartQrXPulse" aria-describedby="Qr-X Pulse">
                         <div id="txtStartQrXPulseError" class="error-message"></div>
                     </div>
                     <div class="col">
-                        <label class="form-label" for="txtQrXPulseIncrement">Qr-X Pulse Increment</label>
+                        <label class="form-label" for="txtQrXPulseIncrement">QR-X Pulse Increment</label>
                         <input type="number" class="form-control" name="QrXPulseIncrement" id="txtQrXPulseIncrement" aria-describedby="Qr-X Pulse Increment">
                         <div id="txtQrXPulseIncrementError" class="error-message"></div>
                     </div>
@@ -337,13 +353,13 @@
                 
                 <div class="row mb-3">
                     <div class="col">
-                        <label class="form-label" for="txtStartQrYPulse">Qr-Y Pulse</label>
-                        <input type="number" class="form-control" name="QrYPulse" id="txtStartQrYPulse" aria-describedby="QR-Y Pulse">
+                        <label class="form-label" for="txtStartQrYPulse">QR-Z Pulse</label>
+                        <input type="number" class="form-control" name="QrYPulse" id="txtStartQrYPulse" aria-describedby="Qr-Z Pulse">
                         <div id="txtStartQrYPulseError" class="error-message"></div>
                     </div>
                     <div class="col">
-                        <label class="form-label" for="txtQrYPulseIncrement">Qr-Y Pulse Increment</label>
-                        <input type="number" class="form-control" name="QrYPulseIncrement" id="txtQrYPulseIncrement" aria-describedby="Qr-Y Pulse Increment">
+                        <label class="form-label" for="txtQrYPulseIncrement">QR-Z Pulse Increment</label>
+                        <input type="number" class="form-control" name="QrYPulseIncrement" id="txtQrYPulseIncrement" aria-describedby="Qr-Z Pulse Increment">
                         <div id="txtQrYPulseIncrementError" class="error-message"></div>
                     </div>
                 </div>
@@ -430,9 +446,9 @@
                     <label class="form-check-label" for="chkIsActive">Is Active</label>
                 </div>
                 <div class="col form-check mb-3">
-                        <input type="checkbox" class="form-check-input" id="chkIsLeft">
-                        <label class="form-check-label" for="chkIsLeft">Is Left</label>
-                    </div>
+                    <input type="checkbox" class="form-check-input" id="chkIsLeft">
+                    <label class="form-check-label" for="chkIsLeft">Is Left</label>
+                </div>
                     
                 <input type="hidden" id="txtId">
                 @* <input type="hidden" id="txtTrolleyId"> *@
@@ -459,14 +475,16 @@
     <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
 
 	<script type="text/javascript">
-        $(document).ready(function () {
+        var trolleyCodeList = [];
 
+        $(document).ready(async function () {
+            getDropdownTrolley();
             loadList();
         });
 
-        var trolleyCodeList = [];
-
         function loadList() {
+             console.log("trolley", trolleyCodeList);
+
             $.ajax({
                 url: "/Trolley/GetTrolleySlotList/",
                 type: "GET",
@@ -486,15 +504,23 @@
                 success: function (result) {
                     swal.close()
                     if (result.success == true) {
-                        getDropdownTrolley();
-
                         $('#listTable').DataTable( {
                             data: result.data,
                             paging: true,
                             pageLength: 50,
                             lengthMenu: [50, 100, 250, 500, 1000],
                             columns: [
-                                // { data: 'trolleyCode' },
+                                { 
+                                    data: 'trolley_Id',
+                                    render: function (data, type, row) {
+                                        console.log("here", trolleyCodeList);
+
+                                        var trolley = trolleyCodeList.find(function(i) {
+                                            return i.trolleyId === data;
+                                        });
+                                        return trolley ? trolley.trolleyCode: '';
+                                    }
+                                },
                                 { data: 'trolleySlotCode' },
                                 { data: 'colNo' },
                                 { data: 'rowNo' },
@@ -541,9 +567,6 @@
                                 }
                             ],
                         });
-
-
-
                     }
                     else {
                         swal.fire({
@@ -564,6 +587,8 @@
         }
 
         function newSlotForm() {
+            getDropdownTrolley();
+
             $("#txtId").val("0");
             $('#ddTrolley').val("");
             $("#txtCode").val("");
@@ -574,7 +599,6 @@
             $("#txtQrXPulse").val("");
             $("#txtQrYPulse").val("");
             document.getElementById("chkIsActive").checked = true;
-            // getDropdownTrolley();
             $("#myModal").modal("show");
         }
 
@@ -582,76 +606,62 @@
             $("#colModal").modal("show");
         }
 
-        function getDropdownTrolley()
-        {
-            $.ajax({
-                url: "/Trolley/GetTrolleyList/",
-                type: "GET",
-                dataType: 'JSON',
-                contentType: 'application/json; charset=utf-8',
-                success: function (result) {
-                    if (result.success == true) {
+        function getDropdownTrolley() {
+            // return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: "/Trolley/GetActiveTrolleyList/",
+                    type: "GET",
+                    dataType: 'JSON',
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (result) {
+                        if (result.success == true) {
 
-                        trolleyCodeList = result.data.map(function (t) {
-                            return {
-                                trolleyId: t.trolley_Id,
-                                trolleyCode: t.trolleyCode,
-                            };
-                        });
-
-                        const dropdownIds = ['ddTrolley', 'ddTrolley1'];
-                        dropdownIds.forEach(function (id) {
-                            const dropdown = document.getElementById(id);
-                            dropdown.innerHTML = "";
-
-                            const defaultOption = document.createElement("option");
-                            defaultOption.value = "";
-                            defaultOption.textContent = "Select a trolley";
-                            defaultOption.disabled = true;
-                            defaultOption.selected = true;
-                            dropdown.appendChild(defaultOption);
-
-                            result.data.forEach(function (t) {
-                                const option = document.createElement("option");
-                                option.value = t.trolley_Id;
-                                option.textContent = t.trolleyCode;
-                                dropdown.appendChild(option);
+                            trolleyCodeList = result.data.map(function (t) {
+                                return {
+                                    trolleyId: t.trolley_Id,
+                                    trolleyCode: t.trolleyCode,
+                                };
                             });
-                        });
+                            console.log("trolley list", trolleyCodeList);
+                            const dropdownIds = ['ddTrolley', 'ddTrolley1'];
+                            dropdownIds.forEach(function (id) {
+                                const dropdown = document.getElementById(id);
+                                dropdown.innerHTML = "";
 
+                                const defaultOption = document.createElement("option");
+                                defaultOption.value = "";
+                                defaultOption.textContent = "Select a trolley";
+                                defaultOption.disabled = true;
+                                defaultOption.selected = true;
+                                dropdown.appendChild(defaultOption);
 
-                        // var dropdown = document.getElementById("ddTrolley");
-                        // dropdown.innerHTML = "";
-
-                        // var defaultOption = document.createElement("option");
-                        // defaultOption.value = "";
-                        // defaultOption.textContent = "Select a trolley";
-                        // defaultOption.disabled = true;
-                        // defaultOption.selected = true;
-                        // dropdown.appendChild(defaultOption);
-
-                        // result.data.forEach(function (t) {
-                        //     var option = document.createElement("option");
-                        //     option.value = t.trolley_Id;
-                        //     option.textContent = t.trolleyCode;
-                        //     dropdown.appendChild(option);
-                        // });
-                    } else {
+                                result.data.forEach(function (t) {
+                                    const option = document.createElement("option");
+                                    option.value = t.trolley_Id;
+                                    option.textContent = t.trolleyCode;
+                                    dropdown.appendChild(option);
+                                });
+                            });
+                            // resolve();
+                        } else {
+                            swal.fire({
+                                icon: 'error',
+                                title: "Wait",
+                                text: result.errMessage
+                            });
+                            // reject(new Error(result.errMessage));
+                        }
+                    },
+                    error: function (error) {
                         swal.fire({
                             icon: 'error',
                             title: "Wait",
-                            text: result.errMessage
+                            text: error.val
                         });
+                        // reject(new Error(error.val)); 
                     }
-                },
-                error: function (error) {
-                    swal.fire({
-                        icon: 'error',
-                        title: "Wait",
-                        text: error.val
-                    });
-                }
-            });
+                });
+            // });
         }
 
         function cancelForm(modalId) {
@@ -914,7 +924,6 @@
         });
 
         function deleteSlot(id, slotCode) {
-            console.log(id, slotCode);
             swal.fire({
                 title: "Are you sure want to delete?",
                 text: "You will not be able to recover this record!",
@@ -1018,8 +1027,6 @@
                 { id: 'txtAddPulse6Inc', name: 'Additional Pulse 6 Increment', required: true, numeric: true, min: 0, allowEmpty: true },
             ];
 
-            console.log("here");
-
             if (validateColModal(fields)) {
                 var data = {
                     Trolley_Id: parseInt($('#ddTrolley1').val()),
@@ -1053,7 +1060,6 @@
                     IsLeft: $('#colModal').find('#chkIsLeft').prop("checked"),
                 };
 
-                console.log(data);
                 $.ajax({
                     url: '/Trolley/SaveRangeOfTrolleySlot',
                     type: 'POST',
@@ -1113,15 +1119,22 @@
             };
 
             var book_header = type === "slots" ? [
-                ['Trolley Code', 'Trolley Slot Code', 'Column No', 'Row No', 'Is Active', 'Is Left', 'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse', 
+                ['Trolley Code', 'Trolley Slot Code', 'Column No', 'Row No', 'Is Active', 'Is Left', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse', 
                 'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6']
-            ] 
-            : [
-                ['Trolley Slot Code', 'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse', 
+            ] : [
+                ['Trolley Slot Code', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse', 
                 'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6']
             ];
 
             var booksheet = XLSX.utils.aoa_to_sheet(book_header);
+            // const bs = XLSX.utils.json_to_sheet(book_header);
+            booksheet['!cols'] = type === "slots" ? [
+                {wpx: 70}, {wpx: 100}, {wpx: 60}, {wpx: 50}, {wpx: 50}, {wpx: 50}, {wpx: 50}, {wpx: 50}, 
+                {wpx: 60}, {wpx: 60}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}
+            ] : [
+                {wpx: 100}, {wpx: 50}, {wpx: 50}, {wpx: 60}, {wpx: 60},
+                {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}
+            ]
             XLSX.utils.book_append_sheet(book, booksheet, "Sheet1");
             XLSX.writeFile(book, type === "slots" ? "TrolleySlotListTemplate.xlsx" : "TrolleySlotPulsesTemplate.xlsx");
         }
@@ -1197,12 +1210,12 @@
             let dataTableColumns;
 
             if (source == "importSlot") {
-                dataTableColumns = ['Trolley Code', 'Trolley Slot Code', 'Column No', 'Row No', 'Is Active', 'Is Left', 'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse',
+                dataTableColumns = ['Trolley Code', 'Trolley Slot Code', 'Column No', 'Row No', 'Is Active', 'Is Left', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
                                      'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6'];
                 $('#updateType').val("slots");
             }
             else {
-                dataTableColumns = ['Trolley Slot Code',  'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse',
+                dataTableColumns = ['Trolley Slot Code',  'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
                                      'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6'];
                 $('#updateType').val("pluses"); 
             }
@@ -1219,11 +1232,12 @@
                 const matchedCol = dataTableColumns.find(col => isMatch(col, column));
 
                 columnDropdowns += `
-                    <div class="row align-items-center mb-3">
-                        <div class="col-4">
-                            <label class="form-label mb-0">File Column: <strong>${column}</strong></label>
+                <div class="container">
+                    <div class="row justify-content-center align-items-center mb-3">
+                        <div class="col-5">
+                            <label class="form-label mb-0">File Column: ${column}</label>
                         </div>
-                        <div class="col-6">
+                        <div class="col-5">
                             <select class="form-select column-mapping" 
                                     data-col="${column}" 
                                     id="column${index}">
@@ -1233,10 +1247,11 @@
                                 `).join('')}
                             </select>
                         </div>
-                    </div>`;
+                    </div>
+                </div>`;
             });
 
-            document.getElementById('csvColumns').innerHTML = columnDropdowns;
+            document.getElementById('csvColumnContent').innerHTML = columnDropdowns;
             $('#columnMatchingModal').modal("show");
         }
 

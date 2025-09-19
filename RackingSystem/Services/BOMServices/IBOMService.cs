@@ -7,6 +7,7 @@ namespace RackingSystem.Services.BOMServices
 {
     public interface IBOMService
     {
+        public Task<ServiceResponseModel<BOMListDTO>> GetBOM(long bomId);
         public Task<ServiceResponseModel<List<BOMListDTO>>> GetBOMList(BOMSearchReqDTO req);
         public Task<ServiceResponseModel<List<BOMDtlDTO>>> GetBOMDetail(long bomId);
         public Task<ServiceResponseModel<BOMDtlReqDTO>> SaveBOM(BOMDtlReqDTO bom);

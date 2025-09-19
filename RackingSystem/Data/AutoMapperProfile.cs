@@ -9,6 +9,8 @@ using RackingSystem.Models.Reel;
 using RackingSystem.Models.Trolley;
 using RackingSystem.Models.Setting;
 using RackingSystem.Models.BOM;
+using RackingSystem.Data.JO;
+using RackingSystem.Models.JO;
 
 namespace RackingSystem.Data
 {
@@ -45,6 +47,8 @@ namespace RackingSystem.Data
             CreateMap<BOMDetail, BOMDtlDTO>();
             CreateMap<BOMDetail, BOMListReqDTO>();
             CreateMap<GRNDetail, GRNDtlListDTO>();
+            CreateMap<JobOrder, JOListDTO>();
+            CreateMap<JobOrderDetail, JODetailReqDTO>();
         }
     }
 }

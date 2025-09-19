@@ -123,7 +123,7 @@ namespace RackingSystem.Services.RackJobQueueServices
                     List<JobOrderDetail> jodtlList = _dbContext.JobOrderDetail.Where(x => x.JobOrder_Id == req.Doc_Id).ToList();
                     foreach (var jodtl in jodtlList)
                     {
-                        bdList = _dbContext.BOMDetail.Where(x => x.BOM_Id == jodtl.BOM_Id).ToList();
+                        bdList = _dbContext.BOMDetail.Where(x => x.BOM_Id == jodtl.Item_Id).ToList();
                         foreach (var bd in bdList)
                         {
                             JobOrderRaws _raw = new JobOrderRaws()
@@ -131,7 +131,7 @@ namespace RackingSystem.Services.RackJobQueueServices
                                 JobOrderRaws_Id = new Guid(),
                                 JobOrderDetail_Id = jodtl.JobOrderDetail_Id,
                                 JobOrder_Id = jodtl.JobOrder_Id,
-                                BOM_Id = jodtl.BOM_Id,
+                                BOM_Id = jodtl.Item_Id,
                                 Item_Id = bd.Item_Id,
                                 BaseQty = bd.Qty,
                                 Qty = bd.Qty * jodtl.Qty,

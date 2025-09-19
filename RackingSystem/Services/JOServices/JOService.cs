@@ -9,8 +9,10 @@ using RackingSystem.Data.Maintenances;
 using RackingSystem.General;
 using RackingSystem.Helpers;
 using RackingSystem.Models;
+using RackingSystem.Models.BOM;
 using RackingSystem.Models.GRN;
 using RackingSystem.Models.JO;
+using System.CodeDom;
 
 namespace RackingSystem.Services.JOServices
 {
@@ -67,7 +69,7 @@ namespace RackingSystem.Services.JOServices
         //    return result;
         //}
 
-        public async Task<ServiceResponseModel<List<JOListDTO>>> GetJOList(JOSearchReqDTO req)
+        public async Task<ServiceResponseModel<List<JOListDTO>>> GetJOList() //JOSearchReqDTO req
         {
             ServiceResponseModel<List<JOListDTO>> result = new ServiceResponseModel<List<JOListDTO>>();
 
@@ -92,6 +94,12 @@ namespace RackingSystem.Services.JOServices
 
                 //result.success = true;
                 //result.data = grndtlListDTO;
+                var jomList = await _dbContext.JobOrder.OrderBy(x => x.JobOrder_Id).ToListAsync();
+                var jomListDTO = _mapper.Map<List<JOListDTO>>(jomList);
+
+                result.success = true;
+                result.data = jomListDTO;
+
                 return result;
             }
             catch (Exception ex)
@@ -103,22 +111,41 @@ namespace RackingSystem.Services.JOServices
             return result;
         }
 
+        public async Task<ServiceResponseModel<List<JODetailReqDTO>>> GetJODetail(long jobId)
+        {
+            ServiceResponseModel<List<JODetailReqDTO>> result = new ServiceResponseModel<List<JODetailReqDTO>>();
+
+            try
+            {
+                var jobDtl = _dbContext.JobOrderDetail.Where(d => d.JobOrder_Id == jobId).ToList();
+                var jobDtlDTO = _mapper.Map<List<JODetailReqDTO>>(jobDtl);
+                result.success = true;
+                result.data = jobDtlDTO;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+            return result;
+        }
+
         public async Task<ServiceResponseModel<JOReqDTO>> SaveJob(JOReqDTO job)
         {
             ServiceResponseModel<JOReqDTO> result = new ServiceResponseModel<JOReqDTO>();
 
             try
             {
-                if (string.IsNullOrEmpty(job.DocNo))
-                {
-                    result.errMessage = "Please enter document no.";
-                    return result;
-                }
+                //if (string.IsNullOrEmpty(job.DocNo))
+                //{
+                //    result.errMessage = "Please enter document no.";
+                //    return result;
+                //}
 
                 int index = 1;
                 foreach (var dtl in job.Details)
                 {
-                    if (dtl.BOM_Id == 0)
+                    if (dtl.Item_Id == 0)
                     {
                         result.errMessage = $"Item {index}: No product selected. Please choose a product.";
                         return result;
@@ -133,11 +160,19 @@ namespace RackingSystem.Services.JOServices
 
                 if (job.JobOrder_Id == 0)
                 {
+                    var jobOrder = await DocFormatHelper.Instance.get_NextDocumentNo(_dbContext, General.EnumConfiguration.DocFormat_JO, DateTime.Now, true);
+                    if (jobOrder.success == false)
+                    {
+                        result.errMessage = jobOrder.errMessage;
+                        return result;
+                    }
+
                     JobOrder _job = new JobOrder()
                     {
-                        DocNo = job.DocNo,
+                        DocNo = jobOrder.data,
                         Description = string.IsNullOrEmpty(job.Description) ? "" : job.Description,
                         Status = "",
+                        DocDate = DateTime.Now,
                         CreatedBy = job.CreatedBy,
                         CreatedDate = DateTime.Now,
                     };
@@ -149,7 +184,7 @@ namespace RackingSystem.Services.JOServices
                         JobOrderDetail _jobDtl = new JobOrderDetail()
                         {
                             JobOrder_Id = _job.JobOrder_Id,
-                            BOM_Id = dtl.BOM_Id,
+                            Item_Id = dtl.Item_Id,
                             Qty = dtl.Qty,
                         };
                         _dbContext.JobOrderDetail.Add(_jobDtl);
@@ -198,7 +233,7 @@ namespace RackingSystem.Services.JOServices
                             JobOrderDetail _jobDtl = new JobOrderDetail()
                             {
                                 JobOrder_Id = _job.JobOrder_Id,
-                                BOM_Id = dtl.BOM_Id,
+                                Item_Id = dtl.Item_Id,
                                 Qty = dtl.Qty,
                             };
                             _dbContext.JobOrderDetail.Add(_jobDtl);
@@ -212,7 +247,7 @@ namespace RackingSystem.Services.JOServices
                                 return result;
                             }
 
-                            _jobDtl.BOM_Id = dtl.BOM_Id;
+                            _jobDtl.Item_Id = dtl.Item_Id;
                             _jobDtl.Qty = dtl.Qty;
                             _dbContext.JobOrderDetail.Update(_jobDtl);
                         }   

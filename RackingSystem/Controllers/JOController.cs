@@ -68,6 +68,19 @@ namespace RackingSystem.Controllers
         //    return result;
         //}
 
+        [HttpGet]
+        public async Task<ServiceResponseModel<List<JOListDTO>>> GetJOList() //[FromBody] JOSearchReqDTO req
+        {
+            ServiceResponseModel<List<JOListDTO>> result = await _joService.GetJOList();
+            return result;
+        }
+
+        [HttpPost]
+        public async Task<ServiceResponseModel<List<JODetailReqDTO>>> GetJODetail([FromBody] long jobId)
+        {
+            ServiceResponseModel<List<JODetailReqDTO>> result = await _joService.GetJODetail(jobId);
+            return result;
+        }
 
         [HttpPost]
         public async Task<IActionResult> SaveJob([FromBody] JOReqDTO job)

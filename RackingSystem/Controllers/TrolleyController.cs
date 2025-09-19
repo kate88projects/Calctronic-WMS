@@ -43,6 +43,13 @@ namespace RackingSystem.Controllers
             return result;
         }
 
+        [HttpGet]
+        public async Task<ServiceResponseModel<List<TrolleyListDTO>>> GetActiveTrolleyList()
+        {
+            ServiceResponseModel<List<TrolleyListDTO>> result = await _trolleyService.GetActiveTrolleyList();
+            return result;
+        }
+
         [HttpPost]
         public async Task<IActionResult> SaveTrolley([FromBody] TrolleyListDTO trolley)
         {

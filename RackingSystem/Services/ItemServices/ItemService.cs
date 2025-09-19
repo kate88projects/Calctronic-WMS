@@ -538,5 +538,46 @@ namespace RackingSystem.Services.ItemServices
             return result;
         }
 
+        public async Task<ServiceResponseModel<List<ItemListDTO>>> GetFinishedItemList()
+        {
+            ServiceResponseModel<List<ItemListDTO>> result = new ServiceResponseModel<List<ItemListDTO>>();
+
+            try
+            {
+                var itemList = await _dbContext.Item.Where(x => x.IsActive == true && x.IsFinishGood == true).OrderBy(x => x.ItemCode).ToListAsync();
+                var itemListDTO = _mapper.Map<List<ItemListDTO>>(itemList).ToList();
+                result.success = true;
+                result.data = itemListDTO;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceResponseModel<List<ItemListDTO>>> GetRawItemList()
+        {
+            ServiceResponseModel<List<ItemListDTO>> result = new ServiceResponseModel<List<ItemListDTO>>();
+
+            try
+            {
+                var itemList = await _dbContext.Item.Where(x => x.IsActive == true && x.IsFinishGood == false).OrderBy(x => x.ItemCode).ToListAsync();
+                var itemListDTO = _mapper.Map<List<ItemListDTO>>(itemList).ToList();
+                result.success = true;
+                result.data = itemListDTO;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
     }
 }

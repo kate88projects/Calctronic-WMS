@@ -161,9 +161,9 @@
                         <div class="col-sm-3" style="">
                             <input id="txtItemCode" name="ItemCode" type="text" class="form-control" placeholder="Item" />
                         </div>
-                        <div class="col-sm-3">
+                        @* <div class="col-sm-3">
                             <input id="txtCreatedBySearch" name="CreatedBy" type="text" class="form-control" placeholder="Created By" />
-                        </div>
+                        </div> *@
                         <div class="col-sm-1 d-flex"> @* col-sm-6 d-flex justify-content-end *@
                             <button type="button" class="btn btn-primary" style="width: 100%; " onclick="loadList(1)"><i class="bi bi-search"></i> </button>
                         </div>
@@ -190,9 +190,9 @@
                         <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
                             <thead>
                                 <tr>
-                                    <th>Job Order Id</th>
-                                    <th>Doc Date</th>
+                                    @* <th>Job Order Id</th> *@
                                     <th>Doc No</th>
+                                    <th>Doc Date</th>
                                     <th>Description</th>
                                     <th>Status</th>
                                     <th>Created Date</th>
@@ -229,13 +229,20 @@
              </div>
              <div class="modal-body">
                  <div class="row g-0"><span class="title titleColor">JOB</span></div>
-                 <div class="row mb-2">
-                     <div class="col">
+                 <div class="row mb-4">
+                     @* <div class="col">
                           <div class="form-floating">
                                 <input type="text" class="form-control" id="txtDocNo" placeholder="Please enter document no">
                                 <label for="txtDocNo">Document No</label>
                                 <div id="txtDocNoError" class="error-message"></div>
                             </div>
+                     </div> *@
+                     <div class="col">
+                         <div class="form-floating">
+                             <input type="text" class="form-control" id="txtdesc" placeholder="Please enter description">
+                             <label for="txtdesc">Description</label>
+                             @* <div id="txtdescError" class="error-message"></div> *@
+                         </div>
                      </div>
                      <div class="col">
                         <div class="form-floating">
@@ -245,15 +252,15 @@
                         </div>
                     </div>
                  </div>
-                 <div class="g-3 mb-4">
+                @*  <div class="g-3 mb-4">
                      <div class="col">
                          <div class="form-floating">
                              <input type="text" class="form-control" id="txtdesc" placeholder="Please enter description">
                              <label for="txtdesc">Description</label>
-                             @* <div id="txtdescError" class="error-message"></div> *@
+                             @* <div id="txtdescError" class="error-message"></div> 
                          </div>
                      </div>
-                </div>
+                </div> *@
 
                 <div class="row g-0"><span class="title subtitleColor">Details</span></div>
                 <div class="itemContainer" id="itemContainer">
@@ -286,7 +293,6 @@
                                 </div>
                             </div> *@
                             <input type="hidden" id="txtJobDtlId1">
-                            <input type="hidden" id="txtBomId">
                         </div>
                     </div>
                 </div>
@@ -313,16 +319,18 @@
     <script src="~/js/sweetalert2.all.min.js"></script>
 
     <script type="text/javascript">
+        let itemIndex = 1;
+
         $(document).ready(function () {
             getBOMList();
-            // loadList();
-            $('#listTable').DataTable({
-                data: null,
-                paging: false,
-                searching: false,
-                "info": false,
-                "bDestroy": true,
-            });
+            loadList();
+            // $('#listTable').DataTable({
+            //     data: null,
+            //     paging: false,
+            //     searching: false,
+            //     "info": false,
+            //     "bDestroy": true,
+            // });
         });
 
         function getBOMList() {
@@ -383,8 +391,8 @@
         function loadList() {
              $.ajax({
                  url: "/JO/GetJOList/",
-                 type: "POST",
-                 data: JSON.stringify(data),
+                 type: "GET",
+                 // data: JSON.stringify(data),
                  dataType: 'JSON',
                  contentType: 'application/json; charset=utf-8',
                  beforeSend: function () {
@@ -407,83 +415,83 @@
                             searching: false,
                             "info": false,
                             "bDestroy": true,
-                            // columns: [
-                            //     { data: 'boM_Id' },
-                            //     { data: 'item_Id' ,
-                            //         render: function(data, type, row) {
-                            //             var item = itemList.find(function(i) {
-                            //                 return i.itemId === data;
-                            //             });
-                            //             return item ? item.itemCode: '';
-                            //         }
-                            //     },
-                            //     { data: 'description' },
-                            //     {
-                            //         data: null,
-                            //         render: function (data, type, row, meta) {
-                            //             if (row.isActive == true) {
-                            //                 return '<span><i class="bi bi-check-square" style="color: darkgreen;"></i></span>'
-                            //             }
-                            //             else {
-                            //                 return '<span><i class="bi bi-app""></i></span>'
-                            //             }
-                            //         }
-                            //     },
-                            //     { data: 'createdDate' },
-                            //     { data: 'createdBy' },
-                            //     {
-                            //         data: null,
-                            //         render: function (data, type, row, meta) {
-                            //             const rawData = JSON.stringify(row).replace(/"/g, "&quot;");
-                            //             return `<div style="display:flex;">
-                            //                         <button class="btn btn-success d-grid edit-bom-btn" style="margin-right:10px;" data-row="${rawData}">
-                            //                             <span><i class="bi bi-pencil-square"></i>Edit</span>
-                            //                         </button>
-                            //                         <button class="btn btn-danger deactivate-account delete-bom-btn" data-id="${row.boM_Id}">
-                            //                             <span><i class="bi bi-trash"></i>Delete</span>
-                            //                         </button>
-                            //                     </div>`;
-                            //         }
-                            //     }
-                            // ],
+                            columns: [
+                                // { data: 'jobOrder_Id' },
+                                { data: 'docNo' },
+                                { 
+                                    data: null ,
+                                    render: function (data, type, row, meta) {
+                                        const docDate = new Date(row.docDate);
+                                        const formattedDate = docDate.toLocaleString('en-GB', {
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric',
+                                            hour: 'numeric',
+                                            minute: 'numeric',
+                                            hour12: true
+                                        });
+                                        return formattedDate;
+                                    }
+                                },
+                                { data: 'description' },
+                                { data: 'status' },
+                                { data: 'createdDate' },
+                                { data: 'createdBy' },
+                                { data: 'updatedDate' },
+                                { data: 'updatedBy' },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        const rawData = JSON.stringify(row).replace(/"/g, "&quot;");
+                                        return `<div style="display:flex;">
+                                                    <button class="btn btn-success d-grid edit-btn" style="margin-right:10px;" data-row="${rawData}">
+                                                        <span><i class="bi bi-pencil-square"></i>Edit</span>
+                                                    </button>
+                                                    <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.jobOrder_Id}">
+                                                        <span><i class="bi bi-trash"></i>Delete</span>
+                                                    </button>
+                                                </div>`;
+                                    }
+                                },
+                            ],
                         });
 
-                        var curCnt = 0;
-                        var pageSize = parseInt($("#selpageSize").val());
-                        var startEntry = ((page - 1) * pageSize) + 1;
-                        var ttlRecords = result.totalRecords === -1 ? $('#lblTotal').text() : result.totalRecords;
-                        var endEntry = Math.min(page * pageSize, ttlRecords);
+                        // var curCnt = 0;
+                        // var pageSize = parseInt($("#selpageSize").val());
+                        // var startEntry = ((page - 1) * pageSize) + 1;
+                        // var ttlRecords = result.totalRecords === -1 ? $('#lblTotal').text() : result.totalRecords;
+                        // var endEntry = Math.min(page * pageSize, ttlRecords);
 
-                        if (ttlRecords === 0 || startEntry > ttlRecords) {
-                            startEntry = 0;
-                            endEntry = 0;
-                        }
-                        $('#lblCurCount').html(`${startEntry} to ${endEntry}`);
+                        // if (ttlRecords === 0 || startEntry > ttlRecords) {
+                        //     startEntry = 0;
+                        //     endEntry = 0;
+                        // }
+                        // $('#lblCurCount').html(`${startEntry} to ${endEntry}`);
 
-                        if (page == 1) {
-                            $('#lblTotal').html(result.totalRecords);
-                            $('#ulPagination').html('');
+                        // if (page == 1) {
+                        //     $('#lblTotal').html(result.totalRecords);
+                        //     $('#ulPagination').html('');
 
-                            var pageSize = $('#selpageSize').val();
-                            const myDiv = document.getElementById('ulPagination');
-                            var ttlPage = result.totalRecords / pageSize;
-                            if ((result.totalRecords % pageSize) > 0) {
-                                ttlPage = ttlPage + 1;
-                            }
-                            $('#txtTotalRecord').val(result.totalRecords);
-                            $('#txtTotalPage').val(ttlPage);
+                        //     var pageSize = $('#selpageSize').val();
+                        //     const myDiv = document.getElementById('ulPagination');
+                        //     var ttlPage = result.totalRecords / pageSize;
+                        //     if ((result.totalRecords % pageSize) > 0) {
+                        //         ttlPage = ttlPage + 1;
+                        //     }
+                        //     $('#txtTotalRecord').val(result.totalRecords);
+                        //     $('#txtTotalPage').val(ttlPage);
 
-                            myDiv.innerHTML += '<li class="page-item disabled"><a href="javascript:prevPage()">Previous</a></li>';
-                            for (var i = 1; i <= ttlPage; i++) {
-                                if (i == 1) {
-                                       myDiv.innerHTML += '<li class="page-item active" id="btnP'+ i +'"><a href="javascript:loadList('+ i +')" class="page-link">'+ i +'</a></li>';
-                                }
-                                else {
-                                       myDiv.innerHTML += '<li class="page-item" id="btnP'+ i +'"><a href="javascript:loadList('+ i +')" class="page-link">'+ i +'</a></li>';
-                                }
-                            }
-                            myDiv.innerHTML += '<li class="page-item disabled"><a href="javascript:nextPage()">Next</a></li>';
-                        }
+                        //     myDiv.innerHTML += '<li class="page-item disabled"><a href="javascript:prevPage()">Previous</a></li>';
+                        //     for (var i = 1; i <= ttlPage; i++) {
+                        //         if (i == 1) {
+                        //                myDiv.innerHTML += '<li class="page-item active" id="btnP'+ i +'"><a href="javascript:loadList('+ i +')" class="page-link">'+ i +'</a></li>';
+                        //         }
+                        //         else {
+                        //                myDiv.innerHTML += '<li class="page-item" id="btnP'+ i +'"><a href="javascript:loadList('+ i +')" class="page-link">'+ i +'</a></li>';
+                        //         }
+                        //     }
+                        //     myDiv.innerHTML += '<li class="page-item disabled"><a href="javascript:nextPage()">Next</a></li>';
+                        // }
                     }
                     else {
                         swal.fire({
@@ -514,7 +522,9 @@
         }
 
         function clearForm() {
-            removeErrMsg(['txtDocNo', 'txtCreatedBy'], true);
+            removeErrMsg(['txtCreatedBy'], true);
+            document.getElementById('txtdesc').value = ''
+            document.getElementById('txtJobId').value = '';
 
             const firstItem = document.querySelector(".item");
             if (firstItem) {
@@ -641,10 +651,10 @@
             let isValid = true;
 
             //validation for JOB header
-            if (!$('#txtDocNo').val()) {
-                isValid = false;
-                showError(field, "Document No is required.");
-            }
+            // if (!$('#txtDocNo').val()) {
+            //     isValid = false;
+            //     showError(field, "Document No is required.");
+            // }
 
             //validation for details
             items.forEach(item => {
@@ -666,20 +676,22 @@
                 formData.push({
                     JobOrderDetail_Id: parseInt(jobDtlId) || 0,
                     JobOrder_Id: parseInt($('#txtJobId').val()) || 0,
-                    BOM_Id: parseInt(subitem),
+                    Item_Id: parseInt(subitem),
                     Qty: parseInt(qty)
                 });
             });
 
             if (isValid) {
                 var jobData = {
-                    DocNo: $('#txtDocNo').val(),
+                    JobOrder_Id: parseInt($('#txtJobId').val()) || 0,
+                    // DocNo: $('#txtDocNo').val(),
                     Description: $('#txtdesc').val(),
                     CreatedBy: $('#txtCreatedBy').val(),
                     Details: formData,
                 };
 
-                console.log(jobData);
+                console.log("jobData", jobData);
+
 
                 $.ajax({
                     url: '/JO/SaveJob',
@@ -727,6 +739,156 @@
                     }
                 });
             }
+        }
+
+        $('#listTable').on('click', '.edit-btn', function () {
+            const row = JSON.parse($(this).attr('data-row'));
+            editForm(row);
+        });
+
+        async function editForm(row) {
+            var hasValue = false;
+
+            // $('#txtDocNo').val(row.docNo);
+            $('#txtdesc').val(row.description);
+            $('#txtCreatedBy').val(row.createdBy);
+            $('#txtJobId').val(row.jobOrder_Id);
+
+            //fetch details
+            var jobDtls = [];
+
+            $.ajax({
+                url: '/JO/GetJODetail',
+                type: 'POST',
+                data: JSON.stringify(row.jobOrder_Id),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    if (result.success == true) {
+                       jobDtls = result.data.map(function (i) {
+                            return {
+                                jobId: i.jobOrder_Id,
+                                jobDetailId: i.jobOrderDetail_Id,
+                                itemId: i.item_Id,
+                                qty: i.qty,
+                            };
+                        });
+
+                        const container = document.getElementById("itemContainer");
+                        const items = container.querySelectorAll(".itemBlock");
+                        const itemCount = items.length;
+
+                        jobDtls.forEach((dtl, index) => {
+                            if (index === 0) {
+                                const firstItem = container.querySelector(".itemBlock");
+                                const select = firstItem.querySelector("select");
+                                const qtyInput = firstItem.querySelector('input[type="number"]');
+                                const detailId = firstItem.querySelector('input[type="hidden"]');
+
+                                select.value = dtl.itemId;  
+                                qtyInput.value = dtl.qty;
+                                detailId.value = dtl.jobDetailId;
+
+                            } else if (itemCount < jobDtls.length) {
+                                createNewInputField(dtl, index+1, true);
+                            }
+                            index++;
+                        });
+                        bgAdjust();
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+            $("#newModal").modal("show");
+        }
+
+        $('#listTable').on('click', '.delete-btn', function () {
+            const id = $(this).attr('data-id');
+            deleteJob(id);
+        });
+
+        function deleteJob(id) {
+            console.log("id", id);
+
+            swal.fire({
+                title: "Are you sure want to delete?",
+                text: "You will not be able to recover this record!",
+                inputAttributes: {
+                    autocapitalize: 'off'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'ok',
+                cancelButtonText: 'cancel',
+                allowOutsideClick: false
+              }).then(function(r) {
+                if (r.isConfirmed == true) {
+                    var data = {
+                        JobOrder_Id: id,
+                    };
+                    $.ajax({
+                        url: '/JO/DeleteJob',
+                        type: 'DELETE',
+                        data: JSON.stringify(data),
+                        dataType: 'json',
+                        contentType: 'application/json; charset=utf-8',
+                        beforeSend: function () {
+                            Swal.fire({
+                                text: 'Please Wait',
+                                width: '300px',
+
+                                allowEscapeKey: false,
+                                allowOutsideClick: false,
+                                showConfirmButton: false,
+                            });
+                            Swal.showLoading()
+                        },
+                        success: function (result) {
+                            if (result.success == true) {
+                                swal.fire({
+                                    icon: 'success',
+                                    title: "Success Deleted",
+                                    text: "",
+                                    didClose: () => {
+                                      window.location.reload();
+                                    }
+                                });
+                            }
+                            else {
+                                swal.fire({
+                                    icon: 'error',
+                                    title: "Wait",
+                                    text: result.errMessage
+                                });
+                            }
+                        },
+                        error: function (error) {
+                            console.log(error);
+                            swal.fire({
+                                icon: 'error',
+                                title: "Wait",
+                                text: error.val
+                            });
+                        }
+                    });
+
+                } else {
+                    return;
+                }
+              });
         }
     </script>
 }

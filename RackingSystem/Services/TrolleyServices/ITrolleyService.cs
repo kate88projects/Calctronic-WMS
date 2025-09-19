@@ -6,6 +6,7 @@ namespace RackingSystem.Services.TrolleyServices
     public interface ITrolleyService
     {
         public Task<ServiceResponseModel<List<TrolleyListDTO>>> GetTrolleyList();
+        public Task<ServiceResponseModel<List<TrolleyListDTO>>> GetActiveTrolleyList();
         public Task<ServiceResponseModel<TrolleyListDTO>> SaveTrolley(TrolleyListDTO trolley);
         public Task<ServiceResponseModel<TrolleyListDTO>> DeleteTrolley(TrolleyListDTO trolley);
         public Task<ServiceResponseModel<List<TrolleySlotDTO>>> GetTrolleySlotList();
