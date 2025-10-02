@@ -35,6 +35,9 @@ namespace RackingSystem.Data.Maintenances
         [Required]
         public int ActualHeight { get; set; } = 0;
 
+        [Required]
+        public decimal ActualHeightDec { get; set; } = 0;
+
         [MaxLength(50)]
         public string ItemCode { get; set; } = "";
 
