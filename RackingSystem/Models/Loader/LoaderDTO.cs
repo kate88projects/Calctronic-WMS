@@ -19,5 +19,16 @@
         public int ColHeight { get; set; } = 0;
 
         public string IPAddr { get; set; } = "";
+
+        public int Col1UsedHeight { get; set; } = 0;
+        public int Col2UsedHeight { get; set; } = 0;
+        public int Col3UsedHeight { get; set; } = 0;
+        public int Col4UsedHeight { get; set; } = 0;
+
+        public int Col1TotalReels { get; set; } = 0;
+        public int Col2TotalReels { get; set; } = 0;
+        public int Col3TotalReels { get; set; } = 0;
+        public int Col4TotalReels { get; set; } = 0;
+
     }
 }

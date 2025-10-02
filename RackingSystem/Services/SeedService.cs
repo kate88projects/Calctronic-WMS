@@ -111,12 +111,23 @@ namespace RackingSystem.Services
                 }
 
                 // Set Default PLC IP Address for racking
-                if (context.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking.ToString()).Any() == false)
+                if (context.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking1.ToString()).Any() == false)
                 {
                     var config = new Configuration
                     {
-                        ConfigTitle = EnumConfiguration.PLC_IPAddr_Racking.ToString(),
+                        ConfigTitle = EnumConfiguration.PLC_IPAddr_Racking1.ToString(),
                         ConfigValue = "192.168.1.15",
+                    };
+                    context.Configuration.Add(config);
+                    await context.SaveChangesAsync();
+                }
+                // Set Default PLC IP Address for gantry
+                if (context.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Gantry1.ToString()).Any() == false)
+                {
+                    var config = new Configuration
+                    {
+                        ConfigTitle = EnumConfiguration.PLC_IPAddr_Gantry1.ToString(),
+                        ConfigValue = "192.168.1.14",
                     };
                     context.Configuration.Add(config);
                     await context.SaveChangesAsync();

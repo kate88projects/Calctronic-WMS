@@ -322,6 +322,26 @@ namespace RackingSystem.Services.LoaderServices
                 }
 
                 var loaderDTO = _mapper.Map<LoaderDTO>(loaderInfo);
+
+                for (int iCol = 1; iCol <= 4; iCol++)
+                {
+                    var col = _dbContext.LoaderColumn.Where(x => x.Loader_Id == loaderDTO.Loader_Id && x.ColNo == iCol).FirstOrDefault();
+                    if (col != null)
+                    {
+                        if (iCol == 1) { loaderDTO.Col1UsedHeight = loaderDTO.ColHeight - col.BalanceHeight; }
+                        if (iCol == 2) { loaderDTO.Col2UsedHeight = loaderDTO.ColHeight - col.BalanceHeight; }
+                        if (iCol == 3) { loaderDTO.Col3UsedHeight = loaderDTO.ColHeight - col.BalanceHeight; }
+                        if (iCol == 4) { loaderDTO.Col4UsedHeight = loaderDTO.ColHeight - col.BalanceHeight; }
+
+                    }
+                    var ttl = _dbContext.LoaderReel.Where(x => x.Loader_Id == loaderDTO.Loader_Id && x.ColNo == iCol).Count();
+                    if (iCol == 1) { loaderDTO.Col1TotalReels = ttl; }
+                    if (iCol == 2) { loaderDTO.Col2TotalReels = ttl; }
+                    if (iCol == 3) { loaderDTO.Col3TotalReels = ttl; }
+                    if (iCol == 4) { loaderDTO.Col4TotalReels = ttl; }
+                }
+
+
                 result.success = true;
                 result.data = loaderDTO;
                 return result;
@@ -343,6 +363,7 @@ namespace RackingSystem.Services.LoaderServices
             {
                 var loaderList = await _dbContext.Loader.Where(x => x.IsActive == true && x.Status == EnumLoaderStatus.Loaded.ToString()).OrderBy(x => x.LoaderCode).ToListAsync();
                 var loaderListDTO = _mapper.Map<List<LoaderListDTO>>(loaderList).ToList();
+
                 result.success = true;
                 result.data = loaderListDTO;
                 return result;

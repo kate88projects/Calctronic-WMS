@@ -406,12 +406,21 @@ namespace RackingSystem.Services.SettingServices
                 var setList = await _dbContext.Configuration.OrderBy(x => x.ConfigTitle).ToListAsync();
                 foreach (var s in setList)
                 {
-                    if (s.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking.ToString())
+                    if (s.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking1.ToString())
                     {
                         setListDTO.Add(new GlobalSettingDTO
                         {
                             Configuration_Id = s.Configuration_Id,
-                            ConfigTitle = "PLC Rack - IP Address",
+                            ConfigTitle = "PLC SRMS - IP Address",
+                            ConfigValue = s.ConfigValue,
+                        });
+                    }
+                    if (s.ConfigTitle == EnumConfiguration.PLC_IPAddr_Gantry1.ToString())
+                    {
+                        setListDTO.Add(new GlobalSettingDTO
+                        {
+                            Configuration_Id = s.Configuration_Id,
+                            ConfigTitle = "PLC Gantry - IP Address",
                             ConfigValue = s.ConfigValue,
                         });
                     }

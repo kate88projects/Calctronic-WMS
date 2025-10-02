@@ -18,6 +18,23 @@ namespace RackingSystem.Controllers
             _rackService = rackService;
         }
 
+        public IActionResult RackJob()
+        {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpRACKING";
+            ViewData["ActiveTab"] = "RackJob";
+            ViewData["Title"] = "Rack Job";
+            return View();
+        }
+
+
         public IActionResult NewTransferHubInTask()
         {
             ViewBag.PermissionList = new List<int>();
