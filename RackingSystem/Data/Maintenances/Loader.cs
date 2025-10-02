@@ -34,10 +34,10 @@ namespace RackingSystem.Data.Maintenances
         public string IPAddr { get; set; } = "";
 
         [MaxLength(50)]
-        public string LockDeviceID { get; set; } = "";
+        public string LockedDeviceID { get; set; } = "";
 
         [MaxLength(50)]
-        public string LockBy { get; set; } = "";
+        public string LockedBy { get; set; } = "";
 
     }
 }
