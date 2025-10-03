@@ -377,5 +377,44 @@ namespace RackingSystem.Services.LoaderServices
             return result;
         }
 
+        public async Task<ServiceResponseModel<List<LoaderColumnDTO>>> GetLoaderColumn(int loaderId)
+        {
+            ServiceResponseModel<List<LoaderColumnDTO>> result = new ServiceResponseModel<List<LoaderColumnDTO>>();
+            try
+            {
+                //var loaderColList = await _dbContext.LoaderColumn.Where(x => x.Loader_Id == loaderId).OrderBy(x => x.ColNo).ToListAsync();
+                //var loaderColListDTO = _mapper.Map<List<LoaderColumnDTO>>(loaderColList).ToList();
+                var loaderColList = await (from lc in _dbContext.LoaderColumn
+                                           join l in _dbContext.Loader on lc.Loader_Id equals l.Loader_Id
+                                           where l.Loader_Id == loaderId
+                                           orderby lc.ColNo
+                                           select new
+                                           {
+                                               lc,
+                                               l.ColHeight
+                                           }).ToListAsync();
+
+                var loaderColListDTO = loaderColList.Select(x =>
+                {
+                    var dto = _mapper.Map<LoaderColumnDTO>(x.lc);
+                    dto.ColHeight = x.ColHeight;
+                    double usage = ((x.ColHeight - dto.BalanceHeight) / (double)x.ColHeight);
+                    dto.UsagePercentage = (int)(usage * 100);
+
+                    return dto;
+                }).ToList();
+
+                result.success = true;
+                result.data = loaderColListDTO;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
     }
 }

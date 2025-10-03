@@ -87,5 +87,12 @@ namespace RackingSystem.Controllers
             return result;
         }
 
+        [HttpPost]
+        public async Task<ServiceResponseModel<List<LoaderColumnDTO>>> GetLoaderColumn([FromBody] int loaderId)
+        {
+            ServiceResponseModel<List<LoaderColumnDTO>> result = await _loaderService.GetLoaderColumn(loaderId);
+            return result;
+        }
+
     }
 }

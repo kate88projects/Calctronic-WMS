@@ -174,7 +174,7 @@
 
     .error-message {
         color: red;
-        /* font-size: 0.875rem; */
+        font-size: 15px;
     }
 
     .hidden {
@@ -186,7 +186,7 @@
             left: 100px;
         }
     }
-
+/* 
     .gauge {
         position: relative;
         border-radius: 50%/100% 100% 0 0;
@@ -197,7 +197,8 @@
     .gauge:before {
         content: "";
         display: block;
-        padding-top: 50%; /* ratio of 2:1*/
+        padding-top: 50%; 
+        // ratio of 2:1
     }
 
     .gauge .chart {
@@ -250,9 +251,86 @@
         right: 5%;
     }
 
-    .text-bg-light {
-        background-color: grey !important;
+    .gauge-container {
+      width: 150px;
+      height: 80px;
+      display: block;
+      float: left;
+      padding: 10px;
+      background-color: #222;
+      margin: 7px;
+      border-radius: 3px;
+      position: relative;
     }
+    .gauge-container > .label {
+      position: absolute;
+      right: 0;
+      top: 0;
+      display: inline-block;
+      background: rgba(0, 0, 0, 0.5);
+      font-family: monospace;
+      font-size: 0.8em;
+      padding: 5px 10px;
+    }
+
+    .wrapper {
+      height: 100px;
+      float: left;
+      margin: 7px;
+      overflow: hidden;
+    }
+    .wrapper > .gauge-container {
+      margin: 0;
+    } */
+
+    /* .text-bg-light {
+        background-color: grey !important;
+    } */
+
+    .gauge-container {
+      width: 160px;
+      height: 120px;
+      display: block;
+      float: left;
+      padding: 10px;
+      /* margin: 7px; */
+      border-radius: 3px;
+      position: relative;
+    }
+
+    .svg-gauge {
+      &__container {
+        position: relative;
+        height: 150px;
+      }
+      &__paths {
+        /* margin: 20px auto 10px; */
+        height: 80px;
+        svg {
+          fill: none;
+        }
+        svg path {
+          transition: 0.3s;
+        }
+      }
+    }
+    .svg-gauge__paths text.label {
+      fill: black;
+      font-family: monospace;
+      font-size: 18px;
+      font-weight: bold;
+      pointer-events: none; 
+    }
+    
+    path {
+        fill: none;
+    }
+
+    /* .batteryContainer {
+        border: 1px solid black;
+    } */
+
+}
 </style>
 
 <div class="container-fluid">
@@ -282,48 +360,90 @@
                             <div class="container containerDtlHistory" style="min-height:100px;">
                                 <div class="row">
                                     <div class="col-12">
-                                        <p class="text-center"><strong>Loader : 00AS01</strong></p>
+                                        <p class="text-center"><strong>- Loader  <span id="loaderName"></span> - </strong></p>
                                         <br />
                                         <div class="progress-group">
-                                           <i class="bi bi-music-note" style="color: green;"></i> 
-                                                Column 1
-                                            <span class="float-end"><b>30</b>/110 mm</span>
-                                            <div class="progress progress-sm">
-                                                <div class="progress-bar text-bg-light" style="width: 80%"></div>
+                                            <i class="" style="color: red;" id="icon-c1"></i>
+                                            Column 1
+                                            <div class="float-end" style="display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 5px;">
+                                                <span style="font-size: 14px; line-height: 1.2;">
+                                                    <b id="percent-c1">0%</b>
+                                                </span>
+                                                <span style="font-size: 10px; color: gray; line-height: 1.2;">
+                                                    <b id="balance-c1">10</b> left /<span id="colHeight-c1">10</span> mm
+                                                </span>
+                                            </div>
+                                            <div class="progress progress-sm" style="width: 100%;">
+                                                <div class="progress-bar bg-success" id="c1" role="progressbar" style="width: 0%"></div>
                                             </div>
                                         </div>
-                                        <br />
-                                        <div class="progress-group">
+                                        <div class="progress-group mt-3">
+                                            <i class="" style="color: red;" id="icon-c2"></i>
                                             Column 2
-                                            <span class="float-end"><b>30</b>/110 mm</span>
-                                            <div class="progress progress-sm">
-                                                <div class="progress-bar text-bg-light" style="width: 10%"></div>
+                                            <div class="float-end" style="display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 5px;">
+                                                <span style="font-size: 14px; line-height: 1.2;">
+                                                    <b id="percent-c2">0%</b>
+                                                </span>
+                                                <span style="font-size: 10px; color: gray; line-height: 1.2;">
+                                                    <b id="balance-c2">10</b> left /<span id="colHeight-c2">10</span> mm
+                                                </span>
+                                            </div>
+                                            <div class="progress progress-sm" style="width: 100%;">
+                                                <div class="progress-bar bg-success" id="c2" role="progressbar" style="width: 0%"></div>
                                             </div>
                                         </div>
-                                        <br />
-                                        <div class="progress-group">
+                                        <div class="progress-group mt-3">
+                                            <i class="" style="color: red;" id="icon-c3"></i>
                                             Column 3
-                                            <span class="float-end"><b>30</b>/110 mm</span>
-                                            <div class="progress progress-sm">
-                                                <div class="progress-bar text-bg-light" style="width: 0%"></div>
+                                            <div class="float-end" style="display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 5px;">
+                                                <span style="font-size: 14px; line-height: 1.2;">
+                                                    <b id="percent-c3">0%</b>
+                                                </span>
+                                                <span style="font-size: 10px; color: gray; line-height: 1.2;">
+                                                    <b id="balance-c3">10</b> left /<span id="colHeight-c3">10</span> mm
+                                                </span>
+                                            </div>
+                                            <div class="progress progress-sm" style="width: 100%;">
+                                                <div class="progress-bar bg-success" id="c3" role="progressbar" style="width: 0%"></div>
                                             </div>
                                         </div>
-                                        <br />
-                                        <div class="progress-group">
+                                        <div class="progress-group mt-3">
+                                            <i class="" style="color: red;" id="icon-c4"></i>
                                             Column 4
-                                            <span class="float-end"><b>30</b>/110 mm</span>
-                                            <div class="progress progress-sm">
-                                                <div class="progress-bar text-bg-light" style="width: 50%"></div>
+                                            <div class="float-end" style="display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 5px;">
+                                                <span style="font-size: 14px; line-height: 1.2;">
+                                                    <b id="percent-c4">0%</b>
+                                                </span>
+                                                <span style="font-size: 10px; color: gray; line-height: 1.2;">
+                                                    <b id="balance-c4">10</b> left /<span id="colHeight-c4">10</span> mm
+                                                </span>
+                                            </div>
+                                            <div class="progress progress-sm" style="width: 100%;">
+                                                <div class="progress-bar bg-success" id="c4" role="progressbar" style="width: 0%"></div>
                                             </div>
                                         </div>
                                         <hr />
-                                        <div style="width: 100%; display: flex; justify-content: center;">
-                                            <div class="gauge" style="width: 200px; --rotation:180deg; --color:#5cb85c; --background:#e9ecef;">
+                                        <div>
+                                            <div style="width: 100%; display: flex; justify-content: center;" class="batteryContainer">
+                                            @* <div class="gauge" style="width: 200px; --rotation:180deg; --color:#5cb85c; --background:#e9ecef;">
                                                 <div class="percentage"></div>
                                                 <div class="mask"></div>
                                                 <span class="value"><span style="font-size:12px;">Battery : </span>100%</span>
+                                            </div> *@
+                                                <div class="svg-gauge svg-gauge__container gauge-container">
+                                                  <div class="svg-gauge__paths">
+                                                    <svg width="160" height="100" xmlns="http://www.w3.org/2000/svg">
+                                                      <path d="M 10 80 A 65 65 0 1 1 140 80" stroke="#d3d3d3" stroke-width="13" stroke-linecap="round"/>
+                                                      <g id="svg-graph-meter-value"></g>
+                                                      <text x="48%" y="60%" text-anchor="middle" dy="0.3em" style="font-size: 12px;" >Battery</text>
+                                                      <text x="48%" y="80%" text-anchor="middle" dy="0.3em" class="label" id="svg-gauge-percentage-2">90 %</text>
+                                                    </svg>
+                                                  </div>
+                                                  </div>
                                             </div>
+                                            <span id="batteryErr" class="error-message d-flex justify-content-center align-items-center" style="font-size: 12px;"></span>
                                         </div>
+                                        
                                     </div>
                                     @* <div class="col-12">
                                         <p>Auto Loader ID : </p>
@@ -373,11 +493,10 @@
                                                         <span class="input-group-text" onclick="clearLoaderScanCode()">X</span>
                                                     </div>
                                                     <br />
-                                                    <p id="pLoader1">
-                                                        Loader :
-                                                        <span class="error-message" id="err1"> aaa </span>
+                                                    <p id="pLoader1">Loader : <span id="loadStatus1"></span>
+                                                        <span class="error-message" id="err1"></span>
                                                     </p>
-                                                    <button class="btn btn-success" style="width:100%;" onclick="retry1()"> Next </button>
+                                                    <button class="btn btn-success" id="btnNext1" style="width:100%;" onclick="step1()" > Next </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -392,16 +511,16 @@
                                                     <img src="~/assets/img/loading.gif" style="width:50%;" />
                                                 </div>
                                                 <div class="col-sm-12 col-md-6">
-                                                    <p id="pCol3">
-                                                        Available Column :
-                                                        <span style="color:red; font-size:15px;" id="errCol3"> </span>
+                                                    <p>Auto Loader : <span id="startStatus"></span></p>
+                                                    <p id="pCol2">Available Column : <span id="colStatus2"></span>
+                                                        <span class="error-message" id="errCol2"></span>
                                                     </p>
-                                                    <p id="pFork3">
-                                                        Fork Status :
-                                                        <span style="color:red; font-size:15px;" id="errFork3"> </span>
+                                                    <p id="pFork2">Fork Status : <span id="forkStatus2"></span>
+                                                        <span class="error-message" id="errFork2"></span>
                                                     </p>
-                                                    <button class="btn btn-warning hidden" id="btnRetry2" style="width:100%;" onclick="step2()" >Retry Column Checking</button>
-                                                    <button class="btn btn-success hidden" id="btnNext2" style="width:100%;" onclick="retry2()"> Next </button>
+                                                    <button class="btn btn-warning hidden" id="btnRetry2" style="width:100%;" onclick="retry2('col')">Retry Column Checking</button>
+                                                    <button class="btn btn-warning hidden" id="btnRetry2-1" style="width:100%;" onclick="retry2('start')">Retry Load Process</button>
+                                                    <button class="btn btn-success hidden" id="btnNext2" style="width:100%;" onclick="step2()"> Next </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -421,18 +540,17 @@
                                                         <span class="input-group-text" onclick="clearItemScanCode()">X</span>
                                                     </div>
                                                     <br />
-                                                    <p id="pItem2">
-                                                        Item :
-                                                        <span style="color:red; font-size:15px;" id="err2"> </span>
+                                                    <p id="pItem3"> Item : <span id="itemStatus"></span>
+                                                        <span class="error-message" id="errItem3"></span>
                                                     </p>
-                                                    <p id="pReel2">
-                                                        Reel ID :
+                                                    <p id="pReel3">
+                                                        Reel ID : <span id="reelIdentity"></span>
                                                     </p>
-                                                    <p id="pHeight2">
-                                                        Est. Height :
+                                                    <p id="pHeight3">
+                                                        Est. Height : <span id="reelHeight"></span>
                                                     </p>
-                                                    <button class="btn btn-warning hidden" style="width:100%;" onclick="step3()" id="btnRetry3"> Retry Scan Reel ID </button>
-                                                    <button class="btn btn-success hidden" style="width:100%;" onclick="retry3()" id="btnNext3"> Next </button>
+                                                    <button class="btn btn-warning hidden" style="width:100%;" onclick="retry3()" id="btnRetry3"> Retry Scan Reel ID </button>
+                                                    <button class="btn btn-success hidden" style="width:100%;" onclick="step3()" id="btnNext3"> Next </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -447,9 +565,11 @@
                                                     <img src="~/assets/img/pre-load.gif" style="width:50%;" />
                                                 </div>
                                                 <div class="col-sm-12 col-md-6">
-                                                    <p>Auto Loader Status: </p>
-                                                    <p>Column Status: </p>
-                                                    <p>Fork Status: </p>
+                                                    <p>Auto Loader Status: <span id="loadConfirm4"></span></p>
+                                                    @* <p>Column Ready: <span id="readyCol4"></span></p> *@
+
+                                                    <span class="error-message" id="startErr" class="d-flex justify-content-center hidden mb-2"> </span>
+                                                    <button class="btn btn-warning hidden" onclick="startPutReel()" id="btnRetryStart" style="width:100%;">Retry Start to Load Reel</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -464,11 +584,11 @@
                                                     <img src="~/assets/img/3d-scanning.gif" style="width:50%;" />
                                                 </div>
                                                 <div class="col-sm-12 col-md-6">
-                                                    <p id="pLoader4">
-                                                        Auto Loader Column : 1 <span style="color:red; font-size:15px;" id="err4"> </span>
+                                                    <p id="pLoader4"> Auto Loader Column : <span id="loadCol4"></span>
+                                                        <span class="error-message" id="errCol4"> </span>
                                                     </p>
                                                     <p id="pHeight4">
-                                                        Actual Height :
+                                                        Actual Height : <span id="heightStatus4"></span>
                                                     </p>
 
                                                     <button class="btn btn-warning hidden" onclick="loadPLC(5)" id="btnRetry4" style="width:100%;">Retry Read Height</button>
@@ -503,6 +623,7 @@
                             <input type="hidden" id="txtActHeight">
                             <input type="hidden" id="txtReelCode">
                             <input type="hidden" id="txtICol">
+                            <div id="dataDiv" data-dec-height=""></div>
                         </div>
                     </div>
                 </div>
@@ -542,7 +663,7 @@
                     </div>
                     <div class="col-6">
                         <p class="" style="font-size:32px;">Please put Reel and tap Start button.</p>
-                        <button class="btn btn-success" style="width: 100%; height: 150px;" onclick="loadPLC(5)">Start</button>
+                        <button class="btn btn-success" style="width: 100%; height: 150px;" onclick="startPutReel()">Start</button>
                     </div>
                 </div>
             </div>
@@ -566,14 +687,14 @@
         scanLoaderEle.addEventListener('keyup', function(event) {
           // Check if the pressed key is "Enter" (key code 13 or key property "Enter")
           if (event.key === 'Enter') {
-
+            $('#loadStatus1').text('');
+            $('#err1').text('');
             const inputValue = this.value;
             var code = inputValue;
             $.ajax({
                 url: "/Loader/GetLoaderInfo_ReadyToLoad?req=" + code,
                 type: "GET",
                 dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
                     Swal.fire({
@@ -592,11 +713,11 @@
                         addLoader(0, result.data.loader_Id, result.data.loaderCode);
                     }
                     else {
-                        $('#pLoader1').html('Loader :  <span class="error-message" id="err1">' + result.errMessage + '</span>');
+                        $('#err1').text(result.errMessage);
                     }
                 },
                 error: function (error) {
-                    $('#pLoader1').html('Loader :  <span class="error-message" id="err1">' + error.val + '</span>');
+                    $('#err1').text(error.val);
                 }
             });
           }
@@ -611,7 +732,6 @@
 
             $("#txtReelCode").val(inputValue);
             $("#itemModal").modal("toggle");
-
             loadPLC(3);
           }
         });
@@ -630,46 +750,53 @@
 
             scanLoaderEle.focus();
 
-            var data=[{
-              type: "indicator",
-              mode: "gauge+number+delta",
-              value: 60,
-              title: {
-                text: 'Speed',
-                font: { size: 14 },
-                yanchor: 'bottom',
-                y: 10
-              },
-              delta: { increasing: { color: "white" } },
-              gauge: {
-                shape: 'angular',
-                axis: {
-                  range: [0, 100],
-                  visible: true,
-                  tickwidth: 1,
-                  tickcolor: "rgb(178, 178, 178)",
-                  tickvals: [0, 100],
-                  tickmode: 'array',
-                  tickfont: {
-                    size: '100px'
-                  }
-                },
-                bar: { color: "rgb(237, 61, 61)", thickness: 1 },
-                bgcolor: "rgb(178, 178, 178)",
-                bordercolor: "rgb(178, 178, 178)",
-              }
-            }];
+            // var data=[{
+            //   type: "indicator",
+            //   mode: "gauge+number+delta",
+            //   value: 60,
+            //   title: {
+            //     text: 'Speed',
+            //     font: { size: 14 },
+            //     yanchor: 'bottom',
+            //     y: 10
+            //   },
+            //   delta: { increasing: { color: "white" } },
+            //   gauge: {
+            //     shape: 'angular',
+            //     axis: {
+            //       range: [0, 100],
+            //       visible: true,
+            //       tickwidth: 1,
+            //       tickcolor: "rgb(178, 178, 178)",
+            //       tickvals: [0, 100],
+            //       tickmode: 'array',
+            //       tickfont: {
+            //         size: '100px'
+            //       }
+            //     },
+            //     bar: { color: "rgb(237, 61, 61)", thickness: 1 },
+            //     bgcolor: "rgb(178, 178, 178)",
+            //     bordercolor: "rgb(178, 178, 178)",
+            //   }
+            // }];
 
-            var layout = {
-              margin: {
-                l: 30,
-                r: 30,
-                b: 5,
-                t: 0,
-                pad: 0
-              }
-            };
+            // var layout = {
+            //   margin: {
+            //     l: 30,
+            //     r: 30,
+            //     b: 5,
+            //     t: 0,
+            //     pad: 0
+            //   }
+            // };
 
+            initialGaugeSetup(
+                "svg-graph-meter-value",
+                "svg-gauge-percentage-2",
+                "rgb(228, 0, 0)",
+                0,
+                setGaugePathValue
+            );
             // Plotly.newPlot('myDiv', data, layout);
         });
 
@@ -695,6 +822,7 @@
             // $("#txtHLoader").val('');
             // $("#txtHCol").val('');
             // $("#txtHColBal").val('');
+            $("#txtScanLoader").val('');
 
             scanLoaderEle.focus();
             $("#txtEstHeight").val(0);
@@ -703,6 +831,26 @@
 
             const fields = ['#txtLoaderId', '#txtLoaderCode', '#txtReelCode', '#txtHReelID', '#txtHItem', '#txtHExtH', '#txtHActH'];
             fields.forEach(i => $(i).val(''));
+            $('#loaderName').text('');
+
+            initialGaugeSetup(
+                "svg-graph-meter-value",
+                "svg-gauge-percentage-2",
+                "rgb(228, 0, 0)",
+                0,
+                setGaugePathValue
+            );
+
+            for (let i = 1; i <= 4; i++)
+            {
+                if ($(`#icon-c${i}`).hasClass("bi bi-fire"))
+                {
+                    $(`#icon-c${i}`).removeClass("bi bi-fire");
+                    $('#c' + i).removeClass("progress-bar-striped progress-bar-animated bg-warning");
+                    $('#c' + i).addClass("bg-success");
+                    console.log("remove here");
+                }
+            }
         }
 
         function restartItem() {
@@ -712,7 +860,7 @@
                 return;
             }
 
-            resetColorPLCForm(2);
+            resetColorPLCForm(3);
             newReel();
             scanLoaderEle.focus();
         }
@@ -721,12 +869,18 @@
             $('#pt2').html("STEP 2 :: Waiting Scan Reel ... ");
             $('#pt3').html("STEP 3 :: Checking column available ... ");
             $('#pt4').html("STEP 4 :: Reading Reel Info ... ");
-            $('#ptLast').html("STEP 5 :: Keep Record and Finalyzing ... ");
+            $('#pTextLast').text("STEP 5 :: Keep Record and Finalyzing ... ");
 
-            $('#pReel2').html("Reel ID : ");
-            $('#pHeight2').html("Est. Height : ");
-            $('#pHeight4').html("Actual Height : ");
-            $('#pTextLast').html("Waiting finish loading reel ... ");
+            // $('#pReel2').html("Reel ID : ");
+            $('#reelIdentity').text('');
+
+            // $('#pHeight2').html("Est. Height : ");
+            $('#reelHeight').text('');
+
+            // $('#pHeight4').html("Actual Height : ");
+            $('#heightStatus4').text('');
+
+            $('#pTextLast').text("Waiting finish loading reel ... ");
 
             const inputs = [
                 { id: "#txtScanItem", value: '' },
@@ -742,18 +896,19 @@
                 $(input.id).val(input.value);
             });
 
-            const errorMessages = [
-                { id: 'err2', message: 'Item : '},
-                { id: 'errCol3', message: 'Available Column : '},
-                { id: 'errFork3', message: 'Fork Status: '},
-                { id: 'err4', message: 'Auto Loader Column : '}
-            ];
-            errorMessages.forEach(error => {
-                $(`#${error.id}`).html(`<span class="error-message" id="${error.id]}"></span>`);
-            });
+            // const errorMessages = [
+            //     { element: 'pItem2', message: 'Item : ', id: 'err2'},
+            //     { element: 'pCol3', message: 'Available Column : ', id: 'errCol3'},
+            //     { element: 'pFork3', message: 'Fork Status : ', id: 'errFork3'},
+            //     { element: 'pLoader4', message: 'Auto Loader Column : ', id: 'err4'}
+            // ];
+            // errorMessages.forEach(error => {
+            //     $(`#${error.element}`).html(`${error.message} <span class="error-message" id="${error.id}"></span>`);
+            // });
+            $('#err1, #errCol2, #errFork2, #errItem3, #errCol4', '#startErr').text("");
+            
 
             $("#waiting2, #waiting3, #waiting4, #waitingLast").removeClass("hidden");
-
         }
 
         function resetColorPLCForm(idx) {
@@ -764,7 +919,7 @@
             steps.forEach(id => $('#' + id).removeClass("next active"));
 
             $('#btnRetry4, #btnRetryLast').addClass("hidden");
-            $('#err1, #err2, #errCol3, #errFork3, #err4, #err5').html("");
+            $('#err1, #errCol2, #errFork2, #errItem3, #errCol4', '#startErr').text("");
 
             if (idx >= 1 && idx <= 5) {
                 $('#' + sections[idx - 1]).addClass('form-active');
@@ -792,7 +947,6 @@
                 url: "/Loader/GetLoaderList_ReadyToLoad/",
                 type: "GET",
                 dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
                     Swal.fire({
@@ -806,7 +960,6 @@
                     Swal.showLoading();
                 },
                 success: function (result) {
-                    // console.log(result);
                     swal.close();
                     if (result.success == true) {
 
@@ -851,7 +1004,6 @@
                     url: "/Loader/GetLoaderInfo_ReadyToLoad?req=" + code,
                     type: "GET",
                     dataType: 'JSON',
-                    // data: JSON.stringify(jsonInput),
                     contentType: 'application/json; charset=utf-8',
                     beforeSend: function () {
                         Swal.fire({
@@ -865,7 +1017,6 @@
                         Swal.showLoading()
                     },
                     success: function (result) {
-                        //console.log(result);
                         swal.close();
                         if (result.success == true) {
                         }
@@ -902,52 +1053,75 @@
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-        function retry1() {
+        function step1() {
             var loaderId = $("#txtLoaderId").val();
             if (loaderId == "") {
-                $('#pLoader1').html('Loader : <span class="error-message" id="err1"> Must select Auto Loader </span>');
+                $('#loadStatus1').text('');
+                $('#err1').text('Must select Auto Loader');
                 return;
             }
+
             var loaderCode = $("#txtLoaderCode").val();
             var scanCode = $("#txtScanLoader").val();
             if (loaderCode.toUpperCase() != scanCode.toUpperCase()) {
-                $('#pLoader1').html('Loader : <span class="error-message" id="err1"> Please rescan the Loader </span>');
+                $('#err1').text('Please rescan the Loader');
                 return;
             }
 
-            step2();
+            if ($('#err1').text() == '')
+            {
+                startBatteryMonitoring(loaderId);
+                getLoaderColumn(loaderId);  //get loader column remaining and show status 
+                retry2();
+            }
+        }
+
+        function retry2(type) {
+            console.log("type", type);
+            $('#btnRetry2').addClass('hidden');
+            $('#btnRetry2-1').addClass('hidden');
+            // resetColorPLCForm(2);
+            $('#errFork2').html('');
+            $('#errCol2').text('');
+
+            if (type != 'col') {
+                $('#startStatus').text('');
+                startLoad();
+            }
+            else 
+            {
+                loadPLC(2);
+            }
+            setTimeout(3000);
         }
 
         function step2() {
-            $('#btnRetry2').addClass('hidden');
-            resetColorPLCForm(2);
-            $('#errFork3').html('');
-
-            setTimeout(3000);
-            loadPLC(2);
-        }
-
-        function retry2() {
             resetColorPLCForm(3);
 
-            $('#pItem2').html('Item : <span class="error-message" id="err2"></span>');
-            $('#pReel2').html("Reel ID : ");
-            $('#pHeight2').html("Est. Height : ");
+            // $('#pItem2').html('Item : <span class="error-message" id="err2"></span>');
+            $('#itemStatus').text('');
+
+            // $('#pReel2').html("Reel ID : ");
+            $('#reelIdentity').text('');
+
+            // $('#pHeight2').html("Est. Height : ");
+            $('#reelHeight').text('');
+
 
             $("#txtEstHeight").val(0);
             $("#txtActHeight").val(0);
             const fields = ['#txtReelCode', '#txtHReelID', '#txtHItem', '#txtHExtH', '#txtHActH'];
             fields.forEach(i => $(i).val(''));
+            $('#btnNext2').addClass('hidden');
         }
 
-        function step3() {
-            $("#btnRetry3").addClass("hidden");
-            $("#err2").html("");
+        function retry3() {
+            $('#errItem3').text('');
 
             var reelCode = $("#txtReelCode").val();
             var scanCode = $("#txtScanItem").val();
             if (reelCode.toUpperCase() != scanCode.toUpperCase() || (reelCode == "" || scanCode == "")) {
-                $('#pItem2').html('Item : <span class="error-message" id="err2"> Please scan Reel. </span>');
+                $('#errItem3').text('Please scan Reel');
                 return;
             }
 
@@ -956,30 +1130,47 @@
             loadPLC(3);
         }
 
-        function retry3() {
+        function step3() {
             resetColorPLCForm(4);
             cont4();
         }
 
         function cont4() {
             loadPLC(4);
-            $("#putModal").modal("show");
+        }
+
+        async function startLoad() {
+            var loaderId = $("#txtLoaderId").val();
+            var callStart = await loadPLCStartLoad(loaderId);
+            resetColorPLCForm(2);
+
+            if (callStart == true) {
+                loadPLC(2);
+            }
         }
 
         async function turnCol() {
             $("#warnTurnModal").modal("toggle");
             var loaderId = $("#txtLoaderId").val();
             var iCol = $("#txtICol").val();
+            console.log("col number here:" + iCol);
             var realCol = await loadPLCGetCurrentColumn(loaderId);
             if (Number(realCol) == 0) {
-                $('#btnRetry3').removeClass("hidden");
+                // $('#btnRetry3').removeClass("hidden"); //not sure what code is this for?
+               $('#btnRetry2').removeClass('hidden');
+               // $('#colStatus').text('');
+               // #('#')
             }
             else {
                 if (realCol < iCol) {
                     var turnCol = await loadPLCTurnColumn(loaderId, Number(iCol));
                     if (turnCol == false) {
+                        $('#colStatus2').text('');
+                        $('#btnRetry2').removeClass('hidden');
+                        $('#errCol2').text('Failed to Turn Column').css('color', 'red');
                         return;
                     }
+                    console.log("turn col", turnCol);
                     realCol = iCol; // (realCol) + 1;
                 }
                 // if (realCol < iCol) {
@@ -996,19 +1187,37 @@
                 //     }
                 //     realCol = Number(realCol) + 1;
                 // }
+                const oldCol = iCol-1;
+                $('#c' + (oldCol)).addClass("bg-success");
+                $('#c' + (oldCol)).removeClass("progress-bar-striped progress-bar-animated bg-warning");
+                $(`#icon-c${oldCol}`).removeClass("bi bi-fire");
+
+                $('#c' + iCol).addClass("progress-bar-striped progress-bar-animated bg-warning");
+                $(`#icon-c${iCol}`).addClass("bi bi-fire");
 
                 // wait for fork is ready
                 // await delay(3000);
                 var chkColFork = await loadPLCCheckColFork(loaderId, iCol);
                 if (chkColFork == false) {
                     $('#btnRetry2').removeClass("hidden");
+                    $('#errFork2').text('Fork Not Ready.').css('color', 'red');
                 }
                 else {
                     // $("#putModal").modal("toggle");
                     $('#btnNext2').removeClass('hidden');
                     $('#btnRetry2').addClass("hidden");
                 }
+            }
+        }
 
+        async function startPutReel() {
+            $('#startErr').addClass('hidden');
+            $('#btnRetryStart').addClass('hidden');
+
+            var loaderId = $("#txtLoaderId").val();
+            var callStart = await loadPLCStartPutReel(loaderId);
+            if (callStart == true) {
+                loadPLC(5);
             }
         }
 
@@ -1020,9 +1229,7 @@
             if (idx == 1) {
                 resetColorPLCForm(1);
                 if (loaderId == "") {
-                    $('#pLoader1').html("Loader : ");
-                    $('#err1').html("No loader is selected.");
-                    $('#btnRetry1').removeClass("hidden");
+                    $('#err1').text("No loader is selected.");
                     return;
                 }
 
@@ -1036,33 +1243,30 @@
             var iCol = $("#txtICol").val();
 
             if (idx == 2) {
-                resetColorPLCForm(2);
-                $('#pCol3').html("Checking Auto Loader Column : " + iCol);
-                // await delay(3000);
-                var chkCol = await loadPLCCheckEstHeight(loaderId, reelCode, iCol);
-                console.log('R3.1::' + chkCol);
+                // resetColorPLCForm(2);
+                $('#startStatus').css('color', 'black');
+                $('#colStatus2').text('Checking on Column ' + iCol);
 
-                if (chkCol == false && iCol <= 4) {
-                    iCol = Number(iCol) + 1;
-                    $('#pCol3').html("Checking Auto Loader Column : " + iCol);
-                    await delay(1000);
+                await delay(3000);
+
+                let attempt = 1;
+                let maxAttempts = 4;
+                let chkCol = false;
+
+                while (chkCol === false && iCol <= maxAttempts) {
                     chkCol = await loadPLCCheckEstHeight(loaderId, reelCode, iCol);
-                    console.log('R3.2::' + chkCol);
+                    console.log(`R3.${attempt}::` + chkCol);
+
+                    if (chkCol == false) {
+                        iCol = Number(iCol) + 1;
+                        // $('#pCol3').html("Checking Auto Loader Column: " + iCol);
+                        $('#colStatus2').text('Checking on Column ' + iCol);
+
+                        await delay(1000);
+                    }
+                    attempt;
                 }
-                if (chkCol == false && iCol <= 4) {
-                    iCol = Number(iCol) + 1;
-                    $('#pCol3').html("Checking Auto Loader Column : " + iCol);
-                    await delay(1000);
-                    chkCol = await loadPLCCheckEstHeight(loaderId, reelCode, iCol);
-                    console.log('R3.3::' + chkCol);
-                }
-                if (chkCol == false && iCol <= 4) {
-                    iCol = Number(iCol) + 1;
-                    $('#pCol3').html("Checking Auto Loader Column : " + iCol);
-                    await delay(1000);
-                    chkCol = await loadPLCCheckEstHeight(loaderId, reelCode, iCol);
-                    console.log('R3.4::' + chkCol);
-                }
+
                 console.log('R3.10::' + iCol);
 
                 if (chkCol == false) {
@@ -1074,23 +1278,38 @@
                     // check is column correct, else need call turn
                     // await delay(3000);
                     var realCol = await loadPLCGetCurrentColumn(loaderId);
+                    console.log("realcol", realCol);
+
                     if (realCol == 0) {
                         $('#btnRetry2').removeClass('hidden');
+                        if (realCol !== false)
+                        {
+                            $('#colStatus2').text('');
+                            $('#errCol2').text('Invalid Column Number');
+                        }
                     }
                     else {
                         if (realCol < iCol) {
                             $('#warnTurnModal').modal('toggle');
                         }
                         else {
+                            
                             var chkColFork = await loadPLCCheckColFork(loaderId, iCol);
                             if (chkColFork == false) {
                                 $('#btnRetry2').removeClass('hidden');
-
+                                $('errFork2').text('Fork Not Ready').css('color', 'red');
                             }
                             else {
                                 // if success then only show next button
                                 $('#btnNext2').removeClass('hidden');
                                 $('#btnRetry2').addClass('hidden');
+                                const oldCol = iCol-1;
+                                $('#c' + (oldCol)).addClass("bg-success");
+                                $('#c' + (oldCol)).removeClass("progress-bar-striped progress-bar-animated bg-warning");
+                                $(`#icon-c${oldCol}`).removeClass("bi bi-fire");
+
+                                $('#c' + iCol).addClass("progress-bar-striped progress-bar-animated bg-warning");
+                                $(`#icon-c${iCol}`).addClass("bi bi-fire");
 
                             }
                         }
@@ -1102,26 +1321,56 @@
 
             if (idx == 3) {
                 if (reelCode == "") {
-                    $('#pItem2').html('Item : <span class="error-message" id="err2"> Please scan Reel. </span>');
+                    // $('#pItem2').html('Item : <span class="error-message" id="err2"> Please scan Reel. </span>');
+                    $('#errItem3').text('Please scan Reel.');
                     return;
                 }
                 // await delay(3000);
                 var chkItem = await loadPLCCheckItem(loaderId, reelCode);
                 console.log('R2::' + chkItem);
                 if (chkItem == false) {
-                    $('#btnRetry3').removeClass('hidden');
+                    // $('#btnRetry3').removeClass('hidden');
+                    $('#btnNext3').addClass('hidden');
+                    $('#itemStatus').text('');
+                    $('#reelIdentity').text('');
+                    $('#reelHeight').text('');
                 } else {
                     $('#btnNext3').removeClass('hidden');
-                    $('#btnRetry3').addClass('hidden');
+                    $('#errItem3').text('');
+                    // $('#btnRetry3').addClass('hidden');
                 }
                 return;
             }
 
             // ID = 4
             iCol = $("#txtICol").val();
-
             if (idx == 4) {
                 //double confirm loader status -- yet finish coding
+                var chkColFork = await loadPLCCheckColFork(loaderId, iCol);
+                if (chkColFork == false) {
+                    // $('#btnRetry2').removeClass("hidden");
+                    // $('#errFork2').text('Fork Not Ready.').css('color', 'red');
+                    $('#btnRetryStart').removeClass('hidden');
+                    $('#startErr').text('Auto Loader not ready to load.');
+                    //try again on start auto loader load.
+                    // swal.fire({
+                    //     icon: 'error',
+                    //     title: "Wait",
+                    //     text: "Please start from Step 1."
+                    // });
+                    // return;
+                }
+                else {
+                    // $("#putModal").modal("toggle");
+                    // $('#btnNext2').removeClass('hidden');
+                    $('#loadConfirm4').text('Auto Loader Ready to Load Reel.');
+
+                    //need check column?
+                    $('#btnRetryStart').addClass("hidden");
+                    $('#startErr').text('');
+                    $("#putModal").modal("show");
+                }
+
                 return; 
             }
 
@@ -1133,11 +1382,14 @@
                         text: "Please start from Step 1."
                     });
                     return;
+
+                    // if ($('#putModal').hasClass("show")) {
+                    //     $('#putModal').modal('toggle');
+                    // }
                 }
 
                 resetColorPLCForm(5);
-                console.log("lodaer id", loaderId, "reelcode", reelCode, "icol", iCol );
-
+                
                 // await delay(1000);
                 var chkAct = await loadPLCActHeight(loaderId, reelCode, iCol);
                 console.log('R4::' + chkAct);
@@ -1152,6 +1404,7 @@
                 }
                 else {
                     $('#btnRetry4').removeClass("hidden");
+                    $('#btnNext4').addClass("hidden");
                 }
                 return;
             }
@@ -1175,22 +1428,23 @@
                     return;
                 }
                 else {
-                    $('#ptLast').html("STEP 5 :: DONE Finalized ");
+                    $('#pTextLast').text("STEP 5 :: DONE Finalized ");
                     await delay(3000);
 
-
-                    resetColorPLCForm(3);
+                    // resetColorPLCForm(3);
+                    getLoaderColumn(loaderId);
+                    retry2();
                     newReel();
                 }
                 // await delay(3000);
             }
-
 
         }
 
         async function loadPLCCheckLoader(loaderId) {
 
             var fResult = false;
+            console.log("loaderId", loaderId);
 
             await $.ajax({
                 url: "/api/PLCLoader/GetLoaderId/" + loaderId,
@@ -1205,16 +1459,17 @@
                     console.log('1::' + JSON.stringify(result));
                     // swal.close();
                     if (result.success == true) {
-                        $('#pLoader1').html("Loader : " + result.data + ' <span class="error-message" id="err1"></span>');
-
+                        $('#loadStatus1').text(result.data);
+                        $('#loaderName').text(result.data);
                         fResult = true;
                     }
                     else {
-                        $('#pLoader1').html('Loader : <span class="error-message" id="err1"> ' + result.errMessage + ' </span>');
+                        $('#loadStatus1').text('');
+                        $('#err1').text(result.errMessage);
                     }
                 },
                 error: function (error) {
-                    $('#pLoader1').html('Loader : <span class="error-message" id="err1"> ' + error.val + ' </span>');
+                    $('#err1').text(error.val);
                 }
             });
 
@@ -1224,27 +1479,23 @@
         async function loadPLCCheckItem(loaderId, reelCode) {
 
             var fResult = false;
-
             // step 2 : scan item
             await $.ajax({
                 url: "/api/PLCLoader/VerifyItem/" + reelCode,
                 type: "GET",
                 dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
 
                 },
                 success: function (result) {
                     console.log('2::' + JSON.stringify(result));
-                    // swal.close();
                     if (result.success == true) {
-                        $('#pItem2').html("Item : " + result.data.itemCode + ' <span class="error-message" id="err2"></span>');
-                        $('#pReel2').html("Reel ID : " + result.data.reelCode);
-                        $('#pHeight2').html("Est. Height : " + result.data.thickness);
+                        $('#itemStatus').text(result.data.itemCode);
+                        $('#reelIdentity').text(result.data.reelCode);
+                        $('#reelHeight').text(result.data.thickness);
 
                         $("#txtEstHeight").val(result.data.thickness);
-
                         $('#txtHReelID').val(result.data.reelCode);
                         $('#txtHItem').val(result.data.itemCode);
                         $('#txtHExtH').val(result.data.thickness);
@@ -1252,12 +1503,11 @@
                         fResult = true;
                     }
                     else {
-                        $('#pItem2').html('Item : <span class="error-message" id="err2"> ' + result.errMessage + ' </span>');
-                        $('#err2').html(result.errMessage);
+                        $('#errItem3').text(result.errMessage);
                     }
                 },
                 error: function (error) {
-                    $('#pItem2').html('Item : <span class="error-message" id="err2"> ' + error.val + ' </span>');
+                    $('#errItem3').text(error.val);
                 }
             });
 
@@ -1265,48 +1515,40 @@
         }
 
         async function loadPLCCheckEstHeight(loaderId, reelCode, iCol) {
-            var thickness = $("#txtEstHeight").val();
             // step 3 : check column height balance and change column
-
+            var thickness = $("#txtEstHeight").val();
             var fResult = false;
 
             await $.ajax({
                 url: "/api/PLCLoader/CheckColumnHeight/" + loaderId + "/" + iCol + "/" + thickness,
                 type: "GET",
                 dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
 
                 },
                 success: function (result) {
                     console.log('3::' + JSON.stringify(result));
-                    // swal.close();
                     if (result.success == true) {
-
-                        $('#pCol3').html("Auto Loader Column : " + iCol + '<span style="color:red; font-size:15px;" id="errCol3"> </span>');
-
+                        $('#colStatus2').text(iCol);
                         $('#txtHColBal').val(result.data);
-
                         fResult = true;
-
                     }
                     else {
                         if (iCol < 4) {
-                            $('#pCol3').html('Auto Loader Column : <span style="color:red; font-size:15px;" id="errCol3">'+ result.errMessage + ' </span>');
+                            $('#errCol2').text(result.errMessage);
                         }
                         else {
-                            $('#pCol3').html('Auto Loader Column : <span style="color:red; font-size:15px;" id="errCol3">All column is full. Please change loader. </span>');
+                            $('#errCol2').text('All column is full. Please change loader.');
                         }
-
                     }
                 },
                 error: function (error) {
                     if (iCol < 4) {
-                        $('#pCol3').html('Auto Loader Column : <span style="color:red; font-size:15px;" id="errCol3">'+ error.val + ' </span>');
+                        $('#errCol2').text(error.val);
                     }
                     else {
-                        $('#pCol3').html('Auto Loader Column : <span style="color:red; font-size:15px;" id="errCol3">All column is full. Please change loader. </span>');
+                        $('#errCol2').text('All column is full. Please change loader.');
                     }
                 }
             });
@@ -1318,28 +1560,28 @@
         async function loadPLCGetCurrentColumn(loaderId) {
 
             var fResult = false;
-
             await $.ajax({
                 url: "/api/PLCLoader/GetCurrentColumn/" + loaderId,
                 type: "GET",
                 dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
 
                 },
                 success: function (result) {
                     console.log('3.2::' + JSON.stringify(result));
-                    // swal.close();
                     if (result.success == true) {
-                        fResult = true;
+                        // fResult = true;
+                        fResult = result.data;
                     }
                     else {
-                        $('#pCol3').html("Auto Loader Column : " + result.errMessage + '<span style="color:red; font-size:15px;" id="errCol3"> </span>');
+                        const msg = (!result.errMessage) ? 'Failed to get auto loader current column' : result.errMessage;
+                        $('#colStatus2').text('');
+                        $('#errCol2').text(msg);
                     }
                 },
                 error: function (error) {
-                    $('#pCol3').html("Auto Loader Column : " + error.val + '<span style="color:red; font-size:15px;" id="errCol3"> </span>');
+                    $('#errCol2').text(error.val);
                 }
             });
 
@@ -1353,25 +1595,23 @@
 
             await $.ajax({
                 url: "/api/PLCLoader/TurnColumn/" + loaderId + "/" + iCol,
-                type: "GET",
+                type: "POST",
                 dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
 
                 },
                 success: function (result) {
                     console.log('3.3::' + JSON.stringify(result));
-                    // swal.close();
                     if (result.success == true) {
                         fResult = true;
                     }
                     else {
-                        $('#pCol3').html("Auto Loader Column : " + result.errMessage + '<span style="color:red; font-size:15px;" id="errCol3"> </span>');
+                        $('#errCol2').text(result.errMessage);
                     }
                 },
                 error: function (error) {
-                    $('#pCol3').html("Auto Loader Column : " + error.val + '<span style="color:red; font-size:15px;" id="errCol3"> </span>');
+                    $('#errCol2').text(error.val);
                 }
             });
 
@@ -1382,35 +1622,29 @@
         async function loadPLCCheckColFork(loaderId, iCol) {
 
             var fResult = false;
-
             await $.ajax({
-                    url: "/api/PLCLoader/GetForkReady/" + loaderId + "/" + iCol,
+                url: "/api/PLCLoader/GetForkReady/" + loaderId + "/" + iCol,
                 type: "GET",
                 dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
 
                 },
                 success: function (result) {
                     console.log('3.3::' + JSON.stringify(result));
-                    // swal.close();
                     if (result.success == true) {
-                        $('#pFork3').html("Fork Status : Column " + iCol + ' is READY.<span style="color:red; font-size:15px;" id="errFork3"> </span>');
-
+                        $('#forkStatus2').text('Column' + iCol + ' is READY');
                         fResult = true;
-
                     }
                     else {
-                        $('#pFork3').html('Fork Status : <span style="color:red; font-size:15px;" id="errFork3">'+ result.errMessage + ' </span>');
+                        $('#errFork2').text(result.errMessage);
                     }
                 },
                 error: function (error) {
-                    $('#pFork3').html('Auto Loader Column : <span style="color:red; font-size:15px;" id="errFork3">'+ error.val + ' </span>');
+                    $('#errFork2').text(error.val);
                 }
             });
 
-            // console.log('3::' + fResult);
             return fResult;
         }
 
@@ -1418,54 +1652,74 @@
         async function loadPLCActHeight(loaderId, reelCode, iCol) {
 
             var fResult = 0;
-
             await $.ajax({
                 url: "/api/PLCLoader/GetReelActualHeight/" + loaderId + "/" + iCol,
                 type: "GET",
                 dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
 
                 },
                 success: function (result) {
                     console.log('4::' + JSON.stringify(result));
-                    // swal.close();
                     if (result.success == true) {
                         $("#txtActHeight").val(result.data[1]);
-                        $('#pLoader4').html("Auto Loader Column : " + iCol + ' <span style="color:red; font-size:15px;" id="err4"> </span>');
-                        $('#pHeight4').html("Actual Height : " + result.data[1]);
+                        // $('#pLoader4').html("Auto Loader Column : " + iCol + ' <span style="color:red; font-size:15px;" id="err4"> </span>');
+                        $('#loadCol4').text(iCol);
+                        // $('#pHeight4').html("Actual Height : " + result.data[1]);
+                        $('#heightStatus4').text(result.data[1]);
 
                         $('#txtHActH').val(result.data[1]);
+                        const dataAttr = document.getElementById("dataDiv");
+                        // dataAttr.setAttribute("data-dec-height", result.data[1]);
+                        dataAttr.dataset.decHeight = result.data[2];
 
                         fResult = 99;
                     }
                     else {
                         fResult = result.data[0];
                         if (result.data[0] == "1") {
-                            $('#pLoader4').html("Auto Loader Column : " + iCol + ' - <span style="color:red; font-size:15px;" id="err4">' + result.errMessage + '</span>');
-                            $('#pHeight4').html("Actual Height : " + result.data[1]);
+                            // $('#pLoader4').html("Auto Loader Column : " + iCol + ' - <span style="color:red; font-size:15px;" id="err4">' + result.errMessage + '</span>');
+                            $('#loadCol4').text(iCol);
+                            $('#errCol4').text(result.errMessage);
+
+                            // $('#pHeight4').html("Actual Height : " + result.data[1]);
+                            $('#heightStatus4').text(result.data[1]);
                         }
                         else {
                             if (iCol < 4) {
-                                $('#pCol3').html("Auto Loader Column : " + (Number(iCol) + 1));
-                                $('#pLoader4').html("Auto Loader Column : " + iCol + ' - <span style="color:red; font-size:15px;" id="err4">' + result.errMessage + '</span>');
-                                $('#pHeight4').html("Actual Height : " + result.data[1]);
+                                // $('#pCol3').html("Auto Loader Column : " + (Number(iCol) + 1));
+                                $('#colStatus2').text((Number(iCol) + 1));
+                                // $('#pLoader4').html("Auto Loader Column : " + iCol + ' - <span style="color:red; font-size:15px;" id="err4">' + result.errMessage + '</span>');
+                                $('#loadCol4').text(iCol);
+                                $('#errCol4').text(result.errMessage);
+
+                                // $('#pHeight4').html("Actual Height : " + result.data[1]);
+                                $('#heightStatus4').text(result.data[1]);
+
 
                                 $("#txtICol").val(Number(iCol) + 1);
                                 $('#txtHCol').val(Number(iCol) + 1);
                                 $("#warnTurnModal").modal("toggle");
                             }
                             else {
-                                $('#pLoader4').html("Auto Loader Column : " + iCol + ' - <span style="color:red; font-size:15px;" id="err4">All column is full, please change auto loader. </span>');
-                                $('#pHeight4').html("Actual Height : " + result.data[1]);
+                                // $('#pLoader4').html("Auto Loader Column : " + iCol + ' - <span style="color:red; font-size:15px;" id="err4">All column is full, please change auto loader. </span>');
+                                $('#loadCol4').text(iCol);
+                                $('#errCol4').text('All column is full, please change auto loader.');
+                                $('#heightStatus4').text(result.data[1]);
+
+                                // $('#pHeight4').html("Actual Height : " + result.data[1]);
                             }
                         }
                     }
                 },
                 error: function (error) {
-                    $('#pLoader4').html("Auto Loader Column : " + iCol + '<span style="color:red; font-size:15px;" id="err4">' + error.val + '</span>');
-                    $('#pHeight4').html("Actual Height : ");
+                    // $('#pLoader4').html("Auto Loader Column : " + iCol + '<span style="color:red; font-size:15px;" id="err4">' + error.val + '</span>');
+                    $('#loadCol4').text(iCol);
+                    $('#errCol4').text(error.val);
+
+                    // $('#pHeight4').html("Actual Height : ");
+                    $('#heightStatus4').text('');
                 }
             });
 
@@ -1474,39 +1728,123 @@
 
         async function loadPLCUpdateDB(loaderId, reelCode, iCol) {
             var actHeight = $("#txtActHeight").val();
-            // console.log('5::' + actHeight);
-
+            const dataAttr = document.getElementById("dataDiv");
             // step 5 : Save data
-            $.ajax({
-                url: "/api/PLCLoader/UpdateReelIntoLoader/" + loaderId + "/" + iCol + "/" + reelCode + "/" + actHeight,
-                type: "GET",
-                dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
-                contentType: 'application/json; charset=utf-8',
-                beforeSend: function () {
+            try {
+                const rlt = await new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: "/api/PLCLoader/UpdateReelIntoLoader/" + loaderId + "/" + iCol + "/" + reelCode + "/" + actHeight + "/" + dataAttr.dataset.decHeight,
+                        type: "GET",
+                        dataType: 'JSON',
+                        contentType: 'application/json; charset=utf-8',
+                        beforeSend: function () {
 
-                },
-                success: function (result) {
-                    console.log('5::' + JSON.stringify(result));
-                    // swal.close();
-                    if (result.success == true) {
-                        $('#pTextLast').html("ALL DONE. Will continue next item after 2 seconds...");
+                        },
+                        success: function (result) {
+                            console.log('5::' + JSON.stringify(result));
+                            if (result.success == true) {
+                                $('#pTextLast').text("ALL DONE. Will continue next item after 2 seconds...");
 
-                        // update balance height
-                        $('#txtHColBal').val(result.data);
+                                // update balance height
+                                $('#txtHColBal').val(result.data);
+                                resolve(true);
+                            }
+                            else {
+                                // $('#pTextLast').html('<span style="color:red; font-size:15px;">' + result.errMessage+ '</span>');
+                                $('#pTextLast').text(result.errMessage);
+                                resolve(false);
+                            }
+                        },
+                        error: function (error) {
+                            // $('#pTextLast').html('<span style="color:red; font-size:15px;">' + error.val + '</span>');
+                            $('#pTextLast').html(error.val);
+                            resolve(false);
+                        }
+                    });
+                });
+                return rlt;
+            }
+            catch (err) {
+                $('#pTextLast').text('Unexpected error occured.');
+                return false;
+            }
+        }
 
-                        // continue new Item
-                    }
-                    else {
-                        $('#pTextLast').html('<span style="color:red; font-size:15px;">' + result.errMessage+ '</span>');
-                    }
-                },
-                error: function (error) {
-                    $('#pTextLast').html('<span style="color:red; font-size:15px;">' + error.val + '</span>');
-                }
-            });
+        async function loadPLCStartLoad(loaderId) {
+            try {
+                const result = await new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: "/api/PLCLoader/StartLoad/" + loaderId,
+                        type: "POST",
+                        dataType: 'JSON',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (result) {
+                            if (result.success == false) {
+                                $('#btnRetry2-1').removeClass('hidden');
+                                $('#startStatus').text('Failed to Start Load Process').css('color', 'red');
+                                resolve(false);
+                            }
+                            else 
+                            {
+                                $('#btnRetry2-1').addClass('hidden');
+                                $('#startStatus').text('Load Process Started').css('font-size', '15px');
+                                resolve(true);
+                            }
+                        },
+                        error: function (error) {
+                            $('#startStatus').text(error.val).css('color', 'red');
+                            resolve(false);
+                        }
+                    });
+                });
+                return result;
+            } catch (err) {
+                $('#startErr').removeClass('hidden');
+                $('#startErr').text('Unexpected error occurred.');
+                return false;
+            }
+        }
 
-            return true;
+        async function loadPLCStartPutReel(loaderId) {
+            try {
+                const result = await new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: "/api/PLCLoader/StartReelLoadIn/" + loaderId,
+                        type: "POST",
+                        dataType: 'JSON',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (result) {
+                            if (result.success == false) {
+                                //if fail to start, retry for twice but start from third will force them to start from step1
+                                if ($('#putModal').hasClass("show")) {
+                                    $('#putModal').modal('toggle');
+                                }
+                                $('#btnRetryStart').removeClass('hidden'); 
+                                $('#startErr').removeClass('hidden');
+                                $('#startErr').text(`Failed to Start Load Reel Process... ${result.errMessage}`);
+                                resolve(false);
+                            }
+                            else 
+                            {
+                                $('#btnRetryStart').addClass('hidden');
+                                $('#startErr').addClass('hidden');
+                                $('#startErr').text('');
+                                resolve(true);
+                            }
+                        },
+                        error: function (error) {
+                            $('#startErr').removeClass('hidden');
+                            $('#startErr').text(error.val);
+                            resolve(false);
+                        }
+                    });
+                });
+                return result;
+            } catch (err) {
+                $('#startErr').removeClass('hidden');
+                $('#startErr').text('Unexpected error occurred.');
+                return false;
+            }
         }
 
         async function endTask() {
@@ -1526,15 +1864,12 @@
         }
 
         async function loadPLCEndTask(loaderId) {
+
             $.ajax({
                 url: "/api/PLCLoader/EndTask/" + loaderId,
-                type: "GET",
+                type: "POST",
                 dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
-                beforeSend: function () {
-
-                },
                 success: function (result) {
                     console.log('10::' + JSON.stringify(result));
                     if (result.success == true) {
@@ -1567,5 +1902,134 @@
             return true;
         }
 
+        function initialGaugeSetup(
+            gaugeElementId,
+            percentId,
+            meterColor,
+            initialValue,
+            setGaugeValueCallback
+        ) {
+            const gaugeElement = document.getElementById(gaugeElementId);
+            const percentageElement = document.getElementById(percentId);
+
+            percentageElement.textContent = initialValue + " %";
+            setGaugeValueCallback(gaugeElement, initialValue, meterColor);
+
+            percentageElement.addEventListener("change", (event) =>
+                percentageChangedEvent(
+                    gaugeElement,
+                    event.target.value,
+                    meterColor,
+                    setGaugeValueCallback
+                )
+            );
+        }
+
+        percentageChangedEvent = (
+            gauge,
+            newPercentage,
+            color,
+            setGaugeValueCallback
+        ) => {
+            const percentage =
+            newPercentage > 100 ? 100 : newPercentage < 0 ? 0 : newPercentage;
+            setGaugeValueCallback(gauge, 80, color);
+        };
+
+        function setGaugePathValue(gaugeElement, percentage, color) {
+            const gaugeRadius = 65;
+            const startingY = 80;
+            const startingX = 10;
+
+            const zeroBasedY = gaugeRadius * Math.sin(percentageInRadians(percentage));
+            const y = -zeroBasedY + startingY;
+            const zeroBasedX = gaugeRadius * Math.cos(percentageInRadians(percentage));
+            const x = -zeroBasedX + gaugeRadius + startingX;
+            // console.log(
+            // `percentage: ${percentage}, zeroBasedY: ${zeroBasedY}, y: ${y}, zeroBasedX: ${zeroBasedX}, x: ${x}`
+            // );
+
+            gaugeElement.innerHTML = `<path d="M ${startingX} ${startingY}
+                A ${gaugeRadius} ${gaugeRadius} 0 0 1 ${x} ${y}"
+                stroke="${color}" stroke-width="13" stroke-linecap="round" />`;
+        }
+
+        function percentageInRadians(percentage) {
+            return percentage * (Math.PI / 100);
+        }
+
+        function startBatteryMonitoring(loaderId) {
+            getBattery(loaderId);
+            setInterval(() => getBattery(loaderId), 300000);
+        }
+
+        function getBattery(loaderId) {
+            $.ajax({
+                url: "/api/PLCLoader/GetBatteryStatus/" + loaderId,
+                type: "GET",
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    if (result.success == true) {
+                        const battery = result.data;
+                        const meterColor = getBatteryColor(battery);
+                        updateBatteryGauge(battery, meterColor);
+                    }
+                    else 
+                    {
+                        //failed to get loader battery
+                        $('#batteryErr').text('Battery Status Unavailable').css('');
+                    }
+                },
+                error: function (error) {
+                    
+                }
+            });
+        }
+
+        function getBatteryColor(battery) {
+            if (battery > 60) {
+                return "#4CAF50"; 
+            } else if (battery >= 30) {
+                return "#FEB21A"; 
+            } else {
+                return "#F44336"; 
+            }
+        }
+
+        function updateBatteryGauge(battery, meterColor) {
+            const gaugeElement = document.getElementById("svg-graph-meter-value");
+            const percentageElement = document.getElementById("svg-gauge-percentage-2");
+
+            percentageElement.textContent = battery + " %";
+            setGaugePathValue(gaugeElement, battery, meterColor);
+        }
+
+        function getLoaderColumn(loaderId) {
+            $.ajax({
+                url: "/loader/GetLoaderColumn/",
+                type: "POST",
+                data: JSON.stringify(loaderId),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    result.data.forEach(item => {
+                        const colNo = item.colNo;
+                        const usagePercentage = item.usagePercentage;
+                        const colHeight = item.colHeight;
+                        const balanceHeight = item.balanceHeight;
+
+                        $(`#percent-c${colNo}`).text(`${usagePercentage}%`);
+                        $(`#balance-c${colNo}`).text(`${balanceHeight}`);
+                        $(`#colHeight-c${colNo}`).text(`${colHeight}`);
+                        $(`#c${colNo}`).css('width', `${usagePercentage}%`);
+                    });
+                    
+                },
+                error: function (error) {
+
+                }
+            });
+        }
     </script>
 }

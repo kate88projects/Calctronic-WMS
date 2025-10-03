@@ -138,7 +138,6 @@ namespace RackingSystem.Controllers.API
                     PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
                     decimalText = getDecimalText(registers[i]);
                     loaderString = loaderString + decimalText;
-                    break;
                 }
                 
                 result.success = _loader.LoaderCode == loaderString;
@@ -427,7 +426,6 @@ namespace RackingSystem.Controllers.API
                 // *** testing
                 result.success = true;
                 result.data = 1;
-                
                 return result;
                 // *** testing
 
@@ -497,7 +495,7 @@ namespace RackingSystem.Controllers.API
 
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
-                int startAddress = 4225;
+                int startAddress = 4224;
                 int numRegisters = 1;
 
                 while (!exit)
@@ -534,10 +532,10 @@ namespace RackingSystem.Controllers.API
         }
 
         [HttpGet("GetReelActualHeight/{loaderId}/{colNo}")]
-        public ServiceResponseModel<List<int>> GetReelActualHeight(long loaderId, int colNo)
+        public ServiceResponseModel<List<double>> GetReelActualHeight(long loaderId, int colNo)
         {
-            ServiceResponseModel<List<int>> result = new ServiceResponseModel<List<int>>();
-            result.data = new List<int>();
+            ServiceResponseModel<List<double>> result = new ServiceResponseModel<List<double>>();
+            result.data = new List<double>();
             string methodName = "GetReelHeight";
 
             try
@@ -560,31 +558,31 @@ namespace RackingSystem.Controllers.API
                 }
 
                 //// *** testing
-                result.success = true;
+                //result.success = true;
                 //result.errMessage = "Cannot get Actual Height, please try again.";
                 //result.data.Add(1);
                 //result.data.Add(0);
                 //result.errMessage = "Loader Column [" + colNo + "] is full.";
-                result.data.Add(2);
-                result.data.Add(15);
-                return result;
+                //result.data.Add(2);
+                //result.data.Add(15);
+                //return result;
                 // *** testing
 
                 int height = 0;
                 string plcIp = _loader.IPAddr;
                 int port = 502;
 
-                ModbusClient modbusClient = new ModbusClient(plcIp, port);
-                modbusClient.Connect();
-                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+                //ModbusClient modbusClient = new ModbusClient(plcIp, port);
+                //modbusClient.Connect();
+                //PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
-                int startAddress = 4216;
-                int numRegisters = 2;
-                int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
-                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress}: {registers[0]}", "");
-                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + 1}: {registers[1]}", "");
+                //int startAddress = 4216;
+                //int numRegisters = 2;
+                //int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                //PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress}: {registers[0]}", "");
+                //PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + 1}: {registers[1]}", "");
 
-                //int[] registers = { 15703, 16701 };
+                int[] registers = { 15703, 16701 };
                 byte[] first16 = BitConverter.GetBytes(registers[0]);
                 byte[] second16 = BitConverter.GetBytes(registers[1]);
                 byte[] floatBytes = 
@@ -600,12 +598,13 @@ namespace RackingSystem.Controllers.API
                 result.success = _loaderCol.BalanceHeight >= height;
                 result.data.Add(_loaderCol.BalanceHeight >= height ? 0 : 2);
                 result.data.Add(height);
+                result.data.Add(rounded);
                 if (_loaderCol.BalanceHeight < height)
                 {
                     result.errMessage = "Loader Column [" + colNo + "] is full.";
                 }
 
-                modbusClient.Disconnect();
+                //modbusClient.Disconnect();
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");
             }
             catch (Exception ex)
@@ -659,7 +658,7 @@ namespace RackingSystem.Controllers.API
                 _reel.StatusIdx = (int)EnumReelStatus.InLoader;
                 _reel.Status = EnumReelStatus.InLoader.ToString();
                 _reel.ActualHeight = actHeight;
-                //_reel.ActualHeightDec = actHieghtDec;
+                _reel.ActualHeightDec = (decimal)Math.Round(actHieghtDec, 3);
                 await _dbContext.SaveChangesAsync();
 
                 _loaderCol.BalanceHeight = _loaderCol.BalanceHeight - actHeight;
@@ -769,7 +768,7 @@ namespace RackingSystem.Controllers.API
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
                 int startAddress = 4317;
-                int value = 2; //1 for end specific column, 2 for end of overall 
+                int value = 1; //1 for end specific column, 2 for end of overall 
 
                 modbusClient.WriteSingleRegister(startAddress, value);
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Successfully wrote value {value} to register {startAddress}.", "");
@@ -793,7 +792,9 @@ namespace RackingSystem.Controllers.API
         {
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             string methodName = "StartLoad";
-           
+
+            result.success = true;
+            return result;
             try
             {
                 var _loader = _dbContext.Loader.Find(loaderId);
@@ -909,7 +910,8 @@ namespace RackingSystem.Controllers.API
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
                 int startAddress = 4321;
-                modbusClient.WriteSingleCoil(startAddress, true);
+                int value = 1;
+                modbusClient.WriteSingleRegister(startAddress, value);
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Successfully wrote value true to register {startAddress}.", "");
                 result.success = true;
 
