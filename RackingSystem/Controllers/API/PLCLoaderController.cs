@@ -1,19 +1,21 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using EasyModbus;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis;
+using Microsoft.EntityFrameworkCore;
 using RackingSystem.Data;
-using RackingSystem.Models.Slot;
-using RackingSystem.Models;
-using RackingSystem.Services.SlotServices;
-using EasyModbus;
-using System.Composition;
+using RackingSystem.Data.Maintenances;
 using RackingSystem.General;
 using RackingSystem.Helpers;
-using System.Reflection;
-using RackingSystem.Data.Maintenances;
+using RackingSystem.Models;
 using RackingSystem.Models.Item;
 using RackingSystem.Models.Reel;
-using Microsoft.EntityFrameworkCore;
+using RackingSystem.Models.Slot;
+using RackingSystem.Services.SlotServices;
+using System.Composition;
+using System.Drawing;
+using System.Reflection;
 
 namespace RackingSystem.Controllers.API
 {
@@ -81,6 +83,7 @@ namespace RackingSystem.Controllers.API
 
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
+                /*
                 // first addr
                 int startAddress = 4196;
                 int numRegisters = 1;
@@ -124,7 +127,20 @@ namespace RackingSystem.Controllers.API
                     decimalText = getDecimalText(registers[i]);
                     loaderString = loaderString + decimalText;
                 }
+                */
 
+                int startAddress =  4196;
+                int numRegisters = 4;
+                int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                
+                for (int i = 0; i < registers.Length; i++)
+                {
+                    PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                    decimalText = getDecimalText(registers[i]);
+                    loaderString = loaderString + decimalText;
+                    break;
+                }
+                
                 result.success = _loader.LoaderCode == loaderString;
                 result.data = loaderString;
                 result.errMessage = "Selected loader [" + _loader.LoaderCode + "] is difference from reading [" + loaderString + "].";
@@ -411,6 +427,7 @@ namespace RackingSystem.Controllers.API
                 // *** testing
                 result.success = true;
                 result.data = 1;
+                
                 return result;
                 // *** testing
 
@@ -424,92 +441,18 @@ namespace RackingSystem.Controllers.API
 
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
-                int startAddress = 4210;
+                int startAddress = 4226;
                 int numRegisters = 1;
 
                 int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                int value = registers[0];
 
-                for (int i = 0; i < registers.Length; i++)
-                {
-                    PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
-                    plcActualHeight = registers[i];
-                }
-
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress}: {value}", "");
+                result.data = value;
                 result.success = true;
-                result.data = registers[0];
 
                 modbusClient.Disconnect();
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");
-
-            }
-            catch (Exception ex)
-            {
-                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
-                result.errMessage = ex.Message;
-                result.errStackTrace = ex.StackTrace ?? "";
-            }
-
-            return result;
-        }
-
-        [HttpGet("TurnColumn/{loaderId}/{iCol}")]
-        public ServiceResponseModel<int> TurnColumn(long loaderId, int iCol)
-        {
-            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
-            string methodName = "TurnColumn";
-
-            try
-            {
-                // 1. check db for available height
-                var _loader = _dbContext.Loader.Find(loaderId);
-                if (_loader == null)
-                {
-                    result.errMessage = "Loader is not found.";
-                    result.data = 0;
-                    return result;
-                }
-
-                //// *** testing
-                //result.success = true;
-                //result.data = 1;
-                //return result;
-                //// *** testing
-
-                // 2. check plc which column is ready
-                int plcActualHeight = 0;
-                string plcIp = _loader.IPAddr;
-                int port = 502;
-
-                ModbusClient modbusClient = new ModbusClient(plcIp, port);
-                modbusClient.Connect();
-
-                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
-
-                int startAddress = 4314;
-                if (iCol == 3)
-                {
-                    startAddress = 4315;
-                }
-                else if (iCol == 4)
-                {
-                    startAddress = 4316;
-                }
-                int numRegisters = 1;
-
-                int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
-
-                for (int i = 0; i < registers.Length; i++)
-                {
-                    PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
-                    plcActualHeight = registers[i];
-                }
-
-                result.success = true;
-                result.data = registers[0];
-
-                modbusClient.Disconnect();
-                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");
-
             }
             catch (Exception ex)
             {
@@ -537,9 +480,9 @@ namespace RackingSystem.Controllers.API
                 }
 
                 //// *** testing
-                //result.success = true;
-                //result.data = 1;
-                //return result;
+                result.success = true;
+                result.data = 1;
+                return result;
                 //// *** testing
 
                 int value = 0;
@@ -554,21 +497,18 @@ namespace RackingSystem.Controllers.API
 
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
-                int startAddress = 4224;
+                int startAddress = 4225;
                 int numRegisters = 1;
 
                 while (!exit)
                 {
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
-                    for (int i = 0; i < registers.Length; i++)
-                    {
-                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
-                        value = registers[i];
-                    }
+                    value = registers[0];
 
-                    if (value == 1)
+                    if (value == 0004) //not sure the comparison for this hex is correct or not
                     {
                         exit = true;
+                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress}: {value}", "");
                     }
                     if ((DateTime.Now - dtRun).TotalMinutes > 3)
                     {
@@ -582,7 +522,6 @@ namespace RackingSystem.Controllers.API
 
                 modbusClient.Disconnect();
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");
-
             }
             catch (Exception ex)
             {
@@ -621,39 +560,42 @@ namespace RackingSystem.Controllers.API
                 }
 
                 //// *** testing
-                //result.success = false;
+                result.success = true;
                 //result.errMessage = "Cannot get Actual Height, please try again.";
                 //result.data.Add(1);
                 //result.data.Add(0);
                 //result.errMessage = "Loader Column [" + colNo + "] is full.";
-                //result.data.Add(2);
-                //result.data.Add(15);
-                //return result;
-                //// *** testing
+                result.data.Add(2);
+                result.data.Add(15);
+                return result;
+                // *** testing
 
-                string decimalText = "";
                 int height = 0;
-
                 string plcIp = _loader.IPAddr;
                 int port = 502;
 
                 ModbusClient modbusClient = new ModbusClient(plcIp, port);
                 modbusClient.Connect();
-
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
                 int startAddress = 4216;
-                int numRegisters = 1;
+                int numRegisters = 2;
                 int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
-                for (int i = 0; i < registers.Length; i++)
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress}: {registers[0]}", "");
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + 1}: {registers[1]}", "");
+
+                //int[] registers = { 15703, 16701 };
+                byte[] first16 = BitConverter.GetBytes(registers[0]);
+                byte[] second16 = BitConverter.GetBytes(registers[1]);
+                byte[] floatBytes = 
                 {
-                    PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
-                    //decimalText = getDecimalText(registers[i]);
-                    byte[] bytes = BitConverter.GetBytes(registers[i]);
-                    float floatValue = BitConverter.ToSingle(bytes, 0);
-                    float roundedValue = (float)((int)(floatValue * 1000)) / 1000;
-                    height = Convert.ToInt32(roundedValue); 
-                }
+                    first16[0], first16[1],
+                    second16[0], second16[1]
+                };
+
+                float value = BitConverter.ToSingle(floatBytes, 0);
+                float rounded = (float)Math.Round(value, 3);
+                height = Convert.ToInt32(rounded); //convert to int will auto round up
 
                 result.success = _loaderCol.BalanceHeight >= height;
                 result.data.Add(_loaderCol.BalanceHeight >= height ? 0 : 2);
@@ -665,7 +607,6 @@ namespace RackingSystem.Controllers.API
 
                 modbusClient.Disconnect();
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");
-
             }
             catch (Exception ex)
             {
@@ -677,8 +618,8 @@ namespace RackingSystem.Controllers.API
             return result;
         }
 
-        [HttpGet("UpdateReelIntoLoader/{loaderId}/{colNo}/{reelCode}/{actHeight}")]
-        public async Task<ServiceResponseModel<int>> UpdateReelIntoLoader(long loaderId, int colNo, string reelCode, int actHeight)
+        [HttpGet("UpdateReelIntoLoader/{loaderId}/{colNo}/{reelCode}/{actHeight}/{actHieghtDec}")]
+        public async Task<ServiceResponseModel<int>> UpdateReelIntoLoader(long loaderId, int colNo, string reelCode, int actHeight, decimal actHieghtDec)
         {
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             string methodName = "UpdateReelIntoLoader";
@@ -718,6 +659,7 @@ namespace RackingSystem.Controllers.API
                 _reel.StatusIdx = (int)EnumReelStatus.InLoader;
                 _reel.Status = EnumReelStatus.InLoader.ToString();
                 _reel.ActualHeight = actHeight;
+                //_reel.ActualHeightDec = actHieghtDec;
                 await _dbContext.SaveChangesAsync();
 
                 _loaderCol.BalanceHeight = _loaderCol.BalanceHeight - actHeight;
@@ -746,11 +688,155 @@ namespace RackingSystem.Controllers.API
             return result;
         }
 
-        [HttpGet("EndTask/{loaderId}")]
+        [HttpGet("GetBatteryStatus/{loaderId}")]
+        public ServiceResponseModel<int> GetBatteryStatus(long loaderId)
+        {
+            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
+            string methodName = "GetBatteryStatus";
+
+            try
+            {
+                var _loader = _dbContext.Loader.Find(loaderId);
+                if (_loader == null)
+                {
+                    result.errMessage = "Loader is not found.";
+                    result.data = 0;
+                    return result;
+                }
+
+                result.data = 55;
+                result.success = true;
+                return result;
+                
+                int value = 0;
+                string plcIp = _loader.IPAddr;
+                int port = 502;
+
+                ModbusClient modbusClient = new ModbusClient(plcIp, port);
+                modbusClient.Connect();
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+
+                int startAddress = 4201;
+                int numRegisters = 1;
+
+                int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                value = registers[0];
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress}: {value}", "");
+
+                modbusClient.Disconnect();
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");
+
+                result.success = true;
+                result.data = registers[0];
+                
+            }
+            catch (Exception ex)
+            {
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        [HttpPost("EndTask/{loaderId}")]
         public ServiceResponseModel<int> EndTask(long loaderId)
         {
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             string methodName = "EndTask";
+
+            try
+            {
+                var _loader = _dbContext.Loader.Find(loaderId);
+                if (_loader == null)
+                {
+                    result.errMessage = "Loader is not found.";
+                    result.data = 0;
+                    return result;
+                }
+
+                // *** testing
+                //result.success = true;
+                //result.data = 1;
+                //return result;
+
+                string plcIp = _loader.IPAddr;
+                int port = 502;
+
+                ModbusClient modbusClient = new ModbusClient(plcIp, port);
+                modbusClient.Connect();
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+
+                int startAddress = 4317;
+                int value = 2; //1 for end specific column, 2 for end of overall 
+
+                modbusClient.WriteSingleRegister(startAddress, value);
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Successfully wrote value {value} to register {startAddress}.", "");
+                result.success = true;
+
+                modbusClient.Disconnect();
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");
+            }
+            catch (Exception ex)
+            {
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        [HttpPost("StartLoad/{loaderId}")]
+        public ServiceResponseModel<int> StartLoad(long loaderId)
+        {
+            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
+            string methodName = "StartLoad";
+           
+            try
+            {
+                var _loader = _dbContext.Loader.Find(loaderId);
+                if (_loader == null)
+                {
+                    result.errMessage = "Loader not found.";
+                    result.data = 0;
+                    return result;
+                }
+
+                string plcIp = _loader.IPAddr;
+                int port = 502;
+
+                ModbusClient modbusClient = new ModbusClient(plcIp, port);
+                modbusClient.Connect();
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+
+                int startAddress = 4320;
+                int value = 1;
+
+                modbusClient.WriteSingleRegister(startAddress, value);
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Successfully wrote value {value} to register {startAddress}.", "");
+                result.success = true;
+
+                modbusClient.Disconnect();
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");
+            }
+            catch (Exception ex)
+            {
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+            
+            result.success = true;
+            return result;
+        }
+
+        [HttpPost("TurnColumn/{loaderId}/{iCol}")]
+        public ServiceResponseModel<int> TurnColumn(long loaderId, int iCol)
+        {
+            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
+            string methodName = "TurnColumn";
 
             try
             {
@@ -764,38 +850,30 @@ namespace RackingSystem.Controllers.API
                 }
 
                 //// *** testing
-                //result.success = true;
-                //result.data = 1;
-                //return result;
+                result.success = true;
+                result.data = 1;
+                return result;
                 //// *** testing
 
                 // 2. check plc which column is ready
-                int value = 0;
+                //int plcActualHeight = 0;
                 string plcIp = _loader.IPAddr;
                 int port = 502;
 
                 ModbusClient modbusClient = new ModbusClient(plcIp, port);
                 modbusClient.Connect();
-
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
-                int startAddress = 4317;
-                int numRegisters = 1;
-
-                int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
-
-                for (int i = 0; i < registers.Length; i++)
-                {
-                    PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
-                    value = registers[i];
-                }
-
+                int startAddress = 4314;
+                modbusClient.WriteSingleRegister(startAddress, iCol);
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Successfully wrote value {iCol} to register {startAddress}.", "");
                 result.success = true;
-                result.data = registers[0];
+
+                //int startAddress = (iCol >= 3 && iCol <= 4) ? 4314 + (iCol - 2) : 4314;
+                //modbusClient.WriteSingleCoil(startAddress, true);
 
                 modbusClient.Disconnect();
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");
-
             }
             catch (Exception ex)
             {
@@ -807,5 +885,44 @@ namespace RackingSystem.Controllers.API
             return result;
         }
 
+        [HttpPost("StartReelLoadIn/{loaderId}")]
+        public ServiceResponseModel<int> StartReelLoadIn(long loaderId)
+        {
+            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
+            string methodName = "StartReelLoadIn";
+
+            try
+            {
+                var _loader = _dbContext.Loader.Find(loaderId);
+                if (_loader == null)
+                {
+                    result.errMessage = "Loader is not found.";
+                    result.data = 0;
+                    return result;
+                }
+
+                string plcIp = _loader.IPAddr;
+                int port = 502;
+
+                ModbusClient modbusClient = new ModbusClient(plcIp, port);
+                modbusClient.Connect();
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+
+                int startAddress = 4321;
+                modbusClient.WriteSingleCoil(startAddress, true);
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Successfully wrote value true to register {startAddress}.", "");
+                result.success = true;
+
+                modbusClient.Disconnect();
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");
+            }
+            catch (Exception ex)
+            {
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+            return result;
+        }
     }
 }
