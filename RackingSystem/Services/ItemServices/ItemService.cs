@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using RackingSystem.Models.GRN;
 using RackingSystem.Models.Slot;
+using RackingSystem.Data.GRN;
 
 namespace RackingSystem.Services.ItemServices
 {
@@ -133,12 +134,13 @@ namespace RackingSystem.Services.ItemServices
                     result.errMessage = "Please refresh the list.";
                     return result;
                 }
-                //Bin? binExist2 = _dbContext.Bin.FirstOrDefault(x => x.ColNo == binReq.ColNo && x.RowNo != binReq.RowNo && x.Bin_Id != binReq.Bin_Id);
-                //if (binExist2 != null)
-                //{
-                //    result.errMessage = "This Column No and Row No has been used.";
-                //    return result;
-                //}
+
+                Item? binExist1 = _dbContext.Item.FirstOrDefault(x => x.ItemGroup_Id == itemReq.ItemGroup_Id);
+                if (binExist1 != null)
+                {
+                    result.errMessage = "This Item Group has been used.";
+                    return result;
+                }
 
                 // 2. save Data
                 ItemGroup? _item = _dbContext.ItemGroup.Find(itemReq.ItemGroup_Id);
@@ -387,12 +389,19 @@ namespace RackingSystem.Services.ItemServices
                     result.errMessage = "Please refresh the list.";
                     return result;
                 }
-                //Bin? binExist2 = _dbContext.Bin.FirstOrDefault(x => x.ColNo == binReq.ColNo && x.RowNo != binReq.RowNo && x.Bin_Id != binReq.Bin_Id);
-                //if (binExist2 != null)
-                //{
-                //    result.errMessage = "This Column No and Row No has been used.";
-                //    return result;
-                //}
+
+                GRNDetail? binExist1 = _dbContext.GRNDetail.FirstOrDefault(x => x.Item_Id == itemReq.Item_Id);
+                if (binExist1 != null)
+                {
+                    result.errMessage = "This Item has been used in GRN.";
+                    return result;
+                }
+                Reel? binExist2 = _dbContext.Reel.FirstOrDefault(x => x.Item_Id == itemReq.Item_Id);
+                if (binExist2 != null)
+                {
+                    result.errMessage = "This Item has been used in Reel.";
+                    return result;
+                }
 
                 // 2. save Data
                 Item? _item = _dbContext.Item.Find(itemReq.Item_Id);

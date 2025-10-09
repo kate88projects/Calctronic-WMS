@@ -186,26 +186,28 @@ namespace RackingSystem.Services.GRNServices
                     result.errMessage = "Please refresh the list.";
                     return result;
                 }
-                //Bin? binExist2 = _dbContext.Bin.FirstOrDefault(x => x.ColNo == binReq.ColNo && x.RowNo != binReq.RowNo && x.Bin_Id != binReq.Bin_Id);
-                //if (binExist2 != null)
-                //{
-                //    result.errMessage = "This Column No and Row No has been used.";
-                //    return result;
-                //}
 
-                // 2. save Data
                 Reel? _reel = _dbContext.Reel.Where(x => x.ReelCode == req.ReelCode).FirstOrDefault();
                 if (_reel == null)
                 {
                     result.errMessage = "Cannot find this Reel, please refresh the list.";
                     return result;
                 }
+
                 GRNDetail? _grnDtl = _dbContext.GRNDetail.Find(req.GRNDetail_Id);
                 if (_grnDtl == null)
                 {
                     result.errMessage = "Cannot find this GRN Detail, please refresh the list.";
                     return result;
                 }
+
+                if (_reel.Status != EnumReelStatus.WaitingLoader.ToString())
+                {
+                    result.errMessage = "This Reel is in [" + _reel.Status + "], cannot delete.";
+                    return result;
+                }
+
+                // 2. save Data
 
                 _dbContext.Reel.Remove(_reel);
                 await _dbContext.SaveChangesAsync();

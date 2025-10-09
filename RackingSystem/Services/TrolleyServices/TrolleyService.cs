@@ -174,6 +174,13 @@ namespace RackingSystem.Services.TrolleyServices
                     return result;
                 }
 
+                TrolleySlot? _trolleySlot = _dbContext.TrolleySlot.FirstOrDefault(x => x.Trolley_Id == trolley.Trolley_Id && x.HasReel == true);
+                if (_trolleySlot != null)
+                {
+                    result.errMessage = "This trolley has Reel, cannot delete.";
+                    return result;
+                }
+
                 Trolley? _trolley = _dbContext.Trolley.Find(trolley.Trolley_Id);
                 if(_trolley == null)
                 {
@@ -356,6 +363,14 @@ namespace RackingSystem.Services.TrolleyServices
                     result.errMessage = "Cannot find this trolley slot, please refresh the list.";
                     return result;
                 }
+
+                if (_trolleySlot.HasReel)
+                {
+                    result.errMessage = "This trolley Slot has Reel, cannot delete.";
+                    return result;
+                }
+
+
                 _dbContext.TrolleySlot.Remove(_trolleySlot);
 
                 await _dbContext.SaveChangesAsync();

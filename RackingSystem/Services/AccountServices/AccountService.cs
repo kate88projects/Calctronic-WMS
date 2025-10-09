@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Components.Web;
 using System;
 using RackingSystem.General;
+using RackingSystem.Data.GRN;
 
 namespace RackingSystem.Services.AccountServices
 {
@@ -281,12 +282,13 @@ namespace RackingSystem.Services.AccountServices
                     result.errMessage = "Please refresh the list.";
                     return result;
                 }
-                //Bin? binExist2 = _dbContext.Bin.FirstOrDefault(x => x.ColNo == binReq.ColNo && x.RowNo != binReq.RowNo && x.Bin_Id != binReq.Bin_Id);
-                //if (binExist2 != null)
-                //{
-                //    result.errMessage = "This Column No and Row No has been used.";
-                //    return result;
-                //}
+
+                GRNDetail? binExist1 = _dbContext.GRNDetail.FirstOrDefault(x => x.CreatedBy == req.Id);
+                if (binExist1 != null)
+                {
+                    result.errMessage = "This User No has been used, cannot delete.";
+                    return result;
+                }
 
                 // 2. save Data
                 var user = await _userManager.FindByIdAsync(req.Id); // Or FindByNameAsync(username)

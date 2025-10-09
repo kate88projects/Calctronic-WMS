@@ -264,6 +264,18 @@ namespace RackingSystem.Services.SlotServices
                     result.errMessage = "Cannot find this slot, please refresh the list.";
                     return result;
                 }
+
+                if (_slot.HasEmptyTray)
+                {
+                    result.errMessage = "This slot has Empty Tray, cannot delete.";
+                    return result;
+                }
+                if (_slot.HasReel)
+                {
+                    result.errMessage = "This slot has Reel, cannot delete.";
+                    return result;
+                }
+
                 _dbContext.Slot.Remove(_slot);
 
                 SlotColumnSetting? _slotCol = _dbContext.SlotColumnSetting.FirstOrDefault(x => x.ColNo == _slot.ColNo);

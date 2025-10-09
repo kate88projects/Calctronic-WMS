@@ -229,12 +229,13 @@ namespace RackingSystem.Services.LoaderServices
                     result.errMessage = "Please refresh the list.";
                     return result;
                 }
-                //Bin? binExist2 = _dbContext.Bin.FirstOrDefault(x => x.ColNo == binReq.ColNo && x.RowNo != binReq.RowNo && x.Bin_Id != binReq.Bin_Id);
-                //if (binExist2 != null)
-                //{
-                //    result.errMessage = "This Column No and Row No has been used.";
-                //    return result;
-                //}
+
+                LoaderReel? binExist1 = _dbContext.LoaderReel.FirstOrDefault(x => x.Loader_Id == req.Loader_Id);
+                if (binExist1 != null)
+                {
+                    result.errMessage = "This Loader has been used.";
+                    return result;
+                }
 
                 // 2. save Data
                 Loader? _item = _dbContext.Loader.Find(req.Loader_Id);
