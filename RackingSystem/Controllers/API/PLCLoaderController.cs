@@ -222,7 +222,7 @@ namespace RackingSystem.Controllers.API
         [HttpGet("CheckColumnHeight/{loaderId}/{colNo}/{height}")]
         public ServiceResponseModel<int> CheckColumnHeight(long loaderId, int colNo, int height)
         {
-            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
+           ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             string methodName = "CheckColumnHeight";
 
             try
@@ -408,7 +408,7 @@ namespace RackingSystem.Controllers.API
 
         [HttpGet("GetCurrentColumn/{loaderId}")]
         public ServiceResponseModel<int> GetCurrentColumn(long loaderId)
-        {
+       {
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             string methodName = "GetCurrentColumn";
 
@@ -503,7 +503,7 @@ namespace RackingSystem.Controllers.API
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     value = registers[0];
 
-                    if (value == 0004) //not sure the comparison for this hex is correct or not
+                    if (value.ToString("X") == "40") 
                     {
                         exit = true;
                         PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress}: {value}", "");
@@ -515,8 +515,8 @@ namespace RackingSystem.Controllers.API
                     }
                 }
 
-                result.success = value == 1;
-                result.data = value;
+                result.success = true;
+                //result.data = value;
 
                 modbusClient.Disconnect();
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");
@@ -601,7 +601,7 @@ namespace RackingSystem.Controllers.API
                 result.data.Add(rounded);
                 if (_loaderCol.BalanceHeight < height)
                 {
-                    result.errMessage = "Loader Column [" + colNo + "] is full.";
+                    result.errMessage = "Reel Height exceeds Column [" + colNo + "] limit.";
                 }
 
                 //modbusClient.Disconnect();
@@ -612,6 +612,7 @@ namespace RackingSystem.Controllers.API
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
+                result.data.Add(1);
             }
 
             return result;
@@ -659,27 +660,24 @@ namespace RackingSystem.Controllers.API
                 _reel.Status = EnumReelStatus.InLoader.ToString();
                 _reel.ActualHeight = actHeight;
                 _reel.ActualHeightDec = (decimal)Math.Round(actHieghtDec, 3);
-                await _dbContext.SaveChangesAsync();
-
-                _loaderCol.BalanceHeight = _loaderCol.BalanceHeight - actHeight;
-                await _dbContext.SaveChangesAsync();
-
-                LoaderReel _loaderReel = new LoaderReel();
-                _loaderReel.Loader_Id = loaderId;
-                _loaderReel.ColNo = colNo;
-                _loaderReel.Reel_Id = _reel.Reel_Id;
-                _dbContext.LoaderReel.Add(_loaderReel);
-                await _dbContext.SaveChangesAsync();
 
                 _loader.Status = EnumLoaderStatus.Loaded.ToString();
-                await _dbContext.SaveChangesAsync();
+                _loaderCol.BalanceHeight = _loaderCol.BalanceHeight - actHeight;
 
+                _dbContext.LoaderReel.Add(new LoaderReel
+                {
+                    Loader_Id = loaderId,
+                    ColNo = colNo,
+                    Reel_Id = _reel.Reel_Id
+                });
+
+                await _dbContext.SaveChangesAsync();
                 result.success = true;
                 result.data = _loaderCol.BalanceHeight;
             }
             catch (Exception ex)
             {
-                //PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
             }
@@ -740,7 +738,7 @@ namespace RackingSystem.Controllers.API
         }
 
         [HttpPost("EndTask/{loaderId}")]
-        public ServiceResponseModel<int> EndTask(long loaderId)
+        public ServiceResponseModel<int> EndTask(long loaderId, [FromBody] int action)
         {
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             string methodName = "EndTask";
@@ -768,7 +766,7 @@ namespace RackingSystem.Controllers.API
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
                 int startAddress = 4317;
-                int value = 1; //1 for end specific column, 2 for end of overall 
+                int value = action; //1 for end specific column, 2 for end of overall 
 
                 modbusClient.WriteSingleRegister(startAddress, value);
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Successfully wrote value {value} to register {startAddress}.", "");

@@ -36,6 +36,7 @@ namespace RackingSystem.Data.Maintenances
         public int ActualHeight { get; set; } = 0;
 
         [Required]
+        [Column(TypeName = "decimal(18,3)")]
         public decimal ActualHeightDec { get; set; } = 0;
 
         [MaxLength(50)]
