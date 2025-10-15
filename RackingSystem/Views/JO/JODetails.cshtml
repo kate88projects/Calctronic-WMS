@@ -1,0 +1,623 @@
+﻿@using RackingSystem.Models.JO
+@model JOListDTO
+@{
+    string mode = ViewBag.Mode;
+}
+
+<style>
+    .card {
+        background: #f2f2f2;
+        height:100%;
+    }
+
+    .table-title {
+        color: #fff;
+        background: #4b5366;
+        border-radius: 3px 3px 0 0;
+    }
+
+    .table-title h2 {
+        margin: 5px 0 0;
+        font-size: 24px;
+    }
+
+    .error-message {
+        color: red;
+        font-size: 0.875rem; 
+        margin-top: 5px;
+    }
+
+    .title {
+        font-weight: 600;
+        margin-bottom: 5px; 
+        font-size: 18px;
+    }
+
+    .title-container {
+        width: 40px;  
+        height: 100%;
+        cursor: pointer;
+        display: flex;               
+        justify-content: flex-start;
+        align-items: center; 
+    }
+
+    .select2-selection--single {
+        height: 40px !important;  
+        border-radius: 0.375rem;   
+        border: 1px solid #ced4da; 
+        padding: 8px;  
+    }
+
+    .select2-selection__arrow {
+        height: 100%;
+        margin: 5px 10px 0px;
+    }
+
+    input {
+        height: 40px;
+    }
+
+   .add-sub {
+        margin-bottom: 10px;
+        margin-left:auto;
+    }
+
+    .bomContainer, .subContainer, .sumContainer {
+        padding: 10px 20px;
+    }
+
+    form {
+        padding: 0px 10px 20px;
+        margin: 20px;
+    }
+
+    .subContainer {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .itemContainer {
+        padding: 5px 25px 0px;
+    }
+
+    #joForm {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 20px;
+    }
+
+    .title-icon {
+        font-size: 18px;
+    }
+
+    .data-row {
+        display: flex;
+        margin-bottom: 10px;
+        font-size: 16px;
+    }
+
+    .label {
+        width: 150px;
+    }
+
+    .value {
+        flex: 1;
+    }
+
+    hr {
+        margin-top: 0;
+    }
+</style>
+
+
+<br />
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-outline ">
+                <div class="card-header table-title">
+                    <div class="card-title">
+                        <h2>JO Details <b></b></h2>
+                    </div>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-warning" onclick="enabledEdit()" @(mode == "view" ? "" : "hidden")>
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form id="joForm" method="post" data-jo-id="@Model.JobOrder_Id">
+                        <div class="bomContainer">
+                            <div class="row">
+                                <div class="col">
+                                    <div class="row">
+                                        <div class="d-flex">
+                                            <i class="bi bi-box title-icon"></i>
+                                            <span class="title titleColor ms-2">Job Order</span>
+                                        </div>
+                                    </div>
+                                    <div class="itemContainer">
+                                        <div class="row g-4">
+                                            <div class="col-4">
+                                                <label for="txtDocNo">Document No</label>
+                                                <input type="text" class="form-control" id="txtDocNo" placeholder="Please enter document no" value="@Model.DocNo" @(mode == "view" ? "disabled" : "") >
+                                                <div id="txtDocNoError" class="error-message"></div>
+                                            </div>
+                                            <div class="col-4">
+                                                <label for="txtdesc">Description</label>
+                                                <input type="text" class="form-control" id="txtdesc" placeholder="Please enter description" value="@Model.Description" @(mode == "view" ? "disabled" : "") >
+                                                <div id="txtdescError" class="error-message"></div>
+                                            </div>
+                                            <div class="col-4">
+                                                <label for="txtCreatedBy">Created By</label>
+                                                <input type="text" class="form-control" id="txtCreatedBy" placeholder="Please enter created person" value="@Model.CreatedBy" @(mode == "view" ? "disabled" : "")>
+                                                <div id="txtCreatedByError" class="error-message"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @* <div class="form-check form-switch">
+                                      <input class="form-check-input" type="checkbox" role="switch" id="chkIsActive" @(Model.IsActive ? "checked" : "") @(mode == "view" ? "disabled" : "")>
+                                      <label class="form-check-label" for="chkIsActive">Enable BOM</label>
+                                    </div> *@
+                                </div>
+                            </div>
+                        </div>
+                       <hr>
+
+                        <div class="subContainer">
+                            <div class="row">
+                                <div class="d-flex">
+                                    <i class="bi bi-list-stars title-icon"></i>
+                                    <span class="title subtitleColor ms-2">Sub Item</span>
+                                </div>
+                            </div>
+                            <div class="itemContainer" id="itemContainer">
+                                <div class="row g-4">
+                                    <div class="col-5">
+                                        <label for="subItem1">Product</label>
+                                    </div>
+                                    <div class="col-4">
+                                        <label for="txtQty1">Quantity</label>
+                                    </div>
+                                </div>
+                                <div class="row itemBlock" id="itemBlock" data-index="1" >
+                                    <div class="item">
+                                        <div class="row g-4 mb-2">
+                                            <div class="col-5">
+                                                <select class="jo-select js-example-basic-single form-control" id="subItem1" style="width:100%" @(mode == "view" ? "disabled" : "")></select>
+                                                <div id="subItem1Error" class="error-message"></div>
+                                            </div>
+                                            <div class="col-4">
+                                                <input type="number" class="form-control" id="txtQty1" placeholder="Please enter quantity" @(mode == "view" ? "disabled" : "") required> 
+                                                <div id="txtQty1Error" class="error-message"></div>
+                                            </div>
+                                            <div class="title-container">
+                                                <button class="btn btn-outline-danger" type="button" onclick="removeItem(this)" @(mode == "view" ? "hidden" : "")>
+                                                    <i class="fa fa-trash" tabindex="0"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="txtJobDtlId1">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button id="addSub" type="button" class="add-sub mt-2 btn btn-outline-success" tabindex="0" onclick="addSubItem()" @(mode == "view" ? "hidden" : "")>
+                                <i class="fas fa-plus-circle"></i> Sub Item
+                            </button>
+                        </div>
+                        <hr>
+
+                        <div class="sumContainer"> 
+                            <div class="row">
+                                <div class="d-flex">
+                                    <i class="bi bi-clipboard-data title-icon"></i>
+                                    <span class="title titleColor ms-2">Summary</span>
+                                </div>
+                            </div>
+                            <div class="itemContainer">
+                                <div class="row data-row">
+                                    <div class="label">Total Sub Items</div>
+                                    <div class="value" id="ttlSub">1</div>
+                                </div>
+                                @* <div class="row data-row">
+                                    <div class="label">Created Date</div>
+                                    <div class="value" id="createDate">-</div>
+                                </div>
+                                <div class="row data-row">
+                                    <div class="label">Updated Date</div>
+                                    <div class="value" id="updateDate">-</div>
+                                </div> *@
+                            </div>                                    
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <button class="btn btn-primary me-2" id="saveButton" @(mode == "view" ? "hidden" : "")>Save</button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="returnToJO()" @(mode == "view" ? "hidden" : "")>Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+    <link rel="stylesheet" href="~/css/gridjs.min.css">    
+    <link rel="stylesheet" href="~/css/select2.min.css">
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/sweetalert2.all.min.js"></script>  
+    <script src="~/js/gridjs.umd.js"></script>
+    <script src="~/js/select2.min.js"></script>
+
+    <script type="text/javascript">
+        let itemIndex = 1;
+        let mode = "@mode";
+
+        $(document).ready(function() {
+            $('.jo-select').select2({
+                placeholder: 'Select an option',
+                width: 'resolve',
+            });
+
+            loadItems().then(() => {
+                loadDetails();
+            }).catch((error) => {
+                swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error
+                });
+            });
+        });
+
+        $('#joForm').on('keydown', function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+            }
+        });
+
+        function loadItems() {
+            return getBOMList();
+        }
+
+        function getBOMList() {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: "/BOM/GetActiveBOMList/",
+                    type: "GET",
+                    dataType: 'JSON',
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (result) {
+                        if (result.success == true) {
+                            const dropdown = document.getElementById('subItem1');
+                            if (dropdown) {
+                                dropdown.innerHTML = "";
+                                const defaultOption = document.createElement("option");
+                                defaultOption.value = "";
+                                defaultOption.textContent = "Choose an Item";
+                                defaultOption.disabled = true;
+                                defaultOption.selected = true;
+                                dropdown.appendChild(defaultOption);
+
+                                result.data.forEach(function (i) {
+                                    const option = document.createElement("option");
+                                    option.value = i.item_Id;
+                                    option.textContent = i.itemCode;
+                                    dropdown.appendChild(option);
+                                });
+
+                                $(dropdown).select2({
+                                    placeholder: 'Select an option', 
+                                    width: 'resolve',
+                                }).trigger('change');
+                            }
+                            resolve();
+                        } else {
+                            reject(result.errMessage);
+                        }
+                    },
+                    error: function (error) {
+                        reject(result.errMessage);
+                    }
+                });
+            });
+        }
+
+        function loadDetails() {
+            var joForm = document.querySelector('#joForm');
+            var joId = joForm.getAttribute('data-jo-id');
+
+            $.ajax({
+                url: '/JO/GetJODetail',
+                type: 'POST',
+                data: JSON.stringify(joId),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    console.log("details" , result.data);
+
+                    if (result.success == true) {
+                       joDtls = result.data.map(function (i) {
+                            return {
+                                jobOrder_Id: i.jobOrder_Id,
+                                jobOrderDetail_Id: i.jobOrderDetail_Id,
+                                itemId: i.item_Id,
+                                qty: i.qty,
+                            };
+                        });
+
+                        const container = document.getElementById("itemContainer");
+                        const items = container.querySelectorAll(".itemBlock");
+                        const itemCount = items.length;
+
+                        joDtls.forEach((dtl, index) => {
+                            if (index === 0) {
+                                const firstItem = container.querySelector(".itemBlock");
+                                const select = firstItem.querySelector("select");
+                                const qtyInput = firstItem.querySelector('input[type="number"]');
+                                const detailId = firstItem.querySelector('input[type="hidden"]');
+
+                                select.value = dtl.itemId;  
+                                qtyInput.value = dtl.qty;
+                                detailId.value = dtl.joDetailId;
+
+                                $(select).val(dtl.itemId).trigger('change');
+
+                            } else if (itemCount < joDtls.length) {
+                                createNewInputField(dtl, index+1, true);
+                            }
+                            index++;
+                        });
+                        itemIndex = joDtls.length == 0 ? itemIndex : joDtls.length;
+
+                        const total = document.querySelectorAll('.itemBlock').length;
+                        document.getElementById('ttlSub').textContent = total;
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+        }
+
+        function addSubItem() {
+           const container = document.getElementById("itemContainer");
+
+           console.log(container);
+
+           itemIndex++;
+           createNewInputField(null, itemIndex, false);
+           const total = document.querySelectorAll('.itemBlock').length;
+           document.getElementById('ttlSub').textContent = total;
+        };
+
+        function createNewInputField(dtl, index, isEditing = false) {
+            console.log(index);
+
+            const container = document.getElementById("itemContainer");
+            const firstItem = container.querySelector(".itemBlock");
+            //destroy select2 before clone to avoid the original select2 be affected
+            $(firstItem.querySelector("select")).select2('destroy');
+
+            const dataIdx = firstItem.getAttribute("data-index");
+            const newItem = firstItem.cloneNode(true);
+            newItem.setAttribute("data-index", index);
+
+            const select = newItem.querySelector("select");
+            const qtyInput = newItem.querySelector('input[type="number"]');
+            const detailId = newItem.querySelector('input[type="hidden"]');
+
+            const newItemIndex = index;
+            select.id = `subItem${newItemIndex}`;
+            qtyInput.id = `txtQty${newItemIndex}`;
+            detailId.id = `txtBomDtlId${newItemIndex}`;
+
+            //remove all label
+            newItem.querySelectorAll('label').forEach(label => label.remove());
+            select.value = isEditing == true ? dtl.itemId : "";
+            qtyInput.value = isEditing == true ? dtl.qty : "";
+            detailId.value = isEditing == true ? dtl.bomDetailId : "";
+
+            const errBlock1 = newItem.querySelector(`#subItem${dataIdx}Error`);
+            errBlock1.id = `subItem${newItemIndex}Error`;
+            const errBlock2 = newItem.querySelector(`#txtQty${dataIdx}Error`);
+            errBlock2.id = `txtQty${newItemIndex}Error`;
+
+            container.appendChild(newItem);
+            //reinitialize select2
+            container.querySelectorAll(".itemBlock").forEach(item => {
+                $(item.querySelector("select")).select2({
+                    placeholder: 'Select an option',
+                    width: 'resolve',
+                }).trigger('change');
+            });
+            removeErrMsg([`subItem${newItemIndex}`, `txtQty${newItemIndex}`]);
+
+        };
+
+        function removeItem(icon) {
+            const item = icon.closest('.itemBlock');
+            const container = document.getElementById("itemContainer");
+            const items = container.querySelectorAll(".itemBlock");
+            const itemCount = items.length;
+
+            if (itemCount > 1)
+            {
+                item.remove();
+            } else {
+                swal.fire({
+                    icon: 'info',
+                    title: "Cannot Remove",
+                    text: "At least one sub-item must remain."
+                });
+            }
+
+            const total = document.querySelectorAll('.itemBlock').length;
+            document.getElementById('ttlSub').textContent = total;
+        };
+
+        function returnToJO() {
+            window.history.back();
+        }
+
+        document.getElementById("saveButton").addEventListener("click", function(event) {
+            event.preventDefault();
+            saveJobOrder();
+        });
+
+        function saveJobOrder() {
+            const items = document.querySelectorAll('.item');
+            const itemCount  = items.length;
+            const formData = [];
+            let isValid = true;
+
+            //validation for JOB header
+            // if (!$('#txtDocNo').val()) {
+            //     isValid = false;
+            //     showError(field, "Document No is required.");
+            // }
+
+            //validation for details
+            items.forEach(item => {
+                removeErrMsg([item.querySelector("select").id, item.querySelector('input[type="number"]').id]);
+                const subitem = item.querySelector("select").value;
+                const qty = item.querySelector('input[type="number"]').value;
+                const jobDtlId = item.querySelector('input[type="hidden"]').value;
+
+                if (!subitem) {
+                    isValid = false;
+                    showError(item.querySelector("select").id, "Please choose an item.");
+                }
+                if (!qty || isNaN(qty) || qty <=0) {
+                    isValid = false;
+                    showError(item.querySelector('input[type="number"]').id, "Please enter a valid quantity (number >= 1)");
+                }
+
+                formData.push({
+                    JobOrderDetail_Id: parseInt(jobDtlId) || 0,
+                    JobOrder_Id: parseInt(@Model.JobOrder_Id) || 0,
+                    Item_Id: parseInt(subitem),
+                    Qty: parseInt(qty)
+                });
+            });
+
+            if (isValid) {
+               var jobData = {
+                    JobOrder_Id: parseInt(@Model.JobOrder_Id) || 0,
+                    // DocNo: $('#txtDocNo').val(),
+                    Description: $('#txtdesc').val(),
+                    CreatedBy: $('#txtCreatedBy').val(),
+                    Details: formData,
+                };
+
+                console.log("jobData", jobData);
+
+                $.ajax({
+                    url: '/JO/SaveJob',
+                    type: 'POST',
+                    data: JSON.stringify(jobData),
+                    dataType: 'JSON',
+                    contentType: 'application/json; charset=utf-8',
+                    beforeSend: function () {
+                        Swal.fire({
+                            text: 'Please Wait',
+                            width: '300px',
+
+                            allowEscapeKey: false,
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                        });
+                        Swal.showLoading()
+                    },
+                    success: function (result) {
+                        if (result.success == true) {
+                            swal.fire({
+                                icon: 'success',
+                                title: "Success Save",
+                                text: "",
+                                didClose: () => {
+                                    window.history.back();
+                                }
+                            });
+                        }
+                        else {
+                            swal.fire({
+                                icon: 'error',
+                                title: "Wait",
+                                text: result.errMessage
+                            });
+                        }
+                    },
+                    error: function (error) {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: error.val
+                        });
+                    }
+                });
+            }
+        }
+
+        function showError(fieldId, message) {
+            document.getElementById(fieldId).classList.add('is-invalid');
+            document.getElementById(fieldId + 'Error').textContent = message;
+        }
+
+        function removeErrMsg(fields, clearValue = false) {
+            if (fields != null)
+            {
+                if (!Array.isArray(fields)) {
+                    fields = [fields];
+                }
+                fields.forEach(function(field) {
+                    document.getElementById(field).classList.remove('is-invalid');
+                    document.getElementById(field).classList.remove('is-valid');
+                    document.getElementById(field + 'Error').textContent = '';
+                    if (clearValue) document.getElementById(field).value = '';
+                });
+            }
+        }
+
+        function enabledEdit() {
+            mode = 'edit';
+
+            const form = document.getElementById('joForm');
+            const elements = form.querySelectorAll('input, select, button');
+
+            elements.forEach(el => {
+                if (el.type != 'hidden') {
+                    el.disabled = false;
+                    el.hidden = false;
+                }
+            });
+
+            document.getElementById('saveButton')?.removeAttribute('hidden');
+            document.getElementById('addSub')?.removeAttribute('hidden');
+
+            document.querySelectorAll('.btn-outline-danger').forEach(btn => {
+                btn.removeAttribute('hidden');
+            });
+
+            document.querySelector('.btn-warning')?.setAttribute('hidden', 'true');
+
+        }
+
+    </script>
+}

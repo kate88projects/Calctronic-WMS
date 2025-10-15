@@ -13,61 +13,14 @@
         font-size: 24px;
     }
 
-    .text-link {
-        color: blue;
-        float: right;
-        margin-bottom: 10px;
-    }
-
-    .title {
-        padding: 8px;
-        font-weight: 600;
-        text-align: center;
-        margin-bottom: 5px;
-    }
-
-    .error-message {
-        color: red;
-        font-size: 0.875rem; 
-        margin-top: 5px;
-    }
-
-    .titleColor {
-        /* background: #B9E5E8; */
-        background: #D6E6F2;
-    }
-
-    .subtitleColor {
-        background: #E3F4F4;
-    }
-
-    .item {
-        margin: 10px;
-    }
-
-    .title-container {
-        right: 16px;
-        float: right;
-        margin-bottom: 5px;
-    }
-
     .row {
         clear: right;
-    }
-
-    .is-invalid {
-        border-color: red;
-    }
-
-    .is-valid {
-        border-color: green;
     }
 
     .table-filter {
         border-radius: 3px;
         border-color: #ddd;
         box-shadow: none;
-        /* margin-bottom: 20px; */
     }
 
     .show-entries select.form-control {
@@ -139,6 +92,27 @@
         font-size: 16px;
         padding-top: 6px
     }
+
+    .custom-table thead th {
+        background-color: #F1F6F9; 
+        color: #000;
+    }
+
+    .custom-table tbody tr:hover td {
+        background-color: #F1F6F9; 
+    }
+
+    .custom-table tbody {
+        font-size: 15px;
+    }
+
+    th.gridjs-th, td.gridjs-td {
+        padding: 12px 16px !important;
+    }
+
+    .view-btn, .edit-btn, .delete-btn {
+        font-size: 15px;
+    }
 </style>
 
 <br />
@@ -151,7 +125,7 @@
                         <h2>JOB Order List <b></b></h2>
                     </div>
                     <div class="card-tools">
-                        <button type="button" class="btn btn-success" onclick="newForm()">
+                        <button type="button" class="btn btn-success" onclick="navigateToNew('new')">
                             Add New JOB
                         </button>
                     </div>
@@ -186,11 +160,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="table table-striped table-bordered table-responsive text-nowrap">
+
+                    <div id="gridTable" class="table table-responsive text-nowrap mt-3"></div>
+                    @* <div class="table table-striped table-bordered table-responsive text-nowrap">
                         <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
                             <thead>
                                 <tr>
-                                    @* <th>Job Order Id</th> *@
+                                    //<th>Job Order Id</th>
                                     <th>Doc No</th>
                                     <th>Doc Date</th>
                                     <th>Description</th>
@@ -203,7 +179,7 @@
                                 </tr>
                             </thead>
                         </table>
-                    </div>
+                    </div> *@
 
                     <div class="clearfix">
                         <div class="hint-text">Showing <b id="lblCurCount">0</b> of <b id="lblTotal">0</b> entries</div>
@@ -221,108 +197,23 @@
     </div>
 </div>
 
-<div class="modal fade" id="newModal">
-     <div class="modal-dialog modal-dialog-centered modal-lg">
-         <div class="modal-content">
-             <div class="modal-header">
-                 <h5 class="modal-title" id="bomModalLabel"> Create New JOB</h5>
-             </div>
-             <div class="modal-body">
-                 <div class="row g-0"><span class="title titleColor">JOB</span></div>
-                 <div class="row mb-4">
-                     @* <div class="col">
-                          <div class="form-floating">
-                                <input type="text" class="form-control" id="txtDocNo" placeholder="Please enter document no">
-                                <label for="txtDocNo">Document No</label>
-                                <div id="txtDocNoError" class="error-message"></div>
-                            </div>
-                     </div> *@
-                     <div class="col">
-                         <div class="form-floating">
-                             <input type="text" class="form-control" id="txtdesc" placeholder="Please enter description">
-                             <label for="txtdesc">Description</label>
-                             @* <div id="txtdescError" class="error-message"></div> *@
-                         </div>
-                     </div>
-                     <div class="col">
-                        <div class="form-floating">
-                            <input type="text" class="form-control" id="txtCreatedBy" placeholder="Please enter created person">
-                            <label for="txtCreatedBy">Created By</label>
-                            <div id="txtCreatedByError" class="error-message"></div>
-                        </div>
-                    </div>
-                 </div>
-                @*  <div class="g-3 mb-4">
-                     <div class="col">
-                         <div class="form-floating">
-                             <input type="text" class="form-control" id="txtdesc" placeholder="Please enter description">
-                             <label for="txtdesc">Description</label>
-                             @* <div id="txtdescError" class="error-message"></div> 
-                         </div>
-                     </div>
-                </div> *@
-
-                <div class="row g-0"><span class="title subtitleColor">Details</span></div>
-                <div class="itemContainer" id="itemContainer">
-                    <div class="itemBlock" id="itemBlock" data-index="1">
-                        <div class="item">
-                            <div class="title-container">
-                              <i class="fa fa-trash" onclick="removeItem(this)" tabindex="0"></i>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col">
-                                    <div class="form-floating">
-                                        <select class="form-select" id="subItem1" required></select>
-                                        <label for="subItem1">Product</label>
-                                        <div id="subItem1Error" class="error-message"></div>
-                                    </div>
-                                </div>
-                                <div class="col">
-                                    <div class="form-floating">
-                                        <input type="number" class="form-control" id="txtQty1" placeholder="Please enter quantity" required>
-                                        <label for="txtQty1">Quantity</label>
-                                        <div id="txtQty1Error" class="error-message"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            @* <div class="g-3 mb-3">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" id="txtRemark1" placeholder="Please enter remark" required>
-                                    <label for="txtRemark1">Remark</label>
-                                    <div id="txtRemark1Error" class="error-message"></div>
-                                </div>
-                            </div> *@
-                            <input type="hidden" id="txtJobDtlId1">
-                        </div>
-                    </div>
-                </div>
-                    
-                <span id="textlink" class="text-link mt-2" tabindex="0"><i class="fas fa-plus-circle"></i> More Details</span>
-                <input type="hidden" id="txtJobId">
-             </div>
-             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="saveJOB()">Save</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="cancelForm()">Cancel</button>
-            </div>
-         </div>
-     </div>
-</div>
-
-
 @section Scripts
 {
     <link href="~/css/datatables.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+    <link rel="stylesheet" href="~/css/gridjs.min.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/datatables.min.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
+    <script src="~/js/gridjs.umd.js"></script>
 
     <script type="text/javascript">
         let itemIndex = 1;
+        let gridInstance = null;
 
         $(document).ready(function () {
-            getBOMList();
+            // getBOMList();
             loadList();
             // $('#listTable').DataTable({
             //     data: null,
@@ -333,66 +224,65 @@
             // });
         });
 
-        function getBOMList() {
-             $.ajax({
-                url: "/BOM/GetActiveBOMList/",
-                type: "GET",
-                dataType: 'JSON',
-                contentType: 'application/json; charset=utf-8',
-                success: function (result) {
-                    if (result.success == true) {
-                        console.log(result.data);
+        // function getBOMList() {
+        //      $.ajax({
+        //         url: "/BOM/GetActiveBOMList/",
+        //         type: "GET",
+        //         dataType: 'JSON',
+        //         contentType: 'application/json; charset=utf-8',
+        //         success: function (result) {
+        //             if (result.success == true) {
+        //                 console.log(result.data);
 
-                        itemList = result.data.map(function (i) {
-                            return {
-                                itemId : i.item_Id,
-                                itemCode: i.itemCode,
-                                itemDescription: i.description,
-                            };
-                        });
+        //                 itemList = result.data.map(function (i) {
+        //                     return {
+        //                         itemId : i.item_Id,
+        //                         itemCode: i.itemCode,
+        //                         itemDescription: i.description,
+        //                     };
+        //                 });
 
-                        const dropdownIds = ['subItem1'];
-                        dropdownIds.forEach(function (id) {
-                            const dropdown = document.getElementById(id);
-                            dropdown.innerHTML = "";
+        //                 const dropdownIds = ['subItem1'];
+        //                 dropdownIds.forEach(function (id) {
+        //                     const dropdown = document.getElementById(id);
+        //                     dropdown.innerHTML = "";
 
-                            const defaultOption = document.createElement("option");
-                            defaultOption.value = "";
-                            defaultOption.textContent = "Choose an Item";
-                            defaultOption.disabled = true;
-                            defaultOption.selected = true;
-                            dropdown.appendChild(defaultOption);
+        //                     const defaultOption = document.createElement("option");
+        //                     defaultOption.value = "";
+        //                     defaultOption.textContent = "Choose an Item";
+        //                     defaultOption.disabled = true;
+        //                     defaultOption.selected = true;
+        //                     dropdown.appendChild(defaultOption);
 
-                            result.data.forEach(function (i) {
-                                const option = document.createElement("option");
-                                option.value = i.item_Id;
-                                option.textContent = i.itemCode;
-                                dropdown.appendChild(option);
-                            });
-                        });
-                    } else {
-                        swal.fire({
-                            icon: 'error',
-                            title: 'Wait',
-                            text: result.errMessage
-                        });
-                    }
-                },
-                error: function (error) {
-                    swal.fire({
-                        icon: 'error',
-                        title: 'Wait',
-                        text: error.val
-                    });
-                }
-            });
-        }
+        //                     result.data.forEach(function (i) {
+        //                         const option = document.createElement("option");
+        //                         option.value = i.item_Id;
+        //                         option.textContent = i.itemCode;
+        //                         dropdown.appendChild(option);
+        //                     });
+        //                 });
+        //             } else {
+        //                 swal.fire({
+        //                     icon: 'error',
+        //                     title: 'Wait',
+        //                     text: result.errMessage
+        //                 });
+        //             }
+        //         },
+        //         error: function (error) {
+        //             swal.fire({
+        //                 icon: 'error',
+        //                 title: 'Wait',
+        //                 text: error.val
+        //             });
+        //         }
+        //     });
+        // }
 
         function loadList() {
              $.ajax({
                  url: "/JO/GetJOList/",
                  type: "GET",
-                 // data: JSON.stringify(data),
                  dataType: 'JSON',
                  contentType: 'application/json; charset=utf-8',
                  beforeSend: function () {
@@ -409,52 +299,141 @@
                 success: function (result) {
                     swal.close()
                     if (result.success == true) {
-                        $('#listTable').DataTable( {
-                            data: result.data,
-                            paging: false,
-                            searching: false,
-                            "info": false,
-                            "bDestroy": true,
+
+                        if (gridInstance) {
+                            gridInstance.destroy();
+                        }
+                        // console.log("data", result.data);
+
+                        gridInstance = new gridjs.Grid({
                             columns: [
-                                // { data: 'jobOrder_Id' },
-                                { data: 'docNo' },
+                                { name: 'JobOrder ID', id: 'jobOrder_Id', hidden: true }, 
+                                { name: 'Doc No', id: 'docNo', width: '160px' },
                                 { 
-                                    data: null ,
-                                    render: function (data, type, row, meta) {
-                                        const docDate = new Date(row.docDate);
-                                        const formattedDate = docDate.toLocaleString('en-GB', {
+                                    name: 'Doc Date', 
+                                    id: 'docDate',
+                                    formatter: (cell, row) => {
+                                        const dateString = row.cells[2].data.split('.')[0];
+                                        const date = new Date(dateString);
+
+                                        if (isNaN(date)) {
+                                            return 'Invalid Date';
+                                        }
+                                        return date.toLocaleString('en-GB', {
                                             year: 'numeric',
-                                            month: 'short',
+                                            month: 'numeric',
+                                            day: 'numeric',
+                                        });
+                                    }
+                                },
+                                { name: 'Description', id: 'description' },
+                                { name: 'Status', id: 'status' },
+                                { 
+                                    name: 'Created Date', 
+                                    formatter: (cell, row) => {
+                                        const dateString = row.cells[5].data.split('.')[0];
+                                        const date = new Date(dateString);
+
+                                        if (isNaN(date)) {
+                                            return 'Invalid Date';
+                                        }
+                                        return date.toLocaleString('en-GB', {
+                                            year: 'numeric',
+                                            month: 'numeric',
                                             day: 'numeric',
                                             hour: 'numeric',
                                             minute: 'numeric',
-                                            hour12: true
+                                            hour12: true,
                                         });
-                                        return formattedDate;
                                     }
                                 },
-                                { data: 'description' },
-                                { data: 'status' },
-                                { data: 'createdDate' },
-                                { data: 'createdBy' },
-                                { data: 'updatedDate' },
-                                { data: 'updatedBy' },
-                                {
-                                    data: null,
-                                    render: function (data, type, row, meta) {
-                                        const rawData = JSON.stringify(row).replace(/"/g, "&quot;");
-                                        return `<div style="display:flex;">
-                                                    <button class="btn btn-success d-grid edit-btn" style="margin-right:10px;" data-row="${rawData}">
-                                                        <span><i class="bi bi-pencil-square"></i>Edit</span>
-                                                    </button>
-                                                    <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.jobOrder_Id}">
-                                                        <span><i class="bi bi-trash"></i>Delete</span>
-                                                    </button>
-                                                </div>`;
+                                { name: 'Created By', id: 'createdBy' },
+                                // { name: 'Updated Date', id: 'updatedDate' },
+                                // { name: 'Updated By', id: 'updatedBy' },
+                                { 
+                                    name: 'Action', 
+                                    formatter: (cell, row) => {
+                                        const rawData = JSON.stringify({
+                                            jobOrder_Id: row.cells[0].data,
+                                            docNo: row.cells[1].data,
+                                            docDate: row.cells[2].data,
+                                            description: row.cells[3].data,
+                                            status: row.cells[4].data,
+                                            createdDate: row.cells[5].data,
+                                            createdBy: row.cells[6].data,
+                                            updatedDate: row.cells[7].data,
+                                        });
+
+                                        return gridjs.html(`
+                                            <div style="display:flex;">
+                                                <button class="btn btn-primary d-grid view-btn" style="margin-right:10px;" data-row='${rawData}' onclick="navigateToView(${row.cells[0].data}, 'view')">
+                                                    <span><i class="bi bi-eye"></i> View</span>
+                                                </button>
+                                                <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row='${rawData}' onclick="navigateToEdit(${row.cells[0].data}, 'edit')">
+                                                    <span><i class="bi bi-pencil-square"></i> Edit</span>
+                                                </button>
+                                                <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.cells[0].data}">
+                                                    <span><i class="bi bi-trash"></i> Delete</span>
+                                                </button>
+                                            </div>
+                                        `);
                                     }
                                 },
                             ],
-                        });
+                            data: result.data,
+                            pagination: false,
+                            search: false,
+                            sort: true,
+                            className: {
+                                table: 'custom-table',
+                            }
+                        }).render(document.getElementById("gridTable"));
+                        // $('#listTable').DataTable( {
+                        //     data: result.data,
+                        //     paging: false,
+                        //     searching: false,
+                        //     "info": false,
+                        //     "bDestroy": true,
+                        //     columns: [
+                        //         // { data: 'jobOrder_Id' },
+                        //         { data: 'docNo' },
+                        //         { 
+                        //             data: null ,
+                        //             render: function (data, type, row, meta) {
+                        //                 const docDate = new Date(row.docDate);
+                        //                 const formattedDate = docDate.toLocaleString('en-GB', {
+                        //                     year: 'numeric',
+                        //                     month: 'short',
+                        //                     day: 'numeric',
+                        //                     hour: 'numeric',
+                        //                     minute: 'numeric',
+                        //                     hour12: true
+                        //                 });
+                        //                 return formattedDate;
+                        //             }
+                        //         },
+                        //         { data: 'description' },
+                        //         { data: 'status' },
+                        //         { data: 'createdDate' },
+                        //         { data: 'createdBy' },
+                        //         { data: 'updatedDate' },
+                        //         { data: 'updatedBy' },
+                        //         {
+                        //             data: null,
+                        //             render: function (data, type, row, meta) {
+                        //                 const rawData = JSON.stringify(row).replace(/"/g, "&quot;");
+                        //                 return `<div style="display:flex;">
+                        //                             <button class="btn btn-success d-grid edit-btn" style="margin-right:10px;" data-row="${rawData}">
+                        //                                 <span><i class="bi bi-pencil-square"></i>Edit</span>
+                        //                             </button>
+                        //                             <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.jobOrder_Id}">
+                        //                                 <span><i class="bi bi-trash"></i>Delete</span>
+                        //                             </button>
+                        //                         </div>`;
+                        //             }
+                        //         },
+                        //     ],
+                        // });
 
                         // var curCnt = 0;
                         // var pageSize = parseInt($("#selpageSize").val());
@@ -511,312 +490,19 @@
              });
         }
 
-        function newForm() {
-            clearForm();
-            $('#newModal').modal("show");
+        function navigateToNew(mode) {
+            window.location.href = '@Url.Action("JODetails", "JO", new { id = "_id_", mode = "_mode_" })'.replace('_id_', 0).replace('_mode_', mode);
         }
 
-        function cancelForm() {
-            $('#newModal').modal("toggle");
-            clearForm();
+        function navigateToView(id, mode) {
+            window.location.href = '@Url.Action("JODetails", "JO", new { id = "_id_", mode = "_mode_" })'.replace('_id_', id).replace('_mode_', mode);
         }
 
-        function clearForm() {
-            removeErrMsg(['txtCreatedBy'], true);
-            document.getElementById('txtdesc').value = ''
-            document.getElementById('txtJobId').value = '';
-
-            const firstItem = document.querySelector(".item");
-            if (firstItem) {
-                const subitem = firstItem.querySelector("select").id;
-                const qty = firstItem.querySelector('input[type="number"]').id;
-                // const remark = firstItem.querySelector('input[type="text"]').id;
-                const detailId = firstItem.querySelector('input[type="hidden"]');
-                detailId.value = "";
-                removeErrMsg([subitem, qty], true);
-            }
-
-            const itemBlock = document.querySelectorAll(".itemBlock");
-            itemBlock.forEach((item, index) => {
-                if (index != 0) {
-                    item.remove();
-                }
-            });
-
-            bgAdjust();
-            itemIndex = 1;
+        function navigateToEdit(id, mode) {
+            window.location.href = '@Url.Action("JODetails", "JO", new { id = "_id_", mode = "_mode_" })'.replace('_id_', id).replace('_mode_', mode);
         }
 
-        function showError(fieldId, message) {
-            document.getElementById(fieldId).classList.add('is-invalid');
-            document.getElementById(fieldId + 'Error').textContent = message;
-        }
-
-        function removeErrMsg(fields, clearValue = false) {
-            if (fields != null)
-            {
-                if (!Array.isArray(fields)) {
-                    fields = [fields];
-                }
-                fields.forEach(function(field) {
-                    document.getElementById(field).classList.remove('is-invalid');
-                    document.getElementById(field).classList.remove('is-valid');
-                    document.getElementById(field + 'Error').textContent = '';
-                    if (clearValue) document.getElementById(field).value = '';
-                });
-            }
-        }
-
-        function bgAdjust() {
-            const allBlocks = document.querySelectorAll(".itemBlock");
-            allBlocks.forEach((block, index) => {
-                block.style.backgroundColor = "";
-
-                if ((index + 1) % 2 === 0) {
-                    block.style.backgroundColor = "#E3F4F4";
-                    block.style.border = "1px solid #E3F4F4";
-                }
-            });
-        }
-
-       document.getElementById("textlink").addEventListener("click", function () {
-           itemIndex++;
-           createNewInputField(null, itemIndex, false);
-           bgAdjust();
-
-        });
-
-        function createNewInputField(dtl, index, isEditing = false) {
-            const container = document.getElementById("itemContainer");
-            const firstItem = container.querySelector(".itemBlock");
-            const dataIdx = firstItem.getAttribute("data-index");
-
-            const newItem = firstItem.cloneNode(true);
-            newItem.setAttribute("data-index", index);
-
-            const select = newItem.querySelector("select");
-            const qtyInput = newItem.querySelector('input[type="number"]');
-            // const remarkInput = newItem.querySelector('input[type="text"]');
-            const detailId = newItem.querySelector('input[type="hidden"]');
-
-            const newItemIndex = index;
-            select.id = `subItem${newItemIndex}`;
-            qtyInput.id = `txtQty${newItemIndex}`;
-            // remarkInput.id = `txtRemark${newItemIndex}`;
-            detailId.id = `txtJobDtlId${newItemIndex}`;
-
-            newItem.querySelector(`label[for^="subItem"]`).setAttribute("for", `subItem${newItemIndex}`);
-            newItem.querySelector(`label[for^="txtQty"]`).setAttribute("for", `txtQty${newItemIndex}`);
-            // newItem.querySelector(`label[for^="txtRemark"]`).setAttribute("for", `txtRemark${newItemIndex}`);
-
-            select.value = isEditing ? dtl.itemId : "";
-            qtyInput.value = isEditing ? dtl.qty : "";
-            // remarkInput.value = isEditing ? dtl.remark : "";
-            detailId.value = isEditing ? dtl.jobDetailId : "";
-
-            const errBlock1 = newItem.querySelector(`#subItem${dataIdx}Error`);
-            errBlock1.id = `subItem${newItemIndex}Error`;
-            const errBlock2 = newItem.querySelector(`#txtQty${dataIdx}Error`);
-            errBlock2.id = `txtQty${newItemIndex}Error`;
-            // const errBlock3 = newItem.querySelector(`#txtRemark${dataIdx}Error`);
-            // errBlock3.id = `txtRemark${newItemIndex}Error`;
-
-            container.appendChild(newItem);
-            removeErrMsg([`subItem${newItemIndex}`, `txtQty${newItemIndex}`]);
-        };
-
-        function removeItem(icon) {
-            const item = icon.closest('.itemBlock');
-            const container = document.getElementById("itemContainer");
-            const items = container.querySelectorAll(".itemBlock");
-            const itemCount = items.length;
-
-            if (itemCount > 1)
-            {
-                item.remove();
-                bgAdjust();
-            } else {
-                swal.fire({
-                    icon: 'info',
-                    title: "Cannot Remove",
-                    text: "At least one sub-item must remain."
-                });
-            }
-        };
-
-        function saveJOB() {
-            const items = document.querySelectorAll('.item');
-            const itemCount = items.length;
-            const formData = [];
-            let isValid = true;
-
-            //validation for JOB header
-            // if (!$('#txtDocNo').val()) {
-            //     isValid = false;
-            //     showError(field, "Document No is required.");
-            // }
-
-            //validation for details
-            items.forEach(item => {
-                removeErrMsg([item.querySelector("select").id, item.querySelector('input[type="number"]').id]);
-                const subitem = item.querySelector("select").value;
-                const qty = item.querySelector('input[type="number"]').value;
-                // const remark = item.querySelector('input[type="text"]').value;
-                const jobDtlId = item.querySelector('input[type="hidden"]').value;
-
-                if (!subitem) {
-                    isValid = false;
-                    showError(item.querySelector("select").id, "Please choose a sub item.");
-                }
-                if (!qty || isNaN(qty) || qty <=0) {
-                    isValid = false;
-                    showError(item.querySelector('input[type="number"]').id, "Please enter a valid quantity (number >= 1)");
-                }
-
-                formData.push({
-                    JobOrderDetail_Id: parseInt(jobDtlId) || 0,
-                    JobOrder_Id: parseInt($('#txtJobId').val()) || 0,
-                    Item_Id: parseInt(subitem),
-                    Qty: parseInt(qty)
-                });
-            });
-
-            if (isValid) {
-                var jobData = {
-                    JobOrder_Id: parseInt($('#txtJobId').val()) || 0,
-                    // DocNo: $('#txtDocNo').val(),
-                    Description: $('#txtdesc').val(),
-                    CreatedBy: $('#txtCreatedBy').val(),
-                    Details: formData,
-                };
-
-                console.log("jobData", jobData);
-
-
-                $.ajax({
-                    url: '/JO/SaveJob',
-                    type: 'POST',
-                    data: JSON.stringify(jobData),
-                    dataType: 'JSON',
-                    contentType: 'application/json; charset=utf-8',
-                    beforeSend: function () {
-                        Swal.fire({
-                            text: 'Please Wait',
-                            width: '300px',
-
-                            allowEscapeKey: false,
-                            allowOutsideClick: false,
-                            showConfirmButton: false,
-                        });
-                        Swal.showLoading()
-                    },
-                    success: function (result) {
-                        if (result.success == true) {
-                            swal.fire({
-                                icon: 'success',
-                                title: "Success Save",
-                                text: "",
-                                didClose: () => {
-                                  window.location.reload();
-                                }
-                            });
-                        }
-                        else {
-                            swal.fire({
-                                icon: 'error',
-                                title: "Wait",
-                                text: result.errMessage
-                            });
-                        }
-                    },
-                    error: function (error) {
-                        console.log(error);
-                        swal.fire({
-                            icon: 'error',
-                            title: "Wait",
-                            text: error.val
-                        });
-                    }
-                });
-            }
-        }
-
-        $('#listTable').on('click', '.edit-btn', function () {
-            const row = JSON.parse($(this).attr('data-row'));
-            editForm(row);
-        });
-
-        async function editForm(row) {
-            var hasValue = false;
-
-            // $('#txtDocNo').val(row.docNo);
-            $('#txtdesc').val(row.description);
-            $('#txtCreatedBy').val(row.createdBy);
-            $('#txtJobId').val(row.jobOrder_Id);
-
-            //fetch details
-            var jobDtls = [];
-
-            $.ajax({
-                url: '/JO/GetJODetail',
-                type: 'POST',
-                data: JSON.stringify(row.jobOrder_Id),
-                dataType: 'JSON',
-                contentType: 'application/json; charset=utf-8',
-                success: function (result) {
-                    if (result.success == true) {
-                       jobDtls = result.data.map(function (i) {
-                            return {
-                                jobId: i.jobOrder_Id,
-                                jobDetailId: i.jobOrderDetail_Id,
-                                itemId: i.item_Id,
-                                qty: i.qty,
-                            };
-                        });
-
-                        const container = document.getElementById("itemContainer");
-                        const items = container.querySelectorAll(".itemBlock");
-                        const itemCount = items.length;
-
-                        jobDtls.forEach((dtl, index) => {
-                            if (index === 0) {
-                                const firstItem = container.querySelector(".itemBlock");
-                                const select = firstItem.querySelector("select");
-                                const qtyInput = firstItem.querySelector('input[type="number"]');
-                                const detailId = firstItem.querySelector('input[type="hidden"]');
-
-                                select.value = dtl.itemId;  
-                                qtyInput.value = dtl.qty;
-                                detailId.value = dtl.jobDetailId;
-
-                            } else if (itemCount < jobDtls.length) {
-                                createNewInputField(dtl, index+1, true);
-                            }
-                            index++;
-                        });
-                        bgAdjust();
-                    }
-                    else {
-                        swal.fire({
-                            icon: 'error',
-                            title: "Wait",
-                            text: result.errMessage
-                        });
-                    }
-                },
-                error: function (error) {
-                    console.log(error);
-                    swal.fire({
-                        icon: 'error',
-                        title: "Wait",
-                        text: error.val
-                    });
-                }
-            });
-            $("#newModal").modal("show");
-        }
-
-        $('#listTable').on('click', '.delete-btn', function () {
+        $('#gridTable').on('click', '.delete-btn', function () {
             const id = $(this).attr('data-id');
             deleteJob(id);
         });

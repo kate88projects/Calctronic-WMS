@@ -69,6 +69,26 @@ namespace RackingSystem.Services.JOServices
         //    return result;
         //}
 
+        public async Task<ServiceResponseModel<JOListDTO>> GetJO(long id)
+        {
+            ServiceResponseModel<JOListDTO> result = new ServiceResponseModel<JOListDTO>();
+
+            try
+            {
+                var joList = await _dbContext.JobOrder.Where(x => x.JobOrder_Id == id).FirstOrDefaultAsync();
+                var joListDTO = _mapper.Map<JOListDTO>(joList);
+                result.success = true;
+                result.data = joListDTO;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+            return result;
+        }
+
         public async Task<ServiceResponseModel<List<JOListDTO>>> GetJOList() //JOSearchReqDTO req
         {
             ServiceResponseModel<List<JOListDTO>> result = new ServiceResponseModel<List<JOListDTO>>();
@@ -94,9 +114,9 @@ namespace RackingSystem.Services.JOServices
 
                 //result.success = true;
                 //result.data = grndtlListDTO;
+
                 var jomList = await _dbContext.JobOrder.OrderBy(x => x.JobOrder_Id).ToListAsync();
                 var jomListDTO = _mapper.Map<List<JOListDTO>>(jomList);
-
                 result.success = true;
                 result.data = jomListDTO;
 
@@ -208,9 +228,10 @@ namespace RackingSystem.Services.JOServices
                         return result;
                     }
 
-                    _job.DocNo = job.DocNo;
+                    //_job.DocNo = job.DocNo;
                     _job.Description = string.IsNullOrEmpty(job.Description) ? "" : job.Description;
-                    _job.UpdatedBy = job.CreatedBy;
+                    //_job.UpdatedBy = job.CreatedBy;
+                    _job.CreatedBy = job.CreatedBy;
                     _job.UpdatedDate = DateTime.Now;
                     _dbContext.JobOrder.Update(_job);
 
@@ -308,5 +329,6 @@ namespace RackingSystem.Services.JOServices
             return result;
         }
 
+        
     }
 }
