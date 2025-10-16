@@ -1,13 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using RackingSystem.Data;
-using RackingSystem.Models.GRN;
+using RackingSystem.Data.JO;
 using RackingSystem.Models;
+using RackingSystem.Models.BOM;
+using RackingSystem.Models.GRN;
+using RackingSystem.Models.JO;
 using RackingSystem.Models.User;
 using RackingSystem.Services.GRNServices;
 using RackingSystem.Services.JOServices;
-using RackingSystem.Models.JO;
-using RackingSystem.Data.JO;
 
 namespace RackingSystem.Controllers
 {
@@ -69,6 +70,13 @@ namespace RackingSystem.Controllers
         //}
 
         [HttpGet]
+        public async Task<ServiceResponseModel<JOListDTO>> GetJO(long Id)
+        {
+            ServiceResponseModel<JOListDTO> result = await _joService.GetJO(Id);
+            return result;
+        }
+
+        [HttpGet]
         public async Task<ServiceResponseModel<List<JOListDTO>>> GetJOList() //[FromBody] JOSearchReqDTO req
         {
             ServiceResponseModel<List<JOListDTO>> result = await _joService.GetJOList();
@@ -94,6 +102,34 @@ namespace RackingSystem.Controllers
         {
             ServiceResponseModel<JOListDTO> result = await _joService.DeleteJob(job);
             return new JsonResult(result);
+        }
+
+        public IActionResult JODetails(int id, string mode)
+        {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpJO";
+            ViewData["ActiveTab"] = "JODetails";
+            ViewData["Title"] = "JO Details";
+            ViewBag.Mode = mode;
+
+            JOListDTO joData = new JOListDTO();
+
+            if (id != 0)
+            {
+                var jo = GetJO(id);
+                jo.Wait();
+                var joHeader = jo.Result;
+                joData = joHeader.data ?? new JOListDTO();
+            }
+
+            return View(joData);
         }
     }
 }

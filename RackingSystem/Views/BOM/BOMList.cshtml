@@ -149,6 +149,21 @@
         color: #000;
     }
 
+    .custom-table tbody tr:hover td {
+        background-color: #F1F6F9; 
+    }
+
+    .custom-table tbody {
+        font-size: 15px;
+    }
+
+    th.gridjs-th, td.gridjs-td {
+        padding: 12px 16px !important;
+    }
+
+    .view-bom-btn, .edit-bom-btn, .delete-bom-btn {
+        font-size: 14px;
+    }
 </style>
 
 
@@ -198,7 +213,7 @@
                         </div>
                     </div>
 
-                    <div id="gridTable" class="table table-responsive text-nowrap"></div>
+                    <div id="gridTable" class="table table-responsive text-nowrap mt-3"></div>
                        @*  <table id="listTable" class="table table-responsive dataTable" style="width:100%">
                             <thead>
                                 <tr>
@@ -325,12 +340,12 @@
 {
     @* <link href="~/css/datatables.min.css" rel="stylesheet"> *@
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+    <link rel="stylesheet" href="~/css/gridjs.min.css">
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
     @* <script src="~/js/datatables.min.js"></script> *@
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
-    <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
-    <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+    <script src="~/js/gridjs.umd.js"></script>
 
 
     <script type="text/javascript">
@@ -407,18 +422,19 @@
                         if (gridInstance) { 
                             gridInstance.destroy();
                         }
-                        console.log(result.data);
+                        // console.log("Data", result.data);
 
                         gridInstance = new gridjs.Grid({
                             columns: [
-                                { name: 'BOM ID', id: 'boM_Id' },
+                                { name: 'BOM ID', id: 'boM_Id', width: '115px' },
                                 { 
                                     name: 'Item Code', 
                                     id: 'item_Id',
                                     formatter: (cell) => {
                                         const item = itemList.find(i => i.itemId === cell);
                                         return item ? item.itemCode : '';
-                                    }
+                                    },
+                                    width: '135px',
                                 },
                                 { 
                                     name: 'Description', 
@@ -463,26 +479,26 @@
                                         });
                                     }
                                 },
-                                { name: 'Created By', id: 'createdBy' },
-                                { 
-                                    name: 'Updated Date', 
-                                    formatter: (cell, row) => {
-                                        const dateString = row.cells[6].data.split('.')[0];
-                                        const date = new Date(dateString);
+                                { name: 'Created By', id: 'createdBy', width: '135px' },
+                                // { 
+                                //     name: 'Updated Date', 
+                                //     formatter: (cell, row) => {
+                                //         const dateString = row.cells[6].data.split('.')[0];
+                                //         const date = new Date(dateString);
 
-                                        if(isNaN(date)) {
-                                            return 'Invalid Date';
-                                        }
-                                        return date.toLocaleString('en-GB', {
-                                            year: 'numeric',
-                                            month: 'numeric',
-                                            day: 'numeric',
-                                            hour: 'numeric',
-                                            minute: 'numeric',
-                                            hour12: true,
-                                        });
-                                    }
-                                },
+                                //         if(isNaN(date)) {
+                                //             return 'Invalid Date';
+                                //         }
+                                //         return date.toLocaleString('en-GB', {
+                                //             year: 'numeric',
+                                //             month: 'numeric',
+                                //             day: 'numeric',
+                                //             hour: 'numeric',
+                                //             minute: 'numeric',
+                                //             hour12: true,
+                                //         });
+                                //     }
+                                // },
                                 { 
                                     name: 'Action',
                                     formatter: (cell, row) => {

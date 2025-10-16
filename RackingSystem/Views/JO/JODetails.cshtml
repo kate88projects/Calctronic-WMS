@@ -139,7 +139,7 @@
                                     </div>
                                     <div class="itemContainer">
                                         <div class="row g-4">
-                                            <div class="col-4">
+                                            <div class="col-5">
                                                 <label for="txtDocNo">Document No</label>
                                                 <input type="text" class="form-control" id="txtDocNo" placeholder="Please enter document no" value="@Model.DocNo" @(mode == "view" ? "disabled" : "") >
                                                 <div id="txtDocNoError" class="error-message"></div>
@@ -149,7 +149,7 @@
                                                 <input type="text" class="form-control" id="txtdesc" placeholder="Please enter description" value="@Model.Description" @(mode == "view" ? "disabled" : "") >
                                                 <div id="txtdescError" class="error-message"></div>
                                             </div>
-                                            <div class="col-4">
+                                            <div class="col-3">
                                                 <label for="txtCreatedBy">Created By</label>
                                                 <input type="text" class="form-control" id="txtCreatedBy" placeholder="Please enter created person" value="@Model.CreatedBy" @(mode == "view" ? "disabled" : "")>
                                                 <div id="txtCreatedByError" class="error-message"></div>
