@@ -353,26 +353,27 @@
                                 { 
                                     name: 'Action', 
                                     formatter: (cell, row) => {
-                                        const rawData = JSON.stringify({
-                                            jobOrder_Id: row.cells[0].data,
-                                            docNo: row.cells[1].data,
-                                            docDate: row.cells[2].data,
-                                            description: row.cells[3].data,
-                                            status: row.cells[4].data,
-                                            createdDate: row.cells[5].data,
-                                            createdBy: row.cells[6].data,
-                                            updatedDate: row.cells[7].data,
-                                        });
+                                        // const rawData = JSON.stringify({
+                                        //     jobOrder_Id: row.cells[0].data,
+                                        //     docNo: row.cells[1].data,
+                                        //     docDate: row.cells[2].data,
+                                        //     description: row.cells[3].data,
+                                        //     status: row.cells[4].data,
+                                        //     createdDate: row.cells[5].data,
+                                        //     createdBy: row.cells[6].data,
+                                        //     updatedDate: row.cells[7].data,
+                                        // });
+                                        const rawData = JSON.stringify(row);
 
                                         return gridjs.html(`
                                             <div style="display:flex;">
-                                                <button class="btn btn-primary d-grid view-btn" style="margin-right:10px;" data-row='${rawData}' onclick="navigateToView(${row.cells[0].data}, 'view')">
+                                                <button class="btn btn-primary d-grid view-btn me-2" data-row='${rawData}' onclick="navigateToView(${row.cells[0].data}, 'view')">
                                                     <span><i class="bi bi-eye"></i> View</span>
                                                 </button>
-                                                <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row='${rawData}' onclick="navigateToEdit(${row.cells[0].data}, 'edit')">
+                                                <button class="btn btn-warning d-grid edit-btn me-2" data-row='${rawData}' onclick="navigateToEdit(${row.cells[0].data}, 'edit')">
                                                     <span><i class="bi bi-pencil-square"></i> Edit</span>
                                                 </button>
-                                                <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.cells[0].data}">
+                                                <button class="btn btn-danger d-grid delete-btn" data-id="${row.cells[0].data}">
                                                     <span><i class="bi bi-trash"></i> Delete</span>
                                                 </button>
                                             </div>
@@ -508,8 +509,6 @@
         });
 
         function deleteJob(id) {
-            console.log("id", id);
-
             swal.fire({
                 title: "Are you sure want to delete?",
                 text: "You will not be able to recover this record!",

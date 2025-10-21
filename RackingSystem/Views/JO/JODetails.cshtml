@@ -63,7 +63,7 @@
         margin-left:auto;
     }
 
-    .bomContainer, .subContainer, .sumContainer {
+    .joContainer, .subContainer, .sumContainer {
         padding: 10px 20px;
     }
 
@@ -128,7 +128,7 @@
                 </div>
                 <div class="card-body">
                     <form id="joForm" method="post" data-jo-id="@Model.JobOrder_Id">
-                        <div class="bomContainer">
+                        <div class="joContainer">
                             <div class="row">
                                 <div class="col">
                                     <div class="row">
@@ -149,11 +149,11 @@
                                                 <input type="text" class="form-control" id="txtdesc" placeholder="Please enter description" value="@Model.Description" @(mode == "view" ? "disabled" : "") >
                                                 <div id="txtdescError" class="error-message"></div>
                                             </div>
-                                            <div class="col-3">
+                                            @* <div class="col-3">
                                                 <label for="txtCreatedBy">Created By</label>
                                                 <input type="text" class="form-control" id="txtCreatedBy" placeholder="Please enter created person" value="@Model.CreatedBy" @(mode == "view" ? "disabled" : "")>
                                                 <div id="txtCreatedByError" class="error-message"></div>
-                                            </div>
+                                            </div>*@
                                         </div>
                                     </div>
                                     @* <div class="form-check form-switch">

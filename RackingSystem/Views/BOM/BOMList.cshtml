@@ -177,7 +177,7 @@
                         <h2>BOM List <b></b></h2>
                     </div>
                     <div class="card-tools">
-                        <button type="button" class="btn btn-warning" onclick="navigateToNew('new')">
+                        <button type="button" class="btn btn-success" onclick="navigateToNew('new')">
                             Add New BOM
                         </button>
                     </div>
@@ -422,7 +422,7 @@
                         if (gridInstance) { 
                             gridInstance.destroy();
                         }
-                        // console.log("Data", result.data);
+                        console.log("Data", result.data);
 
                         gridInstance = new gridjs.Grid({
                             columns: [
@@ -502,25 +502,25 @@
                                 { 
                                     name: 'Action',
                                     formatter: (cell, row) => {
-                                        const rawData = JSON.stringify({
-                                            boM_Id: row.cells[0].data,
-                                            item_Id: row.cells[1].data,
-                                            description: row.cells[2].data,
-                                            isActive: row.cells[3].data,
-                                            createdDate: row.cells[4].data,
-                                            createdBy: row.cells[5].data,
-                                            updatedDate: row.cells[6].data,
-                                        });
-
+                                        // const rawData = JSON.stringify({
+                                        //     boM_Id: row.cells[0].data,
+                                        //     item_Id: row.cells[1].data,
+                                        //     description: row.cells[2].data,
+                                        //     isActive: row.cells[3].data,
+                                        //     createdDate: row.cells[4].data,
+                                        //     createdBy: row.cells[5].data,
+                                        //     updatedDate: row.cells[6].data,
+                                        // });
+                                        const rawData = JSON.stringify(row);
                                         return gridjs.html(`
                                            <div style="display:flex;">
-                                                <button class="btn btn-primary d-grid view-bom-btn" style="margin-right:10px;" data-row='${rawData}' onclick="navigateToView(${row.cells[0].data}, 'view')">
+                                                <button class="btn btn-primary d-grid view-bom-btn me-2" data-row='${rawData}' onclick="navigateToView(${row.cells[0].data}, 'view')">
                                                     <span><i class="bi bi-eye"></i> View</span>
                                                 </button>
-                                                <button class="btn btn-warning d-grid edit-bom-btn" style="margin-right:10px;" data-row='${rawData}' onclick="navigateToEdit(${row.cells[0].data}, 'edit')">
+                                                <button class="btn btn-warning d-grid edit-bom-btn me-2" data-row='${rawData}' onclick="navigateToEdit(${row.cells[0].data}, 'edit')">
                                                     <span><i class="bi bi-pencil-square"></i> Edit</span>
                                                 </button>
-                                                <button class="btn btn-danger deactivate-account delete-bom-btn" data-id="${row.cells[0].data}">
+                                                <button class="btn btn-danger d-grid delete-bom-btn" data-id="${row.cells[0].data}">
                                                     <span><i class="bi bi-trash"></i> Delete</span>
                                                 </button>
                                             </div>
