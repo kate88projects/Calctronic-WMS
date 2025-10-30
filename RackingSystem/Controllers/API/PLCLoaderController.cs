@@ -503,7 +503,7 @@ namespace RackingSystem.Controllers.API
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     value = registers[0];
 
-                    if (value.ToString("X") == "40") 
+                    if (value.ToString("X") == "4") 
                     {
                         exit = true;
                         PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress}: {value}", "");
@@ -737,6 +737,70 @@ namespace RackingSystem.Controllers.API
             return result;
         }
 
+        [HttpGet("GetReadyToTurn/{loaderId}")]
+        public ServiceResponseModel<int> GetReadyToTurn(long loaderId)
+        {
+            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
+            string methodName = "GetReadyToTurn";
+
+            //testing 
+            result.success = true;
+            return result;
+
+            try
+            {
+                var _loader = _dbContext.Loader.Find(loaderId);
+                if (_loader == null)
+                {
+                    result.errMessage = "Lodaer is not found.";
+                    result.data = 0;
+                    return result;
+                }
+
+                DateTime dtRun = DateTime.Now;
+                bool exit = false;
+                int value = 0;
+
+                string plcIp = _loader.IPAddr;
+                int port = 502;
+                
+                ModbusClient modbusClient = new ModbusClient(plcIp, port);
+                modbusClient.Connect();
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+
+                int startAddress = 4224;
+                int numRegisters = 1;
+
+                while (!exit)
+                {
+                    int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                    value = registers[0];
+
+                    if (value.ToString("X") == "400")
+                    {
+                        exit = true;
+                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress}: {value}", "");
+                    }
+                    if ((DateTime.Now - dtRun).TotalMinutes > 3)
+                    {
+                        result.errMessage = "Timeout. Cannot get Turn Column Status.";
+                        exit = true;
+                    }
+                }
+
+                modbusClient.Disconnect();
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");
+                result.success = true;
+            } 
+            catch (Exception ex)
+            {
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+            return result;
+        }
+
         [HttpPost("EndTask/{loaderId}")]
         public ServiceResponseModel<int> EndTask(long loaderId, [FromBody] int action)
         {
@@ -890,6 +954,8 @@ namespace RackingSystem.Controllers.API
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             string methodName = "StartReelLoadIn";
 
+            result.success = true;
+            return result;
             try
             {
                 var _loader = _dbContext.Loader.Find(loaderId);

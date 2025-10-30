@@ -983,6 +983,7 @@
             // $("#txtHLoader").val('');
             // $("#txtHCol").val('');
             // $("#txtHColBal").val('');
+            $('#loadStatus1').text('');
             $("#txtScanLoader").val('');
             $("#txtICol").val(1);
 
@@ -1009,8 +1010,12 @@
                     $(`#icon-c${i}`).removeClass("bi bi-fire");
                     $('#c' + i).removeClass("progress-bar-striped progress-bar-animated bg-warning");
                     $('#c' + i).addClass("bg-success");
-                    console.log("remove here");
                 }
+
+                $(`#percent-c${i}`).text("0%");
+                $(`#balance-c${i}`).text("10");
+                $(`#colHeight-c${i}`).text("10");
+                $(`#c${i}`).css('width', '0%');
             }
         }
 
@@ -1270,13 +1275,8 @@
                 return;
             }
             resetColorPLCForm(4);
-            // cont4();
             loadPLC(4);
         }
-
-        // function cont4() {
-            
-        // }
 
         async function step5() {
             if ($('#warnTurnModal').hasClass("show")) {
@@ -1287,13 +1287,13 @@
             $('#exclamIcon').addClass('hidden');
             $('#errActHeight').text('');
 
-            var chkEnd = await loadPLCEndTask($("#txtLoaderId").val(), 1);
-            if (chkEnd == false) {
-                //retry to end task and turn column
-                $('#btnRetryTurn').removeClass('hidden');
-                $('#btnRetryTurn').text('Retry on Turn Column');
+            var chkColTurn = await loadPLCCheckColTurn($("#txtLoaderId").val());
+            if (chkColTurn == false) {
+                //if not column not ready to turn
                 $('#exclamIcon').removeClass("hidden");
                 $('#errActHeight').text('Failed to Turn Column.');
+                $('#btnRetryTurn').removeClass('hidden');
+                $('#btnRetryTurn').text('Retry on Turn Column');
             }
             else{
                 turnCol(5);
@@ -1309,16 +1309,21 @@
             if (action == 2) {
                 warnText.textContent = "Please make sure hands off and tap Start Turn Column button.";
                 turnBtn.onclick = async function() {
-                    var chkEnd = await loadPLCEndTask($("#txtLoaderId").val(), 1);
-                    if (chkEnd == false) {
+                    var chkColTurn = await loadPLCCheckColTurn($("#txtLoaderId").val());
+                    console.log("after get turn status", chkColTurn);
+
+                    if (chkColTurn == false) {
+                        console.log("here is it?");
                         if ($('#warnTurnModal').hasClass("show")) {
                             $('#warnTurnModal').modal("toggle");
                         }
+                        $('#colStatus2').text('');
+                        $('#errCol2').text('Failed to Turn Column').css('color', 'red');
                         $('#btnRetry2').removeClass('hidden');
-                        // $('#btnRetry2').text('Retry on Turn Column');
-                    }
-                    else{
-                        turnCol(action);
+                        $('#btnRetry2').text('Retry on Turn Column');
+                    } else {
+                        console.log("wait");
+                        turnCol(2);
                     }
                 };
                 $('#turnImg').attr('src', '/assets/img/a-b.gif');
@@ -2033,6 +2038,36 @@
             }
         }
 
+        async function loadPLCCheckColTurn(loaderId) {
+            try {
+                const result = await new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: "/api/PLCLoader/GetReadyToTurn/" + loaderId,
+                        type: "GET",
+                        dataType: 'JSON',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (result) {
+                            if (result.success == true) {
+                                resolve(true);
+                            } else {
+                                if ($('#warnTurnModal').hasClass("show")) {
+                                    $('#warnTurnModal').modal('toggle');
+                                }
+
+                                resolve(false);
+                            }
+                        },
+                        error: function (error) {
+                            resolve(false);
+                        }
+                    })
+                })
+                return result;
+            } catch (err) {
+                return false;
+            }
+        }
+
         async function endTask() {
             var loaderId = $("#txtLoaderId").val();
             if (loaderId == "") {
@@ -2046,10 +2081,21 @@
 
             var chkEnd = await loadPLCEndTask(loaderId, 2);
             console.log('R10::' + chkEnd);
-
-            //use to determine is start load reel process required again in step4
-            $('#loadProcess4').addClass("error-message"); 
-            return;
+            if (chkEnd == true) {
+                restartStep();
+                //use to determine is start load reel process required again in step4
+                $('#loadProcess4').addClass("error-message"); 
+                return;
+            }
+            else 
+            {
+                swal.fire({
+                    icon: 'error',
+                    title: "Wait",
+                    text: "Failed to End Task. Please try again.",
+                });
+                return;
+            }
         }
 
         async function loadPLCEndTask(loaderId, action) {
@@ -2169,6 +2215,7 @@
                         const battery = result.data;
                         const meterColor = getBatteryColor(battery);
                         updateBatteryGauge(battery, meterColor);
+                        $('#batteryErr').text('');
                     }
                     else 
                     {
