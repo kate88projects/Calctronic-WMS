@@ -334,6 +334,11 @@ namespace RackingSystem.Services.LoaderServices
                         if (iCol == 3) { loaderDTO.Col3UsedHeight = loaderDTO.ColHeight - col.BalanceHeight; }
                         if (iCol == 4) { loaderDTO.Col4UsedHeight = loaderDTO.ColHeight - col.BalanceHeight; }
 
+                        if (iCol == 1) { loaderDTO.Col1UsedPercentage = (loaderDTO.Col1UsedHeight * 100) / loaderDTO.ColHeight; }
+                        if (iCol == 2) { loaderDTO.Col2UsedPercentage = (loaderDTO.Col2UsedHeight * 100) / loaderDTO.ColHeight; }
+                        if (iCol == 3) { loaderDTO.Col3UsedPercentage = (loaderDTO.Col3UsedHeight * 100) / loaderDTO.ColHeight; }
+                        if (iCol == 4) { loaderDTO.Col4UsedPercentage = (loaderDTO.Col4UsedHeight * 100) / loaderDTO.ColHeight; }
+
                     }
                     var ttl = _dbContext.LoaderReel.Where(x => x.Loader_Id == loaderDTO.Loader_Id && x.ColNo == iCol).Count();
                     if (iCol == 1) { loaderDTO.Col1TotalReels = ttl; }
@@ -417,5 +422,6 @@ namespace RackingSystem.Services.LoaderServices
 
             return result;
         }
+
     }
 }

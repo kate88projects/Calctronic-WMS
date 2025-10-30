@@ -701,9 +701,9 @@ namespace RackingSystem.Controllers.API
                     return result;
                 }
 
-                result.data = 55;
-                result.success = true;
-                return result;
+                //result.data = 55;
+                //result.success = true;
+                //return result;
                 
                 int value = 0;
                 string plcIp = _loader.IPAddr;

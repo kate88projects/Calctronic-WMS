@@ -29,6 +29,12 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<AppDbContext>(option => 
 option.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
+builder.Services.AddDbContextFactory<AppDbContext>(options =>
+     options.UseSqlServer(
+         builder.Configuration.GetConnectionString("DefaultConnection"))
+         , ServiceLifetime.Scoped
+     );
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {

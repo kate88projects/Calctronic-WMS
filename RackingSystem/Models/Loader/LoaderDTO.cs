@@ -30,5 +30,10 @@
         public int Col3TotalReels { get; set; } = 0;
         public int Col4TotalReels { get; set; } = 0;
 
+        public int Col1UsedPercentage { get; set; } = 0;
+        public int Col2UsedPercentage { get; set; } = 0;
+        public int Col3UsedPercentage { get; set; } = 0;
+        public int Col4UsedPercentage { get; set; } = 0;
+
     }
 }
