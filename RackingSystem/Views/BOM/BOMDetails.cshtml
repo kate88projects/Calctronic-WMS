@@ -64,7 +64,7 @@
         margin-left:auto;
     }
 
-    .bomContainer, .subContainer, .sumContainer {
+    .bomContainer, .subContainer, .sumContainer { 
         padding: 10px 20px;
     }
 
@@ -147,16 +147,16 @@
                                                 <select class="bom-select js-example-basic-single form-control" id="bomName" style="width:100%" @(mode == "view" ? "disabled" : "")></select>
                                                 <div id="bomNameError" class="error-message"></div>
                                             </div>
-                                            <div class="col-5">
+                                            <div class="col-7">
                                                 <label for="txtdesc">Description</label>
                                                 <input type="text" class="form-control" id="txtdesc" placeholder="Please enter description" value="@Model.Description" @(mode == "view" ? "disabled" : "") >
                                                 <div id="txtdescError" class="error-message"></div>
                                             </div>
-                                            <div class="col-3">
+                                            @* <div class="col-3">
                                                 <label for="txtCreatedBy">Created By</label>
                                                 <input type="text" class="form-control" id="txtCreatedBy" placeholder="Please enter created person" value="@Model.CreatedBy" @(mode == "view" ? "disabled" : "")>
                                                 <div id="txtCreatedByError" class="error-message"></div>
-                                            </div>
+                                            </div> *@
                                             <div class="form-check form-switch mt-3 ms-2">
                                               <input class="form-check-input" type="checkbox" role="switch" id="chkIsActive" @(Model.IsActive ? "checked" : "") @(mode == "view" ? "disabled" : "")>
                                               <label class="form-check-label" for="chkIsActive">Enable BOM</label>
@@ -202,11 +202,11 @@
                                     <div class="col-4">
                                         <label for="subItem1">Item</label>
                                     </div>
-                                    <div class="col-5">
-                                        <label for="txtRemark1">Remark</label>
-                                    </div>
                                     <div class="col-2">
                                         <label for="txtQty1">Quantity</label>
+                                    </div>
+                                    <div class="col-5">
+                                        <label for="txtRemark1">Remark</label>
                                     </div>
                                 </div>
                                 <div class="row itemBlock" id="itemBlock" data-index="1" >
@@ -216,13 +216,13 @@
                                                 <select class="bom-select js-example-basic-single form-control" id="subItem1" style="width:100%" @(mode == "view" ? "disabled" : "")></select>
                                                 <div id="subItem1Error" class="error-message"></div>
                                             </div>
+                                             <div class="col-2">
+                                                <input type="number" class="form-control" id="txtQty1" placeholder="Please enter quantity" @(mode == "view" ? "disabled" : "") required> 
+                                                <div id="txtQty1Error" class="error-message"></div>
+                                            </div>
                                             <div class="col-5">
                                                 <input type="text" class="form-control" id="txtRemark1" placeholder="Please enter remark" @(mode == "view" ? "disabled" : "") required >
                                                 <div id="txtRemark1Error" class="error-message"></div>
-                                            </div>
-                                            <div class="col-2">
-                                                <input type="number" class="form-control" id="txtQty1" placeholder="Please enter quantity" @(mode == "view" ? "disabled" : "") required> 
-                                                <div id="txtQty1Error" class="error-message"></div>
                                             </div>
                                             <div class="title-container">
                                                 <button class="btn btn-outline-danger" type="button" onclick="removeItem(this)" @(mode == "view" ? "hidden" : "")>
@@ -606,7 +606,7 @@
                var bomData = {
                     BOM_Id: parseInt(@Model.BOM_Id)  || 0,
                     Item_Id: parseInt($('#bomName').val()),
-                    CreatedBy: $('#txtCreatedBy').val(),
+                    CreatedBy: $('#txtCreatedBy').val() || "",
                     Description: $('#txtdesc').val(),
                     IsActive: $('#chkIsActive').prop("checked"),
                     SubItems: formData,
