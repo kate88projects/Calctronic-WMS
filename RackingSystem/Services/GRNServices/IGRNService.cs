@@ -1,5 +1,6 @@
-﻿using RackingSystem.Models.GRN;
+﻿using Microsoft.AspNetCore.Mvc;
 using RackingSystem.Models;
+using RackingSystem.Models.GRN;
 
 namespace RackingSystem.Services.GRNServices
 {
@@ -10,5 +11,7 @@ namespace RackingSystem.Services.GRNServices
 
         public Task<ServiceResponseModel<int>> GetGRNDetailTotalCount(GRNSearchReqDTO req);
         public Task<ServiceResponseModel<List<GRNDtlListDTO>>> GetGRNDetailList(GRNSearchReqDTO req);
+        public Task<ServiceResponseModel<GRNDtlDTO>> GetLatestGRNDetail(Guid detailId);
+
     }
 }

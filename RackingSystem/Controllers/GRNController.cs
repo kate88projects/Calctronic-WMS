@@ -140,5 +140,12 @@ namespace RackingSystem.Controllers
         //    return View();
         //}
 
+        [HttpPost]
+        public async Task<ServiceResponseModel<GRNDtlDTO>> GetLatestGRNDetail([FromBody] Guid detailId)
+        {
+            ServiceResponseModel<GRNDtlDTO> result = await _grnService.GetLatestGRNDetail(detailId);
+            return result;
+        }
+
     }
 }
