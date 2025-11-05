@@ -458,13 +458,16 @@
                         <h2>NEW Auto Loader Task <b></b></h2>
                     </div>
                     <div class="card-tools">
-                        <button type="button" class="btn btn-danger" onclick="restartStep()">
+                        <button type="button" class="btn btn-success" onclick="restartStep()">
                             NEW LOADER
                         </button>
-                        <button type="button" class="btn btn-warning" onclick="restartItem()">
+                        <button type="button" class="btn btn-primary" id="btnChangeReel" onclick="restartItem()" disabled>
                             CHANGE REEL
                         </button>
-                        <button type="button" class="btn btn-success" onclick="endTask()">
+                        <button type="button" class="btn btn-warning" id="btnStop" onclick="endTask(1)" disabled>
+                            STOP TASK
+                        </button>
+                        <button type="button" class="btn btn-danger" id="btnEnd" onclick="endTask(2)" disabled>
                             END TASK
                         </button>
                     </div>
@@ -669,7 +672,7 @@
                                                 </div>
                                                 <div class="col-sm-7 col-md-7">
                                                     <div class="input-group">
-                                                        <input class="form-control" type="text" placeholder="Scan or Insert Reel ID ... " id="txtScanItem">
+                                                        <input class="form-control" type="text" placeholder="Scan or Insert Reel ID ... " id="txtScanItem" autofocus>
                                                         <span class="input-group-text" onclick="clearItemScanCode()">X</span>
                                                     </div>
                                                     <br />
@@ -699,7 +702,7 @@
                                                 </div>
                                                 <div class="col-sm-7 col-md-7">
                                                     <p>Load Reel Process: <span id="loadProcess4" class="error-message"></span></p>
-                                                    <p>Auto Loader Status: <span id="loadConfirm4"></span></p>
+                                                    @* <p>Auto Loader Status: <span id="loadConfirm4"></span></p> *@
 
                                                     <span class="error-message" id="startErr" class="d-flex justify-content-center hidden mb-2"> </span>
                                                     <button class="btn btn-warning hidden" onclick="loadPLC(4)" id="btnRetryStart" style="width:100%;">Retry Start to Load Reel</button>
@@ -822,8 +825,29 @@
                         <img src="~/assets/img/3d-scanning.gif" style="width:100%;" />
                     </div>
                     <div class="col-6">
-                        <p class="" style="font-size:32px;">Please tap Start button before placing the reel.</p>
-                        <button class="btn btn-success" style="width: 100%; height: 150px;" onclick="loadPLC(5)">Start</button>
+                        <p style="font-size:26px;">
+                            <span class="d-block mb-2"><i class="bi bi-1-square-fill"></i> Put the reel into the loader </span>
+                            <i class="bi bi-2-square-fill"></i> After buzzer stop, press on 'Continue' button.
+                        </p> 
+                        <button class="btn btn-success" style="width: 100%; height: 150px;" onclick="loadPLC(5)">Continue</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="holdStopModal" role="dialog" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-body" style="padding: 50px;">
+                <div class="row">
+                    <div class="col-6">
+                        <img src="~/assets/img/pause.gif" style="width:100%;" />
+                    </div>
+                    <div class="col-6">
+                        <p class="" style="font-size:32px;">Current Loader Task has been stopped. Press 'Continue' button to proceed.</p>
+                        <button class="btn btn-success" style="width: 100%; height: 150px;" onclick="contOnStop()">Continue</button>
                     </div>
                 </div>
             </div>
@@ -833,14 +857,18 @@
 
 @section Scripts
 {
-    <link href="~/css/datatables.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/js/datatables.min.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
 
     <script type="text/javascript">
+
+        let taskLoad = false;
+        // let isUserStopped = false;
+        let stopDecision = false;
+        let stopTimer = null;
+        // let decisionInProgress = false;
 
         // -- get loader info --
         const scanLoaderEle = document.getElementById('txtScanLoader');
@@ -986,7 +1014,10 @@
             $('#loadStatus1').text('');
             $("#txtScanLoader").val('');
             $("#txtICol").val(1);
-
+            document.getElementById("btnChangeReel").setAttribute("disabled", "true");
+            document.getElementById("btnStop").setAttribute("disabled", "true");
+            document.getElementById("btnEnd").setAttribute("disabled", "true");
+            taskLoad = false;
             scanLoaderEle.focus();
             // $("#txtEstHeight").val(0);
             // $("#txtActHeight").val(0);
@@ -1026,7 +1057,9 @@
                 return;
             }
 
+            document.getElementById("btnChangeReel").setAttribute("disabled", "true");
             resetColorPLCForm(3);
+            document.getElementById("btnStop").setAttribute("disabled", "true");
             newReel();
             scanLoaderEle.focus();
         }
@@ -1048,7 +1081,7 @@
                 $(input.id).val(input.value);
             });
             //#loadProcess4
-            $('#reelIdentity, #reelHeight, #itemStatus, #heightStatus4, #loadConfirm4, #loadCol4').text('');
+            $('#reelIdentity, #reelHeight, #itemStatus, #heightStatus4, #loadCol4').text(''); //, #loadConfirm4
             $('#txtHReelID, #txtHItem, #txtHExtH, #txtHActH').text('-');
             $('#exclamIcon').addClass('hidden');
             $("#waiting2, #waiting3, #waiting4, #waitingLast").removeClass("hidden");
@@ -1083,7 +1116,7 @@
                 $('#' + steps[5]).addClass('active');
             }
             //, #btnRetryTurn, #btnRetryStart
-            $('#btnNext2, #btnNext3, #btnNext4, #btnRetryLast, #exclamIcon, #btnRetry4').addClass('hidden');
+            $('#btnNext2, #btnNext3, #btnNext4, #btnRetryLast, #exclamIcon, #btnRetry4, #btnRetryTurn').addClass('hidden');
             $('#err1, #errCol2, #errFork2, #errItem3, #errCol4, #startErr, #errActHeight, #colStatus2, #forkStatus2').text("");
         }
 
@@ -1241,6 +1274,7 @@
 
         function step2() {
             resetColorPLCForm(3);
+            document.getElementById("btnStop").setAttribute("disabled", "true");
 
             // $('#itemStatus').text('');
             // $('#reelIdentity').text('');
@@ -1276,6 +1310,7 @@
             }
             resetColorPLCForm(4);
             loadPLC(4);
+            document.getElementById("btnChangeReel").removeAttribute("disabled");
         }
 
         async function step5() {
@@ -1287,33 +1322,37 @@
             $('#exclamIcon').addClass('hidden');
             $('#errActHeight').text('');
 
-            var chkColTurn = await loadPLCCheckColTurn($("#txtLoaderId").val());
-            if (chkColTurn == false) {
-                //if not column not ready to turn
-                $('#exclamIcon').removeClass("hidden");
-                $('#errActHeight').text('Failed to Turn Column.');
-                $('#btnRetryTurn').removeClass('hidden');
-                $('#btnRetryTurn').text('Retry on Turn Column');
-            }
-            else{
-                turnCol(5);
+            var iCol = $("#txtICol").val();
+            console.log("here icol", iCol);
+
+            var colstate = await loadPLCSetColumnState($("#txtLoaderId").val(), iCol-1);
+            if (colstate == true) {
+                var chkColTurn = await loadPLCCheckColTurn($("#txtLoaderId").val());
+                if (chkColTurn == false) {
+                    //if not column not ready to turn
+                    $('#exclamIcon').removeClass("hidden");
+                    $('#errActHeight').text('Failed to Turn Column.');
+                    $('#btnRetryTurn').removeClass('hidden');
+                    $('#btnRetryTurn').text('Retry on Turn Column');
+                }
+                else{
+                    turnCol(5);
+                }
             }
         }
 
         function warnBeforeTurnCol(action) {
             let warnText = document.getElementById('warnText');
             let turnBtn = document.getElementById('turnBtn');
-
+            var iCol = $("#txtICol").val();
+            console.log('colno here', iCol)
             console.log("action no", action);
 
             if (action == 2) {
                 warnText.textContent = "Please make sure hands off and tap Start Turn Column button.";
                 turnBtn.onclick = async function() {
                     var chkColTurn = await loadPLCCheckColTurn($("#txtLoaderId").val());
-                    console.log("after get turn status", chkColTurn);
-
                     if (chkColTurn == false) {
-                        console.log("here is it?");
                         if ($('#warnTurnModal').hasClass("show")) {
                             $('#warnTurnModal').modal("toggle");
                         }
@@ -1322,19 +1361,19 @@
                         $('#btnRetry2').removeClass('hidden');
                         $('#btnRetry2').text('Retry on Turn Column');
                     } else {
-                        console.log("wait");
+                        // console.log("wait");
                         turnCol(2);
                     }
                 };
                 $('#turnImg').attr('src', '/assets/img/a-b.gif');
             } else {
+                $('#btnRetryTurn').addClass('hidden');
                 warnText.textContent = "Please take out the Reel and only tap Start Turn Column button.";
                 turnBtn.onclick = function() {
                     step5();
                 };
                 $('#turnImg').attr('src', '/assets/img/take-out-reel.gif');
             }
-
             $('#warnTurnModal').modal("show");
         }
 
@@ -1342,6 +1381,7 @@
             var loaderId = $("#txtLoaderId").val();
             var callStart = await loadPLCStartLoad(loaderId);
             resetColorPLCForm(2);
+            taskLoad = true;
 
             if (callStart == true) {
                 loadPLC(2);
@@ -1373,7 +1413,7 @@
                             $('#errCol2').text('Failed to Turn Column').css('color', 'red');
                         }
                         else {
-                            $('#errActHeight').text('Failed to Turn Column').css('color', red);
+                            $('#errActHeight').text('Failed to Turn Column').css('color', 'red');
                             $('#btnRetry4').removeClass('hidden');
                         }
                         return;
@@ -1402,12 +1442,16 @@
                         $('#errFork2').text('Fork Not Ready.').css('color', 'red');
                     } 
                     else {
+
                     }
                 }
                 else {
                     if (index == 2) {
                         $('#btnNext2').removeClass("hidden");
                         $('#btnRetry2').addClass("hidden");
+                        //disabled stop & end task button
+                        document.getElementById("btnStop").removeAttribute("disabled");
+                        document.getElementById("btnEnd").removeAttribute("disabled");
                     } 
                     else {
                         $('#btnRetryTurn').addClass("hidden");
@@ -1465,8 +1509,7 @@
                     if (chkCol == false) {
                         iCol = Number(iCol) + 1;
                         // $('#pCol3').html("Checking Auto Loader Column: " + iCol);
-                        $('#colStatus2').text('Checking on Column ' + iCol);
-
+                        if (iCol < 5) $('#colStatus2').text('Checking on Column ' + iCol);
                         await delay(1000);
                     }
                     attempt;
@@ -1475,7 +1518,7 @@
                 console.log('R3.10::' + iCol);
 
                 if (chkCol == false) {
-                    $('#btnRetry2').removeClass('hidden');
+                    if (iCol < 5) $('#btnRetry2').removeClass('hidden');
                 } else {
                     $("#txtICol").val(iCol);
                     $("#txtHCol").val(iCol);
@@ -1493,9 +1536,13 @@
                         }
                     }
                     else {
+                        console.log("realCol ", realCol, " and iCol ", iCol);
                         if (realCol < iCol) {
-                            // $('#warnTurnModal').modal('toggle');
-                            warnBeforeTurnCol(2);
+                            var colstate = await loadPLCSetColumnState(loaderId, realCol);
+                            console.log("colstate", colstate);
+                            if (colstate == true) {
+                                warnBeforeTurnCol(2);
+                            }
                         }
                         else {
                             
@@ -1515,6 +1562,12 @@
 
                                 $('#c' + iCol).addClass("progress-bar-striped progress-bar-animated bg-warning");
                                 $(`#icon-c${iCol}`).addClass("bi bi-fire");
+
+                                //disabled stop & end task button
+                                document.getElementById("btnStop").removeAttribute("disabled");
+                                document.getElementById("btnEnd").removeAttribute("disabled");
+                                // $('#btnStop').removeClass("disabled");
+                                // $('#btnEnd').removeClass("disabled");
                             }
                         }
                     }
@@ -1546,30 +1599,30 @@
             if (idx == 4) {
                 $('#btnRetryStart').addClass('hidden');
                 var loaderId = $("#txtLoaderId").val();
-                var callStart;
-
-                if ($('#loadProcess4').hasClass("error-message")) {
-                     callStart = await loadPLCStartPutReel(loaderId);
-                }
-                else {
-                    callStart = true;
-                }
+                // var callStart;
+                // if ($('#loadProcess4').hasClass("error-message")) {
+                //      callStart = await loadPLCStartPutReel(loaderId);
+                // }
+                // else {
+                //     callStart = true;
+                // }
+                var callStart = await loadPLCStartPutReel(loaderId);
 
                 if (callStart == true) {
-                    var chkColFork = await loadPLCCheckColFork(loaderId, iCol);
-                    if (chkColFork == false) {
-                        $('#btnRetryStart').removeClass('hidden');
-                        $('#btnRetryStart').text('Retry on Checking Status');
-                        $('#loadConfirm4').addClass("error-message");
-                        $('#loadConfirm4').text('Not ready to load.').css('color', '');
+                    // var chkColFork = await loadPLCCheckColFork(loaderId, iCol);
+                    // if (chkColFork == false) {
+                    //     $('#btnRetryStart').removeClass('hidden');
+                    //     $('#btnRetryStart').text('Retry on Checking Status');
+                    //     $('#loadConfirm4').addClass("error-message");
+                    //     $('#loadConfirm4').text('Not ready to load.').css('color', '');
 
-                    }
-                    else {
-                        $('#loadConfirm4').text('Ready to Load Reel.').css('color', 'black');
+                    // }
+                    // else {
+                        // $('#loadConfirm4').text('Ready to Load Reel.').css('color', 'black');
                         $('#btnRetryStart').addClass("hidden");
-                        $("#putModal").modal("show");
+                        $("#putModal").modal("show"); 
                         // loadPLC(5);
-                    }
+                    // }
                 }
                 return; 
             }
@@ -1584,6 +1637,8 @@
                     return;
                 }
                 
+                $('#loadCol4').text('');
+                $('#heightStatus4').text('');
                 resetColorPLCForm(5);
                 if ($('#putModal').hasClass('show')) {
                     $('#putModal').modal('toggle');
@@ -1616,6 +1671,7 @@
                 $('#exclamIcon').removeClass("bi-info-circle-fill");
                 $('#exclamIcon').css('color', 'red');
                 $('#exclamIcon').addClass("bi-exclamation-triangle-fill");
+                document.getElementById("btnChangeReel").setAttribute("disabled", "true");
 
                 resetColorPLCForm(6);
                 var chkLast = await loadPLCUpdateDB(loaderId, reelCode, iCol);
@@ -1623,27 +1679,45 @@
                 if (chkLast == false) {
                     $('#pTextLast').text('Failed to update info. Please try again.').css('color', 'red');
                     $('#btnRetryLast').removeClass("hidden");
-
                     return;
-                }
-                else {
+                } else {
+                    document.getElementById("btnStop").removeAttribute("disabled");
+                    document.getElementById("btnEnd").removeAttribute("disabled");
                     $('#pTextLast').text("STEP 5 :: DONE Finalized ").css('color', 'black');
-                    await delay(3000);
 
-                    resetColorPLCForm(2);
-                    getLoaderColumn(loaderId);
-                    retry2('col');
-                    newReel();
+                    const userStopped = await waitForDecision();
+                    if (!userStopped) {
+                      console.log('Continue automatically.');
+                      return continueNextStep2('');
+                    }
+
+                    // If user stopped, wait for cancel/confirm
+                    const userCancelled = await waitForDecision();
+                    if (userCancelled === false) {
+                      console.log('User canceled stop — continue.');
+                      continueNextStep2('');
+                    } else {
+                      console.log('User confirmed stop — halt.');
+                    }
+
                 }
-                // await delay(3000);
             }
+        }
 
+        function continueNextStep2(process) {
+            document.getElementById("btnChangeReel").setAttribute("disabled", "true");
+            document.getElementById("btnStop").setAttribute("disabled", "true");
+            document.getElementById("btnEnd").setAttribute("disabled", "true");
+            resetColorPLCForm(2);
+            getLoaderColumn($("#txtLoaderId").val());
+            (process == "start") ? retry2("start") : retry2("col");
+            newReel();
+            isUserStopped = false;
         }
 
         async function loadPLCCheckLoader(loaderId) {
 
             var fResult = false;
-
             await $.ajax({
                 url: "/api/PLCLoader/GetLoaderId/" + loaderId,
                 type: "GET",
@@ -1740,7 +1814,26 @@
                             // $('#errCol2').text(result.errMessage);
                         }
                         else {
-                            $('#errCol2').text('All column is full. Please change loader.');
+                            let countdown = 5;
+                            // $('#btnRetry2').addClass('hidden');
+                            $('#colStatus2').text('');
+                            $('#errCol2').text(`All columns are full. The task will end automatically in ${countdown} seconds.`);
+                            let timer = setInterval(async () => {
+                                countdown--;
+                                $('#errCol2').text(`All columns are full. The task will end automatically in ${countdown} seconds.`);
+
+                                if (countdown <= 0) {
+                                    clearInterval(timer);
+                                    //set full for column4, auto loader will auto perform perfect end task
+                                    var endstate = await loadPLCSetColumnState(loaderId, 4);
+                                    console.log('end state', endstate);
+                                    if (endstate == false)  {
+                                        $('#errCol2').text('Failed to end the task. Check the connection and try again.');
+                                    } else {
+                                        restartStep();
+                                    }
+                                }
+                            }, 1000);
                         }
                     }
                 },
@@ -2053,7 +2146,6 @@
                                 if ($('#warnTurnModal').hasClass("show")) {
                                     $('#warnTurnModal').modal('toggle');
                                 }
-
                                 resolve(false);
                             }
                         },
@@ -2067,8 +2159,49 @@
                 return false;
             }
         }
+        
+        async function loadPLCSetColumnState(loaderId, colNo) {
+            try {
+                const result = await new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: "/api/PLCLoader/SetColumnState/" + loaderId + "/" + colNo,
+                        type: "POST",
+                        dataType: 'JSON',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (result) {
+                            if (result.success == false) {
+                                //if fail to start, retry for twice but start from third will force them to start from step1
+                                // if ($('#putModal').hasClass("show")) {
+                                //     $('#putModal').modal('toggle');
+                                // }
+                                // $('#btnRetryStart').removeClass('hidden'); 
+                                // $('#loadProcess4').text(`Failed to Start... ${result.errMessage.charAt(0).toUpperCase() + result.errMessage.slice(1)}`);
+                                // $('#loadProcess4').addClass("error-message");
+                                resolve(false);
+                            }
+                            else 
+                            {
+                                // $('#btnRetryStart').addClass('hidden');
+                                // $('#loadProcess4').text('Process Started');
+                                // $('#loadProcess4').removeClass("error-message");
+                                resolve(true);
+                            }
+                        },
+                        error: function (error) {
+                            // $('#loadProcess4').text(error.val).css('color', 'red');
+                            resolve(false);
+                        }
+                    });
+                });
+                return result;
+            } catch (err) {
+                return false;
+            }
+        }
 
-        async function endTask() {
+        async function endTask(action) {
+            if (stopDecision) stopDecision(true);
+
             var loaderId = $("#txtLoaderId").val();
             if (loaderId == "") {
                 swal.fire({
@@ -2079,22 +2212,84 @@
                 return;
             }
 
-            var chkEnd = await loadPLCEndTask(loaderId, 2);
-            console.log('R10::' + chkEnd);
-            if (chkEnd == true) {
-                restartStep();
-                //use to determine is start load reel process required again in step4
-                $('#loadProcess4').addClass("error-message"); 
+            var title = action == 2 ? "End Task" : "Stop Task";
+            let timerInterval;
+
+            const swalResult = await swal.fire({
+                title: `${title}?`, 
+                text: `You won't be able to revert this.`,
+                icon: "warning",
+                showCancelButton: true,
+                allowOutsideClick: false,
+                // confirmButtonColor: "#3085d6",
+                // cancelButtonColor: "#d33",
+                confirmButtonText: "Yes",
+                html: `
+                  <div>Confirm stop? Auto-cancel in <span id="countdown">3</span>s.</div>
+                  <div style="margin-top:10px; background:#eee; width:100%; height:8px;">
+                      <div id="bar" style="width:100%; height:8px; background:#f66; transition:width 1s linear;"></div>
+                  </div>
+                `,
+                didOpen: () => {
+                    const content = Swal.getHtmlContainer().querySelector('#countdown');
+                    const bar = Swal.getHtmlContainer().querySelector('#bar');
+                    let timeLeft = 3;
+                    timerInterval = setInterval(() => {
+                        timeLeft--;
+                        bar.style.width = (timeLeft / 3 * 100) + '%';
+
+                        if (content) content.textContent = timeLeft;
+                        if (timeLeft <= 0) {
+                            clearInterval(timerInterval);
+                            Swal.close();
+                        }
+                    }, 1000);
+                },
+                willClose: () => {
+                    clearInterval(timerInterval);
+                }
+            });
+
+
+            if (swalResult.dismiss === Swal.DismissReason.close) {
+                console.log('Auto cancelled due to timeout.');
+                if (stopDecision) { 
+                    stopDecision(false); 
+                }
                 return;
             }
-            else 
-            {
-                swal.fire({
-                    icon: 'error',
-                    title: "Wait",
-                    text: "Failed to End Task. Please try again.",
-                });
+
+            if (swalResult.dismiss && swalResult.dismiss !== Swal.DismissReason.cancel) {
+                console.log('Auto cancelled or closed.');
+                stopDecision?.(false);
                 return;
+            }
+
+
+            if (swalResult.isConfirmed) {
+                if (stopDecision) {
+                    stopDecision(true);
+                }
+                console.log('User confirmed stop.');
+                var chkEnd = await loadPLCEndTask(loaderId, action);
+                if (chkEnd == true) {
+                    if (action == 2) {
+                        restartStep();
+                    } else {
+                        $('#holdStopModal').modal('show');
+                    }
+                } else {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: "Failed to End Task. Please try again.",
+                    });
+                }
+            } else {
+                console.log('User cancelled stop');
+                if (stopDecision) {
+                    stopDecision(false);
+                }
             }
         }
 
@@ -2111,27 +2306,12 @@
                             console.log('10::' + JSON.stringify(result));
                             if (result.success == true) {
                                 resolve(true);
-                                // swal.fire({
-                                //     icon: 'success',
-                                //     title: "Success End Task",
-                                //     text: "",
-                                // });
                             }
                             else {
                                 resolve(false);
-                                // swal.fire({
-                                //     icon: 'error',
-                                //     title: "Wait",
-                                //     text: result.errMessage
-                                // });
                             }
                         },
                         error: function (error) {
-                            // swal.fire({
-                            //     icon: 'error',
-                            //     title: "Wait",
-                            //     text: error.val
-                            // });
                             resolve(false);
                         }
                     });
@@ -2273,5 +2453,50 @@
                 }
             });
         }
+
+        function contOnStop() {
+            $('#holdStopModal').modal("toggle");
+            continueNextStep2('start');
+        }
+        
+        //prevent user close/refresh page
+        window.addEventListener("beforeunload", function (e) {
+            e.preventDefault();
+            e.returnValue = "";
+            const loader = document.getElementById("txtLoaderId").value;
+            localStorage.setItem("loaderId", loader);
+        });
+
+        window.addEventListener("unload", function() {
+            if (taskLoad) { //is task is loading state, send end task for loader
+                const loader = localStorage.getItem("loaderId");
+                const data = JSON.stringify(2);
+                const blob = new Blob([data], { type: "application/json" });
+                const sent = navigator.sendBeacon(`/api/PLCLoader/EndTask/${loader}`, blob);
+                localStorage.removeItem("loaderId");
+            }
+        });
+
+        async function waitForDecision() {
+            return new Promise((resolve) => {
+                stopDecision = (value) => resolve(value);
+
+                let countdown = 3;
+
+                function tick() {
+                  if (countdown > 0) {
+                    $('#pTextLast').text(`Continue to Next Reel..${countdown}...`);
+                    countdown--;
+                    stopTimer = setTimeout(tick, 1000);
+                  } else {
+                    resolve(false);
+                  }
+                }
+
+                tick();
+              });
+        }
     </script>
 }
+
+

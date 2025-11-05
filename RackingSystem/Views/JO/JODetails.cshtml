@@ -141,7 +141,7 @@
                                         <div class="row g-4">
                                             <div class="col-5">
                                                 <label for="txtDocNo">Document No</label>
-                                                <input type="text" class="form-control" id="txtDocNo" placeholder="Please enter document no" value="@Model.DocNo" @(mode == "view" ? "disabled" : "") >
+                                                <input type="text" class="form-control" id="txtDocNo" value="@Model.DocNo" disabled >
                                                 <div id="txtDocNoError" class="error-message"></div>
                                             </div>
                                             <div class="col-4">
@@ -607,7 +607,7 @@
                     el.hidden = false;
                 }
             });
-
+            document.getElementById('txtDocNo').setAttribute('disabled', true);
             document.getElementById('saveButton')?.removeAttribute('hidden');
             document.getElementById('addSub')?.removeAttribute('hidden');
 
