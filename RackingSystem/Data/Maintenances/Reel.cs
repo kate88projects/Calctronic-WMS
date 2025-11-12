@@ -46,5 +46,13 @@ namespace RackingSystem.Data.Maintenances
         public DateTime CreatedDate { get; set; } = DateTime.Now;
 
         public long Slot_Id { get; set; }
+
+        [Required]
+        public bool NeedCheck { get; set; } = false;
+
+        [MaxLength(100)]
+        public string CheckRemark { get; set; } = "";
+
+
     }
 }

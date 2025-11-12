@@ -23,10 +23,10 @@ namespace RackingSystem.Helpers
             string docno = "";
             try
             {
-                var config = _dbContext.Configuration.Where(x => x.ConfigTitle == configType.ToString()).First();
+                var config = _dbContext.Configuration.Where(x => x.ConfigTitle == configType.ToString()).FirstOrDefault();
                 if (config != null)
                 {
-                    var docF = _dbContext.DocFormat.Where(x => x.DocFormat_Id == Convert.ToInt64(config.ConfigValue)).First();
+                    var docF = _dbContext.DocFormat.Where(x => x.DocFormat_Id == Convert.ToInt64(config.ConfigValue)).FirstOrDefault();
                     if (docF != null)
                     {
                         if (docF.IsResetMonthly)
@@ -115,7 +115,7 @@ namespace RackingSystem.Helpers
 
             try
             {
-                var docFDtl = _dbContext.DocFormatDetail.Where(x => x.DocFormat_Id == id && x.Year == docDate.Year && x.Month == docDate.Month).First();
+                var docFDtl = _dbContext.DocFormatDetail.Where(x => x.DocFormat_Id == id && x.Year == docDate.Year && x.Month == docDate.Month).FirstOrDefault();
                 if (docFDtl != null)
                 {
                     nextNo = docFDtl.NextRoundingNum;

@@ -43,11 +43,14 @@
                         <h2>Queue Management <b></b></h2>
                     </div>
                     <div class="card-tools">
-                        <button type="button" class="btn btn-success" onclick="newLoaderForm()">
-                            Add Loader
+                        <button type="button" class="btn btn-primary" onclick="newLoaderForm()">
+                            Add Hub In
                         </button>
                         <button type="button" class="btn btn-success" onclick="newJOForm()">
                             Add Job Order
+                        </button>
+                        <button type="button" class="btn btn-danger" onclick="newJOForm()">
+                            Add Emergency
                         </button>
                     </div>
                 </div>
@@ -289,7 +292,7 @@
 
         function loadJOList() {
             $.ajax({
-                url: "/RackJobQueue/GetJOList_PendingToUnLoad/",
+                url: "/RackJobQueue/GetJOList_PendingToQueue/",
                 type: "GET",
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
@@ -316,8 +319,8 @@
                         for (const opt of result.data)
                         {
                             const el = document.createElement("option");
-                            el.textContent = opt.loaderCode;
-                            el.value = opt.loader_Id;
+                            el.textContent = opt.docNo;
+                            el.value = opt.jobOrder_Id;
                             selJO.appendChild(el);
                         }
 

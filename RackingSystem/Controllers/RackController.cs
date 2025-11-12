@@ -34,7 +34,6 @@ namespace RackingSystem.Controllers
             return View();
         }
 
-
         public IActionResult NewTransferHubInTask()
         {
             ViewBag.PermissionList = new List<int>();
@@ -50,5 +49,22 @@ namespace RackingSystem.Controllers
             ViewData["Title"] = "New Hub In Task";
             return View();
         }
+
+        public IActionResult NewHubInTask()
+        {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpRACKING";
+            ViewData["ActiveTab"] = "NewHubInTask";
+            ViewData["Title"] = "New Hub In Task";
+            return View();
+        }
+
     }
 }

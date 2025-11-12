@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using RackingSystem.Data;
 using RackingSystem.Data.Maintenances;
+using RackingSystem.Data.Rack;
 using RackingSystem.General;
 using System;
 
@@ -66,7 +67,7 @@ namespace RackingSystem.Services
                 {
                     var docF = new DocFormat
                     {
-                        DocFormatType = EnumDocFormat.Reel.ToString(),
+                        DocFormatType = EnumDocFormat.JO.ToString(),
                         DocumentFormat = "JO{yyMM}<000000>",
                         NumberLength = 8,
                         NextRoundingNum = 1,
@@ -84,6 +85,19 @@ namespace RackingSystem.Services
                     var config = new Configuration
                     {
                         ConfigTitle = EnumConfiguration.DocFormat_Reel.ToString(),
+                        ConfigValue = docF.DocFormat_Id.ToString(),
+                    };
+                    context.Configuration.Add(config);
+                    await context.SaveChangesAsync();
+                }
+
+                // Set Default Doc Format for JO in Configuration
+                if (context.DocFormat.Where(x => x.DocFormatType == EnumDocFormat.JO.ToString()).Any() && context.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.DocFormat_JO.ToString()).Any() == false)
+                {
+                    var docF = context.DocFormat.Where(x => x.DocFormatType == EnumDocFormat.JO.ToString()).First();
+                    var config = new Configuration
+                    {
+                        ConfigTitle = EnumConfiguration.DocFormat_JO.ToString(),
                         ConfigValue = docF.DocFormat_Id.ToString(),
                     };
                     context.Configuration.Add(config);
@@ -142,6 +156,26 @@ namespace RackingSystem.Services
                         ConfigValue = "7",
                     };
                     context.Configuration.Add(config);
+                    await context.SaveChangesAsync();
+                }
+
+                // Add SRMS as Rack
+                if (context.RackJob.Any() == false)
+                {
+                    var r = new RackJob
+                    {
+                        CurrentJobType = "",
+                        Loader_Id = 0,
+                        Trolley_Id = 0,
+                        RackJobQueue_Id = 0,
+                        StartDate = DateTime.Now,
+                        LoginIP = "",
+                        CurrentStep = 0,
+                        ReeLId = "",
+                        Slot_Code = "",
+                        Slot_Take = 1
+                    };
+                    context.RackJob.Add(r);
                     await context.SaveChangesAsync();
                 }
             }

@@ -6,5 +6,6 @@
         public string SlotCode { get; set; } = null;
         public int ColNo { get; set; } = 0;
         public int RowNo { get; set; } = 0;
+        public bool IsLeft { get; set; } = true;
     }
 }

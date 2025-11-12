@@ -66,7 +66,16 @@ namespace RackingSystem.Controllers.API
         public async Task<ServiceResponseModel<LoaderDTO>> GetLoaderInfo_PendingToUnLoad(string req)
         {
             ServiceResponseModel<LoaderDTO> result = await _loaderService.GetLoaderInfo(req, true, EnumLoaderStatus.Loaded, null);
-            return result;
+            if (result.data.Col1TotalReels > 0 || result.data.Col2TotalReels > 0 || result.data.Col3TotalReels > 0 || result.data.Col4TotalReels > 0)
+            {
+                return result;
+            }
+            else
+            {
+                result.success = false;
+                result.errMessage = "No Reels to unload.";
+                return result;
+            }
         }
 
         [HttpGet("GetFlexilockStatus")]
@@ -163,11 +172,11 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.data = 1;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.data = 1;
+            //return result;
+            //// *** testing
 
             // 2. check plc which column is ready
             string plcIp = _loader.IPAddr;
@@ -266,11 +275,11 @@ namespace RackingSystem.Controllers.API
                         val1 = registers[i].ToString();
                     }
 
-                    if (val1 != "")
+                    if (val1 == "2")
                     {
                         exit = true;
                     }
-                    if ((DateTime.Now - dtRun).TotalMinutes > 1)
+                    if ((DateTime.Now - dtRun).TotalMinutes > 2)
                     {
                         result.errMessage = "Timeout. Cannot get Unload Status.";
                         exit = true;
@@ -289,6 +298,8 @@ namespace RackingSystem.Controllers.API
                 modbusClient1.Disconnect();
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");
             }
+
+            exit = false;
 
             // 2. check AudoLoader Position = Scan Position
             ModbusClient modbusClient2 = new ModbusClient(_loader.IPAddr, port);
@@ -338,6 +349,7 @@ namespace RackingSystem.Controllers.API
             result.data.Add(val1);
             result.data.Add(val2);
 
+            
             return result;
         }
 
@@ -369,6 +381,11 @@ namespace RackingSystem.Controllers.API
 
                 result.success = true;
                 result.data = r.data[0];
+                //var slot = _dbContext.Slot.Where(x => x.SlotCode == result.data.SlotCode).FirstOrDefault();
+                //if (slot != null)
+                //{
+                //    result.data.IsLeft = slot.IsLeft;
+                //}
                 return result;
 
             }
@@ -545,12 +562,6 @@ namespace RackingSystem.Controllers.API
                 //ServiceResponseModel<int> result1 = await task1;
                 //ServiceResponseModel<TrayReelDTO> result2 = await task2;
 
-                if (r1.success)
-                {
-                    // temp hide
-                    //slot.HasEmptyTray = false;
-                    //await _dbContext.SaveChangesAsync();
-                }
                 result.data = r2.data;
                 result.data.successTray = r1.success;
                 result.data.errMessageTray = r1.errMessage;
@@ -619,13 +630,13 @@ namespace RackingSystem.Controllers.API
             //    return result;
             //}
 
-            //var slot = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
-            //if (slot == null)
-            //{
-            //    result.errMessage = "Cannot find Slot [" + slotCode + "]. ";
-            //    result.data = 0;
-            //    return result;
-            //}
+            var slot = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
+            if (slot == null)
+            {
+                result.errMessage = "Cannot find Slot [" + slotCode + "]. ";
+                result.data = 0;
+                return result;
+            }
 
             //// *** testing
             //result.success = true;
@@ -646,22 +657,25 @@ namespace RackingSystem.Controllers.API
 
                 // step 1 : left or right
                 int registerAddress = 4298;
-                int valueToWrite = 0;
+                //int valueToWrite = 0;
+                int valueToWrite = slot.IsLeft ? 0 : 1;
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
 
                 // step 2 : x-pulses
-                byte[] bytes = BitConverter.GetBytes(57832);
+                //byte[] bytes = BitConverter.GetBytes(57832);
+                byte[] bytes = BitConverter.GetBytes(slot.XPulse);
                 int highBinary = BitConverter.ToUInt16(bytes, 0);
                 int lowBinary = BitConverter.ToUInt16(bytes, 2);
-                registerAddress = 4299;
-                valueToWrite = 0;
-                modbusClient.WriteSingleRegister(registerAddress, highBinary);
                 registerAddress = 4300;
                 valueToWrite = 0;
                 modbusClient.WriteSingleRegister(registerAddress, lowBinary);
+                registerAddress = 4299;
+                valueToWrite = 0;
+                modbusClient.WriteSingleRegister(registerAddress, highBinary);
 
                 // step 3 : y-pulses
-                bytes = BitConverter.GetBytes(4930);
+                //bytes = BitConverter.GetBytes(4930);
+                bytes = BitConverter.GetBytes(slot.YPulse);
                 highBinary = BitConverter.ToUInt16(bytes, 0);
                 lowBinary = BitConverter.ToUInt16(bytes, 2);
                 registerAddress = 4301;
@@ -673,12 +687,14 @@ namespace RackingSystem.Controllers.API
 
                 // step 4 : 
                 registerAddress = 4310;
-                valueToWrite = 634;
+                //valueToWrite = 634;
+                valueToWrite = slot.QRXPulse;
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
 
                 // step 5 : 
                 registerAddress = 4311;
-                valueToWrite = 377;
+                //valueToWrite = 377;
+                valueToWrite = slot.QRYPulse;
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
 
                 // step 6 : 
@@ -694,6 +710,8 @@ namespace RackingSystem.Controllers.API
                 result.success = true;
                 result.data = 1;
 
+                slot.HasEmptyTray = false;
+                await _dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -1123,7 +1141,7 @@ namespace RackingSystem.Controllers.API
                         value = registers[i];
                     }
 
-                    if (value > 0)
+                    if (value == 1)
                     {
                         exit = true;
                     }
@@ -1202,7 +1220,7 @@ namespace RackingSystem.Controllers.API
                         value = registers[i].ToString();
                     }
 
-                    if (value != "0")
+                    if (value == "1")
                     {
                         exit = true;
                     }
@@ -1338,10 +1356,10 @@ namespace RackingSystem.Controllers.API
                         value = registers[i];
                     }
 
-                    if (value > 0)
+                    if (value == 1)
                     {
                         exit = true;
-                        result.success = value == 1;
+                        result.success = true;
                         result.data = Convert.ToInt32(value);
                     }
                     if ((DateTime.Now - dtRun).TotalMinutes > 2)
@@ -1397,6 +1415,10 @@ namespace RackingSystem.Controllers.API
                     return result;
                 }
 
+                // testing 
+                slotUsage.ReserveSlot = 1;
+                // testing 
+
                 var colList = _dbContext.SlotColumnSetting.OrderBy(x => x.Reel_IN_Idx).ToList();
                 foreach (var col in colList)
                 {
@@ -1405,11 +1427,14 @@ namespace RackingSystem.Controllers.API
                     req.TotalSlot = slotUsage.ReserveSlot;
 
                     ServiceResponseModel<SlotFreeDTO> r = await _slotService.GetFreeSlot_ByColumn_ASC(req);
-                    if (r.data.Row1 > 0)
+                    if (r.data != null)
                     {
-                        bottomSlotCol = col.ColNo;
-                        bottomSlotRow = r.data.Row1 + slotUsage.ReserveSlot - 1;
-                        break;
+                        if (r.data.Row1 > 0)
+                        {
+                            bottomSlotCol = col.ColNo;
+                            bottomSlotRow = r.data.Row1 + slotUsage.ReserveSlot - 1;
+                            break;
+                        }
                     }
                 }
                 
@@ -1480,11 +1505,13 @@ namespace RackingSystem.Controllers.API
 
                 // step 1 : left or right
                 int registerAddress = 4298;
-                int valueToWrite = 0;
+                //int valueToWrite = 0;
+                int valueToWrite = slot.IsLeft ? 0 : 1;
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
 
                 // step 2 : x-pulses
-                byte[] bytes = BitConverter.GetBytes(57832);
+                //byte[] bytes = BitConverter.GetBytes(57832);
+                byte[] bytes = BitConverter.GetBytes(slot.XPulse);
                 int highBinary = BitConverter.ToUInt16(bytes, 0);
                 int lowBinary = BitConverter.ToUInt16(bytes, 2);
                 registerAddress = 4299;
@@ -1495,7 +1522,8 @@ namespace RackingSystem.Controllers.API
                 modbusClient.WriteSingleRegister(registerAddress, lowBinary);
 
                 // step 3 : y-pulses
-                bytes = BitConverter.GetBytes(4930);
+                //bytes = BitConverter.GetBytes(4930);
+                bytes = BitConverter.GetBytes(slot.YPulse);
                 highBinary = BitConverter.ToUInt16(bytes, 0);
                 lowBinary = BitConverter.ToUInt16(bytes, 2);
                 registerAddress = 4301;
@@ -1507,12 +1535,14 @@ namespace RackingSystem.Controllers.API
 
                 // step 4 : 
                 registerAddress = 4310;
-                valueToWrite = 634;
+                //valueToWrite = 634;
+                valueToWrite = slot.QRXPulse;
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
 
                 // step 5 : 
                 registerAddress = 4311;
-                valueToWrite = 377;
+                //valueToWrite = 377;
+                valueToWrite = slot.QRYPulse;
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
 
                 // step 6 : 
@@ -1594,7 +1624,7 @@ namespace RackingSystem.Controllers.API
                         value = registers[i];
                     }
 
-                    if (value > 0)
+                    if (value == 1)
                     {
                         exit = true;
                     }
@@ -1701,7 +1731,6 @@ namespace RackingSystem.Controllers.API
                         if (_slotO == null)
                         {
                             result.errMessage = "Other Slot is not found.";
-                            result.data = 0;
                             return result;
                         }
                         _slotO.ReelNo = iR.ToString();
@@ -1949,6 +1978,9 @@ namespace RackingSystem.Controllers.API
             //return result;
             //// *** testing
 
+            DateTime dtRun = DateTime.Now;
+            bool exit = false;
+
             string decimalText = "";
             int value = 0;
 
@@ -1964,11 +1996,26 @@ namespace RackingSystem.Controllers.API
 
                 int startAddress = 4225;
                 int numRegisters = 1;
-                int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
-                for (int i = 0; i < registers.Length; i++)
+                while (!exit)
                 {
-                    PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
-                    value = registers[i];
+                    int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                    for (int i = 0; i < registers.Length; i++)
+                    {
+                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                        value = registers[i];
+                    }
+
+                    string hex2 = value.ToString("X");
+
+                    if (hex2 == "400")
+                    {
+                        exit = true;
+                    }
+                    if ((DateTime.Now - dtRun).TotalMinutes > 2)
+                    {
+                        result.errMessage = "Timeout. Cannot get Reel ID.";
+                        exit = true;
+                    }
                 }
 
                 string hex = value.ToString("X");

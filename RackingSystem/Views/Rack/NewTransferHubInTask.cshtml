@@ -545,23 +545,27 @@
                                                 Flexilock 2 :
                                                 <span style="color:red; font-size:15px;" id="errFlexi2"> </span>
                                             </p>
-                                            <button class="btn btn-warning" onclick="retry2a()" id="btnRetry2a" style="width:49%;">Retry</button>
+                                            <button class="btn btn-warning" onclick="retry2a()" id="btnRetry2a" style="width:49%;">Retry Get Flexilock</button>
                                             <hr />
+                                            <p id="pSetUnload">
+                                                Set Unload :
+                                                <span style="color:red; font-size:15px;" id="errSetUnload"> </span>
+                                            </p>
+                                            <button class="btn btn-danger" onclick="retry2b()" id="btnRetry2b" style="width:49%;">Retry Set </button>
                                             <div class="" id="divTurn2">
+                                                <p id="pEmptyCol2">
+                                                    Set Empty Column : <span style="color:red; font-size:15px;" id="errEmptyCol2"> </span>
+                                                </p>
                                                 <p id="pStatusReady2">
                                                     Status Ready to Turn Column : <span style="color:red; font-size:15px;" id="errStatusReady2"> </span>
                                                 </p>
                                                 <p id="pTurn2">
                                                     Turn Column : <span style="color:red; font-size:15px;" id="errTurn2"> </span>
                                                 </p>
+                                                <button class="btn btn-danger" onclick="retry2SetEmpty()" id="btnRetry2SetEmpty" style="width:49%;">Retry Set Empty</button>
                                                 <button class="btn btn-warning" onclick="retry2ReadyStatus()" id="btnRetry2ReadyStatus" style="width:49%;">Retry Ready Status</button>
                                                 <button class="btn btn-danger" onclick="retry2Turn()" id="btnRetry2Turn" style="width:49%;">Retry Turn</button>
                                             </div>
-                                            <p id="pSetUnload">
-                                                Set Unload :
-                                                <span style="color:red; font-size:15px;" id="errSetUnload"> </span>
-                                            </p>
-                                            <button class="btn btn-warning" onclick="retry2b()" id="btnRetry2b" style="width:49%;">Retry</button>
                                             <hr />
                                             <p id="pLoaderFork">
                                                 Fork Status :
@@ -607,11 +611,11 @@
                                                 Reel :
                                                 <span style="color:red; font-size:15px;" id="errReel3"> </span>
                                             </p>
-                                            <p id="pItem3">
+                                            <p id="pItem3" class="hidden">
                                                 Item :
                                                 <span style="color:red; font-size:15px;" id="errItem3"> </span>
                                             </p>
-                                            <p id="pActHeight3">
+                                            <p id="pActHeight3" class="hidden">
                                                 Actual Height :
                                                 <span style="color:red; font-size:15px;" id="errActHeight3"> </span>
                                             </p>
@@ -699,7 +703,7 @@
                                                 <button class="btn btn-danger" onclick="retryLastSetEmpty()" id="btnRetryLastSetEmpty" style="width:49%;">Retry Set Empty</button>
                                                 <button class="btn btn-warning" onclick="retryLastReadyStatus()" id="btnRetryLastReadyStatus" style="width:49%;">Retry Ready Status</button>
                                                 <button class="btn btn-danger" onclick="retryLastTurn()" id="btnRetryLastTurn" style="width:49%;">Retry Turn</button>
-                                                <button class="btn btn-danger" onclick="retryLastSetEmpty2()" id="btnRetryLastSetEmpty2" style="width:49%;">Retry Set Empty</button> 
+                                                <button class="btn btn-danger" onclick="retryLastSetEmpty2()" id="btnRetryLastSetEmpty2" style="width:49%;">Retry Empty All</button>
                                             </div>
                                         </div>
                                     </div>
@@ -735,11 +739,12 @@
                     <input type="hidden" id="txtCol4TotalReels">
 
                     <input type="hidden" id="txtTempEndTask">
+                    <input type="hidden" id="txtDone">
                 </div>
             </div>
             <div class="col-sm-12 col-md-3" style="padding-right:0px;padding-left:0px;">
                 <div class="card-body" style="background: #f2f2f2; width:100%; height:100%;">
-                    <div class="container containerDtlHistory" style="min-height:50px;">
+                    <div class="container containerDtlHistory" style="min-height:50px; padding-bottom: 50px;">
                         <p class="text-center"><span>Reel : </span> <strong id="txtHReel">-</strong></p>
                         <br />
                         <p>Empty Tray : </p>
@@ -817,7 +822,7 @@
                     </div>
                     <div class="col-6">
                         <p class="" style="font-size:2em;">Please make sure hands off and tap Start Turn Column button.</p>
-                        <button class="btn btn-success" style="width: 100%; height: 150px;" onclick="turnCol()">Start Turn Column</button>
+                        <button class="btn btn-success" style="width: 100%; height: 150px;" onclick="turnCol(1)">Start Turn Column</button>
                     </div>
                 </div>
             </div>
@@ -856,12 +861,14 @@
             $("#txtICol").val('1');
 
             resetColorPLCForm(1);
+            // $('#divTurn2').removeClass("hidden");
             // $("#txtLoaderId").val('2');
             // $("#txtReelId").val('08E80675-3D9B-4622-E0B8-08DDEF6E5195');
             // $("#txtHSlot").val('00M01C001R018');
             // $("#txtHSlotTake").val('2');
             // loadPLC(5);
             $("#txtTempEndTask").val('0');
+            $("#txtDone").val('0');
 
             initialGaugeSetup(
                 "svg-graph-meter-value",
@@ -1093,6 +1100,10 @@
         }
 
         function nextReel() {
+            var d = $("#txtDone").val();
+            if (d == "1" || d == "2") {
+                return;
+            }
             nextTo2();
         }
 
@@ -1138,13 +1149,19 @@
             $('#divTurn').addClass("hidden");
 
             $('#divTurn2').addClass("hidden");
+            $('#btnRetry2SetEmpty').addClass("hidden");
             $('#btnRetry2ReadyStatus').addClass("hidden");
             $('#btnRetry2Turn').addClass("hidden");
+
+            $('#btnRetryLastSetEmpty2').addClass("hidden");
             
             $('#btnNext1').addClass("hidden");
             $('#btnNext2').addClass("hidden");
             $('#btnNext3').addClass("hidden");
             $('#btnNext4').addClass("hidden");
+
+            $('#btnTempEndTask').addClass("hidden");
+            
 
             if (idx == 1) {
                 // const col1 = document.getElementById("col1");
@@ -1259,6 +1276,15 @@
             $('#pLoaderFork').html('Fork Status : <span class="error-message" id="errLoaderFork2"></span>');
             $('#pGripper2').html('Gantry Status : <span class="error-message" id="errGripper2"></span>');
             $('#pCol2').html('Column Ready : <span class="error-message" id="errCol2"></span>');
+            
+            $('#pEmptyColLast').html('Set Empty Column : <span class="error-message" id="errEmptyColLast"> </span>');
+            $('#pEmptyCol2').html('Set Empty Column : <span class="error-message" id="errEmptyCol2"> </span>');
+						
+            $('#pStatusReadyLast').html('Status Ready to Turn Column : <span class="error-message" id="errStatusReadyLast"> </span>');
+            $('#pStatusReady2').html('Status Ready to Turn Column : <span class="error-message" id="errStatusReady2"> </span>');
+						
+            $('#pTurnLast').html('Turn Column : <span class="error-message" id="errTurnLast"> </span>');
+            $('#pTurn2').html('Turn Column : <span class="error-message" id="errTurn2"> </span>');
 
             // $("#txtHLoaderLock").val('');
             // $("#txtHGripper").val('');
@@ -1434,18 +1460,25 @@
             loadPLC(54);
         }
 
+        function retry2SetEmpty() {
+            $('#btnRetry2SetEmpty').addClass("hidden");
+            turnColFirst(1);
+        }
+
         function retry2ReadyStatus() {
             $('#btnRetry2ReadyStatus').addClass("hidden");
-            loadPLC(22);
+            turnColFirst(2);
         }
 
         function retry2Turn() {
             $('#btnRetry2Turn').addClass("hidden");
-            loadPLC(22);
+            turnColFirst(3);
         }
 
         function updateLoaderInfo() {
-            
+
+            var code = $("#txtLoaderCode").val();
+
             $.ajax({
                 url: "/api/PLCHubIn/GetLoaderInfo_PendingToUnLoad/" + code,
                 type: "GET",
@@ -1511,6 +1544,78 @@
             return;
         }
 
+        async function turnColFirst(idx) {
+            var fResult = false;
+
+            $('#divTurn2').removeClass("hidden");
+            var loaderId = $("#txtLoaderId").val();
+            var iCol = $("#txtICol").val();
+
+            var bal = $("#txtCol1TotalReels").val();
+            if (Number(iCol) == 2) { bal = $("#txtCol2TotalReels").val(); }
+            if (Number(iCol) == 3) { bal = $("#txtCol3TotalReels").val(); }
+            if (Number(iCol) == 4) { bal = $("#txtCol4TotalReels").val(); }
+            // $('#txtBal').html(bal);
+
+            if (bal > 0) {
+                return true;
+            }
+            else {
+                var nextCol = 2;
+                if (Number($("#txtCol4TotalReels").val()) > 0) { nextCol = 4; }
+                if (Number($("#txtCol3TotalReels").val()) > 0) { nextCol = 3; }
+                if (Number($("#txtCol2TotalReels").val()) > 0) { nextCol = 2; }
+
+                if (Number(iCol) < Number(nextCol)) {
+
+                    var setE = true;
+                    if (idx <= 1) {
+                        setE = await loadPLCSetColumnEmpty(loaderId, Number(iCol));
+                    }
+                    if (setE == false) {
+                        $('#btnRetry2SetEmpty').removeClass("hidden");
+                        return fResult;
+                    }
+
+                    var getR = true;
+                    if (idx <= 2) {
+                        await delay(8000);
+                        getR = await loadPLCReadyStatus(loaderId);
+                    }
+                    if (getR == false) {
+                        $('#btnRetry2ReadyStatus').removeClass("hidden");
+                        return fResult;
+                    }
+
+                    var getT = true;
+                    if (idx <= 3) {
+                        getT = await loadPLCTurn(loaderId, Number(nextCol));
+                    }
+                    if (getT == false) {
+                        $('#btnRetry2Turn').removeClass("hidden");
+                    }
+                    else {
+                        var delayT = 5000 * (nextCol - 1);
+                        await delay(delayT);
+
+                        var chkGripper2 = await loadPLCCheckUnlodingStatus(loaderId);
+                        console.log('R2.32::' + chkGripper2);
+                        if (chkGripper2 == true) {
+                            if (idx > 0) {
+                                loadPLC(24);
+                            }
+                            return true;
+                        }
+                        else {
+                            $('#btnRetry2c').removeClass("hidden");
+                            return fResult;
+                        }
+                    }
+                }
+
+            }
+        }
+
         async function loadPLC(idx) {
 
             var loaderId = $("#txtLoaderId").val();
@@ -1568,72 +1673,48 @@
 
                         $('#txtHCol').html(Number(realCol));
 
-                        var bal = $("#txtCol1TotalReels").val();
-                        if (Number(realCol) == 2) { bal = $("#txtCol2TotalReels").val(); }
-                        if (Number(realCol) == 3) { bal = $("#txtCol3TotalReels").val(); }
-                        if (Number(realCol) == 4) { bal = $("#txtCol4TotalReels").val(); }
-                        // $('#txtBal').html(bal);
-
-                        if (bal > 0) {
-
+                        var chkUnload = await loadPLCSetLoaderUnload(loaderId);
+                        console.log('R2.2::' + chkUnload);
+                        if (chkUnload == true) {
+                            $("#txtStep2b").val('OK');
+                            await delay(5000);
+                            idx = 23;
                         }
                         else {
-                            var nextCol = 2;
-                            if (Number($("#txtCol4TotalReels").val()) > 0) { nextCol = 4; }
-                            if (Number($("#txtCol3TotalReels").val()) > 0) { nextCol = 3; }
-                            if (Number($("#txtCol2TotalReels").val()) > 0) { nextCol = 2; }
-                            var getR = await loadPLCReadyStatus(loaderId);
-                            console.log('R2.21::' + getR);
-                            if (getR == false) {
-                                $('#btnRetry2ReadyStatus').removeClass("hidden");
-                                return;
-                            }
-                            else {
-                                var getT = await loadPLCTurn(loaderId, Number(nextCol));
-                                console.log('R2.22::' + getT);
-                                if (getT == false) {
-                                    $('#btnRetry2Turn').removeClass("hidden");
-                                }
-                                else {
-                                    var delayT = 5000 * (nextCol - 1);
-                                    await delay(delayT);
-                                }
-                            }
+                            $('#btnRetry2b').removeClass("hidden");
+                            return;
                         }
+
                     }
 
-                    var chkUnload = await loadPLCSetLoaderUnload(loaderId);
-                    console.log('R2.2::' + chkUnload);
-                    if (chkUnload == true) {
-                        $("#txtStep2b").val('OK');
-                        await delay(5000);
-                        idx = 23;
-                    }
-                    else {
-                        $('#btnRetry2b').removeClass("hidden");
-                        return;
-                    }
                 }
             }
             if (idx == 23) {
                 var chkGripper = await loadPLCCheckUnlodingStatus(loaderId);
                 console.log('R2.3::' + chkGripper);
                 if (chkGripper == true) {
-                    $("#txtStep2c").val('OK');
-
-                    const chkAutoRun = document.getElementById('chkAutoRun');
-                    if (chkAutoRun.checked) {
-                        nextTo3();
+                                        
+                    var turnStatus = await turnColFirst(0);
+                    if (turnStatus == false) {
                         return;
                     }
-                    else {
-                        $('#btnNext2').removeClass("hidden");
-                    }
+                    idx = 24;
                 }
                 else {
                     $('#btnRetry2c').removeClass("hidden");
+                    return;
                 }
-                return;
+            }
+            if (idx == 24) {
+                $("#txtStep2c").val('OK');
+                const chkAutoRun = document.getElementById('chkAutoRun');
+                if (chkAutoRun.checked) {
+                    nextTo3();
+                    return;
+                }
+                else {
+                    $('#btnNext2').removeClass("hidden");
+                }
             }
 
             // step 3 : get Empty Tray Slot and Reel info
@@ -1784,12 +1865,7 @@
                     $('#btnRetry4a').removeClass("hidden");
                     return;
                 }
-                if (cont4 == true) {
-                    idx = 42;
-                }
-                else {
-                    return;
-                }
+                idx = 42;
             }
             if (idx == 42) {
                 var chkPlace = await loadPLCPlaceReel();
@@ -1870,15 +1946,29 @@
                     return;
                 }
                 else if (chkLast == 1) {
+                    $("#txtDone").val('1');
                     // need turn
+                    const chkAutoRun = document.getElementById('chkAutoRun');
+                    if (chkAutoRun.checked) {
+                        turnCol(0);
+                    }
+                    else {
+                        $("#warnTurnModal").modal("toggle");
+                    }
                     return;
                 }
                 else if (chkLast == 2) {
+                    $("#txtDone").val('2');
                     // all done
-                    var setE = await loadPLCSetColumnEmpty(loaderId, Number(realCol));
-                    console.log('R5.2::' + setE);
-                    if (setE == false) {
-                        $('#btnRetryLastSetEmpty2').removeClass("hidden");
+                    var iCol = $("#txtICol").val();
+                    for (var iC = Number(iCol); iC <= 4; iC++) {
+                        await delay(1000);
+                        $("#txtICol").val(iC);
+                        var setE = await loadPLCSetColumnEmpty(loaderId, Number(iC));
+                        console.log('R5.2::' + setE);
+                        if (setE == false) {
+                            $('#btnRetryLastSetEmpty2').removeClass("hidden");
+                        }
                     }
                     return;
                 }
@@ -1895,23 +1985,6 @@
                 }
                             
             }
-            // if (idx == 51) {
-            //     var chkET = await loadPLCEndTask(loaderId, false);
-            //     console.log('R5.1::' + chkET);
-            //     if (chkET == true) {
-            //         await delay(3000);
-            //         nextReel();
-            //     }
-            //     else {
-            //         $('#btnRetryLastET').removeClass("hidden");
-            //     }
-            //     return;
-            // }
-
-            // var cont55 = false;
-            // if (idx == 55) {
-            //     cont55 = true;
-            // }
             if (idx == 52) {
                 var iCol = $("#txtICol").val();
                 var realCol = Number(iCol) - 1; // await loadPLCGetCurrentColumn(loaderId);
@@ -1953,10 +2026,13 @@
 
             if (idx == 55) {
                 var iCol = $("#txtICol").val();
-                var setE = await loadPLCSetColumnEmpty(loaderId, Number(iCol));
-                console.log('R5.2::' + setE);
-                if (setE == false) {
-                    $('#btnRetryLastSetEmpty2').removeClass("hidden");
+                for (var iC = Number(iCol); iC <= 4; iC++) {
+                    await delay(1000);
+                    var setE = await loadPLCSetColumnEmpty(loaderId, Number(iC));
+                    console.log('R5.5::' + setE);
+                    if (setE == false) {
+                        $('#btnRetryLastSetEmpty2').removeClass("hidden");
+                    }
                 }
                 return;
             }
@@ -2674,6 +2750,7 @@
 
         async function loadPLCPutAway() {
 
+            var tCode = $("#txtHEmpty").val();
             var sCode = $("#txtHSlot").val();
             var sTake = $("#txtHSlotTake").val();
             var fResult = false;
@@ -2749,7 +2826,7 @@
             var rId = $("#txtReelId").val();
             var sCode = $("#txtHSlot").val();
             var sTake = $("#txtHSlotTake").val();
-            var fResult = 0;
+            var fResult = -1;
 
             // step 4 : scan item
             await $.ajax({
@@ -2774,21 +2851,23 @@
                         else if (result.data == 1) {
                             var iCol = $("#txtICol").val();
                             $("#txtICol").val(Number(iCol) + 1);
-                            $("#warnTurnModal").modal("toggle");
                             $('#pTextLast').html("Loader Column [" + iCol + "] is DONE put away, ready to turn column... ");
                         }
                         // else if (result.data == 5) {
                         //     $('#pTextLast').html("Ready to end task...");
                         // }
                         else {
+                            $('#btnTempEndTask').removeClass("hidden");
                             $('#pTextLast').html("Done Update. Will continue next item after 2 seconds...");
                         }
 
                         fResult = result.data;
+
                     }
                     else {
                         $('#pTextLast').html('<span style="color:red; font-size:15px;">' + result.errMessage+ '</span>');
                     }
+
                 },
                 error: function (error) {
                     $('#pTextLast').html('<span style="color:red; font-size:15px;">' + error.val + '</span>');
@@ -2829,9 +2908,11 @@
             return fResult;
         }
 
-        async function turnCol() {
+        async function turnCol(offModal) {
             $('#divTurn').removeClass("hidden");
-            $("#warnTurnModal").modal("toggle");
+            if (offModal == 1) {
+                $("#warnTurnModal").modal("toggle");
+            }
             var loaderId = $("#txtLoaderId").val();
             var iCol = $("#txtICol").val();
             var realCol = Number(iCol) - 1; // await loadPLCGetCurrentColumn(loaderId);
@@ -2859,6 +2940,8 @@
                                 return;
                             }
                             else {
+                                    $("#txtDone").val('0');
+                                    await delay(3000);
                                     realCol = iCol; // (realCol) + 1;
                                     nextReel();
                             }
@@ -3017,13 +3100,16 @@
                     if (result.success == true) {
                         fResult = true;
                         $('#pEmptyColLast').html('Set Empty Column : Done <span class="error-message" id="errEmptyColLast"> </span>');
+                        $('#pEmptyCol2').html('Set Empty Column : Done <span class="error-message" id="errEmptyCol2"> </span>');
                     }
                     else {
                         $('#pEmptyColLast').html('Set Empty Column : <span class="error-message" id="errEmptyColLast"> ' + result.errMessage + ' </span>');
+                        $('#pEmptyCol2').html('Set Empty Column : <span class="error-message" id="errEmptyCol2"> ' + result.errMessage + ' </span>');
                     }
                 },
                 error: function (error) {
                     $('#pEmptyColLast').html('Set Empty Column : <span class="error-message" id="errEmptyColLast"> ' + error.val + ' </span>');
+                    $('#pEmptyCol2').html('Set Empty Column : <span class="error-message" id="errEmptyColLast"> ' + error.val + ' </span>');
                 }
             });
 
@@ -3084,6 +3170,7 @@
                     // console.log('2::' + JSON.stringify(result));
                     // swal.close();
                     if (result.success == true) {
+                        $("#txtICol").val(nextCol);
                         fResult = true;
                         $('#pTurnLast').html('Turn Column : Done <span class="error-message" id="errTurnLast"> </span>');
                         $('#pTurn2').html('Turn Column : Done <span class="error-message" id="errTurn2"> </span>');

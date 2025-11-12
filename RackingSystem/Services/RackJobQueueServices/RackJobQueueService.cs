@@ -100,7 +100,7 @@ namespace RackingSystem.Services.RackJobQueueServices
                     JobOrderDetail? jobOrderDtlList = _dbContext.JobOrderDetail.FirstOrDefault(x => x.JobOrder_Id == req.Doc_Id);
                     if (jobOrderDtlList == null)
                     {
-                        result.errMessage = "This Job Orderdon't have any Product need pick up.";
+                        result.errMessage = "This Job Order don't have any Product need pick up.";
                         return result;
                     }
                 }
@@ -119,26 +119,34 @@ namespace RackingSystem.Services.RackJobQueueServices
 
                 if (req.DocType == EnumQueueDocType.JO.ToString())
                 {
+                    JobOrder jobOrder = _dbContext.JobOrder.First(x => x.JobOrder_Id == req.Doc_Id);
+                    jobOrder.Status = EnumJobOrderStatus.InQueue.ToString();
+
+                    BOM? bom = new BOM();
                     List<BOMDetail> bdList = new List<BOMDetail>();
                     List<JobOrderDetail> jodtlList = _dbContext.JobOrderDetail.Where(x => x.JobOrder_Id == req.Doc_Id).ToList();
                     foreach (var jodtl in jodtlList)
                     {
-                        bdList = _dbContext.BOMDetail.Where(x => x.BOM_Id == jodtl.Item_Id).ToList();
-                        foreach (var bd in bdList)
+                        bom = _dbContext.BOM.Where(x => x.Item_Id == jodtl.Item_Id).FirstOrDefault();
+                        if (bom != null)
                         {
-                            JobOrderRaws _raw = new JobOrderRaws()
+                            bdList = _dbContext.BOMDetail.Where(x => x.BOM_Id == bom.BOM_Id).ToList();
+                            foreach (var bd in bdList)
                             {
-                                JobOrderRaws_Id = new Guid(),
-                                JobOrderDetail_Id = jodtl.JobOrderDetail_Id,
-                                JobOrder_Id = jodtl.JobOrder_Id,
-                                BOM_Id = jodtl.Item_Id,
-                                Item_Id = bd.Item_Id,
-                                BaseQty = bd.Qty,
-                                Qty = bd.Qty * jodtl.Qty,
-                                BalQty = bd.Qty * jodtl.Qty,
-                            };
-                            _dbContext.JobOrderRaws.Add(_raw);
+                                JobOrderRaws _raw = new JobOrderRaws()
+                                {
+                                    JobOrderRaws_Id = new Guid(),
+                                    JobOrderDetail_Id = jodtl.JobOrderDetail_Id,
+                                    JobOrder_Id = jodtl.JobOrder_Id,
+                                    BOM_Id = jodtl.Item_Id,
+                                    Item_Id = bd.Item_Id,
+                                    BaseQty = bd.Qty,
+                                    Qty = bd.Qty * jodtl.Qty,
+                                    BalQty = bd.Qty * jodtl.Qty,
+                                };
+                                _dbContext.JobOrderRaws.Add(_raw);
 
+                            }
                         }
                     }
                 }
@@ -275,7 +283,7 @@ namespace RackingSystem.Services.RackJobQueueServices
             return result;
         }
 
-        public async Task<ServiceResponseModel<List<JobOrder>>> GetJOList_PendingToUnLoad()
+        public async Task<ServiceResponseModel<List<JobOrder>>> GetJOList_PendingToQueue()
         {
             ServiceResponseModel<List<JobOrder>> result = new ServiceResponseModel<List<JobOrder>>();
 

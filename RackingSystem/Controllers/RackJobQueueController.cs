@@ -69,10 +69,42 @@ namespace RackingSystem.Controllers
         }
 
         [HttpGet]
-        public async Task<ServiceResponseModel<List<JobOrder>>> GetJOList_PendingToUnLoad()
+        public async Task<ServiceResponseModel<List<JobOrder>>> GetJOList_PendingToQueue()
         {
-            ServiceResponseModel<List<JobOrder>> result = await _qService.GetJOList_PendingToUnLoad();
+            ServiceResponseModel<List<JobOrder>> result = await _qService.GetJOList_PendingToQueue();
             return result;
+        }
+
+        public IActionResult RackJobCounter()
+        {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpQ";
+            ViewData["ActiveTab"] = "RackJobCounter";
+            ViewData["Title"] = "SRMS Counter";
+            return View();
+        }
+
+        public IActionResult RackJobViewer()
+        {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpQ";
+            ViewData["ActiveTab"] = "RackJobViewer";
+            ViewData["Title"] = "SRMS Viewer";
+            return View();
         }
 
 

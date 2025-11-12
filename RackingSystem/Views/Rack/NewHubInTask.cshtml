@@ -1,0 +1,689 @@
+﻿
+@{
+}
+
+<style>
+    #scroll-to-bottom {
+        border: 1px solid #000;
+        height: 200px;
+        overflow-y: scroll;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-6">
+            <div class="card card-primary card-outline mb-4">
+                <div class="card-header"><div class="card-title">Loader / Gantry</div></div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="mb-3">
+                                <label for="txtLoader" class="form-label">Loader</label>
+                                <input type="text" class="form-control" id="txtLoader">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="mb-3">
+                                <label for="txtLoaderID" class="form-label">Loader ID</label>
+                                <input type="number" class="form-control" id="txtLoaderID">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="mb-3">
+                                <label for="txtICol" class="form-label">Loader Column</label>
+                                <input type="number" class="form-control" id="txtICol">
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="mb-3">
+                                <label for="txtReelId" class="form-label">Reel ID</label>
+                                <input type="text" class="form-control" id="txtReelId">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="mb-3">
+                                <label for="txtReelCode" class="form-label">Reel Code</label>
+                                <input type="text" class="form-control" id="txtReelCode">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="mb-3">
+                                <label for="txtActHeight" class="form-label">Actual Height</label>
+                                <input type="text" class="form-control" id="txtActHeight">
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    @* <button class="btn btn-warning" onclick="retry2a()" id="btnRetry2a" style="width:20%;">Get Flexilock</button> *@
+                    <button class="btn btn-danger" onclick="loadPLCSetLoaderUnload(2)" id="btnRetry2b" style="width:20%;">Set Unload</button>
+                    @* <button class="btn btn-warning" onclick="retry2c()" id="btnRetry2c" style="width:20%;">Get Unload</button> *@
+
+                    <hr />
+                    <button class="btn btn-danger" onclick="loadPLCStartBarcodeScanner()" id="btnRetry3b" style="width:20%;">Scan Reel</button>
+                    <button class="btn btn-warning" onclick="loadPLCScanReelID()" id="btnRetry3c" style="width:20%;">Get Reel Info</button>
+                    <button class="btn btn-danger" onclick="loadPLCSetActualHeight(2)" id="btnRetry3d" style="width:20%;">Set Act. Height</button>
+
+                    <hr />
+                    @* <div class="row">
+                        <div class="col-4">
+                            <div class="mb-3">
+                                <label for="txtReelPicked" class="form-label">Reel Picked</label>
+                                <input type="text" class="form-control" id="txtReelPicked" style="background-color:lemonchiffon;">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="mb-3">
+                                <label for="txtReelPlaced" class="form-label">Reel Placed</label>
+                                <input type="text" class="form-control" id="txtReelPlaced" style="background-color:lemonchiffon;">
+                            </div>
+                        </div>
+                    </div> *@
+                    <button class="btn btn-warning" onclick="loadPLCGetPickStatus()" id="btnRetry3e" style="width:20%;">Pick Status</button>
+                    <button class="btn btn-danger" onclick="loadPLCPlaceReel()" id="btnRetry3e" style="width:20%;">Place Reel</button>
+                    <button class="btn btn-warning" onclick="loadPLCGetPlaceStatus()" id="btnRetry3e" style="width:20%;">Place Status</button>
+
+                    <hr />
+                    <button class="btn btn-primary" onclick="endTask()" id="btnEnd" style="width:20%;">All Empty</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="card card-success card-outline mb-4">
+                <div class="card-header"><div class="card-title">Cartesian</div></div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="mb-3">
+                                <label for="txtEmptySlot" class="form-label">Empty Tray Slot Code</label>
+                                <input type="text" class="form-control" id="txtEmptySlot">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="mb-3">
+                                <label for="txtPutSlot" class="form-label">Put Away Slot Code</label>
+                                <input type="text" class="form-control" id="txtPutSlot">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="mb-3">
+                                <label for="txtSlotTake" class="form-label">Slot Reserve</label>
+                                <input type="number" class="form-control" id="txtSlotTake">
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="mb-3">
+                                <label for="txtReelIdPut" class="form-label">Put Reel ID</label>
+                                <input type="text" class="form-control" id="txtReelIdPut">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="mb-3">
+                                <label for="txtReelCodePut" class="form-label">Put Reel Code</label>
+                                <input type="text" class="form-control" id="txtReelCodePut">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="mb-3">
+                                <label for="txtActHeightPut" class="form-label">Put Actual Height</label>
+                                <input type="text" class="form-control" id="txtActHeightPut">
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <button class="btn btn-primary" onclick="loadPLCGetEmptyTraySlot()" id="btnRetry3a1" style="width:20%;">Get Slot</button>
+                    <button class="btn btn-danger" onclick="loadPLCTakeEmptyTray()" id="btnRetry3a1" style="width:20%;">Take Tray</button>
+                    <button class="btn btn-warning" onclick="loadPLCGetRetrieveTrayStatus()" id="btnRetry3a2" style="width:20%;">Get Tray Status</button>
+
+                    <hr />
+                    <button class="btn btn-danger" onclick="loadPLCPutAway()" id="btnRetry4c1" style="width:20%;">Put Away</button>
+                    <button class="btn btn-warning" onclick="loadPLCGetPutAwayStatus()" id="btnRetry4c2" style="width:20%;">Put Away Status</button>
+
+                    @*     <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                    <label class="form-check-label" for="exampleCheck1">Check me out</label>
+                </div> *@
+                </div>
+            </div>
+            <div class="card card-success card-outline mb-4">
+                <div class="card-header"><div class="card-title">Log</div></div>
+                <div class="card-body">
+                    <div id="log" style="min-height: 200px; max-height: 200px; overflow: scroll;"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+@section Scripts
+{ 
+    <link href="~/css/datatables.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script src="~/js/datatables.min.js"></script>
+    <script src="~/js/sweetalert2.all.min.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            $("#txtLoader").val('00AS01');
+            $("#txtLoaderID").val('2');
+            $("#txtICol").val('1');
+            $("#txtReelId").val('');
+            $("#txtReelCode").val('');
+            $("#txtActHeight").val('');
+            // $("#txtICol").val('1');
+            // $("#txtReelId").val('2F8FC92C-0098-47FB-534E-08DDF03F9ED2');
+            // $("#txtReelCode").val('A00000018');
+            // $("#txtActHeight").val('11');
+
+            $("#txtEmptySlot").val('');
+            $("#txtPutSlot").val('');
+            $("#txtSlotTake").val('1');
+
+        });
+
+        function logToPage(message) {
+            let now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            let seconds = now.getSeconds();
+
+            const logDiv = document.getElementById('log');
+            const newMessage = document.createElement('div');
+            // newMessage.textContent = `${hours}:${minutes}:${seconds} :: ` + message;
+            newMessage.textContent = message;
+            if (message.includes('ERR')) {
+                newMessage.style.color = 'red';
+            }
+            else {
+                newMessage.style.color = 'grey';
+            }
+            logDiv.appendChild(newMessage);
+            newMessage.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+
+        async function loadPLCSetLoaderUnload(loaderId) {
+
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/SetLoaderUnload/" + loaderId,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    console.log('2::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        logToPage('SetUnload :: OK ');
+                        fResult = true;
+                    }
+                    else {
+                        logToPage('SetUnload :: ERR ' + result.errMessage + ' ');
+                        // $('#pSetUnload').html('Set Unload : <span class="error-message" id="errSetUnload"> ' + result.errMessage + ' </span>');
+                    }
+                },
+                error: function (error) {
+                    // $('#pSetUnload').html('Set Unload : <span class="error-message" id="errSetUnload"> ' + error.val + ' </span>');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCStartBarcodeScanner() {
+
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/StartBarcodeScanner/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('2::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        logToPage('ScanQR :: OK ');
+                        fResult = true;
+                    }
+                    else {
+                        logToPage('ScanQR :: ERR ' + result.errMessage + '  ');
+                        // $('#pSetUnload').html('Set Unload : <span class="error-message" id="errSetUnload"> ' + result.errMessage + ' </span>');
+                    }
+                },
+                error: function (error) {
+                    // $('#pSetUnload').html('Set Unload : <span class="error-message" id="errSetUnload"> ' + error.val + ' </span>');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCScanReelID() {
+
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/GetReelID/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    if (result.data.successReel) {
+                        logToPage('GetReel :: OK ');
+                        $("#txtReelId").val(result.data.reel_Id);
+                        $("#txtReelCode").val(result.data.reelCode);
+                        $("#txtActHeight").val(result.data.actualHeight);
+                    }
+                    else {
+                        logToPage('GetReel :: ERR ' + result.data.errMessageReel + ' ');
+                        // $('#pItem3').html('Get Reel Status : <span class="error-message" id="errItem3">' + result.data.errMessageReel + '</span>');
+                    }
+
+                    if (result.success == true) {
+                        fResult = true;
+                    }
+                },
+                error: function (error) {
+                    // $('#pSetUnload').html('Set Unload : <span class="error-message" id="errSetUnload"> ' + error.val + ' </span>');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCSetActualHeight(loaderId) {
+
+            var actH = $("#txtActHeight").val();
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/SetActualHeight/" + loaderId + "/" + actH,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                        logToPage('SetHeight :: OK ');
+                        fResult = true;
+                    }
+                    else {
+                        logToPage('SetHeight :: ERR ' + result.errMessage + ' ');
+                        // $('#pGetReel3').html('Get Reel Status : <span class="error-message" id="errGetReel3">' + result.errMessage + '</span>');
+                    }
+                },
+                error: function (error) {
+                    // $('#pSetUnload').html('Set Unload : <span class="error-message" id="errSetUnload"> ' + error.val + ' </span>');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCGetPickStatus() {
+
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/GetPickStatus/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                        logToPage('PickStatus :: OK ');
+                        fResult = true;
+                    }
+                    else {
+                        logToPage('PickStatus :: ERR ' + result.errMessage + ' ');
+                        // $('#pPick3').html('Pick Status : <span class="error-message" id="errPick3">' + result.errMessage + '</span>');
+                    }
+                },
+                error: function (error) {
+                    // $('#pPick3').html('Pick Status : <span class="error-message" id="errPick3"> ' + error.val + ' </span>');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCPlaceReel() {
+
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/PutReelOnTray/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                        logToPage('SetPlace :: OK ');
+                        fResult = true;
+                    }
+                    else {
+                        logToPage('SetPlace :: ERR ' + result.errMessage + ' ');
+                        // $('#pPlace4').html('Place to Tray Status : <span class="error-message" id="errPlace4">' + result.errMessage + '</span>');
+                    }
+                },
+                error: function (error) {
+                    // $('#pPlace4').html('Place to Tray Status : <span class="error-message" id="errPlace4"> ' + error.val + ' </span>');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCGetPlaceStatus() {
+
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/GetPlaceStatus/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                        logToPage('PlaceStatus :: OK ');
+
+                        $("#txtReelIdPut").val($("#txtReelId").val());
+                        $("#txtReelCodePut").val($("#txtReelCode").val());
+                        $("#txtActHeightPut").val($("#txtActHeight").val());
+
+                        $("#txtReelId").val('');
+                        $("#txtReelCode").val('');
+                        $("#txtActHeight").val('');
+
+                        fResult = true;
+                    }
+                    else {
+                        logToPage('PlaceStatus :: ERR ' + result.errMessage + ' ');
+                        // $('#pPlace4').html('Place to Tray Status : <span class="error-message" id="errPlace4">' + result.errMessage + '</span>');
+                    }
+                },
+                error: function (error) {
+                    // $('#pPlace4').html('Place to Tray Status : <span class="error-message" id="errPlace4"> ' + error.val + ' </span>');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCGetEmptyTraySlot() {
+
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/GetEmptyTraySlot/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    console.log('3::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        logToPage('GetSlot :: OK ');
+
+                        $("#txtEmptySlot").val(result.data.slotCode);
+                        $("#txtPutSlot").val(result.data.slotCode);
+
+                        fResult = true;
+                    }
+                    else {
+                        logToPage('GetSlot :: ERR ' + result.errMessage + ' ');
+                        // $('#pETray3').html('Empty Tray Slot : <span class="error-message" id="errETray3"> ' + result.errMessage + ' </span>');
+                    }
+                },
+                error: function (error) {
+                    // $('#pETray3').html('Empty Tray Slot : <span class="error-message" id="errETray3"> ' + error.val + ' </span>');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCTakeEmptyTray() {
+
+            var eSlot = $("#txtEmptySlot").val();
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/RetrieveTray/" + eSlot,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    console.log('3::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.data.successTray) {
+                        logToPage('GetSlot :: OK ');
+                        fResult = true;
+                    }
+                    else {
+                        logToPage('GetSlot :: ERR ' + result.data.errMessageTray + ' ');
+                    }
+                },
+                error: function (error) {
+                    // $('#pGetTray3').html('Get Tray Status : <span class="error-message" id="errGetTray3"> ' + error.val + ' </span>');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCGetRetrieveTrayStatus() {
+
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/GetRetrieveTrayStatus/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('3::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        logToPage('GetSlotStatus :: OK ');
+                        fResult = true;
+                    }
+                    else {
+                        logToPage('GetSlotStatus :: ERR ' + result.errMessage + ' ');
+                        // $('#pGetTray3').html('Get Tray Status : <span class="error-message" id="errGetTray3">' + result.errMessage + '</span>');
+                    }
+                },
+                error: function (error) {
+                    // $('#pGetTray3').html('Get Tray Status : <span class="error-message" id="errGetTray3"> ' + error.val + ' </span>');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCPutAway() {
+
+            var sCode = $("#txtPutSlot").val();
+            var sTake = $("#txtSlotTake").val();
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/PutAway/" + sCode + "/" + sTake,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                        logToPage('PutAway :: OK ');
+                        fResult = true;
+                    }
+                    else {
+                        logToPage('PutAway :: ERR ' + result.errMessage + ' ');
+                        // $('#pPutAway4').html('Put Away Status : <span class="error-message" id="errPutAway4"> ' + result.errMessage + ' </span>');
+                    }
+                },
+                error: function (error) {
+                    // $('#pPutAway4').html('Put Away Status : <span class="error-message" id="errPutAway4"> ' + error.val + ' </span>');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCGetPutAwayStatus() {
+
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/GetPutAwayStatus/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                        logToPage('PutAway :: OK ');
+                        fResult = true;
+                    }
+                    else {
+                        logToPage('PutAway :: ERR ' + result.errMessage + ' ');
+                        // $('#pPutAway4').html('Put Away Status : <span class="error-message" id="errPutAway4"> ' + result.errMessage + ' </span>');
+                    }
+                },
+                error: function (error) {
+                    // $('#pPutAway4').html('Put Away Status : <span class="error-message" id="errPutAway4"> ' + error.val + ' </span>');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function endTask() {
+            var loaderId = $("#txtLoaderID").val(); 
+            if (loaderId == "") {
+                swal.fire({
+                    icon: 'error',
+                    title: "Wait",
+                    text: "No loader is selected."
+                });
+                return;
+            }
+
+            // all done
+            var iCol = $("#txtICol").val();
+            for (var iC = Number(iCol); iC <= 4; iC++) {
+                await delay(1000);
+                $("#txtICol").val(iC);
+                var setE = await loadPLCSetColumnEmpty(loaderId, Number(iC));
+            }
+            return;
+        }
+
+        async function loadPLCSetColumnEmpty(loaderId, curCol) {
+
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/SetColumnEmpty/"+ loaderId + "/" + curCol,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('2::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        logToPage('SetEmpty :: OK [' + curCol + '] ');
+                        fResult = true;
+                    }
+                    else {
+                        logToPage('SetEmpty :: ERR [' + curCol + '] ' + result.errMessage + ' ');
+                    }
+                },
+                error: function (error) {
+                    // $('#pEmptyColLast').html('Set Empty Column : <span class="error-message" id="errEmptyColLast"> ' + error.val + ' </span>');
+                    // $('#pEmptyCol2').html('Set Empty Column : <span class="error-message" id="errEmptyColLast"> ' + error.val + ' </span>');
+                }
+            });
+
+            return fResult;
+        }
+
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+
+    </script>
+           
+
+}

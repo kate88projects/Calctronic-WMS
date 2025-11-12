@@ -1,5 +1,1627 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿
+<style>
+
+    :root {
+        --bg-main: #2c3e50;
+        --text-color: #ecf0f1;
+        --accent-color: #3498db;
+        --status-ok: #2ecc71;
+        --status-alarm: #e74c3c;
+        --card-bg: #34495e;
+    }
+
+    body {
+        /* font-family: 'Segoe UI', Arial, sans-serif; */
+        background-color: var(--bg-main);
+        color: var(--text-color);
+        margin: 0;
+        padding: 0;
+    }
+
+    header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: var(--card-bg);
+        padding: 20px 20px;
+        /* border-bottom: 3px solid var(--accent-color); */
+    }
+
+    .header-controls {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .select-container label {
+        margin-right: 8px;
+        font-size: 0.9em;
+        color: var(--text-color);
+    }
+
+    select {
+        padding: 8px 12px;
+        background-color: var(--bg-main);
+        color: var(--text-color);
+        border: 1px solid var(--accent-color);
+        border-radius: 4px;
+        appearance: none;
+        cursor: pointer;
+    }
+
+        select:focus {
+            outline: none;
+            border-color: var(--status-ok);
+        }
+
+    .select-container {
+        position: relative;
+    }
+
+        .select-container::after {
+            content: '▼';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: var(--text-color);
+            font-size: 0.7em;
+        }
+
+    input {
+        padding: 8px 12px;
+        background-color: var(--bg-main);
+        color: var(--text-color);
+        border: 1px solid var(--accent-color);
+        border-radius: 4px;
+        appearance: none;
+        cursor: pointer;
+    }
+
+    .system-status {
+        text-align: right;
+    }
+
+    button {
+        padding: 10px 20px;
+        margin: 5px;
+        cursor: pointer;
+        background-color: var(--accent-color);
+        border: none;
+        color: white;
+        font-size: 16px;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+    .control-btn {
+        padding: 10px 15px;
+        font-weight: bold;
+        min-width: 100px;
+        margin: 0;
+    }
+
+    .start-btn {
+        background-color: var(--status-ok); /* Green */
+    }
+
+        .start-btn:hover {
+            background-color: #27ae60;
+        }
+
+    .stop-btn {
+        background-color: var(--status-alarm); /* Red */
+    }
+
+        .stop-btn:hover {
+            background-color: #c0392b;
+        }
+
+    .control-btn:disabled {
+        background-color: #7f8c8d;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .single-page-layout {
+        display: flex;
+        justify-content: space-around;
+        padding: 20px;
+        gap: 20px;
+    }
+
+    .control-session {
+        flex-basis: 50%;
+        background-color: var(--card-bg);
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* --- Gantry Specific Styles --- */
+    .process-visualization {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        margin-top: 20px;
+        padding: 20px;
+        background-color: var(--bg-main);
+        border-radius: 8px;
+        min-height: 265px;
+    }
+
+    .station {
+        text-align: center;
+        width: 150px;
+    }
+
+    .gantry-path {
+        flex-grow: 1;
+        height: 10px;
+        background-color: var(--card-bg);
+        position: relative;
+        margin: 0 20px;
+    }
+
+    .gantry-head {
+        border-radius: 50%;
+        width: 30px;
+        height: 30px; // 40px;
+        background-color: var(--accent-color);
+        position: absolute;
+        top: -10px; // -15px;
+        transition: left 2s ease-in-out, background-color 0.3s;
+    }
+
+        .gantry-head[data-position="loader"] {
+            left: 0%;
+        }
+
+        .gantry-head[data-position="pickup"] {
+            left: 100%;
+            transform: translateX(-100%);
+        }
+
+        .gantry-head[data-has-reel="true"] {
+            background-color: var(--status-ok);
+        }
+
+    /* Loader Viewport acts as a mask/window */
+    .loader-viewport {
+        width: 100%;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+
+    /* Loader Track holds all columns and moves */
+    .loader-track {
+        display: flex;
+        width: 100%;
+        transition: transform 0.8s ease-in-out; /* Smooth sliding animation */
+    }
+
+        /* When the loader track has this class, we apply a dimming effect */
+        .loader-track.picking-dim .col {
+            opacity: 0.4;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+            /* The actively selected column should remain fully visible */
+            .loader-track.picking-dim .col.active-pick {
+                opacity: 1.0;
+            }
+
+            /* Ensure the reel counts and labels within dimmed columns are still somewhat readable */
+            .loader-track.picking-dim .col * {
+                /* Optional: Maintain slightly higher visibility for text elements */
+                /* opacity: 1.0; */
+            }
+
+    /* Individual columns within the track */
+    .col {
+        width: 25%;
+        flex-shrink: 0;
+        background-color: var(--bg-main);
+        border: 2px solid var(--card-bg);
+        padding: 5px;
+        border-radius: 5px;
+        position: relative;
+        text-align: center;
+    }
+
+    .col-label {
+        display: block;
+        font-size: 0.8em;
+        margin-bottom: 5px;
+    }
+
+    .reel {
+        width: 100%;
+        height: 40px;
+        background-color: #95a5a6;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+    .col[data-status="full"] {
+        border-color: var(--status-ok);
+    }
+
+    .col[data-status="empty"] {
+        /* border-color: var(--status-alarm); */
+        border-color: grey;
+    }
+
+    .col[data-status="full"] .reel {
+        background-color: #7f8c8d;
+    }
+
+    .col[data-status="empty"] .reel {
+        display: none;
+    }
+
+    .col[data-status="empty"] {
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+
+    .reel-count {
+        display: block;
+        margin-top: 5px;
+        font-size: 0.9em;
+        font-weight: bold;
+        color: var(--text-color);
+    }
+
+        .reel-count[data-count="0"] {
+            /* color: var(--status-alarm); */
+            color: grey;
+        }
+
+    /* Define the position classes managed by JavaScript */
+    .loader-track.pos-col-1 {
+        transform: translateX(0%);
+    }
+
+    .loader-track.pos-col-2 {
+        transform: translateX(-25%);
+    }
+
+    .loader-track.pos-col-3 {
+        transform: translateX(-50%);
+    }
+
+    .loader-track.pos-col-4 {
+        transform: translateX(-75%);
+    }
+
+
+    /* Loader Battery Display (Single instance) */
+    .loader-battery-display {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+
+        .loader-battery-display .battery-container {
+            width: 80px;
+            height: 15px;
+            background-color: var(--bg-main);
+            border: 1px solid var(--text-color);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .loader-battery-display .battery-level {
+            height: 100%;
+            background-color: var(--status-ok);
+            transition: width 0.5s ease-in-out, background-color 0.5s;
+        }
+
+        .loader-battery-display .battery-text {
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-left: 10px;
+            color: var(--text-color);
+        }
+
+        .loader-battery-display .battery-critical {
+            background-color: var(--status-alarm) !important;
+        }
+
+        .loader-battery-display .battery-low {
+            background-color: #f1c40f !important;
+        }
+
+
+    /* Drawer Station */
+    .drawer-station {
+        width: 200px;
+    }
+
+    .drawer {
+        width: 100%;
+        height: 60px;
+        background-color: var(--bg-main);
+        border: 2px solid var(--accent-color);
+        border-radius: 5px;
+        margin-top: 10px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .reel-on-drawer {
+        width: 90%;
+        height: 40px;
+        background-color: transparent;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+    .drawer[data-status="Placed"] .reel-on-drawer {
+        background-color: #7f8c8d;
+    }
+
+    .drawer[data-status="None"] {
+        /* border-color: var(--status-alarm); */
+        border-color: grey;
+    }
+
+    .drawer[data-status="Drawer"] {
+        /* border-color: var(--status-alarm); */
+        border-color: var(--status-ok);
+    }
+
+    .drawer[data-status="Placed"] {
+        border-color: var(--status-alarm);
+        /* background-color: #5d6d7e; */
+    }
+
+    #drawer-status-text.unavailable, #fork-status-text.unavailable {
+        color: var(--status-alarm);
+        font-weight: bold;
+    }
+
+    /* --- Cartesian Specific Styles (Simplified) --- */
+    .simplified-rack-visualization {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 10px;
+        background-color: var(--bg-main);
+        min-height: 265px;
+        margin-top: 20px;
+    }
+
+    .rack-area {
+        flex-basis: 40%;
+        padding: 20px;
+        background-color: var(--card-bg);
+        border: 2px solid transparent;
+        text-align: center;
+        min-height: 100px;
+    }
+
+    .rack-center {
+        flex-basis: 15%;
+        text-align: center;
+    }
+
+    .robot-location {
+        background-color: var(--accent-color);
+        padding: 10px;
+        border-radius: 5px;
+        transition: background-color 0.5s;
+        margin-bottom: 10px;
+    }
+
+    .rack-area.active {
+        border-color: var(--status-ok);
+        background-color: #34495e;
+        box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
+    }
+
+    /* --- System Log Area --- */
+    .system-log-container {
+        background-color: var(--card-bg);
+        margin: 0px 20px 20px 20px;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid var(--accent-color);
+    }
+
+    #system-log {
+        background-color: var(--bg-main);
+        color: #7f8c8d;
+        height: 150px;
+        overflow-y: auto;
+        padding: 10px;
+        font-family: monospace;
+        font-size: 0.9em;
+        border-radius: 4px;
+    }
+
+    #system-log-2 {
+        background-color: var(--bg-main);
+        color: #7f8c8d;
+        height: 150px;
+        overflow-y: auto;
+        padding: 10px;
+        font-family: monospace;
+        font-size: 0.9em;
+        border-radius: 4px;
+    }
+
+    .log-entry {
+        margin-bottom: 3px;
+        white-space: nowrap;
+    }
+
+    .log-info {
+        color: var(--text-color);
+    }
+
+    .log-alert {
+        color: var(--status-alarm);
+        font-weight: bold;
+    }
+
+    .log-success {
+        color: var(--status-ok);
+    }
+
+    footer {
+        text-align: center;
+        padding: 10px;
+        background-color: var(--card-bg);
+        width: 100%;
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
+
+<header>
+    <h1>SRMS </h1>
+
+    <div class="header-controls">
+        <div class="select-container">
+            <label for="job-select">Job:</label>
+            <select id="job-select" onchange="handleJobChange(this.value)">
+                <option value="job001">Job 001: Assemble A</option>
+                <option value="job002">Job 002: Assemble B</option>
+                <option value="job003">Job 003: Test Run</option>
+            </select>
+        </div>
+
+        <div class="input-container">
+            <label for="loader-input">Loader/Trolley:</label>
+            <input type="text" id="loader-input" />
+        </div>
+
+        <button id="start-btn" onclick="systemStart()" class="control-btn start-btn">Start</button>
+        <button id="stop-btn" onclick="systemStop()" class="control-btn stop-btn">Stop</button>
+    </div>
+
+    <div class="system-status">Status: <span id="master-status">Ready</span></div>
+</header>
+
+<main class="single-page-layout">
+    <!-- Gantry Session Interface (Left Column) -->
+    <section id="gantry-session" class="control-session">
+        <h2>Gantry <span style="font-size: 1.2rem;">(Pick & Place)</span></h2>
+
+
+        <div class="process-visualization">
+            <!-- Loader Section (Left Point) -->
+            <div class="station loader">
+                <h4>Auto Loader</h4>
+                <div class="loader-viewport">
+                    <!-- The inner track that moves left or right -->
+                    <div class="loader-track picking-dim">
+                        <div class="col" id="col-1" data-status="full"><span class="col-label">C1</span><div class="reel"></div><span class="reel-count" data-count="5">5 left</span></div>
+                        <div class="col" id="col-2" data-status="full"><span class="col-label">C2</span><div class="reel"></div><span class="reel-count" data-count="5">5 left</span></div>
+                        <div class="col" id="col-3" data-status="full"><span class="col-label">C3</span><div class="reel"></div><span class="reel-count" data-count="5">5 left</span></div>
+                        <div class="col" id="col-4" data-status="full"><span class="col-label">C4</span><div class="reel"></div><span class="reel-count" data-count="5">5 left</span></div>
+                    </div>
+                </div>
+                @* <p>Next Pick: Column <span id="next-pick-col">1</span></p> *@
+                <br />
+                <div class="loader-battery-display">
+                    <div class="battery-container">
+                        <div class="battery-level" id="loader-battery-level" data-percent="80" style="width: 80%;"></div>
+                    </div>
+                    <span class="battery-text" id="loader-battery-text">80%</span>
+                </div>
+            </div>
+
+            <!-- Gantry Path Visual -->
+            <div class="gantry-path">
+                <div class="gantry-head" data-position="loader" data-has-reel="false"></div>
+                <br />
+                <span id="txtReel">Reel : -</span>
+            </div>
+
+            <!-- Drawer/Placement Section (Right Point & Interface) -->
+            <div class="station drawer-station">
+
+                <h4>Place on Drawer</h4>
+                <div class="drawer" data-status="None">
+                    <div class="reel-on-drawer"></div>
+                </div>
+                <p> <span id="drawer-status-text">No Drawer</span></p>
+                @* <p>Fork Status: <span id="fork-status-text">Retracted</span></p>  Awaiting Place Command *@
+                <div id="gantry-hold-status" >
+                    🚨 Reel Picked!🚨
+                </div>
+                <br />
+            </div>
+        </div>
+
+        <div class="gantry-controls">
+            <br />
+            <button onclick="startPick()" id="btnPick">Pick</button>
+            <button onclick="startPlace()" id="btnPlace">Place</button>
+            <hr />
+            <a href="">Set Unload</a> > <a href="">Scan QR</a> > <a href="">Reed Reel</a> > <a href="">Set Height</a>
+            <br />
+            <a href="">Retry Pick</a> > <a href="">Retry Place</a>
+        </div>
+
+        <input type="hidden" id="txtSetUnload">
+        <input type="hidden" id="txtLoaderId">
+        <input type="hidden" id="txtReelId">
+        <input type="hidden" id="txtReelCode">
+        <input type="hidden" id="txtActHeight">
+        
+        <input type="hidden" id="txtRetrieveSlot">
+        <input type="hidden" id="txtPutSlot">
+        <input type="hidden" id="txtPutSlotTake">
+    </section>
+
+    <!-- Cartesian Session Interface (Right Column) -->
+    <section id="cartesian-session" class="control-session">
+        <h2>Cartesian <span style="font-size: 1.2rem;">(Retrieve & Put Away)</span></h2>
+        <div class="simplified-rack-visualization">
+            <div class="rack-area left-rack" data-area="left">
+                <h4>Left Rack Area</h4>
+                <input type="text" id="left-input" />
+                @* <p id="left-status">Status: IDLE</p> *@
+            </div>
+
+            <div class="rack-center">
+                <div class="robot-location" data-location="center">Robot Arm</div>
+                <p> <span id="cartesian-state-simple">Ready</span></p>
+            </div>
+
+            <div class="rack-area right-rack" data-area="right">
+                <h4>Right Rack Area</h4>
+                <input type="text" id="right-input" />
+                @* <p id="right-status">Status: IDLE</p> *@
+            </div>
+        </div>
+        <div class="cartesian-controls">
+            <br />
+            <button onclick="startRetrieve()">Retrieve</button>
+            <button onclick="startPutAway()">Put Away</button>
+            <hr />
+            <a href="">Get Drawer Slot</a> > <a href="">Retrieve</a> > <a href="">Get Valid Slot</a> > <a href="">Put Away</a>
+            @* <p style="margin-top: 10px;">*Note: Drawer status above syncs with this system.</p> *@
+        </div>
+    </section>
+</main>
+
+<!-- System Log Area -->
+<div class="system-log-container">
+    <h3>System Log <button onclick="clearLog()">Clear Log</button></h3>
+    <div class="row">
+        <div class="col-6">
+            <div id="system-log">
+                <!-- Log entries will be appended here by JavaScript -->
+            </div>
+        </div>
+        <div class="col-6">
+            <div id="system-log-2">
+                <!-- Log entries will be appended here by JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts
+{ 
+    <link href="~/css/datatables.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/datatables.min.js"></script>
+    <script src="~/js/sweetalert2.all.min.js"></script>
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            $("#txtSetUnload").val('0');
+            updateGantryUIState();
+
+        });
+
+        // Centralized state management with system status
+        let sharedDrawerState = {
+            reelPresent: false,
+            drawerStatus: 'None', // States: 'Drawer', 'Placed', 'None'
+            drawerAtInterface: false,
+            cartesianRobotState: 'Idle', // 'Ready', 'Retrieving', 'Proceed Put Away'
+            cartesianCarrying: 'None',
+            cartesianLocation: 'center',
+            systemRunning: false, // Overall system run status
+            loaderBatteryLevel: 80,
+            gantrySequenceState: 'Idle', // 'Idle', 'Picking', 'PickedAndHolding', 'Placing', 'Returning'
+        };
+
+        let colNum = 1;
+
+        /**
+         * Appends a timestamped message to the HMI log display.
+         */
+        function logMessage(message, type = 'info') {
+            const logContainer = document.getElementById('system-log');
+            if (!logContainer) return;
+
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.classList.add('log-entry', `log-${type}`);
+            logEntry.textContent = `[${timestamp}] ${message}`;
+
+            logContainer.appendChild(logEntry);
+
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function logMessage2(message, type = 'info') {
+            const logContainer = document.getElementById('system-log-2');
+            if (!logContainer) return;
+
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.classList.add('log-entry', `log-${type}`);
+            logEntry.textContent = `[${timestamp}] ${message}`;
+
+            logContainer.appendChild(logEntry);
+
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function clearLog() {
+            const logContainer = document.getElementById('system-log');
+            if (logContainer) {
+                logContainer.innerHTML = '';
+                logMessage("Log cleared by operator.", 'alert');
+            }
+            logContainer = document.getElementById('system-log-2');
+            if (logContainer) {
+                logContainer.innerHTML = '';
+                logMessage2("Log cleared by operator.", 'alert');
+            }
+        }
+
+        // Functions to handle the header select changes
+        function handleJobChange(jobId) {
+            logMessage(`Job changed to: ${jobId}`, 'info');
+        }
+
+        // System Start Handler
+        async function systemStart() {
+            if (sharedDrawerState.systemRunning) return;
+
+            // checking is loader valid and get loader info
+            var loader = $("#loader-input").val();
+            var ok = await getLoader(loader);
+            if (ok == false) {
+                return;
+            }
+
+            updateActiveColumn(1);
+
+            sharedDrawerState.systemRunning = true;
+            updateSystemStatusUI();
+            // logMessage("System Start command issued.", 'alert');
+        }
+
+        // System Stop Handler
+        function systemStop() {
+            if (!sharedDrawerState.systemRunning) return;
+            sharedDrawerState.systemRunning = false;
+            updateSystemStatusUI();
+            // logMessage("System Stop command issued. System idling.", 'alert');
+        }
+
+        // Function to update the main header status text and button states
+        function updateSystemStatusUI() {
+            const masterStatusSpan = document.getElementById('master-status');
+            const startBtn = document.getElementById('start-btn');
+            const stopBtn = document.getElementById('stop-btn');
+
+            if (sharedDrawerState.systemRunning) {
+                masterStatusSpan.textContent = 'RUNNING';
+                masterStatusSpan.style.color = 'var(--status-ok)';
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+            } else {
+                masterStatusSpan.textContent = 'STOPPED';
+                masterStatusSpan.style.color = 'var(--status-alarm)';
+                startBtn.disabled = false;
+                stopBtn.disabled = true;
+            }
+        }
+
+        // Helper function to update column status (Gantry side)
+        function updateColumnStatus(colNo, count) {
+            const colElement = document.getElementById('col-' + colNo);
+
+            const countSpan = colElement.querySelector('.reel-count');
+            countSpan.setAttribute('data-count', count);
+            countSpan.textContent = count + ' left';
+
+            if (count === 0) {
+                colElement.setAttribute('data-status', 'empty');
+            } else {
+                colElement.setAttribute('data-status', 'full');
+            }
+        }
+
+        // Function to update the active pick column visually AND move the loader track
+        function updateActiveColumn(columnNumber) {
+            // Remove active-pick class from previous columns
+            document.querySelectorAll('.col').forEach(col => {
+                col.classList.remove('active-pick');
+            });
+
+            const activeCol = document.getElementById('col-' + columnNumber);
+            if (activeCol) {
+                activeCol.classList.add('active-pick');
+                // document.getElementById('next-pick-col').textContent = columnNumber;
+            }
+
+            // Animate the track to the correct position (existing animation logic)
+            const loaderTrack = document.querySelector('.loader-track');
+            loaderTrack.classList.remove('pos-col-1', 'pos-col-2', 'pos-col-3', 'pos-col-4');
+            loaderTrack.classList.add(`pos-col-${columnNumber}`);
+
+            // // Ensure dimming is off by default when just indexing
+            // loaderTrack.classList.remove('picking-dim');
+        }
+
+        function updateGantryUIState() {
+
+            const pickBtn = document.getElementById('btnPick');
+            const placeBtn = document.getElementById('btnPlace');
+            const holdStatusBanner = document.getElementById('gantry-hold-status');
+            const gantryHead = document.querySelector('.gantry-head');
+
+            // Reset visibility/disability first
+            pickBtn.disabled = false;
+            placeBtn.disabled = false;
+            holdStatusBanner.style.display = 'none';
+
+            switch (sharedDrawerState.gantrySequenceState) {
+                case 'Idle':
+                case 'Returning':
+                    pickBtn.disabled = false;
+                    gantryHead.setAttribute('data-position', 'loader'); // Start moving right
+                    break;
+                case 'Picking':
+                    pickBtn.disabled = true;
+                    placeBtn.disabled = true;
+                    break;
+                case 'PickedAndHolding':
+                    pickBtn.disabled = true; // Cannot start new cycle
+                    placeBtn.disabled = false; // Can now continue
+                    gantryHead.setAttribute('data-position', 'pickup'); // Ensure it stays at loader point
+                    gantryHead.setAttribute('data-has-reel', 'true'); // Visually show it holding
+                    holdStatusBanner.style.display = 'block';
+                    break;
+                case 'Placing':
+                    pickBtn.disabled = true;
+                    placeBtn.disabled = true;
+                    break;
+            }
+
+        }
+
+        function updateDrawerStatus(status, text) {
+            const drawer = document.querySelector('.drawer');
+            drawer.setAttribute('data-status', status);
+            document.getElementById('drawer-status-text').textContent = text;
+        }
+
+        function updateCartesian() {
+            document.querySelectorAll('.rack-area').forEach(area => {
+                area.classList.remove('active');
+            });
+
+            if (sharedDrawerState.cartesianLocation === 'left') {
+                document.querySelector('.left-rack').classList.add('active');
+                // document.getElementById('left-status').textContent = "ROBOT PRESENT";
+                // document.getElementById('right-status').textContent = "Status: IDLE";
+            } else if (sharedDrawerState.cartesianLocation === 'right') {
+                document.querySelector('.right-rack').classList.add('active');
+                // document.getElementById('right-status').textContent = "ROBOT PRESENT";
+                // document.getElementById('left-status').textContent = "Status: IDLE";
+            } else {
+                $("#left-input").val('');
+                $("#right-input").val('');
+                // document.getElementById('left-status').textContent = "Status: IDLE";
+                // document.getElementById('right-status').textContent = "Status: IDLE";
+            }
+
+            document.getElementById('cartesian-state-simple').textContent = sharedDrawerState.cartesianRobotState;
+        }
+
+
+        // Gantry + Loader Start Pick
+        async function startPick() {
+            // ... (existing checks for run mode, viewer mode, etc.) ...
+
+            // // ... (existing logic to find next available column if current is empty) ...
+            // if (currentCount === 0) {
+            //     // ... (existing logic for handling empty loader and recursive call) ...
+            //     return;
+            // }
+
+            // --- Proceed with the actual picking sequence if stock is available ---
+
+            // Update the state to 'Picking', which triggers the dimming effect via updateGantryUIState
+            sharedDrawerState.gantrySequenceState = 'Picking';
+            updateGantryUIState();
+            logMessage(`Gantry cycle started: Picking from Column ${colNum}.`, 'info');
+
+            var setUnloadVal = $("#txtSetUnload").val();
+            if (setUnloadVal == '0') {
+                var setUnload = await loadPLCSetLoaderUnload();
+                if (setUnload == false) {
+                    sharedDrawerState.gantrySequenceState = 'Returning';
+                    updateGantryUIState();
+                    return;
+                }
+                await delay(5000);
+            }
+
+            var chkGantry = await loadPLCCheckUnlodingStatus();
+            if (chkGantry == false) {
+                sharedDrawerState.gantrySequenceState = 'Returning';
+                updateGantryUIState();
+                return;
+            }
+
+            var setScan = await loadPLCStartBarcodeScanner();
+            if (setScan == false) {
+                sharedDrawerState.gantrySequenceState = 'Returning';
+                updateGantryUIState();
+                return;
+            }
+            await delay(3000);
+
+            var getReelInfo = await loadPLCScanReelID();
+            if (getReelInfo == false) {
+                sharedDrawerState.gantrySequenceState = 'Returning';
+                updateGantryUIState();
+                return;
+            }
+
+            var setH = await loadPLCSetActualHeight();
+            if (setH == false) {
+                sharedDrawerState.gantrySequenceState = 'Returning';
+                updateGantryUIState();
+                return;
+            }
+
+            sharedDrawerState.gantrySequenceState = 'PickedAndHolding';
+            updateGantryUIState();
+            logMessage(`Gantry cycle end: Picked from Column ${colNum}.`, 'info');
+
+        }
+
+        // Gantry Start Place
+        async function startPlace() {
+            if (sharedDrawerState.drawerStatus != "Drawer") {
+                logMessage(`Drawer is ${sharedDrawerState.drawerStatus}, please check.`, 'alert');
+                return;
+            }
+
+            // Update the state to 'Picking', which triggers the dimming effect via updateGantryUIState
+            sharedDrawerState.gantrySequenceState = 'Placing';
+            updateGantryUIState();
+            logMessage(`Gantry cycle started: Placing on drawer.`, 'info');
+
+            var chkPicked = await loadPLCGetPickStatus();
+            if (chkPicked == false) {
+                sharedDrawerState.gantrySequenceState = 'PickedAndHolding';
+                updateGantryUIState();
+                return;
+            }
+
+            var setPlace = await loadPLCPlaceReel();
+            if (setPlace == false) {
+                sharedDrawerState.gantrySequenceState = 'PickedAndHolding';
+                updateGantryUIState();
+                return;
+            }
+            await delay(8000);
+
+            var chkPlaced = await loadPLCGetPlaceStatus();
+            if (chkPlaced == false) {
+                sharedDrawerState.gantrySequenceState = 'PickedAndHolding';
+                updateGantryUIState();
+                return;
+            }
+
+            sharedDrawerState.drawerStatus = "Placed";
+            updateDrawerStatus('Placed', 'Placed');
+
+            sharedDrawerState.gantrySequenceState = 'Returning';
+            updateGantryUIState();
+            logMessage(`Gantry cycle end: Placed done.`, 'info');
+
+        }
+
+        // Cartesian Start Retrieve Empty Drawer
+        async function startRetrieve() {
+            if (sharedDrawerState.drawerStatus != "None") {
+                logMessage2(`Drawer is ${sharedDrawerState.drawerStatus}, please check.`, 'alert');
+                return;
+            }
+
+            sharedDrawerState.cartesianRobotState = 'Retrieving';
+            logMessage2(`Cartesian cycle started: Retrieve Empty Drawer.`, 'info');
+
+            var getSlotCode = await loadPLCGetEmptyTraySlot();
+            if (getSlotCode == false) {
+                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                return;
+            }
+
+            updateCartesian();
+            var getSlot = await loadPLCTakeEmptyTray();
+            if (getSlot == false) {
+                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                return;
+            }
+            await delay(8000);
+
+            var chkStatus = await loadPLCGetRetrieveTrayStatus();
+            if (chkStatus == false) {
+                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                return;
+            }
+
+            sharedDrawerState.drawerStatus = "Drawer";
+            updateDrawerStatus('Drawer', 'Empty Drawer');
+
+            sharedDrawerState.cartesianRobotState = 'Ready';
+            sharedDrawerState.cartesianLocation = '';
+            updateCartesian();
+            updateDrawerStatus('Drawer', 'Empty Drawer Ready');
+            logMessage2(`Cartesian cycle end: Retrieved.`, 'info');
+        }
+
+        // Cartesian Start Put Away 
+        async function startPutAway() {
+            if (sharedDrawerState.drawerStatus != "Placed") {
+                logMessage2(`Drawer is ${sharedDrawerState.drawerStatus}, please check.`, 'alert');
+                return;
+            }
+
+            sharedDrawerState.cartesianRobotState = 'In Put Away';
+            logMessage2(`Cartesian cycle started: Put Away Reel.`, 'info');
+
+            var getSlotCode = await loadPLCGetSlot();
+            if (getSlotCode == false) {
+                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                return;
+            }
+
+            updateCartesian();
+            var getSlot = await loadPLCPutAway();
+            if (getSlot == false) {
+                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                return;
+            }
+            await delay(8000);
+
+            var chkStatus = await loadPLCGetPutAwayStatus();
+            if (chkStatus == false) {
+                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                return;
+            }
+
+            sharedDrawerState.cartesianRobotState = 'Ready';
+            sharedDrawerState.cartesianLocation = '';
+            updateCartesian();
+
+            sharedDrawerState.drawerStatus = "None";
+            updateDrawerStatus('None', 'No Drawer');
+            logMessage2(`Cartesian cycle end: Put Away Done.`, 'info');
+        }
+
+
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // ----------- Gantry
+        async function getLoader(code) {
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/GetLoaderInfo_PendingToUnLoad/" + code,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    swal.close();
+
+                    if (result.success == true) {
+                        fResult = true;
+
+                        $("#txtLoaderId").val(result.data.loader_Id);
+
+                        updateColumnStatus(1, result.data.col1TotalReels);
+                        updateColumnStatus(2, result.data.col2TotalReels);
+                        updateColumnStatus(3, result.data.col3TotalReels);
+                        updateColumnStatus(4, result.data.col4TotalReels);
+
+                        // $("#txtCol1TotalReels").val(result.data.col1TotalReels);
+                        // $("#txtCol2TotalReels").val(result.data.col2TotalReels);
+                        // $("#txtCol3TotalReels").val(result.data.col3TotalReels);
+                        // $("#txtCol4TotalReels").val(result.data.col4TotalReels);
+
+                        logMessage('Loader :: Done check ' + code, 'info');
+                    }
+                    else {
+                        logMessage('Loader :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    logMessage('Loader :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCSetLoaderUnload() {
+
+            var loaderId = $("#txtLoaderId").val();
+            var fResult = false;
+
+            var setUnloadVal = $("#txtSetUnload").val();
+            if (setUnloadVal == '1') {
+                return;
+            }
+
+            await $.ajax({
+                url: "/api/PLCHubIn/SetLoaderUnload/" + loaderId,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    console.log('2::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+
+                        $("#txtSetUnload").val("1");
+
+                        logMessage('Set Unload :: Done ', 'info');
+                    }
+                    else {
+                        logMessage('Set Unload :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    logMessage('Set Unload :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCCheckUnlodingStatus() {
+
+            var loaderId = $("#txtLoaderId").val();
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/GetUnlodingStatus/" + loaderId,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                        logMessage('Check Unload :: OK ', 'info');
+
+                        fResult = true;
+                    }
+                    else {
+                        if (result.data[0] != "2") {
+                            logMessage('Check Unload :: Err Gripper ' + result.errMessage, 'alert');
+                        }
+                        if (result.data[1] != "16") {
+                            logMessage('Check Unload :: Err Fork ' + result.errMessage, 'alert');
+                        }
+                    }
+                },
+                error: function (error) {
+                    logMessage('Check Unload :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCStartBarcodeScanner() {
+
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/StartBarcodeScanner/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('2::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        logMessage('Start Scan :: Done ', 'info');
+
+                        fResult = true;
+                    }
+                    else {
+                        logMessage('Start Scan :: Err Gripper ' + result.errMessage, 'alert');
+                        // $('#pSetUnload').html('Set Unload : <span class="error-message" id="errSetUnload"> ' + result.errMessage + ' </span>');
+                    }
+                },
+                error: function (error) {
+                    logMessage('Start Scan :: ' + error.val, 'alert');
+                    // $('#pSetUnload').html('Set Unload : <span class="error-message" id="errSetUnload"> ' + error.val + ' </span>');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCScanReelID() {
+
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/GetReelID/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    if (result.data.successReel) {
+                        fResult = true;
+
+                        $("#txtReelId").val(result.data.reel_Id);
+                        $("#txtReelCode").val(result.data.reelCode);
+                        $("#txtActHeight").val(result.data.actualHeight);
+
+                        $('#txtReel').html('Reel : ' + result.data.reelCode);
+
+                        logMessage('Get Scanned :: OK ' + result.data.scannedBarcode, 'info');
+                        logMessage('Get Scanned :: Item Code ' + result.data.itemCode, 'info');
+                        logMessage('Get Scanned :: Reel Id ' + result.data.reel_Id, 'info');
+                        logMessage('Get Scanned :: Reel Code ' + result.data.reelCode, 'info');
+                        logMessage('Get Scanned :: Actual Height ' + result.data.actualHeight, 'info');
+                    }
+                    else {
+                        logMessage('Get Scanned :: ' + result.data.errMessageReel, 'alert');
+                    }
+                },
+                error: function (error) {
+                    logMessage('Get Scanned :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCSetActualHeight() {
+
+            var loaderId = $("#txtLoaderId").val();
+            var actH = $("#txtActHeight").val();
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/SetActualHeight/" + loaderId + "/" + actH,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                        fResult = true;
+
+                        logMessage('Set Height :: Done ' + result.data.scannedBarcode, 'info');
+                    }
+                    else {
+                        logMessage('Set Height :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    logMessage('Set Height :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCGetPickStatus() {
+
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/GetPickStatus/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('3::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        logMessage('Pick Status :: OK ', 'info');
+                    }
+                    else {
+                        logMessage('Pick Status :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    logMessage('Pick Status :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCPlaceReel() {
+
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/PutReelOnTray/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('4::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        logMessage('Place :: Done ', 'info');
+                    }
+                    else {
+                        logMessage('Place :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    logMessage('Place :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCGetPlaceStatus() {
+
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/GetPlaceStatus/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('4::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        logMessage('Place Status :: OK ', 'info');
+                    }
+                    else {
+                        logMessage('Place Status :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    logMessage('Place Status :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        // ----------- Cartesian :: Empty Drawer
+        async function loadPLCGetEmptyTraySlot() {
+
+            var fResult = false;
+
+            // step 2 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/GetEmptyTraySlot/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('3::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        logMessage2('Get Empty Drawer Slot :: Done ', 'info');
+                        $("#txtRetrieveSlot").val(result.data.slotCode);
+                        if (result.data.isLeft == true) {
+                            sharedDrawerState.cartesianLocation = 'left';
+                            $("#left-input").val(result.data.slotCode);
+                        }
+                        else {
+                            sharedDrawerState.cartesianLocation = 'right';
+                            $("#right-input").val(result.data.slotCode);
+                        }
+                    }
+                    else {
+                        logMessage2('Get Empty Drawer Slot :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    logMessage2('Get Empty Drawer Slot :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCTakeEmptyTray() {
+
+            var eSlot = $("#txtRetrieveSlot").val();
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/RetrieveTray/" + eSlot,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('3::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.data.successTray) {
+                        logMessage2('Retrieve :: Done ', 'info');
+                    }
+                    else {
+                        logMessage2('Retrieve :: ' + result.data.errMessageTray, 'alert');
+                    }
+
+                    fResult = result.data.successTray;
+                },
+                error: function (error) {
+                    logMessage2('Retrieve :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCGetRetrieveTrayStatus() {
+
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/GetRetrieveTrayStatus/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('3::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        logMessage2('Retrieve Status :: OK ', 'info');
+                    }
+                    else {
+                        logMessage2('Retrieve Status :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    logMessage2('Retrieve Status :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        // ----------- Cartesian :: Put Away
+        async function loadPLCGetSlot() {
+
+            var actH = $("#txtActHeight").val();
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/GetBottomSlot/" + actH,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('4::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        logMessage2('Get Put Away Slot :: Done ', 'info');
+                        $("#txtPutSlot").val(result.data.slotCode);
+                        $("#txtPutSlotTake").val(result.data.totalSlot);
+                        if (result.data.isLeft == true) {
+                            sharedDrawerState.cartesianLocation = 'left';
+                            $("#left-input").val(result.data.slotCode);
+                        }
+                        else {
+                            sharedDrawerState.cartesianLocation = 'right';
+                            $("#right-input").val(result.data.slotCode);
+                        }
+                    }
+                    else {
+                        logMessage2('Get Put Away Slot :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    logMessage2('Get Put Away Slot :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCPutAway() {
+
+            var sCode = $("#txtPutSlot").val();
+            var sTake = $("#txtPutSlotTake").val();
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/PutAway/" + sCode + "/" + sTake,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('4::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        logMessage2('Put Away :: Done ', 'info');
+                    }
+                    else {
+                        logMessage2('Put Away :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    logMessage2('Put Away :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCGetPutAwayStatus() {
+
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/GetPutAwayStatus/",
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('4::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        logMessage2('Put Away Status :: Done ', 'info');
+                    }
+                    else {
+                        logMessage2('Put Away Status :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    logMessage2('Put Away Status :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+    </script>
+
 }

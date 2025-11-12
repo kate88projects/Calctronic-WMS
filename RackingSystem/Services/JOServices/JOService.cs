@@ -191,7 +191,7 @@ namespace RackingSystem.Services.JOServices
                     {
                         DocNo = jobOrder.data,
                         Description = string.IsNullOrEmpty(job.Description) ? "" : job.Description,
-                        Status = "",
+                        Status = EnumJobOrderStatus.Draft.ToString(),
                         DocDate = DateTime.Now,
                         CreatedBy = job.CreatedBy,
                         CreatedDate = DateTime.Now,

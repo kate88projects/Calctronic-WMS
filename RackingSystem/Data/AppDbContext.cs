@@ -5,6 +5,7 @@ using RackingSystem.Data.GRN;
 using RackingSystem.Data.JO;
 using RackingSystem.Data.Log;
 using RackingSystem.Data.Maintenances;
+using RackingSystem.Data.Rack;
 using RackingSystem.Data.RackJobQueue;
 using RackingSystem.Models.BOM;
 using RackingSystem.Models.GRN;
@@ -75,6 +76,8 @@ namespace RackingSystem.Data
 
         public DbSet<RackJobQueue.RackJobQueue> RackJobQueue { get; set; }
         public DbSet<RackJobQueueLog> RackJobQueueLog { get; set; }
+
+        public DbSet<RackJob> RackJob { get; set; }
 
         // ------------        Log       ------------
         public DbSet<PLCLoaderLog> PLCLoaderLog { get; set; }

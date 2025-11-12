@@ -11,7 +11,7 @@ namespace RackingSystem.Services.RackJobQueueServices
         public Task<ServiceResponseModel<QReqDTO>> DeleteQueue(QReqDTO req);
         public Task<ServiceResponseModel<QReqDTO>> ChangeQueue(QReqDTO req);
 
-        public Task<ServiceResponseModel<List<JobOrder>>> GetJOList_PendingToUnLoad();
+        public Task<ServiceResponseModel<List<JobOrder>>> GetJOList_PendingToQueue();
 
     }
 }
