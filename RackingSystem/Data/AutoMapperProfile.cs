@@ -47,6 +47,7 @@ namespace RackingSystem.Data
             CreateMap<BOMDetail, BOMDtlDTO>();
             CreateMap<BOMDetail, BOMListReqDTO>();
             CreateMap<GRNDetail, GRNDtlListDTO>();
+            CreateMap<GRNDetail, GRNDtlDTO>();
             CreateMap<JobOrder, JOListDTO>();
             CreateMap<JobOrderDetail, JODetailReqDTO>();
         }

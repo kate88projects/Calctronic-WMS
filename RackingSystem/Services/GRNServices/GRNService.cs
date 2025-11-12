@@ -1,20 +1,21 @@
-﻿using Microsoft.EntityFrameworkCore;
-using RackingSystem.Models.Slot;
-using RackingSystem.Models;
-using AutoMapper;
-using RackingSystem.Data;
-using RackingSystem.Models.GRN;
-using System.Drawing.Printing;
-using Microsoft.Data.SqlClient;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.Internal;
-using RackingSystem.Data.Maintenances;
-using RackingSystem.Models.Item;
+using RackingSystem.Data;
 using RackingSystem.Data.GRN;
-using RackingSystem.Helpers;
+using RackingSystem.Data.Maintenances;
 using RackingSystem.General;
+using RackingSystem.Helpers;
+using RackingSystem.Models;
+using RackingSystem.Models.BOM;
+using RackingSystem.Models.GRN;
+using RackingSystem.Models.Item;
 using RackingSystem.Models.Loader;
+using RackingSystem.Models.Slot;
 using System.Drawing;
+using System.Drawing.Printing;
 
 namespace RackingSystem.Services.GRNServices
 {
@@ -301,6 +302,30 @@ namespace RackingSystem.Services.GRNServices
                 result.errStackTrace = ex.StackTrace ?? "";
             }
 
+            return result;
+        }
+
+        public async Task<ServiceResponseModel<GRNDtlDTO>> GetLatestGRNDetail(Guid detailId)
+        {
+            ServiceResponseModel<GRNDtlDTO> result = new ServiceResponseModel<GRNDtlDTO>();
+
+            try
+            {
+                var grnDtl = _dbContext.GRNDetail.Where(d => d.GRNDetail_Id == detailId).FirstOrDefault();
+                var grnDtlDTO = _mapper.Map<GRNDtlDTO>(grnDtl);  //here mapping incorrect
+
+                var itemDtl = _dbContext.Item.Where(d => d.Item_Id == grnDtl.Item_Id).FirstOrDefault();
+                grnDtlDTO.ItemCode = itemDtl.ItemCode;
+                grnDtlDTO.CreatedDateDisplay = grnDtl.CreatedDate.ToString("dd/MM/yyyy HH:mm:ss");
+
+                result.success = true;
+                result.data = grnDtlDTO;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
             return result;
         }
 
