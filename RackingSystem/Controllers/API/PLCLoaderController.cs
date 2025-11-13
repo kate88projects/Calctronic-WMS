@@ -803,6 +803,52 @@ namespace RackingSystem.Controllers.API
             return result;
         }
 
+        [HttpGet("GetLoaderMode/{loaderId}")]
+        public ServiceResponseModel<int> GetLoaderMode(long loaderId)
+        {
+            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
+            string methodName = "GetLoaderMode";
+
+            result.success = true;
+            return result;
+
+            try
+            {
+                var _loader = _dbContext.Loader.Find(loaderId);
+                if (_loader == null)
+                {
+                    result.errMessage = "Loader is not found.";
+                    result.data = 0;
+                    return result;
+                }
+
+                int value = 0;
+                string plcIp = _loader.IPAddr;
+                int port = 502;
+
+                ModbusClient modbusClient = new ModbusClient(plcIp, port);
+                modbusClient.Connect();
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+
+                int startAddress = 4208;
+                int numRegisters = 1;
+
+                int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                value = registers[0];
+
+                modbusClient.Disconnect();
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");
+                result.success = true;
+            }
+            catch (Exception ex)
+            {
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+            return result;
+        }
+
         [HttpPost("EndTask/{loaderId}")]
         public ServiceResponseModel<int> EndTask(long loaderId, [FromBody] int action)
         {
