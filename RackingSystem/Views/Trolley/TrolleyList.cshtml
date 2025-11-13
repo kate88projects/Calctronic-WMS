@@ -44,17 +44,26 @@
         font-size: 15px;
     }
 
-    th.gridjs-th, td.gridjs-td {
-        padding: 12px 16px !important;
+    .gridjs-pagination {
+        font-size: 14px;
+    }
+
+    th.gridjs-th {
+        padding: 10px 15px !important;
+    }
+
+    td.gridjs-td {
+        padding: 8px 15px !important;
     }
 
     .edit-trolley-btn, .delete-trolley-btn {
-        font-size: 15px;
+        height: 33px;
+        padding: 5px 10px;
+        font-size: 14px;
     }
 </style>
 
-@* <br /> *@
-
+<br />
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -200,16 +209,29 @@
                                 { name: 'Trolley Code', id: 'trolleyCode', width: '150px' },
                                 { name: 'IP Address', id: 'ipAddress', width: '145px' },
                                 { name: 'Remark', id: 'remark' },
-                                { name: 'Total Column', id: 'totalCol', width: '155px' },
-                                { name: 'Total Row', id: 'totalRow', width: '140px' },
+                                { 
+                                    name: 'Total Column', 
+                                    id: 'totalCol', 
+                                    width: '155px',
+                                    formatter: (cell) => 
+                                        gridjs.html(`<div style="text-align:center;">${cell}</div>`)
+                                },
+                                { 
+                                    name: 'Total Row', 
+                                    id: 'totalRow', 
+                                    width: '130px',
+                                    formatter: (cell) =>
+                                        gridjs.html(`<div style="text-align:center;">${cell}</div>`)
+                                },
                                 { 
                                     name: 'Active State', 
                                     id: 'isActive', 
                                     width: '150px',
                                     formatter: (cell, row) => {
-                                        return row.cells[5].data === true 
-                                        ? gridjs.html('<span class="badge rounded-pill bg-success" style="font-size: 13px;" >Active</span>')
-                                        : gridjs.html('<span class="badge rounded-pill bg-secondary" style="font-size: 13px;" >InActive</span>');
+                                        const badgeHtml = row.cells[5].data === true
+                                          ? '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
+                                          : '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>';
+                                        return gridjs.html(`<div style="text-align:center;">${badgeHtml}</div>`);
                                     }
                                 },
                                 { name: 'Status', id: 'status', width: '110px' },
@@ -505,7 +527,6 @@
                         }
                     },
                     error: function (error) {
-                        console.log(error);
                         swal.fire({
                             icon: 'error',
                             title: "Wait",
@@ -581,7 +602,6 @@
                             }
                         },
                         error: function (error) {
-                            console.log(error);
                             swal.fire({
                                 icon: 'error',
                                 title: "Wait",

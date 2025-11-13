@@ -808,7 +808,8 @@ namespace RackingSystem.Controllers.API
         {
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             string methodName = "GetLoaderMode";
-
+            
+            //testing
             result.success = true;
             return result;
 
