@@ -170,10 +170,7 @@ namespace RackingSystem.Services
                         RackJobQueue_Id = 0,
                         StartDate = DateTime.Now,
                         LoginIP = "",
-                        CurrentStep = 0,
-                        ReeLId = "",
-                        Slot_Code = "",
-                        Slot_Take = 1
+                        Json = "",
                     };
                     context.RackJob.Add(r);
                     await context.SaveChangesAsync();

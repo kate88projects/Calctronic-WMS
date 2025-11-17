@@ -136,11 +136,11 @@
     }
 
     .tblCol1 {
-        width: 10%;
+        width: 30%;
     }
 
     .tblCol2 {
-        width: 80%;
+        width: 60%;
     }
 
     .tblCol3 {
@@ -207,14 +207,14 @@
                                 <label>Inactive Bin</label>
                             </div>
                         </div>
-                        <div class="row" style="padding:5px;">
+                        @* <div class="row" style="padding:5px;">
                             <div class="col-4">
                                 <img src="../assets/img/lock.png" style="width:12px;height:12px;" />
                             </div>
                             <div class="col-8">
                                 <label>For Empty Tray</label>
                             </div>
-                        </div>
+                        </div> *@
                         <div class="row" style="padding:5px;">
                             <div class="col-4">
                                 <img src="../assets/img/tray_icon_136086.png" style="width:25px;height:25px;" />
@@ -303,6 +303,10 @@
                     <label class="form-label" for="txtRowNo">Row No</label>
                     <input type="text" class="form-control" name="RowNo" id="txtRowNo" aria-describedby="Row No" disabled>
                 </div>
+                <div class="mb-3">
+                    <label class="form-label" for="txtPriority">Priority</label>
+                    <input type="number" class="form-control" name="RowNo" id="txtPriority" aria-describedby="Priority">
+                </div>
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="chkIsActive">
                     <label class="form-check-label" for="chkIsActive">Is Active</label>
@@ -387,7 +391,7 @@
                                 const cell1 = newRow.insertCell(); // or document.createElement('td');
                                 cell1.innerHTML = '<a style="font-size:10px;" ' +
                                 'href="javascript:updateForm(\'' + result.data[idx - 1].slot_Id + '\',\'' + result.data[idx - 1].rowNo + '\',\'' + result.data[idx - 1].isActive + '\', ' +
-                                '\'' + result.data[idx - 1].forEmptyTray + '\',\'' + result.data[idx - 1].hasEmptyTray + '\',\'' + result.data[idx - 1].hasReel + '\',\'' + result.data[idx - 1].reelNo + '\',)" >' + result.data[idx - 1].rowNo + '</a>';
+                                '\'' + result.data[idx - 1].forEmptyTray + '\',\'' + result.data[idx - 1].hasEmptyTray + '\',\'' + result.data[idx - 1].hasReel + '\',\'' + result.data[idx - 1].reelNo + '\',\'' + result.data[idx - 1].priority + '\')" >' + result.data[idx - 1].rowNo + ' [' + result.data[idx - 1].slotCode + ']' +  '</a>';
                                 $(cell1).addClass("tblRow tblCol1");
                                 const cell2 = newRow.insertCell(); // or document.createElement('td');
                                 if (result.data[idx - 1].hasReel) {
@@ -551,7 +555,7 @@
 
         }
 
-        function updateForm(id, rowno, isAct, forET, hasET, hasR, reelNo) {
+        function updateForm(id, rowno, isAct, forET, hasET, hasR, reelNo, p) {
             $("#txtId").val(id);
             $("#txtRowNo").val(rowno);
             if (isAct == "true") {
@@ -579,6 +583,7 @@
                 document.getElementById("chkHasReel").checked = false;
             }
             $("#txtReelNo").val(reelNo);
+            $("#txtPriority").val(p);
             $("#myModal").modal("show");
         }
 

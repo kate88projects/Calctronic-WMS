@@ -69,7 +69,7 @@
             font-size: 0.7em;
         }
 
-    input {
+    input:not([type]), input[type="text"], input[type="number"] {
         padding: 8px 12px;
         background-color: var(--bg-main);
         color: var(--text-color);
@@ -505,7 +505,7 @@
 
         <div class="input-container">
             <label for="loader-input">Loader/Trolley:</label>
-            <input type="text" id="loader-input" />
+            <input type="text" class="form-check" id="loader-input" />
         </div>
 
         <button id="start-btn" onclick="systemStart()" class="control-btn start-btn">Start</button>
@@ -513,6 +513,11 @@
     </div>
 
     <div class="system-status">Status: <span id="master-status">Ready</span></div>
+    <div class="input-container">
+        <label for="chkAutoRun">Auto:</label>
+        <input type="checkbox" id="chkAutoRun" />
+    </div>
+
 </header>
 
 <main class="single-page-layout">
@@ -528,10 +533,10 @@
                 <div class="loader-viewport">
                     <!-- The inner track that moves left or right -->
                     <div class="loader-track picking-dim">
-                        <div class="col" id="col-1" data-status="full"><span class="col-label">C1</span><div class="reel"></div><span class="reel-count" data-count="5">5 left</span></div>
-                        <div class="col" id="col-2" data-status="full"><span class="col-label">C2</span><div class="reel"></div><span class="reel-count" data-count="5">5 left</span></div>
-                        <div class="col" id="col-3" data-status="full"><span class="col-label">C3</span><div class="reel"></div><span class="reel-count" data-count="5">5 left</span></div>
-                        <div class="col" id="col-4" data-status="full"><span class="col-label">C4</span><div class="reel"></div><span class="reel-count" data-count="5">5 left</span></div>
+                        <div class="col" id="col-1" data-status="full"><span class="col-label">C1</span><div class="reel"></div><span class="reel-count" data-count="0">- left</span></div>
+                        <div class="col" id="col-2" data-status="full"><span class="col-label">C2</span><div class="reel"></div><span class="reel-count" data-count="0">- left</span></div>
+                        <div class="col" id="col-3" data-status="full"><span class="col-label">C3</span><div class="reel"></div><span class="reel-count" data-count="0">- left</span></div>
+                        <div class="col" id="col-4" data-status="full"><span class="col-label">C4</span><div class="reel"></div><span class="reel-count" data-count="0">- left</span></div>
                     </div>
                 </div>
                 @* <p>Next Pick: Column <span id="next-pick-col">1</span></p> *@
@@ -540,7 +545,7 @@
                     <div class="battery-container">
                         <div class="battery-level" id="loader-battery-level" data-percent="80" style="width: 80%;"></div>
                     </div>
-                    <span class="battery-text" id="loader-battery-text">80%</span>
+                    <span class="battery-text" id="loader-battery-text">- %</span>
                 </div>
             </div>
 
@@ -569,23 +574,31 @@
 
         <div class="gantry-controls">
             <br />
-            <button onclick="startPick()" id="btnPick">Pick</button>
-            <button onclick="startPlace()" id="btnPlace">Place</button>
+            <button onclick="startPick()">Pick</button>
+            <button onclick="startPlace()">Place</button>
             <hr />
-            <a href="">Set Unload</a> > <a href="">Scan QR</a> > <a href="">Reed Reel</a> > <a href="">Set Height</a>
+            <a href="javascript:loadPLCSetLoaderUnload()">Set Unload</a> > <a href="javascript:loadPLCScanReelID()">Scan QR</a> > <a href="javascript:loadPLCScanReelID()">Reed Reel</a> > <a href="javascript:loadPLCSetActualHeight()">Set Height (Pick)</a>
             <br />
-            <a href="">Retry Pick</a> > <a href="">Retry Place</a>
+            <a href="javascript:retry_PickStatus()">Pick Status</a> > <a href="javascript:loadPLCPlaceReel()">Place</a> > <a href="javascript:retry_PlaceStatus()">Place Status</a>
         </div>
 
-        <input type="hidden" id="txtSetUnload">
-        <input type="hidden" id="txtLoaderId">
-        <input type="hidden" id="txtReelId">
-        <input type="hidden" id="txtReelCode">
-        <input type="hidden" id="txtActHeight">
-        
-        <input type="hidden" id="txtRetrieveSlot">
-        <input type="hidden" id="txtPutSlot">
-        <input type="hidden" id="txtPutSlotTake">
+        <input type="hidden" id="txtSetUnload" autocomplete="off">
+        <input type="hidden" id="txtLoaderId" autocomplete="off">
+        <input type="hidden" id="txtCol1TotalReels" autocomplete="off">
+        <input type="hidden" id="txtCol2TotalReels" autocomplete="off">
+        <input type="hidden" id="txtCol3TotalReels" autocomplete="off">
+        <input type="hidden" id="txtCol4TotalReels" autocomplete="off">
+
+        <div style="height:42px;"></div>
+        <input type="text" id="txtReelId" placeholder="Reel Id" autocomplete="off">
+        <input type="text" id="txtReelCode" placeholder="Reel Code" autocomplete="off">
+        <input type="number" id="txtActHeight" placeholder="Height" autocomplete="off">
+
+        <hr />
+        <p style="position: relative; text-align: right; margin-bottom: 0; padding-right: 2px;"><a href="javascript:clearLog();" style="color:red;">Clear Log</a></p>
+        <div id="system-log">
+            <!-- Log entries will be appended here by JavaScript -->
+        </div>
     </section>
 
     <!-- Cartesian Session Interface (Right Column) -->
@@ -594,7 +607,7 @@
         <div class="simplified-rack-visualization">
             <div class="rack-area left-rack" data-area="left">
                 <h4>Left Rack Area</h4>
-                <input type="text" id="left-input" />
+                <input type="text" id="left-input" autocomplete="off" />
                 @* <p id="left-status">Status: IDLE</p> *@
             </div>
 
@@ -605,7 +618,7 @@
 
             <div class="rack-area right-rack" data-area="right">
                 <h4>Right Rack Area</h4>
-                <input type="text" id="right-input" />
+                <input type="text" id="right-input" autocomplete="off" />
                 @* <p id="right-status">Status: IDLE</p> *@
             </div>
         </div>
@@ -614,29 +627,28 @@
             <button onclick="startRetrieve()">Retrieve</button>
             <button onclick="startPutAway()">Put Away</button>
             <hr />
-            <a href="">Get Drawer Slot</a> > <a href="">Retrieve</a> > <a href="">Get Valid Slot</a> > <a href="">Put Away</a>
+            <a href="javascript:loadPLCGetEmptyTraySlot()">Get Drawer Slot</a> > <a href="javascript:loadPLCTakeEmptyTray()">Retrieve</a> >
+            <a href="javascript:loadPLCGetSlot()">Get Valid Slot</a> > <a href="javascript:loadPLCPutAway()">Put Away</a>
             @* <p style="margin-top: 10px;">*Note: Drawer status above syncs with this system.</p> *@
+            <br />
+            <a href="javascript:retry_RetrieveStatus()">Retrieve Status</a> > <a href="javascript:retry_PutAwayStatus()">Put Away Status</a>
+        </div>
+
+        <input type="text" id="txtRetrieveSlot" placeholder="Retrieve Slot" autocomplete="off">
+        <input type="text" id="txtPutSlot" placeholder="Put Slot" autocomplete="off">
+        <input type="number" id="txtPutSlotTake" placeholder="Slot Take" autocomplete="off">
+        <br />
+        <input type="text" id="txtReelIdC" placeholder="Reel Id" autocomplete="off">
+        <input type="text" id="txtReelCodeC" placeholder="Reel Code" autocomplete="off">
+        <input type="number" id="txtActHeightC" placeholder="Height" autocomplete="off">
+
+        <hr />
+        <p style="position: relative; text-align: right; margin-bottom: 0; padding-right: 2px;"><a href="javascript:clearLog2();" style="color:red;">Clear Log</a></p>
+        <div id="system-log-2">
+            <!-- Log entries will be appended here by JavaScript -->
         </div>
     </section>
 </main>
-
-<!-- System Log Area -->
-<div class="system-log-container">
-    <h3>System Log <button onclick="clearLog()">Clear Log</button></h3>
-    <div class="row">
-        <div class="col-6">
-            <div id="system-log">
-                <!-- Log entries will be appended here by JavaScript -->
-            </div>
-        </div>
-        <div class="col-6">
-            <div id="system-log-2">
-                <!-- Log entries will be appended here by JavaScript -->
-            </div>
-        </div>
-    </div>
-</div>
-
 
 @section Scripts
 { 
@@ -649,27 +661,31 @@
 
     <script type="text/javascript">
 
-        $(document).ready(function () {
-
-            $("#txtSetUnload").val('0');
-            updateGantryUIState();
-
-        });
-
         // Centralized state management with system status
         let sharedDrawerState = {
-            reelPresent: false,
             drawerStatus: 'None', // States: 'Drawer', 'Placed', 'None'
-            drawerAtInterface: false,
-            cartesianRobotState: 'Idle', // 'Ready', 'Retrieving', 'Proceed Put Away'
-            cartesianCarrying: 'None',
+            cartesianRobotState: 'Ready', // 'Ready', 'Retrieving', 'Proceed Put Away'
             cartesianLocation: 'center',
             systemRunning: false, // Overall system run status
-            loaderBatteryLevel: 80,
-            gantrySequenceState: 'Idle', // 'Idle', 'Picking', 'PickedAndHolding', 'Placing', 'Returning'
+            gantrySequenceState: 'Returning', // 'PickedAndHolding', 'Placing', 'Returning'
         };
 
         let colNum = 1;
+        var gantryAutoTimer;
+        var cartesianAutoTimer;
+        let inPickMove = false;
+        let inPlaceMove = false;
+        let inRetrieveMove = false;
+        let inPutAwayMove = false;
+
+        $(document).ready(function () {
+            disableDivContent(true);
+            $("#txtActHeight").val('');
+            $("#txtActHeightC").val('');
+            $("#txtSetUnload").val('0');
+            updateSystemStatusUI();
+            updateGantryUIState();
+        });
 
         /**
          * Appends a timestamped message to the HMI log display.
@@ -708,7 +724,10 @@
                 logContainer.innerHTML = '';
                 logMessage("Log cleared by operator.", 'alert');
             }
-            logContainer = document.getElementById('system-log-2');
+        }
+
+        function clearLog2() {
+            const logContainer = document.getElementById('system-log-2');
             if (logContainer) {
                 logContainer.innerHTML = '';
                 logMessage2("Log cleared by operator.", 'alert');
@@ -726,16 +745,51 @@
 
             // checking is loader valid and get loader info
             var loader = $("#loader-input").val();
+            if (loader == undefined) {
+                logMessage('Loader :: Please scan loader', 'alert');
+                return;
+            }
+            if (loader == '') {
+                logMessage('Loader :: Please scan loader', 'alert');
+                return;
+            }
             var ok = await getLoader(loader);
             if (ok == false) {
                 return;
             }
 
-            updateActiveColumn(1);
+            // 1. check Need SetUnload
+            var setUnloadVal = $("#txtSetUnload").val();
+            if (setUnloadVal == '0') {
+                var chkMode = await loadPLCCheckMode();
+                if (chkMode == false) {
+                    return;
+                }
+                var setUnload = await loadPLCSetLoaderUnload();
+                if (setUnload == false) {
+                    return;
+                }
+            }
+
+            // 2. Get PLC Current Column
+            var col = await loadPLCGetCurrentColumn();
+            if (col == false) {
+                return;
+            }
+
+            // 3. Continue UI
+            disableDivContent(false);
+
+            updateActiveColumn(colNum);
 
             sharedDrawerState.systemRunning = true;
             updateSystemStatusUI();
             // logMessage("System Start command issued.", 'alert');
+
+            // 4. Continue
+             gantryAutoTimer = setTimeout(gantryAuto, 3000); //3 second workout
+             cartesianAutoTimer = setTimeout(cartesianAuto, 3000); //3 second workout
+
         }
 
         // System Stop Handler
@@ -744,6 +798,9 @@
             sharedDrawerState.systemRunning = false;
             updateSystemStatusUI();
             // logMessage("System Stop command issued. System idling.", 'alert');
+
+            clearTimeout(gantryAutoTimer);
+            clearTimeout(cartesianAutoTimer);
         }
 
         // Function to update the main header status text and button states
@@ -804,36 +861,31 @@
 
         function updateGantryUIState() {
 
-            const pickBtn = document.getElementById('btnPick');
-            const placeBtn = document.getElementById('btnPlace');
+            // const pickBtn = document.getElementById('btnPick');
+            // const placeBtn = document.getElementById('btnPlace');
             const holdStatusBanner = document.getElementById('gantry-hold-status');
             const gantryHead = document.querySelector('.gantry-head');
 
             // Reset visibility/disability first
-            pickBtn.disabled = false;
-            placeBtn.disabled = false;
+            // pickBtn.disabled = false;
+            // placeBtn.disabled = false;
             holdStatusBanner.style.display = 'none';
 
             switch (sharedDrawerState.gantrySequenceState) {
-                case 'Idle':
                 case 'Returning':
-                    pickBtn.disabled = false;
+                    // pickBtn.disabled = false;
                     gantryHead.setAttribute('data-position', 'loader'); // Start moving right
                     break;
-                case 'Picking':
-                    pickBtn.disabled = true;
-                    placeBtn.disabled = true;
-                    break;
                 case 'PickedAndHolding':
-                    pickBtn.disabled = true; // Cannot start new cycle
-                    placeBtn.disabled = false; // Can now continue
+                    // pickBtn.disabled = true; // Cannot start new cycle
+                    // placeBtn.disabled = false; // Can now continue
                     gantryHead.setAttribute('data-position', 'pickup'); // Ensure it stays at loader point
                     gantryHead.setAttribute('data-has-reel', 'true'); // Visually show it holding
                     holdStatusBanner.style.display = 'block';
                     break;
                 case 'Placing':
-                    pickBtn.disabled = true;
-                    placeBtn.disabled = true;
+                    // pickBtn.disabled = true;
+                    // placeBtn.disabled = true;
                     break;
             }
 
@@ -868,39 +920,121 @@
             document.getElementById('cartesian-state-simple').textContent = sharedDrawerState.cartesianRobotState;
         }
 
+        function disableDivContent(status) {
+            const div2 = document.getElementById('gantry-session');
+            if (div2) {
+                const interactiveElements = div2.querySelectorAll('button'); // input, select, textarea,
+                interactiveElements.forEach(element => {
+                    element.setAttribute('disabled', status);
+                    if (status == false) {
+                        element.removeAttribute('disabled');
+                    }
+                });
+            }
 
+            const div = document.getElementById('cartesian-session');
+            if (div) {
+                const interactiveElements = div.querySelectorAll('button'); // input, select, textarea,
+                interactiveElements.forEach(element => {
+                    element.setAttribute('disabled', status);
+                    if (status == false) {
+                        element.removeAttribute('disabled');
+                    }
+                });
+            }
+
+            if (status == true) {
+                const links = document.querySelectorAll('a');
+                links.forEach(link => {
+                  // Store the original href in a data attribute
+                  link.dataset.originalHref = link.href;
+                  // Remove the href attribute to prevent navigation
+                  link.removeAttribute('href');
+                  // Optionally, add a class for visual styling and set aria-disabled for accessibility
+                  link.classList.add('disabled-link');
+                  link.setAttribute('aria-disabled', 'true');
+                });
+            }
+            else {
+                const links = document.querySelectorAll('a');
+                links.forEach(link => {
+                  // Restore the original href from the data attribute
+                  if (link.dataset.originalHref) {
+                    link.href = link.dataset.originalHref;
+                    delete link.dataset.originalHref; // Clean up the data attribute
+                  }
+                  // Remove the styling class and aria-disabled attribute
+                  link.classList.remove('disabled-link');
+                  link.removeAttribute('aria-disabled');
+                });
+            }
+        }
+
+        // ----------- Keep Action
+        function updateAction() {
+
+        }
+
+        // ----------- Action (Auto Mode)
+        function gantryAuto() {
+            const chkAutoRun = document.getElementById('chkAutoRun');
+            if (chkAutoRun.checked) {
+                // 1. if gantry no pick then just pick
+                if (sharedDrawerState.systemRunning == true && sharedDrawerState.gantrySequenceState == "Returning" && inPickMove == false && inPlaceMove == false) {
+                    startPick();
+                }
+
+                // 2. if gantry picked then just place
+                if (sharedDrawerState.systemRunning == true && sharedDrawerState.gantrySequenceState == "PickedAndHolding" && sharedDrawerState.drawerStatus == "Drawer" && inPickMove == false && inPlaceMove == false) {
+
+                }
+            }
+        }
+
+        function cartesianAuto() {
+            const chkAutoRun = document.getElementById('chkAutoRun');
+            if (chkAutoRun.checked) {
+                // 1. if no drawer just take (reelId MUST have first cause need get actual height)
+                if (inPickMove == false) {
+
+                }
+
+                // 2. if have drawer and placed then just put away
+
+            }
+        }
+
+        // ----------- Action
         // Gantry + Loader Start Pick
         async function startPick() {
-            // ... (existing checks for run mode, viewer mode, etc.) ...
-
-            // // ... (existing logic to find next available column if current is empty) ...
-            // if (currentCount === 0) {
-            //     // ... (existing logic for handling empty loader and recursive call) ...
-            //     return;
-            // }
-
-            // --- Proceed with the actual picking sequence if stock is available ---
-
-            // Update the state to 'Picking', which triggers the dimming effect via updateGantryUIState
-            sharedDrawerState.gantrySequenceState = 'Picking';
-            updateGantryUIState();
-            logMessage(`Gantry cycle started: Picking from Column ${colNum}.`, 'info');
-
-            var setUnloadVal = $("#txtSetUnload").val();
-            if (setUnloadVal == '0') {
-                var setUnload = await loadPLCSetLoaderUnload();
-                if (setUnload == false) {
-                    sharedDrawerState.gantrySequenceState = 'Returning';
-                    updateGantryUIState();
-                    return;
-                }
-                await delay(5000);
+            if (inPickMove == true) {
+                return;
             }
+            if (sharedDrawerState.systemRunning != true) {
+                logMessage(`System not yet start.`, 'alert');
+                return;
+            }
+            if (sharedDrawerState.gantrySequenceState != "Returning") {
+                logMessage(`Drawer is ${sharedDrawerState.gantrySequenceState}, please check.`, 'alert');
+                return;
+            }
+
+            logMessage(`Gantry cycle started: Picking from Column ${colNum}.`, 'info');
+            inPickMove = true;
 
             var chkGantry = await loadPLCCheckUnlodingStatus();
             if (chkGantry == false) {
                 sharedDrawerState.gantrySequenceState = 'Returning';
                 updateGantryUIState();
+                inPickMove = false;
+                return;
+            }
+
+            var turn = await turnCol(1);
+            if (turn == false) {
+                sharedDrawerState.gantrySequenceState = 'Returning';
+                updateGantryUIState();
+                inPickMove = false;
                 return;
             }
 
@@ -908,6 +1042,7 @@
             if (setScan == false) {
                 sharedDrawerState.gantrySequenceState = 'Returning';
                 updateGantryUIState();
+                inPickMove = false;
                 return;
             }
             await delay(3000);
@@ -916,6 +1051,7 @@
             if (getReelInfo == false) {
                 sharedDrawerState.gantrySequenceState = 'Returning';
                 updateGantryUIState();
+                inPickMove = false;
                 return;
             }
 
@@ -923,17 +1059,34 @@
             if (setH == false) {
                 sharedDrawerState.gantrySequenceState = 'Returning';
                 updateGantryUIState();
+                inPickMove = false;
+                return;
+            }
+
+            var chkPicked = await loadPLCGetPickStatus();
+            if (chkPicked == false) {
+                sharedDrawerState.gantrySequenceState = 'Returning';
+                updateGantryUIState();
+                inPickMove = false;
                 return;
             }
 
             sharedDrawerState.gantrySequenceState = 'PickedAndHolding';
             updateGantryUIState();
             logMessage(`Gantry cycle end: Picked from Column ${colNum}.`, 'info');
+            inPickMove = false;
 
         }
 
         // Gantry Start Place
         async function startPlace() {
+            if (inPlaceMove == true) {
+                return;
+            }
+            if (sharedDrawerState.systemRunning != true) {
+                logMessage(`System not yet start.`, 'alert');
+                return;
+            }
             if (sharedDrawerState.drawerStatus != "Drawer") {
                 logMessage(`Drawer is ${sharedDrawerState.drawerStatus}, please check.`, 'alert');
                 return;
@@ -943,22 +1096,163 @@
             sharedDrawerState.gantrySequenceState = 'Placing';
             updateGantryUIState();
             logMessage(`Gantry cycle started: Placing on drawer.`, 'info');
-
-            var chkPicked = await loadPLCGetPickStatus();
-            if (chkPicked == false) {
-                sharedDrawerState.gantrySequenceState = 'PickedAndHolding';
-                updateGantryUIState();
-                return;
-            }
+            inPlaceMove = true;
 
             var setPlace = await loadPLCPlaceReel();
             if (setPlace == false) {
                 sharedDrawerState.gantrySequenceState = 'PickedAndHolding';
                 updateGantryUIState();
+                inPlaceMove = false;
                 return;
             }
-            await delay(8000);
+            await delay(3000);
 
+            var chkPlaced = await loadPLCGetPlaceStatus();
+            if (chkPlaced == false) {
+                sharedDrawerState.gantrySequenceState = 'PickedAndHolding';
+                updateGantryUIState();
+                inPlaceMove = false;
+                return;
+            }
+
+            sharedDrawerState.drawerStatus = "Placed";
+            updateDrawerStatus('Placed', 'Placed');
+
+            sharedDrawerState.gantrySequenceState = 'Returning';
+            updateGantryUIState();
+            logMessage(`Gantry cycle end: Placed done.`, 'info');
+            inPlaceMove = false;
+
+        }
+
+        // Cartesian Start Retrieve Empty Drawer
+        async function startRetrieve() {
+            if (inRetrieveMove == true) {
+                return;
+            }
+            if (sharedDrawerState.systemRunning != true) {
+                logMessage(`System not yet start.`, 'alert');
+                return;
+            }
+            if (sharedDrawerState.drawerStatus != "None") {
+                logMessage2(`Drawer is ${sharedDrawerState.drawerStatus}, please check.`, 'alert');
+                return;
+            }
+
+            var actH = $("#txtActHeight").val();
+            if (actH == "") {
+                return;
+            }
+
+            sharedDrawerState.cartesianRobotState = 'Retrieving';
+            logMessage2(`Cartesian cycle started: Retrieve Empty Drawer.`, 'info');
+            inRetrieveMove = true;
+
+            var getSlotCode = await loadPLCGetEmptyTraySlot();
+            if (getSlotCode == false) {
+                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                inRetrieveMove = false;
+                return;
+            }
+
+            updateCartesian();
+            var getSlot = await loadPLCTakeEmptyTray();
+            if (getSlot == false) {
+                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                inRetrieveMove = false;
+                return;
+            }
+            await delay(5000);
+
+            var chkStatus = await loadPLCGetRetrieveTrayStatus();
+            if (chkStatus == false) {
+                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                inRetrieveMove = false;
+                return;
+            }
+
+            sharedDrawerState.drawerStatus = "Drawer";
+            updateDrawerStatus('Drawer', 'Empty Drawer');
+
+            sharedDrawerState.cartesianRobotState = 'Ready';
+            sharedDrawerState.cartesianLocation = '';
+            updateCartesian();
+            updateDrawerStatus('Drawer', 'Empty Drawer Ready');
+            logMessage2(`Cartesian cycle end: Retrieved.`, 'info');
+            inRetrieveMove = false;
+        }
+
+        // Cartesian Start Put Away
+        async function startPutAway() {
+            if (inPutAwayMove == true) {
+                return;
+            }
+            if (sharedDrawerState.systemRunning != true) {
+                logMessage(`System not yet start.`, 'alert');
+                return;
+            }
+            if (sharedDrawerState.drawerStatus != "Placed") {
+                logMessage2(`Drawer is ${sharedDrawerState.drawerStatus}, please check.`, 'alert');
+                return;
+            }
+
+            var actH = $("#txtActHeightC").val();
+            if (actH == "") {
+                return;
+            }
+
+            sharedDrawerState.cartesianRobotState = 'In Put Away';
+            logMessage2(`Cartesian cycle started: Put Away Reel.`, 'info');
+            inPutAwayMove = true;
+
+            var getSlotCode = await loadPLCGetSlot();
+            if (getSlotCode == false) {
+                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                inPutAwayMove = false;
+                return;
+            }
+
+            updateCartesian();
+            var getSlot = await loadPLCPutAway();
+            if (getSlot == false) {
+                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                inPutAwayMove = false;
+                return;
+            }
+            await delay(5000);
+
+            var chkStatus = await loadPLCGetPutAwayStatus();
+            if (chkStatus == false) {
+                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                inPutAwayMove = false;
+                return;
+            }
+
+            sharedDrawerState.cartesianRobotState = 'Ready';
+            sharedDrawerState.cartesianLocation = '';
+            updateCartesian();
+
+            sharedDrawerState.drawerStatus = "None";
+            updateDrawerStatus('None', 'No Drawer');
+            logMessage2(`Cartesian cycle end: Put Away Done.`, 'info');
+            inPutAwayMove = false;
+        }
+
+
+        // ----------- Action :: retry
+        async function retry_PickStatus() {
+            var chkPicked = await loadPLCGetPickStatus();
+            if (chkPicked == false) {
+                sharedDrawerState.gantrySequenceState = 'Returning';
+                updateGantryUIState();
+                return;
+            }
+
+            sharedDrawerState.gantrySequenceState = 'PickedAndHolding';
+            updateGantryUIState();
+        }
+
+        async function retry_PlaceStatus() {
             var chkPlaced = await loadPLCGetPlaceStatus();
             if (chkPlaced == false) {
                 sharedDrawerState.gantrySequenceState = 'PickedAndHolding';
@@ -971,34 +1265,10 @@
 
             sharedDrawerState.gantrySequenceState = 'Returning';
             updateGantryUIState();
-            logMessage(`Gantry cycle end: Placed done.`, 'info');
 
         }
 
-        // Cartesian Start Retrieve Empty Drawer
-        async function startRetrieve() {
-            if (sharedDrawerState.drawerStatus != "None") {
-                logMessage2(`Drawer is ${sharedDrawerState.drawerStatus}, please check.`, 'alert');
-                return;
-            }
-
-            sharedDrawerState.cartesianRobotState = 'Retrieving';
-            logMessage2(`Cartesian cycle started: Retrieve Empty Drawer.`, 'info');
-
-            var getSlotCode = await loadPLCGetEmptyTraySlot();
-            if (getSlotCode == false) {
-                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
-                return;
-            }
-
-            updateCartesian();
-            var getSlot = await loadPLCTakeEmptyTray();
-            if (getSlot == false) {
-                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
-                return;
-            }
-            await delay(8000);
-
+        async function retry_RetrieveStatus() {
             var chkStatus = await loadPLCGetRetrieveTrayStatus();
             if (chkStatus == false) {
                 sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
@@ -1012,33 +1282,9 @@
             sharedDrawerState.cartesianLocation = '';
             updateCartesian();
             updateDrawerStatus('Drawer', 'Empty Drawer Ready');
-            logMessage2(`Cartesian cycle end: Retrieved.`, 'info');
         }
 
-        // Cartesian Start Put Away 
-        async function startPutAway() {
-            if (sharedDrawerState.drawerStatus != "Placed") {
-                logMessage2(`Drawer is ${sharedDrawerState.drawerStatus}, please check.`, 'alert');
-                return;
-            }
-
-            sharedDrawerState.cartesianRobotState = 'In Put Away';
-            logMessage2(`Cartesian cycle started: Put Away Reel.`, 'info');
-
-            var getSlotCode = await loadPLCGetSlot();
-            if (getSlotCode == false) {
-                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
-                return;
-            }
-
-            updateCartesian();
-            var getSlot = await loadPLCPutAway();
-            if (getSlot == false) {
-                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
-                return;
-            }
-            await delay(8000);
-
+        async function retry_PutAwayStatus() {
             var chkStatus = await loadPLCGetPutAwayStatus();
             if (chkStatus == false) {
                 sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
@@ -1051,9 +1297,7 @@
 
             sharedDrawerState.drawerStatus = "None";
             updateDrawerStatus('None', 'No Drawer');
-            logMessage2(`Cartesian cycle end: Put Away Done.`, 'info');
         }
-
 
 
         function delay(ms) {
@@ -1065,7 +1309,7 @@
             var fResult = false;
 
             await $.ajax({
-                url: "/api/PLCHubIn/GetLoaderInfo_PendingToUnLoad/" + code,
+                url: "/api/PLCHubIn/StartUnload/" + code,
                 type: "GET",
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
@@ -1082,22 +1326,23 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
+                    // console.log(result);
                     swal.close();
 
                     if (result.success == true) {
                         fResult = true;
 
-                        $("#txtLoaderId").val(result.data.loader_Id);
+                        $("#txtLoaderId").val(result.data.loaderInfo.loader_Id);
 
-                        updateColumnStatus(1, result.data.col1TotalReels);
-                        updateColumnStatus(2, result.data.col2TotalReels);
-                        updateColumnStatus(3, result.data.col3TotalReels);
-                        updateColumnStatus(4, result.data.col4TotalReels);
+                        updateColumnStatus(1, result.data.loaderInfo.col1TotalReels);
+                        updateColumnStatus(2, result.data.loaderInfo.col2TotalReels);
+                        updateColumnStatus(3, result.data.loaderInfo.col3TotalReels);
+                        updateColumnStatus(4, result.data.loaderInfo.col4TotalReels);
 
-                        // $("#txtCol1TotalReels").val(result.data.col1TotalReels);
-                        // $("#txtCol2TotalReels").val(result.data.col2TotalReels);
-                        // $("#txtCol3TotalReels").val(result.data.col3TotalReels);
-                        // $("#txtCol4TotalReels").val(result.data.col4TotalReels);
+                        $("#txtCol1TotalReels").val(result.data.loaderInfo.col1TotalReels);
+                        $("#txtCol2TotalReels").val(result.data.loaderInfo.col2TotalReels);
+                        $("#txtCol3TotalReels").val(result.data.loaderInfo.col3TotalReels);
+                        $("#txtCol4TotalReels").val(result.data.loaderInfo.col4TotalReels);
 
                         logMessage('Loader :: Done check ' + code, 'info');
                     }
@@ -1107,6 +1352,39 @@
                 },
                 error: function (error) {
                     logMessage('Loader :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCCheckMode() {
+
+            var loaderId = $("#txtLoaderId").val();
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/GetLoaderMode/" + loaderId,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('2::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        logMessage('Loader Mode :: Auto ', 'info');
+                    }
+                    else {
+                        logMessage('Loader Mode :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    logMessage('Set Unload :: ' + error.val, 'alert');
                 }
             });
 
@@ -1386,6 +1664,16 @@
                     if (result.success == true) {
                         fResult = true;
                         logMessage('Place Status :: OK ', 'info');
+
+                        $("#txtReelIdC").val($("#txtReelId").val());
+                        $("#txtReelCodeC").val($("#txtReelCode").val());
+                        $("#txtActHeightC").val($("#txtActHeight").val());
+
+                        $("#txtReelId").val('');
+                        $("#txtReelCode").val('');
+                        $("#txtActHeight").val('');
+
+                        $('#txtReel').html('Reel : - ');
                     }
                     else {
                         logMessage('Place Status :: ' + result.errMessage, 'alert');
@@ -1393,6 +1681,198 @@
                 },
                 error: function (error) {
                     logMessage('Place Status :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        // ----------- Loader
+        async function loadPLCGetCurrentColumn() {
+
+            var loaderId = $("#txtLoaderId").val();
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCLoader/GetCurrentColumn/" + loaderId,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('2.3::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        colNum = result.data;
+                        fResult = true;
+                        logMessage('PLC Column :: ' + result.data, 'info');
+                    }
+                    else {
+                        logMessage('PLC Column :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    logMessage('PLC Column :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function turnCol(idx) {
+            var fResult = false;
+
+            var loaderId = $("#txtLoaderId").val();
+
+            var bal = $("#txtCol1TotalReels").val();
+            if (Number(colNum) == 2) { bal = $("#txtCol2TotalReels").val(); }
+            if (Number(colNum) == 3) { bal = $("#txtCol3TotalReels").val(); }
+            if (Number(colNum) == 4) { bal = $("#txtCol4TotalReels").val(); }
+            // $('#txtBal').html(bal);
+
+            if (bal > 0) {
+                return true;
+            }
+            else {
+                var nextCol = 2;
+                if (Number($("#txtCol4TotalReels").val()) > 0) { nextCol = 4; }
+                if (Number($("#txtCol3TotalReels").val()) > 0) { nextCol = 3; }
+                if (Number($("#txtCol2TotalReels").val()) > 0) { nextCol = 2; }
+
+                if (Number(colNum) < Number(nextCol)) {
+
+                    var setE = true;
+                    if (idx <= 1) {
+                        setE = await loadPLCSetColumnEmpty(loaderId, Number(colNum));
+                        await delay(8000);
+                    }
+                    if (setE == false) {
+                        return fResult;
+                    }
+
+                    var getR = true;
+                    if (idx <= 2) {
+                        getR = await loadPLCReadyStatus(loaderId);
+                    }
+                    if (getR == false) {
+                        return fResult;
+                    }
+
+                    var getT = true;
+                    if (idx <= 3) {
+                        getT = await loadPLCTurn(loaderId, Number(nextCol));
+                    }
+                    if (getT == false) {
+                    }
+                    else {
+                        var delayT = 5000 * (nextCol - 1);
+                        await delay(delayT);
+
+                        var chkGripper2 = await loadPLCCheckUnlodingStatus(loaderId);
+                        // console.log('R2.32::' + chkGripper2);
+                        if (chkGripper2 == true) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return fResult;
+        }
+
+        async function loadPLCSetColumnEmpty(loaderId, curCol) {
+
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/SetColumnEmpty/"+ loaderId + "/" + curCol,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('2::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        logMessage('Set Empty Column :: Done ', 'info');
+                    }
+                    else {
+                        logMessage('Set Empty Column :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    logMessage('Set Empty Column :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCReadyStatus(loaderId) {
+
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/GetReadyTurnStatus/"+ loaderId,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('2::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        logMessage('Status Ready to Turn Column :: OK ', 'info');
+                    }
+                    else {
+                        logMessage('Status Ready to Turn Column :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    logMessage('Status Ready to Turn Column :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCTurn(loaderId, nextCol) {
+
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/SetTurnColumn/"+ loaderId + "/" + nextCol,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('2::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        colNum = nextCol;
+                        fResult = true;
+                        logMessage('Turn Column :: OK ', 'info');
+                    }
+                    else {
+                        logMessage('Turn Column :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    logMessage('Turn Column :: ' + error.val, 'alert');
                 }
             });
 
@@ -1512,7 +1992,7 @@
         // ----------- Cartesian :: Put Away
         async function loadPLCGetSlot() {
 
-            var actH = $("#txtActHeight").val();
+            var actH = $("#txtActHeightC").val();
             var fResult = false;
 
             // step 4 : scan item
@@ -1609,6 +2089,15 @@
                     if (result.success == true) {
                         fResult = true;
                         logMessage2('Put Away Status :: Done ', 'info');
+
+                        $("#txtRetrieveSlot").val('');
+                        $("#txtPutSlot").val('');
+                        $("#txtPutSlotTake").val('');
+
+                        $("#txtReelIdC").val('');
+                        $("#txtReelCodeC").val('');
+                        $("#txtActHeightC").val('');
+
                     }
                     else {
                         logMessage2('Put Away Status :: ' + result.errMessage, 'alert');

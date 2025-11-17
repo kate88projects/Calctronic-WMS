@@ -14,5 +14,7 @@
         public string ReelNo { get; set; } = "";
 
         public int RowNo { get; set; } = 0;
+
+        public int Priority { get; set; } = 0;
     }
 }

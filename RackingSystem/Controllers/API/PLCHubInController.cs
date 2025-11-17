@@ -2,6 +2,7 @@
 using EasyModbus;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RackingSystem.Data;
 using RackingSystem.Data.Maintenances;
@@ -10,6 +11,7 @@ using RackingSystem.Helpers;
 using RackingSystem.Models;
 using RackingSystem.Models.API;
 using RackingSystem.Models.Loader;
+using RackingSystem.Models.RackJob;
 using RackingSystem.Models.Reel;
 using RackingSystem.Models.Slot;
 using RackingSystem.Services.LoaderServices;
@@ -66,6 +68,12 @@ namespace RackingSystem.Controllers.API
         public async Task<ServiceResponseModel<LoaderDTO>> GetLoaderInfo_PendingToUnLoad(string req)
         {
             ServiceResponseModel<LoaderDTO> result = await _loaderService.GetLoaderInfo(req, true, EnumLoaderStatus.Loaded, null);
+            if (result.data == null)
+            {
+                result.success = false;
+                result.errMessage = "This loader is not for unloading.";
+                return result;
+            }
             if (result.data.Col1TotalReels > 0 || result.data.Col2TotalReels > 0 || result.data.Col3TotalReels > 0 || result.data.Col4TotalReels > 0)
             {
                 return result;
@@ -76,6 +84,44 @@ namespace RackingSystem.Controllers.API
                 result.errMessage = "No Reels to unload.";
                 return result;
             }
+        }
+
+        [HttpGet("StartUnload/{req}")]
+        public async Task<ServiceResponseModel<RackJobHubInDTO>> StartUnload(string req)
+        {
+            ServiceResponseModel<RackJobHubInDTO> result = new ServiceResponseModel<RackJobHubInDTO>();
+            result.data = new RackJobHubInDTO();
+
+            try
+            {
+                ServiceResponseModel<LoaderDTO> r = await _loaderService.GetLoaderInfo(req, true, EnumLoaderStatus.Loaded, null);
+                if (r.data == null)
+                {
+                    result.success = false;
+                    result.errMessage = "This loader is not for unloading.";
+                    return result;
+                }
+                if (r.data.Col1TotalReels > 0 || r.data.Col2TotalReels > 0 || r.data.Col3TotalReels > 0 || r.data.Col4TotalReels > 0)
+                {
+                    var srms = _dbContext.RackJob.First();
+                    RackJobHubInDTO json = JsonConvert.DeserializeObject<RackJobHubInDTO>(srms.Json) ?? new RackJobHubInDTO();
+                    result.data = json;
+                    result.data.LoaderInfo = r.data;
+                    result.success = true;
+                    return result;
+                }
+                else
+                {
+                    result.success = false;
+                    result.errMessage = "No Reels to unload.";
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+            }
+            return result;
         }
 
         [HttpGet("GetFlexilockStatus")]
@@ -279,7 +325,7 @@ namespace RackingSystem.Controllers.API
                     {
                         exit = true;
                     }
-                    if ((DateTime.Now - dtRun).TotalMinutes > 2)
+                    if ((DateTime.Now - dtRun).TotalSeconds > 30)
                     {
                         result.errMessage = "Timeout. Cannot get Unload Status.";
                         exit = true;
@@ -325,7 +371,7 @@ namespace RackingSystem.Controllers.API
                     {
                         exit = true;
                     }
-                    if ((DateTime.Now - dtRun).TotalMinutes > 1)
+                    if ((DateTime.Now - dtRun).TotalSeconds > 30)    
                     {
                         result.errMessage = "Timeout. Cannot get Reel ID.";
                         exit = true;
@@ -526,42 +572,8 @@ namespace RackingSystem.Controllers.API
                 r2.data.errMessageSetH = r2c.errMessage;
             }
 
-            //// 1. run retrieve empty tray
-            //Task<ServiceResponseModel<int>> task1 = Task.Run(async () =>
-            //{
-            //    //await Task.Delay(5000); // Simulate some work
-            //    ServiceResponseModel<int> r1 = await RetrieveEmptyTray(configRack.ConfigValue, slotCode);
-            //    //DateTime dtTest = DateTime.Now;
-            //    //while ((DateTime.Now - dtTest).TotalMinutes < 2)
-            //    //{
-            //    //    string a = "";
-            //    //}
-            //    return r1;
-            //});
-
-            //// 2. run scan reel and write actual height  
-            //Task<ServiceResponseModel<TrayReelDTO>> task2 = Task.Run(async () =>
-            //{
-            //    var r2c = await SetActualHeightByIP(_loader.IPAddr, actHeight);
-            //    if (r2c.success)
-            //    {
-            //        r2.data.successSetH = true;
-            //        r2.success = true;
-            //    }
-            //    else
-            //    {
-            //        r2.data.errMessageSetH = r2c.errMessage;
-            //    }
-            //    return r2;
-            //});
-
             try
             {
-                // 3. wait for both is done 
-                //await Task.WhenAll(task1, task2);
-                //ServiceResponseModel<int> result1 = await task1;
-                //ServiceResponseModel<TrayReelDTO> result2 = await task2;
-
                 result.data = r2.data;
                 result.data.successTray = r1.success;
                 result.data.errMessageTray = r1.errMessage;
@@ -897,7 +909,7 @@ namespace RackingSystem.Controllers.API
                         exit = true;
                         reelID = reelID + decimalText;
                     }
-                    if ((DateTime.Now - dtRun).TotalMinutes > 1)
+                    if ((DateTime.Now - dtRun).TotalSeconds > 30)
                     {
                         result.errMessage = "Timeout. Cannot get Reel ID.";
                         exit = true;
@@ -1145,7 +1157,7 @@ namespace RackingSystem.Controllers.API
                     {
                         exit = true;
                     }
-                    if ((DateTime.Now - dtRun).TotalMinutes > 2)
+                    if ((DateTime.Now - dtRun).TotalSeconds > 30)
                     {
                         result.errMessage = "Timeout. Cannot get Empty Tray Status.";
                         exit = true;
@@ -1224,7 +1236,7 @@ namespace RackingSystem.Controllers.API
                     {
                         exit = true;
                     }
-                    if ((DateTime.Now - dtRun).TotalMinutes > 2)
+                    if ((DateTime.Now - dtRun).TotalSeconds > 30)
                     {
                         result.errMessage = "Timeout. Cannot get Pick Status.";
                         exit = true;
@@ -1362,7 +1374,7 @@ namespace RackingSystem.Controllers.API
                         result.success = true;
                         result.data = Convert.ToInt32(value);
                     }
-                    if ((DateTime.Now - dtRun).TotalMinutes > 2)
+                    if ((DateTime.Now - dtRun).TotalSeconds > 30)
                     {
                         result.errMessage = "Timeout. Cannot get Reel ID.";
                         exit = true;
@@ -1419,21 +1431,36 @@ namespace RackingSystem.Controllers.API
                 slotUsage.ReserveSlot = 1;
                 // testing 
 
-                var colList = _dbContext.SlotColumnSetting.OrderBy(x => x.Reel_IN_Idx).ToList();
-                foreach (var col in colList)
+                SlotFreeReqDTO reqSlot = new SlotFreeReqDTO();
+                reqSlot.ColNo = 0;
+                reqSlot.TotalSlot = slotUsage.ReserveSlot;
+                ServiceResponseModel<SlotFreeDTO> rSlot = await _slotService.GetFreeSlot_BySlot_ASC(reqSlot);
+                if (rSlot.data != null)
                 {
-                    SlotFreeReqDTO req = new SlotFreeReqDTO();
-                    req.ColNo = col.ColNo;
-                    req.TotalSlot = slotUsage.ReserveSlot;
-
-                    ServiceResponseModel<SlotFreeDTO> r = await _slotService.GetFreeSlot_ByColumn_ASC(req);
-                    if (r.data != null)
+                    if (rSlot.data.Row1 > 0)
                     {
-                        if (r.data.Row1 > 0)
+                        bottomSlotCol = rSlot.data.ColNo;
+                        bottomSlotRow = rSlot.data.Row1;
+                    }
+                }
+                if (bottomSlotCol == 0 && bottomSlotRow == 0)
+                {
+                    var colList = _dbContext.SlotColumnSetting.OrderBy(x => x.Reel_IN_Idx).ToList();
+                    foreach (var col in colList)
+                    {
+                        SlotFreeReqDTO req = new SlotFreeReqDTO();
+                        req.ColNo = col.ColNo;
+                        req.TotalSlot = slotUsage.ReserveSlot;
+
+                        ServiceResponseModel<SlotFreeDTO> r = await _slotService.GetFreeSlot_ByColumn_ASC(req);
+                        if (r.data != null)
                         {
-                            bottomSlotCol = col.ColNo;
-                            bottomSlotRow = r.data.Row1 + slotUsage.ReserveSlot - 1;
-                            break;
+                            if (r.data.Row1 > 0)
+                            {
+                                bottomSlotCol = col.ColNo;
+                                bottomSlotRow = r.data.Row1; // + slotUsage.ReserveSlot - 1;
+                                break;
+                            }
                         }
                     }
                 }
@@ -1628,7 +1655,7 @@ namespace RackingSystem.Controllers.API
                     {
                         exit = true;
                     }
-                    if ((DateTime.Now - dtRun).TotalMinutes > 3)
+                    if ((DateTime.Now - dtRun).TotalSeconds > 30)
                     {
                         result.errMessage = "Timeout. Cannot get Reel ID.";
                         exit = true;
@@ -2011,7 +2038,7 @@ namespace RackingSystem.Controllers.API
                     {
                         exit = true;
                     }
-                    if ((DateTime.Now - dtRun).TotalMinutes > 2)
+                    if ((DateTime.Now - dtRun).TotalSeconds > 30)
                     {
                         result.errMessage = "Timeout. Cannot get Reel ID.";
                         exit = true;
@@ -2088,6 +2115,59 @@ namespace RackingSystem.Controllers.API
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");
             }
 
+            return result;
+        }
+
+        [HttpGet("GetLoaderMode/{loaderId}")]
+        public ServiceResponseModel<int> GetLoaderMode(long loaderId)
+        {
+            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
+            string methodName = "GetLoaderMode";
+
+            ////// *** testing
+            //result.success = true;
+            //return result;
+            ////// *** testing
+
+            var _loader = _dbContext.Loader.Find(loaderId);
+            if (_loader == null)
+            {
+                result.errMessage = "Loader is not found.";
+                result.data = 0;
+                return result;
+            }
+
+            int value = 0;
+            string plcIp = _loader.IPAddr;
+            int port = 502;
+
+            ModbusClient modbusClient = new ModbusClient(plcIp, port);
+
+            try
+            {
+                modbusClient.Connect();
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+
+                int startAddress = 4208;
+                int numRegisters = 1;
+
+                int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                value = registers[0];
+
+                result.success = value == 1;
+                result.errMessage = "Current mode is [" + value + "], please turn to Auto.";
+            }
+            catch (Exception ex)
+            {
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+            finally
+            {
+                modbusClient.Disconnect();
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");
+            }
             return result;
         }
 

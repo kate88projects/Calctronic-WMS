@@ -35,5 +35,8 @@ namespace RackingSystem.Models.Slot
         public string? ErrorMsg { get; set; }
         public bool IsLeft { get; set; } = false;
 
+        public bool NeedCheck { get; set; } = false;
+        public string CheckRemark { get; set; } = "";
+        public int Priority { get; set; } = 0;
     }
 }

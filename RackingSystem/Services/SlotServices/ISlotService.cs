@@ -15,6 +15,8 @@ namespace RackingSystem.Services.SlotServices
         public Task<ServiceResponseModel<List<SlotListDTO>>> GetSlotStatus_ByColumn(int req);
         public Task<ServiceResponseModel<SlotFreeDTO>> GetFreeSlot_ByColumn_ASC(SlotFreeReqDTO slotReq);
         public Task<ServiceResponseModel<SlotFreeDTO>> GetFreeSlot_ByColumn_DESC(SlotFreeReqDTO req);
+        public Task<ServiceResponseModel<SlotFreeDTO>> GetFreeSlot_BySlot_ASC(SlotFreeReqDTO slotReq);
+
         public Task<ServiceResponseModel<SlotDTO>> UpdateSlotStatus(SlotStatusReqDTO slotReq);
         public Task<ServiceResponseModel<List<SlotListDTO>>> UpdateExcelPulses (List<SlotListDTO> slotPulses);
         public Task<ServiceResponseModel<List<Slot_DrawerFreeDTO>>> GetFreeSlot_Drawer_ByColumn();

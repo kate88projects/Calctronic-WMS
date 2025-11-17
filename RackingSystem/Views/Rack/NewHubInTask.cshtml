@@ -137,11 +137,12 @@
                         </div>
                     </div>
                     <hr />
-                    <button class="btn btn-primary" onclick="loadPLCGetEmptyTraySlot()" id="btnRetry3a1" style="width:20%;">Get Slot</button>
+                    <button class="btn btn-primary" onclick="loadPLCGetEmptyTraySlot()" id="btnRetry3a1" style="width:20%;">Get Tray Slot</button>
                     <button class="btn btn-danger" onclick="loadPLCTakeEmptyTray()" id="btnRetry3a1" style="width:20%;">Take Tray</button>
                     <button class="btn btn-warning" onclick="loadPLCGetRetrieveTrayStatus()" id="btnRetry3a2" style="width:20%;">Get Tray Status</button>
 
                     <hr />
+                    <button class="btn btn-primary" onclick="loadPLCGetSlot()" id="btnRetry3a1" style="width:20%;">Get Slot</button>
                     <button class="btn btn-danger" onclick="loadPLCPutAway()" id="btnRetry4c1" style="width:20%;">Put Away</button>
                     <button class="btn btn-warning" onclick="loadPLCGetPutAwayStatus()" id="btnRetry4c2" style="width:20%;">Put Away Status</button>
 
@@ -671,6 +672,43 @@
                 error: function (error) {
                     // $('#pEmptyColLast').html('Set Empty Column : <span class="error-message" id="errEmptyColLast"> ' + error.val + ' </span>');
                     // $('#pEmptyCol2').html('Set Empty Column : <span class="error-message" id="errEmptyColLast"> ' + error.val + ' </span>');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCGetSlot() {
+
+            var actH = $("#txtActHeightPut").val();
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/GetBottomSlot/" + actH,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('4::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        logToPage('GetSlot :: OK ');
+
+                        $("#txtPutSlot").val(result.data.slotCode);
+
+                        fResult = true;
+                    }
+                    else {
+                        logToPage('GetSlot ERR :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    logToPage('GetSlot ERR :: ' + error.val, 'alert');
                 }
             });
 

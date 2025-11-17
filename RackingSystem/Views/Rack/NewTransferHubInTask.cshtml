@@ -350,9 +350,6 @@
                 <h2>NEW Transfer Hub In <b></b></h2>
             </div>
             <div class="card-tools">
-              @*   <button type="button" class="btn btn-danger" onclick="restartStep()">
-                    NEW LOADER
-                </button> *@
                 <input type="checkbox" class="custom-control-input" id="chkAutoRun" />
                 <label for="chkAutoRun" style="padding-right:30px;"> Auto Run </label>
                 @* <button type="button" class="btn btn-success" onclick="endTask()">
@@ -537,6 +534,12 @@
                                             <img src="~/assets/img/vpn.gif" style="width:50%;" />
                                         </div>
                                         <div class="col-sm-12 col-md-8">
+                                            <p id="pMode">
+                                                Loader Mode :
+                                                <span style="color:red; font-size:15px;"> </span>
+                                            </p>
+                                            <button class="btn btn-warning" onclick="retryMode()" id="btnRetryMode" style="width:49%;">Retry Get Mode</button>
+                                            <hr />
                                             <p id="pFlexi1">
                                                 Flexilock 1 :
                                                 <span style="color:red; font-size:15px;" id="errFlexi1"> </span>
@@ -740,6 +743,8 @@
 
                     <input type="hidden" id="txtTempEndTask">
                     <input type="hidden" id="txtDone">
+
+                    <input type="hidden" id="txtRunning">
                 </div>
             </div>
             <div class="col-sm-12 col-md-3" style="padding-right:0px;padding-left:0px;">
@@ -840,6 +845,21 @@
     <script src="~/js/sweetalert2.all.min.js"></script>
 
     <script type="text/javascript">
+        window.addEventListener('beforeunload', function (e) {
+            var a = $("#txtRunning").val();
+            if (a == "1") {
+                e.preventDefault(); // This is necessary for the browser to show a prompt
+                e.returnValue = 'Cannot close this page.'; // Custom message for some browsers
+                // In most modern browsers, the message displayed is a generic one provided by the browser itself.
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'F5' || (event.ctrlKey && event.key === 'r')) { // F5 or Ctrl+R
+                event.preventDefault(); // Prevents the default refresh action
+                console.log('Refresh attempt prevented!');
+            }
+        });
 
         const scanLoaderEle = document.getElementById('txtScanLoader');
 
@@ -857,6 +877,7 @@
 
         $(document).ready(function () {
 
+            $("#txtRunning").val('0');
             $("#txtSetUnload").val('0');
             $("#txtICol").val('1');
 
@@ -1053,52 +1074,6 @@
             });
         }
 
-        function restartStep() {
-            resetColorPLCForm(1);
-
-            $("#txtScanLoader").val('');
-            $('#pLoader1').html('Loader : <span class="error-message" id="err1"> </span>');
-
-            $("#txtLoaderId").val('');
-            $("#txtLoaderCode").val('');
-            $("#txtReelId").val('');
-            $("#txtReelCode").val('');
-            $("#txtActHeight").val(0);
-            $("#txtICol").val(1);
-            $("#txtStep2a").val('');
-            $("#txtStep2b").val('');
-            $("#txtStep3").val('');
-            $("#txtStep4").val('');
-
-            $("#txtCol1TotalReels").val('0');
-            $("#txtCol2TotalReels").val('0');
-            $("#txtCol3TotalReels").val('0');
-            $("#txtCol4TotalReels").val('0');
-
-            $("#txtHLoader").html('');
-            // $("#txtHLoaderLock").val('');
-            // $("#txtHGripper").val('');
-            // $("#txtHCol").html('');
-
-            $("#txtHEmpty").val('');
-            $("#txtHReel").html('-');
-            $("#txtHItem").val('');
-            $("#txtHActH").val('');
-            $("#txtHSlot").val('');
-            $("#txtHSlotTake").val('');
-
-            scanLoaderEle.focus();
-
-            initialGaugeSetup(
-                "svg-graph-meter-value",
-                "svg-gauge-percentage-2",
-                "rgb(228, 0, 0)",
-                0,
-                setGaugePathValue
-            );
-
-        }
-
         function nextReel() {
             var d = $("#txtDone").val();
             if (d == "1" || d == "2") {
@@ -1126,6 +1101,7 @@
             $("#step4").removeClass("active");
             $("#stepLast").removeClass("active");
 
+            $('#btnRetryMode').addClass("hidden");
             $('#btnRetry2a').addClass("hidden");
             $('#btnRetry2b').addClass("hidden");
             $('#btnRetry2c').addClass("hidden");
@@ -1296,7 +1272,7 @@
             $("#txtHSlot").val('');
             $("#txtHSlotTake").val('');
 
-            loadPLC(21);
+            loadPLC(20);
         }
 
         function nextTo3() {
@@ -1357,6 +1333,11 @@
 
             resetColorPLCForm(5);
             loadPLC(5);
+        }
+
+        function retryMode() {
+            $('#btnRetryMode').addClass("hidden");
+            loadPLC(20);
         }
 
         function retry2a() {
@@ -1638,9 +1619,26 @@
             //     }
             //     return;
             // }
-            
+
 
             // step 2 : check flexilock and gripper
+            if (idx == 20) {
+                var setUnloadVal = $("#txtSetUnload").val();
+                if (setUnloadVal == '1') {
+                    idx = 21;
+                }
+                else {
+                    var chkMode = await loadPLCCheckMode(loaderId);
+                    console.log('R2.0::' + chkMode);
+                    if (chkMode == true) {
+                        idx = 21;
+                    }
+                    else {
+                        $('#btnRetryMode').removeClass("hidden");
+                        return;
+                    }
+                }
+            }
             if (idx == 21) {
                 var chkFlex = await loadPLCCheckFlexilock();
                 console.log('R2.1::' + chkFlex);
@@ -1676,6 +1674,7 @@
                         var chkUnload = await loadPLCSetLoaderUnload(loaderId);
                         console.log('R2.2::' + chkUnload);
                         if (chkUnload == true) {
+                            $("#txtRunning").val('1');
                             $("#txtStep2b").val('OK');
                             await delay(5000);
                             idx = 23;
@@ -1727,7 +1726,7 @@
                     var getScanReel = await loadPLCGetScanReel();
                     console.log('R3.2::' + getScanReel);
                     if (getScanReel == true) {
-                        await delay(3000);
+                        // await delay(3000);
                         var getSlot = await loadPLCGetTrayReel(loaderId);
                         console.log('R3.3::' + getSlot);
                         await delay(8000);
@@ -1969,6 +1968,9 @@
                         if (setE == false) {
                             $('#btnRetryLastSetEmpty2').removeClass("hidden");
                         }
+                        else {
+                            $("#txtRunning").val('0');
+                        }
                     }
                     return;
                 }
@@ -2097,6 +2099,39 @@
         //         }
         //     });
         // }
+
+        async function loadPLCCheckMode(loaderId) {
+
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/GetLoaderMode/" + loaderId,
+                type: "GET",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    console.log('2::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        $('#pMode').html('Loader Mode : Auto. <span class="error-message"></span>');
+
+                        fResult = true;
+                    }
+                    else {
+                        $('#pMode').html('Loader Mode : <span class="error-message"> ' + result.errMessage + ' </span>');
+                    }
+                },
+                error: function (error) {
+                    $('#pMode').html('Loader Mode : <span class="error-message"> ' + error.val + ' </span>');
+                }
+            });
+
+            return fResult;
+        }
 
         async function loadPLCCheckFlexilock() {
 

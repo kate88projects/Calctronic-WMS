@@ -88,6 +88,8 @@ namespace RackingSystem.Data
 
         public DbSet<SlotFreeDTO> SP_SlotGetFreeSlotByCol_ASC { get; set; }
         public DbSet<SlotFreeDTO> SP_SlotGetFreeSlotByCol_DESC { get; set; }
+        public DbSet<SlotFreeDTO> Slot_GET_FREESLOT_ASC { get; set; }
+
         public DbSet<BOMListDTO> SP_BOMSearchList { get; set; }
         public DbSet<Slot_DrawerFreeDTO> SP_SlotGetFreeSDrawerByCol { get; set; }
 

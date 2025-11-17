@@ -649,6 +649,32 @@ namespace RackingSystem.Services.SlotServices
             return result;
         }
 
+        public async Task<ServiceResponseModel<SlotFreeDTO>> GetFreeSlot_BySlot_ASC(SlotFreeReqDTO req)
+        {
+            ServiceResponseModel<SlotFreeDTO> result = new ServiceResponseModel<SlotFreeDTO>();
+
+            try
+            {
+                var parameters = new[]
+                {
+                    new SqlParameter("@TotalSlot", req.TotalSlot),
+                };
+
+                string sql = "EXECUTE dbo.Slot_GET_FREESLOT_ASC @TotalSlot ";
+                var listDTO = await _dbContext.SP_SlotGetFreeSlotByCol_ASC.FromSqlRaw(sql, parameters).ToListAsync();
+
+                result.success = true;
+                result.data = listDTO.First();
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
         public async Task<ServiceResponseModel<SlotDTO>> UpdateSlotStatus(SlotStatusReqDTO slotReq)
         {
             ServiceResponseModel<SlotDTO> result = new ServiceResponseModel<SlotDTO>();
@@ -673,6 +699,7 @@ namespace RackingSystem.Services.SlotServices
                 _slot.HasEmptyTray = slotReq.HasEmptyTray;
                 _slot.HasReel = slotReq.HasReel;
                 _slot.ReelNo = slotReq.ReelNo;
+                _slot.Priority = slotReq.Priority;
                 _dbContext.Slot.Update(_slot);
                 await _dbContext.SaveChangesAsync();
 
