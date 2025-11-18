@@ -1,0 +1,295 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+<style type="text/css">
+    .table-title {
+        color: #fff;
+        background: #4b5366;
+        border-radius: 3px 3px 0 0;
+    }
+
+    .table-title h2 {
+        margin: 5px 0 0;
+        font-size: 24px;
+    }
+
+    .row {
+        clear: right;
+    }
+
+    .custom-table thead th {
+        background-color: #F1F6F9;
+        color: #000;
+    }
+
+    .custom-table tbody tr:hover td {
+        background-color: #F1F6F9;
+    }
+
+    .custom-table tbody {
+        font-size: 15px;
+    }
+
+    .gridjs-pagination {
+        font-size: 14px;
+    }
+
+    th.gridjs-th {
+        padding: 10px 15px !important;
+    }
+
+    td.gridjs-td {
+        padding: 8px 15px !important;
+    }
+
+    .view-btn, .edit-btn, .delete-btn {
+        height: 33px;
+        font-size: 14px;
+        padding: 5px 10px;
+    }
+</style>
+
+<br />
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-outline ">
+                <div class="card-header table-title">
+                    <div class="card-title">
+                        <h2>Emergency JOB Order List <b></b></h2>
+                    </div>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-success" onclick="navigateToNew('new')">
+                            Add New Emergency JO 
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body pt-0">
+                    <div id="gridTable" class="table table-responsive text-nowrap mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+    <link rel="stylesheet" href="~/css/gridjs.min.css">
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/sweetalert2.all.min.js"></script>
+    <script src="~/js/gridjs.umd.js"></script>
+
+
+    <script type="text/javascript">
+        let gridInstance = null;
+
+        $(document).ready(function() {
+            loadList();
+        });
+
+        function loadList() {
+            $.ajax({
+                url: "/JO/GetJOEmergencyList/",
+                type: "GET",
+                dataType: "JSON",
+                contentType: "application/json; charset=utf-8",
+                beforeSend: function() {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading();
+                },
+                success: function(result) {
+                    swal.close();
+                    console.log("result", result);
+
+                    if (result.success == true) {
+                        if (gridInstance) {
+                            gridInstance.destroy();
+                        }
+                        gridInstance = new gridjs.Grid({
+                            columns: [
+                                { name: 'Emergency Id', id: 'jobOrderEmergency_Id', hidden: true },
+                                { name: 'Doc No', id: 'docNo', width: '160px' },
+                                { 
+                                    name: 'Doc Date', 
+                                    id: 'docDate', 
+                                    formatter: (cell, row) => {
+                                        const dateString = row.cells[2].data.split('.')[0];
+                                        const date = new Date(dateString);
+
+                                        if (isNaN(date)) {
+                                            return 'Invalid Date';
+                                        }
+                                        return date.toLocaleString('en-GB', {
+                                            year: 'numeric',
+                                            month: 'numeric',
+                                            day: 'numeric',
+                                        });
+                                    }
+                                },
+                                { name: 'Description', id: 'description' },
+                                { name: 'Status', id: 'status', width: '99px' },
+                                {
+                                    name: 'Created Date',
+                                    formatter: (cell, row) => {
+                                        const dateString = row.cells[5].data.split('.')[0];
+                                        const date = new Date(dateString);
+
+                                        if (isNaN(date)) {
+                                            return 'Invalid Date';
+                                        }
+                                        return date.toLocaleString('en-GB', {
+                                            year: 'numeric',
+                                            month: 'numeric',
+                                            day: 'numeric',
+                                            hour: 'numeric',
+                                            minute: 'numeric',
+                                            hour12: true,
+                                        });
+                                    }
+                                },
+                                // { name: 'Created By', id: 'createdBy' },
+                                {
+                                    name: 'Action',
+                                    formatter: (cell, row) => {
+                                        const rawData = JSON.stringify(row);
+                                        return gridjs.html(`
+                                            <div style="display:flex;">
+                                                <button class="btn btn-primary d-grid view-btn me-2" data-row='${rawData}' onclick="navigateToView(${row.cells[0].data}, 'view')">
+                                                    <span><i class="bi bi-eye"></i> View</span>
+                                                </button>
+                                                <button class="btn btn-warning d-grid edit-btn me-2" data-row='${rawData}' onclick="navigateToEdit(${row.cells[0].data}, 'edit')">
+                                                    <span><i class="bi bi-pencil-square"></i> Edit</span>
+                                                </button>
+                                                <button class="btn btn-danger d-grid delete-btn" data-id="${row.cells[0].data}">
+                                                    <span><i class="bi bi-trash"></i> Delete</span>
+                                                </button>
+                                            </div>
+                                        `);
+                                    }
+                                },
+                            ],
+                            data: result.data,
+                            pagination: {
+                                limit: 10
+                            },
+                            search: true,
+                            sort: true,
+                            className: {
+                                table: 'custom-table',
+                            }
+                        }).render(document.getElementById("gridTable"));
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+        }
+
+        function navigateToNew(mode) {
+            window.location.href = '@Url.Action("JOEmergencyDetails", "JO", new { id = "_id_", mode = "_mode_" })'.replace('_id_', 0).replace('_mode_', mode);
+        }
+
+        function navigateToView(id, mode) {
+            window.location.href = '@Url.Action("JOEmergencyDetails", "JO", new { id = "_id_", mode = "_mode_" })'.replace('_id_', id).replace('_mode_', mode);
+        }
+
+        function navigateToEdit(id, mode) {
+            window.location.href = '@Url.Action("JOEmergencyDetails", "JO", new { id = "_id_", mode = "_mode_" })'.replace('_id_', id).replace('_mode_', mode);
+        }
+
+        $('#gridTable').on('click', '.delete-btn', function () {
+            const id = $(this).attr('data-id');
+            deleteEmergency(id);
+        });
+
+        function deleteEmergency(id) {
+            swal.fire({
+                title: "Are you sure want to delete?",
+                text: "You will not be able to recover this record!",
+                inputAttributes: {
+                    autocapitalize: 'off'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'ok',
+                cancelButtonText: 'cancel',
+                allowOutsideClick: false,
+            }).then(function(r) {
+                if (r.isConfirmed == true) {
+                    var data = {
+                        JobOrderEmergency_Id: id,
+                    };
+                    $.ajax({
+                        url: '/JO/DeleteEmergency',
+                        type: 'DELETE',
+                        data: JSON.stringify(data),
+                        dataType: 'json',
+                        contentType: 'application/json; charset=utf-8',
+                        beforeSend: function () {
+                            Swal.fire({
+                                text: 'Please Wait',
+                                width: '300px',
+                                allowEscapeKey: false,
+                                allowOutsideClick: false,
+                                showConfirmButton: false,
+                            });
+                            Swal.showLoading();
+                        },
+                        success: function (result) {
+                            if (result.success == true) {
+                                swal.fire({
+                                    icon: 'success',
+                                    title: "Success Deleted",
+                                    text: "",
+                                    didClose: () => {
+                                      window.location.reload();
+                                    }
+                                });
+                            }
+                            else {
+                                swal.fire({
+                                    icon: 'error',
+                                    title: "Wait",
+                                    text: result.errMessage
+                                });
+                            }
+                        },
+                        error: function (error) {
+                            console.log(error);
+                            swal.fire({
+                                icon: 'error',
+                                title: "Wait",
+                                text: error.val
+                            });
+                        }
+                    });
+
+                } else {
+                    return;
+                }
+            });
+        }
+    </script>
+}

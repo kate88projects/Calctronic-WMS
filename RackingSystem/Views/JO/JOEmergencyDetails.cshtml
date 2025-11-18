@@ -1,5 +1,5 @@
 ﻿@using RackingSystem.Models.JO
-@model JOListDTO
+@model JOEmergencyReqDTO
 @{
     string mode = ViewBag.Mode;
 }
@@ -7,7 +7,7 @@
 <style>
     .card {
         background: #f2f2f2;
-        height:100%;
+        height: 100%;
     }
 
     .table-title {
@@ -43,10 +43,10 @@
     }
 
     .select2-selection--single {
-        height: 40px !important;  
-        border-radius: 0.375rem;   
-        border: 1px solid #ced4da; 
-        padding: 8px;  
+        height: 40px !important;
+        border-radius: 0.375rem;
+        border: 1px solid #ced4da;
+        padding: 8px;
     }
 
     .select2-selection__arrow {
@@ -58,12 +58,12 @@
         height: 40px;
     }
 
-   .add-sub {
+    .add-sub {
         margin-bottom: 10px;
-        margin-left:auto;
+        margin-left: auto;
     }
 
-    .joContainer, .subContainer, .sumContainer {
+    .joEContainer, .subContainer, .sumContainer {
         padding: 10px 20px;
     }
 
@@ -81,7 +81,7 @@
         padding: 5px 25px 0px;
     }
 
-    #joForm {
+    #joEForm {
         background-color: #fff;
         padding: 30px;
         border-radius: 20px;
@@ -110,7 +110,6 @@
     }
 </style>
 
-
 <br />
 <div class="container-fluid">
     <div class="row">
@@ -118,7 +117,7 @@
             <div class="card card-outline ">
                 <div class="card-header table-title">
                     <div class="card-title">
-                        <h2>JO Details <b></b></h2>
+                        <h2>Emergency JO Details <b></b></h2>
                     </div>
                     <div class="card-tools">
                         <button type="button" class="btn btn-warning" onclick="enabledEdit()" @(mode == "view" ? "" : "hidden")>
@@ -127,43 +126,34 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <form id="joForm" method="post" data-jo-id="@Model.JobOrder_Id">
-                        <div class="joContainer">
+                    <form id="joEForm" method="post" data-joe-id="@Model.JobOrderEmergency_Id">
+                        <div class="joEContainer">
                             <div class="row">
                                 <div class="col">
                                     <div class="row">
                                         <div class="d-flex">
-                                            <i class="bi bi-box title-icon"></i>
-                                            <span class="title titleColor ms-2">Job Order</span>
+                                            <i class="bi bi-exclamation-diamond title-icon"></i>
+                                            <span class="title titleColor ms-2">Emergency Job Order</span>
                                         </div>
                                     </div>
                                     <div class="itemContainer">
                                         <div class="row g-4">
                                             <div class="col-5">
                                                 <label for="txtDocNo">Document No</label>
-                                                <input type="text" class="form-control" id="txtDocNo" value="@Model.DocNo" disabled >
+                                                <input type="text" class="form-control" id="txtDocNo" value="@Model.DocNo" disabled>
                                                 <div id="txtDocNoError" class="error-message"></div>
                                             </div>
                                             <div class="col-5">
                                                 <label for="txtdesc">Description</label>
-                                                <input type="text" class="form-control" id="txtdesc" placeholder="Please enter description" value="@Model.Description" @(mode == "view" ? "disabled" : "") >
+                                                <input type="text" class="form-control" id="txtdesc" placeholder="Please enter description" value="@Model.Description" @(mode == "view" ? "disabled" : "")>
                                                 <div id="txtdescError" class="error-message"></div>
                                             </div>
-                                            @* <div class="col-3">
-                                                <label for="txtCreatedBy">Created By</label>
-                                                <input type="text" class="form-control" id="txtCreatedBy" placeholder="Please enter created person" value="@Model.CreatedBy" @(mode == "view" ? "disabled" : "")>
-                                                <div id="txtCreatedByError" class="error-message"></div>
-                                            </div>*@
                                         </div>
                                     </div>
-                                    @* <div class="form-check form-switch">
-                                      <input class="form-check-input" type="checkbox" role="switch" id="chkIsActive" @(Model.IsActive ? "checked" : "") @(mode == "view" ? "disabled" : "")>
-                                      <label class="form-check-label" for="chkIsActive">Enable BOM</label>
-                                    </div> *@
                                 </div>
                             </div>
                         </div>
-                       <hr>
+                        <hr>
 
                         <div class="subContainer">
                             <div class="row">
@@ -181,15 +171,15 @@
                                         <label for="txtQty1">Quantity</label>
                                     </div>
                                 </div>
-                                <div class="row itemBlock" id="itemBlock" data-index="1" >
+                                <div class="row itemBlock" id="itemBlock" data-index="1">
                                     <div class="item">
                                         <div class="row g-4 mb-2">
                                             <div class="col-5">
-                                                <select class="jo-select js-example-basic-single form-control" id="subItem1" style="width:100%" @(mode == "view" ? "disabled" : "")></select>
+                                                <select class="joe-select js-example-basic-single form-control" id="subItem1" style="width:100%" @(mode == "view" ? "disabled" : "")></select>
                                                 <div id="subItem1Error" class="error-message"></div>
                                             </div>
                                             <div class="col-4">
-                                                <input type="number" class="form-control" id="txtQty1" placeholder="Please enter quantity" @(mode == "view" ? "disabled" : "") required> 
+                                                <input type="number" class="form-control" id="txtQty1" placeholder="Please enter quantity" @(mode == "view" ? "disabled" : "") required>
                                                 <div id="txtQty1Error" class="error-message"></div>
                                             </div>
                                             <div class="title-container">
@@ -198,7 +188,7 @@
                                                 </button>
                                             </div>
                                         </div>
-                                        <input type="hidden" id="txtJobDtlId1">
+                                        <input type="hidden" id="txtJobEDtlId1">
                                     </div>
                                 </div>
                             </div>
@@ -209,7 +199,7 @@
                         </div>
                         <hr>
 
-                        <div class="sumContainer"> 
+                        <div class="sumContainer">
                             <div class="row">
                                 <div class="d-flex">
                                     <i class="bi bi-clipboard-data title-icon"></i>
@@ -221,21 +211,13 @@
                                     <div class="label">Total Sub Items</div>
                                     <div class="value" id="ttlSub">1</div>
                                 </div>
-                                @* <div class="row data-row">
-                                    <div class="label">Created Date</div>
-                                    <div class="value" id="createDate">-</div>
-                                </div>
-                                <div class="row data-row">
-                                    <div class="label">Updated Date</div>
-                                    <div class="value" id="updateDate">-</div>
-                                </div> *@
-                            </div>                                    
+                            </div>
                         </div>
 
                         <div class="d-flex justify-content-end">
                             <button class="btn btn-primary me-2" id="saveButton" @(mode == "view" ? "hidden" : "")>Save</button>
-                            <button type="button" class="btn btn-outline-secondary" onclick="returnToJO()" @(mode == "view" ? "hidden" : "")>Cancel</button>
-                            <button type="button" class="btn btn-secondary" id="backButton" onclick="returnToJO()" @(mode == "view" ? "" : "hidden")><i class="bi bi-arrow-left"></i> Back</button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="returnToEmergency()" @(mode == "view" ? "hidden" : "")>Cancel</button>
+                            <button type="button" class="btn btn-secondary" id="backButton" onclick="returnToEmergency()" @(mode == "view" ? "" : "hidden")><i class="bi bi-arrow-left"></i> Back</button>
                         </div>
                     </form>
                 </div>
@@ -245,6 +227,7 @@
 </div>
 
 @section Scripts {
+
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
     <link rel="stylesheet" href="~/css/gridjs.min.css">    
     <link rel="stylesheet" href="~/css/select2.min.css">
@@ -257,9 +240,9 @@
     <script type="text/javascript">
         let itemIndex = 1;
         let mode = "@mode";
-
+        
         $(document).ready(function() {
-            $('.jo-select').select2({
+            $('.joe-select').select2({
                 placeholder: 'Select an option',
                 width: 'resolve',
             });
@@ -274,7 +257,7 @@
                 });
             });
 
-            $('.jo-select').on('select2:open', function() {
+            $('.joe-select').on('select2:open', function() {
                 setTimeout(() => {
                     let searchField = document.querySelector('.select2-container--open .select2-search__field');
                     if (searchField) {
@@ -284,27 +267,28 @@
             });
         });
 
-        $('#joForm').on('keydown', function(event) {
+        $('#joEForm').on('keydown', function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
             }
         });
 
         function loadItems() {
-            return getBOMList();
+            return getRawList();
         }
 
-        function getBOMList() {
+        function getRawList() {
             return new Promise((resolve, reject) => {
                 $.ajax({
-                    url: "/BOM/GetActiveBOMList/",
+                    url: "/Item/GetRawItemList/",
                     type: "GET",
                     dataType: 'JSON',
                     contentType: 'application/json; charset=utf-8',
                     success: function (result) {
                         if (result.success == true) {
                             const dropdown = document.getElementById('subItem1');
-                            if (dropdown) {
+                            if (dropdown)
+                            {
                                 dropdown.innerHTML = "";
                                 const defaultOption = document.createElement("option");
                                 defaultOption.value = "";
@@ -321,7 +305,7 @@
                                 });
 
                                 $(dropdown).select2({
-                                    placeholder: 'Select an option', 
+                                    placeholder: 'Select an option',
                                     width: 'resolve',
                                 }).trigger('change');
                             }
@@ -338,23 +322,21 @@
         }
 
         function loadDetails() {
-            var joForm = document.querySelector('#joForm');
-            var joId = joForm.getAttribute('data-jo-id');
+            var joEForm = document.querySelector('#joEForm');
+            var joEId = joEForm.getAttribute('data-joe-id');
 
             $.ajax({
-                url: '/JO/GetJODetail',
+                url: '/JO/GetJOEmergencyDetail',
                 type: 'POST',
-                data: JSON.stringify(joId),
+                data: JSON.stringify(joEId),
                 dataType: 'JSON',
                 contentType: 'application/json; charset=utf-8',
                 success: function (result) {
-                    console.log("details" , result.data);
-
-                    if (result.success == true) {
-                       joDtls = result.data.map(function (i) {
+                    if (result.success = true) {
+                        joEDtls = result.data.map(function (i) {
                             return {
-                                jobOrder_Id: i.jobOrder_Id,
-                                jobOrderDetail_Id: i.jobOrderDetail_Id,
+                                jobOrderEmergency_Id: i.jobOrderEmergency_Id,
+                                jobOrderEmergencyDetail_Id: i.jobOrderEmergencyDetail_Id,
                                 itemId: i.item_Id,
                                 qty: i.qty,
                             };
@@ -364,25 +346,24 @@
                         const items = container.querySelectorAll(".itemBlock");
                         const itemCount = items.length;
 
-                        joDtls.forEach((dtl, index) => {
+                        joEDtls.forEach((dtl, index) => {
                             if (index === 0) {
                                 const firstItem = container.querySelector(".itemBlock");
                                 const select = firstItem.querySelector("select");
                                 const qtyInput = firstItem.querySelector('input[type="number"]');
                                 const detailId = firstItem.querySelector('input[type="hidden"]');
 
-                                select.value = dtl.itemId;  
+                                select.value = dtl.itemId;
                                 qtyInput.value = dtl.qty;
                                 detailId.value = dtl.joDetailId;
 
                                 $(select).val(dtl.itemId).trigger('change');
-
-                            } else if (itemCount < joDtls.length) {
+                            } else if (itemCount < joEDtls.length) {
                                 createNewInputField(dtl, index+1, true);
                             }
                             index++;
                         });
-                        itemIndex = joDtls.length == 0 ? itemIndex : joDtls.length;
+                        itemIndex = joEDtls.length == 0 ? itemIndex : joEDtls.length;
 
                         const total = document.querySelectorAll('.itemBlock').length;
                         document.getElementById('ttlSub').textContent = total;
@@ -402,7 +383,7 @@
                         text: error.val
                     });
                 }
-            });
+            })
         }
 
         function addSubItem() {
@@ -484,33 +465,25 @@
             document.getElementById('ttlSub').textContent = total;
         };
 
-        function returnToJO() {
+        function returnToEmergency() {
             window.history.back();
         }
 
         document.getElementById("saveButton").addEventListener("click", function(event) {
             event.preventDefault();
-            saveJobOrder();
+            saveEmergencyJobOrder();
         });
 
-        function saveJobOrder() {
+        function saveEmergencyJobOrder() {
             const items = document.querySelectorAll('.item');
-            const itemCount  = items.length;
             const formData = [];
             let isValid = true;
 
-            //validation for JOB header
-            // if (!$('#txtDocNo').val()) {
-            //     isValid = false;
-            //     showError(field, "Document No is required.");
-            // }
-
-            //validation for details
             items.forEach(item => {
                 removeErrMsg([item.querySelector("select").id, item.querySelector('input[type="number"]').id]);
                 const subitem = item.querySelector("select").value;
                 const qty = item.querySelector('input[type="number"]').value;
-                const jobDtlId = item.querySelector('input[type="hidden"]').value;
+                const jobEDtlId = item.querySelector('input[type="hidden"]').value;
 
                 if (!subitem) {
                     isValid = false;
@@ -522,8 +495,8 @@
                 }
 
                 formData.push({
-                    JobOrderDetail_Id: parseInt(jobDtlId) || 0,
-                    JobOrder_Id: parseInt(@Model.JobOrder_Id) || 0,
+                    jobOrderEmergencyDetail_Id: parseInt(jobEDtlId) || 0,
+                    jobOrderEmergency_Id: parseInt(@Model.JobOrderEmergency_Id) || 0,
                     Item_Id: parseInt(subitem),
                     Qty: parseInt(qty)
                 });
@@ -531,17 +504,15 @@
 
             if (isValid) {
                var jobData = {
-                    JobOrder_Id: parseInt(@Model.JobOrder_Id) || 0,
-                    // DocNo: $('#txtDocNo').val(),
+                    JobOrderEmergency_Id: parseInt(@Model.JobOrderEmergency_Id) || 0,
                     Description: $('#txtdesc').val(),
-                    CreatedBy: $('#txtCreatedBy').val(),
-                    Details: formData,
+                    EmergencyDetails: formData,
                 };
 
                 console.log("jobData", jobData);
 
                 $.ajax({
-                    url: '/JO/SaveJob',
+                    url: '/JO/SaveEmergency',
                     type: 'POST',
                     data: JSON.stringify(jobData),
                     dataType: 'JSON',
@@ -550,12 +521,11 @@
                         Swal.fire({
                             text: 'Please Wait',
                             width: '300px',
-
                             allowEscapeKey: false,
                             allowOutsideClick: false,
                             showConfirmButton: false,
                         });
-                        Swal.showLoading()
+                        Swal.showLoading();
                     },
                     success: function (result) {
                         if (result.success == true) {
@@ -572,7 +542,7 @@
                             swal.fire({
                                 icon: 'error',
                                 title: "Wait",
-                                text: result.errMessage
+                                text: result.errMessage,
                             });
                         }
                     },
@@ -580,7 +550,7 @@
                         swal.fire({
                             icon: 'error',
                             title: "Wait",
-                            text: error.val
+                            text: error.val,
                         });
                     }
                 });
@@ -610,7 +580,7 @@
         function enabledEdit() {
             mode = 'edit';
 
-            const form = document.getElementById('joForm');
+            const form = document.getElementById('joEForm');
             const elements = form.querySelectorAll('input, select, button');
 
             elements.forEach(el => {
@@ -630,6 +600,6 @@
             document.querySelector('.btn-warning')?.setAttribute('hidden', 'true');
             document.getElementById('backButton')?.setAttribute('hidden', 'true');
         }
-
     </script>
+
 }

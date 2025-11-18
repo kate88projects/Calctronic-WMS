@@ -2,16 +2,18 @@
 
 namespace RackingSystem.Data.JO
 {
-    public class JobOrderDetail
+    public class JobOrderEmergencyDetail
     {
         [Key]
-        public long JobOrderDetail_Id { get; set; }
+        public long JobOrderEmergencyDetail_Id { get; set; }
+
         [Required]
-        public long JobOrder_Id { get; set; }
+        public long JobOrderEmergency_Id { get; set; }
+
         [Required]
         public long Item_Id { get; set; }
+
         [Required]
         public int Qty { get; set; } = 0;
-
     }
 }

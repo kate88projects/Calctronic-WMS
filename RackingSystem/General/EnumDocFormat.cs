@@ -3,6 +3,7 @@
     public enum EnumDocFormat
     {
         Reel,
-        JO
+        JO,
+        EM_JO,
     }
 }

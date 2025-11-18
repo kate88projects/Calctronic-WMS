@@ -50,6 +50,9 @@ namespace RackingSystem.Data
             CreateMap<GRNDetail, GRNDtlDTO>();
             CreateMap<JobOrder, JOListDTO>();
             CreateMap<JobOrderDetail, JODetailReqDTO>();
+            CreateMap<JobOrderEmergency, JOEmergencyReqDTO>();
+            CreateMap<JobOrderEmergencyDetail, JOEmergencyDetailReqDTO>();
+
         }
     }
 }

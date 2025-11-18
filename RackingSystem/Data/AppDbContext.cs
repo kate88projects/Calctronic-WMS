@@ -73,6 +73,9 @@ namespace RackingSystem.Data
         public DbSet<JobOrder> JobOrder { get; set; }
         public DbSet<JobOrderDetail> JobOrderDetail { get; set; }
         public DbSet<JobOrderRaws> JobOrderRaws { get; set; }
+        public DbSet<JobOrderEmergency> JobOrderEmergency { get; set; }
+        public DbSet<JobOrderEmergencyDetail> JobOrderEmergencyDetail { get; set; }
+
 
         public DbSet<RackJobQueue.RackJobQueue> RackJobQueue { get; set; }
         public DbSet<RackJobQueueLog> RackJobQueueLog { get; set; }
