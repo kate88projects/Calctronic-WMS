@@ -71,6 +71,7 @@ namespace RackingSystem.Services.SlotServices
                     (slotReq.YPulse, "Y Pulse"),
                     (slotReq.QRXPulse, "Qr-X Pulse"),
                     (slotReq.QRYPulse, "Qr-Y Pulse"),
+                    (slotReq.Priority, "Priority"),
                 };
 
                 foreach (var (value, fieldName) in validatefield)
@@ -142,6 +143,7 @@ namespace RackingSystem.Services.SlotServices
                         Add5Pulse = slotReq.Add5Pulse,
                         Add6Pulse = slotReq.Add6Pulse,
                         IsLeft = slotReq.IsLeft,
+                        Priority = slotReq.Priority,
                     };
                     _dbContext.Slot.Add(_slot);
 
@@ -189,6 +191,7 @@ namespace RackingSystem.Services.SlotServices
                     _slot.Add5Pulse = slotReq.Add5Pulse;
                     _slot.Add6Pulse = slotReq.Add6Pulse;
                     _slot.IsLeft = slotReq.IsLeft;
+                    _slot.Priority = slotReq.Priority;
                     _dbContext.Slot.Update(_slot);
 
                     SlotColumnSetting? _slotCol = _dbContext.SlotColumnSetting.FirstOrDefault(x => x.ColNo == oldColNo);

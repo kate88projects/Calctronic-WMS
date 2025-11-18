@@ -1,4 +1,5 @@
-﻿<style>
+﻿
+<style>
     .table-title {
         color: #fff;
         background: #4b5366;
@@ -15,10 +16,9 @@
         border-color: #007bff;
     }
 
-    #columnNumber {
+    /* #columnNumber {
         max-width: 720px;
-
-    }
+    } */
 
     .btn-primary:hover {
         background-color: #0056b3;
@@ -30,12 +30,13 @@
         text-align: left !important;
     }
 
+    /*
     .align-td td {
         padding: 8px;
         text-align: left !important;
     }
 
-    /* .input-group {
+     .input-group {
         display: flex;
         justify-content: center;
         width: 100%;
@@ -62,7 +63,7 @@
 
     .input-group .btn i {
         font-size: 1.2rem;
-    } */
+    } 
 
     .form-label {
         font-size: 1rem;
@@ -71,6 +72,16 @@
 
     .card2 {
         margin-top: 10px;
+    } */
+
+    .custom-table tbody tr:hover td {
+        background-color: #F1F6F9; 
+    }
+
+    .custom-table thead th {
+        background-color: #F1F6F9; 
+        font-size: 16px;
+        color: #000;
     }
 
 </style>
@@ -95,9 +106,9 @@
                             <input type="number" id="columnNumber" class="form-control" placeholder="Enter Column Number" min="1" />
                             <button id="btnRetrieve" class="btn btn-primary" onclick="retrieveEmpty()"><i class="fas fa-search"></i> Retrieve</button>
                         </div>
-                    </div> *@
+                    </div> 
 
-                    <div class="table table-responsive text-nowrap">
+                     <div class="table table-responsive text-nowrap">
                         <table class="table dataTable hover" id="slotTable">
                             <thead>
                                 <tr>
@@ -109,7 +120,8 @@
                                 </tr>
                             </thead>
                         </table>
-                    </div>
+                    </div> *@
+                    <div id="gridTable" class="table table-responsive text-nowrap"></div>
                 </div>
             </div>
         </div>
@@ -118,26 +130,35 @@
 
 @section Scripts
 {
-    <link href="~/css/datatables.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
-
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/js/datatables.min.js"></script>
+
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
     <script src="~/js/sweetalert2.all.min.js"></script>    
+    <link href="https://unpkg.com/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+    <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
 
     <script type="text/javascript">
 
         $(document).ready(async function () {
-            $('#slotTable').DataTable({
-                data: null,
-            });
+            loadDefault();
         });
+
+        let gridInstance = null;
+        
+        function loadDefault() {
+            gridInstance = new gridjs.Grid({
+                columns: ['Priority', 'Slot ID', 'Slot Code', 'Column No', 'Row No'],
+                data: [],
+                className: {
+                    table: 'table table-bordered custom-table'
+                },
+            }).render(document.getElementById("gridTable"));
+        }
 
         function retrieveEmpty() {
             $.ajax({
                 url: '/Slot/GetFreeSlot_Drawer_ByColumn', 
                 type: 'GET',
-                // data: JSON.stringify(colNo),
                 dataType: 'JSON',
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
@@ -154,36 +175,67 @@
                     Swal.close();
                     if (result.success == true) {
                         console.log(result);
-                        $('#slotTable').addClass('align-td');
 
-                        result.data.forEach((item, index) => {
-                            item.priority = index + 1;
-                        });
+                        const tableData = result.data.map((item, index) => [
+                            index +1,
+                            item.slot_Id,
+                            item.slotCode,
+                            item.colNo,
+                            item.rowNo
+                        ]);
 
-                        $('#slotTable').DataTable( {
-                            data: result.data,
-                            "bDestroy": true,
-                            columns: [
-                                { data: 'priority'},
-                                { data: 'slot_Id' },
-                                { data: 'slotCode' },
-                                { data: 'colNo' },
-                                { data: 'rowNo' },
-                            ],
-                            order: [[0, 'asc']],
-                        });
+                        if (gridInstance) { //destroy previous grid instance 
+                            gridInstance.destroy();
+                        }
+
+                        gridInstance = new gridjs.Grid({
+                            columns: ['Priority', 'Slot ID', 'Slot Code', 'Column No', 'Row No'],
+                            data: tableData,
+                            pagination: true,
+                            sort: true,
+                            search: true,
+                            className: {
+                                table: 'table table-bordered custom-table',
+                                // td: 'custom-td',
+                            },
+                        }).render(document.getElementById("gridTable"));
+
+                        // $('#slotTable').addClass('align-td');
+                        // result.data.forEach((item, index) => {
+                        //     item.priority = index + 1;
+                        // });
+                        // $('#slotTable').DataTable( {
+                        //     data: result.data,
+                        //     "bDestroy": true,
+                        //     columns: [
+                        //         { data: 'priority'},
+                        //         { data: 'slot_Id' },
+                        //         { data: 'slotCode' },
+                        //         { data: 'colNo' },
+                        //         { data: 'rowNo' },
+                        //     ],
+                        //     order: [[0, 'asc']],
+                        // });
                     }
                     else 
                     {
-                        $('#slotTable tbody').empty();
-                        $('#slotTable tbody').append('<tr><td colspan="5" class="dt-empty">No empty trays found from slot.</td></tr>');                       
+                        if (gridInstance) {
+                            gridInstance.destroy();
+                        }
+
+                        document.getElementById("gridTable").innerHTML = `
+                            <div class="alert alert-warning text-center" role="alert"
+                                No empty trays found from slot.
+                            </div>`;
+                        // $('#slotTable tbody').empty();
+                        // $('#slotTable tbody').append('<tr><td colspan="5" class="dt-empty">No empty trays found from slot.</td></tr>');                       
                     }
                 },
                 error: function(error) {
                     swal.fire({
                         icon: 'error',
                         title: "Wait",
-                        text: error.val
+                        text: error.statusText || "An error occurred"
                     });
                 }
             });

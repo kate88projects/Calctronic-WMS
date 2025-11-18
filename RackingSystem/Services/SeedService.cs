@@ -78,6 +78,23 @@ namespace RackingSystem.Services
                     await context.SaveChangesAsync();
                 }
 
+                // Add Doc Format for Emergency JobOrder
+                logger.LogInformation("Start Add Doc Format for Emergency JobOrder ... ");
+                if (context.DocFormat.Where(x => x.DocFormatType == EnumDocFormat.EM_JO.ToString()).Any() == false)
+                {
+                    var docF = new DocFormat
+                    {
+                        DocFormatType = EnumDocFormat.EM_JO.ToString(),
+                        DocumentFormat = "EM_JO{yyMM}<000000>",
+                        NumberLength = 8,
+                        NextRoundingNum = 1,
+                        IsActive = true,
+                        IsResetMonthly = true,
+                    };
+                    context.DocFormat.Add(docF);
+                    await context.SaveChangesAsync();
+                }
+
                 // Set Default Doc Format for Reel in Configuration
                 if (context.DocFormat.Where(x => x.DocFormatType == EnumDocFormat.Reel.ToString()).Any() && context.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.DocFormat_Reel.ToString()).Any() == false)
                 {
@@ -98,6 +115,19 @@ namespace RackingSystem.Services
                     var config = new Configuration
                     {
                         ConfigTitle = EnumConfiguration.DocFormat_JO.ToString(),
+                        ConfigValue = docF.DocFormat_Id.ToString(),
+                    };
+                    context.Configuration.Add(config);
+                    await context.SaveChangesAsync();
+                }
+
+                // Set Default Doc Format for Emergency JO in Configuration
+                if (context.DocFormat.Where(x => x.DocFormatType == EnumDocFormat.EM_JO.ToString()).Any() && context.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.DocFormat_EmergencyJO.ToString()).Any() == false)
+                {
+                    var docF = context.DocFormat.Where(x => x.DocFormatType == EnumDocFormat.EM_JO.ToString()).First();
+                    var config = new Configuration
+                    {
+                        ConfigTitle = EnumConfiguration.DocFormat_EmergencyJO.ToString(),
                         ConfigValue = docF.DocFormat_Id.ToString(),
                     };
                     context.Configuration.Add(config);

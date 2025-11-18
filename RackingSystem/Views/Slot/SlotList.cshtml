@@ -29,7 +29,6 @@
     .text-link {
         color: blue;
         cursor: pointer;
-        /* text-decoration: underline; */
         display: block;
         text-align: right;
         margin-bottom: 10px;
@@ -43,15 +42,58 @@
         border: 1px solid #ccc;
     }
 
+    #columnMatchingLabel {
+        text-align: center;
+        width: 100%;
+        font-weight: bold;
+    }
+
     .modal-body {
       max-height: calc(100vh - 200px); 
       overflow-y: auto;
     }
+    
+    .matching-btn {
+        justify-content: center;
+    }
 
+    .bi-upload {
+        padding-left: 10px;
+    }
+
+    .custom-table thead th {
+        background-color: #F1F6F9;
+        color: #000;
+    }
+
+    .custom-table tbody tr:hover td {
+        background-color: #F1F6F9;
+    }
+
+    .custom-table tbody {
+        font-size: 15px;
+    }
+
+    .gridjs-pagination {
+        font-size: 14px;
+    }
+
+    th.gridjs-th {
+        padding: 10px 15px !important;
+    }
+
+    td.gridjs-td {
+        padding: 8px 15px !important;
+    }
+
+    .edit-slot-btn, .delete-slot-btn {
+        height: 33px;
+        padding: 5px 10px;
+        font-size: 14px;
+    }
 </style>
 
 <br />
-
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -84,8 +126,9 @@
                         </button>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="table table-striped table-bordered table-responsive text-nowrap">
+                <div class="card-body pt-0">
+                    <div id="gridTable" class="table table-responsive text-nowrap mt-3"></div>
+                    <@* div class="table table-striped table-bordered table-responsive text-nowrap">
                         <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
                             <thead>
                                 <tr>
@@ -94,17 +137,17 @@
                                     <th>Row No</th>
                                     <th>Is Active</th>
                                     <th>Is Left</th>
-                                    @* <th>Has Empty Tray</th>
-                                    <th>Has Reel</th> *@
+                                    //<th>Has Empty Tray</th>
+                                    //<th>Has Reel</th> 
                                     <th>X Pulse</th>
                                     <th>Y Pulse</th>
-                                    <th>Qr-X Pulse</th>
-                                    <th>Qr-Y Pulse</th>
+                                    <th>QR-X Pulse</th>
+                                    <th>QR-Y Pulse</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
                         </table>
-                    </div>
+                    </div> *@
                 </div>
             </div>
         </div>
@@ -119,11 +162,13 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body" id="csvColumns">
-        <div id="csvColumns"></div> 
-        <div id="dataTableColumns"></div> 
+          <div class="row">
+              <div id="csvColumnContent"></div> 
+              <div id="dataTableColumns"></div> 
+          </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" onclick="processAndSubmitData()">Submit</button>
+      <div class="modal-footer matching-btn">
+        <button type="button" class="btn btn-primary" onclick="processAndSubmitData()">Submit<i class="bi bi-upload fs-5"></i></button>
       </div>
       <input type="hidden" id="updateType" />
     </div>
@@ -140,45 +185,52 @@
             </div>
             @* <form action="/Slot/SaveSlot" method="post"> *@
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label" for="txtCode">Slot Code</label>
-                        <input type="text" class="form-control" name="SlotCode" id="txtCode" aria-describedby="Slot Code">
-                        <div id="txtCodeError" class="error-message"></div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label class="form-label" for="txtCode">Slot Code</label>
+                            <input type="text" class="form-control" name="SlotCode" id="txtCode" aria-describedby="Slot Code">
+                            <div id="txtCodeError" class="error-message"></div>
+                        </div>
+                        <div class="col">
+                            <label class="form-label" for="txtPriority">Priority Level</label>
+                            <input type="number" class="form-control" name="Priority" id="txtPriority" aria-describedby="Priority Level" min="0">
+                            <div id="txtPriorityError" class="error-message"></div>
+                        </div>
                         @* <span asp-validation-for="SlotCode" class="text-danger"></span> *@
                     </div>
                     <div class="row mb-3">
                         <div class="col">
                             <label class="form-label" for="txtColNo">Column No</label>
-                            <input type="text" class="form-control" name="ColNo" id="txtColNo" aria-describedby="Column No">
+                            <input type="text" class="form-control" name="ColNo" id="txtColNo" aria-describedby="Column No" min="1">
                             <div id="txtColNoError" class="error-message"></div>
                         </div>
                         <div class="col">
                             <label class="form-label" for="txtRowNo">Row No</label>
-                            <input type="text" class="form-control" name="RowNo" id="txtRowNo" aria-describedby="Row No">
+                            <input type="text" class="form-control" name="RowNo" id="txtRowNo" aria-describedby="Row No" min="1">
                             <div id="txtRowNoError" class="error-message"></div>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col">
                             <label class="form-label" for="txtXPulse">X Pulse</label>
-                            <input type="number" class="form-control" name="XPulse" id="txtXPulse" aria-describedby="X Pulse" min="1">
+                            <input type="number" class="form-control" name="XPulse" id="txtXPulse" aria-describedby="X Pulse" min="0">
                             <div id="txtXPulseError" class="error-message"></div>
                         </div>
                         <div class="col">
                             <label class="form-label" for="txtYPulse">Y Pulse</label>
-                            <input type="number" class="form-control" name="YPulse" id="txtYPulse" aria-describedby="Y Pulse" min="1">
+                            <input type="number" class="form-control" name="YPulse" id="txtYPulse" aria-describedby="Y Pulse" min="0">
                             <div id="txtYPulseError" class="error-message"></div>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col">
-                            <label class="form-label" for="txtQrXPulse">Qr-X Pulse</label>
-                            <input type="number" class="form-control" name="QrXPulse" id="txtQrXPulse" aria-describedby="QR-X Pulse" min="1">
+                            <label class="form-label" for="txtQrXPulse">QR-X Pulse</label>
+                            <input type="number" class="form-control" name="QrXPulse" id="txtQrXPulse" aria-describedby="Qr-X Pulse" min="0">
                             <div id="txtQrXPulseError" class="error-message"></div>
                         </div>
                         <div class="col">
-                            <label class="form-label" for="txtQrYPulse">Qr-Y Pulse</label>
-                            <input type="number" class="form-control" name="QrYPulse" id="txtQrYPulse" aria-describedby="Qr-Y Pulse" min="1">
+                            <label class="form-label" for="txtQrYPulse">QR-Y Pulse</label>
+                            <input type="number" class="form-control" name="QrYPulse" id="txtQrYPulse" aria-describedby="Qr-Y Pulse" min="0">
                             <div id="txtQrYPulseError" class="error-message"></div>
                         </div>
                     </div>
@@ -187,36 +239,36 @@
                         <div class="row mb-3">
                             <div class="col">
                                 <label class="form-label" for="txtAddPulse1">Additional Pulse 1</label>
-                                <input type="number" class="form-control" name="AddPulse1" id="txtAddPulse1" aria-describedby="Additional Pulse 1" min="1">
+                                <input type="number" class="form-control" name="AddPulse1" id="txtAddPulse1" aria-describedby="Additional Pulse 1" min="0">
                                 <div id="txtAddPulse1Error" class="error-message"></div>
                             </div>
                             <div class="col">
                                 <label class="form-label" for="txtAddPulse2">Additional Pulse 2</label>
-                                <input type="number" class="form-control" name="AddPulse2" id="txtAddPulse2" aria-describedby="Additional Pulse 2" min="1">
+                                <input type="number" class="form-control" name="AddPulse2" id="txtAddPulse2" aria-describedby="Additional Pulse 2" min="0">
                                 <div id="txtAddPulse2Error" class="error-message"></div>
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col">
                                 <label class="form-label" for="txtAddPulse3">Additional Pulse 3</label>
-                                <input type="number" class="form-control" name="AddPulse3" id="txtAddPulse3" aria-describedby="Additional Pulse 3" min="1">
+                                <input type="number" class="form-control" name="AddPulse3" id="txtAddPulse3" aria-describedby="Additional Pulse 3" min="0">
                                 <div id="txtAddPulse3Error" class="error-message"></div>
                             </div>
                             <div class="col">
                                 <label class="form-label" for="txtAddPulse4">Additional Pulse 4</label>
-                                <input type="number" class="form-control" name="AddPulse4" id="txtAddPulse4" aria-describedby="Additional Pulse 4" min="1">
+                                <input type="number" class="form-control" name="AddPulse4" id="txtAddPulse4" aria-describedby="Additional Pulse 4" min="0">
                                 <div id="txtAddPulse4Error" class="error-message"></div>
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col">
                                 <label class="form-label" for="txtAddPulse5">Additional Pulse 5</label>
-                                <input type="number" class="form-control" name="AddPulse5" id="txtAddPulse5" aria-describedby="Additional Pulse 5" min="1">
+                                <input type="number" class="form-control" name="AddPulse5" id="txtAddPulse5" aria-describedby="Additional Pulse 5" min="0">
                                 <div id="txtAddPulse5Error" class="error-message"></div>
                             </div>
                             <div class="col">
                                 <label class="form-label" for="txtAddPulse6">Additional Pulse 6</label>
-                                <input type="number" class="form-control" name="AddPulse6" id="txtAddPulse6" aria-describedby="Additional Pulse 6"" min="1">
+                                <input type="number" class="form-control" name="AddPulse6" id="txtAddPulse6" aria-describedby="Additional Pulse 6" min="0">
                                 <div id="txtAddPulse6Error" class="error-message"></div>
                             </div>
                         </div>
@@ -255,11 +307,17 @@
             </div>
             @* <form action="/Slot/SaveSlot" method="post"> *@
             <div class="modal-body" style="max-height: calc(100vh - 200px); overflow-y: auto;">
-                <div class="mb-3">
-                    <label class="form-label" for="txtCodeFormat">Slot Code Format</label>
-                    <input type="text" class="form-control" name="SlotCodeFormat" id="txtCodeFormat" aria-describedby="Slot Code Format">
-                    <div id="txtCodeFormatError" class="error-message"></div>
-                    @* <span asp-validation-for="SlotCode" class="text-danger"></span> *@
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label" for="txtCodeFormat">Slot Code Format</label>
+                        <input type="text" class="form-control" name="SlotCodeFormat" id="txtCodeFormat" aria-describedby="Slot Code Format">
+                        <div id="txtCodeFormatError" class="error-message"></div>
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="txtPriority">Priority Level</label>
+                        <input type="number" class="form-control" name="Priority" id="txtPriority" aria-describedby="Priority Level" min="0">
+                        <div id="txtPriorityError" class="error-message"></div>
+                    </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col">
@@ -270,31 +328,31 @@
                     </div>
                     <div class="col">
                         <label class="form-label" for="txtTotalCol">Total Column</label>
-                        <input type="number" class="form-control" name="TotalCol" id="txtTotalCol" aria-describedby="Total Col">
+                        <input type="number" class="form-control" name="TotalCol" id="txtTotalCol" aria-describedby="Total Col" min="1">
                         <div id="txtTotalColError" class="error-message"></div>
                     </div>
                     <div class="col">
                         <label class="form-label" for="txtRowFrom">Row No From</label>
-                        <input type="number" class="form-control" name="RowNo" id="txtRowFrom" aria-describedby="Row No">
+                        <input type="number" class="form-control" name="RowNo" id="txtRowFrom" aria-describedby="Row No" min="1">
                         <div id="txtRowFromError" class="error-message"></div>
 
                     </div>
                     <div class="col">
                         <label class="form-label" for="txtTotalRow">Total Row</label>
-                        <input type="number" class="form-control" name="TotalRow" id="txtTotalRow" aria-describedby="Total Row">
+                        <input type="number" class="form-control" name="TotalRow" id="txtTotalRow" aria-describedby="Total Row" min="1">
                         <div id="txtTotalRowError" class="error-message"></div>
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col">
                         <label class="form-label" for="txtStartXPulse">X Pulse</label>
-                        <input type="number" class="form-control" name="XPulse" id="txtStartXPulse" aria-describedby="X Pulse">
+                        <input type="number" class="form-control" name="XPulse" id="txtStartXPulse" aria-describedby="X Pulse" min="0">
                         <div id="txtStartXPulseError" class="error-message"></div>
 
                     </div>
                     <div class="col">
                         <label class="form-label" for="txtXPulseIncrement">X Pulse Increment</label>
-                        <input type="number" class="form-control" name="XPulseIncrement" id="txtXPulseIncrement" aria-describedby="X Pulse Increment">
+                        <input type="number" class="form-control" name="XPulseIncrement" id="txtXPulseIncrement" aria-describedby="X Pulse Increment" min="0">
                         <div id="txtXPulseIncrementError" class="error-message"></div>
                     </div>
                 </div>
@@ -302,38 +360,38 @@
                 <div class="row mb-3">
                     <div class="col">
                         <label class="form-label" for="txtStartYPulse">Y Pulse</label>
-                        <input type="number" class="form-control" name="YPulse" id="txtStartYPulse" aria-describedby="Y Pulse">
+                        <input type="number" class="form-control" name="YPulse" id="txtStartYPulse" aria-describedby="Y Pulse" min="0">
                         <div id="txtStartYPulseError" class="error-message"></div>
                     </div>
                     <div class="col">
                         <label class="form-label" for="txtYPulseIncrement">Y Pulse Increment</label>
-                        <input type="number" class="form-control" name="YPulseIncrement" id="txtYPulseIncrement" aria-describedby="Y Pulse Increment">
+                        <input type="number" class="form-control" name="YPulseIncrement" id="txtYPulseIncrement" aria-describedby="Y Pulse Increment" min="0">
                         <div id="txtYPulseIncrementError" class="error-message"></div>
                     </div>
                 </div>
 
                 <div class="row mb-3">
                     <div class="col">
-                        <label class="form-label" for="txtStartQrXPulse">Qr-X Pulse</label>
-                        <input type="number" class="form-control" name="QrXPulse" id="txtStartQrXPulse" aria-describedby="QR-X Pulse">
+                        <label class="form-label" for="txtStartQrXPulse">QR-X Pulse</label>
+                        <input type="number" class="form-control" name="QrXPulse" id="txtStartQrXPulse" aria-describedby="Qr-X Pulse" min="0">
                         <div id="txtStartQrXPulseError" class="error-message"></div>
                     </div>
                     <div class="col">
-                        <label class="form-label" for="txtQrXPulseIncrement">Qr-X Pulse Increment</label>
-                        <input type="number" class="form-control" name="QrXPulseIncrement" id="txtQrXPulseIncrement" aria-describedby="Qr-X Pulse Increment">
+                        <label class="form-label" for="txtQrXPulseIncrement">QR-X Pulse Increment</label>
+                        <input type="number" class="form-control" name="QrXPulseIncrement" id="txtQrXPulseIncrement" aria-describedby="Qr-X Pulse Increment" min="0">
                         <div id="txtQrXPulseIncrementError" class="error-message"></div>
                     </div>
                 </div>
                 
                 <div class="row mb-3">
                     <div class="col">
-                        <label class="form-label" for="txtStartQrYPulse">Qr-Y Pulse</label>
-                        <input type="number" class="form-control" name="QrYPulse" id="txtStartQrYPulse" aria-describedby="QR-Y Pulse">
+                        <label class="form-label" for="txtStartQrYPulse">QR-Y Pulse</label>
+                        <input type="number" class="form-control" name="QrYPulse" id="txtStartQrYPulse" aria-describedby="Qr-Y Pulse" min="0">
                         <div id="txtStartQrYPulseError" class="error-message"></div>
                     </div>
                     <div class="col">
-                        <label class="form-label" for="txtQrYPulseIncrement">Qr-Y Pulse Increment</label>
-                        <input type="number" class="form-control" name="QrYPulseIncrement" id="txtQrYPulseIncrement" aria-describedby="Qr-Y Pulse Increment">
+                        <label class="form-label" for="txtQrYPulseIncrement">QR-Y Pulse Increment</label>
+                        <input type="number" class="form-control" name="QrYPulseIncrement" id="txtQrYPulseIncrement" aria-describedby="Qr-Y Pulse Increment" min="0">
                         <div id="txtQrYPulseIncrementError" class="error-message"></div>
                     </div>
                 </div>
@@ -342,72 +400,72 @@
                     <div class="row mb-3">
                         <div class="col">
                             <label class="form-label" for="txtStartAddPulse1">Additional Pulse 1</label>
-                            <input type="number" class="form-control" name="AddPulse1" id="txtStartAddPulse1" aria-describedby="Additional Pulse 1" min="1">
+                            <input type="number" class="form-control" name="AddPulse1" id="txtStartAddPulse1" aria-describedby="Additional Pulse 1" min="0">
                             <div id="txtStartAddPulse1Error" class="error-message"></div>
                         </div>
                         <div class="col">
                             <label class="form-label" for="txtAddPulse1Inc">Additional Pulse 1 Increment</label>
-                            <input type="number" class="form-control" name="AddPulse1Inc" id="txtAddPulse1Inc" aria-describedby="Additional Pulse 1 Increment" min="1">
+                            <input type="number" class="form-control" name="AddPulse1Inc" id="txtAddPulse1Inc" aria-describedby="Additional Pulse 1 Increment" min="0">
                             <div id="txtAddPulse1IncError" class="error-message"></div>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col">
                             <label class="form-label" for="txtStartAddPulse2">Additional Pulse 2</label>
-                            <input type="number" class="form-control" name="AddPulse2" id="txtStartAddPulse2" aria-describedby="Additional Pulse 2" min="1">
+                            <input type="number" class="form-control" name="AddPulse2" id="txtStartAddPulse2" aria-describedby="Additional Pulse 2" min="0">
                             <div id="txtStartAddPulse2Error" class="error-message"></div>
                         </div>
                         <div class="col">
                             <label class="form-label" for="txtAddPulse2Inc">Additional Pulse 2 Increment</label>
-                            <input type="number" class="form-control" name="AddPulse2Inc" id="txtAddPulse2Inc" aria-describedby="Additional Pulse 2 Increment" min="1">
+                            <input type="number" class="form-control" name="AddPulse2Inc" id="txtAddPulse2Inc" aria-describedby="Additional Pulse 2 Increment" min="0">
                             <div id="txtAddPulse2IncError" class="error-message"></div>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col">
                             <label class="form-label" for="txtStartAddPulse3">Additional Pulse 3</label>
-                            <input type="number" class="form-control" name="AddPulse3" id="txtStartAddPulse3" aria-describedby="Additional Pulse 3" min="1">
+                            <input type="number" class="form-control" name="AddPulse3" id="txtStartAddPulse3" aria-describedby="Additional Pulse 3" min="0">
                             <div id="txtStartAddPulse3Error" class="error-message"></div>
                         </div>
                         <div class="col">
                             <label class="form-label" for="txtAddPulse3Inc">Additional Pulse 3 Increment</label>
-                            <input type="number" class="form-control" name="AddPulse3Inc" id="txtAddPulse3Inc" aria-describedby="Additional Pulse 3 Increment" min="1">
+                            <input type="number" class="form-control" name="AddPulse3Inc" id="txtAddPulse3Inc" aria-describedby="Additional Pulse 3 Increment" min="0">
                             <div id="txtAddPulse3IncError" class="error-message"></div>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col">
                             <label class="form-label" for="txtStartAddPulse4">Additional Pulse 4</label>
-                            <input type="number" class="form-control" name="AddPulse4" id="txtStartAddPulse4" aria-describedby="Additional Pulse 4" min="1">
+                            <input type="number" class="form-control" name="AddPulse4" id="txtStartAddPulse4" aria-describedby="Additional Pulse 4" min="0">
                             <div id="txtStartAddPulse4Error" class="error-message"></div>
                         </div>
                         <div class="col">
                             <label class="form-label" for="txtAddPulse4Inc">Additional Pulse 4 Increment</label>
-                            <input type="number" class="form-control" name="AddPulse4Inc" id="txtAddPulse4Inc" aria-describedby="Additional Pulse 4 Increment" min="1">
+                            <input type="number" class="form-control" name="AddPulse4Inc" id="txtAddPulse4Inc" aria-describedby="Additional Pulse 4 Increment" min="0">
                             <div id="txtAddPulse4IncError" class="error-message"></div>
                         </div>
                    </div>
                    <div class="row mb-3">
                         <div class="col">
                             <label class="form-label" for="txtStartAddPulse5">Additional Pulse 5</label>
-                            <input type="number" class="form-control" name="AddPulse5" id="txtStartAddPulse5" aria-describedby="Additional Pulse 5" min="1">
+                            <input type="number" class="form-control" name="AddPulse5" id="txtStartAddPulse5" aria-describedby="Additional Pulse 5" min="0">
                             <div id="txtStartAddPulse5Error" class="error-message"></div>
                         </div>
                         <div class="col">
                             <label class="form-label" for="txtAddPulse5Inc">Additional Pulse 5 Increment</label>
-                            <input type="number" class="form-control" name="AddPulse5Inc" id="txtAddPulse5Inc" aria-describedby="Additional Pulse 5 Increment" min="1">
+                            <input type="number" class="form-control" name="AddPulse5Inc" id="txtAddPulse5Inc" aria-describedby="Additional Pulse 5 Increment" min="0">
                             <div id="txtAddPulse5IncError" class="error-message"></div>
                         </div>
                    </div>
                    <div class="row mb-3">
                         <div class="col">
                             <label class="form-label" for="txtStartAddPulse6">Additional Pulse 6</label>
-                            <input type="number" class="form-control" name="AddPulse6" id="txtStartAddPulse6" aria-describedby="Additional Pulse 6" min="1">
+                            <input type="number" class="form-control" name="AddPulse6" id="txtStartAddPulse6" aria-describedby="Additional Pulse 6" min="0">
                             <div id="txtStartAddPulse6Error" class="error-message"></div>
                         </div>
                         <div class="col">
                             <label class="form-label" for="txtAddPulse6Inc">Additional Pulse 6 Increment</label>
-                            <input type="number" class="form-control" name="AddPulse6Inc" id="txtAddPulse6Inc" aria-describedby="Additional Pulse 6 Increment" min="1">
+                            <input type="number" class="form-control" name="AddPulse6Inc" id="txtAddPulse6Inc" aria-describedby="Additional Pulse 6 Increment" min="0">
                            <div id="txtAddPulse6IncError" class="error-message"></div>
                         </div>
                    </div>
@@ -416,12 +474,12 @@
                 <span id="textlink2" class="text-link" tabindex="0" onclick="customPulses('colModal', true)"><i class="fas fa-plus-circle"></i> Additional Pulses</span>
                 
                 <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkIsActive">
-                    <label class="form-check-label" for="chkIsActive">Is Active</label>
+                    <input type="checkbox" class="form-check-input" id="chkIsActiveRange">
+                    <label class="form-check-label" for="chkIsActiveRange">Is Active</label>
                 </div>
                 <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkIsLeft">
-                    <label class="form-check-label" for="chkIsLeft">Is Left</label>
+                    <input type="checkbox" class="form-check-input" id="chkIsLeftRange">
+                    <label class="form-check-label" for="chkIsLeftRange">Is Left</label>
                 </div>
 
                 <input type="hidden" id="txtId">
@@ -438,24 +496,23 @@
 
 @section Scripts
 {
-    <link href="../css/datatables.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../css/sweetalert2.min.css">
+    <link rel="stylesheet" href="~/css/gridjs.min.css">
+    @* <link rel="stylesheet" href="~/css/datatables.min.css"> *@
 
     <script src="../lib/jquery/dist/jquery.min.js"></script>
-    <script src="../js/datatables.min.js"></script>
     <script src="../js/sweetalert2.all.min.js"></script>
-
+    @* <script src="~/js/datatables.min.js"></script> *@
+    <script src="~/js/gridjs.umd.js"></script>
     <script src="../js/xlsx.full.min.js"></script>
     <script src="../js/exceljs.min.js"></script>
 
     <script type="text/javascript">
-
         let uploadedFileContent = null;
         let uploadedFileExtension = null;
-
+        let gridInstance = null;
 
         $(document).ready(function () {
-
             loadList();
         });
 
@@ -479,6 +536,7 @@
                 success: function (result) {
                     swal.close()
                     if (result.success == true) {
+                        /*
                         $('#listTable').DataTable( {
                             data: result.data,
                             paging: true,
@@ -541,7 +599,7 @@
                                     render: function (data, type, row, meta) {
                                         const rowData = JSON.stringify(row).replace(/"/g, "&quot;");  //replace all double quotes with HTML entity  //custom data attribute >> data-*
                                         return `<div style="display:flex;">
-                                                    <button class="btn btn-success d-grid edit-slot-btn" style="margin-right: 10px;" data-row="${rowData}">
+                                                    <button class="btn btn-warning d-grid edit-slot-btn" style="margin-right: 10px;" data-row="${rowData}">
                                                         <span><i class="bi bi-pencil-square"></i>Edit</span>
                                                     </button>
                                                     <button class="btn btn-danger delete-slot-bin" data-id="${row.slot_Id}" data-code="${row.slotCode}">
@@ -552,8 +610,94 @@
                                 }
                             ],
                         });
+                        */
+                       if (gridInstance) {
+                           gridInstance.destroy();
+                       }
 
-
+                       gridInstance = new gridjs.Grid({
+                           columns: [
+                               { name: 'Slot Code', id: 'slotCode' },
+                               { name: 'Col No', id: 'colNo', width: '102px' },
+                               { name: 'Row No', id: 'rowNo', width: '110px' },
+                               { 
+                                   name: 'Active State',
+                                   id : 'isActive',
+                                   width: '144px',
+                                   formatter: (cell, row) => {
+                                       const badgeHtml = row.cells[3].data === true
+                                          ? '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
+                                          : '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>';
+                                        return gridjs.html(`<div style="text-align:center;">${badgeHtml}</div>`);
+                                   }
+                               },
+                               {
+                                    name: 'Side',
+                                    id :'isLeft',
+                                    width: '90px',
+                                    data: row => row.isLeft,
+                                    formatter: cell => {
+                                        const sideMap = { false: 'Right', true: 'Left' };
+                                        return sideMap[cell] || cell;
+                                    }
+                               },
+                               { name: 'X Pulse', id: 'xPulse', width: '106px' },
+                               { name: 'Y Pulse', id: 'yPulse', width: '106px' },
+                               { name: 'QR-X Pulse', id: 'qrxPulse', width: '134px' },
+                               { name: 'QR-Y Pulse', id: 'qryPulse', width: '134px' },
+                               { name: 'AddPulse1', id: 'add1Pulse', hidden: true },
+                               { name: 'AddPulse2', id: 'add2Pulse', hidden: true },
+                               { name: 'AddPulse3', id: 'add3Pulse', hidden: true },
+                               { name: 'AddPulse4', id: 'add4Pulse', hidden: true },
+                               { name: 'AddPulse5', id: 'add5Pulse', hidden: true },
+                               { name: 'AddPulse6', id: 'add6Pulse', hidden: true },
+                               { name: 'SlotCodeId', id: 'slot_Id', hidden: true },
+                               { name: 'Priority', id: 'priority', hidden: true },
+                               {
+                                   name: 'Action',
+                                   formatter: (cell, row) => {
+                                      const cleanRow = {
+                                          slotCode: row.cells[0]?.data,
+                                          colNo: row.cells[1]?.data,
+                                          rowNo: row.cells[2]?.data,
+                                          isActive: row.cells[3]?.data,
+                                          isLeft: row.cells[4]?.data,
+                                          xPulse: row.cells[5]?.data,
+                                          yPulse: row.cells[6]?.data,
+                                          qrxPulse: row.cells[7]?.data,
+                                          qryPulse: row.cells[8]?.data,
+                                          add1Pulse: row.cells[9]?.data,
+                                          add2Pulse: row.cells[10]?.data,
+                                          add3Pulse: row.cells[11]?.data,
+                                          add4Pulse: row.cells[12]?.data,
+                                          add5Pulse: row.cells[13]?.data,
+                                          add6Pulse: row.cells[14]?.data,
+                                          slot_Id: row.cells[15]?.data,
+                                          priority: row.cells[16]?.data,
+                                      };
+                                      const rawData = btoa(JSON.stringify(cleanRow));
+                                      return gridjs.html(`
+                                          <div style="display: flex;">
+                                              <button class="btn btn-warning d-grid edit-slot-btn me-2" data-row="${rawData}">
+                                                  <span><i class="bi bi-pencil-square"></i> Edit</span>
+                                              </button>
+                                              <button class="btn btn-danger d-grid delete-slot-btn" data-id="${cleanRow.slot_Id}" data-code="${cleanRow.slotCode}">
+                                                  <span><i class="bi bi-trash"></i> Delete</span>
+                                              </button>
+                                          </div>
+                                      `);
+                                   }
+                               }
+                           ],
+                           data: result.data,
+                           pagination: true,
+                           search: true,
+                           sort: true,
+                           resizable: true,
+                           className: {
+                               table: 'custom-table',
+                           }
+                       }).render(document.getElementById("gridTable"));
 
                     }
                     else {
@@ -589,6 +733,8 @@
             $('#txtAddPulse4').val("");
             $('#txtAddPulse5').val("");
             $('#txtAddPulse6').val("");
+
+            // const inputFields = ['#txtCode', '#txtColNo', '#']
             document.getElementById("chkIsActive").checked = true;
             document.getElementById("chkIsLeft").checked = false;
             $("#myModal").modal("show");
@@ -599,12 +745,13 @@
             // $("#txtCode").val("");
             // $("#txtColNo").val("");
             // $("#txtRowNo").val("");
-            // document.getElementById("chkIsActive").checked = true;
+            document.getElementById("chkIsActiveRange").checked = true;
             $("#colModal").modal("show");
         }
 
-        $('#listTable').on('click', '.edit-slot-btn', function () {
-            const row = JSON.parse($(this).attr('data-row'));
+        $('#gridTable').on('click', '.edit-slot-btn', function () {
+            const row = JSON.parse(atob($(this).attr('data-row')));
+            console.log("row", row);
             editSlotForm(row);
         });
 
@@ -619,6 +766,7 @@
             $("#txtYPulse").val(row.yPulse);
             $("#txtQrXPulse").val(row.qrxPulse);
             $("#txtQrYPulse").val(row.qryPulse);
+            $("#txtPriority").val(row.priority);
 
             var addPulseFields = [
                 { field: "#txtAddPulse1", value: row.add1Pulse },
@@ -706,7 +854,7 @@
                 fields = ['txtCodeFormat', 'txtColFrom', 'txtTotalCol', 'txtRowFrom', 'txtTotalRow', 'txtStartXPulse', 'txtXPulseIncrement', 'txtStartYPulse', 'txtYPulseIncrement', 'txtStartQrXPulse', 'txtQrXPulseIncrement', 'txtStartQrYPulse', 'txtQrYPulseIncrement'];
             }
             else {
-                fields = ['txtCode', 'txtColNo', 'txtRowNo', 'txtXPulse', 'txtYPulse', 'txtQrXPulse', 'txtQrYPulse', 'txtAddPulse1', 'txtAddPulse2', 'txtAddPulse3', 'txtAddPulse4', 'txtAddPulse5', 'txtAddPulse6'];
+                fields = ['txtCode', 'txtPriority', 'txtColNo', 'txtRowNo', 'txtXPulse', 'txtYPulse', 'txtQrXPulse', 'txtQrYPulse', 'txtAddPulse1', 'txtAddPulse2', 'txtAddPulse3', 'txtAddPulse4', 'txtAddPulse5', 'txtAddPulse6'];
             }
             removeErrMsg(fields, true);
             customPulses(modalId);
@@ -728,10 +876,11 @@
                 { id: 'txtCode', name: 'Slot Code', required: true, numeric: false },
                 { id: 'txtColNo', name: 'Column No', required: true, numeric: true, min: 1 },
                 { id: 'txtRowNo', name: 'Row No', required: true, numeric: true, min: 1 },
-                { id: 'txtXPulse', name: 'X Pulse', required: true, numeric: true, min: 1 },
-                { id: 'txtYPulse', name: 'Y Pulse', required: true, numeric: true, min: 1 },
-                { id: 'txtQrXPulse', name: 'Qr-X Pulse', required: true, numeric: true, min: 1 },
-                { id: 'txtQrYPulse', name: 'Qr-Y Pulse', required: true, numeric: true, min: 1 },
+                { id: 'txtXPulse', name: 'X Pulse', required: true, numeric: true, min: 0 },
+                { id: 'txtYPulse', name: 'Y Pulse', required: true, numeric: true, min: 0 },
+                { id: 'txtQrXPulse', name: 'Qr-X Pulse', required: true, numeric: true, min: 0 },
+                { id: 'txtQrYPulse', name: 'Qr-Y Pulse', required: true, numeric: true, min: 0 },
+                { id: 'txtPriority', name: 'Priority', required: true, numeric: true, min: 0 },
                 // ...(!isHidden ? addPulseFields : [])
             ];
 
@@ -752,10 +901,9 @@
                     Add5Pulse: parseInt($('#txtAddPulse5').val()) || 0,
                     Add6Pulse: parseInt($('#txtAddPulse6').val()) || 0,
                     IsActive: $('#myModal').find('#chkIsActive').prop("checked"),
-                    IsLeft: $('#myModal').find('#chkIsLeft').prop("checked")
+                    IsLeft: $('#myModal').find('#chkIsLeft').prop("checked"),
+                    Priority: parseInt($('#txtPriority').val()),
                 };
-
-                // console.log(data);
 
                 $.ajax({
                     url: '/Slot/SaveSlot',
@@ -806,10 +954,10 @@
             }
         }
 
-        $('#listTable').on('click', '.delete-slot-bin', function () {
-                const id = $(this).attr('data-id');
-                const slotCode = $(this).attr('data-code');
-                deleteSlot(id, slotCode);
+        $('#gridTable').on('click', '.delete-slot-btn', function () {
+            const id = $(this).attr('data-id');
+            const slotCode = $(this).attr('data-code');
+            deleteSlot(id, slotCode);
         });
 
         function deleteSlot(id, slotCode) {
@@ -825,7 +973,6 @@
                 allowOutsideClick: false
                 }).then(function(r) {
                 if (r.isConfirmed == true) {
-
                     var data = {
                         Slot_Id: id,
                         SlotCode: slotCode,
@@ -900,8 +1047,8 @@
                     return;
                 }
 
-                if (field.numeric && (isNaN(value) || Number(value) < (field.min || 0))) {
-                    showError(field.id, `Please enter a valid ${field.name} (number >= ${field.min || 0}).`);
+                if (field.numeric && (isNaN(value.trim()) || Number(value) < (field.min))) {
+                    showError(field.id, `Please enter a valid ${field.name} (number >= ${field.min}).`);
                     isValid = false;
                 }
             });
@@ -929,38 +1076,20 @@
         }
 
         function saveRangeOfSlot() {
-            // let addPulseFields;
-            // addPulseFields = [
-            //     { id: 'txtStartAddPulse1', name: 'Additional Pulse 1', required: true, numeric: true, min: 1 },
-            //     { id: 'txtAddPulse1Inc', name: 'Additional Pulse 1 Increment', required: true, numeric: true, min: 1 },
-            //     { id: 'txtStartAddPulse2', name: 'Additional Pulse 2', required: true, numeric: true, min: 1 },
-            //     { id: 'txtAddPulse2Inc', name: 'Additional Pulse 2 Increment', required: true, numeric: true, min: 1 },
-            //     { id: 'txtStartAddPulse3', name: 'Additional Pulse 3', required: true, numeric: true, min: 1 },
-            //     { id: 'txtAddPulse3Inc', name: 'Additional Pulse 3 Increment', required: true, numeric: true, min: 1 },
-            //     { id: 'txtStartAddPulse4', name: 'Additional Pulse 4', required: true, numeric: true, min: 1 },
-            //     { id: 'txtAddPulse4Inc', name: 'Additional Pulse 4 Increment', required: true, numeric: true, min: 1 },
-            //     { id: 'txtStartAddPulse5', name: 'Additional Pulse 5', required: true, numeric: true, min: 1 },
-            //     { id: 'txtAddPulse5Inc', name: 'Additional Pulse 5 Increment', required: true, numeric: true, min: 1 },
-            //     { id: 'txtStartAddPulse6', name: 'Additional Pulse 6', required: true, numeric: true, min: 1 },
-            //     { id: 'txtAddPulse6Inc', name: 'Additional Pulse 6 Increment', required: true, numeric: true, min: 1 },
-            // ];
-
-            // const isHidden = document.querySelector('#additional2').classList.contains('hidden');
             const fields = [
                 { id: 'txtCodeFormat', name: 'Slot Code Format', required: true, numeric: false },
                 { id: 'txtColFrom', name: 'Column No From', required: true, numeric: true, min: 1 },
                 { id: 'txtTotalCol', name: 'Total Column', required: true, numeric: true, min: 1 },
                 { id: 'txtRowFrom', name: 'Row No From', required: true, numeric: true, min: 1 },
                 { id: 'txtTotalRow', name: 'Total Row', required: true, numeric: true, min: 1 },
-                { id: 'txtStartXPulse', name: 'X Pulse', required: true, numeric: true, min: 1 },
-                { id: 'txtXPulseIncrement', name: 'X Pulse Increment', required: true, numeric: true, min: 1 },
-                { id: 'txtStartYPulse', name: 'Y Pulse', required: true, numeric: true, min: 1 },
-                { id: 'txtYPulseIncrement', name: 'Y Pulse Increment', required: true, numeric: true, min: 1 },
-                { id: 'txtStartQrXPulse', name: 'Qr-X Pulse', required: true, numeric: true, min: 1 },
-                { id: 'txtQrXPulseIncrement', name: 'Qr-X Pulse Increment', required: true, numeric: true, min: 1 },
-                { id: 'txtStartQrYPulse', name: 'Qr-Y Pulse', required: true, numeric: true, min: 1 },
-                { id: 'txtQrYPulseIncrement', name: 'Qr-Y Pulse Increment', required: true, numeric: true, min: 1 },
-                // ...(!isHidden ? addPulseFields : [])
+                { id: 'txtStartXPulse', name: 'X Pulse', required: true, numeric: true, min: 0 },
+                { id: 'txtXPulseIncrement', name: 'X Pulse Increment', required: true, numeric: true, min: 0 },
+                { id: 'txtStartYPulse', name: 'Y Pulse', required: true, numeric: true, min: 0 },
+                { id: 'txtYPulseIncrement', name: 'Y Pulse Increment', required: true, numeric: true, min: 0 },
+                { id: 'txtStartQrXPulse', name: 'Qr-X Pulse', required: true, numeric: true, min: 0 },
+                { id: 'txtQrXPulseIncrement', name: 'Qr-X Pulse Increment', required: true, numeric: true, min: 0 },
+                { id: 'txtStartQrYPulse', name: 'Qr-Y Pulse', required: true, numeric: true, min: 0 },
+                { id: 'txtQrYPulseIncrement', name: 'Qr-Y Pulse Increment', required: true, numeric: true, min: 0 },
             ];
 
             if (validateColModal(fields)) {
@@ -990,8 +1119,8 @@
                     Add5PulseIncrement: parseInt($('#txtAddPulse5Inc').val()) || 0,
                     Add6Pulse: parseInt($('#txtStartAddPulse6').val()) || 0,
                     Add6PulseIncrement: parseInt($('#txtAddPulse6Inc').val()) || 0,
-                    IsActive: $('#colModal').find('#chkIsActive').prop("checked"),
-                    IsLeft: $('#colModal').find('#chkIsLeft').prop("checked"),
+                    IsActive: $('#colModal').find('#chkIsActiveRange').prop("checked"),
+                    IsLeft: $('#colModal').find('#chkIsLeftRange').prop("checked"),
                 };
 
             $.ajax({
@@ -1054,15 +1183,23 @@
             };
 
             var book_header = type === "slots" ? [
-                ['Slot Code', 'Column No', 'Row No', 'Has Empty Tray', 'Has Reel', 'Is Active', 'Is Left', 'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse',
+                ['Slot Code', 'Column No', 'Row No', 'Is Active', 'Is Left', 'X Pulse', 'Y Pulse', 'QR-X Pulse', 'QR-Y Pulse',
                 'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6']
             ]
             : [
-                ['Slot Code', 'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse',
+                ['Slot Code', 'X Pulse', 'Y Pulse', 'QR-X Pulse', 'QR-Y Pulse',
                 'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6']
             ];
 
+            // var booksheet = XLSX.utils.aoa_to_sheet(book_header);
             var booksheet = XLSX.utils.aoa_to_sheet(book_header);
+            booksheet['!cols'] = type === "slots" ? [
+                {wpx: 90}, {wpx: 60}, {wpx: 50}, {wpx: 50}, {wpx: 50}, {wpx: 50}, {wpx: 50}, 
+                {wpx: 60}, {wpx: 60}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}
+            ] : [
+                {wpx: 90}, {wpx: 50}, {wpx: 50}, {wpx: 60}, {wpx: 60},
+                {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}
+            ]
             XLSX.utils.book_append_sheet(book, booksheet, "Sheet1");
             XLSX.writeFile(book, type === "slots" ? "SlotListTemplate.xlsx" : "PulsesTemplate.xlsx");
         }
@@ -1142,12 +1279,12 @@
             let dataTableColumns;
 
             if (source == "importSlot") {
-                dataTableColumns = ['Slot Code', 'Column No', 'Row No', 'Has Empty Tray', 'Has Reel', 'Is Active', 'Is Left', 'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse',
+                dataTableColumns = ['Slot Code', 'Column No', 'Row No', 'Is Active', 'Is Left', 'X Pulse', 'Y Pulse', 'QR-X Pulse', 'QR-Y Pulse',
                                         'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6'];
                 $('#updateType').val("slots");
             }
             else {
-                dataTableColumns = ['Slot Code',  'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse',
+                dataTableColumns = ['Slot Code',  'X Pulse', 'Y Pulse', 'QR-X Pulse', 'QR-Y Pulse',
                                         'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6'];
                 $('#updateType').val("pluses");
             }
@@ -1164,11 +1301,11 @@
                 const matchedCol = dataTableColumns.find(col => isMatch(col, column));
 
                 columnDropdowns += `
-                    <div class="row align-items-center mb-3">
-                        <div class="col-4">
-                            <label class="form-label mb-0">File Column: <strong>${column}</strong></label>
+                    <div class="row justify-content-center align-items-center mb-3">
+                        <div class="col-5">
+                            <label class="form-label mb-0">File Column: ${column}</label>
                         </div>
-                        <div class="col-6">
+                        <div class="col-5">
                             <select class="form-select column-mapping"
                                     data-col="${column}"
                                     id="column${index}">
@@ -1223,7 +1360,7 @@
                 if (updateType === "slots")
                 {
                     const fieldNames = [
-                        'Slot Code', 'Column No', 'Row No', 'Has Empty Tray', 'Has Reel', 'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse',
+                        'Slot Code', 'Column No', 'Row No', 'X Pulse', 'Y Pulse', 'QR-X Pulse', 'QR-Y Pulse',
                         'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6',
                         'Is Active', 'Is Left'
                     ];
@@ -1236,7 +1373,7 @@
 
                     slotsData = data.slice(1).map(row => {
                         return {
-                            SlotId: 0,
+                            Slot_Id: 0,
                             SlotCode: row[colIndex['Slot Code']],
                             ColNo: row[colIndex['Column No']],
                             RowNo: row[colIndex['Row No']],
@@ -1244,8 +1381,8 @@
                             HasReel: parseBool(row[colIndex['Has Reel']]),
                             XPulse: row[colIndex['X Pulse']],
                             YPulse: row[colIndex['Y Pulse']],
-                            QRXPulse: row[colIndex['Qr-X Pulse']],
-                            QRYPulse: row[colIndex['Qr-Y Pulse']],
+                            QRXPulse: row[colIndex['QR-X Pulse']],
+                            QRYPulse: row[colIndex['QR-Y Pulse']],
                             Add1Pulse: row[colIndex['Additional Pulse 1']],
                             Add2Pulse: row[colIndex['Additional Pulse 2']],
                             Add3Pulse: row[colIndex['Additional Pulse 3']],
@@ -1259,7 +1396,7 @@
                 }
                 else {
                     const fieldNames = [
-                        'Slot Code','X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse',
+                        'Slot Code','X Pulse', 'Y Pulse', 'QR-X Pulse', 'QR-Y Pulse',
                         'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6',
                         'Is Active', 'Is Left'
                     ];
@@ -1276,8 +1413,8 @@
                             SlotCode: row[colIndex['Slot Code']],
                             XPulse: row[colIndex['X Pulse']],
                             YPulse: row[colIndex['Y Pulse']],
-                            QRXPulse: row[colIndex['Qr-X Pulse']],
-                            QRYPulse: row[colIndex['Qr-Y Pulse']],
+                            QRXPulse: row[colIndex['QR-X Pulse']],
+                            QRYPulse: row[colIndex['QR-Y Pulse']],
                             Add1Pulse: row[colIndex['Additional Pulse 1']],
                             Add2Pulse: row[colIndex['Additional Pulse 2']],
                             Add3Pulse: row[colIndex['Additional Pulse 3']],
@@ -1311,6 +1448,8 @@
 
         function saveExcelSlots(slotsData, bookBuffer, source) {
             const url = source == "slots" ? '/Slot/SaveExcelSlot' : '/Slot/UpdateExcelPulses';
+            console.log(JSON.stringify(slotsData));
+
             if (slotsData != null)
             {
                 $.ajax({
@@ -1375,7 +1514,7 @@
                 const workbook = new ExcelJS.Workbook();
                 await workbook.xlsx.load(bookBuffer);
                 const worksheet = workbook.getWorksheet(1);
-                const columnsToHighlight = updateType === "slots" ? [1, 2, 3, 18] : [1, 12];
+                const columnsToHighlight = updateType === "slots" ? [1, 2, 3, 16] : [1, 12];
 
                 // let colorIndex = 0;
                 // const highlightColors = [
@@ -1386,7 +1525,7 @@
 
                 // Add "Error" header
                 const headerRow = worksheet.getRow(1);
-                const errIdx = updateType === "slots" ? 18 : 12;
+                const errIdx = updateType === "slots" ? 16 : 12;
                 headerRow.getCell(errIdx).value = 'Error';
                 headerRow.commit();
 
@@ -1433,9 +1572,9 @@
                 link.click();
 
                 Swal.fire({
-                icon: 'warning',
-                title: "Validation Issues Found",
-                text: "Review on returned file and fix errors."
+                    icon: 'warning',
+                    title: "Validation Issues Found",
+                    text: "Review on returned file and fix errors."
                 });
         }
 

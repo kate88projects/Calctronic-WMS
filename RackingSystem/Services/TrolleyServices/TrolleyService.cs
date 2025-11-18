@@ -293,6 +293,8 @@ namespace RackingSystem.Services.TrolleyServices
                         RowNo = trolleySlot.RowNo,
                         IsActive = trolleySlot.IsActive,
                         IsLeft = trolleySlot.IsLeft,
+                        //IsLeft = (int)trolleySlot.IsLeft,
+
                         HasReel = trolleySlot.HasReel,
                         XPulse = trolleySlot.XPulse,
                         YPulse = trolleySlot.YPulse,
@@ -321,6 +323,8 @@ namespace RackingSystem.Services.TrolleyServices
                     _ts.RowNo = trolleySlot.RowNo;
                     _ts.IsActive = trolleySlot.IsActive;
                     _ts.IsLeft = trolleySlot.IsLeft;
+                    //_ts.Side = (int)trolleySlot.Side;
+
                     _ts.XPulse = trolleySlot.XPulse;
                     _ts.YPulse = trolleySlot.YPulse;
                     _ts.QRXPulse = trolleySlot.QRXPulse;

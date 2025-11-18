@@ -34,6 +34,7 @@ namespace RackingSystem.Models.Slot
         public bool IsLeft { get; set; } = false;
 
         public int TotalSlot { get; set; } = 1;
+        public int Priority { get; set; } = 0;
 
     }
 }

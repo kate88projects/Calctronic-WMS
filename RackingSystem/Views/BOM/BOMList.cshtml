@@ -450,6 +450,7 @@
                                 { 
                                     name: 'Status', 
                                     id: 'isActive',
+                                    width: '99px',
                                     formatter: (cell, row) => {
                                         return row.cells[3].data === true
                                           ? gridjs.html('<span class="badge rounded-pill bg-success">Active</span>')
@@ -694,24 +695,6 @@
                                 itemDescription: i.description,
                             };
                         });
-
-                        // console.log("itemlist", itemList);
-                        // const dropdown = document.getElementById('bomName');
-                        // dropdown.innerHTML = "";
-
-                        // const defaultOption = document.createElement("option");
-                        // defaultOption.value = "";
-                        // defaultOption.textContent = "Choose an Item";
-                        // defaultOption.disabled = true;
-                        // defaultOption.selected = true;
-                        // dropdown.appendChild(defaultOption);
-
-                        // result.data.forEach(function (i) {
-                        //     const option = document.createElement("option");
-                        //     option.value = i.item_Id;
-                        //     option.textContent = i.itemCode;
-                        //     dropdown.appendChild(option);
-                        // });
                     } else {
                         swal.fire({
                             icon: 'error',
