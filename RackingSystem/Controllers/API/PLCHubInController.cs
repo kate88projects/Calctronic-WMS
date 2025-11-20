@@ -17,13 +17,14 @@ using RackingSystem.Models.Slot;
 using RackingSystem.Services.LoaderServices;
 using RackingSystem.Services.SlotServices;
 using System.IO;
+using System.Reflection.Metadata;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace RackingSystem.Controllers.API
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class PLCHubInController : Controller
     {
         private readonly AppDbContext _dbContext;
@@ -62,6 +63,63 @@ namespace RackingSystem.Controllers.API
 
             }
             return "";
+        }
+
+        [HttpPost("UpdateRackJobJson")]
+        public async Task<ServiceResponseModel<bool>> UpdateRackJobJson([FromBody] RackJobHubInJsonDTO req)
+        {
+            ServiceResponseModel<bool> result = new ServiceResponseModel<bool>();
+            result.data = false;
+            if (req == null)
+            {
+                result.errMessage = "No body.";
+                return result;
+            }
+
+            try
+            {
+                var _job = _dbContext.RackJob.FirstOrDefault();
+                if (_job != null)
+                {
+                    _job.Json = JsonConvert.SerializeObject(req);
+                    await _dbContext.SaveChangesAsync();
+                    result.success = true;
+                }
+                else
+                {
+                    result.errMessage = "No RackJob found.";
+                }
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+            }
+            return result;
+        }
+
+        [HttpGet("GetRackJobJson")]
+        public ServiceResponseModel<RackJobHubInJsonDTO> GetRackJobJson()
+        {
+            ServiceResponseModel<RackJobHubInJsonDTO> result = new ServiceResponseModel<RackJobHubInJsonDTO>();
+            result.data = new RackJobHubInJsonDTO();
+            try
+            {
+                var _job = _dbContext.RackJob.FirstOrDefault();
+                if (_job != null)
+                {
+                    result.data = JsonConvert.DeserializeObject<RackJobHubInJsonDTO>(_job.Json) ?? new RackJobHubInJsonDTO();
+                    result.success = true;
+                }
+                else
+                {
+                    result.errMessage = "No RackJob found.";
+                }
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+            }
+            return result;
         }
 
         [HttpGet("GetLoaderInfo_PendingToUnLoad/{req}")]
@@ -123,6 +181,31 @@ namespace RackingSystem.Controllers.API
             }
             return result;
         }
+
+        //[HttpGet("GetColumnInfo/{req}")]
+        //public async Task<ServiceResponseModel<RackJobHubInDTO>> GetColumnInfo(string req)
+        //{
+        //    ServiceResponseModel<RackJobHubInDTO> result = new ServiceResponseModel<RackJobHubInDTO>();
+        //    result.data = new RackJobHubInDTO();
+
+        //    try
+        //    {
+        //        ServiceResponseModel<LoaderDTO> r = await _loaderService.GetLoaderInfo(req, false, EnumLoaderStatus.Loaded, null);
+        //        if (r.data == null)
+        //        {
+        //            result.success = false;
+        //            result.errMessage = "Loader Not Found.";
+        //            return result;
+        //        }
+        //        result.data.LoaderInfo = r.data;
+        //        result.success = true;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        result.errMessage = ex.Message;
+        //    }
+        //    return result;
+        //}
 
         [HttpGet("GetFlexilockStatus")]
         public ServiceResponseModel<List<int>> GetFlexilockStatus()
@@ -867,12 +950,12 @@ namespace RackingSystem.Controllers.API
             result.data = "";
             string methodName = "GetReelIDByIP";
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "Cannot get Reel ID, please try again.";
-            result.data = "A00000018";
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "Cannot get Reel ID, please try again.";
+            //result.data = "A00000018";
+            //return result;
+            //// *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -926,6 +1009,10 @@ namespace RackingSystem.Controllers.API
                     {
                         PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
                         decimalText = getDecimalText(registers[i]);
+                        if (decimalText.Length > 2)
+                        {
+                            decimalText = decimalText.Replace("\0", "");
+                        }
                         reelID = reelID + decimalText;
                     }
 
@@ -937,6 +1024,10 @@ namespace RackingSystem.Controllers.API
                     {
                         PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
                         decimalText = getDecimalText(registers[i]);
+                        if (decimalText.Length > 2)
+                        {
+                            decimalText = decimalText.Replace("\0", "");
+                        }
                         reelID = reelID + decimalText;
                     }
 
@@ -948,6 +1039,10 @@ namespace RackingSystem.Controllers.API
                     {
                         PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
                         decimalText = getDecimalText(registers[i]);
+                        if (decimalText.Length > 2)
+                        {
+                            decimalText = decimalText.Replace("\0", "");
+                        }
                         reelID = reelID + decimalText;
                     }
 
@@ -959,6 +1054,10 @@ namespace RackingSystem.Controllers.API
                     {
                         PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
                         decimalText = getDecimalText(registers[i]);
+                        if (decimalText.Length > 2)
+                        {
+                            decimalText = decimalText.Replace("\0", "");
+                        }
                         reelID = reelID + decimalText;
                     }
 
@@ -970,13 +1069,17 @@ namespace RackingSystem.Controllers.API
                     {
                         PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
                         decimalText = getDecimalText(registers[i]);
+                        if (decimalText.Length > 2)
+                        {
+                            decimalText = decimalText.Replace("\0", "");
+                        }
                         reelID = reelID + decimalText;
                     }
 
                     PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Get Reel ID {reelID}", "");
 
                     // *** testing
-                    reelID = "A00000018";
+                    //reelID = "A00000018";
                     result.data = reelID;
                     result.success = true;
                 }
@@ -1642,7 +1745,7 @@ namespace RackingSystem.Controllers.API
 
                 while (!exit)
                 {
-                    int startAddress = 4229;
+                    int startAddress = 4196; // 4229;
                     int numRegisters = 1;
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
@@ -1651,7 +1754,7 @@ namespace RackingSystem.Controllers.API
                         value = registers[i];
                     }
 
-                    if (value == 1)
+                    if (value == 0) // 1 means tengah buat, 0 means complete
                     {
                         exit = true;
                     }
@@ -1662,7 +1765,7 @@ namespace RackingSystem.Controllers.API
                     }
                 }
 
-                result.success = value == 1;
+                result.success = value == 0;
                 result.data = value;
                 if (value == 1)
                 {
@@ -1808,6 +1911,175 @@ namespace RackingSystem.Controllers.API
 
                 result.success = true;
                 result.data = r;
+            }
+            catch (Exception ex)
+            {
+                //PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        [HttpGet("UpdateLoaderCount/{loaderId}/{colNo}/{reelId}")]
+        public async Task<ServiceResponseModel<int>> UpdateLoaderCount(long loaderId, int colNo, string reelId)
+        {
+            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
+            result.data = -1;
+            string methodName = "UpdateReelIntoLoader";
+
+            try
+            {
+                var _loader = _dbContext.Loader.Find(loaderId);
+                if (_loader == null)
+                {
+                    result.errMessage = "Loader is not found.";
+                    return result;
+                }
+                var _reel = _dbContext.Reel.Where(x => x.Reel_Id.ToString() == reelId).FirstOrDefault();
+                if (_reel == null)
+                {
+                    result.errMessage = "Reel is not found.";
+                    return result;
+                }
+                var _loaderCol = _dbContext.LoaderColumn.Where(x => x.Loader_Id == loaderId && x.ColNo == colNo).FirstOrDefault();
+                if (_loaderCol == null)
+                {
+                    result.errMessage = "Loader Column is not found.";
+                    return result;
+                }
+                var _loaderReel = _dbContext.LoaderReel.Where(x => x.Reel_Id.ToString().ToUpper() == reelId.ToUpper()).FirstOrDefault();
+                //if (_loaderReel == null)
+                //{
+                //    result.errMessage = "Loader Reel is not found.";
+                //    return result;
+                //}
+
+                // temp hide
+                // 1.1 update reel status
+                _reel.StatusIdx = (int)EnumReelStatus.InPicked;
+                _reel.Status = EnumReelStatus.InPicked.ToString();
+                await _dbContext.SaveChangesAsync();
+
+                if (_loaderReel != null)
+                {
+                    // 2. update loader columne balance height
+                    _loaderCol.BalanceHeight = _loaderCol.BalanceHeight + _reel.ActualHeight;
+                    await _dbContext.SaveChangesAsync();
+
+                    // 3. remove reel from loaderreel
+                    _dbContext.LoaderReel.Remove(_loaderReel);
+                    await _dbContext.SaveChangesAsync();
+                }
+
+                // 6. Checking loader all column status and update
+                int r = 0;
+                var colBal = _dbContext.LoaderReel.Where(x => x.Loader_Id == loaderId).FirstOrDefault();
+                if (colBal == null)
+                {
+                    // means all is out
+                    r = 2;
+                }
+                else
+                {
+                    colBal = _dbContext.LoaderReel.Where(x => x.Loader_Id == loaderId && x.ColNo == colNo).FirstOrDefault();
+                    if (colBal == null)
+                    {
+                        // means cur col all is out
+                        r = 1;
+                    }
+                }
+                //// if is whole loader last 2nd reel then need call endtask first
+                //if (r == 0)
+                //{
+                //    var colBal2 = _dbContext.LoaderReel.Where(x => x.Loader_Id == loaderId).Count();
+                //    if (colBal2 == 2)
+                //    {
+                //        r = 5;
+                //    }
+                //}
+
+
+                if (r == 2)
+                {
+                    _loader.Status = EnumLoaderStatus.ReadyToLoad.ToString();
+                    await _dbContext.SaveChangesAsync();
+                }
+
+                result.success = true;
+                result.data = r;
+            }
+            catch (Exception ex)
+            {
+                //PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        [HttpGet("UpdateReelRack/{reelId}/{slotCode}/{slotReserve}")]
+        public async Task<ServiceResponseModel<int>> UpdateReelRack(string reelId, string slotCode, int slotReserve)
+        {
+            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
+            result.data = -1;
+            string methodName = "UpdateReelIntoLoader";
+
+            try
+            {
+                var _reel = _dbContext.Reel.Where(x => x.Reel_Id.ToString() == reelId).FirstOrDefault();
+                if (_reel == null)
+                {
+                    result.errMessage = "Reel is not found.";
+                    return result;
+                }
+                var _slot = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
+                if (_slot == null)
+                {
+                    result.errMessage = "Slot is not found.";
+                    return result;
+                }
+
+                // temp hide
+                // 1.1 update reel status
+                _reel.StatusIdx = (int)EnumReelStatus.IsReady;
+                _reel.Status = EnumReelStatus.IsReady.ToString();
+                await _dbContext.SaveChangesAsync();
+
+                // 4. update slot set reelId
+                _slot.Reel_Id = _reel.Reel_Id;
+                _slot.ReelNo = "0";
+                _slot.HasReel = true;
+                _slot.HasEmptyTray = false;
+                await _dbContext.SaveChangesAsync();
+
+                // 5. update other slot if is reserved
+                if (slotReserve > 1)
+                {
+                    for (int iR = 1; iR < slotReserve; iR++)
+                    {
+                        var _slotO = _dbContext.Slot.Where(x => x.ColNo == _slot.ColNo && x.RowNo == (_slot.RowNo - iR)).FirstOrDefault();
+                        if (_slotO == null)
+                        {
+                            result.errMessage = "Other Slot is not found.";
+                            return result;
+                        }
+                        _slotO.ReelNo = iR.ToString();
+                        _slotO.HasReel = true;
+                        _slotO.HasEmptyTray = false;
+                        await _dbContext.SaveChangesAsync();
+                    }
+                }
+
+
+                // 1.2 update slot id
+                _reel.Slot_Id = _slot.Slot_Id;
+                await _dbContext.SaveChangesAsync();
+
+                result.success = true;
+                result.data = 1;
             }
             catch (Exception ex)
             {

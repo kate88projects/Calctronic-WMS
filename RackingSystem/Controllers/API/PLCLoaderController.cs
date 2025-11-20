@@ -67,9 +67,9 @@ namespace RackingSystem.Controllers.API
                 }
 
                 // *** testing
-                result.success = true;
-                result.data = "00AS01";
-                return result;
+                //result.success = true;
+                //result.data = "00AS01";
+                //return result;
                 // *** testing
 
                 string loaderString = "";
@@ -424,9 +424,9 @@ namespace RackingSystem.Controllers.API
                 }
 
                 // *** testing
-                result.success = true;
-                result.data = 1;
-                return result;
+                //result.success = true;
+                //result.data = 1;
+                //return result;
                 // *** testing
 
                 // 2. check plc which column is ready
@@ -478,10 +478,10 @@ namespace RackingSystem.Controllers.API
                 }
 
                 //// *** testing
-                result.success = true;
-                result.data = 1;
-                return result;
-                //// *** testing
+                //result.success = true;
+                //result.data = 1;
+                //return result;
+                ////// *** testing
 
                 int value = 0;
                 DateTime dtRun = DateTime.Now;
@@ -573,17 +573,17 @@ namespace RackingSystem.Controllers.API
                 string plcIp = _loader.IPAddr;
                 int port = 502;
 
-                //ModbusClient modbusClient = new ModbusClient(plcIp, port);
-                //modbusClient.Connect();
-                //PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+                ModbusClient modbusClient = new ModbusClient(plcIp, port);
+                modbusClient.Connect();
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
-                //int startAddress = 4216;
-                //int numRegisters = 2;
-                //int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
-                //PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress}: {registers[0]}", "");
-                //PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + 1}: {registers[1]}", "");
+                int startAddress = 4216;
+                int numRegisters = 2;
+                int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress}: {registers[0]}", "");
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + 1}: {registers[1]}", "");
 
-                int[] registers = { 15703, 16701 };
+                //int[] registers = { 15703, 16701 };
                 byte[] first16 = BitConverter.GetBytes(registers[0]);
                 byte[] second16 = BitConverter.GetBytes(registers[1]);
                 byte[] floatBytes = 
@@ -594,7 +594,7 @@ namespace RackingSystem.Controllers.API
 
                 float value = BitConverter.ToSingle(floatBytes, 0);
                 float rounded = (float)Math.Round(value, 3);
-                height = 169;//((int)rounded) + 1;
+                height = ((int)rounded) + 1;
                 result.success = _loaderCol.BalanceHeight >= height;
                 result.data.Add(_loaderCol.BalanceHeight >= height ? 0 : 2);
                 result.data.Add(height);
@@ -604,7 +604,7 @@ namespace RackingSystem.Controllers.API
                     result.errMessage = "Reel Height exceeds Column [" + colNo + "] limit.";
                 }
 
-                //modbusClient.Disconnect();
+                modbusClient.Disconnect();
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");
             }
             catch (Exception ex)
@@ -703,9 +703,9 @@ namespace RackingSystem.Controllers.API
                 }
 
                 //testing
-                result.data = 1;
-                result.success = true;
-                return result;
+                //result.data = 1;
+                //result.success = true;
+                //return result;
 
                 int value = 0;
                 string plcIp = _loader.IPAddr;
@@ -746,8 +746,8 @@ namespace RackingSystem.Controllers.API
             string methodName = "GetReadyToTurn";
 
             //testing 
-            result.success = true;
-            return result;
+            //result.success = true;
+            //return result;
 
             try
             {
@@ -810,8 +810,8 @@ namespace RackingSystem.Controllers.API
             string methodName = "GetLoaderMode";
             
             //testing
-            result.success = true;
-            return result;
+            //result.success = true;
+            //return result;
 
             try
             {
@@ -905,9 +905,9 @@ namespace RackingSystem.Controllers.API
             string methodName = "StartLoad";
 
             //testing
-            result.success = true;
-            //result.success = false;
-            return result;
+            //result.success = true;
+            ////result.success = false;
+            //return result;
             try
             {
                 var _loader = _dbContext.Loader.Find(loaderId);
@@ -964,9 +964,9 @@ namespace RackingSystem.Controllers.API
                 }
 
                 //// *** testing
-                result.success = true;
-                result.data = 1;
-                return result;
+                //result.success = true;
+                //result.data = 1;
+                //return result;
                 //// *** testing
 
                 // 2. check plc which column is ready
@@ -1006,8 +1006,8 @@ namespace RackingSystem.Controllers.API
             string methodName = "StartReelLoadIn";
 
             //testing
-            result.success = true;
-            return result;
+            //result.success = true;
+            //return result;
             try
             {
                 var _loader = _dbContext.Loader.Find(loaderId);
@@ -1050,8 +1050,8 @@ namespace RackingSystem.Controllers.API
             string methodName = "SetColumnState";
 
             //testing
-            result.success = true;
-            return result;
+            //result.success = true;
+            //return result;
 
             try
             {

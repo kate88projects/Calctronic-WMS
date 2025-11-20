@@ -84,6 +84,7 @@ namespace RackingSystem.Data
 
         // ------------        Log       ------------
         public DbSet<PLCLoaderLog> PLCLoaderLog { get; set; }
+        public DbSet<PLCHubInLog> PLCHubInLog { get; set; }
 
         // ------------ Stored Procedure ------------
         public DbSet<ItemListDTO> SP_ItemSearchList { get; set; }

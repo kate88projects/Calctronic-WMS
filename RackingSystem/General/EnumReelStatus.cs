@@ -7,5 +7,6 @@
         IsReady = 3,
         OnHold = 4,
         Out = 5,
+        InPicked = 6,
     }
 }

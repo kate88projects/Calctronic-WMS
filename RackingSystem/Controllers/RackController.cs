@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RackingSystem.Data;
+using RackingSystem.Models.RackJob;
+using RackingSystem.Models;
 using RackingSystem.Models.User;
 using RackingSystem.Services.GRNServices;
 using RackingSystem.Services.RackServices;

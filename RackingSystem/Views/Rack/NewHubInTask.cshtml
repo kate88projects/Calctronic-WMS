@@ -88,6 +88,7 @@
 
                     <hr />
                     <button class="btn btn-primary" onclick="endTask()" id="btnEnd" style="width:20%;">All Empty</button>
+                    <button class="btn btn-primary" onclick="endTaskFull()" id="btnEnd" style="width:20%;">All Full</button>
                 </div>
             </div>
         </div>
@@ -709,6 +710,60 @@
                 },
                 error: function (error) {
                     logToPage('GetSlot ERR :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function endTaskFull() {
+            var loaderId = $("#txtLoaderID").val();
+            if (loaderId == "") {
+                swal.fire({
+                    icon: 'error',
+                    title: "Wait",
+                    text: "No loader is selected."
+                });
+                return;
+            }
+
+            // all done
+            var iCol = $("#txtICol").val();
+            for (var iC = Number(iCol); iC <= 4; iC++) {
+                await delay(1000);
+                $("#txtICol").val(iC);
+                var setE = await loadPLCSetColumnFull(loaderId, Number(iC));
+            }
+            return;
+        }
+
+        async function loadPLCSetColumnFull(loaderId, curCol) {
+
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCLoader/SetColumnState/"+ loaderId + "/" + curCol,
+                type: "POST",
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('2::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        logToPage('SetEmpty :: OK [' + curCol + '] ');
+                        fResult = true;
+                    }
+                    else {
+                        logToPage('SetEmpty :: ERR [' + curCol + '] ' + result.errMessage + ' ');
+                    }
+                },
+                error: function (error) {
+                    // $('#pEmptyColLast').html('Set Empty Column : <span class="error-message" id="errEmptyColLast"> ' + error.val + ' </span>');
+                    // $('#pEmptyCol2').html('Set Empty Column : <span class="error-message" id="errEmptyColLast"> ' + error.val + ' </span>');
                 }
             });
 
