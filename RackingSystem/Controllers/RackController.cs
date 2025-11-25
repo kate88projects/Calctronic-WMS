@@ -23,12 +23,14 @@ namespace RackingSystem.Controllers
 
         public IActionResult RackJob()
         {
+            ViewBag.xToken = "";
             ViewBag.PermissionList = new List<int>();
             string s = HttpContext.Session.GetString("xSession") ?? "";
             if (s != "")
             {
                 UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
                 ViewBag.PermissionList = data.UACIdList;
+                ViewBag.xToken = data.Token;
             }
 
             ViewData["ActiveGroup"] = "grpRACKING";
@@ -39,12 +41,14 @@ namespace RackingSystem.Controllers
 
         public IActionResult NewTransferHubInTask()
         {
+            ViewBag.xToken = "";
             ViewBag.PermissionList = new List<int>();
             string s = HttpContext.Session.GetString("xSession") ?? "";
             if (s != "")
             {
                 UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
                 ViewBag.PermissionList = data.UACIdList;
+                ViewBag.xToken = data.Token;
             }
 
             ViewData["ActiveGroup"] = "grpRACKING";
@@ -55,12 +59,14 @@ namespace RackingSystem.Controllers
 
         public IActionResult NewHubInTask()
         {
+            ViewBag.xToken = "";
             ViewBag.PermissionList = new List<int>();
             string s = HttpContext.Session.GetString("xSession") ?? "";
             if (s != "")
             {
                 UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
                 ViewBag.PermissionList = data.UACIdList;
+                ViewBag.xToken = data.Token;
             }
 
             ViewData["ActiveGroup"] = "grpRACKING";

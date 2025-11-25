@@ -49,14 +49,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(1); // Default timeout for inactive sessions
-        options.SlidingExpiration = true; // Enable sliding expiration
-        options.LoginPath = "/Account/Login"; // Redirect path on timeout
-                                                       // Other options like AccessDeniedPath, LogoutPath, etc.
-    });
+//builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+//    .AddCookie(options =>
+//    {
+//        options.ExpireTimeSpan = TimeSpan.FromMinutes(1); // Default timeout for inactive sessions
+//        options.SlidingExpiration = true; // Enable sliding expiration
+//        options.LoginPath = "/Account/Login"; // Redirect path on timeout
+//                                                       // Other options like AccessDeniedPath, LogoutPath, etc.
+//    });
 
 builder.Services.AddRazorPages();
 builder.Services.AddScoped<ISettingService, SettingService>();
@@ -116,7 +116,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
-//app.UseAuthorization();
+app.UseAuthorization();
 
 app.UseSession();
 

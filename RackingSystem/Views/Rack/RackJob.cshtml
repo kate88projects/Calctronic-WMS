@@ -1,4 +1,7 @@
-﻿
+﻿@{
+
+}
+
 <style>
 
     :root {
@@ -592,6 +595,7 @@
         <input type="hidden" id="txtCol2TotalReels" autocomplete="off">
         <input type="hidden" id="txtCol3TotalReels" autocomplete="off">
         <input type="hidden" id="txtCol4TotalReels" autocomplete="off">
+        <input type="hidden" id="xToken" value="@ViewBag.xToken" autocomplete="off">
 
         <div style="height:20px;"></div>
         <input type="text" id="txtReelId" placeholder="Reel Id" autocomplete="off">
@@ -694,6 +698,8 @@
 
         let endTask = false;
 
+        let token = '';
+
         $(document).ready(function () {
             disableDivContent(true);
             $("#txtActHeight").val('0');
@@ -703,6 +709,8 @@
             updateSystemStatusUI();
             updateGantryUIState();
             // updateJson();
+
+            token = $('#xToken').val();
         });
 
         /**
@@ -1024,9 +1032,16 @@
                 ReelCodeC: $("#txtReelCodeC").val(),
                 ActualHeightC: Number($("#txtActHeightC").val()),
             }
+
+            const token = sessionStorage.getItem('xToken');
+            console.log(token);
+
             $.ajax({
                 url: '/api/PLCHubIn/UpdateRackJobJson',
                 type: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 data: JSON.stringify(data),
                 dataType: 'JSON',
                 contentType: 'application/json; charset=utf-8',
@@ -1507,6 +1522,9 @@
             await $.ajax({
                 url: "/api/PLCHubIn/UpdateLoaderCount/" + loaderId + "/" + colNum + "/" + reelId,
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -1543,6 +1561,9 @@
             await $.ajax({
                 url: "/api/PLCHubIn/UpdateReelRack/" + reelIdC + "/" + sCode + "/" + sTake,
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -1584,6 +1605,9 @@
             await $.ajax({
                 url: "/api/PLCHubIn/StartUnload/" + code,
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -1639,6 +1663,9 @@
             await $.ajax({
                 url: "/api/PLCHubIn/GetLoaderMode/" + loaderId,
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -1677,6 +1704,9 @@
             await $.ajax({
                 url: "/api/PLCHubIn/SetLoaderUnload/" + loaderId,
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -1713,6 +1743,9 @@
             await $.ajax({
                 url: "/api/PLCHubIn/GetUnlodingStatus/" + loaderId,
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -1749,6 +1782,9 @@
             await $.ajax({
                 url: "/api/PLCHubIn/StartBarcodeScanner/",
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -1784,6 +1820,9 @@
             await $.ajax({
                 url: "/api/PLCHubIn/GetReelID/",
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -1827,6 +1866,9 @@
             await $.ajax({
                 url: "/api/PLCHubIn/SetActualHeight/" + loaderId + "/" + actH,
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -1859,6 +1901,9 @@
             await $.ajax({
                 url: "/api/PLCHubIn/GetPickStatus/",
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -1892,6 +1937,9 @@
             await $.ajax({
                 url: "/api/PLCHubIn/PutReelOnTray/",
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -1925,6 +1973,9 @@
             await $.ajax({
                 url: "/api/PLCHubIn/GetPlaceStatus/",
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -1969,6 +2020,9 @@
             await $.ajax({
                 url: "/api/PLCLoader/GetCurrentColumn/" + loaderId,
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -2062,6 +2116,9 @@
             await $.ajax({
                 url: "/api/PLCHubIn/SetColumnEmpty/"+ loaderId + "/" + curCol,
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -2094,6 +2151,9 @@
             await $.ajax({
                 url: "/api/PLCHubIn/GetReadyTurnStatus/"+ loaderId,
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -2126,6 +2186,9 @@
             await $.ajax({
                 url: "/api/PLCHubIn/SetTurnColumn/"+ loaderId + "/" + nextCol,
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -2167,6 +2230,9 @@
             await $.ajax({
                 url: "/api/PLCHubIn/UnloadEndTask/" + loaderId,
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -2201,6 +2267,9 @@
             await $.ajax({
                 url: "/api/PLCHubIn/GetEmptyTraySlot/",
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -2243,6 +2312,9 @@
             await $.ajax({
                 url: "/api/PLCHubIn/RetrieveTray/" + eSlot,
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -2277,6 +2349,9 @@
             await $.ajax({
                 url: "/api/PLCHubIn/GetRetrieveTrayStatus/",
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -2312,6 +2387,9 @@
             await $.ajax({
                 url: "/api/PLCHubIn/GetBottomSlot/" + actH,
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -2357,6 +2435,9 @@
             await $.ajax({
                 url: "/api/PLCHubIn/PutAway/" + sCode + "/" + sTake,
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
@@ -2390,6 +2471,9 @@
             await $.ajax({
                 url: "/api/PLCHubIn/GetPutAwayStatus/",
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',

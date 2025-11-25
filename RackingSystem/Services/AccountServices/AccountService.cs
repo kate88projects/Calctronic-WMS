@@ -99,7 +99,8 @@ namespace RackingSystem.Services.AccountServices
                 Fullname = rUser.FullName,
                 Username = rUser.UserName ?? "",
                 Token = tokenR,
-                UACIdList = uacIdList
+                UACIdList = uacIdList,
+                DeviceId = Guid.NewGuid().ToString(),
             };
             return response;
 

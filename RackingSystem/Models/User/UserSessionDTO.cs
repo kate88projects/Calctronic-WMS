@@ -6,5 +6,6 @@
         public string Username { get; set; } = "";
         public string Token { get; set; } = "";
         public List<int> UACIdList { get; set; } = new List<int>();
+        public string DeviceId { get; set; } = "";
     }
 }

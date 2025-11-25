@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using EasyModbus;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -23,6 +25,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace RackingSystem.Controllers.API
 {
+    [Authorize(AuthenticationSchemes = $"{JwtBearerDefaults.AuthenticationScheme}")]
     [ApiController]
     [Route("api/[controller]")]
     public class PLCHubInController : Controller
@@ -223,13 +226,13 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "Right is locked. Left is locked. ";
-            result.data.Add(2);
-            result.data.Add(2);
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "Right is locked. Left is locked. ";
+            //result.data.Add(2);
+            //result.data.Add(2);
+            //return result;
+            //// *** testing
 
             string decimalText = "";
             string lock1 = "0";
@@ -1222,7 +1225,7 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
+            //// *** testing
             //result.success = true;
             //result.errMessage = "Done";
             //result.data = 2;
@@ -1379,7 +1382,7 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
+            //// *** testing
             //result.success = true;
             //result.data = 1;
             //return result;
