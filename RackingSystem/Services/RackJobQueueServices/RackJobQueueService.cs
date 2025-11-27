@@ -191,8 +191,8 @@ namespace RackingSystem.Services.RackJobQueueServices
                 }
                 else
                 {
-                    var existingDetails = _dbContext.JobOrderRaws.Where(d => d.JobOrder_Id == req.Doc_Id && d.BalQty < d.Qty).FirstOrDefault();
-                    if (iExist != null)
+                    var joRaw = _dbContext.JobOrderRaws.Where(d => d.JobOrder_Id == req.Doc_Id && d.BalQty < d.Qty).FirstOrDefault();
+                    if (joRaw != null)
                     {
                         result.errMessage = "This Task has loaded cannot remove.";
                         return result;
@@ -212,12 +212,12 @@ namespace RackingSystem.Services.RackJobQueueServices
                 if (req.DocType == EnumQueueDocType.JO.ToString())
                 {
                     var existingDetails = _dbContext.JobOrderRaws.Where(d => d.JobOrder_Id == req.Doc_Id).ToList();
-                    foreach (var dtl in existingDetails)
-                    {
-                        _dbContext.JobOrderRaws.Remove(dtl);
-                    }
+                    _dbContext.JobOrderRaws.RemoveRange(existingDetails);
                     await _dbContext.SaveChangesAsync();
                 }
+
+                // 3. requeue
+                var sqlSP = await _dbContext.Database.ExecuteSqlInterpolatedAsync($"EXEC {GeneralStatic.SP_Q_Requeue} ");
 
                 result.success = true;
             }
@@ -242,15 +242,10 @@ namespace RackingSystem.Services.RackJobQueueServices
                     result.errMessage = "Please select Task Type.";
                     return result;
                 }
-                if (req.NewIdx == 1)
-                {
-                    result.errMessage = "Only Task 2 and above can change queue.";
-                    return result;
-                }
                 RackJobQueue? curQ = _dbContext.RackJobQueue.FirstOrDefault(x => x.Doc_Id == req.Doc_Id && x.DocType == req.DocType);
                 if (curQ == null)
                 {
-                    result.errMessage = "This Task not exist.";
+                    result.errMessage = "This Task is not exist.";
                     return result;
                 }
                 if (curQ.Idx == req.NewIdx)
@@ -263,6 +258,19 @@ namespace RackingSystem.Services.RackJobQueueServices
                 {
                     result.errMessage = "This Task [" + req.NewIdx + "] is not exist.";
                     return result;
+                }
+                if (req.NewIdx == 1)
+                {
+                    var srms = _dbContext.RackJob.FirstOrDefault();
+                    if (srms != null)
+                    {
+                        if (srms.RackJobQueue_Id == otherQ.RackJobQueue_Id)
+                        {
+                            //result.errMessage = "Only Task 2 and above can change queue.";
+                            result.errMessage = "This Task is running, cannot change.";
+                            return result;
+                        }
+                    }
                 }
 
                 // 2. save Data

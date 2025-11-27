@@ -1,7 +1,4 @@
 ﻿
-@{
-}
-
 <style>
     .table-title {
         color: #fff;
@@ -140,7 +137,7 @@
                     <input type="text" class="form-control" name="Doc No" id="txtDocNo" aria-describedby="Doc No" disabled>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" for="txtQ">Loader</label>
+                    <label class="form-label" for="txtQ">Queue No</label>
                     <input type="number" class="form-control" name="Q No" id="txtQ" aria-describedby="Q No">
                     <div id="txtQError" class="error-message"></div>
                 </div>
@@ -148,7 +145,7 @@
                 <input type="hidden" id="txtDocType">
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="saveItem()">Save</button>
+                <button type="button" class="btn btn-primary" onclick="saveQ()">Save</button>
                 <button type="button" class="btn btn-outline-secondary" onclick="cancelQForm()">Cancel</button>
             </div>
             @* </form> *@
@@ -208,9 +205,15 @@
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
+                                        var btnStart ='';
+                                        if (row.idx == 1) {
+                                            btnStart = `<button class="btn btn-primary d-grid start-btn" style="margin-left:10px;" data-id="${row.rackJobQueue_Id}" data-row="${rowData}">
+                                        <span><i class="bi bi-setting-square""></i>  Start</span></button>`;
+                                        }
                                         return `<div style="display:flex;"><button class="btn btn-success d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
                                         <span><i class="bi bi-pencil-square""></i>  Change Q</span></button>
-                                        <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.doc_Id}" data-code="${row.docType}"><span><i class="bi bi-trash""></i>  Delete</span></button></div>`;
+                                        <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.doc_Id}" data-code="${row.docType}"><span><i class="bi bi-trash""></i>  Delete</span></button>
+                                        ` + btnStart + `</div>`;
                                     }
                                 }
                             ],
@@ -359,10 +362,10 @@
 
         $('#listTable').on('click', '.edit-btn', function () {
             const row = JSON.parse($(this).attr('data-row'));
-            editLoaderForm(row);
+            editQForm(row);
         });
 
-        function editLoaderForm(row) {
+        function editQForm(row) {
             $("#txtDocNo").val(row.docNo);
             $("#txtQ").val(row.idx);
             $("#txtDocId").val(row.doc_Id);
@@ -649,6 +652,76 @@
               });
 
         }
+
+        function saveQ() {
+
+            var docId =  $("#txtDocId").val();
+            var docType =  $("#txtDocType").val();
+            var newIdx =  $("#txtQ").val();
+
+            var data = {
+                Doc_Id: docId,
+                DocType: docType,
+                NewIdx: newIdx,
+            }
+
+            // console.log(JSON.stringify(data));
+
+            $.ajax({
+                url: '/RackJobQueue/ChangeQueue',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    // console.log(result);
+                    if (result.success == true) {
+                        $("#joModal").modal("toggle");
+                        swal.fire({
+                            icon: 'success',
+                            title: "Success Update",
+                            text: "",
+                            didClose: () => {
+                              window.location.reload();
+                            }
+                        });
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+
+        }
+
+        $('#listTable').on('click', '.start-btn', function () {
+           const id = $(this).attr('data-id');
+            var redirectUrl = '@Url.Action("RackJobHubIn", "Rack")';
+            window.open(redirectUrl + '?qId=' + id, '_blank');
+        });
 
     </script>
 }

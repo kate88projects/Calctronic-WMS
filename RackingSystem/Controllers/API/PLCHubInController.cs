@@ -10,16 +10,19 @@ using RackingSystem.Data;
 using RackingSystem.Data.Maintenances;
 using RackingSystem.General;
 using RackingSystem.Helpers;
+using RackingSystem.Migrations;
 using RackingSystem.Models;
 using RackingSystem.Models.API;
 using RackingSystem.Models.Loader;
 using RackingSystem.Models.RackJob;
 using RackingSystem.Models.Reel;
 using RackingSystem.Models.Slot;
+using RackingSystem.Models.User;
 using RackingSystem.Services.LoaderServices;
 using RackingSystem.Services.SlotServices;
 using System.IO;
 using System.Reflection.Metadata;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -147,8 +150,8 @@ namespace RackingSystem.Controllers.API
             }
         }
 
-        [HttpGet("StartUnload/{req}")]
-        public async Task<ServiceResponseModel<RackJobHubInDTO>> StartUnload(string req)
+        [HttpGet("StartUnload/{req}/{qId}")]
+        public async Task<ServiceResponseModel<RackJobHubInDTO>> StartUnload(string req, long qId)
         {
             ServiceResponseModel<RackJobHubInDTO> result = new ServiceResponseModel<RackJobHubInDTO>();
             result.data = new RackJobHubInDTO();
@@ -164,7 +167,22 @@ namespace RackingSystem.Controllers.API
                 }
                 if (r.data.Col1TotalReels > 0 || r.data.Col2TotalReels > 0 || r.data.Col3TotalReels > 0 || r.data.Col4TotalReels > 0)
                 {
+                    string devId = "";
+                    string s = HttpContext.Session.GetString("xSession") ?? "";
+                    if (s != "")
+                    {
+                        UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                        devId = data.DeviceId;
+                    }
+
                     var srms = _dbContext.RackJob.First();
+                    srms.StartDate = DateTime.Now;
+                    srms.CurrentJobType = EnumQueueDocType.Loader.ToString();
+                    srms.RackJobQueue_Id = qId;
+                    srms.Loader_Id = r.data.Loader_Id;
+                    srms.LoginIP = devId;
+                    _dbContext.SaveChanges();
+
                     RackJobHubInDTO json = JsonConvert.DeserializeObject<RackJobHubInDTO>(srms.Json) ?? new RackJobHubInDTO();
                     result.data = json;
                     result.data.LoaderInfo = r.data;
@@ -182,6 +200,49 @@ namespace RackingSystem.Controllers.API
             {
                 result.errMessage = ex.Message;
             }
+            return result;
+        }
+
+        [HttpGet("StopUnload/{qId}")]
+        public async Task<ServiceResponseModel<bool>> StopUnload(long qId)
+        {
+            ServiceResponseModel<bool> result = new ServiceResponseModel<bool>();
+            result.data = false;
+
+            try
+            {
+                // 1. if loader is fully empty then remove q
+                var q = _dbContext.RackJobQueue.Where(x => x.RackJobQueue_Id == qId).FirstOrDefault();
+                if (q != null)
+                {
+                    var colBal = _dbContext.LoaderReel.Where(x => x.Loader_Id == q.Doc_Id).FirstOrDefault();
+                    if (colBal == null)
+                    {
+                        _dbContext.RackJobQueue.Remove(q);
+                        _dbContext.SaveChanges();
+
+                        var sqlSP = await _dbContext.Database.ExecuteSqlInterpolatedAsync($"EXEC {GeneralStatic.SP_Q_Requeue} ");
+                    }
+                }
+
+                // 2. update srms
+                var srms = _dbContext.RackJob.First();
+                srms.StartDate = DateTime.Now;
+                srms.CurrentJobType = "";
+                srms.RackJobQueue_Id = 0;
+                srms.Loader_Id = 0;
+                srms.LoginIP = "";
+                _dbContext.SaveChanges();
+
+                result.success = true;
+                result.data = true;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
             return result;
         }
 

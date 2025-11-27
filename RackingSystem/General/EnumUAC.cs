@@ -6,6 +6,8 @@
         MM_TrolleyList_MENU = 2,
         MM_TrolleySlotList_MENU = 3,
         MM_SlotList_MENU = 4,
+        MM_SlotUpdatePulse_MENU = 5,
+        MM_SlotUpdateDrawer_MENU = 6,
 
         STOCK_ItemGroupList_MENU = 20,
         STOCK_ItemList_MENU = 21,
@@ -15,6 +17,7 @@
         GRN_NewReceive_MENU = 60,
         GRN_GRNDtlList_MENU = 61,
         GRN_ReprintList_MENU = 62,
+        GRN_NewLoaderTask_MENU = 63,
 
         JO_JOList_MENU = 80,
         JO_Emergency_MENU = 81,

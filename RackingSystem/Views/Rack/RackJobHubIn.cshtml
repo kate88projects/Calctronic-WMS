@@ -1,5 +1,5 @@
 ﻿@{
-
+    Layout = "~/Views/Shared/_LayoutEmpty.cshtml";
 }
 
 <style>
@@ -497,17 +497,18 @@
     <h1>SRMS </h1>
 
     <div class="header-controls">
-        <div class="select-container">
-            <label for="job-select">Job:</label>
-            <select id="job-select" onchange="handleJobChange(this.value)">
+        <div class="input-container">
+            <label for="job-input">Job:</label>
+            <input type="text" id="job-input" value="@ViewBag.QNo" disabled />
+            @* <select id="job-select" onchange="handleJobChange(this.value)">
                 <option value="job001">Job 001: Assemble A</option>
                 <option value="job002">Job 002: Assemble B</option>
                 <option value="job003">Job 003: Test Run</option>
-            </select>
+            </select> *@
         </div>
 
         <div class="input-container">
-            <label for="loader-input">Loader/Trolley:</label>
+            <label for="loader-input">Loader:</label>
             <input type="text" id="loader-input" />
         </div>
 
@@ -595,7 +596,9 @@
         <input type="hidden" id="txtCol2TotalReels" autocomplete="off">
         <input type="hidden" id="txtCol3TotalReels" autocomplete="off">
         <input type="hidden" id="txtCol4TotalReels" autocomplete="off">
+
         <input type="hidden" id="xToken" value="@ViewBag.xToken" autocomplete="off">
+        <input type="hidden" id="xQId" value="@ViewBag.QId" autocomplete="off">
 
         <div style="height:20px;"></div>
         <input type="text" id="txtReelId" placeholder="Reel Id" autocomplete="off">
@@ -699,6 +702,7 @@
         let endTask = false;
 
         let token = '';
+        let qId = 0;
 
         $(document).ready(function () {
             disableDivContent(true);
@@ -711,6 +715,7 @@
             // updateJson();
 
             token = $('#xToken').val();
+            qId = Number($('#xQId').val());            
         });
 
         /**

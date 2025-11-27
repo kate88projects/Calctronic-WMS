@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+
+    <title>@ViewData["Title"] - WMS</title>
+
+    <!-- Theme Color -->
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#007bff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
+
+    <!-- Fonts -->
+    @* <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round"> *@
+    <link href="~/css/roboto.css" rel="stylesheet" />
+
+    @* <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js" integrity="sha384-SlE991lGASHoBfWbelyBPLsUlwY1GwNDJo3jSJO04KZ33K2bwfV9YBauFfnzvynJ" crossorigin="anonymous"></script> *@
+    <script src="~/js/fontawesome-all.js"></script>
+
+    <link rel="stylesheet"
+          href="~/css/overlayscrollbars.min.css"
+          crossorigin="anonymous" />
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap-font/bootstrap-icons.min.css"
+          crossorigin="anonymous" />
+
+    <!--begin::Required Plugin(AdminLTE)-->
+    @* <link rel="stylesheet" href="../../css/adminlte.css" /> *@
+    <link rel="stylesheet" href="~/css/adminlte.css" asp-append-version="true" />
+    <!--end::Required Plugin(AdminLTE)-->
+
+
+    <style type="text/css">
+        html * {
+            /* font-size: 1em !important; */
+            /* color: #000 !important; */
+            font-family: Varela Round !important;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        @RenderBody()
+    </div>
+
+    <!--end::Third Party Plugin(OverlayScrollbars)--><!--begin::Required Plugin(popperjs for Bootstrap 5)-->
+    <script src="~/lib/popper/popper.js"></script>
+    <script type="module" src="~/js/adminlte.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $.ajax({
+                url: '/Account/getSession',
+                type: 'GET',
+                success: function(data) {
+                    // console.log(data);
+                    if (data == "") {
+                        window.location.href = '@Url.Action("Login", "Account")';
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+
+
+            // for (var j = 1; j <= ttlPage; j++) {
+            //     $('#btnP' + j).removeClass('active');
+            // }
+            // $('#btnP' + page).addClass('active');
+
+            var myActiveTab = '@ViewData["ActiveTab"]';
+            var myActiveGroup = '@ViewData["ActiveGroup"]';
+            console.log(myActiveGroup);
+            $('#' + myActiveGroup).addClass('menu-open');
+
+            const allLinks = document.querySelectorAll('a.nav-link'); // Selects all <a> elements on the page
+
+            allLinks.forEach(link => {
+              const hrefValue = link.href; // Access the href attribute of each link
+                    // console.log(hrefValue);
+              if (hrefValue.includes(myActiveTab)) {
+                  $(link).addClass('active');
+              }
+              else {
+                  $(link).removeClass('active');
+              }
+            });
+
+
+        });
+    </script>
+
+</body>
+</html>

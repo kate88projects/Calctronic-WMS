@@ -371,7 +371,7 @@ namespace RackingSystem.Services.SlotServices
                                 RowNo = slot.RowNo,
                                 IsActive = slot.IsActive,
                                 IsLeft = slot.IsLeft,
-                                HasEmptyTray = true,
+                                HasEmptyTray = false,
                                 HasReel = slot.HasReel,
                                 XPulse = slot.XPulse,
                                 YPulse = slot.YPulse,
@@ -383,6 +383,7 @@ namespace RackingSystem.Services.SlotServices
                                 Add4Pulse = slot.Add4Pulse,
                                 Add5Pulse = slot.Add5Pulse,
                                 Add6Pulse = slot.Add6Pulse,
+                                Priority = slot.Priority,
                             };
                             _dbContext.Slot.Add(_slot);
 

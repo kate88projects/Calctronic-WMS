@@ -94,7 +94,8 @@
                             </a>
                         </li>
 
-                        @if (ViewBag.PermissionList.Contains(1) || ViewBag.PermissionList.Contains(2) || ViewBag.PermissionList.Contains(3) || ViewBag.PermissionList.Contains(4))
+                        @if (ViewBag.PermissionList.Contains(1) || ViewBag.PermissionList.Contains(2) || ViewBag.PermissionList.Contains(3) || ViewBag.PermissionList.Contains(4) ||
+                                ViewBag.PermissionList.Contains(5) || ViewBag.PermissionList.Contains(6))
                         {
                             <li class="nav-item" id="grpMM">
                                 <a href="javascript:none" class="nav-link">
@@ -141,6 +142,24 @@
                                             </a>
                                         </li>
                                     }
+                                    @if (ViewBag.PermissionList.Contains(5) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="SlotUpdatePulse" asp-controller="Slot" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>Slot Update Pulses</p>
+                                            </a>
+                                        </li>
+                                    }
+                                   @*  @if (ViewBag.PermissionList.Contains(6) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="SlotList" asp-controller="Slot" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>Slot Check Drawer</p>
+                                            </a>
+                                        </li>
+                                    } *@
                                 </ul>
                             </li>
                         }
@@ -203,7 +222,7 @@
                         }
 
 
-                        @if (ViewBag.PermissionList.Contains(60) || ViewBag.PermissionList.Contains(61) || ViewBag.PermissionList.Contains(62))
+                        @if (ViewBag.PermissionList.Contains(60) || ViewBag.PermissionList.Contains(61) || ViewBag.PermissionList.Contains(62) || ViewBag.PermissionList.Contains(63))
                         {
                             <li class="nav-item" id="grpGRN">
                                 <a href="javascript:none" class="nav-link">
@@ -214,15 +233,6 @@
                                     </p>
                                 </a>
                                 <ul class="nav nav-treeview">
-                                    @if (ViewBag.PermissionList.Contains(60) == true)
-                                    {
-                                        <li class="nav-item">
-                                            <a asp-action="NewAutoLoaderTask" asp-controller="GRN" class="nav-link">
-                                                <i class="nav-icon bi bi-asterisk"></i>
-                                                <p>New Auto Loader Task</p>
-                                            </a>
-                                        </li>
-                                    }
                                     @if (ViewBag.PermissionList.Contains(60) == true)
                                     {
                                         <li class="nav-item">
@@ -250,6 +260,15 @@
                                             </a>
                                         </li>
                                     } *@
+                                    @if (ViewBag.PermissionList.Contains(63) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="NewAutoLoaderTask" asp-controller="GRN" class="nav-link">
+                                                <i class="nav-icon bi bi-asterisk"></i>
+                                                <p>New Auto Loader Task</p>
+                                            </a>
+                                        </li>
+                                    }
                                 </ul>
                             </li>
                         }

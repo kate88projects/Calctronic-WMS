@@ -1184,7 +1184,7 @@
 
             var book_header = type === "slots" ? [
                 ['Slot Code', 'Column No', 'Row No', 'Is Active', 'Is Left', 'X Pulse', 'Y Pulse', 'QR-X Pulse', 'QR-Y Pulse',
-                'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6']
+                'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6', 'Priority']
             ]
             : [
                 ['Slot Code', 'X Pulse', 'Y Pulse', 'QR-X Pulse', 'QR-Y Pulse',
@@ -1194,8 +1194,8 @@
             // var booksheet = XLSX.utils.aoa_to_sheet(book_header);
             var booksheet = XLSX.utils.aoa_to_sheet(book_header);
             booksheet['!cols'] = type === "slots" ? [
-                {wpx: 90}, {wpx: 60}, {wpx: 50}, {wpx: 50}, {wpx: 50}, {wpx: 50}, {wpx: 50}, 
-                {wpx: 60}, {wpx: 60}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}
+                {wpx: 90}, {wpx: 60}, {wpx: 50}, {wpx: 50}, {wpx: 50}, {wpx: 50}, {wpx: 50},
+                {wpx: 60}, {wpx: 60}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}
             ] : [
                 {wpx: 90}, {wpx: 50}, {wpx: 50}, {wpx: 60}, {wpx: 60},
                 {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}
@@ -1280,7 +1280,7 @@
 
             if (source == "importSlot") {
                 dataTableColumns = ['Slot Code', 'Column No', 'Row No', 'Is Active', 'Is Left', 'X Pulse', 'Y Pulse', 'QR-X Pulse', 'QR-Y Pulse',
-                                        'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6'];
+                                        'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6', 'Priority'];
                 $('#updateType').val("slots");
             }
             else {
@@ -1362,7 +1362,7 @@
                     const fieldNames = [
                         'Slot Code', 'Column No', 'Row No', 'X Pulse', 'Y Pulse', 'QR-X Pulse', 'QR-Y Pulse',
                         'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6',
-                        'Is Active', 'Is Left'
+                        'Is Active', 'Is Left', 'Priority'
                     ];
                     fieldNames.forEach(field => {
                         colIndex[field] = columns.indexOf(normalizeString(userMappings, field));
@@ -1391,6 +1391,7 @@
                             Add6Pulse: row[colIndex['Additional Pulse 6']],
                             IsActive: parseBool(row[colIndex['Is Active']]),
                             IsLeft: parseBool(row[colIndex['Is Left']]),
+                            Priority: row[colIndex['Priority']],
                         };
                     });
                 }
