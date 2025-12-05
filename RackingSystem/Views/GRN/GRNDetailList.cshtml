@@ -2,19 +2,6 @@
 @{
 }
 <style type="text/css">
-    .table-title {
-        color: #fff;
-        background: #4b5366;
-        /*     padding: 16px 25px;
-                margin: -20px -25px 10px; */
-        border-radius: 3px 3px 0 0;
-    }
-
-        .table-title h2 {
-            margin: 5px 0 0;
-            font-size: 24px;
-        }
-
     .show-entries select.form-control {
         width: 60px;
         margin: 0 5px;
@@ -32,30 +19,24 @@
         box-shadow: none;
     }
 
-    .table-filter {
-        /* padding: 5px 0 15px;
-            border-bottom: 1px solid #e9e9e9;
-            margin-bottom: 5px; */
+    .table-filter .btn {
+        height: 34px;
     }
 
-        .table-filter .btn {
-            height: 34px;
-        }
+    .table-filter label {
+        font-weight: normal;
+        margin-left: 10px;
+    }
 
-        .table-filter label {
-            font-weight: normal;
-            margin-left: 10px;
-        }
+    .table-filter select, .table-filter input {
+        display: inline-block;
+        margin-left: 5px;
+    }
 
-        .table-filter select, .table-filter input {
-            display: inline-block;
-            margin-left: 5px;
-        }
-
-        .table-filter input {
-            width: 200px;
-            display: inline-block;
-        }
+    .table-filter input {
+        width: 200px;
+        display: inline-block;
+    }
 
     .filter-group select.form-control {
         width: 110px;
@@ -66,49 +47,49 @@
         margin-top: 7px;
     }
 
-        .filter-icon i {
-            font-size: 18px;
-            opacity: 0.7;
-        }
+    .filter-icon i {
+        font-size: 18px;
+        opacity: 0.7;
+    }
 
     .pagination {
         float: right;
         margin: 0 0 5px;
     }
 
-        .pagination li a {
-            border: none;
-            font-size: 13px;
-            min-width: 30px;
-            min-height: 30px;
-            color: #999;
-            margin: 0 2px;
-            line-height: 30px;
-            border-radius: 2px !important;
-            text-align: center;
-            padding: 0 6px;
-        }
+    .pagination li a {
+        border: none;
+        font-size: 13px;
+        min-width: 30px;
+        min-height: 30px;
+        color: #999;
+        margin: 0 2px;
+        line-height: 30px;
+        border-radius: 2px !important;
+        text-align: center;
+        padding: 0 6px;
+    }
 
-            .pagination li a:hover {
-                color: #666;
-            }
+    .pagination li a:hover {
+        color: #666;
+    }
 
-        .pagination li.active a {
-            background: #03A9F4;
-        }
+    .pagination li.active a {
+        background: #03A9F4;
+    }
 
-            .pagination li.active a:hover {
-                background: #0397d6;
-            }
+    .pagination li.active a:hover {
+        background: #0397d6;
+    }
 
-        .pagination li.disabled i {
-            color: #ccc;
-        }
+    .pagination li.disabled i {
+        color: #ccc;
+    }
 
-        .pagination li i {
-            font-size: 16px;
-            padding-top: 6px
-        }
+    .pagination li i {
+        font-size: 16px;
+        padding-top: 6px
+    }
 
     .text-success {
         color: #10c469;
@@ -131,39 +112,39 @@
         margin: 0 0 5px;
     }
 
-        .pagination li a {
-            border: none;
-            font-size: 13px;
-            min-width: 30px;
-            min-height: 30px;
-            color: #999;
-            margin: 0 2px;
-            line-height: 30px;
-            border-radius: 2px !important;
-            text-align: center;
-            padding: 0 6px;
-        }
+    .pagination li a {
+        border: none;
+        font-size: 13px;
+        min-width: 30px;
+        min-height: 30px;
+        color: #999;
+        margin: 0 2px;
+        line-height: 30px;
+        border-radius: 2px !important;
+        text-align: center;
+        padding: 0 6px;
+    }
 
-            .pagination li a:hover {
-                color: #666;
-            }
+    .pagination li a:hover {
+        color: #666;
+    }
 
-        .pagination li.active a {
-            background: #03A9F4;
-        }
+    .pagination li.active a {
+        background: #03A9F4;
+    }
 
-            .pagination li.active a:hover {
-                background: #0397d6;
-            }
+    .pagination li.active a:hover {
+        background: #0397d6;
+    }
 
-        .pagination li.disabled i {
-            color: #ccc;
-        }
+    .pagination li.disabled i {
+        color: #ccc;
+    }
 
-        .pagination li i {
-            font-size: 16px;
-            padding-top: 6px
-        }
+    .pagination li i {
+        font-size: 16px;
+        padding-top: 6px
+    }
 
     .hint-text {
         float: left;
@@ -171,21 +152,23 @@
         font-size: 13px;
     }
 
+    #contentBox {
+        background-color: white;
+    }
 </style>
 
-<br />
+@section PageHeader {
+    <header class="d-flex align-items-center justify-content-between w-100">
+        <h2 class="pageTitle">GRN List <b></b></h2>
+    </header>
+}
 
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <div class="card card-outline ">
-                <div class="card-header table-title">
-                    <div class="card-title">
-                        <h2>GRN List <b></b></h2>
-                    </div>
-                </div>
+            <div class="card">
                 <div class="card-body">
-                    <div class="row" style="padding:5px;">
+                    <div id="contentBox" class="row mt-2" style="padding:5px;">
                         <div class="col-sm-2" style="">
                             <input id="txtGRN" name="GRNBatchNo" type="text" class="form-control" style="" placeholder="GRN No" />
                         </div>

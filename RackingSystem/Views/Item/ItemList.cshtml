@@ -3,19 +3,6 @@
 }
 
 <style>
-    .table-title {
-        color: #fff;
-        background: #4b5366;
-        /*     padding: 16px 25px;
-            margin: -20px -25px 10px; */
-        border-radius: 3px 3px 0 0;
-    }
-
-        .table-title h2 {
-            margin: 5px 0 0;
-            font-size: 24px;
-        }
-
     .show-entries select.form-control {
         width: 60px;
         margin: 0 5px;
@@ -39,24 +26,24 @@
         margin-bottom: 5px; */
     }
 
-        .table-filter .btn {
-            height: 34px;
-        }
+    .table-filter .btn {
+        height: 34px;
+    }
 
-        .table-filter label {
-            font-weight: normal;
-            margin-left: 10px;
-        }
+    .table-filter label {
+        font-weight: normal;
+        margin-left: 10px;
+    }
 
-        .table-filter select, .table-filter input {
-            display: inline-block;
-            margin-left: 5px;
-        }
+    .table-filter select, .table-filter input {
+        display: inline-block;
+        margin-left: 5px;
+    }
 
-        .table-filter input {
-            width: 200px;
-            display: inline-block;
-        }
+    .table-filter input {
+        width: 200px;
+        display: inline-block;
+    }
 
     .filter-group select.form-control {
         width: 110px;
@@ -67,73 +54,83 @@
         margin-top: 7px;
     }
 
-        .filter-icon i {
-            font-size: 18px;
-            opacity: 0.7;
-        }
+    .filter-icon i {
+        font-size: 18px;
+        opacity: 0.7;
+    }
 
     .pagination {
         float: right;
         margin: 0 0 5px;
     }
 
-        .pagination li a {
-            border: none;
-            font-size: 13px;
-            min-width: 30px;
-            min-height: 30px;
-            color: #999;
-            margin: 0 2px;
-            line-height: 30px;
-            border-radius: 2px !important;
-            text-align: center;
-            padding: 0 6px;
-        }
-
-            .pagination li a:hover {
-                color: #666;
-            }
-
-        .pagination li.active a {
-            background: #03A9F4;
-        }
-
-            .pagination li.active a:hover {
-                background: #0397d6;
-            }
-
-        .pagination li.disabled i {
-            color: #ccc;
-        }
-
-        .pagination li i {
-            font-size: 16px;
-            padding-top: 6px
-        }
-
-    .error-message {
-        color: red;
-        font-size: 0.875rem;
-        margin-top: 5px;
+    .pagination li a {
+        border: none;
+        font-size: 13px;
+        min-width: 30px;
+        min-height: 30px;
+        color: #999;
+        margin: 0 2px;
+        line-height: 30px;
+        border-radius: 2px !important;
+        text-align: center;
+        padding: 0 6px;
     }
 
-    .is-invalid {
-        border-color: red;
+    .pagination li a:hover {
+        color: #666;
     }
 
-    .is-valid {
-        border-color: green;
+    .pagination li.active a {
+        background: #03A9F4;
     }
 
+    .pagination li.active a:hover {
+        background: #0397d6;
+    }
+
+    .pagination li.disabled i {
+        color: #ccc;
+    }
+
+    .pagination li i {
+        font-size: 16px;
+        padding-top: 6px
+    }
+
+    .modal-body {
+        max-height: calc(100vh - 200px);
+        overflow-y: auto;
+    }
 </style>
 
-<br />
+@section PageHeader {
+    <header class="d-flex align-items-center justify-content-between w-100">
+        <h2 class="pageTitle">Item List</h2>
+        <div class="d-flex gap-2">
+            <div class="btn-group">
+                <button type="button" class="btn btn-warning">Import</button>
+                <button type="button" class="btn btn-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="true">
+                    <span class="visually-hidden">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(114.5px, 40px, 0px);">
+                    <li><a class="dropdown-item" onclick="downloadTemp()">Download Template</a></li>
+                    <li><a class="dropdown-item" onclick="triggerFileInput()">Import Item from Excel</a></li>
+                </ul>
+                <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleFileUpload(event)">
+            </div>
+            <button type="button" class="btn btn-success" onclick="newItemForm()">
+                Add New Item
+            </button>
+        </div>
+    </header>
+}
 
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <div class="card card-outline ">
-                <div class="card-header table-title">
+            <div class="card">
+                @* <div class="card-header table-title">
                     <div class="card-title">                        
                         <h2>Item List <b></b></h2>
                     </div>
@@ -153,7 +150,7 @@
                             Add New Item
                         </button>
                     </div>
-                </div>
+                </div> *@
                 <div class="card-body">
                     <div class="row" style="padding:5px;">
                         <div class="col-sm-3" style="">
@@ -190,7 +187,9 @@
                             </div>
                         </div>
                     </div>
-                    <div class="table table-striped table-bordered table-responsive text-nowrap">
+                    <div id="gridTable" class="table table-responsive text-nowrap mt-3"></div>
+
+                    @* <div class="table table-striped table-bordered table-responsive text-nowrap">
                         <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
                             <thead>
                                 <tr>
@@ -201,14 +200,14 @@
                                     <th>Is Active</th>
                                     <th>FinishGood?</th>
                                     <th>Dimension</th>
-                                    @* <th>Width (inch)</th> *@
+                                    @* <th>Width (inch)</th>//
                                     <th>Max Thickness (mm)</th>
                                     <th>Alarm?</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
                         </table>
-                    </div>
+                    </div> *@
 
                     <div class="clearfix">
                         <div class="hint-text">Showing <b id="lblCurCount">0</b> of <b id="lblTotal">0</b> entries</div>
@@ -325,13 +324,14 @@
 
 @section Scripts
 {
-    <link href="~/css/datatables.min.css" rel="stylesheet">
+    @* <link href="~/css/datatables.min.css" rel="stylesheet"> *@
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+    <link rel="stylesheet" href="~/css/gridjs.min.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/js/datatables.min.js"></script>
+    @* <script src="~/js/datatables.min.js"></script> *@
     <script src="~/js/sweetalert2.all.min.js"></script>
-
+    <script src="~/js/gridjs.umd.js"></script>
     <script src="~/js/xlsx.full.min.js"></script>
     <script src="~/js/exceljs.min.js"></script>
 
@@ -339,6 +339,7 @@
 
         let uploadedFileContent = null;
         let uploadedFileExtension = null;
+        let gridInstance = null;
 
         $(document).ready(function() {
             $('#txtTotalRecord').val(0);
@@ -408,9 +409,10 @@
                     Swal.showLoading();
                 },
                 success: function (result) {
-                    // console.log(result);
+                    console.log(result);
                     swal.close()
                     if (result.success == true) {
+                        /*
                         $('#listTable').DataTable({
                             data: result.data,
                             paging: false,
@@ -490,6 +492,121 @@
                                 }
                             ]
                         });
+                        */
+
+                        if (gridInstance) {
+                            gridInstance.destroy();
+                        }
+
+                        gridInstance = new gridjs.Grid({
+                            columns: [
+                                { name: 'Item Id', id: 'item_Id', hidden: true },
+                                { name: 'Item Code', id: 'itemCode', width: '120px' },
+                                { name: 'Item Group Id', id: 'itemGroup_Id', hidden: true },
+                                { name: 'UOM', id: 'uom' },
+                                { 
+                                    name: 'Description', 
+                                    id: 'description',
+                                    formatter: (cell) => {
+                                        const maxLength = 50;
+                                        if (!cell) return '';
+                                        return cell.length > maxLength
+                                            ? gridjs.html(`<span title="${cell}">${cell.substring(0, maxLength)}...</span>`)
+                                            : cell;
+                                    }
+                                },
+                                { name: 'Item Group', id: 'itemGroupCode', width: '140px' },
+                                { 
+                                    name: 'Active State', 
+                                    id: 'isActive',
+                                    width: '140px',
+                                    formatter: (cell, row) => {
+                                       const badgeHtml = row.cells[7].data === true
+                                          ? '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
+                                          : '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>';
+                                        return gridjs.html(`<div style="text-align:center;">${badgeHtml}</div>`);
+                                   }
+                                },
+                                {   name: 'Finish Goods?', 
+                                    id: 'isFinishGood',
+                                    width: '160px',
+                                    formatter: (cell) => {
+                                        return gridjs.html(`
+                                            <div style="text-align:center;">
+                                                ${cell === true
+                                                    ? '<i class="bi bi-check-square text-success"></i>'
+                                                    : '<i class="bi bi-app"></i>'
+                                                }
+                                            </div>
+                                        `);
+                                    }
+                                },
+                                { name: 'Thickness', id: 'thickness', hidden: true },
+                                { name: 'Width', id: 'width', hidden: true },
+                                { name: 'Reel Dimension Id', id: 'reelDimension_Id', hidden: true },
+                                { 
+                                    name: 'Dimension', 
+                                    formatter: (cell, row) => {
+                                        return gridjs.html(`<span>${row.cells[9].data} mm X ${row.cells[10].data} inch</span>`);
+                                    }
+                                },
+                                { name: 'Max Thickness(mm)', id: 'maxThickness', width: '190px' },
+                                { 
+                                    name: 'Alarm?', 
+                                    id: 'alarmOverMaxThickness', 
+                                    width: '100px',
+                                    formatter: (cell) => {
+                                        return gridjs.html(`
+                                            <div style="text-align:center;">
+                                                ${cell === true
+                                                    ? '<i class="bi bi-check-square text-success"></i>'
+                                                    : '<i class="bi bi-app"></i>'
+                                                }
+                                            </div>
+                                        `);
+                                    }
+                                },
+                                { 
+                                    name: 'Action',
+                                    formatter: (cell, row) => {
+                                        const cleanRow = {
+                                            item_Id: row.cells[0]?.data,
+                                            itemCode: row.cells[1]?.data,
+                                            itemGroup_Id: row.cells[2]?.data,
+                                            uom: row.cells[3]?.data,
+                                            description: row.cells[4]?.data,
+                                            itemGroup: row.cells[5]?.data,
+                                            isFinishGood: row.cells[6]?.data,
+                                            thickness: row.cells[7]?.data,
+                                            width: row.cells[8]?.data,
+                                            reelDimension_Id: row.cells[9]?.data,
+                                            maxThickness: row.cells[10]?.data,
+                                            alarmOverMaxThickness: row.cells[11]?.data,
+                                        };
+                                        const rawData = btoa(JSON.stringify(cleanRow));
+                                        return gridjs.html(`
+                                           <div style="display: flex;">
+                                               <button class="btn btn-warning d-grid edit-btn me-2" data-row="${rawData}">
+                                                   <span><i class="bi bi-pencil-square"></i> Edit</span>
+                                               </button>
+                                               <button class="btn btn-danger d-grid delete-btn" data-id="${cleanRow.item_Id}" data-code="${cleanRow.itemCode}">
+                                                   <span><i class="bi bi-trash"></i> Delete</span>
+                                               </button>
+                                           </div>
+                                        `);
+                                    }
+                                }
+                            ],
+                            data: result.data,
+                            pagination: false,
+                            search: false,
+                            sort: false,
+                            resizable: true,
+                            className: {
+                                table: 'custom-table',
+                            }
+                        }).render(document.getElementById("gridTable"));
+
 
                         // if is page 1 then need regenerate pagination, else just show current entry
                         var curCnt = 0;
@@ -671,8 +788,8 @@
             $("#myModal").modal("show");
         }
 
-        $('#listTable').on('click', '.edit-btn', function () {
-            const row = JSON.parse($(this).attr('data-row'));
+        $('#gridTable').on('click', '.edit-btn', function () {
+            const row = JSON.parse(atob($(this).attr('data-row')));
             editItemForm(row);
         });
 
@@ -790,8 +907,6 @@
                 AlarmOverMaxThickness: chkAlarmOverMaxThickness.checked ? true : false
             }
 
-            //console.log(JSON.stringify(data));
-
             $.ajax({
                 url: '/Item/SaveItem',
                 type: 'POST',
@@ -810,7 +925,6 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
-                    // console.log(result);
                     if (result.success == true) {
                         $("#myModal").modal("toggle");
                         swal.fire({
@@ -839,11 +953,9 @@
                     });
                 }
             });
-
-            // console.log(id);
         }
 
-        $('#listTable').on('click', '.delete-btn', function () {
+        $('#gridTable').on('click', '.delete-btn', function () {
                 const id = $(this).attr('data-id');
                 const code = $(this).attr('data-code');
                 deleteItem(id, code);

@@ -6,25 +6,7 @@
 
 <style>
     .card {
-        background: #f2f2f2;
-        height:100%;
-    }
-
-    .table-title {
-        color: #fff;
-        background: #4b5366;
-        border-radius: 3px 3px 0 0;
-    }
-
-    .table-title h2 {
-        margin: 5px 0 0;
-        font-size: 24px;
-    }
-
-    .error-message {
-        color: red;
-        font-size: 0.875rem; 
-        margin-top: 5px;
+        border-color: #f2f2f2 !important;
     }
 
     .title {
@@ -68,10 +50,6 @@
         padding: 10px 20px;
     }
 
-    form {
-        padding: 0px 10px 20px;
-    }
-
     .subContainer {
         display: flex;
         flex-direction: column;
@@ -83,12 +61,16 @@
 
     #bomForm {
         background-color: #fff;
-        padding: 30px;
+        padding: 20px 30px;
         border-radius: 20px;
     }
 
     .card-body {
-        background-color: #E9ECEF;
+        background-color: #f2f2f2;
+    }
+
+    .bg-body-tertiary {
+        background-color: #f2f2f2 !important;
     }
 
     .title-icon {
@@ -114,12 +96,22 @@
     }
 </style>
 
-<br />
+@section PageHeader {
+    <header class="d-flex align-items-center justify-content-between w-100">
+        <h2 class="pageTitle">BOM Details</h2>
+        <div class="d-flex">
+            <button type="button" class="btn btn-warning" onclick="enabledEdit()" @(mode == "view" ? "" : "hidden")>
+                <i class="bi bi-pencil-square"></i> Edit
+            </button>
+        </div>
+    </header>
+}
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <div class="card card-outline ">
-                <div class="card-header table-title">
+            <div class="card">
+                @* <div class="card-header table-title">
                     <div class="card-title">
                         <h2>BOM Details <b></b></h2>
                     </div>
@@ -128,7 +120,7 @@
                             <i class="bi bi-pencil-square"></i> Edit
                         </button>
                     </div>
-                </div>
+                </div> *@
                 <div class="card-body">
                     <form id="bomForm" method="post" data-bom-id="@Model.BOM_Id">
                         <div class="bomContainer">
@@ -259,6 +251,7 @@
                         <div class="d-flex justify-content-end">
                             <button class="btn btn-primary me-2" id="saveButton" @(mode == "view" ? "hidden" : "")>Save</button>
                             <button type="button" class="btn btn-outline-secondary" onclick="returnToBOM()" @(mode == "view" ? "hidden" : "")>Cancel</button>
+                            <button type="button" class="btn btn-secondary" id="backButton" onclick="returnToBOM()" @(mode == "view" ? "" : "hidden")><i class="bi bi-arrow-left"></i> Back</button>
                         </div>
                     </form>
                 </div>
@@ -703,6 +696,7 @@
             });
 
             document.querySelector('.btn-warning')?.setAttribute('hidden', 'true');
+            document.getElementById('backButton')?.setAttribute('hidden', 'true');
 
         }
 

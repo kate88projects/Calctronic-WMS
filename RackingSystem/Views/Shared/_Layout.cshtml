@@ -30,7 +30,7 @@
     @* <link rel="stylesheet" href="../../css/adminlte.css" /> *@
     <link rel="stylesheet" href="~/css/adminlte.css" asp-append-version="true" />
     <!--end::Required Plugin(AdminLTE)-->
-
+    <link rel="stylesheet" href="~/css/general.css" />
 
     <style type="text/css">
         html * {
@@ -38,6 +38,25 @@
         /* color: #000 !important; */
         font-family: Varela Round !important;
         }
+
+        @@media (max-width: 768px) {
+            .card-body {
+                height: auto !important;
+            }
+
+            .app-wrapper {
+                display: flex;
+                flex-direction: column;
+                height: 100vh;
+            }
+
+            .app-main {
+                flex-grow: 1;
+                padding: 20px;
+                overflow: auto;
+            }
+        }
+
     </style>
 </head>
 
@@ -63,6 +82,16 @@
             </div>
             <!--end::Container-->
         </nav> *@
+        <div class="page-header-wrapper">
+            <div id="sideBtn" class="navBtn click flex-start">
+                <i class="bi bi-list"></i>
+            </div>
+            
+            <div class="page-header-slot">
+                @RenderSection("PageHeader", required: false)
+            </div>
+        </div>
+        
         <!--end::Header-->
         <!--begin::Sidebar-->
         <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
@@ -579,5 +608,21 @@
         });
     </script>
 
+        const body = document.querySelector('body');
+        const sideBtn = document.getElementById('sideBtn');
+        sideBtn.addEventListener('click', () => {
+            if (body.classList.contains('sidebar-open')) {
+                body.classList.remove('sidebar-open');
+                sideBtn.classList.remove('click');
+                body.classList.add('sidebar-closed');
+                body.classList.add('sidebar-collapse');
+            } else {
+                body.classList.remove('sidebar-closed');
+                body.classList.remove('sidebar-collapse');
+                body.classList.add('sidebar-open');
+                sideBtn.classList.add('click');
+            }
+        });
+    </script>
 </body>
 </html>

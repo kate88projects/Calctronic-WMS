@@ -16,17 +16,6 @@
         height:100%;
     }
 
-    .table-title {
-        color: #fff;
-        background: #4b5366;
-        border-radius: 3px 3px 0 0;
-    }
-
-    .table-title h2 {
-        margin: 5px 0 0;
-        font-size: 24px;
-    }
-
     .title {
         font-weight: 600;
         margin-bottom: 5px; 
@@ -73,12 +62,6 @@
         margin-bottom: 10px;
     }
 
-    .error-message {
-        color: red;
-        font-size: 0.875rem;
-        margin-top: 5px;
-    }
-
     .is-invalid {
         border-color: red;
     }
@@ -90,20 +73,32 @@
     .hidden {
         display: none;
     }
+
+    .card-body, .bg-body-tertiary {
+        background-color: #f2f2f2 !important;
+    }
+
+    .card-body {
+        padding: 10px !important;
+    }
+
+    .card {
+        border-color: #f2f2f2 !important;
+    }
 </style>
 
-<br />
+@section PageHeader {
+    <header class="d-flex align-items-center justify-content-between w-100">
+        <h2 class="pageTitle">New GRN <b></b></h2>
+    </header>
+}
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <div class="card card-outline ">
-                <div class="card-header table-title">
-                    <div class="card-title">
-                        <h2>NEW GRN <b></b></h2>
-                    </div>
-                </div>
+            <div class="card">
                 <div class="card-body">
-                    <div id="grnForm">
+                    <div id="grnForm" class="mt-2">
                         <div class="grnContainer">
                             <div class="row">
                                 <div class="col">

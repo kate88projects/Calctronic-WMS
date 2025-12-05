@@ -2,7 +2,6 @@
 @{
 }
 
-
 <style type="text/css">
     body {
         color: #566787;
@@ -19,19 +18,6 @@
         line-height: 10px;
     }
 
-    .table-title {
-        color: #fff;
-        background: #4b5366;
-        /*     padding: 16px 25px;
-        margin: -20px -25px 10px; */
-        border-radius: 3px 3px 0 0;
-    }
-
-    .table-title h2 {
-        margin: 5px 0 0;
-        font-size: 24px;
-    }
-
     .containerDtl {
         height: 100%;
         width: 100%;
@@ -42,11 +28,11 @@
         /* display: flex; 
         justify-content: center; 
         align-items: center;  */
-
     }
 
     .containerDtlHistory {
         width: 100%;
+        height: 100%;
         border-radius: 10px;
         overflow: hidden;
         background-color: white;
@@ -186,11 +172,11 @@
         display: none;
     }
 
-    @@media (min-width: 1440px) {
+    /* @@media (min-width: 1440px) {
         .progressBar li::after {
             left: 100px;
         }
-    }
+    } */
 /* 
     .gauge {
         position: relative;
@@ -286,10 +272,6 @@
     }
     .wrapper > .gauge-container {
       margin: 0;
-    } */
-
-    /* .text-bg-light {
-        background-color: grey !important;
     } */
 
     .gauge-container {
@@ -402,30 +384,11 @@
         border-radius: 8px 0 0 0;
     }  */
 
-    /* .btnTab {
-        /* border: 1px solid black; 
-        width: 100%;
-        border-radius: 0px;
-    }
-
-    .tabContainer {
-        background-color: #f2f2f2;
-        padding-top: 16px;
-    } */
-
-    /* .left-body {
-        padding-top: 0 !important;
-    } */
-
     .reelDtl {
         background-color: #f2f2f2;
         padding: 10px 10px 10px 20px;
         border-radius: 10px;
         margin-bottom: 10px;
-    }
-
-    .badge-container {
-        /* position: relative; */
     }
 
     .badge {
@@ -445,37 +408,81 @@
     .col-md-7 {
         padding: 20px 20px 20px 0px;
     }
-}
+
+    .card-body, .bg-body-tertiary {
+        background-color: #f2f2f2 !important;
+    }
+
+    .card-body {
+        padding: 10px !important;
+    }
+
+    .card {
+        border-color: #f2f2f2 !important;
+    }
+
+    /* header {
+        display: flex;
+        align-items: center;
+        gap: 15px;        
+        flex-wrap: wrap;
+    }
+
+    .pageTitle {
+        margin: 0;
+        text-align: center;
+    }
+
+    header .btn {
+        height: 40px;
+    } 
+
+    .page-header-wrapper {
+        color: #fff !important;
+        background: #4b5366;
+    }
+
+    .bg-body-tertiary {
+        background-color: #f2f2f2 !important;
+    }
+
+    .card {
+        box-shadow: none;
+        border: 1px solid #f2f2f2 !important;
+    }
+
+    .card-body {
+        height: 100%;
+        background-color: #f2f2f2;
+        padding: 10px !important;
+    } */
+
 </style>
 
-<div class="container-fluid">
+@section PageHeader { 
+    <header class="d-flex align-items-center justify-content-between w-100">
+        <h2 class="pageTitle">New Auto Loader Task</h2>
+        <div class="d-flex gap-2">
+            @* <button type="button" class="btn btn-success" onclick="restartStep()">
+                NEW LOADER
+            </button> *@
+            <button type="button" class="btn btn-warning" id="btnStop" onclick="endTask(1)" disabled>
+                STOP TASK
+            </button>
+            <button type="button" class="btn btn-danger" id="btnEnd" onclick="endTask(2)" disabled>
+                END TASK
+            </button>
+        </div>
+    </header> 
+} 
 
+<div class="container-fluid">
     <div class="row">
-        <div class="col-12">
-            <div class="card card-outline ">
-                <div class="card-header table-title">
-                    <div class="card-title">
-                        <h2>NEW Auto Loader Task <b></b></h2>
-                    </div>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-success" onclick="restartStep()">
-                            NEW LOADER
-                        </button>
-                        <button type="button" class="btn btn-primary" id="btnChangeReel" onclick="restartItem()" disabled>
-                            CHANGE REEL
-                        </button>
-                        <button type="button" class="btn btn-warning" id="btnStop" onclick="endTask(1)" disabled>
-                            STOP TASK
-                        </button>
-                        <button type="button" class="btn btn-danger" id="btnEnd" onclick="endTask(2)" disabled>
-                            END TASK
-                        </button>
-                    </div>
-                </div>
+        <div class="col">
+            <div id="cardContent" class="card">
                 <div class="row">
-                    <div class="col-sm-12 col-md-3" style="padding-right:0px;">
-                        
-                         <div class="card-body" style="background: #f2f2f2; width:100%; height:100%; padding-right:0px;">
+                    <div class="col-sm-12 col-md-3 pe-0">
+                         <div class="card-body pb-4 pe-0 w-100">
                           @*  <div class="row g-0 tabContainer">
                                 <div class="col loadTab">
                                     <Button class="btn btn-dark btnTab" type="button" onclick="changeTabContent('Loader')">Loader</Button>
@@ -485,7 +492,7 @@
                                 </div>
                             </div> *@
 
-                            <div class="container containerDtlHistory" style="min-height:100px;" id="loaderTabContent">
+                            <div class="container containerDtlHistory mt-2" style="min-height:100px;" id="loaderTabContent">
                                 <div class="row">
                                     <div class="col-12">
                                         <p class="text-center"><strong>- Loader  <span id="loaderName"></span> - </strong></p>
@@ -603,9 +610,9 @@
                             @* </div> *@
                         </div>
                     </div>
-                    <div class="col-sm-12 col-md-6" style="padding-left:0px;">
-                        <div class="card-body" style="background: #f2f2f2; height:100%;">
-                            <div class="container containerDtl">
+                    <div class="col-sm-12 col-md-6 ps-0">
+                        <div class="card-body pb-4">
+                            <div class="container containerDtl mt-2">
                                 <ul class="progressBar">
                                     <li class="active" id="step1">Loader</li>
                                     <li id="step2">Column</li>
@@ -704,7 +711,7 @@
                                                     <p>Load Reel Process: <span id="loadProcess4" class="error-message"></span></p>
                                                     @* <p>Auto Loader Status: <span id="loadConfirm4"></span></p> *@
 
-                                                    <span class="error-message" id="startErr" class="d-flex justify-content-center hidden mb-2"> </span>
+                                                    <span id="startErr" class="d-flex justify-content-center hidden mb-2 error-message"> </span>
                                                     <button class="btn btn-warning hidden" onclick="loadPLC(4)" id="btnRetryStart" style="width:100%;">Retry Start to Load Reel</button>
                                                 </div>
                                             </div>
@@ -730,8 +737,15 @@
                                                     <div class="mb-2">
                                                         <i class="bi bi-exclamation-triangle-fill hidden" style="color: red;" id="exclamIcon"></i> 
                                                         <span id="errActHeight" class="error-message mb-2"></span>
+
+                                                        <div id="loadingBlk" class="d-flex justify-content-center align-items-end d-none">
+                                                            <span class="text-primary me-2">Turning Column....</span>
+                                                            <div class="spinner-border text-primary" role="status">
+                                                                <span class="visually-hidden">Loading...</span>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <button class="btn btn-warning hidden" onclick="loadPLC(5)" id="btnRetry4" style="width:100%;">Retry Reel Height Measurement</button>
+                                                    <button class="btn btn-warning hidden" onclick="retry5(1)" id="btnRetry4" style="width:100%;">Retry Reel Height Measurement</button>
                                                     <button class="btn btn-success hidden"  onclick="loadPLC(6)" id="btnNext4" style="width:100%;"> Next </button>
                                                     <button class="btn btn-warning hidden" onclick="warnBeforeTurnCol(5)" id="btnRetryTurn" style="width:100%">Turn to Next Column</button>
                                                 </div>
@@ -766,9 +780,9 @@
                             <div id="dataDiv" data-dec-height=""></div>
                         </div>
                     </div>
-                    <div class="col-sm-12 col-md-3" style="padding-left:0px;">
-                        <div class="card-body" style="background: #f2f2f2; width:100%; height:100%;padding-right:20px; padding-left:0px;">
-                            <div class="container containerDtlHistory" style="min-height:100px;">
+                    <div class="col-sm-12 col-md-3 ps-0">
+                        <div class="card-body pb-4 w-100 ps-0" style="padding-right:20px;">
+                            <div class="container containerDtlHistory mt-2" style="min-height:100px;">
                                 <div class="row" style="margin-bottom: 10px;">
                                     <div class="col-sm-6" style="display: flex; flex-direction: column; justify-content: flex-end;">
                                         <div class="badge-container" style="height: 30px;">
@@ -794,7 +808,6 @@
             </div>
         </div>
     </div>
-
 </div>
 
 <div class="modal fade" id="warnTurnModal" role="dialog" data-bs-backdrop="static">
@@ -855,6 +868,24 @@
     </div>
 </div>
 
+<div class="modal fade" id="fullModal" role="dialog" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-body" style="padding: 50px;">
+                <div class="row">
+                    <div class="col-6">
+                        <img src="~/assets/img/emergency.gif" style="width:100%;" />
+                    </div>
+                    <div class="col-6">
+                        <p class="" style="font-size:32px;">Reel Height exceed the column limit. Please take out the Reel and Press on "End Task".</p>
+                        <button class="btn btn-success" style="width: 100%; height: 150px;" onclick="fullUsage()">End Task</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts
 {
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
@@ -865,10 +896,9 @@
     <script type="text/javascript">
 
         let taskLoad = false;
-        // let isUserStopped = false;
         let stopDecision = false;
         let stopTimer = null;
-        // let decisionInProgress = false;
+        let token = "@ViewBag.xToken";
 
         // -- get loader info --
         const scanLoaderEle = document.getElementById('txtScanLoader');
@@ -924,7 +954,6 @@
           }
         });
 
-
         $(document).ready(function () {
             resetColorPLCForm(1);
             newReel();
@@ -933,52 +962,7 @@
             $("#txtLoaderId").val('');
             $("#txtICol").val(1);
 
-            // $("#txtEstHeight").val(0);
-            // $("#txtActHeight").val(0);
-            // $("#txtReelCode").val('');
-
             scanLoaderEle.focus();
-
-            // var data=[{
-            //   type: "indicator",
-            //   mode: "gauge+number+delta",
-            //   value: 60,
-            //   title: {
-            //     text: 'Speed',
-            //     font: { size: 14 },
-            //     yanchor: 'bottom',
-            //     y: 10
-            //   },
-            //   delta: { increasing: { color: "white" } },
-            //   gauge: {
-            //     shape: 'angular',
-            //     axis: {
-            //       range: [0, 100],
-            //       visible: true,
-            //       tickwidth: 1,
-            //       tickcolor: "rgb(178, 178, 178)",
-            //       tickvals: [0, 100],
-            //       tickmode: 'array',
-            //       tickfont: {
-            //         size: '100px'
-            //       }
-            //     },
-            //     bar: { color: "rgb(237, 61, 61)", thickness: 1 },
-            //     bgcolor: "rgb(178, 178, 178)",
-            //     bordercolor: "rgb(178, 178, 178)",
-            //   }
-            // }];
-
-            // var layout = {
-            //   margin: {
-            //     l: 30,
-            //     r: 30,
-            //     b: 5,
-            //     t: 0,
-            //     pad: 0
-            //   }
-            // };
-
             initialGaugeSetup(
                 "svg-graph-meter-value",
                 "svg-gauge-percentage-2",
@@ -986,45 +970,36 @@
                 0,
                 setGaugePathValue
             );
-            // Plotly.newPlot('myDiv', data, layout);
         });
 
         function clearLoaderScanCode() {
-            scanLoaderEle.focus();
-            // $("#txtHLoader").val('');
-            // $("#txtHCol").val('');
-            // $("#txtHColBal").val('');
-
             const inputFields = ['#txtScanLoader', '#txtLoaderId', '#txtLoaderCode'];
             inputFields.forEach(i => $(i).val(''));
+
+            scanLoaderEle.focus();
         }
 
         function clearItemScanCode() {
-            scanItemEle.focus();
             const fields = ['#txtScanItem', '#txtReelCode', '#txtHReelID', '#txtHItem', '#txtHExtH', '#txtHActH'];
             fields.forEach(i => $(i).val(''));
+
+            scanItemEle.focus();
         }
 
         function restartStep() {
             resetColorPLCForm(1);
             newReel();
-            // $("#txtHLoader").val('');
-            // $("#txtHCol").val('');
-            // $("#txtHColBal").val('');
             $('#loadStatus1').text('');
             $("#txtScanLoader").val('');
             $("#txtICol").val(1);
-            document.getElementById("btnChangeReel").setAttribute("disabled", "true");
+            // document.getElementById("btnChangeReel").setAttribute("disabled", "true");
             document.getElementById("btnStop").setAttribute("disabled", "true");
             document.getElementById("btnEnd").setAttribute("disabled", "true");
             taskLoad = false;
-            scanLoaderEle.focus();
-            // $("#txtEstHeight").val(0);
-            // $("#txtActHeight").val(0);
 
             const fields = ['#txtLoaderId', '#txtLoaderCode', '#txtScanLoader', '#loaderName'];
             fields.forEach(i => $(i).val(''));
-            // $('#loaderName').text('');
+            scanLoaderEle.focus();
 
             initialGaugeSetup(
                 "svg-graph-meter-value",
@@ -1049,7 +1024,7 @@
                 $(`#c${i}`).css('width', '0%');
             }
         }
-
+        /*
         function restartItem() {
             var loaderId = $("#txtLoaderId").val();
             if (loaderId == "") {
@@ -1057,12 +1032,13 @@
                 return;
             }
 
-            document.getElementById("btnChangeReel").setAttribute("disabled", "true");
+            // document.getElementById("btnChangeReel").setAttribute("disabled", "true");
             resetColorPLCForm(3);
             document.getElementById("btnStop").setAttribute("disabled", "true");
             newReel();
-            scanLoaderEle.focus();
+            scanItemEle.focus();
         }
+        */
 
         function newReel() {
             $('#pt2').html("STEP 2 :: Waiting Scan Reel ... ");
@@ -1231,7 +1207,7 @@
             return new Promise(resolve => setTimeout(resolve, ms));
         }
 
-        function step1() {
+        async function step1() {
             var loaderId = $("#txtLoaderId").val();
             if (loaderId == "") {
                 $('#loadStatus1').text('');
@@ -1247,11 +1223,21 @@
                 return;
             }
 
-            if ($('#err1').text() == '')
-            {
-                startBatteryMonitoring(loaderId);
-                getLoaderColumn(loaderId);  //get loader column usage and show status 
-                retry2();
+            //check loader mode
+            var loaderMode = await loadPLCGetLoaderMode($("#txtLoaderId").val());
+            if (loaderMode == false) {
+                swal.fire({
+                    icon: 'error',
+                    title: "Wait",
+                    text: "Loader is not in Auto Mode.",
+                });
+            } else {
+                if ($('#err1').text() == '')
+                {
+                    startBatteryMonitoring(loaderId);
+                    getLoaderColumn(loaderId);  //get loader column usage and show status
+                    retry2();
+                }
             }
         }
 
@@ -1274,8 +1260,9 @@
 
         function step2() {
             resetColorPLCForm(3);
-            document.getElementById("btnStop").setAttribute("disabled", "true");
+            scanItemEle.focus();
 
+            // document.getElementById("btnStop").setAttribute("disabled", "true");
             // $('#itemStatus').text('');
             // $('#reelIdentity').text('');
             // $('#reelHeight').text('');
@@ -1301,30 +1288,45 @@
             loadPLC(3);
         }
 
-        function step3() {
+        async function step3() {
+
             if ($('#txtScanItem').val() != $('#txtReelCode').val()) {
                 $('#itemStatus, #reelHeight, #reelIdentity').text('');
                 $('#errItem3').text('Please rescan the Reel');
                 $('#btnNext3').addClass("hidden");
                 return;
             }
-            resetColorPLCForm(4);
-            loadPLC(4);
-            document.getElementById("btnChangeReel").removeAttribute("disabled");
+            
+            //ensure the col is enough space
+            var chkHeight = await loadPLCCheckEstHeight($('#txtLoaderId').val(), $('#txtReelCode').val(), $('#txtICol').val(), 3);
+            if (chkHeight == false) {
+                swal.fire({
+                    icon: 'error',
+                    title: "Wait",
+                    text: "Reel height exceeds the column balance height. ",
+                });
+            } 
+            else {
+                resetColorPLCForm(4);
+                document.getElementById("btnStop").setAttribute("disabled", "true");
+                document.getElementById("btnEnd").setAttribute("disabled", "true");
+                loadPLC(4);
+                // document.getElementById("btnChangeReel").removeAttribute("disabled");
+            }
         }
 
         async function step5() {
             if ($('#warnTurnModal').hasClass("show")) {
                 $('#warnTurnModal').modal("toggle");
             }
+
+            $('#loadingBlk').removeClass('d-none');
             //end column before turn
             $('#btnRetryTurn').addClass('hidden');
             $('#exclamIcon').addClass('hidden');
             $('#errActHeight').text('');
 
             var iCol = $("#txtICol").val();
-            console.log("here icol", iCol);
-
             var colstate = await loadPLCSetColumnState($("#txtLoaderId").val(), iCol-1);
             if (colstate == true) {
                 var chkColTurn = await loadPLCCheckColTurn($("#txtLoaderId").val());
@@ -1341,21 +1343,31 @@
             }
         }
 
+        function retry5(action) {
+            if (action == 1) {
+                loadPLC(5);
+            }
+            else {
+                resetColorPLCForm(4);
+                loadPLC(4);
+            }
+        }
+
         function warnBeforeTurnCol(action) {
             let warnText = document.getElementById('warnText');
             let turnBtn = document.getElementById('turnBtn');
-            var iCol = $("#txtICol").val();
-            console.log('colno here', iCol)
-            console.log("action no", action);
+            // var iCol = $("#txtICol").val();
+            turnBtn.disabled = false;
 
             if (action == 2) {
-                warnText.textContent = "Please make sure hands off and tap Start Turn Column button.";
+                warnText.textContent = "Please make sure hands off and tap 'Start Turn Column' button.";
                 turnBtn.onclick = async function() {
+                    // turnBtn.disabled = true;
+                    if ($('#warnTurnModal').hasClass("show")) {
+                        $('#warnTurnModal').modal("toggle");
+                    }
                     var chkColTurn = await loadPLCCheckColTurn($("#txtLoaderId").val());
                     if (chkColTurn == false) {
-                        if ($('#warnTurnModal').hasClass("show")) {
-                            $('#warnTurnModal').modal("toggle");
-                        }
                         $('#colStatus2').text('');
                         $('#errCol2').text('Failed to Turn Column').css('color', 'red');
                         $('#btnRetry2').removeClass('hidden');
@@ -1370,6 +1382,7 @@
                 $('#btnRetryTurn').addClass('hidden');
                 warnText.textContent = "Please take out the Reel and only tap Start Turn Column button.";
                 turnBtn.onclick = function() {
+                    turnBtn.disabled = true;
                     step5();
                 };
                 $('#turnImg').attr('src', '/assets/img/take-out-reel.gif');
@@ -1463,15 +1476,19 @@
                         $('#errActHeight').text("Column turned successfully. Please try again on reel height measurement.").css('color', 'green');
                         $('#loadCol4').text(iCol);
                         $('#btnRetry4').removeClass("hidden");
+                        
+                        document.getElementById('btnRetry4').onclick = function() {
+                            retry5(0);
+                        };
                         //back to pre-load stage
                         // resetColorPLCForm(4);
                     }
                 }
+                $('#loadingBlk').addClass('d-none');
             }
         }
 
         async function loadPLC(idx) {
-
             var loaderId = $("#txtLoaderId").val();
 
             // step 1 : check loader
@@ -1482,7 +1499,6 @@
                     return;
                 }
 
-                // await delay(3000);
                 var chkLoader = await loadPLCCheckLoader(loaderId);
                 console.log('R1::' + chkLoader);
                 return;
@@ -1492,7 +1508,6 @@
             var iCol = $("#txtICol").val();
 
             if (idx == 2) {
-                // resetColorPLCForm(2);
                 $('#startStatus').css('color', 'black');
                 $('#colStatus2').text('Checking on Column ' + iCol);
 
@@ -1503,19 +1518,18 @@
                 let chkCol = false;
 
                 while (chkCol === false && iCol <= maxAttempts) {
-                    chkCol = await loadPLCCheckEstHeight(loaderId, reelCode, iCol);
+                    chkCol = await loadPLCCheckEstHeight(loaderId, reelCode, iCol, idx);
                     console.log(`R3.${attempt}::` + chkCol);
 
                     if (chkCol == false) {
                         iCol = Number(iCol) + 1;
-                        // $('#pCol3').html("Checking Auto Loader Column: " + iCol);
                         if (iCol < 5) $('#colStatus2').text('Checking on Column ' + iCol);
                         await delay(1000);
                     }
                     attempt;
                 }
 
-                console.log('R3.10::' + iCol);
+                // console.log('R3.10::' + iCol);
 
                 if (chkCol == false) {
                     if (iCol < 5) $('#btnRetry2').removeClass('hidden');
@@ -1524,7 +1538,6 @@
                     $("#txtHCol").val(iCol);
 
                     // check is column correct, else need call turn
-                    // await delay(3000);
                     var realCol = await loadPLCGetCurrentColumn(loaderId);
 
                     if (realCol == 0) {
@@ -1536,11 +1549,19 @@
                         }
                     }
                     else {
-                        console.log("realCol ", realCol, " and iCol ", iCol);
                         if (realCol < iCol) {
-                            var colstate = await loadPLCSetColumnState(loaderId, realCol);
-                            console.log("colstate", colstate);
-                            if (colstate == true) {
+                            //set full for those unavailable column
+                            var currentCol = realCol;
+                            var setState = false;
+                            while (currentCol < iCol) {
+                                var colstate = await loadPLCSetColumnState(loaderId, currentCol);
+                                if (colstate == true) {
+                                    setState = true;
+                                    currentCol++;
+                                }
+                            }
+
+                            if (setState) {
                                 warnBeforeTurnCol(2);
                             }
                         }
@@ -1636,9 +1657,9 @@
                     });
                     return;
                 }
-                
                 $('#loadCol4').text('');
                 $('#heightStatus4').text('');
+                $('#loadingBlk').addClass('d-none');
                 resetColorPLCForm(5);
                 if ($('#putModal').hasClass('show')) {
                     $('#putModal').modal('toggle');
@@ -1671,7 +1692,7 @@
                 $('#exclamIcon').removeClass("bi-info-circle-fill");
                 $('#exclamIcon').css('color', 'red');
                 $('#exclamIcon').addClass("bi-exclamation-triangle-fill");
-                document.getElementById("btnChangeReel").setAttribute("disabled", "true");
+                // document.getElementById("btnChangeReel").setAttribute("disabled", "true");
 
                 resetColorPLCForm(6);
                 var chkLast = await loadPLCUpdateDB(loaderId, reelCode, iCol);
@@ -1705,7 +1726,7 @@
         }
 
         function continueNextStep2(process) {
-            document.getElementById("btnChangeReel").setAttribute("disabled", "true");
+            // document.getElementById("btnChangeReel").setAttribute("disabled", "true");
             document.getElementById("btnStop").setAttribute("disabled", "true");
             document.getElementById("btnEnd").setAttribute("disabled", "true");
             resetColorPLCForm(2);
@@ -1721,8 +1742,10 @@
             await $.ajax({
                 url: "/api/PLCLoader/GetLoaderId/" + loaderId,
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
 
@@ -1755,11 +1778,11 @@
             await $.ajax({
                 url: "/api/PLCLoader/VerifyItem/" + reelCode,
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 contentType: 'application/json; charset=utf-8',
-                beforeSend: function () {
-
-                },
                 success: function (result) {
                     console.log('2::' + JSON.stringify(result));
                     if (result.success == true) {
@@ -1788,32 +1811,35 @@
             return fResult;
         }
 
-        async function loadPLCCheckEstHeight(loaderId, reelCode, iCol) {
+        async function loadPLCCheckEstHeight(loaderId, reelCode, iCol, stepid) {
             // step 3 : check column height balance and change column
             var thickness = $("#txtEstHeight").val();
             var fResult = false;
 
-            await $.ajax({
-                url: "/api/PLCLoader/CheckColumnHeight/" + loaderId + "/" + iCol + "/" + thickness,
-                type: "GET",
-                dataType: 'JSON',
-                contentType: 'application/json; charset=utf-8',
-                beforeSend: function () {
+            try {
+                const result = await $.ajax({
+                    url: "/api/PLCLoader/CheckColumnHeight/" + loaderId + "/" + iCol + "/" + thickness,
+                    type: "GET",
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    },
+                    dataType: 'JSON',
+                    contentType: 'application/json; charset=utf-8'
+                });
 
-                },
-                success: function (result) {
-                    console.log('3::' + JSON.stringify(result));
-                    if (result.success == true) {
+                console.log('3::' + JSON.stringify(result));
+                if (result.success == true) {
+                    if (stepid == 2) {
                         $('#errCol2').text('');
                         $('#colStatus2').text(iCol);
                         $('#txtHColBal').val(result.data);
-                        fResult = true;
                     }
-                    else {
-                        if (iCol < 4) {
-                            // $('#errCol2').text(result.errMessage);
-                        }
-                        else {
+                    fResult = true;
+                } else {
+                    if (stepid == 2) {
+                        // $('#errCol2').text(result.errMessage);
+                        if (iCol >= 4) {
+                            var realCol = await loadPLCGetCurrentColumn(loaderId);
                             let countdown = 5;
                             // $('#btnRetry2').addClass('hidden');
                             $('#colStatus2').text('');
@@ -1824,28 +1850,37 @@
 
                                 if (countdown <= 0) {
                                     clearInterval(timer);
-                                    //set full for column4, auto loader will auto perform perfect end task
-                                    var endstate = await loadPLCSetColumnState(loaderId, 4);
-                                    console.log('end state', endstate);
-                                    if (endstate == false)  {
-                                        $('#errCol2').text('Failed to end the task. Check the connection and try again.');
-                                    } else {
+                                    var success = false;
+
+                                    while (Number(realCol) <= 4) {
+                                        //set full for all unavailable col, auto loader will perform perfect end task
+                                        var endstate = await loadPLCSetColumnState(loaderId, realCol);
+                                        success = true;
+                                        realCol++;
+                                        console.log('end state', endstate);
+                                        if (endstate == false)  {
+                                            $('#errCol2').text('Failed to end the task. Check the connection and try again.');
+                                            success = false;
+                                            break;
+                                        }
+                                    }
+
+                                    if (success) {
                                         restartStep();
                                     }
                                 }
                             }, 1000);
                         }
                     }
-                },
-                error: function (error) {
-                    if (iCol < 4) {
-                        $('#errCol2').text(error.val);
-                    }
-                    else {
-                        $('#errCol2').text('All column is full. Please change loader.');
-                    }
                 }
-            });
+            } catch (error) {
+                if (iCol < 4) {
+                    $('#errCol2').text(error.val);
+                }
+                else {
+                    $('#errCol2').text('All column is full. Please change loader.');
+                }
+            }
 
             // console.log('3::' + fResult);
             return fResult;
@@ -1857,6 +1892,9 @@
             await $.ajax({
                 url: "/api/PLCLoader/GetCurrentColumn/" + loaderId,
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
@@ -1890,6 +1928,9 @@
             await $.ajax({
                 url: "/api/PLCLoader/TurnColumn/" + loaderId + "/" + iCol,
                 type: "POST",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
@@ -1919,6 +1960,9 @@
             await $.ajax({
                 url: "/api/PLCLoader/GetForkReady/" + loaderId + "/" + iCol,
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
@@ -1949,6 +1993,9 @@
             await $.ajax({
                 url: "/api/PLCLoader/GetReelActualHeight/" + loaderId + "/" + iCol,
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
@@ -1987,18 +2034,22 @@
                                 $('#loadCol4').text(iCol);
                                 $('#heightStatus4').text(result.data[1]);
                                 // $('#errCol4').text(result.errMessage);
-                                $('#errActHeight').text(result.errMessage);
+                                $('#errActHeight').text(result.errMessage).css('color', 'red');
 
                                 $("#txtICol").val(Number(iCol) + 1);
                                 $('#txtHCol').val(Number(iCol) + 1);
                                 // $("#warnTurnModal").modal("toggle");
                                 $('#btnRetryTurn').removeClass('hidden');
                                 $('#exclamIcon').removeClass('hidden');
+                                $('#exclamIcon').removeClass("bi-info-circle-fill");
+                                $('#exclamIcon').addClass("bi-exclamation-triangle-fill").css('color', 'red');
                             }
                             else {
                                 $('#loadCol4').text(iCol);
-                                $('#errCol4').text('All column is full, please change auto loader.');
                                 $('#heightStatus4').text(result.data[1]);
+                                $('#fullModal').modal("show");
+                                // $('#errCol4').text('All column is full, please take out the reel and change auto loader.');
+
                             }
                         }
                     }
@@ -2016,12 +2067,17 @@
         async function loadPLCUpdateDB(loaderId, reelCode, iCol) {
             var actHeight = $("#txtActHeight").val();
             const dataAttr = document.getElementById("dataDiv");
+
+            console.log("data attr", dataAttr);
             // step 5 : Save data
             try {
                 const rlt = await new Promise((resolve, reject) => {
                     $.ajax({
                         url: "/api/PLCLoader/UpdateReelIntoLoader/" + loaderId + "/" + iCol + "/" + reelCode + "/" + actHeight + "/" + dataAttr.dataset.decHeight,
                         type: "GET",
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        },
                         dataType: 'JSON',
                         contentType: 'application/json; charset=utf-8',
                         beforeSend: function () {
@@ -2061,6 +2117,9 @@
                     $.ajax({
                         url: "/api/PLCLoader/StartLoad/" + loaderId,
                         type: "POST",
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        },
                         dataType: 'JSON',
                         contentType: 'application/json; charset=utf-8',
                         success: function (result) {
@@ -2097,6 +2156,9 @@
                     $.ajax({
                         url: "/api/PLCLoader/StartReelLoadIn/" + loaderId,
                         type: "POST",
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        },
                         dataType: 'JSON',
                         contentType: 'application/json; charset=utf-8',
                         success: function (result) {
@@ -2137,12 +2199,16 @@
                     $.ajax({
                         url: "/api/PLCLoader/GetReadyToTurn/" + loaderId,
                         type: "GET",
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        },
                         dataType: 'JSON',
                         contentType: 'application/json; charset=utf-8',
                         success: function (result) {
                             if (result.success == true) {
                                 resolve(true);
-                            } else {
+                            } 
+                            else {
                                 if ($('#warnTurnModal').hasClass("show")) {
                                     $('#warnTurnModal').modal('toggle');
                                 }
@@ -2166,6 +2232,9 @@
                     $.ajax({
                         url: "/api/PLCLoader/SetColumnState/" + loaderId + "/" + colNo,
                         type: "POST",
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        },
                         dataType: 'JSON',
                         contentType: 'application/json; charset=utf-8',
                         success: function (result) {
@@ -2271,20 +2340,34 @@
                     stopDecision(true);
                 }
                 console.log('User confirmed stop.');
-                var chkEnd = await loadPLCEndTask(loaderId, action);
-                if (chkEnd == true) {
-                    if (action == 2) {
-                        restartStep();
-                    } else {
-                        $('#holdStopModal').modal('show');
+                var currentCol = $("#txtICol").val();
+                console.log(currentCol);
+
+                if (action == 2) { //set full, loader will auto end task
+                    while (currentCol <= 4) {
+                        var chkFull = await loadPLCSetColumnState(loaderId, currentCol);
+                        currentCol++;
                     }
-                } else {
-                    swal.fire({
-                        icon: 'error',
-                        title: "Wait",
-                        text: "Failed to End Task. Please try again.",
-                    });
+                    restartStep();
                 }
+                else 
+                {
+                    var chkEnd = await loadPLCEndTask(loaderId, action);
+                    if (chkEnd == true) {
+                        // if (action == 2) {
+                        //     restartStep();
+                        // } else {
+                        $('#holdStopModal').modal('show');
+                        // }
+                    } else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: "Failed to End Task. Please try again.",
+                        });
+                    }
+                }
+
             } else {
                 console.log('User cancelled stop');
                 if (stopDecision) {
@@ -2299,6 +2382,9 @@
                     $.ajax({
                         url: "/api/PLCLoader/EndTask/" + loaderId,
                         type: "POST",
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        },
                         dataType: 'JSON',
                         data: JSON.stringify(action),
                         contentType: 'application/json; charset=utf-8',
@@ -2323,6 +2409,33 @@
             }
         }
 
+        async function loadPLCGetLoaderMode(loaderId) {
+
+            var fResult = false;
+            await $.ajax({
+                url: "/api/PLCLoader/GetLoaderMode/" + loaderId,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    if (result.success == true && result.data == 1) {
+                        fResult = true;
+                    } 
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: "Loader is not in Auto Mode.",
+                    });
+                }
+            });
+            return fResult;
+        }
+        
         function initialGaugeSetup(
             gaugeElementId,
             percentId,
@@ -2388,6 +2501,9 @@
             $.ajax({
                 url: "/api/PLCLoader/GetBatteryStatus/" + loaderId,
                 type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
                 contentType: 'application/json; charset=utf-8',
                 success: function (result) {
@@ -2400,11 +2516,11 @@
                     else 
                     {
                         //failed to get loader battery
-                        $('#batteryErr').text('Battery Status Unavailable').css('');
+                        $('#batteryErr').text('Battery Status Unavailable');
                     }
                 },
                 error: function (error) {
-                    
+                    $('#batteryErr').text('Battery Status Unavailable');
                 }
             });
         }
@@ -2431,6 +2547,9 @@
             $.ajax({
                 url: "/loader/GetLoaderColumn/",
                 type: "POST",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 data: JSON.stringify(loaderId),
                 dataType: 'JSON',
                 contentType: 'application/json; charset=utf-8',
@@ -2446,7 +2565,6 @@
                         $(`#colHeight-c${colNo}`).text(`${colHeight}`);
                         $(`#c${colNo}`).css('width', `${usagePercentage}%`);
                     });
-                    
                 },
                 error: function (error) {
 
@@ -2458,44 +2576,56 @@
             $('#holdStopModal').modal("toggle");
             continueNextStep2('start');
         }
+
+        async function fullUsage() {
+            $('#fullModal').modal("toggle");
+            var colstate = await loadPLCSetColumnState($("#txtLoaderId").val(), 4);
+            if (colstate == false) {
+                swal.fire({
+                    icon: 'error',
+                    title: "Wait",
+                    text: "Failed to end task. Please try again.",
+                });
+                $('#fullModal').modal("show");
+            }
+            restartStep();
+        }
         
         //prevent user close/refresh page
-        window.addEventListener("beforeunload", function (e) {
-            e.preventDefault();
-            e.returnValue = "";
-            const loader = document.getElementById("txtLoaderId").value;
-            localStorage.setItem("loaderId", loader);
-        });
+        // window.addEventListener("beforeunload", function (e) {
+        //     e.preventDefault();
+        //     e.returnValue = "";
+        //     const loader = document.getElementById("txtLoaderId").value;
+        //     localStorage.setItem("loaderId", loader);
+        // });
 
-        window.addEventListener("unload", function() {
-            if (taskLoad) { //is task is loading state, send end task for loader
-                const loader = localStorage.getItem("loaderId");
-                const data = JSON.stringify(2);
-                const blob = new Blob([data], { type: "application/json" });
-                const sent = navigator.sendBeacon(`/api/PLCLoader/EndTask/${loader}`, blob);
-                localStorage.removeItem("loaderId");
-            }
-        });
+        // window.addEventListener("unload", function() {
+        //     if (taskLoad) { //is task is loading state, send end task for loader
+        //         const loader = localStorage.getItem("loaderId");
+        //         const data = JSON.stringify(2);
+        //         const blob = new Blob([data], { type: "application/json" });
+        //         const sent = navigator.sendBeacon(`/api/PLCLoader/EndTask/${loader}`, blob);
+        //         localStorage.removeItem("loaderId");
+        //     }
+        // });
 
-        async function waitForDecision() {
-            return new Promise((resolve) => {
-                stopDecision = (value) => resolve(value);
+        // async function waitForDecision() {
+        //     return new Promise((resolve) => {
+        //        stopDecision = (value) => resolve(value);
 
-                let countdown = 3;
-
-                function tick() {
-                  if (countdown > 0) {
-                    $('#pTextLast').text(`Continue to Next Reel..${countdown}...`);
-                    countdown--;
-                    stopTimer = setTimeout(tick, 1000);
-                  } else {
-                    resolve(false);
-                  }
-                }
-
-                tick();
-              });
-        }
+        //        let countdown = 3;
+        //        function tick() {
+        //           if (countdown > 0) {
+        //              $('#pTextLast').text(`Continue to Next Reel..${countdown}...`);
+        //              countdown--;
+        //              stopTimer = setTimeout(tick, 1000);
+        //           } else {
+        //              resolve(false);
+        //           }
+        //        }
+        //        tick();
+        //     });
+        // }
     </script>
 }
 

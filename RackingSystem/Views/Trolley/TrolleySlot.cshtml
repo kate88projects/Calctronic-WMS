@@ -3,31 +3,6 @@
 }
 
 <style>
-    .table-title {
-        color: #fff;
-        background: #4b5366;
-        border-radius: 3px 3px 0 0;
-    }
-
-    .table-title h2 {
-        margin: 5px 0 0;
-        font-size: 24px;
-    }
-
-    .error-message {
-        color: red;
-        font-size: 0.875rem; 
-        margin-top: 5px;
-    }
-
-    .is-invalid {
-        border-color: red;
-    }
-
-    .is-valid {
-        border-color: green;
-    }
-
     .text-link {
         color: blue;
         cursor: pointer;
@@ -62,18 +37,63 @@
     .bi-upload {
         padding-left: 10px;
     }
+
+    .edit-slot-btn, .delete-slot-btn {
+        height: 33px;
+        padding: 5px 10px;
+        font-size: 14px;
+    }
+
 </style>
 
-<br />
+@section PageHeader {
+    <header class="d-flex align-items-center justify-content-between w-100">
+        <h2 class="pageTitle">Universal Trolley Slot List</h2>
+        <div class="d-flex gap-2">
+            <div class="btn-group">
+                <button type="button" class="btn btn-warning">Import</button>
+                <button type="button" class="btn btn-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="true">
+                    <span class="visually-hidden">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(114.5px, 40px, 0px);">
+                    <li><a class="dropdown-item" href="#" id="dTemp" onclick="downloadTemp('slots')">Download Trolley Slot List Template</a></li>
+                    <li><a class="dropdown-item" href="#" id="dTemp" onclick="downloadTemp('pulses')">Download Update Trolley Pulses Template</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="triggerFileInput('importSlot')">Import Slot from Excel</a></li>
+                </ul>
+                <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleFileUpload(event)">
+            </div>
+            <button type="button" class="btn btn-primary" onclick="triggerFileInput('updatePulses')">
+                Update Pulses By Excel
+            </button>@*
+             <button type="button" class="btn btn-success" onclick="newSlotColForm()">
+                Add New Trolley Slot Column
+            </button>
+            <button type="button" class="btn btn-success" onclick="newSlotForm()">
+                Add New Trolley Slot
+            </button> *@
+            <div class="btn-group">
+                <button type="button" class="btn btn-success">Add</button>
+                <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="visually-hidden">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" onclick="newSlotForm()">Add Single Trolley Slot</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="newSlotColForm()">Add Range of Trolley Slots</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+}
 
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <div class="card card-outline ">
+            <div class="card">
+                @*
                 <div class="card-header table-title">
-                    <div class="card-title">
+                     <div class="card-title">
                         <h2>Universal Trolley Slot List <b></b></h2>
-                    </div>
+                    </div> 
                     <div class="card-tools">
                         <div class="btn-group">
                             <button type="button" class="btn btn-warning">Import</button>
@@ -97,9 +117,10 @@
                             Add New Trolley Slot
                         </button>
                     </div>
-                </div>
-                <div class="card-body">
-                    <div class="table table-striped table-bordered table-responsive text-nowrap">
+                </div>*@
+                <div class="card-body pt-0">
+                    <div id="gridTable" class="table table-responsive text-nowrap mt-3"></div>
+                    @* <div class="table table-striped table-bordered table-responsive text-nowrap"> 
                         <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
                             <thead>
                                 <tr>
@@ -107,7 +128,7 @@
                                     <th>Universal Trolley Slot Code</th>
                                     <th>Column No</th>
                                     <th>Row No</th>
-                                    @* <th>Reel No</th> *@
+                                    @* <th>Reel No</th> 
                                     <th>Is Active</th>
                                     <th>Is Left</th>
                                     <th>X Pulse</th>
@@ -118,7 +139,7 @@
                                 </tr>
                             </thead>
                         </table>
-                    </div>
+                    </div> *@
                 </div>
             </div>
         </div>
@@ -146,7 +167,7 @@
   </div>
 </div>
 
-<div class="modal fade" id="myModal" role="dialog">
+<div class="modal fade" data-bs-backdrop="static" id="myModal" role="dialog">
     <div class="modal-dialog">
 
         <!-- Modal content-->
@@ -156,51 +177,56 @@
             </div>
             @* <form action="/Slot/SaveSlot" method="post"> *@
                 <div class="modal-body">
-                    <div class="mb-3">
-                    <label class="form-label" for="ddTrolley">Universal Trolley</label>
-                        <select class="form-select" aria-label="Default select example" name="Trolley" id="ddTrolley">
-                            @* <option selected>Please choose trolley</option> *@
-                        </select>
-                        <div id="ddTrolleyError" class="error-message"></div>
-                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label class="form-label" for="ddTrolley">Universal Trolley</label>
+                                <select class="form-select" aria-label="Default select example" name="Trolley" id="ddTrolley" oninput="removeErrMsg(this.id)"></select>
+                                <div id="ddTrolleyError" class="error-message"></div>
+                            </div>
+                            <div class="col">
+                                <label class="form-label" for="txtPriority">Priority Level</label>
+                                <input type="number" class="form-control" name="Priority" id="txtPriority" aria-describedby="Priority Level" min="0">
+                                <div id="txtPriorityError" class="error-message"></div>
+                            </div>
+                        </div>
                     <div class="mb-3">
                     <label class="form-label" for="txtCode">Universal Trolley Slot Code</label>
-                        <input type="text" class="form-control" name="SlotCode" id="txtCode" aria-describedby="Slot Code">
+                        <input type="text" class="form-control" name="SlotCode" id="txtCode" aria-describedby="Slot Code" oninput="removeErrMsg(this.id)">
                         <div id="txtCodeError" class="error-message"></div>
                     </div>
                     <div class="row mb-3">
                         <div class="col">
                             <label class="form-label" for="txtColNo">Column No</label>
-                            <input type="text" class="form-control" name="ColNo" id="txtColNo" aria-describedby="Column No">
+                            <input type="number" class="form-control" name="ColNo" id="txtColNo" aria-describedby="Column No" min="1" pattern="\d*" oninput="removeErrMsg(this.id)">
                             <div id="txtColNoError" class="error-message"></div>
                         </div>
                         <div class="col">
                             <label class="form-label" for="txtRowNo">Row No</label>
-                            <input type="text" class="form-control" name="RowNo" id="txtRowNo" aria-describedby="Row No">
+                            <input type="number" class="form-control" name="RowNo" id="txtRowNo" aria-describedby="Row No" min="1" oninput="removeErrMsg(this.id)">
                             <div id="txtRowNoError" class="error-message"></div>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col">
                             <label class="form-label" for="txtXPulse">X Pulse</label>
-                            <input type="number" class="form-control" name="XPulse" id="txtXPulse" aria-describedby="X Pulse" min="1">
+                            <input type="number" class="form-control" name="XPulse" id="txtXPulse" aria-describedby="X Pulse" min="0" oninput="removeErrMsg(this.id)">
                             <div id="txtXPulseError" class="error-message"></div>
                         </div>
                         <div class="col">
                             <label class="form-label" for="txtYPulse">Z Pulse</label>
-                            <input type="number" class="form-control" name="YPulse" id="txtYPulse" aria-describedby="Z Pulse" min="1">
+                            <input type="number" class="form-control" name="YPulse" id="txtYPulse" aria-describedby="Z Pulse" min="0" oninput="removeErrMsg(this.id)">
                             <div id="txtYPulseError" class="error-message"></div>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col">
                             <label class="form-label" for="txtQrXPulse">QR-X Pulse</label>
-                            <input type="number" class="form-control" name="QrXPulse" id="txtQrXPulse" aria-describedby="Qr-X Pulse" min="1">
+                            <input type="number" class="form-control" name="QrXPulse" id="txtQrXPulse" aria-describedby="Qr-X Pulse" min="0" oninput="removeErrMsg(this.id)">
                             <div id="txtQrXPulseError" class="error-message"></div>
                         </div>
                         <div class="col">
                             <label class="form-label" for="txtQrYPulse">QR-Z Pulse</label>
-                            <input type="number" class="form-control" name="QrYPulse" id="txtQrYPulse" aria-describedby="Qr-Z Pulse" min="1">
+                            <input type="number" class="form-control" name="QrYPulse" id="txtQrYPulse" aria-describedby="Qr-Z Pulse" min="0" oninput="removeErrMsg(this.id)">
                             <div id="txtQrYPulseError" class="error-message"></div>
                         </div>
                     </div>
@@ -209,36 +235,36 @@
                         <div class="row mb-3">
                             <div class="col">
                                 <label class="form-label" for="txtAddPulse1">Additional Pulse 1</label>
-                                <input type="number" class="form-control" name="AddPulse1" id="txtAddPulse1" aria-describedby="Additional Pulse 1" min="1" pattern="\d*">
+                                <input type="number" class="form-control" name="AddPulse1" id="txtAddPulse1" aria-describedby="Additional Pulse 1" min="0" oninput="removeErrMsg(this.id)">
                                 <div id="txtAddPulse1Error" class="error-message"></div>
                             </div>
                             <div class="col">
                                 <label class="form-label" for="txtAddPulse2">Additional Pulse 2</label>
-                                <input type="number" class="form-control" name="AddPulse2" id="txtAddPulse2" aria-describedby="Additional Pulse 2" min="1">
+                                <input type="number" class="form-control" name="AddPulse2" id="txtAddPulse2" aria-describedby="Additional Pulse 2" min="0" oninput="removeErrMsg(this.id)">
                                 <div id="txtAddPulse2Error" class="error-message"></div>
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col">
                                 <label class="form-label" for="txtAddPulse3">Additional Pulse 3</label>
-                                <input type="number" class="form-control" name="AddPulse3" id="txtAddPulse3" aria-describedby="Additional Pulse 3" min="1">
+                                <input type="number" class="form-control" name="AddPulse3" id="txtAddPulse3" aria-describedby="Additional Pulse 3" min="0" onnput="removeErrMsg(this.id)">
                                 <div id="txtAddPulse3Error" class="error-message"></div>
                             </div>
                             <div class="col">
                                 <label class="form-label" for="txtAddPulse4">Additional Pulse 4</label>
-                                <input type="number" class="form-control" name="AddPulse4" id="txtAddPulse4" aria-describedby="Additional Pulse 4" min="1">
+                                <input type="number" class="form-control" name="AddPulse4" id="txtAddPulse4" aria-describedby="Additional Pulse 4" min="0" oninput="removeErrMsg(this.id)">
                                 <div id="txtAddPulse4Error" class="error-message"></div>
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col">
                                 <label class="form-label" for="txtAddPulse5">Additional Pulse 5</label>
-                                <input type="number" class="form-control" name="AddPulse5" id="txtAddPulse5" aria-describedby="Additional Pulse 5" min="1">
+                                <input type="number" class="form-control" name="AddPulse5" id="txtAddPulse5" aria-describedby="Additional Pulse 5" min="0" oninput="removeErrMsg(this.id)">
                                 <div id="txtAddPulse5Error" class="error-message"></div>
                             </div>
                             <div class="col">
                                 <label class="form-label" for="txtAddPulse6">Additional Pulse 6</label>
-                                <input type="number" class="form-control" name="AddPulse6" id="txtAddPulse6" aria-describedby="Additional Pulse 6"" min="1">
+                                <input type="number" class="form-control" name="AddPulse6" id="txtAddPulse6" aria-describedby="Additional Pulse 6"" min="0" oninput="removeErrMsg(this.id)">
                                 <div id="txtAddPulse6Error" class="error-message"></div>
                             </div>
                         </div>
@@ -267,7 +293,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="colModal" role="dialog">
+<div class="modal fade" data-bs-backdrop="static" id="colModal" role="dialog">
     <div class="modal-dialog modal-lg">
 
         <div class="modal-content">
@@ -278,36 +304,35 @@
                 <div class="row mb-3">
                     <div class="col">
                         <label class="form-label" for="ddTrolley1">Universal Trolley</label>
-                        <select class="form-select" aria-label="Default select example" name="Trolley" id="ddTrolley1"></select>
+                        <select class="form-select" aria-label="Default select example" name="Trolley" id="ddTrolley1" oninput="removeErrMsg(this.id)"></select>
                         <div id="ddTrolley1Error" class="error-message"></div>
                     </div>
                     <div class="col">
                         <label class="form-label" for="txtCodeFormat">Universal Trolley Slot Code Format</label>
-                        <input type="text" class="form-control" name="SlotCodeFormat" id="txtCodeFormat" aria-describedby="Slot Code Format">
+                        <input type="text" class="form-control" name="SlotCodeFormat" id="txtCodeFormat" aria-describedby="Slot Code Format" oninput="removeErrMsg(this.id)">
                         <div id="txtCodeFormatError" class="error-message"></div>
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col">
                         <label class="form-label" for="txtColFrom">Column No From</label>
-                        <input type="number" class="form-control" name="ColNo" id="txtColFrom" aria-describedby="Slot Code">
+                        <input type="number" class="form-control" name="ColNo" id="txtColFrom" aria-describedby="Slot Code" oninput="removeErrMsg(this.id)">
                         <div id="txtColFromError" class="error-message"></div>
-                        @* <span asp-validation-for="SlotCode" class="text-danger"></span> *@
                     </div>
                     <div class="col">
                         <label class="form-label" for="txtTotalCol">Total Column</label>
-                        <input type="number" class="form-control" name="TotalCol" id="txtTotalCol" aria-describedby="Total Col">
+                        <input type="number" class="form-control" name="TotalCol" id="txtTotalCol" aria-describedby="Total Col" oninput="removeErrMsg(this.id)">
                         <div id="txtTotalColError" class="error-message"></div>
                     </div>
                     <div class="col">
                         <label class="form-label" for="txtRowFrom">Row No From</label>
-                        <input type="number" class="form-control" name="RowNo" id="txtRowFrom" aria-describedby="Row No">
+                        <input type="number" class="form-control" name="RowNo" id="txtRowFrom" aria-describedby="Row No" min="1" oninput="removeErrMsg(this.id)">
                         <div id="txtRowFromError" class="error-message"></div>
 
                     </div>
                     <div class="col">
                         <label class="form-label" for="txtTotalRow">Total Row</label>
-                        <input type="number" class="form-control" name="TotalRow" id="txtTotalRow" aria-describedby="Total Row">
+                        <input type="number" class="form-control" name="TotalRow" id="txtTotalRow" aria-describedby="Total Row" min="1" oninput="removeErrMsg(this.id)">
                         <div id="txtTotalRowError" class="error-message"></div>
                     </div>
                 </div>
@@ -315,12 +340,12 @@
                 <div class="row mb-3">
                     <div class="col">
                         <label class="form-label" for="txtStartXPulse">X Pulse</label>
-                        <input type="number" class="form-control" name="XPulse" id="txtStartXPulse" aria-describedby="X Pulse">
+                        <input type="number" class="form-control" name="XPulse" id="txtStartXPulse" aria-describedby="X Pulse" oninput="removeErrMsg(this.id)">
                         <div id="txtStartXPulseError" class="error-message"></div>
                     </div>
                     <div class="col">
                         <label class="form-label" for="txtXPulseIncrement">X Pulse Increment</label>
-                        <input type="number" class="form-control" name="XPulseIncrement" id="txtXPulseIncrement" aria-describedby="X Pulse Increment">
+                        <input type="number" class="form-control" name="XPulseIncrement" id="txtXPulseIncrement" aria-describedby="X Pulse Increment" oninput="removeErrMsg(this.id)">
                         <div id="txtXPulseIncrementError" class="error-message"></div>
                     </div>
                 </div>
@@ -328,12 +353,12 @@
                 <div class="row mb-3">
                     <div class="col">
                         <label class="form-label" for="txtStartYPulse">Z Pulse</label>
-                        <input type="number" class="form-control" name="YPulse" id="txtStartYPulse" aria-describedby="Z Pulse">
+                        <input type="number" class="form-control" name="YPulse" id="txtStartYPulse" aria-describedby="Z Pulse" oninput="removeErrMsg(this.id)">
                         <div id="txtStartYPulseError" class="error-message"></div>
                     </div>
                     <div class="col">
                         <label class="form-label" for="txtYPulseIncrement">Z Pulse Increment</label>
-                        <input type="number" class="form-control" name="YPulseIncrement" id="txtYPulseIncrement" aria-describedby="Z Pulse Increment">
+                        <input type="number" class="form-control" name="YPulseIncrement" id="txtYPulseIncrement" aria-describedby="Z Pulse Increment" oninput="removeErrMsg(this.id)">
                         <div id="txtYPulseIncrementError" class="error-message"></div>
                     </div>
                 </div>
@@ -341,12 +366,12 @@
                 <div class="row mb-3">
                     <div class="col">
                         <label class="form-label" for="txtStartQrXPulse">QR-X Pulse</label>
-                        <input type="number" class="form-control" name="QrXPulse" id="txtStartQrXPulse" aria-describedby="Qr-X Pulse">
+                        <input type="number" class="form-control" name="QrXPulse" id="txtStartQrXPulse" aria-describedby="Qr-X Pulse" oninput="removeErrMsg(this.id)">
                         <div id="txtStartQrXPulseError" class="error-message"></div>
                     </div>
                     <div class="col">
                         <label class="form-label" for="txtQrXPulseIncrement">QR-X Pulse Increment</label>
-                        <input type="number" class="form-control" name="QrXPulseIncrement" id="txtQrXPulseIncrement" aria-describedby="Qr-X Pulse Increment">
+                        <input type="number" class="form-control" name="QrXPulseIncrement" id="txtQrXPulseIncrement" aria-describedby="Qr-X Pulse Increment" oninput="removeErrMsg(this.id)">
                         <div id="txtQrXPulseIncrementError" class="error-message"></div>
                     </div>
                 </div>
@@ -354,12 +379,12 @@
                 <div class="row mb-3">
                     <div class="col">
                         <label class="form-label" for="txtStartQrYPulse">QR-Z Pulse</label>
-                        <input type="number" class="form-control" name="QrYPulse" id="txtStartQrYPulse" aria-describedby="Qr-Z Pulse">
+                        <input type="number" class="form-control" name="QrYPulse" id="txtStartQrYPulse" aria-describedby="Qr-Z Pulse" oninput="removeErrMsg(this.id)">
                         <div id="txtStartQrYPulseError" class="error-message"></div>
                     </div>
                     <div class="col">
                         <label class="form-label" for="txtQrYPulseIncrement">QR-Z Pulse Increment</label>
-                        <input type="number" class="form-control" name="QrYPulseIncrement" id="txtQrYPulseIncrement" aria-describedby="Qr-Z Pulse Increment">
+                        <input type="number" class="form-control" name="QrYPulseIncrement" id="txtQrYPulseIncrement" aria-describedby="Qr-Z Pulse Increment" oninput="removeErrMsg(this.id)">
                         <div id="txtQrYPulseIncrementError" class="error-message"></div>
                     </div>
                 </div>
@@ -368,72 +393,72 @@
                     <div class="row mb-3">
                         <div class="col">
                             <label class="form-label" for="txtStartAddPulse1">Additional Pulse 1</label>
-                            <input type="number" class="form-control" name="AddPulse1" id="txtStartAddPulse1" aria-describedby="Additional Pulse 1" min="1">
+                            <input type="number" class="form-control" name="AddPulse1" id="txtStartAddPulse1" aria-describedby="Additional Pulse 1" min="0" oninput="removeErrMsg(this.id)">
                             <div id="txtStartAddPulse1Error" class="error-message"></div>
                         </div>
                         <div class="col">
                             <label class="form-label" for="txtAddPulse1Inc">Additional Pulse 1 Increment</label>
-                            <input type="number" class="form-control" name="AddPulse1Inc" id="txtAddPulse1Inc" aria-describedby="Additional Pulse 1 Increment" min="1">
+                            <input type="number" class="form-control" name="AddPulse1Inc" id="txtAddPulse1Inc" aria-describedby="Additional Pulse 1 Increment" min="0" oninput="removeErrMsg(this.id)">
                             <div id="txtAddPulse1IncError" class="error-message"></div>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col">
                             <label class="form-label" for="txtStartAddPulse2">Additional Pulse 2</label>
-                            <input type="number" class="form-control" name="AddPulse2" id="txtStartAddPulse2" aria-describedby="Additional Pulse 2" min="1">
+                            <input type="number" class="form-control" name="AddPulse2" id="txtStartAddPulse2" aria-describedby="Additional Pulse 2" min="0" oninput="removeErrMsg(this.id)">
                             <div id="txtStartAddPulse2Error" class="error-message"></div>
                         </div>
                         <div class="col">
                             <label class="form-label" for="txtAddPulse2Inc">Additional Pulse 2 Increment</label>
-                            <input type="number" class="form-control" name="AddPulse2Inc" id="txtAddPulse2Inc" aria-describedby="Additional Pulse 2 Increment" min="1">
+                            <input type="number" class="form-control" name="AddPulse2Inc" id="txtAddPulse2Inc" aria-describedby="Additional Pulse 2 Increment" min="0" oninput="removeErrMsg(this.id)">
                             <div id="txtAddPulse2IncError" class="error-message"></div>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col">
                             <label class="form-label" for="txtStartAddPulse3">Additional Pulse 3</label>
-                            <input type="number" class="form-control" name="AddPulse3" id="txtStartAddPulse3" aria-describedby="Additional Pulse 3" min="1">
+                            <input type="number" class="form-control" name="AddPulse3" id="txtStartAddPulse3" aria-describedby="Additional Pulse 3" min="0" oninput="removeErrMsg(this.id)">
                             <div id="txtStartAddPulse3Error" class="error-message"></div>
                         </div>
                         <div class="col">
                             <label class="form-label" for="txtAddPulse3Inc">Additional Pulse 3 Increment</label>
-                            <input type="number" class="form-control" name="AddPulse3Inc" id="txtAddPulse3Inc" aria-describedby="Additional Pulse 3 Increment" min="1">
+                            <input type="number" class="form-control" name="AddPulse3Inc" id="txtAddPulse3Inc" aria-describedby="Additional Pulse 3 Increment" min="0" oninput="removeErrMsg(this.id)">
                             <div id="txtAddPulse3IncError" class="error-message"></div>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col">
                             <label class="form-label" for="txtStartAddPulse4">Additional Pulse 4</label>
-                            <input type="number" class="form-control" name="AddPulse4" id="txtStartAddPulse4" aria-describedby="Additional Pulse 4" min="1">
+                            <input type="number" class="form-control" name="AddPulse4" id="txtStartAddPulse4" aria-describedby="Additional Pulse 4" min="0" oninput="removeErrMsg(this.id)">
                             <div id="txtStartAddPulse4Error" class="error-message"></div>
                         </div>
                         <div class="col">
                             <label class="form-label" for="txtAddPulse4Inc">Additional Pulse 4 Increment</label>
-                            <input type="number" class="form-control" name="AddPulse4Inc" id="txtAddPulse4Inc" aria-describedby="Additional Pulse 4 Increment" min="1">
+                            <input type="number" class="form-control" name="AddPulse4Inc" id="txtAddPulse4Inc" aria-describedby="Additional Pulse 4 Increment" min="0" oninput="removeErrMsg(this.id)">
                             <div id="txtAddPulse4IncError" class="error-message"></div>
                         </div>
                    </div>
                    <div class="row mb-3">
                         <div class="col">
                             <label class="form-label" for="txtStartAddPulse5">Additional Pulse 5</label>
-                            <input type="number" class="form-control" name="AddPulse5" id="txtStartAddPulse5" aria-describedby="Additional Pulse 5" min="1">
+                            <input type="number" class="form-control" name="AddPulse5" id="txtStartAddPulse5" aria-describedby="Additional Pulse 5" min="0" oniput="removeErrMsg(this.id)">
                             <div id="txtStartAddPulse5Error" class="error-message"></div>
                         </div>
                         <div class="col">
                             <label class="form-label" for="txtAddPulse5Inc">Additional Pulse 5 Increment</label>
-                            <input type="number" class="form-control" name="AddPulse5Inc" id="txtAddPulse5Inc" aria-describedby="Additional Pulse 5 Increment" min="1">
+                            <input type="number" class="form-control" name="AddPulse5Inc" id="txtAddPulse5Inc" aria-describedby="Additional Pulse 5 Increment" min="0" oninput="removeErrMsg(this.id)">
                             <div id="txtAddPulse5IncError" class="error-message"></div>
                         </div>
                    </div>
                    <div class="row mb-3">
                         <div class="col">
                             <label class="form-label" for="txtStartAddPulse6">Additional Pulse 6</label>
-                            <input type="number" class="form-control" name="AddPulse6" id="txtStartAddPulse6" aria-describedby="Additional Pulse 6" min="1">
+                            <input type="number" class="form-control" name="AddPulse6" id="txtStartAddPulse6" aria-describedby="Additional Pulse 6" min="0" oninput="removeErrMsg(this.id)">
                             <div id="txtStartAddPulse6Error" class="error-message"></div>
                         </div>
                         <div class="col">
                             <label class="form-label" for="txtAddPulse6Inc">Additional Pulse 6 Increment</label>
-                            <input type="number" class="form-control" name="AddPulse6Inc" id="txtAddPulse6Inc" aria-describedby="Additional Pulse 6 Increment" min="1">
+                            <input type="number" class="form-control" name="AddPulse6Inc" id="txtAddPulse6Inc" aria-describedby="Additional Pulse 6 Increment" min="0" oninput="removeErrMsg(this.id)">
                            <div id="txtAddPulse6IncError" class="error-message"></div>
                         </div>
                    </div>
@@ -465,17 +490,20 @@
 
 @section Scripts
 {
-	<link href="~/css/datatables.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+    <link rel="stylesheet" href="~/css/gridjs.min.css">
+    @* <link rel="stylesheet" href="~/css/datatables.min.css"> *@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/js/datatables.min.js"></script>
+    @* <script src="~/js/datatables.min.js"></script> *@
     <script src="~/js/sweetalert2.all.min.js"></script>    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+    <script src="~/js/gridjs.umd.js"></script>
+    <script src="../js/xlsx.full.min.js"></script>
+    <script src="../js/exceljs.min.js"></script>
 
 	<script type="text/javascript">
         var trolleyCodeList = [];
+        let gridInstance = null;
 
         $(document).ready(async function () {
             getDropdownTrolley();
@@ -483,8 +511,6 @@
         });
 
         function loadList() {
-             console.log("trolley", trolleyCodeList);
-
             $.ajax({
                 url: "/Trolley/GetTrolleySlotList/",
                 type: "GET",
@@ -494,7 +520,6 @@
                     Swal.fire({
                         text: 'Please Wait',
                         width: '300px',
-
                         allowEscapeKey: false,
                         allowOutsideClick: false,
                         showConfirmButton: false,
@@ -502,8 +527,112 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
+                    console.log(result);
                     swal.close()
                     if (result.success == true) {
+                        if (gridInstance) {
+                            gridInstance.destroy();
+                        }
+
+                        gridInstance = new gridjs.Grid({
+                            columns: [
+                                { 
+                                    name: 'Trolley', 
+                                    id: 'trolley_Id', 
+                                    width: '100px',
+                                    formatter: (cell) => {
+                                        const trolley = trolleyCodeList.find(t => t.trolleyId === cell);
+                                        return gridjs.html(`${trolley ? trolley.trolleyCode: '-'}`);
+                                    }
+                                },
+                                { name: 'Trolley Slot Id', id: 'trolleySlot_Id', hidden: true },
+                                { name: 'Trolley Slot Code', id: 'trolleySlotCode', width: '180px' },
+                                { name: 'Col No', id: 'colNo', width: '102px' },
+                                { name: 'Row No', id: 'rowNo', width: '110px' }, 
+                                { 
+                                    name: 'Active State', 
+                                    id: 'isActive', 
+                                    width: '144px',
+                                    formatter: (cell, row) => {
+                                        const badgeHtml = row.cells[5].data === true
+                                          ? '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
+                                          : '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>';
+                                        return gridjs.html(`<div style="text-align:center;">${badgeHtml}</div>`);
+                                    }
+                                },
+                                {
+                                    name: 'Side',
+                                    id :'isLeft',
+                                    width: '90px',
+                                    data: row => row.isLeft,
+                                    formatter: cell => {
+                                        const sideMap = { false: 'Right', true: 'Left' };
+                                        return sideMap[cell] || cell;
+                                    }
+                                },
+                                { name: 'X Pulse', id: 'xPulse', width: '106px' },
+                                { name: 'Z Pulse', id: 'yPulse', width: '106px' },
+                                { name: 'QR-X Pulse', id: 'qrxPulse', width: '134px' },
+                                { name: 'QR-Z Pulse', id: 'qryPulse', width: '134px' },
+                                { name: 'AddPulse1', id: 'add1Pulse', hidden: true },
+                                { name: 'AddPulse2', id: 'add2Pulse', hidden: true },
+                                { name: 'AddPulse3', id: 'add3Pulse', hidden: true },
+                                { name: 'AddPulse4', id: 'add4Pulse', hidden: true },
+                                { name: 'AddPulse5', id: 'add5Pulse', hidden: true },
+                                { name: 'AddPulse6', id: 'add6Pulse', hidden: true },
+                                {
+                                    name: 'Action',
+                                    formatter: (cell, row) => {
+                                        const cleanRow = {
+                                            trolley_Id: row.cells[0]?.data,
+                                            trolleySlot_Id: row.cells[1]?.data,
+                                            trolleySlotCode: row.cells[2]?.data,
+                                            colNo: row.cells[3]?.data,
+                                            rowNo: row.cells[4]?.data,
+                                            isActive: row.cells[5]?.data,
+                                            side: row.cells[6]?.data,
+                                            xPulse: row.cells[7]?.data,
+                                            yPulse: row.cells[8]?.data,
+                                            qrxPulse: row.cells[9]?.data,
+                                            qryPulse: row.cells[10]?.data,
+                                            add1Pulse: row.cells[11]?.data,
+                                            add2Pulse: row.cells[12]?.data,
+                                            add3Pulse: row.cells[13]?.data,
+                                            add4Pulse: row.cells[14]?.data,
+                                            add5Pulse: row.cells[15]?.data,
+                                            add6Pulse: row.cells[16]?.data,
+                                        };
+                                        const rawData = btoa(JSON.stringify(cleanRow));
+                                        return gridjs.html(`
+                                            <div style="display: flex;">
+                                                <button class="btn btn-warning d-grid edit-slot-btn me-2" data-row="${rawData}">
+                                                    <span><i class="bi bi-pencil-square"></i> Edit</span>
+                                                </button>
+                                                <button class="btn btn-danger d-grid delete-slot-btn" data-id="${cleanRow.trolleySlot_Id}" data-code="${cleanRow.trolleySlotCode}">
+                                                    <span><i class="bi bi-trash"></i> Delete</span>
+                                                </button>
+                                            </div>
+                                        `);
+                                    }
+                                }
+                            ],
+                            data: result.data,
+                            pagination: true,
+                            search: true,
+                            sort: true,
+                            resizable: true,
+                            className: {
+                                table: 'custom-table',
+                            }
+                        }).render(document.getElementById("gridTable"));
+
+                        //remove grid-footer class
+                        const footer = document.querySelector('#gridTable .gridjs-footer');
+                        if (footer) {
+                            footer.id = "gridFooter";
+                        }
+                        document.getElementById("gridFooter").classList.remove("gridjs-footer");
+                        /*
                         $('#listTable').DataTable( {
                             data: result.data,
                             paging: true,
@@ -556,7 +685,7 @@
                                     render: function (data, type, row, meta) {
                                         const rawData = JSON.stringify(row).replace(/"/g, "&quot;");
                                         return `<div style="display:flex;">
-                                                    <button class="btn btn-success d-grid edit-slot-btn" style="margin-right:10px;" data-row="${rawData}">
+                                                    <button class="btn btn-warning d-grid edit-slot-btn" style="margin-right:10px;" data-row="${rawData}">
                                                         <span><i class="bi bi-pencil-square"></i>Edit</span>
                                                     </button>
                                                     <button class="btn btn-danger deactivate-account delete-slot-btn" data-id="${row.trolleySlot_Id}" data-code=${row.trolleySlotCode}">
@@ -567,6 +696,7 @@
                                 }
                             ],
                         });
+                        */
                     }
                     else {
                         swal.fire({
@@ -590,14 +720,17 @@
             getDropdownTrolley();
 
             $("#txtId").val("0");
-            $('#ddTrolley').val("");
-            $("#txtCode").val("");
-            $("#txtColNo").val("");
-            $("#txtRowNo").val("");
-            $("#txtXPulse").val("");
-            $("#txtYPulse").val("");
-            $("#txtQrXPulse").val("");
-            $("#txtQrYPulse").val("");
+            const fields = ['#ddTrolley', '#txtCode', '#txtColNo', '#txtRowNo', '#txtXPulse', '#txtYPulse', '#txtQrXPulse', '#txtQrYPulse'];
+            fields.forEach(i => $(i).val(''));
+
+            // $('#ddTrolley').val("");
+            // $("#txtCode").val("");
+            // $("#txtColNo").val("");
+            // $("#txtRowNo").val("");
+            // $("#txtXPulse").val("");
+            // $("#txtYPulse").val("");
+            // $("#txtQrXPulse").val("");
+            // $("#txtQrYPulse").val("");
             document.getElementById("chkIsActive").checked = true;
             $("#myModal").modal("show");
         }
@@ -669,10 +802,10 @@
 
             var fields;
             if (modalId == "colModal") {
-                fields = ['txtCodeFormat', 'txtColFrom', 'txtTotalCol', 'txtRowFrom', 'txtTotalRow', 'txtStartXPulse', 'txtXPulseIncrement', 'txtStartYPulse', 'txtYPulseIncrement', 'txtStartQrXPulse', 'txtQrXPulseIncrement', 'txtStartQrYPulse', 'txtQrYPulseIncrement'];
+                fields = ['ddTrolley1', 'txtCodeFormat', 'txtColFrom', 'txtTotalCol', 'txtRowFrom', 'txtTotalRow', 'txtStartXPulse', 'txtXPulseIncrement', 'txtStartYPulse', 'txtYPulseIncrement', 'txtStartQrXPulse', 'txtQrXPulseIncrement', 'txtStartQrYPulse', 'txtQrYPulseIncrement'];
             } 
             else {
-                fields = ['ddTrolley', 'txtCode', 'txtColNo', 'txtRowNo', 'txtXPulse', 'txtYPulse', 'txtQrXPulse', 'txtQrYPulse', 'txtAddPulse1', 'txtAddPulse2', 'txtAddPulse3', 'txtAddPulse4', 'txtAddPulse5', 'txtAddPulse6'];
+                fields = ['ddTrolley', 'txtPriority', 'txtCode', 'txtColNo', 'txtRowNo', 'txtXPulse', 'txtYPulse', 'txtQrXPulse', 'txtQrYPulse', 'txtAddPulse1', 'txtAddPulse2', 'txtAddPulse3', 'txtAddPulse4', 'txtAddPulse5', 'txtAddPulse6'];
             }
             removeErrMsg(fields, true);
             customPulses(modalId);
@@ -747,6 +880,7 @@
                 { id: 'txtAddPulse4', name: 'Additional Pulse 4', required: true, numeric: true, min: 0, allowEmpty: true },
                 { id: 'txtAddPulse5', name: 'Additional Pulse 5', required: true, numeric: true, min: 0, allowEmpty: true },
                 { id: 'txtAddPulse6', name: 'Additional Pulse 6', required: true, numeric: true, min: 0, allowEmpty: true },
+                { id: 'txtPriority', name: 'Priority', required: true, numeric: true, min:0 }
             ];
           
             if (validateColModal(fields)) {
@@ -767,10 +901,9 @@
                     Add5Pulse: parseInt($('#txtAddPulse5').val()) || 0,
                     Add6Pulse: parseInt($('#txtAddPulse6').val()) || 0,
                     IsActive: $('#myModal').find('#chkIsActive').prop("checked"),
-                    IsLeft: $('#myModal').find('#chkIsLeft').prop("checked")
+                    IsLeft: $('#myModal').find('#chkIsLeft').prop("checked"),
+                    Priority: parseInt($('#txtPriority').val()) || 0,
                 };
-
-                console.log(data);
 
                 $.ajax({
                     url: '/Trolley/SaveTrolleySlot',
@@ -782,12 +915,11 @@
                         Swal.fire({
                             text: 'Please Wait',
                             width: '300px',
-
                             allowEscapeKey: false,
                             allowOutsideClick: false,
                             showConfirmButton: false,
                         });
-                        Swal.showLoading()
+                        Swal.showLoading();
                     },
                     success: function (result) {
                         if (result.success == true) {
@@ -878,8 +1010,8 @@
             }
         }
 
-        $('#listTable').on('click', '.edit-slot-btn', function () {
-            const row = JSON.parse($(this).attr('data-row'));
+        $('#gridTable').on('click', '.edit-slot-btn', function () {
+            const row = JSON.parse(atob($(this).attr('data-row')));
             editSlotForm(row);
         });
 
@@ -917,7 +1049,7 @@
             $("#myModal").modal("show");
         }
 
-        $('#listTable').on('click', '.delete-slot-btn', function () {
+        $('#gridTable').on('click', '.delete-slot-btn', function () {
             const id = $(this).attr('data-id');
             const slotCode = $(this).attr('data-code');
             deleteSlot(id, slotCode);

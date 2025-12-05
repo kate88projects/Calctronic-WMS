@@ -1,18 +1,8 @@
 ﻿
 @{
 }
+
 <style>
-    .table-title {
-        color: #fff;
-        background: #4b5366;
-        border-radius: 3px 3px 0 0;
-    }
-
-    .table-title h2 {
-        margin: 5px 0 0;
-        font-size: 24px;
-    }
-
     .row {
         clear: right;
     }
@@ -93,31 +83,6 @@
         padding-top: 6px
     }
 
-    .custom-table thead th {
-        background-color: #F1F6F9; 
-        color: #000;
-    }
-
-    .custom-table tbody tr:hover td {
-        background-color: #F1F6F9; 
-    }
-
-    .custom-table tbody {
-        font-size: 15px;
-    }
-
-    .gridjs-pagination {
-        font-size: 14px;
-    }
-
-    th.gridjs-th {
-        padding: 10px 15px !important;
-    }
-
-    td.gridjs-td {
-        padding: 8px 15px !important;
-    }
-
     .view-btn, .edit-btn, .delete-btn {
         height: 33px;
         font-size: 14px;
@@ -125,12 +90,22 @@
     }
 </style>
 
-<br />
+@section PageHeader {
+    <header class="d-flex align-items-center justify-content-between w-100">
+        <h2 class="pageTitle">JOB Order List</h2>
+        <div class="d-flex">
+            <button type="button" class="btn btn-success" onclick="navigateToNew('new')">
+                Add New JOB
+            </button>
+        </div>
+    </header>
+}
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <div class="card card-outline ">
-                <div class="card-header table-title">
+            <div class="card">
+                @* <div class="card-header table-title">
                     <div class="card-title">
                         <h2>JOB Order List <b></b></h2>
                     </div>
@@ -139,7 +114,7 @@
                             Add New JOB
                         </button>
                     </div>
-                </div>
+                </div> *@
                 <div class="card-body pt-0">
                     @* <div class="row" style="padding:5px;">
                         <div class="col-sm-3" style="">
@@ -337,7 +312,7 @@
                                     id: 'description', 
                                     width: '140px',
                                     formatter: (cell) => {
-                                        const maxLength = 25;
+                                        const maxLength = 30;
                                         if (!cell) return '';
                                         return cell.length > maxLength
                                             ? gridjs.html(`<span title="${cell}">${cell.substring(0, maxLength)}...</span>`)
@@ -381,7 +356,6 @@
                                         //     updatedDate: row.cells[7].data,
                                         // });
                                         const rawData = JSON.stringify(row);
-
                                         return gridjs.html(`
                                             <div style="display:flex;">
                                                 <button class="btn btn-primary d-grid view-btn me-2" data-row='${rawData}' onclick="navigateToView(${row.cells[0].data}, 'view')">
@@ -399,15 +373,21 @@
                                 },
                             ],
                             data: result.data,
-                            pagination: {
-                                limit: 20
-                            },
+                            pagination: true,
                             search: true,
                             sort: true,
                             className: {
                                 table: 'custom-table',
                             }
                         }).render(document.getElementById("gridTable"));
+
+                        //remove grid-footer class
+                        const footer = document.querySelector('#gridTable .gridjs-footer');
+                        if (footer) {
+                            footer.id = "gridFooter";
+                        }
+                        document.getElementById("gridFooter").classList.remove("gridjs-footer");
+
                         // $('#listTable').DataTable( {
                         //     data: result.data,
                         //     paging: false,

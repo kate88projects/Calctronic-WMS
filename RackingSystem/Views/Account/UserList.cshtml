@@ -2,46 +2,27 @@
 }
 
 <style>
-    .table-title {
-        color: #fff;
-        background: #4b5366;
-        /*     padding: 16px 25px;
-                    margin: -20px -25px 10px; */
-        border-radius: 3px 3px 0 0;
-    }
-
-        .table-title h2 {
-            margin: 5px 0 0;
-            font-size: 24px;
-        }
-
     .pnlHide {
         display: none;
     }
-
-    .error-message {
-        color: red;
-        font-size: 0.875rem;
-        margin-top: 5px;
-    }
-
-    .is-invalid {
-        border-color: red;
-    }
-
-    .is-valid {
-        border-color: green;
-    }
-
 </style>
 
-<br />
+@section PageHeader {
+    <header class="d-flex align-items-center justify-content-between w-100">
+        <h2 class="pageTitle">User List</h2>
+        <div class="d-flex">
+            <button type="button" class="btn btn-success" onclick="newItemForm()">
+                Add New User
+            </button>
+        </div>
+    </header>
+}
 
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <div class="card card-outline ">
-                <div class="card-header table-title">
+            <div class="card">
+                @* <div class="card-header table-title">
                     <div class="card-title">
                         <h2>User List <b></b></h2>
                     </div>
@@ -50,9 +31,11 @@
                             Add New User
                         </button>
                     </div>
-                </div>
-                <div class="card-body">
-                    <div class="table table-striped table-bordered table-responsive text-nowrap">
+                </div> *@
+                <div class="card-body pt-0">
+                    <div id="gridTable" class="table table-responsive text-nowrap mt-3"></div>
+
+                    @* <div class="table table-striped table-bordered table-responsive text-nowrap">
                         <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
                             <thead>
                                 <tr>
@@ -64,7 +47,7 @@
                                 </tr>
                             </thead>
                         </table>
-                    </div>
+                    </div> *@
                 </div>
             </div>
         </div>
@@ -164,17 +147,20 @@
 
 @section Scripts
 {
-    <link href="~/css/datatables.min.css" rel="stylesheet">
+    @* <link href="~/css/datatables.min.css" rel="stylesheet"> *@
+    <link rel="stylesheet" href="~/css/gridjs.min.css">
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/js/datatables.min.js"></script>
+    @* <script src="~/js/datatables.min.js"></script> *@
     <script src="~/js/sweetalert2.all.min.js"></script>
+    <script src="~/js/gridjs.umd.js"></script>
 
     <script type="text/javascript">
 
-        $(document).ready(function () {
+        let gridInstance = null;
 
+        $(document).ready(function () {
             loadList();
         });
 
@@ -200,6 +186,7 @@
                     console.log(result);
                     swal.close()
                     if (result.success == true) {
+                        /*
                         $('#listTable').DataTable( {
                             data: result.data,
                             paging: true,
@@ -230,23 +217,73 @@
                                         <span><i class="bi bi-lock""></i>  Reset Password</span></button>
                                         <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.id}" data-code="${row.username}"><span><i class="bi bi-trash""></i>  Delete</span></button></div>`;
 
-                                        // return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
-                                        // 'onclick="editItemForm(\'' + row.id + '\', ' +
-                                        // '\'' + row.username + '\', \'' + row.fullname + '\', \'' + row.email + '\', \'' + row.isActive + '\' )">' +
-                                        // '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
-
-                                        // '<button class="btn btn-warning d-grid" style="margin-right:10px;"' +
-                                        // 'onclick="resetPassForm(\'' + row.id + '\', \'' + row.username + '\')">' +
-                                        // '<span><i class="bi bi-lock""></i>  Reset Password</span></button>' +
-
-                                        // '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.id + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
                                     }
                                 }
                             ],
-                        });
+                        });*/
 
+                        if (gridInstance) {
+                            gridInstance.destroy();
+                        }
 
+                         gridInstance = new gridjs.Grid({
+                            columns: [
+                                { name: 'Username', id: 'username' },
+                                { name: 'Fullname', id: 'fullname' },
+                                { name: 'Email', id: 'email' },
+                                { 
+                                    name: 'Active State', 
+                                    id: 'isActive',
+                                    formatter: (cell, row) => {
+                                        return row.cells[3].data === true
+                                          ? gridjs.html('<span class="badge rounded-pill bg-success">Active</span>')
+                                          : gridjs.html('<span class="badge rounded-pill bg-secondary">InActive</span>');
+                                    }
+                                },
+                                { name: 'Id', id: 'id', hidden: true },
+                                { 
+                                    name: 'Action',
+                                    formatter: (cell, row) => {
+                                        const cleanRow = {
+                                            username: row.cells[0]?.data,
+                                            fullname: row.cells[1]?.data,
+                                            email: row.cells[2]?.data,
+                                            isActive: row.cells[3]?.data,
+                                            id: row.cells[4]?.data,
+                                        };
+                                        const rawData = btoa(JSON.stringify(cleanRow));
+                                        return gridjs.html(`
+                                            <div style="display:flex;">
+                                                <button class="btn btn-success d-grid edit-btn" style="margin-right:10px;" data-row="${rawData}">
+                                                    <span><i class="bi bi-pencil-square""></i>  Edit</span>
+                                                </button>
+                                                <button class="btn btn-success d-grid edit-Pass-btn" style="margin-right:10px;" data-row="${rawData}">
+                                                    <span><i class="bi bi-lock""></i>  Reset Password</span>
+                                                </button>
+                                                <button class="btn btn-danger deactivate-account delete-btn" data-id="${cleanRow.id}" data-code="${cleanRow.username}">
+                                                    <span><i class="bi bi-trash""></i>  Delete</span>
+                                                </button>
+                                            </div>
+                                        `)
+                                    }
+                                },
+                            ],
+                            data: result.data,
+                            pagination: true,
+                            search: true,
+                            sort: true,
+                            resizable: true,
+                            className: {
+                                table: 'custom-table',
+                            }
+                         }).render(document.getElementById("gridTable"));
 
+                         //remove grid-footer class
+                        const footer = document.querySelector('#gridTable .gridjs-footer');
+                        if (footer) {
+                            footer.id = "gridFooter";
+                        }
+                        document.getElementById("gridFooter").classList.remove("gridjs-footer");
                     }
                     else {
                         swal.fire({
@@ -281,8 +318,9 @@
             $('#pnlConfirmPassword').removeClass('pnlHide');
         }
 
-        $('#listTable').on('click', '.edit-btn', function () {
-            const row = JSON.parse($(this).attr('data-row'));
+        $('#gridTable').on('click', '.edit-btn', function () {
+            const row = JSON.parse(atob($(this).attr('data-row')));
+            console.log("row", row);
             editItemForm(row);
         });
 
@@ -305,8 +343,8 @@
             $("#myModal").modal("show");
         }
 
-        $('#listTable').on('click', '.edit-Pass-btn', function () {
-            const row = JSON.parse($(this).attr('data-row'));
+        $('#gridTable').on('click', '.edit-Pass-btn', function () {
+            const row = JSON.parse(atob($(this).attr('data-row')));
             resetPassForm(row);
         });
 
@@ -377,8 +415,6 @@
                 Fullname: '',
                 Email: ''
             }
-
-            //console.log(JSON.stringify(data));
 
             $.ajax({
                 url: '/Account/ResetUserPassword',
@@ -561,7 +597,7 @@
             // console.log(id);
         }
 
-        $('#listTable').on('click', '.delete-btn', function () {
+        $('#gridTable').on('click', '.delete-btn', function () {
                 const id = $(this).attr('data-id');
                 const code = $(this).attr('data-code');
                 deleteItem(id, code);
