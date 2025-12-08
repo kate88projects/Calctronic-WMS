@@ -1,9 +1,4 @@
-﻿@{
-}
-
-<style>
-</style>
-
+﻿
 @section PageHeader {
     <header class="d-flex align-items-center justify-content-between w-100">
         <h2 class="pageTitle">Item Group List</h2>
@@ -19,20 +14,10 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                @* <div class="card-header table-title">
-                    <div class="card-title">
-                        <h2>Item Group List <b></b></h2>
-                    </div>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-success" onclick="newItemForm()">
-                            Add New Item Group
-                        </button>
-                    </div>
-                </div> *@
                 <div class="card-body pt-0">
-                    <div id="gridTable" class="table table-responsive text-nowrap mt-3"></div>
-                    @* <div class="table table-striped table-bordered table-responsive text-nowrap">
-                        <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
+                    @* <div id="gridTable" class="table table-responsive text-nowrap mt-3"></div> *@
+                    <div class="text-nowrap table-container mt-1">
+                        <table id="listTable" class="dataTable row-border hover order-column" style="width:100%">
                             <thead>
                                 <tr>
                                     <th>Item Group Code</th>
@@ -42,7 +27,7 @@
                                 </tr>
                             </thead>
                         </table>
-                    </div> *@
+                    </div>
                 </div>
             </div>
         </div>
@@ -88,18 +73,22 @@
 
 @section Scripts
 {
-    @* <link href="~/css/datatables.min.css" rel="stylesheet"> *@
-    @* <script src="~/js/datatables.min.js"></script> *@
-
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
-    <link rel="stylesheet" href="~/css/gridjs.min.css">
+    <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
+    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/js/gridjs.umd.js"></script>
+    <script src="../js/dataTables.js"></script>
+    <script src="../js/dataTables.columnControl.js"></script>
+    <script src="../js/columnControl.dataTables.js"></script>
+
     <script src="~/js/sweetalert2.all.min.js"></script>
 
+    @* <script src="~/js/gridjs.umd.js"></script> 
+    <link rel="stylesheet" href="~/css/gridjs.min.css">*@
+
     <script type="text/javascript">
-        let gridInstance = null;
+        // let gridInstance = null;
 
         $(document).ready(function () {
             loadList();
@@ -115,7 +104,6 @@
                     Swal.fire({
                         text: 'Please Wait',
                         width: '300px',
-
                         allowEscapeKey: false,
                         allowOutsideClick: false,
                         showConfirmButton: false,
@@ -125,7 +113,7 @@
                 success: function (result) {
                     swal.close()
                     if (result.success == true) {
-                        /*
+                        
                         $('#listTable').DataTable( {
                             data: result.data,
                             paging: true,
@@ -138,10 +126,10 @@
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         if (row.isActive == true) {
-                                            return '<span><i class="bi bi-check-square" style="color: darkgreen;"></i></span>'
+                                            return '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
                                         }
                                         else {
-                                            return '<span><i class="bi bi-app""></i></span>'
+                                            return '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>'
                                         }
                                     }
                                 },
@@ -149,21 +137,29 @@
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
-                                        return `<div style="display:flex;"><button class="btn btn-success d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
-                                        <span><i class="bi bi-pencil-square""></i>  Edit</span></button>
-                                        <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.itemGroup_Id}" data-code="${row.itemGroupCode}"><span><i class="bi bi-trash""></i>  Delete</span></button></div>`;
-
-                                        // return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
-                                        // 'onclick="editItemForm(\'' + row.itemGroup_Id + '\', \'' + row.itemGroupCode + '\', \'' + row.description + '\', ' +
-                                        // '\'' + row.isActive + '\')">' +
-                                        // '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
-
-                                        // '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.itemGroup_Id + '\', \'' + row.itemGroupCode + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
+                                        return `<div style="display:flex;">
+                                            <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
+                                                <span><i class="bi bi-pencil-square""></i>  Edit</span>
+                                            </button>
+                                            <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.itemGroup_Id}" data-code="${row.itemGroupCode}">
+                                                <span><i class="bi bi-trash""></i>  Delete</span>
+                                            </button></div>`;
                                     }
                                 }
                             ],
-                        }); */
-
+                            language: {
+                                searchPlaceholder: "🔍︎ Search",
+                                search: ""
+                            },
+                            ordering: {
+                                indicators: false
+                            },
+                            columnControl: ['orderStatus'],
+                            columnDropdowns: [
+                                { width: '50px' },
+                            ]
+                        });
+                        /*
                        if (gridInstance) {
                            gridInstance.destroy();
                        }
@@ -223,6 +219,7 @@
                             footer.id = "gridFooter";
                         }
                         document.getElementById("gridFooter").classList.remove("gridjs-footer");
+                        */
                     }
                     else {
                         swal.fire({
@@ -251,8 +248,8 @@
             $("#myModal").modal("show");
         }
 
-        $('#gridTable').on('click', '.edit-btn', function () {
-            const row = JSON.parse(atob($(this).attr('data-row')));
+        $('#listTable').on('click', '.edit-btn', function () {
+            const row = JSON.parse($(this).attr('data-row'));
             editItemForm(row);
         });
 
@@ -328,7 +325,6 @@
                     Swal.fire({
                         text: 'Please Wait',
                         width: '300px',
-
                         allowEscapeKey: false,
                         allowOutsideClick: false,
                         showConfirmButton: false,
@@ -366,7 +362,7 @@
             });
         }
 
-        $('#gridTable').on('click', '.delete-btn', function () {
+        $('#listTable').on('click', '.delete-btn', function () {
             const id = $(this).attr('data-id');
             const code = $(this).attr('data-code');
             deleteItem(id, code);
@@ -401,7 +397,6 @@
                             Swal.fire({
                                 text: 'Please Wait',
                                 width: '300px',
-
                                 allowEscapeKey: false,
                                 allowOutsideClick: false,
                                 showConfirmButton: false,
@@ -410,7 +405,6 @@
                         },
                         success: function (result) {
                             if (result.success == true) {
-                                // $("#myModal").modal("toggle");
                                 swal.fire({
                                     icon: 'success',
                                     title: "Success Deleted",

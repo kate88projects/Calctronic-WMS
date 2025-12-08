@@ -1,9 +1,4 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
-
+﻿
 <style>
     .row {
         clear: right;
@@ -13,7 +8,6 @@
         border-radius: 3px;
         border-color: #ddd;
         box-shadow: none;
-        margin-bottom: 20px;
     }
 
     .show-entries select.form-control {
@@ -86,7 +80,7 @@
         padding-top: 6px
     }
 
-    .view-bom-btn, .edit-bom-btn, .delete-bom-btn {
+    .view-btn {
         font-size: 14px;
     }
 </style>
@@ -105,17 +99,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <div class="card mt-1">
-                @* <div class="card-header table-title">
-                    <div class="card-title">
-                        <h2>BOM List <b></b></h2>
-                    </div>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-success" onclick="navigateToNew('new')">
-                            Add New BOM
-                        </button>
-                    </div>
-                </div> *@
+            <div class="card">
                 <div class="card-body">
                     <div class="row" style="padding:5px;">
                         <div class="col-sm-3" style="">
@@ -147,8 +131,9 @@
                         </div>
                     </div>
 
-                    <div id="gridTable" class="table table-responsive text-nowrap mt-3"></div>
-                       @*  <table id="listTable" class="table table-responsive dataTable" style="width:100%">
+                    @* <div id="gridTable" class="table table-responsive text-nowrap mt-3"></div> *@
+                    <div class="text-nowrap table-container">
+                        <table id="listTable" class="dataTable row-border hover order-column" style="width:100%">
                             <thead>
                                 <tr>
                                     <th>BOM Id</th>
@@ -160,9 +145,9 @@
                                     <th>Action</th>
                                 </tr>
                             </thead>
-                        </table>  *@
-                    
-
+                        </table>
+                    </div>
+                       
                     <div class="clearfix">
                         <div class="hint-text">Showing <b id="lblCurCount">0</b> of <b id="lblTotal">0</b> entries</div>
                         <ul class="pagination" id="ulPagination">
@@ -179,113 +164,26 @@
     </div>
 </div>
 
-@* <div class="modal fade" id="newModal" data-bs-backdrop="static">
-     <div class="modal-dialog modal-dialog-centered modal-lg">
-         <div class="modal-content">
-             <div class="modal-header">
-                 <h5 class="modal-title" id="bomModalLabel"> Create New BOM</h5>
-             </div>
-             <div class="modal-body">
-                 <div class="row g-0"><span class="title titleColor">BOM</span></div>
-                 <div class="row mb-2">
-                     <div class="col">
-                          <div class="form-floating">
-                                <select class="form-select" id="bomName">
-                                    <option value="" disabled selected>Choose BOM Item</option>
-                                </select>
-                                <label for="bomName">BOM Item</label>
-                                <div id="bomNameError" class="error-message"></div>
-                            </div>
-                     </div>
-                     <div class="col">
-                        <div class="form-floating">
-                            <input type="text" class="form-control" id="txtCreatedBy" placeholder="Please enter created person">
-                            <label for="txtCreatedBy">Created By</label>
-                            <div id="txtCreatedByError" class="error-message"></div>
-                        </div>
-                    </div>
-                 </div>
-                 <div class="g-3 mb-2">
-                     <div class="col">
-                         <div class="form-floating">
-                             <input type="text" class="form-control" id="txtdesc" placeholder="Please enter description">
-                             <label for="txtdesc">Description</label>
-                             <div id="txtdescError" class="error-message"></div>
-                         </div>
-                     </div>
-                </div>
-                
-                <div class="mb-3">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="chkIsActive">
-                        <label class="form-check-label" for="chkIsActive">Is Active</label>
-                    </div>
-                </div>
-
-                <div class="row g-0"><span class="title subtitleColor">Sub Item</span></div>
-                <div class="itemContainer" id="itemContainer">
-                    <div class="itemBlock" id="itemBlock" data-index="1">
-                        <div class="item">
-                            <div class="title-container">
-                              <span class="item-title">Item 1</span>
-                              <i class="fa fa-trash" onclick="removeItem(this)" tabindex="0"></i>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col">
-                                    <div class="form-floating">
-                                        <select class="form-select" id="subItem1" required></select>
-                                        <label for="subItem1">Sub Item</label>
-                                        <div id="subItem1Error" class="error-message"></div>
-                                    </div>
-                                </div>
-                                <div class="col">
-                                    <div class="form-floating">
-                                        <input type="number" class="form-control" id="txtQty1" placeholder="Please enter quantity" required>
-                                        <label for="txtQty1">Quantity</label>
-                                        <div id="txtQty1Error" class="error-message"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="g-3 mb-3">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" id="txtRemark1" placeholder="Please enter remark" required>
-                                    <label for="txtRemark1">Remark</label>
-                                    <div id="txtRemark1Error" class="error-message"></div>
-                                </div>
-                            </div>
-                            <input type="hidden" id="txtBomDtlId1">
-                        </div>
-                    </div>
-                </div>
-                    
-                <span id="textlink" class="text-link mt-2" tabindex="0"><i class="fas fa-plus-circle"></i> Sub Item</span>
-                <input type="hidden" id="txtBomId">
-             </div>
-             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="saveBOM()">Save</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="cancelForm()">Cancel</button>
-            </div>
-         </div>
-     </div>
-</div> *@
-
-
 @section Scripts
 {
-    @* <link href="~/css/datatables.min.css" rel="stylesheet"> *@
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
-    <link rel="stylesheet" href="~/css/gridjs.min.css">
+    <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
+    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="../js/dataTables.js"></script>
+    <script src="../js/dataTables.columnControl.js"></script>
+    <script src="../js/columnControl.dataTables.js"></script>
+    <script src="~/js/sweetalert2.all.min.js"></script>
 
     @* <script src="~/js/datatables.min.js"></script> *@
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/js/sweetalert2.all.min.js"></script>
-    <script src="~/js/gridjs.umd.js"></script>
-
+    @* <link href="~/css/datatables.min.css" rel="stylesheet"> *@
+    @* <script src="~/js/gridjs.umd.js"></script> *@
+    @* <link rel="stylesheet" href="~/css/gridjs.min.css"> *@
 
     <script type="text/javascript">
         let itemIndex = 1;
         var itemList = [];
-        let gridInstance = null;
 
         $(document).ready(async function () {
             $('#txtTotalRecord').val(0);
@@ -352,7 +250,7 @@
                 success: function (result) {
                     swal.close()
                     if (result.success == true) {
-
+                        /*
                         if (gridInstance) { 
                             gridInstance.destroy();
                         }
@@ -470,52 +368,89 @@
                                 table: 'custom-table',
                             }
                         }).render(document.getElementById("gridTable"));
-                        // $('#listTable').DataTable( {
-                        //     data: result.data,
-                        //     paging: false,
-                        //     searching: false,
-                        //     "info": false,
-                        //     "bDestroy": true,
-                        //     columns: [
-                        //         { data: 'boM_Id' },
-                        //         { data: 'item_Id' ,
-                        //             render: function(data, type, row) {
-                        //                 var item = itemList.find(function(i) {
-                        //                     return i.itemId === data;
-                        //                 });
-                        //                 return item ? item.itemCode: '';
-                        //             }
-                        //         },
-                        //         { data: 'description' },
-                        //         {
-                        //             data: null,
-                        //             render: function (data, type, row, meta) {
-                        //                 if (row.isActive == true) {
-                        //                     return '<span><i class="bi bi-check-square" style="color: darkgreen;"></i></span>'
-                        //                 }
-                        //                 else {
-                        //                     return '<span><i class="bi bi-app""></i></span>'
-                        //                 }
-                        //             }
-                        //         },
-                        //         { data: 'createdDate' },
-                        //         { data: 'createdBy' },
-                        //         {
-                        //             data: null,
-                        //             render: function (data, type, row, meta) {
-                        //                 const rawData = JSON.stringify(row).replace(/"/g, "&quot;");
-                        //                 return `<div style="display:flex;">
-                        //                             <button class="btn btn-success d-grid edit-bom-btn" style="margin-right:10px;" data-row="${rawData}">
-                        //                                 <span><i class="bi bi-pencil-square"></i>Edit</span>
-                        //                             </button>
-                        //                             <button class="btn btn-danger deactivate-account delete-bom-btn" data-id="${row.boM_Id}">
-                        //                                 <span><i class="bi bi-trash"></i>Delete</span>
-                        //                             </button>
-                        //                         </div>`;
-                        //             }
-                        //         }
-                        //     ],
-                        // });
+                        */
+                        $('#listTable').DataTable({
+                            data: result.data,
+                            paging: false,
+                            searching: false,
+                            "info": false,
+                            "bDestroy": true,
+                            columns: [
+                                { data: 'boM_Id' },
+                                { data: 'item_Id' ,
+                                    render: function(data, type, row) {
+                                        var item = itemList.find(function(i) {
+                                            return i.itemId === data;
+                                        });
+                                        return item ? item.itemCode: '';
+                                    }
+                                },
+                                { 
+                                    data: 'description' ,
+                                    render: function (data, type, row, meta) {
+                                        const maxLength = 50;
+                                        const desc = row.description || "";
+                                        const shortDesc = desc.length > maxLength
+                                            ? desc.substring(0, maxLength) + "..."
+                                            : desc;
+
+                                        return `
+                                            <p style="margin: 0;">
+                                                <span title="${desc}">${shortDesc}</span><br/>
+                                                <span style="font-size:13px;color:grey;">${row.desc2 || ""}</span>
+                                            </p>
+                                        `;
+                                    }
+                                },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        if (row.isActive == true) {
+                                            return '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
+                                        }
+                                        else {
+                                            return '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>'
+                                        }
+                                    }
+                                },
+                                { 
+                                    data: 'createdDate',
+                                    render: function (data, type, row) {
+                                        const date = new Date(data.split('.')[0]);
+                                        if (isNaN(date)) return 'Invalid Date';
+
+                                        return date.toLocaleString('en-GB', {
+                                            year: 'numeric',
+                                            month: 'numeric',
+                                            day: 'numeric',
+                                            hour: 'numeric',
+                                            minute: 'numeric',
+                                            hour: 'numeric',
+                                            hour12: true
+                                        });
+                                    }
+                                },
+                                { data: 'createdBy' },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        const rawData = JSON.stringify(row).replace(/"/g, "&quot;");
+                                        console.log(row);
+                                        return `<div style="display:flex;">
+                                                    <button class="btn btn-primary d-grid view-btn me-2" data-row='${rawData}' onclick="navigateToView(${row.boM_Id}, 'view')">
+                                                    <span><i class="bi bi-eye"></i> View</span>
+                                                    </button>
+                                                    <button class="btn btn-warning d-grid edit-btn me-2" data-row='${rawData}' onclick="navigateToEdit(${row.boM_Id}, 'edit')">
+                                                        <span><i class="bi bi-pencil-square"></i> Edit</span>
+                                                    </button>
+                                                    <button class="btn btn-danger d-grid delete-btn" data-id="${row.boM_Id}">
+                                                        <span><i class="bi bi-trash"></i> Delete</span>
+                                                    </button>
+                                                </div>`;
+                                    }
+                                }
+                            ],
+                        });
 
                         var curCnt = 0;
                         var pageSize = parseInt($("#selpageSize").val());
@@ -1017,7 +952,7 @@
         //     $("#newModal").modal("show");
         // }
 
-        $('#gridTable').on('click', '.delete-bom-btn', function () {
+        $('#listTable').on('click', '.delete-btn', function () {
             const id = $(this).attr('data-id');
             deleteBom(id);
         });

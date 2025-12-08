@@ -1,9 +1,4 @@
-﻿@{
-}
-
-<style>
-</style>
-
+﻿
 @section PageHeader {
     <header class="d-flex align-items-center justify-content-between w-100">
         <h2 class="pageTitle">Slot Calculation Setting</h2>
@@ -19,19 +14,9 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                @* <div class="card-header table-title">
-                    <div class="card-title">
-                        <h2>Slot Calculation Setting <b></b></h2>
-                    </div>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-success" onclick="newItemForm()">
-                            Add New Slot Calculation
-                        </button>
-                    </div>
-                </div> *@
-                <div class="card-body">
-                    <div class="table table-striped table-bordered table-responsive text-nowrap">
-                        <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
+                <div class="card-body pt-0">
+                    <div class="text-nowrap table-container mt-1">
+                        <table id="listTable" class="row-border dataTable hover order-column" style="width:100%">
                             <thead>
                                 <tr>
                                     <th>Max Thickness (mm)</th>
@@ -82,17 +67,19 @@
 
 @section Scripts
 {
-    <link href="~/css/datatables.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+    <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
+    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/js/datatables.min.js"></script>
+    <script src="../js/dataTables.js"></script>
+    <script src="../js/dataTables.columnControl.js"></script>
+    <script src="../js/columnControl.dataTables.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
 
     <script type="text/javascript">
 
         $(document).ready(function () {
-
             loadList();
         });
 
@@ -101,13 +88,11 @@
                 url: "/Setting/GetSlotCalculationList/",
                 type: "GET",
                 dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
                     Swal.fire({
                         text: 'Please Wait',
                         width: '300px',
-
                         allowEscapeKey: false,
                         allowOutsideClick: false,
                         showConfirmButton: false,
@@ -115,33 +100,45 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
-                    console.log(result);
                     swal.close()
                     if (result.success == true) {
                         $('#listTable').DataTable( {
                             data: result.data,
                             paging: true,
                             pageLength: 50,
-                            lengthMenu: [50, 100, 250, 500, 1000],
                             columns: [
-                                { data: 'maxThickness' },
-                                { data: 'reserveSlot' },
+                                { data: 'maxThickness', width: '300px' },
+                                { data: 'reserveSlot', width: '300px' },
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
-                                        return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
-                                        'onclick="editItemForm(\'' + row.slotCalculation_Id + '\', ' +
-                                        '\'' + row.maxThickness + '\', \'' + row.reserveSlot + '\' )">' +
-                                        '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
+                                        return `<div style="display: flex;">
+                                                    <button class="btn btn-warning d-grid" style="margin-right: 10px;"
+                                                    onclick="editItemForm('${row.slotCalculation_Id}', '${row.maxThickness}', '${row.reserveSlot}')">
+                                                        <span><i class="bi bi-pencil-square""></i>  Edit</span>
+                                                    </button>
+                                                    <button class="btn btn-danger deactivate-account" onclick="deleteItem('${row.slotCalculation_Id}', '${row.maxThickness}')">
+                                                        <span><i class="bi bi-trash""></i>  Delete</span>
+                                                    </button>
+                                                </div>`;
+                                    //     return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
+                                    //     'onclick="editItemForm(\'' + row.slotCalculation_Id + '\', ' +
+                                    //     '\'' + row.maxThickness + '\', \'' + row.reserveSlot + '\' )">' +
+                                    //     '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
 
-                                        '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.slotCalculation_Id + '\', \'' + row.maxThickness + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
+                                    //     '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.slotCalculation_Id + '\', \'' + row.maxThickness + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
                                     }
                                 }
                             ],
+                            language: {
+                                searchPlaceholder: "🔍︎ Search",
+                                search: ""
+                            },
+                            ordering: {
+                                indicators: false
+                            },
+                            columnControl: ['orderStatus']
                         });
-
-
-
                     }
                     else {
                         swal.fire({
@@ -228,8 +225,6 @@
                 ReserveSlot: $("#txtReserveSlot").val(),
             }
 
-            //console.log(JSON.stringify(data));
-
             $.ajax({
                 url: '/Setting/SaveSlotCalculation',
                 type: 'POST',
@@ -240,7 +235,6 @@
                     Swal.fire({
                         text: 'Please Wait',
                         width: '300px',
-
                         allowEscapeKey: false,
                         allowOutsideClick: false,
                         showConfirmButton: false,
@@ -248,7 +242,6 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
-                    // console.log(result);
                     if (result.success == true) {
                         $("#myModal").modal("toggle");
                         swal.fire({
@@ -278,7 +271,6 @@
                 }
             });
 
-            // console.log(id);
         }
 
         function deleteItem(id, maxh) {
@@ -293,7 +285,7 @@
                 confirmButtonText: 'ok',
                 cancelButtonText: 'cancel',
                 allowOutsideClick: false
-              }).then(function(r) {
+            }).then(function(r) {
                 if (r.isConfirmed == true) {
 
                     var data = {
@@ -310,7 +302,6 @@
                             Swal.fire({
                                 text: 'Please Wait',
                                 width: '300px',
-
                                 allowEscapeKey: false,
                                 allowOutsideClick: false,
                                 showConfirmButton: false,
@@ -349,7 +340,7 @@
                 } else {
                     return;
                 }
-              });
+            });
 
         }
 

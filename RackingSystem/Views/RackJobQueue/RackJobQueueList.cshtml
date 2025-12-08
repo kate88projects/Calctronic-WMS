@@ -1,7 +1,4 @@
 ﻿
-<style>
-</style>
-
 @section PageHeader {
     <header class="d-flex align-items-center justify-content-between w-100">
         <h2 class="pageTitle">Queue Management</h2>
@@ -23,25 +20,9 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                @* <div class="card-header table-title">
-                    <div class="card-title">
-                        <h2>Queue Management <b></b></h2>
-                    </div>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-primary" onclick="newLoaderForm()">
-                            Add Hub In
-                        </button>
-                        <button type="button" class="btn btn-success" onclick="newJOForm()">
-                            Add Job Order
-                        </button>
-                        <button type="button" class="btn btn-danger" onclick="newJOForm()">
-                            Add Emergency
-                        </button>
-                    </div>
-                </div> *@
                 <div class="card-body">
-                    <div class="table table-striped table-bordered table-responsive text-nowrap">
-                        <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
+                    <div class="text-nowrap table-container mt-1">
+                        <table id="listTable" class="dataTable row-border hover order-column" style="width:100%">
                             <thead>
                                 <tr>
                                     <th>Idx</th>
@@ -63,12 +44,10 @@
 <div class="modal fade" id="loaderModal" role="dialog">
     <div class="modal-dialog">
 
-        <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Add Loader</h4>
             </div>
-            @* <form action="/bin/SaveBin" method="post"> *@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label" for="selLoader">Loader</label>
@@ -80,7 +59,6 @@
                 <button type="button" class="btn btn-primary" onclick="saveLoader()">Save</button>
                 <button type="button" class="btn btn-outline-secondary" onclick="cancelLoaderForm()">Cancel</button>
             </div>
-            @* </form> *@
         </div>
     </div>
 </div>
@@ -88,12 +66,10 @@
 <div class="modal fade" id="joModal" role="dialog">
     <div class="modal-dialog">
 
-        <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Add Job Order</h4>
             </div>
-            @* <form action="/bin/SaveBin" method="post"> *@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label" for="selJO">Job Order</label>
@@ -105,7 +81,6 @@
                 <button type="button" class="btn btn-primary" onclick="saveJO()">Save</button>
                 <button type="button" class="btn btn-outline-secondary" onclick="cancelJOForm()">Cancel</button>
             </div>
-            @* </form> *@
         </div>
     </div>
 </div>
@@ -113,12 +88,10 @@
 <div class="modal fade" id="qModal" role="dialog">
     <div class="modal-dialog">
 
-        <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Add Loader</h4>
             </div>
-            @* <form action="/bin/SaveBin" method="post"> *@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label" for="txtDocNo">Loader / Doc No</label>
@@ -136,18 +109,23 @@
                 <button type="button" class="btn btn-primary" onclick="saveQ()">Save</button>
                 <button type="button" class="btn btn-outline-secondary" onclick="cancelQForm()">Cancel</button>
             </div>
-            @* </form> *@
         </div>
     </div>
 </div>
 
 @section Scripts
 {
-    <link href="~/css/datatables.min.css" rel="stylesheet">
+    @* <link href="~/css/datatables.min.css" rel="stylesheet">
+    <script src="~/js/datatables.min.js"></script> *@
+
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+    <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
+    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/js/datatables.min.js"></script>
+    <script src="../js/dataTables.js"></script>
+    <script src="../js/dataTables.columnControl.js"></script>
+    <script src="../js/columnControl.dataTables.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
 
     <script type="text/javascript">
@@ -161,13 +139,11 @@
                 url: "/RackJobQueue/GetQueueList/",
                 type: "GET",
                 dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
                     Swal.fire({
                         text: 'Please Wait',
                         width: '300px',
-
                         allowEscapeKey: false,
                         allowOutsideClick: false,
                         showConfirmButton: false,
@@ -196,19 +172,29 @@
                                         var btnStart ='';
                                         if (row.idx == 1) {
                                             btnStart = `<button class="btn btn-primary d-grid start-btn" style="margin-left:10px;" data-id="${row.rackJobQueue_Id}" data-row="${rowData}">
-                                        <span><i class="bi bi-setting-square""></i>  Start</span></button>`;
+                                                            <span><i class="bi bi-setting-square""></i>  Start</span>
+                                                        </button>`;
                                         }
-                                        return `<div style="display:flex;"><button class="btn btn-success d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
-                                        <span><i class="bi bi-pencil-square""></i>  Change Q</span></button>
-                                        <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.doc_Id}" data-code="${row.docType}"><span><i class="bi bi-trash""></i>  Delete</span></button>
-                                        ` + btnStart + `</div>`;
+                                        return `<div style="display:flex;">
+                                                    <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
+                                                        <span><i class="bi bi-pencil-square""></i>  Change Q</span>
+                                                    </button>
+                                                    <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.doc_Id}" data-code="${row.docType}">
+                                                        <span><i class="bi bi-trash""></i>  Delete</span>
+                                                    </button>` + btnStart + 
+                                               `</div>`;
                                     }
                                 }
                             ],
+                            language: {
+                                searchPlaceholder: "🔍︎ Search",
+                                search: ""
+                            },
+                            ordering: {
+                                indicators: false
+                            },
+                            columnControl: ['orderStatus']
                         });
-
-
-
                     }
                     else {
                         swal.fire({
@@ -233,7 +219,6 @@
                 url: "/Loader/GetLoaderList_PendingToUnLoad/",
                 type: "GET",
                 dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
                     Swal.fire({
@@ -247,7 +232,6 @@
                     Swal.showLoading();
                 },
                 success: function (result) {
-                    // console.log(result);
                     swal.close();
                     if (result.success == true) {
 
@@ -261,7 +245,6 @@
                             el.value = opt.loader_Id;
                             selLoader.appendChild(el);
                         }
-
                     }
                     else {
                         swal.fire({
@@ -286,13 +269,11 @@
                 url: "/RackJobQueue/GetJOList_PendingToQueue/",
                 type: "GET",
                 dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
                     Swal.fire({
                         text: 'Please Wait',
                         width: '300px',
-
                         allowEscapeKey: false,
                         allowOutsideClick: false,
                         showConfirmButton: false,
@@ -300,7 +281,6 @@
                     Swal.showLoading();
                 },
                 success: function (result) {
-                    // console.log(result);
                     swal.close();
                     if (result.success == true) {
 
@@ -314,7 +294,6 @@
                             el.value = opt.jobOrder_Id;
                             selJO.appendChild(el);
                         }
-
                     }
                     else {
                         swal.fire({
@@ -444,8 +423,6 @@
                 DocType: 'Loader',
             }
 
-            // console.log(JSON.stringify(data));
-
             $.ajax({
                 url: '/RackJobQueue/AddQueue',
                 type: 'POST',
@@ -456,7 +433,6 @@
                     Swal.fire({
                         text: 'Please Wait',
                         width: '300px',
-
                         allowEscapeKey: false,
                         allowOutsideClick: false,
                         showConfirmButton: false,
@@ -464,7 +440,6 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
-                    // console.log(result);
                     if (result.success == true) {
                         $("#loaderModal").modal("toggle");
                         swal.fire({
@@ -493,8 +468,6 @@
                     });
                 }
             });
-
-            // console.log(id);
         }
 
         function saveJO() {
@@ -508,8 +481,6 @@
                 DocType: 'JO',
             }
 
-            // console.log(JSON.stringify(data));
-
             $.ajax({
                 url: '/RackJobQueue/AddQueue',
                 type: 'POST',
@@ -520,7 +491,6 @@
                     Swal.fire({
                         text: 'Please Wait',
                         width: '300px',
-
                         allowEscapeKey: false,
                         allowOutsideClick: false,
                         showConfirmButton: false,
@@ -528,7 +498,6 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
-                    // console.log(result);
                     if (result.success == true) {
                         $("#joModal").modal("toggle");
                         swal.fire({
@@ -557,8 +526,6 @@
                     });
                 }
             });
-
-            // console.log(id);
         }
 
         $('#listTable').on('click', '.delete-btn', function () {
@@ -597,7 +564,6 @@
                             Swal.fire({
                                 text: 'Please Wait',
                                 width: '300px',
-
                                 allowEscapeKey: false,
                                 allowOutsideClick: false,
                                 showConfirmButton: false,
@@ -606,7 +572,6 @@
                         },
                         success: function (result) {
                             if (result.success == true) {
-                                // $("#myModal").modal("toggle");
                                 swal.fire({
                                     icon: 'success',
                                     title: "Success Deleted",
@@ -653,8 +618,6 @@
                 NewIdx: newIdx,
             }
 
-            // console.log(JSON.stringify(data));
-
             $.ajax({
                 url: '/RackJobQueue/ChangeQueue',
                 type: 'POST',
@@ -665,7 +628,6 @@
                     Swal.fire({
                         text: 'Please Wait',
                         width: '300px',
-
                         allowEscapeKey: false,
                         allowOutsideClick: false,
                         showConfirmButton: false,
@@ -673,7 +635,6 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
-                    // console.log(result);
                     if (result.success == true) {
                         $("#joModal").modal("toggle");
                         swal.fire({

@@ -5,17 +5,6 @@
     .row .form-check {
         margin-left: 10px;
     }
-
-    .modal-body {
-        max-height: calc(100vh - 200px);
-        overflow-y: auto;
-    }
-
-    .edit-trolley-btn, .delete-trolley-btn {
-        height: 33px;
-        padding: 5px 10px;
-        font-size: 14px;
-    }
 </style>
 
 @section PageHeader {
@@ -33,20 +22,9 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                @* <div class="card-header table-title">
-                    <div class="card-title">
-                        <h2>Universal Trolley List <b></b></h2>
-                    </div>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-success" onclick="newTrolleyForm()">
-                            Add New Universal Trolley
-                        </button>
-                    </div>
-                </div> *@
                 <div class="card-body pt-0">
-                    <div id="gridTable" class="table table-responsive text-nowrap mt-3"></div>
-                    @* <div class="table table-striped table-bordered table-responsive text-nowrap">
-                        <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
+                    <div class="text-nowrap table-container mt-1">
+                        <table id="listTable" class="dataTable row-border hover order-column" style="width:100%">
                             <thead>
                                 <tr>
                                     <th>Universal Trolley Code</th>
@@ -55,13 +33,13 @@
                                     <th>Total Column</th>
                                     <th>Total Row</th>
                                     <th>Is Active</th>
-                                    // <th>Status</th>f
+                                    @* <th>Status</th> *@
                                     <th>Side</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
                         </table>
-                    </div> *@
+                    </div>
                 </div>
             </div>
         </div>
@@ -129,19 +107,20 @@
 
 @section Scripts
 {
-    @* <link href="~/css/datatables.min.css" rel="stylesheet"> *@
-    @* <script src="~/js/datatables.min.js"></script> *@
-
-    <link rel="stylesheet" href="~/css/gridjs.min.css"> 
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+    <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
+    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/js/gridjs.umd.js"></script>
+    <script src="../js/dataTables.js"></script>
+    <script src="../js/dataTables.columnControl.js"></script>
+    <script src="../js/columnControl.dataTables.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
 
-	<script type="text/javascript">
-        let gridInstance = null;
+    @* <link rel="stylesheet" href="~/css/gridjs.min.css"> *@
+    @* <script src="~/js/gridjs.umd.js"></script> *@
 
+	<script type="text/javascript">
         $(document).ready(function () {
             loadList();
         });
@@ -165,6 +144,7 @@
                 success: function (result) {
                     swal.close()
                     if (result.success == true) {
+                        /*
                         if (gridInstance) {
                             gridInstance.destroy();
                         }
@@ -254,7 +234,8 @@
                             footer.id = "gridFooter";
                         }
                         document.getElementById("gridFooter").classList.remove("gridjs-footer");
-                        /*
+                        */
+                        
                         $('#listTable').DataTable( {
                             data: result.data,
                             paging: true,
@@ -270,10 +251,10 @@
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         if (row.isActive == true) {
-                                            return '<span><i class="bi bi-check-square" style="color: darkgreen;"></i></span>'
+                                            return '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
                                         }
                                         else {
-                                            return '<span><i class="bi bi-app""></i></span>'
+                                            return '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>'
                                         }
                                     }
                                 },
@@ -292,18 +273,25 @@
                                     render: function (data, type, row, meta) {
                                         const rawData = JSON.stringify(row).replace(/"/g, "&quot;");
                                         return `<div style="display:flex;">
-                                                    <button class="btn btn-success d-grid edit-trolley-btn" style="margin-right:10px;" data-row="${rawData}">
+                                                    <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rawData}">
                                                         <span><i class="bi bi-pencil-square"></i>Edit</span>
                                                     </button>
-                                                    <button class="btn btn-danger deactivate-account delete-trolley-btn" data-id="${row.trolley_Id}" data-code="${row.trolleyCode}">
+                                                    <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.trolley_Id}" data-code="${row.trolleyCode}">
                                                         <span><i class="bi bi-trash"></i>Delete</span>
                                                     </button>
                                                 </div>`;
                                     }
                                 }
                             ],
+                            language: {
+                                searchPlaceholder: "🔍︎ Search",
+                                search: ""
+                            },
+                            ordering: {
+                                indicators: false
+                            },
+                            columnControl: ['orderStatus']
                         });
-                        */
                     }
                     else {
                         swal.fire({
@@ -338,8 +326,8 @@
             removeErrMsg(true);
         }
 
-        $('#gridTable').on('click', '.edit-trolley-btn', function() {
-            const row = JSON.parse(atob($(this).attr('data-row')));
+        $('#listTable').on('click', '.edit-btn', function() {
+            const row = JSON.parse($(this).attr('data-row'));
             editTrolleyForm(row);
         });
 
@@ -501,7 +489,7 @@
             }
         }
 
-        $('#gridTable').on('click', '.delete-trolley-btn', function() {
+        $('#listTable').on('click', '.delete-btn', function() {
             const id = $(this).attr('data-id');
             const slotCode = $(this).attr('data-code');
             deleteTrolley(id, slotCode);

@@ -1,19 +1,9 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
-}
-
+﻿
 <style type="text/css">
     .row {
         clear: right;
     }
 
-    .view-btn, .edit-btn, .delete-btn {
-        height: 33px;
-        font-size: 14px;
-        padding: 5px 10px;
-    }
 </style>
 
 @section PageHeader {
@@ -31,18 +21,26 @@
     <div class="row">
         <div class="col-12">
             <div class="card card-outline ">
-                @* <div class="card-header table-title">
-                    <div class="card-title">
-                        <h2>Emergency JOB Order List <b></b></h2>
-                    </div>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-success" onclick="navigateToNew('new')">
-                            Add New Emergency JO 
-                        </button>
-                    </div>
-                </div> *@
                 <div class="card-body pt-0">
-                    <div id="gridTable" class="table table-responsive text-nowrap mt-3"></div>
+                    @* <div id="gridTable" class="table table-responsive text-nowrap mt-3"></div> *@
+                    <div class="text-nowrap table-container mt-1">
+                        <table id="listTable" class="dataTable row-border hover order-column" style="width:100%">
+                            <thead>
+                                <tr>
+                                    @* <th>Job Order Id</th> *@
+                                    <th>Doc No</th>
+                                    <th>Doc Date</th>
+                                    <th>Description</th>
+                                    <th>Status</th>
+                                    <th>Created Date</th>
+                                    @*   <th>Created By</th>
+                                    <th>Updated Date</th>
+                                    <th>Updated By</th> *@
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -52,12 +50,17 @@
 @section Scripts
 {
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
-    <link rel="stylesheet" href="~/css/gridjs.min.css">
+    <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
+    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="../js/dataTables.js"></script>
+    <script src="../js/dataTables.columnControl.js"></script>
+    <script src="../js/columnControl.dataTables.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
-    <script src="~/js/gridjs.umd.js"></script>
 
+    @* <script src="~/js/gridjs.umd.js"></script>
+    <link rel="stylesheet" href="~/css/gridjs.min.css"> *@
 
     <script type="text/javascript">
         let gridInstance = null;
@@ -87,6 +90,7 @@
                     console.log("result", result);
 
                     if (result.success == true) {
+                        /*
                         if (gridInstance) {
                             gridInstance.destroy();
                         }
@@ -181,11 +185,101 @@
                             footer.id = "gridFooter";
                         }
                         document.getElementById("gridFooter").classList.remove("gridjs-footer");
-                    }
-                    else {
-                        swal.fire({
-                            icon: 'error',
-                            title: "Wait",
+                        */
+
+                        $('#listTable').DataTable({
+                           data: result.data,
+                           paging: true,
+                           searching: true,
+                           "info": true,
+                           "bDestroy": true,
+                           columns: [
+                              { data: 'docNo' },
+                              {
+                                  data: null ,
+                                  render: function (data, type, row, meta) {
+                                      const docDate = new Date(row.docDate.split('.')[0]);
+                                        if (isNaN(docDate)) return 'Invalid Date';
+
+                                        return docDate.toLocaleString('en-GB', {
+                                            year: 'numeric',
+                                            month: 'numeric',
+                                            day: 'numeric',
+                                            hour: 'numeric',
+                                            minute: 'numeric',
+                                            hour: 'numeric',
+                                            hour12: true
+                                        });
+                                      return formattedDate;
+                                  }
+                              },
+                              {
+                                  data: 'description' ,
+                                  render: function (data, type, row, meta) {
+                                      const maxLength = 50;
+                                      const desc = row.description || "";
+                                      const shortDesc = desc.length > maxLength
+                                          ? desc.substring(0, maxLength) + "..."
+                                          : desc;
+
+                                      return `
+                                           <p style="margin: 0;">
+                                              <span title="${desc}">${shortDesc}</span><br/>
+                                              <span style="font-size:13px;color:grey;">${row.desc2 || ""}</span>
+                                          </p>
+                                      `;
+                                  }
+                              },
+                              { data: 'status' },
+                              {
+                                  data: 'createdDate',
+                                  render: function (data, type, row) {
+                                      const date = new Date(data.split('.')[0]);
+                                      if (isNaN(date)) return 'Invalid Date';
+
+                                      return date.toLocaleString('en-GB', {
+                                          year: 'numeric',
+                                          month: 'numeric',
+                                          day: 'numeric',
+                                          hour: 'numeric',
+                                          minute: 'numeric',
+                                          hour: 'numeric',
+                                          hour12: true
+                                      });
+                                  }
+                              },
+                              {
+                                  data: null,
+                                  render: function (data, type, row, meta) {
+                                      const rawData = JSON.stringify(row).replace(/"/g, "&quot;");
+                                      return `<div style="display:flex;">
+                                                 <button class="btn btn-primary d-grid view-btn me-2" data-row='${rawData}' onclick="navigateToView(${row.jobOrderEmergency_Id}, 'view')">
+                                                      <span><i class="bi bi-eye"></i> View</span>
+                                                  </button>
+                                                  <button class="btn btn-warning d-grid edit-btn me-2" data-row='${rawData}' onclick="navigateToEdit(${row.jobOrderEmergency_Id}, 'edit')">
+                                                      <span><i class="bi bi-pencil-square"></i> Edit</span>
+                                                  </button>
+                                                  <button class="btn btn-danger d-grid delete-btn" data-id="${row.jobOrderEmergency_Id}">
+                                                      <span><i class="bi bi-trash"></i> Delete</span>
+                                                  </button>
+                                              </div>`;
+                                  }
+                              },
+                          ],
+                          language: {
+                                searchPlaceholder: "🔍︎ Search",
+                                search: ""
+                            },
+                            ordering: {
+                                indicators: false
+                            },
+                            columnControl: ['orderStatus']
+                      });
+                   }
+                   else {
+                       swal.fire({
+                           icon: 'error',
+                           title: "Wait",
                             text: result.errMessage
                         });
                     }
@@ -212,7 +306,7 @@
             window.location.href = '@Url.Action("JOEmergencyDetails", "JO", new { id = "_id_", mode = "_mode_" })'.replace('_id_', id).replace('_mode_', mode);
         }
 
-        $('#gridTable').on('click', '.delete-btn', function () {
+        $('#listTable').on('click', '.delete-btn', function () {
             const id = $(this).attr('data-id');
             deleteEmergency(id);
         });

@@ -1,10 +1,4 @@
-﻿@{
-}
-
-
-<style>
-</style>
-
+﻿
 @section PageHeader {
     <header class="d-flex align-items-center justify-content-between w-100">
         <h2 class="pageTitle">Slot Column Setting</h2>
@@ -20,19 +14,9 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                @* <div class="card-header table-title">
-                    <div class="card-title">
-                        <h2>Slot Column Setting <b></b></h2>
-                    </div>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-success" onclick="updateSetting()">
-                            Update Setting
-                        </button>
-                    </div>
-                </div> *@
-                <div class="card-body">
-                    <div class="table table-striped table-bordered table-responsive text-nowrap">
-                        <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
+                <div class="card-body pt-0">
+                    <div class="text-nowrap table-container mt-1">
+                        <table id="listTable" class="row-border dataTable hover order-column" style="width:100%">
                             <thead>
                                 <tr>
                                     <th>Column No</th>
@@ -47,7 +31,6 @@
                     </div>
                 </div>
                 <input type="hidden" id="txtTotalCol">
-
             </div>
         </div>
     </div>
@@ -55,11 +38,14 @@
 
 @section Scripts
 {
-    <link href="~/css/datatables.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+    <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
+    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/js/datatables.min.js"></script>
+    <script src="../js/dataTables.js"></script>
+    <script src="../js/dataTables.columnControl.js"></script>
+    <script src="../js/columnControl.dataTables.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
 
     <script type="text/javascript">
@@ -74,13 +60,11 @@
                 url: "/Setting/GetSlotColumnSetting/",
                 type: "GET",
                 dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
                     Swal.fire({
                         text: 'Please Wait',
                         width: '300px',
-
                         allowEscapeKey: false,
                         allowOutsideClick: false,
                         showConfirmButton: false,
@@ -88,39 +72,37 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
-                    // console.log(result);
                     swal.close()
                     if (result.success == true) {
                         $('#listTable').DataTable( {
                             data: result.data,
                             paging: true,
                             pageLength: 50,
-                            lengthMenu: [50, 100, 250, 500, 1000],
                             columns: [
                                 { data: 'colNo' },
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         const rowIndex = meta.row;
-                                        return '<input type="hidden" id="txtId' + rowIndex + '" value="' + row.slotColumnSetting_Id + '">' +
-                                        '<input type="number" class="form-control" id="txtEDIn' + rowIndex + '" value="' + row.emptyDrawer_IN_Idx + '">' +
-                                        '<div id="txtEDIn' + rowIndex + 'Error" class="error-message"></div>';
+                                        return `<input type="hidden" id="txtId${rowIndex}" value="${row.slotColumnSetting_Id}">
+                                            <input type="number" class="form-control" id="txtEDIn${rowIndex}" value="${row.emptyDrawer_IN_Idx}">
+                                            <div id="txtEDIn${rowIndex}Error" class="error-message"></div>`;
                                     }
                                 },
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         const rowIndex = meta.row;
-                                        return '<input type="number" class="form-control" id="txtEDOut' + rowIndex + '" value="' + row.emptyDrawer_OUT_Idx + '">' +
-                                        '<div id="txtEDOut' + rowIndex + 'Error" class="error-message"></div>';
+                                        return `<input type="number" class="form-control" id="txtEDOut${rowIndex}" value="${row.emptyDrawer_OUT_Idx}">
+                                            <div id="txtEDOut${rowIndex}Error" class="error-message"></div>`;
                                     }
                                 },
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         const rowIndex = meta.row;
-                                        return '<input type="number" class="form-control" id="txtRIn' + rowIndex + '" value="' + row.reel_IN_Idx + '">' +
-                                        '<div id="txtRIn' + rowIndex + 'Error" class="error-message"></div>';
+                                        return `<input type="number" class="form-control" id="txtRIn${rowIndex}" value="${row.reel_IN_Idx}">
+                                                <div id="txtRIn${rowIndex}Error" class="error-message"></div>`;
                                     }
                                 },
                                 // {
@@ -138,15 +120,21 @@
                                 //         'onclick="editItemForm(\'' + row.slotColumnSetting_Id + '\', ' +
                                 //         '\'' + row.maxThickness + '\', \'' + row.reserveSlot + '\', \'' + row.maxThickness + '\', \'' + row.reserveSlot + '\' )">' +
                                 //         '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
-
                                 //         '</div>';
                                 //     }
                                 // }
                             ],
+                            language: {
+                                searchPlaceholder: "🔍︎ Search",
+                                search: ""
+                            },
+                            ordering: {
+                                indicators: false
+                            },
+                            columnControl: ['orderStatus']
                         });
 
                         $('#txtTotalCol').val(result.totalRecords);
-
                     }
                     else {
                         swal.fire({
@@ -243,8 +231,6 @@
                 dataList.push(data);
             }
 
-            // console.log(JSON.stringify(dataList));
-
             $.ajax({
                 url: '/Setting/SaveSlotColumnSetting',
                 type: 'POST',
@@ -255,7 +241,6 @@
                     Swal.fire({
                         text: 'Please Wait',
                         width: '300px',
-
                         allowEscapeKey: false,
                         allowOutsideClick: false,
                         showConfirmButton: false,
@@ -263,7 +248,6 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
-                    // console.log(result);
                     if (result.success == true) {
                         $("#myModal").modal("toggle");
                         swal.fire({
@@ -293,7 +277,6 @@
                 }
             });
 
-            // console.log(id);
         }
 
     </script>

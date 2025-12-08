@@ -10,10 +10,16 @@
     }
 </style>
 
+@section PageHeader {
+    <header class="d-flex align-items-center justify-content-between w-100">
+        <h2 class="pageTitle">Hub In Task(P) </h2>
+    </header>
+}
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-6">
-            <div class="card card-primary card-outline mb-4">
+            <div class="card card-primary card-outline mb-4 mt-3">
                 <div class="card-header"><div class="card-title">Loader / Gantry</div></div>
                 <div class="card-body">
                     <div class="row">
@@ -59,13 +65,13 @@
                     </div>
                     <hr />
                     @* <button class="btn btn-warning" onclick="retry2a()" id="btnRetry2a" style="width:20%;">Get Flexilock</button> *@
-                    <button class="btn btn-danger" onclick="loadPLCSetLoaderUnload(2)" id="btnRetry2b" style="width:20%;">Set Unload</button>
+                    <button class="btn btn-danger" onclick="loadPLCSetLoaderUnload(2)" id="btnRetry2b" style="white-space: nowrap;">Set Unload</button>
                     @* <button class="btn btn-warning" onclick="retry2c()" id="btnRetry2c" style="width:20%;">Get Unload</button> *@
 
                     <hr />
-                    <button class="btn btn-danger" onclick="loadPLCStartBarcodeScanner()" id="btnRetry3b" style="width:20%;">Scan Reel</button>
-                    <button class="btn btn-warning" onclick="loadPLCScanReelID()" id="btnRetry3c" style="width:20%;">Get Reel Info</button>
-                    <button class="btn btn-danger" onclick="loadPLCSetActualHeight(2)" id="btnRetry3d" style="width:20%;">Set Act. Height</button>
+                    <button class="btn btn-danger" onclick="loadPLCStartBarcodeScanner()" id="btnRetry3b" style="white-space: nowrap;">Scan Reel</button>
+                    <button class="btn btn-warning" onclick="loadPLCScanReelID()" id="btnRetry3c" style="white-space: nowrap;">Get Reel Info</button>
+                    <button class="btn btn-danger" onclick="loadPLCSetActualHeight(2)" id="btnRetry3d" style="white-space: nowrap;">Set Act. Height</button>
 
                     <hr />
                     @* <div class="row">
@@ -82,18 +88,18 @@
                             </div>
                         </div>
                     </div> *@
-                    <button class="btn btn-warning" onclick="loadPLCGetPickStatus()" id="btnRetry3e" style="width:20%;">Pick Status</button>
-                    <button class="btn btn-danger" onclick="loadPLCPlaceReel()" id="btnRetry3e" style="width:20%;">Place Reel</button>
-                    <button class="btn btn-warning" onclick="loadPLCGetPlaceStatus()" id="btnRetry3e" style="width:20%;">Place Status</button>
+                    <button class="btn btn-warning" onclick="loadPLCGetPickStatus()" id="btnRetry3e" style="white-space: nowrap;">Pick Status</button>
+                    <button class="btn btn-danger" onclick="loadPLCPlaceReel()" id="btnRetry3e" style="white-space: nowrap;">Place Reel</button>
+                    <button class="btn btn-warning" onclick="loadPLCGetPlaceStatus()" id="btnRetry3e" style="white-space: nowrap;">Place Status</button>
 
                     <hr />
-                    <button class="btn btn-primary" onclick="endTask()" id="btnEnd" style="width:20%;">All Empty</button>
-                    <button class="btn btn-primary" onclick="endTaskFull()" id="btnEnd" style="width:20%;">All Full</button>
+                    <button class="btn btn-primary" onclick="endTask()" id="btnEnd" style="white-space: nowrap;">All Empty</button>
+                    <button class="btn btn-primary" onclick="endTaskFull()" id="btnEnd" style="white-space: nowrap;">All Full</button>
                 </div>
             </div>
         </div>
         <div class="col-6">
-            <div class="card card-success card-outline mb-4">
+            <div class="card card-success card-outline mb-4 mt-3">
                 <div class="card-header"><div class="card-title">Cartesian</div></div>
                 <div class="card-body">
                     <div class="row">
@@ -138,14 +144,14 @@
                         </div>
                     </div>
                     <hr />
-                    <button class="btn btn-primary" onclick="loadPLCGetEmptyTraySlot()" id="btnRetry3a1" style="width:20%;">Get Tray Slot</button>
-                    <button class="btn btn-danger" onclick="loadPLCTakeEmptyTray()" id="btnRetry3a1" style="width:20%;">Take Tray</button>
-                    <button class="btn btn-warning" onclick="loadPLCGetRetrieveTrayStatus()" id="btnRetry3a2" style="width:20%;">Get Tray Status</button>
+                    <button class="btn btn-primary" onclick="loadPLCGetEmptyTraySlot()" id="btnRetry3a1" style="white-space: nowrap;">Get Tray Slot</button>
+                    <button class="btn btn-danger" onclick="loadPLCTakeEmptyTray()" id="btnRetry3a1" style="white-space: nowrap;">Take Tray</button>
+                    <button class="btn btn-warning" onclick="loadPLCGetRetrieveTrayStatus()" id="btnRetry3a2" style="white-space: nowrap;">Get Tray Status</button>
 
                     <hr />
-                    <button class="btn btn-primary" onclick="loadPLCGetSlot()" id="btnRetry3a1" style="width:20%;">Get Slot</button>
-                    <button class="btn btn-danger" onclick="loadPLCPutAway()" id="btnRetry4c1" style="width:20%;">Put Away</button>
-                    <button class="btn btn-warning" onclick="loadPLCGetPutAwayStatus()" id="btnRetry4c2" style="width:20%;">Put Away Status</button>
+                    <button class="btn btn-primary" onclick="loadPLCGetSlot()" id="btnRetry3a1" style="white-space: nowrap;">Get Slot</button>
+                    <button class="btn btn-danger" onclick="loadPLCPutAway()" id="btnRetry4c1" style="white-space: nowrap;">Put Away</button>
+                    <button class="btn btn-warning" onclick="loadPLCGetPutAwayStatus()" id="btnRetry4c2" style="white-space: nowrap;">Put Away Status</button>
 
                     @*     <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="exampleCheck1">

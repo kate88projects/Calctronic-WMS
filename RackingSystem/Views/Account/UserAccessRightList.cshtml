@@ -1,6 +1,4 @@
-﻿@{
-}
-
+﻿
 <style>
     tr:hover td {
         background-color: #F8F6F0;
@@ -27,20 +25,10 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                @* <div class="card-header table-title">
-                    <div class="card-title">
-                        <h2>User Access Right List <b></b></h2>
-                    </div>
-                    <div class="card-tools"> *@
-                        @* <button type="button" class="btn btn-success" onclick="newItemForm()">
-                            Update User UAC
-                        </button> *@
-                    @* </div> 
-                </div>*@
                 <div class="card-body pt-0">
-                    <div id="gridTable" class="table table-responsive text-nowrap mt-3"></div>
-                    @* <div class="table table-striped table-bordered table-responsive text-nowrap">
-                        <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
+                    @* <div id="gridTable" class="table table-responsive text-nowrap mt-3"></div> *@
+                    <div class="text-nowrap table-container mt-1">
+                        <table id="listTable" class="row-border dataTable hover order-column" style="width:100%">
                             <thead>
                                 <tr>
                                     <th>Username</th>
@@ -50,7 +38,7 @@
                                 </tr>
                             </thead>
                         </table>
-                    </div> *@
+                    </div>
                 </div>
             </div>
         </div>
@@ -60,12 +48,10 @@
 <div class="modal fade" id="myModal" role="dialog">
     <div class="modal-dialog modal-lg">
 
-        <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Update User Access Right</h4>
             </div>
-            @* <form action="/bin/SaveBin" method="post"> *@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label" for="txtFullname">Fullname</label>
@@ -260,7 +246,6 @@
                 <button type="button" class="btn btn-primary" onclick="savePermission()">Save</button>
                 <button type="button" class="btn btn-outline-secondary" onclick="cancelForm()">Cancel</button>
             </div>
-            @* </form> *@
         </div>
     </div>
     </div>
@@ -268,14 +253,17 @@
 
 @section Scripts
 {
-    <link href="~/css/datatables.min.css" rel="stylesheet"> 
-    <script src="~/js/datatables.min.js"></script>
+    @*<link href="~/css/datatables.min.css" rel="stylesheet"> 
+    <script src="~/js/datatables.min.js"></script> *@
 
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
-    <link rel="stylesheet" href="~/css/gridjs.min.css">
+    <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
+    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/js/gridjs.umd.js"></script>
+    <script src="../js/dataTables.js"></script>
+    <script src="../js/dataTables.columnControl.js"></script>
+    <script src="../js/columnControl.dataTables.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
 
     <script type="text/javascript">
@@ -291,13 +279,11 @@
                 url: "/Account/GetUserAccessRightList/",
                 type: "GET",
                 dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
                     Swal.fire({
                         text: 'Please Wait',
                         width: '300px',
-
                         allowEscapeKey: false,
                         allowOutsideClick: false,
                         showConfirmButton: false,
@@ -305,10 +291,8 @@
                     Swal.showLoading();
                 },
                 success: function (result) {
-                    console.log(result);
                     swal.close()
                     if (result.success == true) {
-                        /*
                         $('#listTable').DataTable( {
                             data: result.data,
                             paging: true,
@@ -321,10 +305,10 @@
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         if (row.isActive == true) {
-                                            return '<span><i class="bi bi-check-square" style="color: darkgreen;"></i></span>'
+                                            return '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
                                         }
                                         else {
-                                            return '<span><i class="bi bi-app""></i></span>'
+                                            return '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>'
                                         }
                                     }
                                 },
@@ -332,14 +316,24 @@
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
-                                        return `<div style="display:flex;"><button class="btn btn-success d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
-                                        <span><i class="bi bi-pencil-square""></i>  Edit</span></button></div>`;
+                                        return `<div style="display:flex;">
+                                                   <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
+                                                        <span><i class="bi bi-pencil-square""></i>  Edit</span>
+                                                    </button>`;
                                     }
                                 }
                             ],
+                            language: {
+                                searchPlaceholder: "🔍︎ Search",
+                                search: ""
+                            },
+                            ordering: {
+                                indicators: false
+                            },
+                            columnControl: ['orderStatus']
                         });
-                        */
-
+                        
+                       /*
                        if (gridInstance) {
                             gridInstance.destroy();
                         }
@@ -394,6 +388,7 @@
                             footer.id = "gridFooter";
                         }
                         document.getElementById("gridFooter").classList.remove("gridjs-footer");
+                        */
                     }
                     else {
                         swal.fire({
@@ -413,8 +408,8 @@
             });
         }
 
-        $('#gridTable').on('click', '.edit-btn', function () {
-            const row = JSON.parse(atob($(this).attr('data-row')));
+        $('#listTable').on('click', '.edit-btn', function () {
+            const row = JSON.parse($(this).attr('data-row'));
             showForm(row);
         });
 
@@ -450,8 +445,8 @@
                             else {
                                 $(inputs[i]).prop('checked', false);
                             }
-            }
-            else {
+                        }
+                        else {
                             $(inputs[i]).prop('checked', false);
                         }
                     }
@@ -536,8 +531,6 @@
                 UACIdList: permissions
             }
 
-            //console.log(JSON.stringify(data));
-
             $.ajax({
                 url: '/Account/SaveUserAccessRight',
                 type: 'POST',
@@ -548,7 +541,6 @@
                     Swal.fire({
                         text: 'Please Wait',
                         width: '300px',
-
                         allowEscapeKey: false,
                         allowOutsideClick: false,
                         showConfirmButton: false,
@@ -556,7 +548,6 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
-                    // console.log(result);
                     if (result.success == true) {
                         $("#myModal").modal("toggle");
                         swal.fire({
@@ -586,7 +577,6 @@
                 }
             });
 
-            // console.log(id);
         }
 
         function checkGroup() {
@@ -688,9 +678,7 @@
                 if ($(".chkSetting:checked").length == $(".chkSetting").length) {
                     $("#txtSetting").prop('checked', true);
                 }
-
             });
-
         }
 
     </script>

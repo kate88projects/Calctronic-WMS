@@ -22,11 +22,6 @@
         width: 100%;
         font-weight: bold;
     }
-
-    .modal-body {
-      max-height: calc(100vh - 200px); 
-      overflow-y: auto;
-    }
     
     .matching-btn {
         justify-content: center;
@@ -36,13 +31,13 @@
         padding-left: 10px;
     }
 
-    .edit-slot-btn, .delete-slot-btn {
+    .edit-btn, .delete-btn {
         height: 33px;
         padding: 5px 10px;
         font-size: 15px;
     }
 
-    .dt-input {
+/*     .dt-input {
         margin-right: 10px;
     }
 
@@ -57,8 +52,7 @@
 
     th, td {
 		padding: 5px;
-		EEEEEE
-        /* border: 0.5px solid #; */
+        /* border: 0.5px solid #EEEEEE;
     }
 
     .dataTable {
@@ -103,7 +97,7 @@
 
     /* .dt-info, .dt-paging, label {
         font-size: 15px;
-    } */
+    } 
 
     .dt-paging-button {
         border-left: 0.5px solid #C9CDCF !important;
@@ -122,7 +116,7 @@
 
     div.table-container .dt-container .dt-paging .dt-paging-button.current:hover {
         background-color: none; 
-    }
+    } */
 
 
 </style>
@@ -200,7 +194,7 @@
                 </div> *@
                 <div class="card-body pt-0">
                     @* <div id="gridTable" class="table table-responsive text-nowrap mt-3"></div> *@
-                    <div class="text-nowrap table-container">
+                    <div class="text-nowrap table-container mt-1">
                         <table id="listTable" class="dataTable row-border hover order-column" style="width:100%">
                             <thead>
                                 @* //dt-column-search table-bordered table-responsive dataTable hover *@
@@ -208,7 +202,7 @@
                                     <th>Slot Code</th>
                                     <th>Column No</th>
                                     <th>Row No</th>
-                                    <th>Is Active</th>
+                                    <th>Active State</th>
                                     <th>Is Left</th>
                              @*        <th>Has Empty Tray</th>
                                     <th>Has Reel</th>  *@
@@ -571,27 +565,26 @@
 @section Scripts
 {
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
-@*     <link rel="stylesheet" href="~/css/gridjs.min.css"> *@
     <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
     <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
 
     <script src="../lib/jquery/dist/jquery.min.js"></script>
-    @* <script src="../js/jquery-3.7.1.js"></script> *@
     <script src="../js/dataTables.js"></script>
     <script src="../js/dataTables.columnControl.js"></script>
     <script src="../js/columnControl.dataTables.js"></script> 
-        
+
     <script src="~/js/sweetalert2.all.min.js"></script>
-    @* <script src="../js/gridjs.umd.js"></script> *@
     <script src="../js/xlsx.full.min.js"></script>
     <script src="../js/exceljs.min.js"></script>
+
+    @* <link rel="stylesheet" href="~/css/gridjs.min.css"> *@
+    @* <script src="../js/gridjs.umd.js"></script> *@
+    @* <script src="../js/jquery-3.7.1.js"></script> *@
+
 
     <script type="text/javascript">
         let uploadedFileContent = null;
         let uploadedFileExtension = null;
-        // let gridInstance = null;
-        // let pageLimit = 10;
-        // let dataArry = null;
 
         $(document).ready(function () {
             loadList();
@@ -622,7 +615,7 @@
                             data: result.data,
                             paging: true,
                             pageLength: 50,
-                            lengthMenu: [10, 20, 50, 100],
+                            lengthMenu: [50, 100, 250, 500, 1000],
                             columns: [
                                 { data: 'slotCode' },
                                 { data: 'colNo' },
@@ -631,10 +624,10 @@
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         if (row.isActive == true) {
-                                            return '<span><i class="bi bi-check-square" style="color: darkgreen;"></i></span>'
+                                            return '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
                                         }
                                         else {
-                                            return '<span><i class="bi bi-app""></i></span>'
+                                            return '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>'
                                         }
                                     }
                                 },
@@ -680,10 +673,10 @@
                                     render: function (data, type, row, meta) {
                                         const rowData = JSON.stringify(row).replace(/"/g, "&quot;");  //replace all double quotes with HTML entity  //custom data attribute >> data-*
                                         return `<div style="display:flex;">
-                                                    <button class="btn btn-warning d-grid edit-slot-btn" style="margin-right: 10px;" data-row="${rowData}">
+                                                    <button class="btn btn-warning d-grid edit-btn" style="margin-right: 10px;" data-row="${rowData}">
                                                         <span><i class="bi bi-pencil-square"></i>Edit</span>
                                                     </button>
-                                                    <button class="btn btn-danger delete-slot-btn" data-id="${row.slot_Id}" data-code="${row.slotCode}">
+                                                    <button class="btn btn-danger delete-btn" data-id="${row.slot_Id}" data-code="${row.slotCode}">
                                                         <span><i class="bi bi-trash"></i>Delete</span>
                                                     </button>
                                                 </div>`;
@@ -697,17 +690,8 @@
                             ordering: {
                                 indicators: false
                             },
-                            columnControl: ['orderStatus'],
-                            columnDropdowns: [
-                                { width: '50px' },
-                            ]
+                            columnControl: ['orderStatus']
                         });
-                        
-                        /*
-                       if (gridInstance) {
-                            gridInstance.destroy();
-                       }
-                       renderGrid(dataArry);*/
                         
                     }
                     else {
@@ -727,110 +711,6 @@
                 }
             });       
            
-        }
-
-        // document.getElementById("gotoPage").addEventListener("change", (e) => {
-        //   const page = parseInt(e.target.value, 10);
-        //   grid.updateConfig({
-        //     pagination: { enabled: true, limit: 5, page }
-        //   }).forceRender();
-        // });
-
-        function renderGrid(dataArry, page=1) {
-            gridInstance = new gridjs.Grid({
-                columns: [
-                    { name: 'Slot Code', id: 'slotCode' },
-                    { name: 'Col No', id: 'colNo', width: '102px' },
-                    { name: 'Row No', id: 'rowNo', width: '110px' },
-                    {
-                        name: 'Active State',
-                        id : 'isActive',
-                        width: '144px',
-                        formatter: (cell, row) => {
-                            const badgeHtml = row.cells[3].data === true
-                                ? '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
-                                : '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>';
-                            return gridjs.html(`<div style="text-align:center;">${badgeHtml}</div>`);
-                        }
-                    },
-                    {
-                        name: 'Side',
-                        id :'isLeft',
-                        width: '90px',
-                        data: row => row.isLeft,
-                        formatter: cell => {
-                            const sideMap = { false: 'Right', true: 'Left' };
-                            return sideMap[cell] || cell;
-                        }
-                    },
-                    { name: 'X Pulse', id: 'xPulse', width: '106px' },
-                    { name: 'Z Pulse', id: 'yPulse', width: '106px' },
-                    { name: 'QR-X Pulse', id: 'qrxPulse', width: '134px' },
-                    { name: 'QR-Z Pulse', id: 'qryPulse', width: '134px' },
-                    { name: 'AddPulse1', id: 'add1Pulse', hidden: true },
-                    { name: 'AddPulse2', id: 'add2Pulse', hidden: true },
-                    { name: 'AddPulse3', id: 'add3Pulse', hidden: true },
-                    { name: 'AddPulse4', id: 'add4Pulse', hidden: true },
-                    { name: 'AddPulse5', id: 'add5Pulse', hidden: true },
-                    { name: 'AddPulse6', id: 'add6Pulse', hidden: true },
-                    { name: 'SlotCodeId', id: 'slot_Id', hidden: true },
-                    { name: 'Priority', id: 'priority', hidden: true },
-                    {
-                        name: 'Action',
-                        formatter: (cell, row) => {
-                            const cleanRow = {
-                                slotCode: row.cells[0]?.data,
-                                colNo: row.cells[1]?.data,
-                                rowNo: row.cells[2]?.data,
-                                isActive: row.cells[3]?.data,
-                                isLeft: row.cells[4]?.data,
-                                xPulse: row.cells[5]?.data,
-                                yPulse: row.cells[6]?.data,
-                                qrxPulse: row.cells[7]?.data,
-                                qryPulse: row.cells[8]?.data,
-                                add1Pulse: row.cells[9]?.data,
-                                add2Pulse: row.cells[10]?.data,
-                                add3Pulse: row.cells[11]?.data,
-                                add4Pulse: row.cells[12]?.data,
-                                add5Pulse: row.cells[13]?.data,
-                                add6Pulse: row.cells[14]?.data,
-                                slot_Id: row.cells[15]?.data,
-                                priority: row.cells[16]?.data,
-                            };
-                            const rawData = btoa(JSON.stringify(cleanRow));
-                            return gridjs.html(`
-                                <div style="display: flex;">
-                                    <button class="btn btn-warning d-grid edit-slot-btn me-2" data-row="${rawData}">
-                                        <span><i class="bi bi-pencil-square"></i> Edit</span>
-                                    </button>
-                                    <button class="btn btn-danger d-grid delete-slot-btn" data-id="${cleanRow.slot_Id}" data-code="${cleanRow.slotCode}">
-                                        <span><i class="bi bi-trash"></i> Delete</span>
-                                    </button>
-                                </div>
-                            `);
-                        }
-                    }
-                ],
-                pagination: {
-                    enabled: true,
-                    limit:  pageLimit,
-                    page: page,
-                },
-                data: dataArry,
-                search: true,
-                sort: true,
-                resizable: true,
-                className: {
-                    table: 'custom-table',
-                },
-            }).render(document.getElementById("gridTable"));
-
-            const footer = document.querySelector('#gridTable .gridjs-footer');
-            if (footer) {
-                footer.id = "gridFooter";
-            }
-
-            document.getElementById("gridFooter").classList.remove("gridjs-footer");
         }
 
         function newSlotForm() {
@@ -864,8 +744,8 @@
             $("#colModal").modal("show");
         }
 
-        $('#gridTable').on('click', '.edit-slot-btn', function () {
-            const row = JSON.parse(atob($(this).attr('data-row')));
+        $('#listTable').on('click', '.edit-btn', function () {
+            const row = JSON.parse($(this).attr('data-row'));
             console.log("row", row);
             editSlotForm(row);
         });
@@ -1069,7 +949,7 @@
             }
         }
 
-        $('#gridTable').on('click', '.delete-slot-btn', function () {
+        $('#listTable').on('click', '.delete-btn', function () {
             const id = $(this).attr('data-id');
             const slotCode = $(this).attr('data-code');
             deleteSlot(id, slotCode);

@@ -216,15 +216,15 @@
                             </div>
                         </div>
                     </div>
-                    <div class="table table-striped table-bordered table-responsive text-nowrap">
-                        <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
+                    <div class="text-nowrap table-container mt-2">
+                        <table id="listTable" class="row-border dataTable hover order-column" style="width:100%">
                             <thead>
                                 <tr>
                                     <th>GRN No</th>
                                     <th>Item</th>
                                     <th>Qty</th>
                                     <th>Reel Code</th>
-                                    <th>Reel Status</th>
+                                    @* <th>Reel Status</th> *@
                                     <th>Created / Updated</th>
                                     <th>Action</th>
                                 </tr>
@@ -234,8 +234,7 @@
 
                     <div class="clearfix">
                         <div class="hint-text">Showing <b id="lblCurCount">0</b> out of <b id="lblTotal">0</b> entries</div>
-                        <ul class="pagination" id="ulPagination">
-                        </ul>
+                        <ul class="pagination" id="ulPagination"></ul>
                         <input type="hidden" id="txtCurPage">
                         <input type="hidden" id="txtTotalRecord">
                         <input type="hidden" id="txtPageSize">
@@ -251,11 +250,14 @@
 
 @section Scripts
 {
-    <link href="~/css/datatables.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+    <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
+    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/js/datatables.min.js"></script>
+    <script src="../js/dataTables.js"></script>
+    <script src="../js/dataTables.columnControl.js"></script>
+    <script src="../js/columnControl.dataTables.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
 
     <script type="text/javascript">
@@ -330,7 +332,6 @@
                     Swal.fire({
                         text: 'Please Wait',
                         width: '300px',
-
                         allowEscapeKey: false,
                         allowOutsideClick: false,
                         showConfirmButton: false,
@@ -361,18 +362,18 @@
                                 },
                                 { data: 'qty' },
                                 { data: 'reelCode' },
-                                {
-                                    data: null,
-                                    render: function (data, type, row, meta) {
-                                        return '<p style="margin:0;">' + row.reelStatus + '</p>';
-                                        // return '<p>' + row.createdDateDisplay + '</p><p>' + row.updatedDateDisplay + '</p>';
-                                    }
-                                },
+                                // {
+                                //     data: null,
+                                //     render: function (data, type, row, meta) {
+                                //         return '<p style="margin:0;">' + row.reelStatus + '</p>';
+                                //         // return '<p>' + row.createdDateDisplay + '</p><p>' + row.updatedDateDisplay + '</p>';
+                                //     }
+                                // },
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         if (row.createdDateDisplay == row.updatedDateDisplay) {
-                                            return '<p style="margin:0;">' + row.createdDateDisplay + '</p>';
+                                            return `<p style="margin:0;">${row.createdDateDisplay}</p>`;
                                         }
                                         else {
                                             return '<p style="margin:0;"><span>' + row.updatedDateDisplay + '</span><br/>' +

@@ -14,19 +14,9 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                @* <div class="card-header table-title">
-                    <div class="card-title">
-                        <h2>Reel Dimension Setting <b></b></h2>
-                    </div>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-success" onclick="newItemForm()">
-                            Add New Dimension
-                        </button>
-                    </div>
-                </div> *@
-                <div class="card-body">
-                    <div class="table table-striped table-bordered table-responsive text-nowrap">
-                        <table id="listTable" class="dt-column-search table table-bordered table-responsive dataTable" style="width:100%">
+                <div class="card-body pt-0">
+                    <div class="text-nowrap table-container mt-1">
+                        <table id="listTable" class="row-border dataTable hover order-column" style="width:100%">
                             <thead>
                                 <tr>
                                     <th>Thickness (mm)</th>
@@ -46,12 +36,10 @@
 <div class="modal fade" id="myModal" role="dialog">
     <div class="modal-dialog">
 
-        <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Update Dimension</h4>
             </div>
-            @* <form action="/bin/SaveBin" method="post"> *@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label" for="txtThickness">Thickness (mm)</label>
@@ -76,18 +64,20 @@
                 <button type="button" class="btn btn-primary" onclick="saveItem()">Save</button>
                 <button type="button" class="btn btn-outline-secondary" onclick="cancelForm()">Cancel</button>
             </div>
-            @* </form> *@
         </div>
     </div>
 </div>
 
 @section Scripts
 {
-    <link href="~/css/datatables.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+    <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
+    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/js/datatables.min.js"></script>
+    <script src="../js/dataTables.js"></script>
+    <script src="../js/dataTables.columnControl.js"></script>
+    <script src="../js/columnControl.dataTables.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
 
     <script type="text/javascript">
@@ -101,13 +91,11 @@
                 url: "/Setting/GetReelDimensionList/",
                 type: "GET",
                 dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
                     Swal.fire({
                         text: 'Please Wait',
                         width: '300px',
-
                         allowEscapeKey: false,
                         allowOutsideClick: false,
                         showConfirmButton: false,
@@ -115,14 +103,12 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
-                    console.log(result);
                     swal.close()
                     if (result.success == true) {
                         $('#listTable').DataTable( {
                             data: result.data,
                             paging: true,
                             pageLength: 50,
-                            lengthMenu: [50, 100, 250, 500, 1000],
                             columns: [
                                 { data: 'thickness' },
                                 { data: 'width' },
@@ -130,19 +116,29 @@
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
-                                        return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
-                                        'onclick="editItemForm(\'' + row.reelDimension_Id + '\', ' +
-                                        '\'' + row.thickness + '\', \'' + row.width + '\', \'' + row.maxThickness + '\' )">' +
-                                        '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
+                                        return `<div style="display: flex;">
+                                                    <button class="btn btn-warning d-grid" style="margin-right: 10px;"
+                                                        onclick="editItemForm('${row.reelDimension_Id}', '${row.thickness}', '${row.width}', '${row.maxThickness}')">
+                                                        <span><i class="bi bi-pencil-square"></i> Edit</span>
+                                                    </button>
 
-                                        '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.reelDimension_Id + '\', \'' + row.thickness + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
+                                                    <button class="btn btn-danger deactivate-account"
+                                                        onclick="deleteItem('${row.reelDimension_Id}', '${row.thickness}')">
+                                                        <span><i class="bi bi-trash"></i> Delete</span>
+                                                    </button>
+                                                </div>`;
                                     }
                                 }
                             ],
+                            language: {
+                                searchPlaceholder: "🔍︎ Search",
+                                search: ""
+                            },
+                            ordering: {
+                                indicators: false
+                            },
+                            columnControl: ['orderStatus']
                         });
-
-
-
                     }
                     else {
                         swal.fire({
@@ -237,8 +233,6 @@
                 MaxThickness: $("#txtMaxThickness").val(),
             }
 
-            //console.log(JSON.stringify(data));
-
             $.ajax({
                 url: '/Setting/SaveReelDimension',
                 type: 'POST',
@@ -249,7 +243,6 @@
                     Swal.fire({
                         text: 'Please Wait',
                         width: '300px',
-
                         allowEscapeKey: false,
                         allowOutsideClick: false,
                         showConfirmButton: false,
@@ -257,7 +250,6 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
-                    // console.log(result);
                     if (result.success == true) {
                         $("#myModal").modal("toggle");
                         swal.fire({
@@ -302,7 +294,7 @@
                 confirmButtonText: 'ok',
                 cancelButtonText: 'cancel',
                 allowOutsideClick: false
-              }).then(function(r) {
+            }).then(function(r) {
                 if (r.isConfirmed == true) {
 
                     var data = {
@@ -319,7 +311,6 @@
                             Swal.fire({
                                 text: 'Please Wait',
                                 width: '300px',
-
                                 allowEscapeKey: false,
                                 allowOutsideClick: false,
                                 showConfirmButton: false,
@@ -359,7 +350,7 @@
                     return;
                 }
               });
-
+            });
         }
 
     </script>

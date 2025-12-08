@@ -88,6 +88,7 @@ header .btn {
 }
 
 /* gridjs table styling */
+/*
 .custom-table thead th {
     background-color: #F1F6F9;
     color: #000;
@@ -125,4 +126,107 @@ td.gridjs-td {
 
 .gridjs-wrapper:nth-last-of-type(2) {
     border-radius: 8px;
+}
+*/
+
+/* js datatable styling */
+.dt-input {
+    margin-right: 10px;
+}
+
+#dt-length-0, #dt-search-0, #dt-search-1, #dt-length-1 {
+    border-radius: 10px;
+    padding: 8px;
+}
+
+.dataTable th {
+    background-color: #F2F2F2;
+}
+
+.dataTable th, td {
+    padding: 8px;
+    /* border: 0.5px solid #EEEEEE; */
+}
+
+.dataTable th.dt-type-numeric, .dataTable th.dt-type-date {
+    text-align: left !important;
+}
+
+.dataTable td.dt-type-numeric, .dataTable td.dt-type-date {
+    text-align: center !important;
+}
+
+.dataTable {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+
+th:first-child {
+    border-top-left-radius: 10px;
+}
+
+th:last-child {
+    border-top-right-radius: 10px;
+}
+
+tr:last-child td:first-child {
+    border-bottom-left-radius: 10px;
+}
+
+tr:last-child td:last-child {
+    border-bottom-right-radius: 10px;
+}
+
+.table-container {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.table-container::-webkit-scrollbar {
+    height: 6px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background-color: rgba(0,0,0,0.3);
+    border-radius: 3px;
+}
+
+.dt-paging {
+    border: 0.5px solid #C9CDCF;
+    border-radius: 15px;
+}
+
+/* .dt-info, .dt-paging, label {
+        font-size: 15px;
+    } */
+
+.dt-paging-button {
+    border-left: 0.5px solid #C9CDCF !important;
+    margin: 0px !important;
+}
+
+.dt-paging-button:first-child {
+    border: none !important;
+}
+
+div.table-container .dt-container .dt-paging .dt-paging-button.current {
+    color: blue !important;
+    border: 0px;
+    background-color: white !important;
+}
+
+div.table-container .dt-container .dt-paging .dt-paging-button.current:hover {
+    background-color: none;
+}
+
+.view-btn, .edit-btn, .delete-btn, #printQR, #printItem, .edit-Pass-btn {
+    height: 33px;
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+/* modal styling */
+.modal-body {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto
 }

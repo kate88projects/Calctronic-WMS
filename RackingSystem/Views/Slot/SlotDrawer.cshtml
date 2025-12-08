@@ -1,70 +1,4 @@
 ﻿
-<style>
-    .btn-primary {
-        background-color: #007bff;
-        border-color: #007bff;
-    }
-
-    /* #columnNumber {
-        max-width: 720px;
-    } */
-
-    .btn-primary:hover {
-        background-color: #0056b3;
-        border-color: #004085;
-    }
-
-    .table th {
-        background-color: #f8f9fa;
-        text-align: left !important;
-    }
-
-    /*
-    .align-td td {
-        padding: 8px;
-        text-align: left !important;
-    }
-
-     .input-group {
-        display: flex;
-        justify-content: center;
-        width: 100%;
-    }
-
-    .input-group .form-control {
-        border-radius: 10px 0 0 10px;  
-        border-right: 0;
-        height: 45px;
-    }
-
-    .input-group .btn {
-        border-radius: 0 10px 10px 0;
-        height: 45px;
-        padding: 0 20px;
-        border-left: 0;
-        background-color: #007bff;
-        color: white;
-    }
-
-    .input-group .form-control:focus {
-        box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.5); 
-    }
-
-    .input-group .btn i {
-        font-size: 1.2rem;
-    } 
-
-    .form-label {
-        font-size: 1rem;
-        font-weight: 500;
-    }
-
-    .card2 {
-        margin-top: 10px;
-    } */
-
-</style>
-
 @section PageHeader {
     <header class="d-flex align-items-center justify-content-between w-100">
         <h2 class="pageTitle">Empty Slot Drawer</h2>
@@ -80,25 +14,9 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                @* <div class="card-header table-title">
-                    <div class="card-title">
-                        <h2>Empty Slot Drawer</h2>
-                    </div>
-                     <div class="card-tools">
-                        <button id="btnRetrieve" class="btn btn-primary" onclick="retrieveEmpty()"><i class="fas fa-search"></i> Retrieve</button>
-                    </div>
-                </div> *@
-
-                <div class="card-body">
-                    @* <div class="mb-4">
-                        <div class="input-group">
-                            <input type="number" id="columnNumber" class="form-control" placeholder="Enter Column Number" min="1" />
-                            <button id="btnRetrieve" class="btn btn-primary" onclick="retrieveEmpty()"><i class="fas fa-search"></i> Retrieve</button>
-                        </div>
-                    </div> 
-
-                     <div class="table table-responsive text-nowrap">
-                        <table class="table dataTable hover" id="slotTable">
+                <div class="card-body pt-0">
+                    <div class="text-nowrap table-container mt-1">
+                        <table class="dataTable row-border hover order-column" id="listTable">
                             <thead>
                                 <tr>
                                     <th>Priority</th>
@@ -109,8 +27,7 @@
                                 </tr>
                             </thead>
                         </table>
-                    </div> *@
-                    <div id="gridTable" class="table table-responsive text-nowrap"></div>
+                    </div> 
                 </div>
             </div>
         </div>
@@ -119,21 +36,27 @@
 
 @section Scripts
 {
-    <link rel="stylesheet" href="~/css/gridjs.min.css">
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+    <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
+    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="../js/dataTables.js"></script>
+    <script src="../js/dataTables.columnControl.js"></script>
+    <script src="../js/columnControl.dataTables.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
-    <script src="~/js/gridjs.umd.js"></script>
+@*     <script src="~/js/gridjs.umd.js"></script>
+    <link rel="stylesheet" href="~/css/gridjs.min.css"> *@
 
     <script type="text/javascript">
+        let table = null;
 
         $(document).ready(async function () {
             loadDefault();
         });
 
-        let gridInstance = null;
-        
         function loadDefault() {
+            /*
             gridInstance = new gridjs.Grid({
                 columns: ['Priority', 'Slot ID', 'Slot Code', 'Column No', 'Row No'],
                 data: [],
@@ -141,6 +64,25 @@
                     table: 'table table-bordered custom-table'
                 },
             }).render(document.getElementById("gridTable"));
+            */
+
+           table = $('#listTable').DataTable( {
+                 columns: [
+                    { data: 'priority' },
+                    { data: 'slot_Id' },
+                    { data: 'slotCode' },
+                    { data: 'colNo' },
+                    { data: 'rowNo' },
+                ],
+                language: {
+                    searchPlaceholder: "🔍︎ Search",
+                    search: ""
+                },
+                ordering: {
+                    indicators: false
+                },
+                columnControl: ['orderStatus']
+           });
         }
 
         function retrieveEmpty() {
@@ -162,8 +104,8 @@
                 success: function(result) {
                     Swal.close();
                     if (result.success == true) {
-                        console.log(result);
-
+                        console.log(result); 
+                        /*
                         const tableData = result.data.map((item, index) => [
                             index +1,
                             item.slot_Id,
@@ -172,6 +114,7 @@
                             item.rowNo
                         ]);
 
+                       
                         if (gridInstance) { //destroy previous grid instance 
                             gridInstance.destroy();
                         }
@@ -194,36 +137,14 @@
                             footer.id = "gridFooter";
                         }
                         document.getElementById("gridFooter").classList.remove("gridjs-footer");
+                        */
+                        result.data.forEach((item, index) => {
+                            item.priority = index + 1;
+                        });
 
-                        // $('#slotTable').addClass('align-td');
-                        // result.data.forEach((item, index) => {
-                        //     item.priority = index + 1;
-                        // });
-                        // $('#slotTable').DataTable( {
-                        //     data: result.data,
-                        //     "bDestroy": true,
-                        //     columns: [
-                        //         { data: 'priority'},
-                        //         { data: 'slot_Id' },
-                        //         { data: 'slotCode' },
-                        //         { data: 'colNo' },
-                        //         { data: 'rowNo' },
-                        //     ],
-                        //     order: [[0, 'asc']],
-                        // });
-                    }
-                    else 
-                    {
-                        if (gridInstance) {
-                            gridInstance.destroy();
-                        }
-
-                        document.getElementById("gridTable").innerHTML = `
-                            <div class="alert alert-warning text-center" role="alert"
-                                No empty trays found from slot.
-                            </div>`;
-                        // $('#slotTable tbody').empty();
-                        // $('#slotTable tbody').append('<tr><td colspan="5" class="dt-empty">No empty trays found from slot.</td></tr>');                       
+                        table.clear();
+                        table.rows.add(result.data);
+                        table.draw();
                     }
                 },
                 error: function(error) {
