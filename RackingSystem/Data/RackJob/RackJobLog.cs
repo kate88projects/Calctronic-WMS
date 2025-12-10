@@ -2,10 +2,10 @@
 
 namespace RackingSystem.Data.RackJob
 {
-    public class RackJob
+    public class RackJobLog
     {
         [Key]
-        public long Rack_Id { get; set; }
+        public long RackJobLog_Id { get; set; }
 
         [Required]
         [MaxLength(50)]
@@ -24,11 +24,11 @@ namespace RackingSystem.Data.RackJob
         public DateTime StartDate { get; set; } = DateTime.Now;
 
         [Required]
+        public DateTime EndDate { get; set; } = DateTime.Now;
+
+        [Required]
         [MaxLength(50)]
         public string LoginIP { get; set; } = "";
 
-        [Required]
-        public string Json { get; set; } = "";
-        
     }
 }

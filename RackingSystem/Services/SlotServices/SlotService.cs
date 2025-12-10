@@ -584,7 +584,7 @@ namespace RackingSystem.Services.SlotServices
 
             try
             {
-                var slotList = await _dbContext.Slot.Where(x => x.ColNo == req).OrderBy(x => x.RowNo).ToListAsync();
+                var slotList = await _dbContext.Slot.Where(x => x.ColNo == req).OrderByDescending(x => x.RowNo).ToListAsync();
                 var slotListDTO = _mapper.Map<List<SlotListDTO>>(slotList).ToList();
                 result.success = true;
                 result.data = slotListDTO;

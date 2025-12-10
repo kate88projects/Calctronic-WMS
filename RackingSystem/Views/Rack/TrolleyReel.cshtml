@@ -1,0 +1,401 @@
+﻿
+<style>
+    .single-page-layout {
+        /* font-family: sans-serif; */
+        background: #1a1a1a; /* #111;*/
+        color: #eee;
+        margin: 0;
+        padding: 20px;
+        width: 100%;
+        height: 100%;
+    }
+
+    .trolley {
+        display: flex;
+        gap: 40px;
+        flex-wrap: nowrap;
+        justify-content: center;
+        overflow-x: auto
+    }
+
+    .side {
+        border: 1px solid #333;
+        padding: 20px;
+        border-radius: 10px;
+        background: #1a1a1a
+    }
+
+    .title {
+        font-weight: 700;
+        margin-bottom: 10px;
+        text-align: center
+    }
+
+    .grid {
+        display: flex;
+        gap: 20px
+    }
+
+    .column {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 6px;
+        background: #0003;
+        border-radius: 6px
+    }
+
+    .sub-column {
+        display: flex;
+        flex-direction: column;
+        gap: 4px
+    }
+
+    .sub-container {
+        display: flex;
+        flex-direction: row;
+        gap: 20px
+    }
+
+    .cell {
+        width: 24px;
+        height: 24px;
+        border-radius: 4px;
+        background: #333;
+        cursor: pointer;
+        transition: 0.2s
+    }
+
+        .cell.on {
+            background: #00ffa2;
+            box-shadow: 0 0 10px #00ffa2
+        }
+
+    .search-box {
+        margin-bottom: 20px;
+        text-align: center
+    }
+
+    input[type=text] {
+        padding: 8px;
+        width: 260px;
+        border-radius: 6px;
+        border: 1px solid #666;
+        background: #222;
+        color: #eee
+    }
+
+    button {
+        padding: 8px 14px;
+        border: none;
+        border-radius: 6px;
+        background: #00a2ff;
+        color: #000;
+        font-weight: 700;
+        cursor: pointer;
+        margin-left: 6px
+    }
+
+    .col-label {
+        color: #0af;
+        font-size: 12px;
+        text-align: center;
+        margin-bottom: 6px
+    }
+
+    .row-label {
+        color: #888;
+        font-size: 11px;
+        width: 26px;
+        text-align: right
+    }
+
+    .row-wrap {
+        display: flex;
+        align-items: center;
+        gap: 6px
+    }
+
+    .cell:hover {
+        transform: scale(1.06)
+    }
+
+    .cell.empty {
+        background: #222;
+        opacity: 0.3;
+        border: 1px dashed #555
+    }
+
+    .controls {
+        margin-top: 10px;
+        text-align: center
+    }
+
+</style>
+
+<div class="single-page-layout">
+
+    <div class="search-box">
+        <input id="trolleyId" type="text" placeholder="Enter Trolley" />
+        <button id="loadBtn" style="margin-right:30px;">Load </button>
+        <input id="reelId" type="text" placeholder="Enter Reel ID / Raw Mat Code / BOM Code" />
+        <button id="findBtn">Find</button>
+        <button id="turnOffBtn">Turn Off LED</button>
+
+    </div>
+
+    <div class="trolley" id="trolley"></div>
+
+</div>
+
+<input type="hidden" id="xToken" value="@ViewBag.xToken" autocomplete="off">
+
+@section Scripts
+{
+    <link href="~/css/datatables.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/datatables.min.js"></script>
+    <script src="~/js/sweetalert2.all.min.js"></script>
+
+    <script type="text/javascript">
+        let token = '';
+
+        const COLUMNS_PER_SIDE = 3;
+        const ROWS = 50;
+        const rawMatMap = { "RM1001": "R0005", "RM2001": "R0120" };
+        const bomMap = {}; // { "BOM-A1": "R0020", "BOM-B7": "R0150" };
+        const reelMap = {};
+        let idCounter = 1;
+        const SIDES = ['front','back'];
+
+        SIDES.forEach(side=>{
+          for(let c=0;c<COLUMNS_PER_SIDE;c++){
+            for(let r=0;r<ROWS;r++){
+              const id = 'R'+(idCounter++).toString().padStart(4,'0');
+              reelMap[id] = {side, column:c, row:r};
+            }
+          }
+        });
+        const emptyReels = new Set(["R0010","R0020"]);
+        const posMap = {};
+        for(const [id, p] of Object.entries(reelMap)){
+          posMap[`${p.side}-${p.column}-${p.row}`] = id;
+        }
+
+        const trolley = document.getElementById('trolley');
+        SIDES.forEach(side=>{
+          const sideDiv = document.createElement('div');
+          sideDiv.className = 'side';
+          sideDiv.innerHTML = `<div class="title">${side==='front'?'A SIDE':'B SIDE'}</div>`;
+          const grid = document.createElement('div');
+          grid.className = 'grid';
+          for(let c=0;c<COLUMNS_PER_SIDE;c++){
+            const col = document.createElement('div');
+            col.className = 'column';
+            col.dataset.side = side;
+            col.dataset.col = c;
+            const colLabel = document.createElement('div');
+            colLabel.className = 'col-label';
+            colLabel.textContent = (side==='front'?'A':'B') + (c+1);
+            col.appendChild(colLabel);
+            const subCols = [document.createElement('div'), document.createElement('div')];
+            subCols.forEach(sub => sub.className = 'sub-column');
+            for(let r=0;r<ROWS;r++){
+              const rowWrap = document.createElement('div');
+              rowWrap.className = 'row-wrap';
+              const rowLabel = document.createElement('div');
+              rowLabel.className = 'row-label';
+              rowLabel.textContent = r+1;
+              const cell = document.createElement('div');
+              cell.className = 'cell';
+              cell.dataset.row = r;
+              cell.title = `${colLabel.textContent} - Row ${r+1}`;
+              cell.addEventListener('click',()=>{
+                  cell.classList.toggle('on');
+                  loadPLCOn(c, r);
+              });
+              const reelCode = document.createElement('div');
+              reelCode.style.color = '#6cf';
+              reelCode.style.fontSize = '11px';
+              reelCode.textContent = '' + posMap[`${side}-${c}-${r}`];
+              // if(emptyReels.has(reelCode.textContent)){
+              //   cell.classList.add('empty');
+              //   reelCode.style.color = '#555';
+              //   reelCode.textContent = 'EMPTY';
+              // }
+              if (r % 2 == 0) {
+                cell.classList.add('empty');
+                reelCode.style.color = '#555';
+                reelCode.textContent = 'EMPTY';
+              }
+              rowWrap.appendChild(rowLabel);
+              rowWrap.appendChild(cell);
+              rowWrap.appendChild(reelCode);
+              if(r<25) subCols[0].appendChild(rowWrap);
+              else subCols[1].appendChild(rowWrap);
+            }
+            const subContainer=document.createElement('div');subContainer.className='sub-container';subCols.forEach(sub=>subContainer.appendChild(sub));
+            col.appendChild(subContainer);
+            grid.appendChild(col);
+          }
+          sideDiv.appendChild(grid);
+          trolley.appendChild(sideDiv);
+        });
+
+        $(document).ready(function () {
+            token = $('#xToken').val();
+        });
+
+        function clearAll(){
+            // call api to close
+
+
+            // set ui to off
+            document.querySelectorAll('.cell.on').forEach(c=>c.classList.remove('on'));
+        }
+
+        function highlightByReelId(reelId){
+            clearAll();
+            const p=reelMap[reelId];
+            if(!p)return false;
+
+            const selector=`.side .column[data-side="${p.side}"][data-col="${p.column}"] .cell[data-row="${p.row}"]`;
+            const cell=document.querySelector(selector);
+            if(cell){
+                cell.classList.add('on');
+                cell.scrollIntoView({behavior:'smooth',block:'center'});
+                return true;
+            }
+            return false;
+        }
+
+        function findReel() {
+            const q = document.getElementById('trolleyId').value.trim();
+            if(!q)return
+
+            alert('Please enter a search value');
+
+            if(reelMap[q]){
+                highlightByReelId(q);return;
+            }
+            if(rawMatMap[q]){
+                const rid=rawMatMap[q];
+                if(highlightByReelId(rid))return;
+            }
+                if(bomMap[q]){
+                    const rid=bomMap[q];
+                    if(highlightByReelId(rid))return;
+                }
+                alert('No match found');
+            }
+
+        async function loadTrolley() {
+            const tr = document.getElementById('trolleyId').value.trim();
+            if (tr == "") {
+                alert('Please insert Trolley Code');
+                return;
+            }
+
+            await $.ajax({
+                url: "/api/PLCHubIn/StartUnload/" + tr,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    console.log(result);
+                    swal.close();
+
+                    if (result.success == true) {
+
+                    }
+                    else {
+                        alert('Trolley :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    alert('Trolley :: ' + error.val, 'alert');
+                }
+            });
+
+
+        }
+
+        async function loadPLCOn(colNo, rowNo) {
+            // console.log(colNo + " || " + rowNo);
+
+            await $.ajax({
+                url: "/api/PLCHubIn/SetTrolleyOn/" + colNo + "/" + rowNo,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    // console.log(result);
+                    swal.close();
+
+                    if (result.success == true) {
+
+                    }
+                    else {
+                        alert('ON :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    alert('ON :: ' + error.val, 'alert');
+                }
+            });
+
+
+        }
+
+        
+
+        document.getElementById('loadBtn').addEventListener('click',loadTrolley);
+        document.getElementById('findBtn').addEventListener('click',findReel);
+        document.getElementById('reelId').addEventListener('keydown',e=>{if(e.key==='Enter')findReel();});
+
+        // Turn off LED with optional Auto Close
+        let autoOffTimeout;
+        document.getElementById('turnOffBtn').addEventListener('click',()=>{
+          clearAll();
+          if(document.getElementById('autoClose').checked){
+            if(autoOffTimeout) clearTimeout(autoOffTimeout);
+            autoOffTimeout = setTimeout(clearAll, 5*60*1000);
+          }
+        });
+
+        window._debug={reelMap,rawMatMap,bomMap};
+    </script>
+}
+

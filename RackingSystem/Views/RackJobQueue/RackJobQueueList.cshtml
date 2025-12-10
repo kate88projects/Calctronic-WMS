@@ -3,7 +3,7 @@
     <header class="d-flex align-items-center justify-content-between w-100">
         <h2 class="pageTitle">Queue Management</h2>
         <div class="d-flex gap-2">
-            <button type="button" class="btn btn-primary" onclick="newLoaderForm()">
+            <button type="button" class="btn btn-success" onclick="newLoaderForm()">
                 Add Hub In
             </button>
             <button type="button" class="btn btn-success" onclick="newJOForm()">
@@ -636,7 +636,7 @@
                 },
                 success: function (result) {
                     if (result.success == true) {
-                        $("#joModal").modal("toggle");
+                        // $("#joModal").modal("toggle");
                         swal.fire({
                             icon: 'success',
                             title: "Success Update",

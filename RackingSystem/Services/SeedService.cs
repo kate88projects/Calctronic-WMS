@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using RackingSystem.Data;
 using RackingSystem.Data.Maintenances;
-using RackingSystem.Data.Rack;
+using RackingSystem.Data.RackJob;
 using RackingSystem.General;
 using System;
 

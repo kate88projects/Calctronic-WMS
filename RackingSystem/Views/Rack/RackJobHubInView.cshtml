@@ -22,8 +22,8 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background-color: var(--card-bg);
-        padding: 20px 20px;
+        /* background-color: var(--card-bg); */
+        /* padding: 20px 20px; */
         /* border-bottom: 3px solid var(--accent-color); */
     }
 
@@ -133,6 +133,8 @@
         justify-content: space-around;
         padding: 20px;
         gap: 20px;
+        background-color: var(--bg-main);
+        height: 100%;
     }
 
     .control-session {
@@ -492,33 +494,31 @@
     }
 </style>
 
-<header>
-    <h1>SRMS </h1>
+@section PageHeader {
+    <header class="d-flex align-items-center justify-content-between w-100">
+        <h2 class="pageTitle">SRMS [View]</h2>
+        <div class="header-controls">
+            <div class="input-container">
+                <label for="job-input">Job:</label>
+                <input type="text" id="job-input" value="@ViewBag.QNo" disabled />
+            </div>
 
-    <div class="header-controls">
-        <div class="input-container">
-            <label for="job-input">Job:</label>
-            <input type="text" id="job-input" value="@ViewBag.QNo" disabled />
+            <div class="input-container">
+                <label for="loader-input">Loader/Trolley:</label>
+                <input type="text" id="loader-input" />
+            </div>
         </div>
 
-        <div class="input-container">
-            <label for="loader-input">Loader/Trolley:</label>
-            <input type="text" id="loader-input" />
+        <div class="system-status">
+            Status: <span id="master-status">Ready</span>
+            <div class="input-container">
+                <label for="chkAutoRun">Auto:</label>
+                <input type="checkbox" id="chkAutoRun" />
+            </div>
         </div>
 
-        <button id="start-btn" class="control-btn start-btn">Start</button>
-        <button id="stop-btn" class="control-btn stop-btn">Stop</button>
-    </div>
-
-    <div class="system-status">
-        Status: <span id="master-status">Ready</span>
-        <div class="input-container">
-            <label for="chkAutoRun">Auto:</label>
-            <input type="checkbox" id="chkAutoRun" />
-        </div>
-    </div>
-
-</header>
+    </header>
+}
 
 <main class="single-page-layout">
     <!-- Gantry Session Interface (Left Column) -->
@@ -646,10 +646,9 @@
         };
 
         let colNum = 1;
-
         let endTask = false;
-
         let token = '';
+        var uiAutoTimer;
 
         $(document).ready(function () {
             updateSystemStatusUI();
@@ -657,6 +656,8 @@
             // updateJson();
 
             token = $('#xToken').val();
+
+             uiAutoTimer = setInterval(updateUI, 1000); //1 second workout
         });
 
         /**
@@ -709,19 +710,13 @@
         // Function to update the main header status text and button states
         function updateSystemStatusUI() {
             const masterStatusSpan = document.getElementById('master-status');
-            const startBtn = document.getElementById('start-btn');
-            const stopBtn = document.getElementById('stop-btn');
 
             if (sharedDrawerState.systemRunning) {
                 masterStatusSpan.textContent = 'RUNNING';
                 masterStatusSpan.style.color = 'var(--status-ok)';
-                startBtn.disabled = true;
-                stopBtn.disabled = false;
             } else {
                 masterStatusSpan.textContent = 'STOPPED';
                 masterStatusSpan.style.color = 'var(--status-alarm)';
-                startBtn.disabled = false;
-                stopBtn.disabled = true;
             }
         }
 
@@ -829,10 +824,82 @@
 
         // ----------- HMI Action
         async function updateUI() {
+            // get value from db
+            await getJson();
+
+            // change
+            updateColumnStatus(1, Number($("#txtCol1TotalReels").val()));
+            updateColumnStatus(2, Number($("#txtCol2TotalReels").val()));
+            updateColumnStatus(3, Number($("#txtCol3TotalReels").val()));
+            updateColumnStatus(4, Number($("#txtCol4TotalReels").val()));
+
             updateActiveColumn(colNum);
 
-            sharedDrawerState.systemRunning = true;
             updateSystemStatusUI();
+            updateGantryUIState();
+            updateCartesian();
+        }
+
+        async function getJson() {
+            var fResult = false;
+
+            await $.ajax({
+                url: '/api/PLCHubIn/GetRackJobJson',
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                },
+                success: function (result) {
+                    sharedDrawerState.systemRunning = result.data.systemRunning;
+
+                    sharedDrawerState.drawerStatus = result.data.drawerStatus;
+                    sharedDrawerState.gantrySequenceState = result.data.gantryStatus;
+
+                    $("#loader-input").val(result.data.loaderCode);
+                    $("#txtLoaderId").val(result.data.loaderId);
+
+                    $("#txtSetUnload").val(result.data.setUnload);
+                    $("#txtReelId").val(result.data.reelId);
+                    $("#txtReelCode").val(result.data.reelCode);
+                    $("#txtActHeight").val(result.data.actualHeight);
+
+                    sharedDrawerState.cartesianRobotState = result.data.cartesianRobotState;
+                    sharedDrawerState.cartesianLocation = result.data.cartesianLocation;
+
+                    $("#txtRetrieveSlot").val(result.data.retrieveSlot);
+                    $("#txtPutSlot").val(result.data.putAwaySlot);
+                    $("#txtPutSlotTake").val(result.data.slotTake);
+
+                    $("#txtReelIdC").val(result.data.reelIdC);
+                    $("#txtReelCodeC").val(result.data.reelCodeC);
+                    $("#txtActHeightC").val(result.data.actualHeightC);
+
+                    halfPickMove = result.data.HalfPickMove;
+                    halfPickMoveStep = result.data.halfPickMoveStep;
+                    halfPlaceMove = result.data.halfPlaceMove;
+                    halfPlaceMoveStep = result.data.halfPlaceMoveStep;
+
+                    $("#txtCol1TotalReels").val(result.data.col1TotalReels);
+                    $("#txtCol2TotalReels").val(result.data.col2TotalReels);
+                    $("#txtCol3TotalReels").val(result.data.col3TotalReels);
+                    $("#txtCol4TotalReels").val(result.data.col4TotalReels);
+
+                    colNum = result.data.colNum;
+
+                    fResult = true;
+
+                    return fResult;
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+            return fResult;
         }
 
 

@@ -79,10 +79,13 @@ namespace RackingSystem.Services.AccountServices
 
             var uacIdList = _dbContext.UserAccessRight.Where(x => x.User_Id == rUser.Id).Select(x => x.UAC_Id).ToList();
 
+            string devId = Guid.NewGuid().ToString();
+
             var authClaims = new List<Claim>
                 {
                     new Claim(JwtRegisteredClaimNames.Sub, rUser.UserName!),
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim(JwtRegisteredClaimNames.Jti, devId),
+                    new Claim("DeviceId", devId),
                 };
 
             var token = new JwtSecurityToken(
@@ -100,7 +103,7 @@ namespace RackingSystem.Services.AccountServices
                 Username = rUser.UserName ?? "",
                 Token = tokenR,
                 UACIdList = uacIdList,
-                DeviceId = Guid.NewGuid().ToString(),
+                DeviceId = devId,
             };
             return response;
 

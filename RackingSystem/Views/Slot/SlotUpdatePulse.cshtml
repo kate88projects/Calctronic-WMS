@@ -39,6 +39,36 @@
                     background: #03a3e7;
                 }
 
+            .table-wrapper .btn.btn-success {
+                color: #fff;
+                background: #198754;
+            }
+
+                .table-wrapper .btn.btn-success:hover {
+                    background: #198754;
+                }
+
+                .table-wrapper .btn.btn-success:disabled {
+                    background-color: #7f8c8d;
+                    cursor: not-allowed;
+                    opacity: 0.6;
+                }
+
+            .table-wrapper .btn.btn-danger {
+                color: #fff;
+                background: #dc3545;
+            }
+
+                .table-wrapper .btn.btn-danger:hover {
+                    background: #dc3545;
+                }
+
+                .table-wrapper .btn.btn-danger:disabled {
+                    background-color: #7f8c8d;
+                    cursor: not-allowed;
+                    opacity: 0.6;
+                }
+
     .table-title .btn {
         font-size: 17px;
         border: none;
@@ -145,85 +175,135 @@
         width: 10%;
     }
 
+    /* --- System Log Area --- */
+    .system-log-container {
+        background-color: var(--card-bg);
+        margin: 0px 20px 20px 20px;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid var(--accent-color);
+    }
+
+    #system-log {
+        background-color: var(--bg-main);
+        color: #7f8c8d;
+        height: 350px;
+        overflow-y: auto;
+        padding: 10px;
+        font-family: monospace;
+        font-size: 0.9em;
+        border-radius: 4px;
+    }
+
+    .log-entry {
+        margin-bottom: 3px;
+        white-space: nowrap;
+    }
+
+    .log-info {
+        color: var(--text-color);
+    }
+
+    .log-alert {
+        color: var(--status-alarm);
+        font-weight: bold;
+    }
+
+    .log-success {
+        color: var(--status-ok);
+    }
+
 </style>
 
-<div class="container-fluid">
-    <div class="table-wrapper">
-        <div class="table-title">
-            <div class="row">
-                <div class="col-sm-4">
-                    <h2>Racking Status <b></b></h2>
-                </div>
-            </div>
-        </div>
+@section PageHeader {
+    <header class="d-flex align-items-center justify-content-between w-100">
+        <h2 class="pageTitle">Slot Update Pulses</h2>
+    </header>
+}
 
-        <div class="row" style="padding:5px;">
-            <div class="col-sm-4" style="">
-            </div>
-            <div class="col-sm-4" style="">
-            </div>
-            <div class="col-sm-4" style="">
-                <div class="row">
-                    <div class="col-3" style="padding:0;">
-                        @* <select id="selDateType" name="DateType" class="form-control">
+<div class="container-fluid">
+    <br />
+    <input type="hidden" id="xToken" value="@ViewBag.xToken" autocomplete="off">
+
+    <div class="row" style="padding:5px;">
+        <div class="col-sm-4" style="">
+        </div>
+        <div class="col-sm-4" style="">
+        </div>
+        <div class="col-sm-4" style="">
+            <div class="row">
+                <div class="col-3" style="padding:0;">
+                    @* <select id="selDateType" name="DateType" class="form-control">
                             <option value="25">25</option>
                             <option value="50">50</option>
                         </select> *@
-                        <label>Column : </label>
-                    </div>
-                    <div class="col-5" style="padding:0;">
-                        <input id="txtCol" name="txtCol" type="number" class="form-control" style="" placeholder="Column No" />
-                    </div>
-                    <div class="col-4" style="padding:0;">
-                        <button type="button" class="btn btn-primary" style="width:100%;" onclick="loadList()"><i class="bi bi-search"></i> </button>
-                    </div>
+                    <label>Column : </label>
+                </div>
+                <div class="col-5" style="padding:0;">
+                    <input id="txtCol" name="txtCol" type="number" class="form-control" style="" placeholder="Column No" />
+                </div>
+                <div class="col-4" style="padding:0;">
+                    <button type="button" class="btn btn-primary" style="width:100%;" onclick="loadList()"><i class="bi bi-search"></i> </button>
                 </div>
             </div>
         </div>
-        <hr />
+    </div>
+    <hr />
 
-        <div class="row">
-            <div class="col-2">
-                <div class="card card-success">
-                    <div class="card-body">
-                        <div class="row" style="padding:5px;">
-                            @* <div class="col-4">
-                                <span style="font-size:15px;">3</span>
-                            </div>
-                            <div class="col-8">
-                                <label>Tray with Reel - 3rd level</label>
-                            </div> *@
+    <div class="row">
+        <div class="col-2">
+            <div class="card card-success">
+                <div class="card-body">
+                    <div class="row" style="padding:5px;">
+                        <div class="col-6" style="padding:0;">
+                            <label>From Row : </label>
+                        </div>
+                        <div class="col-6" style="padding:0;">
+                            <input id="txtRow" type="number" class="form-control" style="" placeholder="Row No" />
                         </div>
                     </div>
+                    <div class="row" style="padding:5px;">
+                        <div class="col-6" style="padding:0;">
+                            <label for="chkCont">Continuously : </label>
+                        </div>
+                        <div class="col-6" style="padding:0;">
+                            <input id="chkCont" type="checkbox" class="" style="" />
+                        </div>
+                    </div>
+                    <button class="btn btn-success" style="width:100%;" onclick="getQRPulses()" id="start-btn"> Get QR Pulses </button>
+                    <button class="btn btn-danger" style="width:100%;" onclick="stopGet()" id="stop-btn"> Stop Get </button>
+                    <hr />
+                    <div id="system-log">
+                        <!-- Log entries will be appended here by JavaScript -->
+                    </div>
                 </div>
             </div>
-            <div class="col-2">
-                <table class="table table-striped table-hover" id="list1Table">
-                    <tbody id="list1TableBody"></tbody>
-                </table>
-            </div>
-            <div class="col-2">
-                <table class="table table-striped table-hover" id="list2Table">
-                    <tbody id="list2TableBody"></tbody>
-                </table>
-            </div>
-            <div class="col-2">
-                <table class="table table-striped table-hover" id="list3Table">
-                    <tbody id="list3TableBody"></tbody>
-                </table>
-            </div>
-            <div class="col-2">
-                <table class="table table-striped table-hover" id="list4Table">
-                    <tbody id="list4TableBody"></tbody>
-                </table>
-            </div>
-            <div class="col-2">
-                <table class="table table-striped table-hover" id="list5Table">
-                    <tbody id="list5TableBody"></tbody>
-                </table>
-            </div>
         </div>
-
+        <div class="col-2">
+            <table class="table table-striped table-hover" id="list1Table">
+                <tbody id="list1TableBody"></tbody>
+            </table>
+        </div>
+        <div class="col-2">
+            <table class="table table-striped table-hover" id="list2Table">
+                <tbody id="list2TableBody"></tbody>
+            </table>
+        </div>
+        <div class="col-2">
+            <table class="table table-striped table-hover" id="list3Table">
+                <tbody id="list3TableBody"></tbody>
+            </table>
+        </div>
+        <div class="col-2">
+            <table class="table table-striped table-hover" id="list4Table">
+                <tbody id="list4TableBody"></tbody>
+            </table>
+        </div>
+        <div class="col-2">
+            <table class="table table-striped table-hover" id="list5Table">
+                <tbody id="list5TableBody"></tbody>
+            </table>
+        </div>
     </div>
 
 </div>
@@ -290,8 +370,25 @@
 
     <script type="text/javascript">
 
+        var autoTimer;
+        var runningTask = false;
+        var endTask = true;
+        let token = '';
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
         $(document).ready(function () {
+            const startBtn = document.getElementById('start-btn');
+            const stopBtn = document.getElementById('stop-btn');
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+
+            token = $('#xToken').val();
+
             $('#txtCol').val(1);
+            $('#txtRow').val(1);
             loadList();
         });
 
@@ -315,7 +412,7 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
-                    console.log(result);
+                    // console.log(result);
                     swal.close();
                     if (result.success == true) {
 
@@ -327,30 +424,15 @@
 
                             for (let i = 0; i < 25; i++) { // Example: Add 5 rows
                                 if (idx >= 111) { continue; }
+                                const rawData = JSON.stringify(result.data[idx - 1]);
                                 const newRow = tbl.insertRow(); // or document.createElement('tr');
                                 const cell1 = newRow.insertCell(); // or document.createElement('td');
-                                cell1.innerHTML = '<a style="font-size:10px;" ' +
-                                'href="javascript:updateForm(\'' + result.data[idx - 1].slot_Id + '\',\'' + result.data[idx - 1].rowNo + '\',\'' + result.data[idx - 1].isActive + '\', ' +
-                                '\'' + result.data[idx - 1].forEmptyTray + '\',\'' + result.data[idx - 1].hasEmptyTray + '\',\'' + result.data[idx - 1].hasReel + '\',\'' + result.data[idx - 1].reelNo + '\',\'' + result.data[idx - 1].priority + '\')" >' + result.data[idx - 1].rowNo + '</a>';
+                                cell1.innerHTML = `<a style="font-size:10px;"
+                                href='javascript:none;' id='btnUpdate' data-row='${rawData}' > ` + result.data[idx - 1].rowNo + '</a>';
                                 $(cell1).addClass("tblRow tblCol1");
-                                const cell2 = newRow.insertCell(); // or document.createElement('td');
-                                // if (result.data[idx - 1].hasReel) {
-                                //     if (result.data[idx - 1].reelNo == 0) {
-                                //         cell2.innerHTML = '<img src="../assets/img/tray_full_icon_138077.png" style="display:flex;justify-self: center; height:25px;" />';
-                                //     }
-                                //     else {
-                                //         cell2.innerHTML = '<span style="display:flex;justify-self: center; font-size:15px;">2</span>';
-                                //     }
-                                // }
-                                // else {
-                                //     if (result.data[idx - 1].hasEmptyTray) {
-                                //         cell2.innerHTML = '<img src="../assets/img/tray_icon_136086.png" style="display:flex;justify-self: center;width:25px;height:25px;" />';
-                                //     }
-                                //     else {
-                                //         cell2.innerHTML = '';
-                                //     }
-                                // }
-                                cell2.innerHTML = '' + result.data[idx - 1].qrxPulse + ', ' + result.data[idx - 1].qryPulse;
+                                const cell2 = newRow.insertCell();
+                                cell2.id = "R" + (111 - idx);
+                                cell2.innerHTML = '' + result.data[idx - 1].qrxPulse + ' , ' + result.data[idx - 1].qryPulse + '';
                                 $(cell2).addClass("tblRow tblCol2");
                                 const cell3 = newRow.insertCell(); // or document.createElement('td');
                                 if (result.data[idx - 1].isActive) {
@@ -391,140 +473,236 @@
 
         }
 
-        function simulateResult() {
+        function logMessage(message, type = 'info') {
+            const logContainer = document.getElementById('system-log');
+            if (!logContainer) return;
 
-            var data = {
-                ColNo: $("#txtCol").val(),
-                TotalSlot: $("#txtTotalRow").val(),
-                SortExp: 'row1 asc',
-            };
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.classList.add('log-entry', `log-${type}`);
+            logEntry.textContent = `[${timestamp}] ${message}`;
 
-            $.ajax({
-                url: "/Slot/GetFreeSlot_ByColumn_ASC",
-                type: "POST",
+            logContainer.appendChild(logEntry);
+
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function clearLog() {
+            const logContainer = document.getElementById('system-log');
+            if (logContainer) {
+                logContainer.innerHTML = '';
+                logMessage("Log cleared by operator.", 'alert');
+            }
+        }
+
+        function getQRPulses() {
+            const startBtn = document.getElementById('start-btn');
+            const stopBtn = document.getElementById('stop-btn');
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+
+            endTask = false;
+            runningTask = false;
+            autoTimer = setInterval(getPulsesAuto, 2000);
+        }
+
+        function stopGet() {
+            const startBtn = document.getElementById('start-btn');
+            const stopBtn = document.getElementById('stop-btn');
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+
+            endTask = true;
+            clearInterval(autoTimer);
+            return;
+        }
+
+        function stop() {
+            const startBtn = document.getElementById('start-btn');
+            const stopBtn = document.getElementById('stop-btn');
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+
+            runningTask = false;
+            endTask = true;
+            clearInterval(autoTimer);
+            return;
+        }
+
+        async function getPulsesAuto() {
+            if (endTask == true) { return; }
+            if (runningTask == true) { return; }
+
+            var iCol = Number($('#txtCol').val());
+            var rowFrom = Number($('#txtRow').val());
+
+
+            if (rowFrom >= 111) {
+                console.log('RF:111');
+                $('#txtRow').val(110);
+                stop();
+                return;
+            }
+
+            runningTask = true;
+            var r = await startScanPulses(iCol, rowFrom);
+            if (r == false) {
+                r = await startScanPulses(iCol, rowFrom);
+                if (r == false) {
+                    stop();
+                    return;
+                }
+            }
+
+            await delay(1000);
+
+            if (r == true) {
+                var r2 = await readPulses(iCol, rowFrom);
+                if (r2 == false) {
+                    r2 = await readPulses(iCol, rowFrom);
+                    if (r2 == false) {
+                        stop();
+                        return;
+                    }
+                }
+            }
+            runningTask = false;
+
+            const chkCont = document.getElementById('chkCont');
+            if (chkCont.checked == false) {
+                console.log('chkCont');
+                stop();
+                return;
+            }
+        }
+
+        async function startScanPulses(iCol, rowFrom) {
+            var fResult = false;
+
+            if (rowFrom >= 111) {
+                return false;
+            }
+
+            await $.ajax({
+                url: "/api/PLCSlot/SetScanPulseStart/" + iCol + "/" + rowFrom,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
-                data: JSON.stringify(data),
+                // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
-                    Swal.fire({
-                        text: 'Please Wait',
-                        width: '300px',
-
-                        allowEscapeKey: false,
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
-                    });
-                    Swal.showLoading()
                 },
                 success: function (result) {
-                    console.log(result);
-                    swal.close();
-                    if (result.success == true) {
-                          const myDiv = document.getElementById('txtResult');
-                          myDiv.innerHTML = result.data.row1 + ' || ' + result.data.row2 + ' || ' + result.data.row3;
-                          myDiv.innerHTML = result.data.row1 + ' || ' + result.data.row2 + ' || ' + result.data.row3 + ' || ' + result.data.row4;
 
+                    if (result.success == true) {
+                        fResult = true;
+                        logMessage('Start Scan :: Done ' + rowFrom, 'info');
                     }
                     else {
-                        swal.fire({
-                            icon: 'error',
-                            title: "Wait",
-                            text: result.errMessage
-                        });
+                        logMessage('Start Scan :: ' + result.errMessage, 'alert');
                     }
                 },
                 error: function (error) {
-                    swal.fire({
-                        icon: 'error',
-                        title: "Wait",
-                        text: error.val
-                    });
+                    logMessage('Start Scan :: ' + error.val, 'alert');
                 }
             });
 
+            return fResult;
         }
 
-        function simulateResultDesc() {
+        async function readPulses(iCol, rowFrom) {
+            var fResult = false;
 
-            var data = {
-                ColNo: $("#txtCol").val(),
-                TotalSlot: $("#txtTotalRow").val(),
-                SortExp: '',
-            };
-
-            $.ajax({
-                url: "/Slot/GetFreeSlot_ByColumn_DESC",
-                type: "POST",
+            await $.ajax({
+                url: "/api/PLCSlot/ReadPulse/" + iCol + "/" + rowFrom,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
                 dataType: 'JSON',
-                data: JSON.stringify(data),
+                // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
-                    Swal.fire({
-                        text: 'Please Wait',
-                        width: '300px',
-
-                        allowEscapeKey: false,
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
-                    });
-                    Swal.showLoading()
                 },
                 success: function (result) {
-                    console.log(result);
-                    swal.close();
-                    if (result.success == true) {
-                          const myDiv = document.getElementById('txtResult');
-                          myDiv.innerHTML = result.data.row1 + ' || ' + result.data.row2 + ' || ' + result.data.row3 + ' || ' + result.data.row4;
 
+                    if (result.success == true) {
+                        fResult = true;
+
+                        document.getElementById('R' + rowFrom).innerHTML = result.data;
+                        logMessage('Read :: Done ' + result.data, 'info');
+
+                        rowFrom = Number(rowFrom) + 1;
+                        $('#txtRow').val(rowFrom);
                     }
                     else {
-                        swal.fire({
-                            icon: 'error',
-                            title: "Wait",
-                            text: result.errMessage
-                        });
+                        logMessage('Read :: ' + result.errMessage, 'alert');
                     }
                 },
                 error: function (error) {
-                    swal.fire({
-                        icon: 'error',
-                        title: "Wait",
-                        text: error.val
-                    });
+                    logMessage('Read :: ' + error.val, 'alert');
                 }
             });
 
+            return fResult;
         }
 
-        function updateForm(id, rowno, isAct, forET, hasET, hasR, reelNo, p) {
-            $("#txtId").val(id);
-            $("#txtRowNo").val(rowno);
-            if (isAct == "true") {
+        $('#list1Table').on('click', '#btnUpdate', function () {
+            const data = JSON.parse($(this).attr('data-row').replace(/&quot;/g, '"'));
+            updateForm(data);
+        });
+
+        $('#list2Table').on('click', '#btnUpdate', function () {
+            const data = JSON.parse($(this).attr('data-row').replace(/&quot;/g, '"'));
+            updateForm(data);
+        });
+
+        $('#list3Table').on('click', '#btnUpdate', function () {
+            const data = JSON.parse($(this).attr('data-row').replace(/&quot;/g, '"'));
+            updateForm(data);
+        });
+
+        $('#list4Table').on('click', '#btnUpdate', function () {
+            const data = JSON.parse($(this).attr('data-row').replace(/&quot;/g, '"'));
+            updateForm(data);
+        });
+
+        $('#list5Table').on('click', '#btnUpdate', function () {
+            const data = JSON.parse($(this).attr('data-row').replace(/&quot;/g, '"'));
+            updateForm(data);
+        });
+
+        function updateForm(data) {
+            $("#txtId").val(data.slot_Id);
+            $("#txtRowNo").val(data.rowNo);
+            if (data.isActive == "true") {
                 document.getElementById("chkIsActive").checked = true;
             }
             else {
                 document.getElementById("chkIsActive").checked = false;
             }
-            if (forET == "true") {
+            if (data.forEmptyTray == "true") {
                 document.getElementById("chkForEmptyTray").checked = true;
             }
             else {
                 document.getElementById("chkForEmptyTray").checked = false;
             }
-            if (hasET == "true") {
+            if (data.hasEmptyTray == "true") {
                 document.getElementById("chkHasEmptyTray").checked = true;
             }
             else {
                 document.getElementById("chkHasEmptyTray").checked = false;
             }
-            if (hasR == "true") {
+            if (data.hasReel == "true") {
                 document.getElementById("chkHasReel").checked = true;
             }
             else {
                 document.getElementById("chkHasReel").checked = false;
             }
-            $("#txtReelNo").val(reelNo);
-            $("#txtPriority").val(p);
+            $("#txtReelNo").val(data.reelNo);
+            $("#txtPriority").val(data.priority);
             $("#myModal").modal("show");
         }
 

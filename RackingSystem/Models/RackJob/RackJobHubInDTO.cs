@@ -56,5 +56,16 @@ namespace RackingSystem.Models.RackJob
         public string ReelCodeC { get; set; } = "";
         public int ActualHeightC { get; set; } = 0;
 
+        public bool HalfPickMove { get; set; } = false;
+        public int HalfPickMoveStep { get; set; } = 0;
+        public bool HalfPlaceMove { get; set; } = false;
+        public int HalfPlaceMoveStep { get; set; } = 0;
+
+        public int ColNum { get; set; } = 1;
+
+        public int Col1TotalReels { get; set; } = 0;
+        public int Col2TotalReels { get; set; } = 0;
+        public int Col3TotalReels { get; set; } = 0;
+        public int Col4TotalReels { get; set; } = 0;
     }
 }

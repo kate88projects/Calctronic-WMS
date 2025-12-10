@@ -439,16 +439,22 @@
                                             </a>
                                         </li>
                                     }
-                                    <li class="nav-item">
+                                    @* <li class="nav-item">
                                         <a asp-action="RackJob" asp-controller="Rack" class="nav-link">
                                             <i class="nav-icon bi bi-asterisk"></i>
                                             <p>Transfer Hub In Task</p>
                                         </a>
-                                    </li>
+                                    </li> *@
                                     <li class="nav-item">
                                         <a asp-action="NewHubInTask" asp-controller="Rack" class="nav-link">
                                             <i class="nav-icon bi bi-asterisk"></i>
-                                            <p>Hub In Task (P)</p>
+                                            <p>Hub In (Manual)</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a asp-action="TrolleyReel" asp-controller="Rack" class="nav-link">
+                                            <i class="nav-icon bi bi-asterisk"></i>
+                                            <p>Trolley Reel</p>
                                         </a>
                                     </li>
                                 </ul>
@@ -606,7 +612,6 @@
 
 
         });
-    </script>
 
         const body = document.querySelector('body');
         const sideBtn = document.getElementById('sideBtn');

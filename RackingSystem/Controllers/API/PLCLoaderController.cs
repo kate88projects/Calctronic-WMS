@@ -424,9 +424,9 @@ namespace RackingSystem.Controllers.API
                 }
 
                 // *** testing
-                //result.success = true;
-                //result.data = 1;
-                //return result;
+                result.success = true;
+                result.data = 1;
+                return result;
                 // *** testing
 
                 // 2. check plc which column is ready

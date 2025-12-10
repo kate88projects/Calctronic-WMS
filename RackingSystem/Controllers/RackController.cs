@@ -24,9 +24,11 @@ namespace RackingSystem.Controllers
 
         public IActionResult RackJobHubIn(long qId)
         {
+            ViewBag.QContinuos = "0";
             ViewBag.QId = qId;
             ViewBag.QNo = "";
             ViewBag.xToken = "";
+            ViewBag.DeviceId = "";
             ViewBag.PermissionList = new List<int>();
             string s = HttpContext.Session.GetString("xSession") ?? "";
             if (s != "")
@@ -34,6 +36,7 @@ namespace RackingSystem.Controllers
                 UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
                 ViewBag.PermissionList = data.UACIdList;
                 ViewBag.xToken = data.Token;
+                ViewBag.DeviceId = data.DeviceId;
 
                 var q = _context.RackJobQueue.Where(x => x.RackJobQueue_Id == qId).FirstOrDefault();
                 if (q != null)
@@ -67,9 +70,13 @@ namespace RackingSystem.Controllers
                 var srms = _context.RackJob.FirstOrDefault();
                 if (srms != null)
                 {
-                    if (srms.RackJobQueue_Id != 0 && srms.LoginIP != "")
+                    if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
                     {
                         return View("RackJobHubInView");
+                    }
+                    if (srms.RackJobQueue_Id != 0 && srms.LoginIP == ViewBag.DeviceId)
+                    {
+                        ViewBag.QContinuos = "1";
                     }
                 }
             }
@@ -113,6 +120,24 @@ namespace RackingSystem.Controllers
             ViewData["ActiveGroup"] = "grpRACKING";
             ViewData["ActiveTab"] = "NewHubInTask";
             ViewData["Title"] = "New Hub In Task";
+            return View();
+        }
+
+        public IActionResult TrolleyReel()
+        {
+            ViewBag.xToken = "";
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+                ViewBag.xToken = data.Token;
+            }
+
+            ViewData["ActiveGroup"] = "grpRACKING";
+            ViewData["ActiveTab"] = "TrolleyReel";
+            ViewData["Title"] = "Trolley Reel";
             return View();
         }
 

@@ -30,5 +30,22 @@ namespace RackingSystem.Helpers
             _dbContext.SaveChanges();
 
         }
+
+        public void InsertPLCHubInLog(AppDbContext _dbContext, long id, string evt, string r1, string r2)
+        {
+
+
+            PLCHubInLog log = new PLCHubInLog()
+            {
+                Loader_Id = id,
+                EventName = evt,
+                Remark1 = r1,
+                Remark2 = r2,
+                CreatedDate = DateTime.Now,
+            };
+            _dbContext.PLCHubInLog.Add(log);
+            _dbContext.SaveChanges();
+
+        }
     }
 }
