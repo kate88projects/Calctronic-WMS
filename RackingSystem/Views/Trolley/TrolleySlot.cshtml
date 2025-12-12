@@ -1393,7 +1393,7 @@
                 if (updateType === "slots")
                 {
                     const fieldNames = [
-                        'Trolley Code', 'Trolley Slot Code', 'Column No', 'Row No', 'X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse',
+                        'Trolley Code', 'Trolley Slot Code', 'Column No', 'Row No', 'X Pulse', 'Z Pulse', 'Qr-X Pulse', 'Qr-Z Pulse',
                         'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6',
                         'Is Active', 'Is Left'
                     ];
@@ -1413,9 +1413,9 @@
                             ColNo: row[colIndex['Column No']],
                             RowNo: row[colIndex['Row No']],
                             XPulse: row[colIndex['X Pulse']],
-                            YPulse: row[colIndex['Y Pulse']],
+                            YPulse: row[colIndex['Z Pulse']],
                             QRXPulse: row[colIndex['Qr-X Pulse']],
-                            QRYPulse: row[colIndex['Qr-Y Pulse']],
+                            QRYPulse: row[colIndex['Qr-Z Pulse']],
                             Add1Pulse: row[colIndex['Additional Pulse 1']],
                             Add2Pulse: row[colIndex['Additional Pulse 2']],
                             Add3Pulse: row[colIndex['Additional Pulse 3']],
@@ -1429,7 +1429,7 @@
                 }
                 else {
                     const fieldNames = [
-                        'Trolley Slot Code','X Pulse', 'Y Pulse', 'Qr-X Pulse', 'Qr-Y Pulse',
+                        'Trolley Slot Code','X Pulse', 'Z Pulse', 'Qr-X Pulse', 'Qr-Z Pulse',
                         'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6',
                         'Is Active', 'Is Left'
                     ];
@@ -1444,9 +1444,9 @@
                         return {
                             TrolleySlotCode: row[colIndex['Trolley Slot Code']],
                             XPulse: row[colIndex['X Pulse']],
-                            YPulse: row[colIndex['Y Pulse']],
+                            YPulse: row[colIndex['Z Pulse']],
                             QRXPulse: row[colIndex['Qr-X Pulse']],
-                            QRYPulse: row[colIndex['Qr-Y Pulse']],
+                            QRYPulse: row[colIndex['Qr-Z Pulse']],
                             Add1Pulse: row[colIndex['Additional Pulse 1']],
                             Add2Pulse: row[colIndex['Additional Pulse 2']],
                             Add3Pulse: row[colIndex['Additional Pulse 3']],

@@ -9,7 +9,7 @@
             <button type="button" class="btn btn-success" onclick="newJOForm()">
                 Add Job Order
             </button>
-            <button type="button" class="btn btn-danger" onclick="newJOForm()">
+            <button type="button" class="btn btn-danger" onclick="newEmergencyForm()">
                 Add Emergency
             </button>
         </div>
@@ -80,6 +80,28 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" onclick="saveJO()">Save</button>
                 <button type="button" class="btn btn-outline-secondary" onclick="cancelJOForm()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="emModal" role="dialog">
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add Emergency Order</h4>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" for="selEmergency">Emergency Order</label>
+                    <select class="form-control" id="selEmergency"> </select>
+                    <div id="selEmergencyError" class="error-message"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="saveEmergency()">Save</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="cancelEmergencyForm()">Cancel</button>
             </div>
         </div>
     </div>
@@ -313,6 +335,53 @@
             });
         }
 
+        function loadEmergencyList() {
+            $.ajax({
+                url: "/JO/GetJOEmergencyList/",
+                type: "GET",
+                dataType: "JSON",
+                contentType: "application/json; charset=utf-8",
+                beforeSend: function() {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading();
+                },
+                success: function(result) {
+                    swal.close();
+                    if (result.success == true) {
+                        const selEmergency = document.getElementById('selEmergency');
+                        selEmergency.options.length = 0;
+                        for (const opt of result.data)
+                        {
+                            const el = document.createElement("option");
+                            el.textContent = opt.docNo;
+                            el.value = opt.jobOrderEmergency_Id;
+                            selEmergency.appendChild(el);
+                        }
+                   }
+                   else {
+                       swal.fire({
+                           icon: 'error',
+                           title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+        }
+
         function newLoaderForm() {
             loadLoaderList();
             removeLoaderErrMsg([]);
@@ -325,6 +394,13 @@
             removeJOErrMsg([]);
             $("#selJO").val("");
             $("#joModal").modal("show");
+        }
+
+        function newEmergencyForm() {
+            loadEmergencyList();
+            removeEmergencyErrMsg([]);
+            $("#selEmergency").val("");
+            $("#emModal").modal("show");
         }
 
         $('#listTable').on('click', '.edit-btn', function () {
@@ -346,6 +422,10 @@
 
         function cancelJOForm() {
             $("#joModal").modal("toggle");
+        }
+
+        function cancelEmergencyForm() {
+            $("#emModal").modal("toggle");
         }
 
         function cancelQForm() {
@@ -407,6 +487,35 @@
             var txt = document.getElementById("selJO");
             if (txt.value == "") {
                 showError(txt.id, `Please select Job Order.`);
+                isValid = false;
+            }
+            return isValid;
+        }
+
+        function showEmergencyError(fieldId, message) {
+            document.getElementById(fieldId).classList.add('is-invalid');
+            document.getElementById(fieldId + 'Error').textContent = message;
+        }
+
+        function removeEmergencyErrMsg(fields, clearValue = false) {
+            fields = ['selEmergency' ];
+            if (!Array.isArray(fields)) {
+                fields = [fields];
+            }
+
+            fields.forEach(function(field) {
+                document.getElementById(field).classList.remove('is-invalid');
+                document.getElementById(field).classList.remove('is-valid');
+                document.getElementById(field + 'Error').textContent = '';
+                if (clearValue) document.getElementById(field).value = '';
+            });
+        }
+
+        function checkEmergencyInput() {
+            let isValid = true;
+            var txt = document.getElementById("selEmergency");
+            if (txt.value == "") {
+                showError(txt.id, `Please select Emergency.`);
                 isValid = false;
             }
             return isValid;
@@ -500,6 +609,64 @@
                 success: function (result) {
                     if (result.success == true) {
                         $("#joModal").modal("toggle");
+                        swal.fire({
+                            icon: 'success',
+                            title: "Success Update",
+                            text: "",
+                            didClose: () => {
+                              window.location.reload();
+                            }
+                        });
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+        }
+
+        function saveEmergency() {
+            removeEmergencyErrMsg([]);
+            if (checkEmergencyInput() == false) {
+                return;
+            }
+
+            var data = {
+                Doc_Id: $("#selEmergency").val(),
+                DocType: 'JOE',
+            }
+
+            $.ajax({
+                url: '/RackJobQueue/AddQueue',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                        $("#emModal").modal("toggle");
                         swal.fire({
                             icon: 'success',
                             title: "Success Update",

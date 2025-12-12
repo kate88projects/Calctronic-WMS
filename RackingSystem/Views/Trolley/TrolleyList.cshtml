@@ -5,6 +5,19 @@
     .row .form-check {
         margin-left: 10px;
     }
+
+    .ipSection {
+        /* border: 1px dashed black; */
+        padding: 10px;
+    }
+
+    .sectionTitle {
+        text-align: center;
+        border-bottom: 1px solid black;
+        padding: 5px;
+        margin-bottom: 10px;
+        width :100%;
+    }
 </style>
 
 @section PageHeader {
@@ -28,13 +41,13 @@
                             <thead>
                                 <tr>
                                     <th>Universal Trolley Code</th>
-                                    <th>IP Address</th>
+                                    @* <th>IP Address</th> *@
                                     <th>Remark</th>
-                                    <th>Total Column</th>
+                                    @* <th>Total Column</th> *@
                                     <th>Total Row</th>
                                     <th>Is Active</th>
                                     @* <th>Status</th> *@
-                                    <th>Side</th>
+                                    @* <th>Side</th> *@
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -47,28 +60,118 @@
 </div>
 
 <div class="modal fade" data-bs-backdrop="static" id="myModal" role="dialog">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Update Universal Trolley</h4>
             </div>
             <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label" for="txtCode">Universal Trolley Code</label>
-                    <input type="text" class="form-control" name="LoaderCode" id="txtCode" aria-describedby="Trolley Code">
-                    <div id="txtCodeError" class="error-message"></div>
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="form-label" for="txtCode">Universal Trolley Code</label>
+                        <input type="text" class="form-control" name="LoaderCode" id="txtCode" aria-describedby="Trolley Code">
+                        <div id="txtCodeError" class="error-message"></div>
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="txtRemark">Remark</label>
+                        <input type="text" class="form-control" name="Remark" id="txtRemark" aria-describedby="Remark">
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtIP">IP Address</label>
-                    <input type="text" class="form-control" name="IP" id="txtIP" aria-describedby="IP Address" oninput="formatIP(this)">
-                    <div id="txtIPError" class="error-message"></div>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtTotalCol">Total Column</label>
+                <div class="sectionTitle">IP Address 1</div>
+                <div class="ipSection">
+                    <div class="row mb-1">
+                        <div class="col">
+                            <label class="form-label" for="txtIP1">IP Address</label>
+                            <input type="text" class="form-control" name="txtIP1" id="txtIP1" aria-describedby="IP Address1" oninput="formatIP(this)">
+                            <div id="txtIP1Error" class="error-message"></div>
+                        </div>
+                        <div class="col">
+                            <label class="form-label" for="txtTotalRow">Total Row</label>
+                            <input type="number" class="form-control" name="TotalRow" id="txtTotalRow" aria-describedby="Total Row">
+                            <div id="txtTotalRowError" class="error-message"></div>
+                            @* <label class="form-label" for="txtTotalCol">Total Column</label>
                     <input type="number" class="form-control" name="TotalCol" id="txtTotalCol" aria-describedby="Total Column">
-                    <div id="txtTotalColError" class="error-message"></div>
+                    <div id="txtTotalColError" class="error-message"></div> *@
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label class="form-label" for="txtAdd1Col1">1st Column</label>
+                            <input type="number" class="form-control" name="txtAdd1Col1" id="txtAdd1Col1" aria-describedby="IP1 Column 1">
+                            <div id="txtAdd1Col1Error" class="error-message"></div>
+                        </div>
+                        <div class="col">
+                            <label class="form-label" for="txtAdd1Col2">2nd Column</label>
+                            <input type="number" class="form-control" name="txtAdd1Col2" id="txtAdd1Col2" aria-describedby="IP1 Column2">
+                            <div id="txtAdd1Col2Error" class="error-message"></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="mb-3">
+                
+                <div class="sectionTitle">IP Address 2</div>
+                <div class="ipSection">
+                    <div class="row mb-1">
+                        <div class="col">
+                            <label class="form-label" for="txtIP2">IP Address</label>
+                            <input type="text" class="form-control" name="txtIP2" id="txtIP2" aria-describedby="IP Address2" oninput="formatIP(this)">
+                            <div id="txtIP2Error" class="error-message"></div>
+                        </div>
+                        <div class="col">
+                            <label class="form-label" for="txtTotalRow2">Total Row</label>
+                            <input type="number" class="form-control" name="txtTotalRow2" id="txtTotalRow2" aria-describedby="Total Row2">
+                            <div id="txtTotalRow2Error" class="error-message"></div>
+                            @* <label class="form-label" for="txtTotalCol">Total Column</label>
+                    <input type="number" class="form-control" name="TotalCol" id="txtTotalCol" aria-describedby="Total Column">
+                    <div id="txtTotalColError" class="error-message"></div> *@
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label class="form-label" for="txtAdd2Col1">1st Column</label>
+                            <input type="number" class="form-control" name="txtAdd2Col1" id="txtAdd2Col1" aria-describedby="IP2 Column 1">
+                            <div id="txtAdd2Col1Error" class="error-message"></div>
+                        </div>
+                        <div class="col">
+                            <label class="form-label" for="txtAdd2Col2">2nd Column</label>
+                            <input type="number" class="form-control" name="txtAdd2Col2" id="txtAdd2Col2" aria-describedby="IP2 Column2">
+                            <div id="txtAdd2Col2Error" class="error-message"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sectionTitle">IP Address 3</div>
+                <div class="ipSection">
+                    <div class="row mb-1">
+                        <div class="col">
+                            <label class="form-label" for="txtIP3">IP Address</label>
+                            <input type="text" class="form-control" name="txtIP3" id="txtIP3" aria-describedby="IP Address3" oninput="formatIP(this)">
+                            <div id="txtIP3Error" class="error-message"></div>
+                        </div>
+                        <div class="col">
+                            <label class="form-label" for="txtTotalRow3">Total Row</label>
+                            <input type="number" class="form-control" name="txtTotalRow3" id="txtTotalRow3" aria-describedby="Total Row3">
+                            <div id="txtTotalRow3Error" class="error-message"></div>
+                            @* <label class="form-label" for="txtTotalCol">Total Column</label>
+                    <input type="number" class="form-control" name="TotalCol" id="txtTotalCol" aria-describedby="Total Column">
+                    <div id="txtTotalColError" class="error-message"></div> *@
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label class="form-label" for="txtAdd3Col1">1st Column</label>
+                            <input type="number" class="form-control" name="txtAdd3Col1" id="txtAdd3Col1" aria-describedby="IP3 Column 1">
+                            <div id="txtAdd3Col1Error" class="error-message"></div>
+                        </div>
+                        <div class="col">
+                            <label class="form-label" for="txtAdd3Col2">2nd Column</label>
+                            <input type="number" class="form-control" name="txtAdd3Col2" id="txtAdd3Col2" aria-describedby="IP3 Column2">
+                            <div id="txtAdd3Col2Error" class="error-message"></div>
+                        </div>
+                    </div>
+                </div>
+
+                @*
+                <div class="row mb-3">
                     <label class="form-label" for="txtTotalRow">Total Row</label>
                     <input type="number" class="form-control" name="TotalRow" id="txtTotalRow" aria-describedby="Total Row">
                     <div id="txtTotalRowError" class="error-message"></div>
@@ -76,9 +179,9 @@
                 <div class="mb-3">
                     <label class="form-label" for="txtRemark">Remark</label>
                     <input type="text" class="form-control" name="Remark" id="txtRemark" aria-describedby="Remark">
-                    @* <div id="txtRemarkError" class="error-message"></div> *@
-                </div>
-                <div class="mb-3 row">
+                    <div id="txtRemarkError" class="error-message"></div> 
+                </div>*@
+                @* <div class="mb-3 row">
                     <label class="form-label">Trolley Side</label>
                     <div class="col-3 form-check">
                         <input class="form-check-input" type="radio" id="sideL" name="side" value="0" checked/>
@@ -88,7 +191,7 @@
                         <input class="form-check-input" type="radio" id="sideR" name="side" value="1" />
                         <label for="sideR">Right Side</label>
                     </div>
-                </div>
+                </div> *@
                 <div class="form-check">
                     <input type="checkbox" class="form-check-input" id="chkIsActive">
                     <label class="form-check-label" for="chkIsActive">Active</label>
@@ -144,6 +247,7 @@
                 success: function (result) {
                     swal.close()
                     if (result.success == true) {
+                        console.log(result.data);
                         /*
                         if (gridInstance) {
                             gridInstance.destroy();
@@ -243,9 +347,7 @@
                             lengthMenu: [50, 100, 250, 500, 1000],
                             columns: [
                                 { data: 'trolleyCode' },
-                                { data: 'ipAddress' },
                                 { data: 'remark' },
-                                { data: 'totalCol' },
                                 { data: 'totalRow' },
                                 {
                                     data: null,
@@ -258,16 +360,6 @@
                                         }
                                     }
                                 },
-                                // { data: 'status' },
-                                {   data: 'side', 
-                                    render: function(data, type, row, meta) {
-                                        const sideMap = {
-                                            0: 'A',
-                                            1: 'B'
-                                        };
-                                        return sideMap[data];
-                                    }
-                                }, 
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
@@ -281,7 +373,27 @@
                                                     </button>
                                                 </div>`;
                                     }
-                                }
+                                },
+                                { data: 'ipAdd1', visible: false },
+                                { data: 'ipAdd2', visible: false },
+                                { data: 'ipAdd3', visible: false },
+                                { data: 'ipAdd1Col1', visible: false },
+                                { data: 'ipAdd1Col2', visible: false },
+                                { data: 'ipAdd2Col1', visible: false },
+                                { data: 'ipAdd2Col2', visible: false },
+                                { data: 'ipAdd3Col1', visible: false },
+                                { data: 'ipAdd3Col2', visible: false },
+                                // { data: 'totalCol' },
+                                // { data: 'status' },
+                                // {   data: 'side', 
+                                //     render: function(data, type, row, meta) {
+                                //         const sideMap = {
+                                //             0: 'A',
+                                //             1: 'B'
+                                //         };
+                                //         return sideMap[data];
+                                //     }
+                                // }, 
                             ],
                             language: {
                                 searchPlaceholder: "🔍︎ Search",
@@ -315,8 +427,8 @@
         {   
             removeErrMsg(true);
             $("#txtId").val("0");
-            $('#txtIP, #txtCode, #txtTotalCol, #txtTotalRow, #txtRemark').val("");
-            document.getElementById("sideL").checked = true;
+            $('#txtIP1, #txtCode, #txtTotalRow, #txtRemark, #txtAdd1Col1, #txtAdd1Col2, #txtIP2, #txtAdd2Col1, #txtAdd2Col2, #txtIP3, #txtAdd3Col1, #txtAdd3Col2').val("");
+            // document.getElementById("sideL").checked = true;
             document.getElementById("chkIsActive").checked = true;
             $("#myModal").modal("show");
         }
@@ -334,17 +446,24 @@
         function editTrolleyForm(row) {
             $('#txtId').val(row.trolley_Id);
             $("#txtCode").val(row.trolleyCode);
-            $("#txtIP").val(row.ipAddress);
-            $("#txtTotalCol").val(row.totalCol);
+            $("#txtIP1").val(row.ipAdd1);
+            $("#txtIP2").val(row.ipAdd2);
+            $("#txtIP3").val(row.ipAdd3);
+            $("#txtAdd1Col1").val(row.ipAdd1Col1);
+            $("#txtAdd1Col2").val(row.ipAdd1Col2);
+            $("#txtAdd2Col1").val(row.ipAdd2Col1);
+            $("#txtAdd2Col2").val(row.ipAdd2Col2);
+            $("#txtAdd3Col1").val(row.ipAdd3Col1);
+            $("#txtAdd3Col2").val(row.ipAdd3Col2);
             $("#txtTotalRow").val(row.totalRow);
             $("#txtRemark").val(row.remark);
 
-            if (row.side == "0") {
-                document.getElementById("sideL").checked = true;
-            } 
-            else {
-                document.getElementById("sideR").checked = true;
-            }
+            // if (row.side == "0") {
+            //     document.getElementById("sideL").checked = true;
+            // } 
+            // else {
+            //     document.getElementById("sideR").checked = true;
+            // }
 
             if (row.isActive == true) {
                 document.getElementById("chkIsActive").checked = true;
@@ -358,9 +477,17 @@
         function removeErrMsg(clearValue = false) {
             const fields = [
                 { id: 'txtCode', name: 'Trolley Code', required: true, numeric: false },
-                { id: 'txtIP', name: 'IP Address', required: true, numeric: false },
+                { id: 'txtIP1', name: 'IP Address', required: true, numeric: false },
+                { id: 'txtIP2', name: 'IP Address', required: true, numeric: false },
+                { id: 'txtIP3', name: 'IP Address', required: true, numeric: false },
+                { id: 'txtAdd1Col1', name: 'IP Address 1 - 1st Column', required: true, numeric: true, min: 1 },
+                { id: 'txtAdd1Col2', name: 'IP Address 1 - 2nd Column', required: true, numeric: true, min: 1 },
+                { id: 'txtAdd2Col1', name: 'IP Address 2 - 1st Column', required: true, numeric: true, min: 1 },
+                { id: 'txtAdd2Col2', name: 'IP Address 2 - 2nd Column', required: true, numeric: true, min: 1 },
+                { id: 'txtAdd3Col1', name: 'IP Address 3 - 1st Column', required: true, numeric: true, min: 1 },
+                { id: 'txtAdd3Col2', name: 'IP Address 3 - 2nd Column', required: true, numeric: true, min: 1 },
                 // { id: 'txtRemark', name: 'Remark', required: true, numeric: false },
-                { id: 'txtTotalCol', name: 'Total Column', required: true, numeric: true, min: 1 },
+                // { id: 'txtTotalCol', name: 'Total Column', required: true, numeric: true, min: 1 },
                 { id: 'txtTotalRow', name: 'Total Row', required: true, numeric: true, min: 1 },
             ];
 
@@ -404,8 +531,15 @@
             let isValid = true;
             const fields = [
                 { id: 'txtCode', name: 'Trolley Code', required: true, numeric: false },
-                { id: 'txtIP', name: 'IP Address', required: true, numeric: false },
-                { id: 'txtTotalCol', name: 'Total Column', required: true, numeric: true, min: 1 },
+                { id: 'txtIP1', name: 'IP Address1', required: true, numeric: false },
+                { id: 'txtIP2', name: 'IP Address2', required: true, numeric: false },
+                { id: 'txtIP3', name: 'IP Address3', required: true, numeric: false },
+                { id: 'txtAdd1Col1', name: 'IP Address 1 - 1st Column', required: true, numeric: true, min: 1 },
+                { id: 'txtAdd1Col2', name: 'IP Address 1 - 2nd Column', required: true, numeric: true, min: 1 },
+                { id: 'txtAdd2Col1', name: 'IP Address 2 - 1st Column', required: true, numeric: true, min: 1 },
+                { id: 'txtAdd2Col2', name: 'IP Address 2 - 2nd Column', required: true, numeric: true, min: 1 },
+                { id: 'txtAdd3Col1', name: 'IP Address 3 - 1st Column', required: true, numeric: true, min: 1 },
+                { id: 'txtAdd3Col2', name: 'IP Address 3 - 2nd Column', required: true, numeric: true, min: 1 },
                 { id: 'txtTotalRow', name: 'Total Row', required: true, numeric: true, min: 1 },
             ];
 
@@ -434,12 +568,20 @@
                 var data = {
                     Trolley_Id: parseInt($('#txtId').val()) || 0,
                     TrolleyCode: $('#txtCode').val(),
-                    IPAddress: $('#txtIP').val(),
+                    IPAdd1: $('#txtIP1').val(),
+                    IPAdd2: $('#txtIP2').val(),
+                    IPAdd3: $('#txtIP3').val(),
+                    IPAdd1Col1: parseInt($('#txtAdd1Col1').val()) || 0,
+                    IPAdd1Col2: parseInt($('#txtAdd1Col2').val()) || 0,
+                    IPAdd2Col1: parseInt($('#txtAdd2Col1').val()) || 0,
+                    IPAdd2Col2: parseInt($('#txtAdd2Col2').val()) || 0,
+                    IPAdd3Col1: parseInt($('#txtAdd3Col1').val()) || 0,
+                    IPAdd3Col2: parseInt($('#txtAdd3Col2').val()) || 0,
                     Remark: $('#txtRemark').val(),
-                    TotalCol: parseInt($('#txtTotalCol').val()) || 0,
+                    // TotalCol: parseInt($('#txtTotalCol').val()) || 0,
                     TotalRow: parseInt($('#txtTotalRow').val()) || 0,
                     IsActive: chkIsActive.checked ? true : false,
-                    Side: parseInt($("input[name='side']:checked").val()) || 0,
+                    // Side: parseInt($("input[name='side']:checked").val()) || 0,
                 };
 
                 $.ajax({
