@@ -78,26 +78,79 @@ namespace RackingSystem.Services.TrolleyServices
                     result.errMessage = "Please insert Trolley Code.";
                     return result;
                 }
-                if (trolley.TotalCol <= 0)
-                {
-                    result.errMessage = "Please insert Total Column.";
-                    return result;
-                }
+                //if (trolley.TotalCol <= 0)
+                //{
+                //    result.errMessage = "Please insert Total Column.";
+                //    return result;
+                //}
                 if (trolley.TotalRow <= 0)
                 {
                     result.errMessage = "Please insert Total Row.";
                     return result;
                 }
-                if (string.IsNullOrEmpty(trolley.IPAddress))
+                if (string.IsNullOrEmpty(trolley.IPAdd1))
                 {
                     result.errMessage = "Please insert IP Address.";
                     return result;
                 }
-                if (!IPAddress.TryParse(trolley.IPAddress, out _)) //only verify on IPv4 and IPv6
+                if (!IPAddress.TryParse(trolley.IPAdd1, out _)) //only verify on IPv4 and IPv6
                 {
                     result.errMessage = "Invalid IP Address format. Please insert again.";
                     return result;
                 }
+                if (string.IsNullOrEmpty(trolley.IPAdd2))
+                {
+                    result.errMessage = "Please insert IP Address.";
+                    return result;
+                }
+                if (!IPAddress.TryParse(trolley.IPAdd2, out _)) //only verify on IPv4 and IPv6
+                {
+                    result.errMessage = "Invalid IP Address format. Please insert again.";
+                    return result;
+                }
+                if (string.IsNullOrEmpty(trolley.IPAdd3))
+                {
+                    result.errMessage = "Please insert IP Address.";
+                    return result;
+                }
+                if (!IPAddress.TryParse(trolley.IPAdd3, out _)) //only verify on IPv4 and IPv6
+                {
+                    result.errMessage = "Invalid IP Address format. Please insert again.";
+                    return result;
+                }
+
+                if (trolley.IPAdd1Col1 == 0)
+                {
+                    result.errMessage = "Please insert IP Address 1 -> 1st Column No.";
+                    return result;
+                }
+                if (trolley.IPAdd1Col2 == 0)
+                {
+                    result.errMessage = "Please insert IP Address 1 -> 2nd Column No.";
+                    return result;
+                }
+                if (trolley.IPAdd2Col1 == 0)
+                {
+                    result.errMessage = "Please insert IP Address 2 -> 1st Column No.";
+                    return result;
+                }
+                if (trolley.IPAdd2Col2 == 0)
+                {
+                    result.errMessage = "Please insert IP Address 2 -> 2nd Column No.";
+                    return result;
+                }
+                if (trolley.IPAdd3Col1 == 0)
+                {
+                    result.errMessage = "Please insert IP Address 3 -> 1st Column No.";
+                    return result;
+                }
+                if (trolley.IPAdd3Col2 == 0)
+                {
+                    result.errMessage = "Please insert IP Address 3 -> 2nd Column No.";
+                    return result;
+                }
+
+
                 if (trolley.Trolley_Id == 0)
                 {
                     Trolley? trolleyExist = _dbContext.Trolley.FirstOrDefault(x => x.TrolleyCode == trolley.TrolleyCode);
@@ -123,12 +176,20 @@ namespace RackingSystem.Services.TrolleyServices
                     Trolley _trolley = new Trolley()
                     {
                         TrolleyCode = trolley.TrolleyCode,
-                        IPAddress = trolley.IPAddress,
+                        IPAdd1 = trolley.IPAdd1,
+                        IPAdd2 = trolley.IPAdd2,
+                        IPAdd3 = trolley.IPAdd3,
+                        IPAdd1Col1 = trolley.IPAdd1Col1,
+                        IPAdd1Col2 = trolley.IPAdd1Col2,
+                        IPAdd2Col1 = trolley.IPAdd2Col1,
+                        IPAdd2Col2 = trolley.IPAdd2Col2,
+                        IPAdd3Col1 = trolley.IPAdd3Col1,
+                        IPAdd3Col2 = trolley.IPAdd3Col2,
                         IsActive = trolley.IsActive,
                         Remark = trolley.Remark,
-                        TotalCol = trolley.TotalCol,
+                        //TotalCol = trolley.TotalCol,
                         TotalRow = trolley.TotalRow,
-                        Side = (int)trolley.Side,
+                        //Side = (int)trolley.Side,
                     };
                     _dbContext.Trolley.Add(_trolley);
 
@@ -142,12 +203,20 @@ namespace RackingSystem.Services.TrolleyServices
                         return result;
                     }
                     _trolley.TrolleyCode = trolley.TrolleyCode;
-                    _trolley.IPAddress = trolley.IPAddress;
+                    _trolley.IPAdd1 = trolley.IPAdd1;
+                    _trolley.IPAdd2 = trolley.IPAdd2;
+                    _trolley.IPAdd3 = trolley.IPAdd3;
+                    _trolley.IPAdd1Col1 = trolley.IPAdd1Col1;
+                    _trolley.IPAdd1Col2 = trolley.IPAdd1Col2;
+                    _trolley.IPAdd2Col1 = trolley.IPAdd2Col1;
+                    _trolley.IPAdd2Col2 = trolley.IPAdd2Col2;
+                    _trolley.IPAdd3Col1 = trolley.IPAdd3Col1;
+                    _trolley.IPAdd3Col2 = trolley.IPAdd3Col2;
                     _trolley.Remark = trolley.Remark;
-                    _trolley.TotalCol = trolley.TotalCol;
+                    //_trolley.TotalCol = trolley.TotalCol;
                     _trolley.TotalRow = trolley.TotalRow;
                     _trolley.IsActive = trolley.IsActive;
-                    _trolley.Side = (int)trolley.Side;
+                    //_trolley.Side = (int)trolley.Side;
                     _dbContext.Trolley.Update(_trolley);
                 }
                 
@@ -563,11 +632,11 @@ namespace RackingSystem.Services.TrolleyServices
                             ts.ErrorMsg = "";
                             //errorsLine.Add();
                         }
-                        //else
-                        //{
-                        //    errorsLine.Add(ts);
-                        //}
-                        errorsLine.Add(ts);
+                        else
+                        {
+                            errorsLine.Add(ts);
+                        }
+                        //errorsLine.Add(ts);
 
                     }
 
