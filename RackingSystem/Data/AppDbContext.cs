@@ -11,6 +11,7 @@ using RackingSystem.Models.BOM;
 using RackingSystem.Models.GRN;
 using RackingSystem.Models.Item;
 using RackingSystem.Models.RackJobQueue;
+using RackingSystem.Models.Reel;
 using RackingSystem.Models.Slot;
 
 namespace RackingSystem.Data
@@ -90,16 +91,22 @@ namespace RackingSystem.Data
 
         // ------------ Stored Procedure ------------
         public DbSet<ItemListDTO> SP_ItemSearchList { get; set; }
+
         public DbSet<GRNDtlListDTO> SP_GRNDTLSearchList { get; set; }
+
+        public DbSet<BOMListDTO> SP_BOMSearchList { get; set; }
 
         public DbSet<SlotFreeDTO> SP_SlotGetFreeSlotByCol_ASC { get; set; }
         public DbSet<SlotFreeDTO> SP_SlotGetFreeSlotByCol_DESC { get; set; }
-        public DbSet<SlotFreeDTO> Slot_GET_FREESLOT_ASC { get; set; }
+        //public DbSet<SlotFreeDTO> Slot_GET_FREESLOT_ASC { get; set; }
 
-        public DbSet<BOMListDTO> SP_BOMSearchList { get; set; }
-        public DbSet<Slot_DrawerFreeDTO> SP_SlotGetFreeSDrawerByCol { get; set; }
+        public DbSet<Slot_DrawerFreeDTO> SP_SlotGetFreeDrawerByCol { get; set; }
 
         public DbSet<QListDTO> SP_QueueList { get; set; }
+
+        public DbSet<SlotFreeDTO> SP_TrolleySlot_GET_FREESLOT_ASC { get; set; }
+
+        public DbSet<ReelAvailableListDTO> SP_ReelGetAvailSearchList { get; set; }
 
     }
 }

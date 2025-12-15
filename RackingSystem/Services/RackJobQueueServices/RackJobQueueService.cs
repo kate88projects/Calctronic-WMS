@@ -84,6 +84,10 @@ namespace RackingSystem.Services.RackJobQueueServices
                 {
 
                 }
+                else if (req.DocType == EnumQueueDocType.Trolley.ToString())
+                {
+
+                }
                 else
                 {
                     JobOrder? jobOrder = _dbContext.JobOrder.FirstOrDefault(x => x.JobOrder_Id == req.Doc_Id);

@@ -94,5 +94,21 @@ namespace RackingSystem.Controllers
             return result;
         }
 
+        public IActionResult LoaderDetailList()
+        {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpRACKING";
+            ViewData["ActiveTab"] = "LoaderDetailList";
+            ViewData["Title"] = "Loader Detail List";
+            return View();
+        }
+
     }
 }

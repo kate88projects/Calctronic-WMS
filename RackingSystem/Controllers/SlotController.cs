@@ -91,6 +91,16 @@ namespace RackingSystem.Controllers
             int colNo = 0;
             bool isNum = int.TryParse(req, out colNo);
             ServiceResponseModel<List<SlotListDTO>> result = await _slotService.GetSlotStatus_ByColumn(colNo);
+
+            int ttlIn = _context.Slot.Where(x => x.ColNo == colNo && x.IsActive == false).Count();
+            int ttlC = _context.Slot.Where(x => x.ColNo == colNo && x.NeedCheck == true).Count();
+            int ttlET = _context.Slot.Where(x => x.ColNo == colNo && x.HasEmptyTray == true).Count();
+            int ttlTR = _context.Slot.Where(x => x.ColNo == colNo && x.HasReel && x.ReelNo == "0").Count();
+            int ttlTRN = _context.Slot.Where(x => x.ColNo == colNo && x.HasReel && x.ReelNo != "0").Count();
+            int ttlA = _context.Slot.Where(x => x.ColNo == colNo && x.HasReel == false && x.HasEmptyTray == false && x.IsActive == true && x.NeedCheck == false).Count();
+
+            result.errMessage = ttlIn + "," + ttlC + "," + ttlET + "," + ttlTR + "," + ttlTRN + "," + ttlA;
+
             return result;
         }
 
@@ -193,6 +203,38 @@ namespace RackingSystem.Controllers
             ViewData["ActiveGroup"] = "grpMM";
             ViewData["ActiveTab"] = "SlotUpdatePulse";
             ViewData["Title"] = "Slot Update Pulses";
+            return View();
+        }
+
+        public IActionResult SlotColumnStatus()
+        {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpRACKING";
+            ViewData["ActiveTab"] = "SlotColumnStatus";
+            ViewData["Title"] = "Slot Column Status";
+            return View();
+        }
+
+        public IActionResult SlotDetailList()
+        {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpRACKING";
+            ViewData["ActiveTab"] = "SlotDetailList";
+            ViewData["Title"] = "Slot Detail List";
             return View();
         }
 

@@ -1,4 +1,5 @@
 ﻿using RackingSystem.Models;
+using RackingSystem.Models.Slot;
 using RackingSystem.Models.Trolley;
 
 namespace RackingSystem.Services.TrolleyServices
@@ -15,5 +16,8 @@ namespace RackingSystem.Services.TrolleyServices
         public Task<ServiceResponseModel<TrolleySlotRangeDTO>> SaveRangeOfTrolleySlot(TrolleySlotRangeDTO tsRanges);
         public Task<ServiceResponseModel<List<TrolleySlotDTO>>> SaveExcelTrolleySlot(List<TrolleySlotDTO> trolleySlot);
         public Task<ServiceResponseModel<List<TrolleySlotDTO>>> UpdateExcelTSPulses(List<TrolleySlotDTO> tsPulses);
+
+        public Task<ServiceResponseModel<TrolleyDTO>> GetTrolleyInfo(string req);
+        public Task<ServiceResponseModel<SlotFreeDTO>> GetFreeTrolleySlot_BySlot_ASC(SlotFreeReqDTO req);
     }
 }

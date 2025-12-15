@@ -62,5 +62,16 @@ namespace RackingSystem.Data.Maintenances
         [Required]
         public int Add6Pulse { get; set; } = 0;
 
+        public Guid Reel_Id { get; set; }
+
+        [Required]
+        public bool NeedCheck { get; set; } = false;
+
+        [MaxLength(100)]
+        public string CheckRemark { get; set; } = "";
+
+        [Required]
+        public int Priority { get; set; } = 0;
+
     }
 }

@@ -409,8 +409,11 @@
                                     if (result.data[idx - 1].reelNo == 0) {
                                         cell2.innerHTML = '<img src="../assets/img/tray_full_icon_138077.png" style="display:flex;justify-self: center; height:25px;" />';
                                     }
-                                    else {
+                                    else if (result.data[idx - 1].reelNo == 1) {
                                         cell2.innerHTML = '<span style="display:flex;justify-self: center; font-size:15px;">2</span>';
+                                    }
+                                    else {
+                                        cell2.innerHTML = '<span style="display:flex;justify-self: center; font-size:15px;">3</span>';
                                     }
                                 }
                                 else {
@@ -438,7 +441,6 @@
                                 $(cell3).addClass("tblRow tblCol3");
 
                                     idx = idx + 1;
-                                }
                             }
                         }
 

@@ -1058,12 +1058,12 @@ namespace RackingSystem.Controllers.API
             result.data = "";
             string methodName = "GetReelIDByIP";
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "Cannot get Reel ID, please try again.";
-            result.data = "A00000018";
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "Cannot get Reel ID, please try again.";
+            //result.data = "A00000018";
+            //return result;
+            //// *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -1781,12 +1781,12 @@ namespace RackingSystem.Controllers.API
                 byte[] bytes = BitConverter.GetBytes(slot.XPulse);
                 int highBinary = BitConverter.ToUInt16(bytes, 0);
                 int lowBinary = BitConverter.ToUInt16(bytes, 2);
-                registerAddress = 4299;
-                valueToWrite = 0;
-                modbusClient.WriteSingleRegister(registerAddress, highBinary);
                 registerAddress = 4300;
                 valueToWrite = 0;
                 modbusClient.WriteSingleRegister(registerAddress, lowBinary);
+                registerAddress = 4299;
+                valueToWrite = 0;
+                modbusClient.WriteSingleRegister(registerAddress, highBinary);
 
                 // step 3 : y-pulses
                 //bytes = BitConverter.GetBytes(4930);
@@ -2003,6 +2003,7 @@ namespace RackingSystem.Controllers.API
                         _slotO.ReelNo = iR.ToString();
                         _slotO.HasReel = true;
                         _slotO.HasEmptyTray = false;
+                        _slotO.Reel_Id = _reel.Reel_Id;
                         await _dbContext.SaveChangesAsync();
                     }
                 }
@@ -2203,6 +2204,7 @@ namespace RackingSystem.Controllers.API
                             result.errMessage = "Other Slot is not found.";
                             return result;
                         }
+                        _slotO.Reel_Id = _reel.Reel_Id;
                         _slotO.ReelNo = iR.ToString();
                         _slotO.HasReel = true;
                         _slotO.HasEmptyTray = false;
@@ -2576,6 +2578,26 @@ namespace RackingSystem.Controllers.API
             {
                 modbusClient.Disconnect();
                 PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Disconnected.", "");
+            }
+            return result;
+        }
+
+        [HttpGet("Trolley/{code}")]
+        public async Task<ServiceResponseModel<bool>> Trolley(string code)
+        {
+            ServiceResponseModel<bool> result = new ServiceResponseModel<bool>();
+            result.data = false;
+
+            try
+            {
+                var claims = User.Identities.First().Claims.ToList();
+                string devId = claims?.FirstOrDefault(x => x.Type.Equals("DeviceId", StringComparison.OrdinalIgnoreCase))?.Value ?? "";
+
+                result.success = true;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
             }
             return result;
         }

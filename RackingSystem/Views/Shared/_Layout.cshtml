@@ -57,6 +57,11 @@
             }
         }
 
+        .page-header-wrapper {
+            background-color: #343A40;
+            height: 3.5rem;
+        }
+
     </style>
 </head>
 
@@ -98,7 +103,7 @@
             <!--begin::Sidebar Brand-->
             <div class="sidebar-brand">
                 <!--begin::Brand Link-->
-                <a href="./index.html" class="brand-link">
+                <a asp-action="Dashboard1" asp-controller="Dashboard" class="brand-link">
                     <!--begin::Brand Text-->
                     <span class="brand-text fw-light">WMS</span>
                     <!--end::Brand Text-->
@@ -175,8 +180,17 @@
                                     {
                                         <li class="nav-item">
                                             <a asp-action="SlotUpdatePulse" asp-controller="Slot" class="nav-link">
-                                                <i class="nav-icon bi bi-circle"></i>
-                                                <p>Slot Update Pulses</p>
+                                                <i class="nav-icon bi bi-asterisk"></i>
+                                                <p>SRMS Update Pulses</p>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (ViewBag.PermissionList.Contains(5) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="TrolleyUpdatePulse" asp-controller="Trolley" class="nav-link">
+                                                <i class="nav-icon bi bi-asterisk"></i>
+                                                <p>Trolley Update Pulses</p>
                                             </a>
                                         </li>
                                     }
@@ -398,7 +412,7 @@
                                 <a href="javascript:none" class="nav-link">
                                     <i class="nav-icon bi bi-hdd-rack"></i>
                                     <p>
-                                        RACKING
+                                        Report
                                         <i class="nav-arrow bi bi-chevron-right"></i>
                                     </p>
                                 </a>
@@ -412,16 +426,61 @@
                                             </a>
                                         </li>
                                     }
-                                    @if (ViewBag.PermissionList.Contains(101) == true)
+                                    @if (ViewBag.PermissionList.Contains(100) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="LoaderDetailList" asp-controller="Loader" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>Loader Detail List</p>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (ViewBag.PermissionList.Contains(100) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="SlotDetailList" asp-controller="Slot" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>SRMS Detail List</p>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (ViewBag.PermissionList.Contains(100) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="TrolleyDetailList" asp-controller="Trolley" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>Trolley Detail List</p>
+                                            </a>
+                                        </li>
+                                    }
+                                    @* @if (ViewBag.PermissionList.Contains(101) == true)
                                     {
                                         <li class="nav-item">
                                             <a asp-action="SlotStatus" asp-controller="Slot" class="nav-link">
                                                 <i class="nav-icon bi bi-circle"></i>
-                                                <p>Racking Status</p>
+                                                <p>SRMS Status</p>
+                                            </a>
+                                        </li>
+                                    } *@
+                                    @if (ViewBag.PermissionList.Contains(101) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="SlotColumnStatus" asp-controller="Slot" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>SRMS Column Status</p>
                                             </a>
                                         </li>
                                     }
-                                    @if (ViewBag.PermissionList.Contains(102) == true)
+                                    @if (ViewBag.PermissionList.Contains(101) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="TrolleyColumnStatus" asp-controller="Trolley" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>Trolley Column Status</p>
+                                            </a>
+                                        </li>
+                                    }
+                                    @* @if (ViewBag.PermissionList.Contains(102) == true)
                                     {
                                         <li class="nav-item">
                                             <a asp-action="SlotDrawer" asp-controller="Slot" class="nav-link">
@@ -438,7 +497,7 @@
                                                 <p>Simulation</p>
                                             </a>
                                         </li>
-                                    }
+                                    } *@
                                     @* <li class="nav-item">
                                         <a asp-action="RackJob" asp-controller="Rack" class="nav-link">
                                             <i class="nav-icon bi bi-asterisk"></i>

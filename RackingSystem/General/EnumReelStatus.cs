@@ -8,5 +8,6 @@
         OnHold = 4,
         Out = 5,
         InPicked = 6,
+        InTrolley = 7,
     }
 }

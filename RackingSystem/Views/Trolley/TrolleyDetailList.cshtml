@@ -1,0 +1,548 @@
+﻿
+<style>
+    body {
+        color: #566787;
+        background: #f5f5f5;
+        /* font-family: 'Varela Round', sans-serif; */
+        /* font-size: 13px; */
+    }
+
+    .table-wrapper {
+        background: #fff;
+        padding: 20px 25px;
+        margin: 30px auto;
+        border-radius: 3px;
+        box-shadow: 0 1px 1px rgba(0,0,0,.05);
+    }
+
+        .table-wrapper .btn {
+            float: right;
+            color: #333;
+            background-color: #fff;
+            border-radius: 3px;
+            border: none;
+            outline: none !important;
+            margin-left: 10px;
+        }
+
+            .table-wrapper .btn:hover {
+                color: #333;
+                background: #f2f2f2;
+            }
+
+            .table-wrapper .btn.btn-primary {
+                color: #fff;
+                background: #03A9F4;
+            }
+
+                .table-wrapper .btn.btn-primary:hover {
+                    background: #03a3e7;
+                }
+
+            .table-wrapper .btn.btn-success {
+                color: #fff;
+                background: #198754;
+            }
+
+                .table-wrapper .btn.btn-success:hover {
+                    background: #198754;
+                }
+
+                .table-wrapper .btn.btn-success:disabled {
+                    background-color: #7f8c8d;
+                    cursor: not-allowed;
+                    opacity: 0.6;
+                }
+
+            .table-wrapper .btn.btn-danger {
+                color: #fff;
+                background: #dc3545;
+            }
+
+                .table-wrapper .btn.btn-danger:hover {
+                    background: #dc3545;
+                }
+
+                .table-wrapper .btn.btn-danger:disabled {
+                    background-color: #7f8c8d;
+                    cursor: not-allowed;
+                    opacity: 0.6;
+                }
+
+    .table-title .btn {
+        font-size: 17px;
+        border: none;
+    }
+
+        .table-title .btn i {
+            float: left;
+            font-size: 21px;
+            margin-right: 5px;
+        }
+
+        .table-title .btn span {
+            float: left;
+            margin-top: 2px;
+            height: 21px;
+        }
+
+    .table-title {
+        color: #fff;
+        background: #4b5366;
+        padding: 16px 25px;
+        margin: -20px -25px 10px;
+        border-radius: 3px 3px 0 0;
+    }
+
+        .table-title h2 {
+            margin: 5px 0 0;
+            font-size: 24px;
+        }
+
+    .show-entries select.form-control {
+        width: 60px;
+        margin: 0 5px;
+    }
+
+    .table-filter .filter-group {
+        float: right;
+        margin-left: 15px;
+    }
+
+    .table-filter input, .table-filter select {
+        height: 34px;
+        border-radius: 3px;
+        border-color: #ddd;
+        box-shadow: none;
+    }
+
+    .table-filter {
+        padding: 5px 0 15px;
+        border-bottom: 1px solid #e9e9e9;
+        margin-bottom: 5px;
+    }
+
+        .table-filter .btn {
+            height: 34px;
+        }
+
+        .table-filter label {
+            font-weight: normal;
+            margin-left: 10px;
+        }
+
+        .table-filter select, .table-filter input {
+            display: inline-block;
+            margin-left: 5px;
+        }
+
+        .table-filter input {
+            width: 200px;
+            display: inline-block;
+        }
+
+    .filter-group select.form-control {
+        width: 110px;
+    }
+
+    .filter-icon {
+        float: right;
+        margin-top: 7px;
+    }
+
+        .filter-icon i {
+            font-size: 18px;
+            opacity: 0.7;
+        }
+
+    /* .table > :not(caption) > * > * {
+                            padding: 0 !important;
+                        } */
+
+    .tblRow {
+        padding: 0 !important;
+    }
+
+    .tblCol1 {
+        width: 30%;
+    }
+
+    .tblCol2 {
+        width: 60%;
+    }
+
+    .tblCol3 {
+        width: 10%;
+        place-content: center;
+    }
+
+    /* --- System Log Area --- */
+    .system-log-container {
+        background-color: var(--card-bg);
+        margin: 0px 20px 20px 20px;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid var(--accent-color);
+    }
+
+    #system-log {
+        background-color: var(--bg-main);
+        color: #7f8c8d;
+        height: 350px;
+        overflow-y: auto;
+        padding: 10px;
+        font-family: monospace;
+        font-size: 0.9em;
+        border-radius: 4px;
+    }
+
+    .log-entry {
+        margin-bottom: 3px;
+        white-space: nowrap;
+    }
+
+    .log-info {
+        color: var(--text-color);
+    }
+
+    .log-alert {
+        color: var(--status-alarm);
+        font-weight: bold;
+    }
+
+    .log-success {
+        color: var(--status-ok);
+    }
+
+    .status-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .status-card {
+        background: #f9fafb;
+        border-radius: 14px;
+        padding: 16px;
+        text-align: center;
+        border: 1px solid #e5e7eb;
+    }
+
+        .status-card h3 {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 6px;
+        }
+
+        .status-card .value {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+    .yellow {
+        background: yellow;
+    }
+
+    .circle {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        box-shadow: 0px 0px 1px 1px #0000001a;
+    }
+
+    .pulse {
+        animation: pulse-animation 2s infinite;
+    }
+
+    @@keyframes pulse-animation {
+        0% {
+            box-shadow: 0 0 0 0px rgba(0, 0, 0, 0.2);
+        }
+
+        100% {
+            box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+        }
+    }
+</style>
+
+
+@section PageHeader {
+    <header class="d-flex align-items-center justify-content-between w-100">
+        <h2 class="pageTitle">Trolley Detail List</h2>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-warning" onclick="export()">
+                Export
+            </button>
+        </div>
+    </header>
+}
+
+<div class="container-fluid">
+    <br />
+
+    <input type="hidden" id="xToken" value="@ViewBag.xToken" autocomplete="off">
+
+    <div class="row" style="padding:5px;">
+        @* <div class="col-sm-4" style=""></div>
+            <div class="col-sm-4" style=""></div> *@
+        <div class="col-sm-4" style="">
+            <div class="row">
+                <div class="col-3" style="padding:0;">
+                    @* <select id="selDateType" name="DateType" class="form-control">
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select> *@
+                    <label>Trolley : </label>
+                </div>
+                <div class="col-5" style="padding:0;">
+                    <input id="txtTrolley" type="text" class="form-control" style="" placeholder="Trolley" />
+                </div>
+                <div class="col-4" style="padding:0;">
+                    <button type="button" class="btn btn-primary" style="width:100%;" onclick="loadList()"><i class="bi bi-search"></i> </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr />
+
+    <!-- Status -->
+    <div class="status-grid">
+        <div class="status-card">
+            <h3>Item Group</h3>
+            <div class="value" id="txtGroup">-</div>
+        </div>
+        <div class="status-card">
+            <h3>Need Checking</h3>
+            <div class="value" id="txtCheck">–</div>
+        </div>
+        @* <div class="status-card">
+            <h3>Occupied Slot</h3>
+            <div class="value" id="txtOT">Empty Tray : -</div>
+            <div class="value" id="txtOTR">Tray w Reel : -</div>
+            <div class="value" id="txtOTRN">Slot w Reel : -</div>
+        </div>
+        <div class="status-card">
+            <h3>Available Slot</h3>
+            <div class="value" id="txtA">-</div>
+        </div> *@
+    </div>
+
+    <hr />
+
+    <table id="listTable" class="row-border dataTable hover order-column" style="width:100%">
+        <thead>
+            <tr>
+                <th>Reel Code</th>
+                <th>Item Code</th>
+                <th>Qty</th>
+                <th>Status</th>
+                <th>Actual Height</th>
+                <th>Slot</th>
+            </tr>
+        </thead>
+    </table>
+
+
+</div>
+
+@section Scripts
+{
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+    <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
+    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="../js/dataTables.js"></script>
+    <script src="../js/dataTables.columnControl.js"></script>
+    <script src="../js/columnControl.dataTables.js"></script>
+    <script src="~/js/sweetalert2.all.min.js"></script>
+
+    @* <script src="~/js/gridjs.umd.js"></script> *@
+    @* <script src="~/js/datatables.min.js"></script> *@
+    @* <link rel="stylesheet" href="~/css/gridjs.min.css"> *@
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            loadList();
+        });
+
+        function loadList() {
+            $.ajax({
+                url: "/Loader/GetLoaderList/",
+                type: "POST",
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading();
+                },
+                success: function (result) {
+                    swal.close();
+                    if (result.success == true) {
+                        $('#listTable').DataTable( {
+                            data: result.data,
+                            paging: true,
+                            pageLength: 50,
+                            lengthMenu: [50, 100, 250, 500, 1000],
+                            columns: [
+                                { data: 'loaderCode' },
+                                { data: 'description' },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        if (row.isActive == true) {
+                                            return '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
+                                        }
+                                        else {
+                                            return '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>'
+                                        }
+                                    }
+                                },
+                                { data: 'status' },
+                                { data: 'totalCol' },
+                                { data: 'colHeight' },
+                                { data: 'ipAddr' },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        return `<span>${row.balancePercentage} %</span>`;
+                                    }
+                                },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
+                                        return `<div style="display:flex;">
+                                            <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
+                                                <span><i class="bi bi-pencil-square""></i>  Edit</span></button>
+                                            <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.loader_Id}" data-code="${row.loaderCode}">
+                                                <span><i class="bi bi-trash""></i>  Delete</span>
+                                            </button></div>`;
+                                    }
+                                }
+                            ],
+                            language: {
+                                searchPlaceholder: "🔍︎ Search",
+                                search: ""
+                            },
+                            ordering: {
+                                indicators: false
+                            },
+                            columnControl: ['orderStatus']
+                        });
+                       /*
+                       if (gridInstance) {
+                           gridInstance.destroy();
+                       }
+
+                       gridInstance = new gridjs.Grid({
+                           columns: [
+                               { name: 'Auto Loader Code', id: 'loaderCode', width: '188px' },
+                               { name: 'Description', id: 'description', width: '148px' },
+                               {
+                                   name: 'Active State',
+                                   id: 'isActive',
+                                   width: '140px',
+                                   formatter: (cell, row) => {
+                                        const badgeHtml = row.cells[2].data === true
+                                          ? '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
+                                          : '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>';
+                                        return gridjs.html(`<div style="text-align:center;">${badgeHtml}</div>`);
+                                   }
+                               },
+                               { name: 'Status', id: 'status' },
+                               { 
+                                   name: 'Total Column', 
+                                   id: 'totalCol', 
+                                   width: '148px',
+                                   formatter: (cell) => 
+                                        gridjs.html(`<div style="text-align:center;">${cell}</div>`)
+                               },
+                               { 
+                                   name: 'Column Height', 
+                                   id: 'colHeight', width: '163px', 
+                                   formatter: (cell) => 
+                                        gridjs.html(`<div style="text-align:center;">${cell}</div>`) 
+                               },
+                               { name: 'IP Address', id: 'ipAddr' },
+                               { 
+                                   name: 'Balance',
+                                   id: 'balancePercentage',
+                                   width: '110px',
+                                   formatter: (cell) =>
+                                        gridjs.html(`<div style="text-align:center;">${cell}%</div>`)
+                               },
+                               { name: 'Loader_Id', id: 'loader_Id', hidden: true },
+                               {
+                                   name: 'Action',
+                                   formatter: (cell, row) => {
+                                       const cleanRow = {
+                                           loaderCode: row.cells[0]?.data,
+                                           description: row.cells[1]?.data,
+                                           isActive: row.cells[2]?.data,
+                                           status: row.cells[3]?.data,
+                                           totalCol: row.cells[4]?.data,
+                                           colHeight: row.cells[5]?.data,
+                                           ipAddr: row.cells[6]?.data,
+                                           balance: row.cells[7]?.data,
+                                           loader_Id: row.cells[8]?.data,
+                                       };
+                                       const rawData = btoa(JSON.stringify(cleanRow));
+                                       return gridjs.html(`
+                                           <div style="display: flex;">
+                                               <button class="btn btn-warning d-grid edit-btn me-2" data-row="${rawData}">
+                                                   <span><i class="bi bi-pencil-square"></i> Edit</span>
+                                               </button>
+                                               <button class="btn btn-danger d-grid delete-btn" data-id="${cleanRow.loader_Id}" data-code="${cleanRow.loaderCode}">
+                                                   <span><i class="bi bi-trash"></i> Delete</span>
+                                               </button>
+                                           </div>
+                                       `);
+                                   }
+                               }
+                           ],
+                           data: result.data,
+                           pagination: true,
+                           search: true,
+                           sort: true,
+                           resizable: true,
+                           className: {
+                               table: 'custom-table',
+                           }
+                       }).render(document.getElementById("gridTable"));
+
+                       //remove grid-footer class
+                        const footer = document.querySelector('#gridTable .gridjs-footer');
+                        if (footer) {
+                            footer.id = "gridFooter";
+                        }
+                        document.getElementById("gridFooter").classList.remove("gridjs-footer");
+                        */
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+        }
+
+    </script>
+}

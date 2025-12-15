@@ -5,6 +5,7 @@ using RackingSystem.Models;
 using RackingSystem.Models.Trolley;
 using RackingSystem.Models.User;
 using RackingSystem.Services.TrolleyServices;
+using System.Collections.Generic;
 using System.Security.Policy;
 
 namespace RackingSystem.Controllers
@@ -120,6 +121,131 @@ namespace RackingSystem.Controllers
             ServiceResponseModel<List<TrolleySlotDTO>> result = await _trolleyService.UpdateExcelTSPulses(tsPulses);
             return new JsonResult(result);
         }
+
+        public IActionResult TrolleyUpdatePulse()
+        {
+            ViewBag.xToken = "";
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+                ViewBag.xToken = data.Token;
+            }
+
+            ViewData["ActiveGroup"] = "grpMM";
+            ViewData["ActiveTab"] = "TrolleyUpdatePulse";
+            ViewData["Title"] = "Trolley Update Pulses";
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<ServiceResponseModel<List<TrolleySlotDTO>>> GetTrolleySlotStatus_BySide(string side)
+        {
+            ServiceResponseModel<List<TrolleySlotDTO>> result = await _trolleyService.GetTrolleySlotList();
+            List<TrolleySlotDTO> data = new List<TrolleySlotDTO>();
+            result.errMessage = "0,0,0,0,0,0";
+            if (result.success)
+            {
+                var isLeft = side == "A";
+                data = result.data.Where(x => x.IsLeft == isLeft).ToList().OrderByDescending(x => x.RowNo).ToList();
+                result.data = data;
+
+                int ttlIn = result.data.Where(x => x.IsLeft == isLeft && x.IsActive == false).Count();
+                int ttlC = result.data.Where(x => x.IsLeft == isLeft && x.NeedCheck == true).Count();
+                int ttlET = 0; // result.data.Where(x => x.IsLeft == isLeft && x.HasEmptyTray == true).Count();
+                int ttlTR = result.data.Where(x => x.IsLeft == isLeft && x.HasReel && x.ReelNo == "0").Count();
+                int ttlTRN = result.data.Where(x => x.IsLeft == isLeft && x.HasReel && x.ReelNo != "0").Count();
+                int ttlA = result.data.Where(x => x.IsLeft == isLeft && x.HasReel == false && x.IsActive == true && x.NeedCheck == false).Count();
+
+                result.errMessage = ttlIn + "," + ttlC + "," + ttlET + "," + ttlTR + "," + ttlTRN + "," + ttlA;
+
+            }
+
+            return result;
+        }
+
+        [HttpGet]
+        public async Task<ServiceResponseModel<List<TrolleySlotDTO>>> GetTrolleySlotStatus(string side)
+        {
+            ServiceResponseModel<List<TrolleySlotDTO>> result = await _trolleyService.GetTrolleySlotList();
+            List<TrolleySlotDTO> data = new List<TrolleySlotDTO>();
+            result.errMessage = "0,0,0,0,0,0";
+            if (result.success)
+            {
+                int ttlIn = result.data.Where(x => x.IsActive == false).Count();
+                int ttlC = result.data.Where(x =>  x.NeedCheck == true).Count();
+                int ttlET = 0; // result.data.Where(x => x.IsLeft == isLeft && x.HasEmptyTray == true).Count();
+                int ttlTR = result.data.Where(x => x.HasReel && x.ReelNo == "0").Count();
+                int ttlTRN = result.data.Where(x => x.HasReel && x.ReelNo != "0").Count();
+                int ttlA = result.data.Where(x => x.HasReel == false && x.IsActive == true && x.NeedCheck == false).Count();
+
+                result.errMessage = ttlIn + "," + ttlC + "," + ttlET + "," + ttlTR + "," + ttlTRN + "," + ttlA;
+
+                var isLeft = side == "A";
+                data = result.data.Where(x => x.IsLeft == isLeft).ToList().OrderByDescending(x => x.RowNo).ToList();
+                result.data = data;
+
+            }
+
+            return result;
+        }
+
+        public IActionResult TrolleyColumnStatus()
+        {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpRACKING";
+            ViewData["ActiveTab"] = "TrolleyColumnStatus";
+            ViewData["Title"] = "Trolley Column Status";
+            return View();
+        }
+
+        public IActionResult TrolleyDetailList()
+        {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpRACKING";
+            ViewData["ActiveTab"] = "TrolleyDetailList";
+            ViewData["Title"] = "Trolley Detail List";
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<ServiceResponseModel<List<TrolleySlotDTO>>> GetTrolleyDetailList(string code)
+        {
+            ServiceResponseModel<List<TrolleySlotDTO>> result = await _trolleyService.GetTrolleySlotList();
+            List<TrolleySlotDTO> data = new List<TrolleySlotDTO>();
+            result.errMessage = "0,0,0,0,0,0";
+            if (result.success)
+            {
+                int ttlIn = result.data.Where(x => x.IsActive == false).Count();
+                int ttlC = result.data.Where(x => x.NeedCheck == true).Count();
+                int ttlET = 0; // result.data.Where(x => x.IsLeft == isLeft && x.HasEmptyTray == true).Count();
+                int ttlTR = result.data.Where(x => x.HasReel && x.ReelNo == "0").Count();
+                int ttlTRN = result.data.Where(x => x.HasReel && x.ReelNo != "0").Count();
+                int ttlA = result.data.Where(x => x.HasReel == false && x.IsActive == true && x.NeedCheck == false).Count();
+
+                result.errMessage = ttlIn + "," + ttlC + "," + ttlET + "," + ttlTR + "," + ttlTRN + "," + ttlA;
+
+            }
+
+            return result;
+        }
+
     }
 }
 

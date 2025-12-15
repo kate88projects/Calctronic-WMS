@@ -7,5 +7,7 @@
         public int TotalSlot { get; set; } = 0;
 
         public int ColNo { get; set; } = 0;
+
+        public bool IsLeft { get; set; } = true;
     }
 }

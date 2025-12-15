@@ -11,6 +11,7 @@ using RackingSystem.Models.Setting;
 using RackingSystem.Models.BOM;
 using RackingSystem.Data.JO;
 using RackingSystem.Models.JO;
+using RackingSystem.Models.RackJob;
 
 namespace RackingSystem.Data
 {
@@ -42,6 +43,7 @@ namespace RackingSystem.Data
             .ForMember(dest => dest.BalancePercentage, opt => opt.Ignore())
             .ForMember(dest => dest.UsagePercentage, opt => opt.Ignore());
             CreateMap<Trolley, TrolleyListDTO>();
+            CreateMap<Trolley, TrolleyDTO>();
             CreateMap<TrolleySlot, TrolleySlotDTO>();
             CreateMap<BOM, BOMListDTO>();
             CreateMap<BOMDetail, BOMDtlDTO>();
@@ -50,7 +52,9 @@ namespace RackingSystem.Data
             CreateMap<GRNDetail, GRNDtlDTO>();
             CreateMap<JobOrder, JOListDTO>();
             CreateMap<JobOrderDetail, JODetailReqDTO>();
+            CreateMap<JobOrderDetail, RackJobHubOutDtlDTO>();
             CreateMap<JobOrderEmergency, JOEmergencyReqDTO>();
+            CreateMap<JobOrderEmergency, RackJobHubOutEDtlDTO>();
             CreateMap<JobOrderEmergencyDetail, JOEmergencyDetailReqDTO>();
 
         }

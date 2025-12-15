@@ -2607,25 +2607,25 @@
         //         const sent = navigator.sendBeacon(`/api/PLCLoader/EndTask/${loader}`, blob);
         //         localStorage.removeItem("loaderId");
         //     }
-        // });
+        // }); 
 
-        // async function waitForDecision() {
-        //     return new Promise((resolve) => {
-        //        stopDecision = (value) => resolve(value);
+        async function waitForDecision() {
+            return new Promise((resolve) => {
+               stopDecision = (value) => resolve(value);
 
-        //        let countdown = 3;
-        //        function tick() {
-        //           if (countdown > 0) {
-        //              $('#pTextLast').text(`Continue to Next Reel..${countdown}...`);
-        //              countdown--;
-        //              stopTimer = setTimeout(tick, 1000);
-        //           } else {
-        //              resolve(false);
-        //           }
-        //        }
-        //        tick();
-        //     });
-        // }
+               let countdown = 3;
+               function tick() {
+                  if (countdown > 0) {
+                     $('#pTextLast').text(`Continue to Next Reel..${countdown}...`);
+                     countdown--;
+                     stopTimer = setTimeout(tick, 1000);
+                  } else {
+                     resolve(false);
+                  }
+               }
+               tick();
+            });
+        }
     </script>
 }
 

@@ -3,6 +3,9 @@
     <header class="d-flex align-items-center justify-content-between w-100">
         <h2 class="pageTitle">Queue Management</h2>
         <div class="d-flex gap-2">
+            <button type="button" class="btn btn-success" onclick="newTrolleyForm()">
+                Add Drawer In
+            </button>
             <button type="button" class="btn btn-success" onclick="newLoaderForm()">
                 Add Hub In
             </button>
@@ -107,6 +110,30 @@
     </div>
 </div>
 
+<div class="modal fade" id="trolleyModal" role="dialog">
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add Trolley</h4>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" for="selTrolley">Trolley</label>
+                    <select class="form-control" id="selTrolley">
+                        <option id="1"> Trolley1A </option>
+                        </select>
+                    <div id="selTrolleyError" class="error-message"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="saveTrolley()">Save</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="cancelTrolleyForm()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="qModal" role="dialog">
     <div class="modal-dialog">
 
@@ -193,10 +220,23 @@
                                         const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
                                         var btnStart ='';
                                         if (row.idx == 1) {
-                                            btnStart = `<button class="btn btn-primary d-grid start-btn" style="margin-left:10px;" data-id="${row.rackJobQueue_Id}" data-row="${rowData}">
+                                            btnStart = `<button class="btn btn-primary d-grid start-btn" style="margin-left:10px;" data-id="${row.rackJobQueue_Id}" data-code="${row.docType}" data-row="${rowData}">
                                                             <span><i class="bi bi-setting-square""></i>  Start</span>
                                                         </button>`;
                                         }
+                                        else {
+                                            if (row.docType == "JOE") {
+                                                btnStart = `<button class="btn btn-primary d-grid start-btn" style="margin-left:10px;" data-id="${row.rackJobQueue_Id}" data-code="${row.docType}" data-row="${rowData}">
+                                                            <span><i class="bi bi-setting-square""></i>  Start</span>
+                                                        </button>`;
+                                            }
+                                            if (row.docType == "Trolley") {
+                                                btnStart = `<button class="btn btn-primary d-grid start-btn" style="margin-left:10px;" data-id="${row.rackJobQueue_Id}" data-code="${row.docType}" data-row="${rowData}">
+                                                            <span><i class="bi bi-setting-square""></i>  Start</span>
+                                                        </button>`;
+                                            }
+                                        }
+                                        
                                         return `<div style="display:flex;">
                                                     <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
                                                         <span><i class="bi bi-pencil-square""></i>  Change Q</span>
@@ -403,6 +443,13 @@
             $("#emModal").modal("show");
         }
 
+        function newTrolleyForm() {
+            // loadTrolleyList();
+            removeTrolleyErrMsg([]);
+            $("#selTrolley").val("");
+            $("#trolleyModal").modal("show");
+        }
+
         $('#listTable').on('click', '.edit-btn', function () {
             const row = JSON.parse($(this).attr('data-row'));
             editQForm(row);
@@ -426,6 +473,10 @@
 
         function cancelEmergencyForm() {
             $("#emModal").modal("toggle");
+        }
+
+        function cancelTrolleyForm() {
+            $("#trolleyModal").modal("toggle");
         }
 
         function cancelQForm() {
@@ -486,7 +537,7 @@
             let isValid = true;
             var txt = document.getElementById("selJO");
             if (txt.value == "") {
-                showError(txt.id, `Please select Job Order.`);
+                showJOError(txt.id, `Please select Job Order.`);
                 isValid = false;
             }
             return isValid;
@@ -516,6 +567,36 @@
             var txt = document.getElementById("selEmergency");
             if (txt.value == "") {
                 showError(txt.id, `Please select Emergency.`);
+                isValid = false;
+            }
+            return isValid;
+        }
+
+        // Show error message and highlight invalid fields
+        function showTrolleyError(fieldId, message) {
+            document.getElementById(fieldId).classList.add('is-invalid');
+            document.getElementById(fieldId + 'Error').textContent = message;
+        }
+
+        function removeTrolleyErrMsg(fields, clearValue = false) {
+            fields = ['selTrolley' ];
+            if (!Array.isArray(fields)) {
+                fields = [fields];
+            }
+
+            fields.forEach(function(field) {
+                document.getElementById(field).classList.remove('is-invalid');
+                document.getElementById(field).classList.remove('is-valid');
+                document.getElementById(field + 'Error').textContent = '';
+                if (clearValue) document.getElementById(field).value = '';
+            });
+        }
+
+        function checkTrolleyInput() {
+            let isValid = true;
+            var txt = document.getElementById("selTrolley");
+            if (txt.value == "") {
+                showTrolleyError(txt.id, `Please enter Trolley.`);
                 isValid = false;
             }
             return isValid;
@@ -695,6 +776,65 @@
             });
         }
 
+        function saveTrolley() {
+            removeTrolleyErrMsg([]);
+            if (checkTrolleyInput() == false) {
+                return;
+            }
+
+            var data = {
+                Doc_Id: 1,
+                DocType: 'Trolley',
+                NewIdx: 1,
+            }
+
+            $.ajax({
+                url: '/RackJobQueue/AddQueue',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                        $("#trolleyModal").modal("toggle");
+                        swal.fire({
+                            icon: 'success',
+                            title: "Success Update",
+                            text: "",
+                            didClose: () => {
+                              window.location.reload();
+                            }
+                        });
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+        }
+
         $('#listTable').on('click', '.delete-btn', function () {
                 const id = $(this).attr('data-id');
                 const code = $(this).attr('data-code');
@@ -834,9 +974,20 @@
         }
 
         $('#listTable').on('click', '.start-btn', function () {
-           const id = $(this).attr('data-id');
-            var redirectUrl = '@Url.Action("RackJobHubIn", "Rack")';
-            window.open(redirectUrl + '?qId=' + id, '_blank');
+            const id = $(this).attr('data-id');
+            const code = $(this).attr('data-code');
+            if (code == "JO" || code == "JOE") {
+                var redirectUrl = '@Url.Action("RackJobHubOut", "Rack")';
+                window.open(redirectUrl + '?qId=' + id, '_blank');
+            }
+            else if (code == "Trolley") {
+                var redirectUrl = '@Url.Action("RackDrawerIn", "Rack")';
+                window.open(redirectUrl + '?qId=' + id, '_blank');
+            }
+            else {
+                var redirectUrl = '@Url.Action("RackJobHubIn", "Rack")';
+                window.open(redirectUrl + '?qId=' + id, '_blank');
+            }
         });
 
     </script>

@@ -423,11 +423,11 @@ namespace RackingSystem.Controllers.API
                     return result;
                 }
 
-                // *** testing
-                result.success = true;
-                result.data = 1;
-                return result;
-                // *** testing
+                //// *** testing
+                //result.success = true;
+                //result.data = 1;
+                //return result;
+                //// *** testing
 
                 // 2. check plc which column is ready
                 int plcActualHeight = 0;
@@ -839,6 +839,7 @@ namespace RackingSystem.Controllers.API
 
                 modbusClient.Disconnect();
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");
+                result.data = value;
                 result.success = true;
             }
             catch (Exception ex)

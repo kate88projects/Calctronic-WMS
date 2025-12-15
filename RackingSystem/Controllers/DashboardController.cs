@@ -5,7 +5,6 @@ using RackingSystem.Models.User;
 
 namespace RackingSystem.Controllers
 {
-    [Authorize]
     public class DashboardController : Controller
     {
         public IActionResult Dashboard1()

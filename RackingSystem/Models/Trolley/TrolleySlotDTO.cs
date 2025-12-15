@@ -1,4 +1,6 @@
-﻿namespace RackingSystem.Models.Trolley
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace RackingSystem.Models.Trolley
 {
     public class TrolleySlotDTO
     {
@@ -28,5 +30,13 @@
         public int Add6Pulse { get; set; } = 0;
 
         public string? ErrorMsg { get; set; }
+
+        public Guid Reel_Id { get; set; }
+
+        public bool NeedCheck { get; set; } = false;
+        public string CheckRemark { get; set; } = "";
+        public int Priority { get; set; } = 0;
+        public int TotalSlot { get; set; } = 1;
+
     }
 }

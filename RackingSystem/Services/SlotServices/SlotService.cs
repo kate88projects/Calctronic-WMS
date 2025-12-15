@@ -829,7 +829,7 @@ namespace RackingSystem.Services.SlotServices
             try
             {
                 string sql = "EXECUTE dbo.Slot_GET_FREEDRAWERBYCOL";
-                var listDTO = await _dbContext.SP_SlotGetFreeSDrawerByCol.FromSqlRaw(sql).ToListAsync();
+                var listDTO = await _dbContext.SP_SlotGetFreeDrawerByCol.FromSqlRaw(sql).ToListAsync();
                 if (listDTO.Count == 0)
                 {
                     result.success = false;

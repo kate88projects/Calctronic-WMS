@@ -4,6 +4,7 @@
     {
         JO,
         JOE,
-        Loader
+        Loader,
+        Trolley
     }
 }

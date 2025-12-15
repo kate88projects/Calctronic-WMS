@@ -1,12 +1,15 @@
 ﻿using AspNetCoreGeneratedDocument;
 using AutoMapper;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using RackingSystem.Data;
 using RackingSystem.Data.Maintenances;
+using RackingSystem.General;
 using RackingSystem.Models;
 using RackingSystem.Models.Loader;
 using RackingSystem.Models.Slot;
 using RackingSystem.Models.Trolley;
+using System.Drawing;
 using System.Net;
 using System.Text.RegularExpressions;
 using static System.Reflection.Metadata.BlobBuilder;
@@ -764,5 +767,76 @@ namespace RackingSystem.Services.TrolleyServices
 
             return result;
         }
+
+        public async Task<ServiceResponseModel<TrolleyDTO>> GetTrolleyInfo(string req)
+        {
+            ServiceResponseModel<TrolleyDTO> result = new ServiceResponseModel<TrolleyDTO>();
+
+            try
+            {
+                var trolleyInfo = await _dbContext.Trolley.Where(x => x.TrolleyCode == req).FirstOrDefaultAsync();
+
+                if (trolleyInfo == null)
+                {
+                    result.errMessage = "Cannot find this Trolley [" + req + "].";
+                    return result;
+                }
+
+                var trDTO = _mapper.Map<TrolleyDTO>(trolleyInfo);
+
+                trDTO.Col1Balance = _dbContext.TrolleySlot.Where(x => x.Trolley_Id == trDTO.Trolley_Id && x.ColNo == 1 && x.IsLeft == true && x.HasReel == false).Count();
+                trDTO.Col2Balance = _dbContext.TrolleySlot.Where(x => x.Trolley_Id == trDTO.Trolley_Id && x.ColNo == 2 && x.IsLeft == true && x.HasReel == false).Count();
+                trDTO.Col3Balance = _dbContext.TrolleySlot.Where(x => x.Trolley_Id == trDTO.Trolley_Id && x.ColNo == 3 && x.IsLeft == true && x.HasReel == false).Count();
+                trDTO.Col4Balance = _dbContext.TrolleySlot.Where(x => x.Trolley_Id == trDTO.Trolley_Id && x.ColNo == 1 && x.IsLeft == false && x.HasReel == false).Count();
+                trDTO.Col5Balance = _dbContext.TrolleySlot.Where(x => x.Trolley_Id == trDTO.Trolley_Id && x.ColNo == 2 && x.IsLeft == false && x.HasReel == false).Count();
+                trDTO.Col6Balance = _dbContext.TrolleySlot.Where(x => x.Trolley_Id == trDTO.Trolley_Id && x.ColNo == 3 && x.IsLeft == false && x.HasReel == false).Count();
+
+                trDTO.Col1TotalUsed = 50 - trDTO.Col1Balance;
+                trDTO.Col2TotalUsed = 50 - trDTO.Col2Balance;
+                trDTO.Col3TotalUsed = 50 - trDTO.Col3Balance;
+                trDTO.Col4TotalUsed = 50 - trDTO.Col4Balance;
+                trDTO.Col5TotalUsed = 50 - trDTO.Col5Balance;
+                trDTO.Col6TotalUsed = 50 - trDTO.Col6Balance;
+
+                result.success = true;
+                result.data = trDTO;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceResponseModel<SlotFreeDTO>> GetFreeTrolleySlot_BySlot_ASC(SlotFreeReqDTO req)
+        {
+            ServiceResponseModel<SlotFreeDTO> result = new ServiceResponseModel<SlotFreeDTO>();
+
+            try
+            {
+                var parameters = new[]
+                {
+                    new SqlParameter("@TotalSlot", req.TotalSlot),
+                    new SqlParameter("@IsLeft", req.IsLeft),
+                };
+
+                string sql = "EXECUTE dbo.TrolleySlot_GET_FREESLOT_ASC @TotalSlot, @IsLeft ";
+                var listDTO = await _dbContext.SP_TrolleySlot_GET_FREESLOT_ASC.FromSqlRaw(sql, parameters).ToListAsync();
+
+                result.success = true;
+                result.data = listDTO.First();
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
     }
 }

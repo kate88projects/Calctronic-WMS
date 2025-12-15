@@ -1,5 +1,5 @@
 ﻿
-<style >
+<style>
     body {
         color: #566787;
         background: #f5f5f5;
@@ -156,8 +156,8 @@
         }
 
     /* .table > :not(caption) > * > * {
-                padding: 0 !important;
-            } */
+                    padding: 0 !important;
+                } */
 
     .tblRow {
         padding: 0 !important;
@@ -173,7 +173,6 @@
 
     .tblCol3 {
         width: 10%;
-        place-content:center;
     }
 
     /* --- System Log Area --- */
@@ -213,6 +212,14 @@
     .log-success {
         color: var(--status-ok);
     }
+
+    /* .xVal {
+        color: darkblue;
+    }
+
+    .yVal {
+        color: darkgreen;
+    } */
 
     .status-grid {
         display: grid;
@@ -256,28 +263,25 @@
     }
 
     @@keyframes pulse-animation {
-        0%
+        0% {
+            box-shadow: 0 0 0 0px rgba(0, 0, 0, 0.2);
+        }
 
-    {
-        box-shadow: 0 0 0 0px rgba(0, 0, 0, 0.2);
-    }
-
-    100% {
-        box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
-    }
-
+        100% {
+            box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+        }
     }
 </style>
 
-
 @section PageHeader {
     <header class="d-flex align-items-center justify-content-between w-100">
-        <h2 class="pageTitle">Slot Update Pulses</h2>
+        <h2 class="pageTitle">Trolley Update Pulses</h2>
     </header>
 }
 
 <div class="container-fluid">
     <br />
+
     <input type="hidden" id="xToken" value="@ViewBag.xToken" autocomplete="off">
     <input id="chkCont" type="checkbox" class="" style="display:none;" />
 
@@ -287,8 +291,11 @@
                 <div class="col-4" style="padding:0;">
                     <label>Column : </label>
                 </div>
-                <div class="col-8" style="padding:0;">
-                    <input id="txtCol" name="txtCol" type="number" class="form-control" style="" placeholder="Column No" />
+                <div class="col-4" style="padding:0;">
+                    <input id="txtSide" type="text" class="form-control" style="" placeholder="Side" />
+                </div>
+                <div class="col-4" style="padding:0;">
+                    <input id="txtCol" type="number" class="form-control" style="" placeholder="Col No" />
                 </div>
             </div>
         </div>
@@ -302,17 +309,6 @@
                 </div>
             </div>
         </div>
-        @* <div class="col-sm-3" style="">
-            <div class="row">
-                <div class="col-4" style="padding:0;">
-                    <label for="chkCont">Continuously </label>
-                </div>
-                <div class="col-5" style="padding:0;">
-                    
-                </div>
-            </div>
-        </div> *@
-
         <div class="col-sm-6" style="">
             <div class="row" style="padding-left:10px;">
                 <div class="col-3" style="padding:0;">
@@ -352,8 +348,8 @@
             <div class="value" id="txtErr" style="color: darkred;">-</div>
         </div>
     </div>
-    <hr />
 
+    <hr />
 
     <div class="row">
         <div class="col-2">
@@ -371,74 +367,13 @@
                 <tbody id="list3TableBody"></tbody>
             </table>
         </div>
-        <div class="col-2">
-            <table class="table table-striped table-hover" id="list4Table">
-                <tbody id="list4TableBody"></tbody>
-            </table>
-        </div>
-        <div class="col-2">
-            <table class="table table-striped table-hover" id="list5Table">
-                <tbody id="list5TableBody"></tbody>
-            </table>
-        </div>
-        <div class="col-2">
+        <div class="col-6">
             <div id="system-log" style="border: 1px solid lightgrey;">
                 <!-- Log entries will be appended here by JavaScript -->
             </div>
         </div>
     </div>
 
-</div>
-
-<div class="modal fade" id="myModal" role="dialog">
-    <div class="modal-dialog">
-
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Update Slot</h4>
-            </div>
-            @* <form action="/bin/SaveBin" method="post"> *@
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label" for="txtRowNo">Row No</label>
-                    <input type="text" class="form-control" name="RowNo" id="txtRowNo" aria-describedby="Row No" disabled>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtPriority">Priority</label>
-                    <input type="number" class="form-control" name="RowNo" id="txtPriority" aria-describedby="Priority">
-                </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkIsActive">
-                    <label class="form-check-label" for="chkIsActive">Is Active</label>
-                </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkForEmptyTray">
-                    <label class="form-check-label" for="chkForEmptyTray">For Empty Tray</label>
-                </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkHasEmptyTray">
-                    <label class="form-check-label" for="chkHasEmptyTray">Has Empty Tray</label>
-                </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkHasReel">
-                    <label class="form-check-label" for="chkHasReel">Has Reel</label>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtReelNo">Reel No</label>
-                    <input type="number" class="form-control" name="ReelNo" id="txtReelNo" aria-describedby="ReelNo">
-                </div>
-
-                <input type="hidden" id="txtId">
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="updateSlotStatus()">Update</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="cancelForm()">Cancel</button>
-            </div>
-            @* </form> *@
-        </div>
-    </div>
 </div>
 
 @section Scripts
@@ -451,7 +386,7 @@
     <script src="~/js/sweetalert2.all.min.js"></script>
 
     <script type="text/javascript">
-         
+
         var autoTimer;
         var runningTask = false;
         var endTask = true;
@@ -469,15 +404,16 @@
 
             token = $('#xToken').val();
 
+            $('#txtSide').val('A');
             $('#txtCol').val(1);
             $('#txtRow').val(1);
             loadList();
         });
 
         function loadList() {
-            var col = $('#txtCol').val();
+            var s = $('#txtSide').val();
             $.ajax({
-                url: "/Slot/GetSlotStatus_ByColumn?req=" + col,
+                url: "/Trolley/GetTrolleySlotStatus_BySide?side=" + s,
                 type: "GET",
                 dataType: 'JSON',
                 // data: JSON.stringify(jsonInput),
@@ -499,13 +435,28 @@
                     if (result.success == true) {
 
                         var idx = 1;
-                        for (let iC = 1; iC <= 5; iC++) {
+                        for (let iC = 1; iC <= 3; iC++) {
                             const tbl = document.getElementById('list' + iC + 'Table');
                             const tableBody = document.getElementById('list' + iC + 'TableBody');
                             tableBody.innerHTML = '';
+                            idx = 1;
 
-                            for (let i = 0; i < 25; i++) { // Example: Add 5 rows
-                                if (idx >= 111) { continue; }
+                            for (let i = 0; i < 150; i++) { // Example: Add 5 rows
+                                var colNo = iC;
+                                if (result.data[idx - 1].colNo != iC) {
+                                    idx = idx + 1;
+                                    continue;
+                                }
+                                // if (s == "A") {
+                                // }
+                                // else {
+                                //     if (result.data[idx - 1].colNo != (iC + 100)) {
+                                //         idx = idx + 1;
+                                //         continue;
+                                //     }
+                                //     colNo = iC + 100;
+                                // }
+
                                 const rawData = JSON.stringify(result.data[idx - 1]);
                                 const newRow = tbl.insertRow(); // or document.createElement('tr');
                                 const cell1 = newRow.insertCell(); // or document.createElement('td');
@@ -513,8 +464,8 @@
                                 href='javascript:none;' id='btnUpdate' data-row='${rawData}' > ` + result.data[idx - 1].rowNo + '</a>';
                                 $(cell1).addClass("tblRow tblCol1");
                                 const cell2 = newRow.insertCell();
-                                cell2.id = "R" + (111 - idx);
-                                cell2.innerHTML = '' + result.data[idx - 1].qrxPulse + ' , ' + result.data[idx - 1].qryPulse + '';
+                                cell2.id = colNo + "R" + result.data[idx - 1].rowNo;
+                                cell2.innerHTML = '<span class="xVal">' + result.data[idx - 1].qrxPulse + '</span> <span style="color:lightgrey;">,</span>  <span class="yVal">' + result.data[idx - 1].qryPulse + '</span>';
                                 $(cell2).addClass("tblRow tblCol2");
                                 const cell3 = newRow.insertCell(); // or document.createElement('td');
                                 if (result.data[idx - 1].needCheck) {
@@ -577,8 +528,6 @@
         }
 
         function getQRPulses() {
-            document.getElementById('chkCont').checked = false;
-
             const startBtn = document.getElementById('start-btn');
             const stopBtn = document.getElementById('stop-btn');
             startBtn.disabled = true;
@@ -587,23 +536,6 @@
             endTask = false;
             runningTask = false;
             autoTimer = setInterval(getPulsesAuto, 2000);
-
-            document.getElementById('txtIdle').innerHTML = "Running";
-        }
-
-        function getContQRPulses() {
-            document.getElementById('chkCont').checked = true;
-
-            const startBtn = document.getElementById('start-btn');
-            const stopBtn = document.getElementById('stop-btn');
-            startBtn.disabled = true;
-            stopBtn.disabled = false;
-
-            endTask = false;
-            runningTask = false;
-            autoTimer = setInterval(getPulsesAuto, 2000);
-
-            document.getElementById('txtIdle').innerHTML = "Running Continuosly";
         }
 
         function stopGet() {
@@ -623,9 +555,6 @@
             startBtn.disabled = false;
             stopBtn.disabled = true;
 
-            document.getElementById('txtIdle').innerHTML = "Stop";
-            document.getElementById('txtCurRow').innerHTML = "-";
-
             runningTask = false;
             endTask = true;
             clearInterval(autoTimer);
@@ -640,9 +569,9 @@
             var rowFrom = Number($('#txtRow').val());
 
 
-            if (rowFrom >= 111) {
-                console.log('RF:111');
-                $('#txtRow').val(110);
+            if (rowFrom >= 51) {
+                console.log('RF:51');
+                $('#txtRow').val(51);
                 stop();
                 return;
             }
@@ -681,16 +610,14 @@
 
         async function startScanPulses(iCol, rowFrom) {
             var fResult = false;
+            var s = $('#txtSide').val();
 
-            if (rowFrom >= 111) {
+            if (rowFrom >= 51) {
                 return false;
             }
 
-            document.getElementById('txtCurRow').innerHTML = rowFrom;
-            document.getElementById('txtErr').innerHTML = "-";
-
             await $.ajax({
-                url: "/api/PLCSlot/SetScanPulseStart/" + iCol + "/" + rowFrom,
+                url: "/api/PLCSlot/SetScanTrolleyPulseStart/" + s + "/" + iCol + "/" + rowFrom,
                 type: "GET",
                 headers: {
                     'Authorization': 'Bearer ' + token
@@ -708,12 +635,10 @@
                     }
                     else {
                         logMessage('Start Scan :: ' + result.errMessage, 'alert');
-                        document.getElementById('txtErr').innerHTML = result.errMessage;
                     }
                 },
                 error: function (error) {
                     logMessage('Start Scan :: ' + error.val, 'alert');
-                    document.getElementById('txtErr').innerHTML = error.val;
                 }
             });
 
@@ -722,11 +647,10 @@
 
         async function readPulses(iCol, rowFrom) {
             var fResult = false;
-
-            document.getElementById('txtErr').innerHTML = "-";
+            var s = $('#txtSide').val();
 
             await $.ajax({
-                url: "/api/PLCSlot/ReadPulse/" + iCol + "/" + rowFrom,
+                url: "/api/PLCSlot/ReadTrolleyPulse/" + s + "/" + iCol + "/" + rowFrom,
                 type: "GET",
                 headers: {
                     'Authorization': 'Bearer ' + token
@@ -741,8 +665,7 @@
                     if (result.success == true) {
                         fResult = true;
 
-                        document.getElementById('R' + rowFrom).innerHTML = result.data;
-                        document.getElementById('txtRead').innerHTML = result.data;
+                        document.getElementById(iCol + 'R' + rowFrom).innerHTML = result.data;
                         logMessage('Read :: Done ' + result.data, 'info');
 
                         rowFrom = Number(rowFrom) + 1;
@@ -750,12 +673,10 @@
                     }
                     else {
                         logMessage('Read :: ' + result.errMessage, 'alert');
-                        document.getElementById('txtErr').innerHTML = result.errMessage;
                     }
                 },
                 error: function (error) {
                     logMessage('Read :: ' + error.val, 'alert');
-                    document.getElementById('txtErr').innerHTML = error.val;
                 }
             });
 
@@ -764,133 +685,123 @@
 
         $('#list1Table').on('click', '#btnUpdate', function () {
             const data = JSON.parse($(this).attr('data-row').replace(/&quot;/g, '"'));
-            updateForm(data);
+            // updateForm(data);
         });
 
         $('#list2Table').on('click', '#btnUpdate', function () {
             const data = JSON.parse($(this).attr('data-row').replace(/&quot;/g, '"'));
-            updateForm(data);
+            // updateForm(data);
         });
 
         $('#list3Table').on('click', '#btnUpdate', function () {
             const data = JSON.parse($(this).attr('data-row').replace(/&quot;/g, '"'));
-            updateForm(data);
+            // updateForm(data);
         });
 
-        $('#list4Table').on('click', '#btnUpdate', function () {
-            const data = JSON.parse($(this).attr('data-row').replace(/&quot;/g, '"'));
-            updateForm(data);
-        });
+        // function updateForm(data) {
+        //     $("#txtId").val(data.slot_Id);
+        //     $("#txtRowNo").val(data.rowNo);
+        //     if (data.isActive == "true") {
+        //         document.getElementById("chkIsActive").checked = true;
+        //     }
+        //     else {
+        //         document.getElementById("chkIsActive").checked = false;
+        //     }
+        //     if (data.forEmptyTray == "true") {
+        //         document.getElementById("chkForEmptyTray").checked = true;
+        //     }
+        //     else {
+        //         document.getElementById("chkForEmptyTray").checked = false;
+        //     }
+        //     if (data.hasEmptyTray == "true") {
+        //         document.getElementById("chkHasEmptyTray").checked = true;
+        //     }
+        //     else {
+        //         document.getElementById("chkHasEmptyTray").checked = false;
+        //     }
+        //     if (data.hasReel == "true") {
+        //         document.getElementById("chkHasReel").checked = true;
+        //     }
+        //     else {
+        //         document.getElementById("chkHasReel").checked = false;
+        //     }
+        //     $("#txtReelNo").val(data.reelNo);
+        //     $("#txtPriority").val(data.priority);
+        //     $("#myModal").modal("show");
+        // }
 
-        $('#list5Table').on('click', '#btnUpdate', function () {
-            const data = JSON.parse($(this).attr('data-row').replace(/&quot;/g, '"'));
-            updateForm(data);
-        });
+        // function updateSlotStatus() {
+        //     const chkIsAct = document.querySelector('#chkIsActive');
+        //     const chkForEmptyTray = document.querySelector('#chkForEmptyTray');
+        //     const chkHasEmptyTray = document.querySelector('#chkHasEmptyTray');
+        //     const chkHasReel = document.querySelector('#chkHasReel');
 
-        function updateForm(data) {
-            $("#txtId").val(data.slot_Id);
-            $("#txtRowNo").val(data.rowNo);
-            if (data.isActive == "true") {
-                document.getElementById("chkIsActive").checked = true;
-            }
-            else {
-                document.getElementById("chkIsActive").checked = false;
-            }
-            if (data.forEmptyTray == "true") {
-                document.getElementById("chkForEmptyTray").checked = true;
-            }
-            else {
-                document.getElementById("chkForEmptyTray").checked = false;
-            }
-            if (data.hasEmptyTray == "true") {
-                document.getElementById("chkHasEmptyTray").checked = true;
-            }
-            else {
-                document.getElementById("chkHasEmptyTray").checked = false;
-            }
-            if (data.hasReel == "true") {
-                document.getElementById("chkHasReel").checked = true;
-            }
-            else {
-                document.getElementById("chkHasReel").checked = false;
-            }
-            $("#txtReelNo").val(data.reelNo);
-            $("#txtPriority").val(data.priority);
-            $("#myModal").modal("show");
-        }
+        //     var data = {
+        //         Slot_Id: $("#txtId").val(),
+        //         IsActive: chkIsAct.checked ? true : false,
+        //         ForEmptyTray: chkForEmptyTray.checked ? true : false,
+        //         HasEmptyTray: chkHasEmptyTray.checked ? true : false,
+        //         HasReel: chkHasReel.checked ? true : false,
+        //         ReelNo: $("#txtReelNo").val(),
+        //         RowNo: $("#txtRowNo").val(),
+        //     }
 
-        function updateSlotStatus() {
-            const chkIsAct = document.querySelector('#chkIsActive');
-            const chkForEmptyTray = document.querySelector('#chkForEmptyTray');
-            const chkHasEmptyTray = document.querySelector('#chkHasEmptyTray');
-            const chkHasReel = document.querySelector('#chkHasReel');
+        //     //console.log(JSON.stringify(data));
 
-            var data = {
-                Slot_Id: $("#txtId").val(),
-                IsActive: chkIsAct.checked ? true : false,
-                ForEmptyTray: chkForEmptyTray.checked ? true : false,
-                HasEmptyTray: chkHasEmptyTray.checked ? true : false,
-                HasReel: chkHasReel.checked ? true : false,
-                ReelNo: $("#txtReelNo").val(),
-                RowNo: $("#txtRowNo").val(),
-            }
+        //     $.ajax({
+        //         url: '/Slot/UpdateSlotStatus',
+        //         type: 'POST',
+        //         data: JSON.stringify(data),
+        //         dataType: 'JSON',
+        //         contentType: 'application/json; charset=utf-8',
+        //         beforeSend: function () {
+        //             Swal.fire({
+        //                 text: 'Please Wait',
+        //                 width: '300px',
 
-            //console.log(JSON.stringify(data));
+        //                 allowEscapeKey: false,
+        //                 allowOutsideClick: false,
+        //                 showConfirmButton: false,
+        //             });
+        //             Swal.showLoading()
+        //         },
+        //         success: function (result) {
+        //             // console.log(result);
+        //             if (result.success == true) {
+        //                 $("#myModal").modal("toggle");
+        //                 swal.fire({
+        //                     icon: 'success',
+        //                     title: "Success Update",
+        //                     text: "",
+        //                     didClose: () => {
+        //                       window.location.reload();
+        //                     }
+        //                 });
+        //             }
+        //             else {
+        //                 swal.fire({
+        //                     icon: 'error',
+        //                     title: "Wait",
+        //                     text: result.errMessage
+        //                 });
+        //             }
+        //         },
+        //         error: function (error) {
+        //             console.log(error);
+        //             swal.fire({
+        //                 icon: 'error',
+        //                 title: "Wait",
+        //                 text: error.val
+        //             });
+        //         }
+        //     });
 
-            $.ajax({
-                url: '/Slot/UpdateSlotStatus',
-                type: 'POST',
-                data: JSON.stringify(data),
-                dataType: 'JSON',
-                contentType: 'application/json; charset=utf-8',
-                beforeSend: function () {
-                    Swal.fire({
-                        text: 'Please Wait',
-                        width: '300px',
+        //     // console.log(id);
+        // }
 
-                        allowEscapeKey: false,
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
-                    });
-                    Swal.showLoading()
-                },
-                success: function (result) {
-                    // console.log(result);
-                    if (result.success == true) {
-                        $("#myModal").modal("toggle");
-                        swal.fire({
-                            icon: 'success',
-                            title: "Success Update",
-                            text: "",
-                            didClose: () => {
-                              window.location.reload();
-                            }
-                        });
-                    }
-                    else {
-                        swal.fire({
-                            icon: 'error',
-                            title: "Wait",
-                            text: result.errMessage
-                        });
-                    }
-                },
-                error: function (error) {
-                    console.log(error);
-                    swal.fire({
-                        icon: 'error',
-                        title: "Wait",
-                        text: error.val
-                    });
-                }
-            });
-
-            // console.log(id);
-        }
-
-        function cancelForm() {
-            $("#myModal").modal("toggle");
-        }
+        // function cancelForm() {
+        //     $("#myModal").modal("toggle");
+        // }
 
 
     </script>

@@ -1,6 +1,196 @@
-﻿@section PageHeader {
+﻿
+<style type="text/css">
+    .show-entries select.form-control {
+        width: 60px;
+        margin: 0 5px;
+    }
+
+    .table-filter .filter-group {
+        float: right;
+        margin-left: 15px;
+    }
+
+    .table-filter input, .table-filter select {
+        height: 34px;
+        border-radius: 3px;
+        border-color: #ddd;
+        box-shadow: none;
+    }
+
+    .table-filter .btn {
+        height: 34px;
+    }
+
+    .table-filter label {
+        font-weight: normal;
+        margin-left: 10px;
+    }
+
+    .table-filter select, .table-filter input {
+        display: inline-block;
+        margin-left: 5px;
+    }
+
+    .table-filter input {
+        width: 200px;
+        display: inline-block;
+    }
+
+    .filter-group select.form-control {
+        width: 110px;
+    }
+
+    .filter-icon {
+        float: right;
+        margin-top: 7px;
+    }
+
+        .filter-icon i {
+            font-size: 18px;
+            opacity: 0.7;
+        }
+
+    .pagination {
+        float: right;
+        margin: 0 0 5px;
+    }
+
+        .pagination li a {
+            border: none;
+            font-size: 13px;
+            min-width: 30px;
+            min-height: 30px;
+            color: #999;
+            margin: 0 2px;
+            line-height: 30px;
+            border-radius: 2px !important;
+            text-align: center;
+            padding: 0 6px;
+        }
+
+            .pagination li a:hover {
+                color: #666;
+            }
+
+        .pagination li.active a {
+            background: #03A9F4;
+        }
+
+            .pagination li.active a:hover {
+                background: #0397d6;
+            }
+
+        .pagination li.disabled i {
+            color: #ccc;
+        }
+
+        .pagination li i {
+            font-size: 16px;
+            padding-top: 6px
+        }
+
+    .text-success {
+        color: #10c469;
+    }
+
+    .text-info {
+        color: #62c9e8;
+    }
+
+    .text-warning {
+        color: #FFC107;
+    }
+
+    .text-danger {
+        color: #ff5b5b;
+    }
+
+    .pagination {
+        float: right;
+        margin: 0 0 5px;
+    }
+
+        .pagination li a {
+            border: none;
+            font-size: 13px;
+            min-width: 30px;
+            min-height: 30px;
+            color: #999;
+            margin: 0 2px;
+            line-height: 30px;
+            border-radius: 2px !important;
+            text-align: center;
+            padding: 0 6px;
+        }
+
+            .pagination li a:hover {
+                color: #666;
+            }
+
+        .pagination li.active a {
+            background: #03A9F4;
+        }
+
+            .pagination li.active a:hover {
+                background: #0397d6;
+            }
+
+        .pagination li.disabled i {
+            color: #ccc;
+        }
+
+        .pagination li i {
+            font-size: 16px;
+            padding-top: 6px
+        }
+
+    .hint-text {
+        float: left;
+        margin-top: 10px;
+        font-size: 13px;
+    }
+
+    #contentBox {
+        background-color: white;
+    }
+
+    .status-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .status-card {
+        background: #f9fafb;
+        border-radius: 14px;
+        padding: 16px;
+        text-align: center;
+        border: 1px solid #e5e7eb;
+    }
+
+        .status-card h3 {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 6px;
+        }
+
+        .status-card .value {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+</style>
+
+
+@section PageHeader {
     <header class="d-flex align-items-center justify-content-between w-100">
         <h2 class="pageTitle">Reel List <b></b></h2>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-warning" onclick="export()">
+                Export
+            </button>
+        </div>
     </header>
 }
 
@@ -9,7 +199,106 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body pt-0">
-                    <div class="text-nowrap table-container mt-1">
+                    <div id="contentBox" class="row mt-2" style="padding:5px;">
+                        <div class="col-sm-2" style="">
+                            <input id="txtReelCode" name="ReelCode" type="text" class="form-control" style="" placeholder="Reel Code" />
+                        </div>
+                        <div class="col-sm-2" style="">
+                            <input id="txtItemCode" name="ItemCode" type="text" class="form-control" style="" placeholder="Item Code" />
+                        </div>
+                        <div class="col-sm-2" style="">
+                            <select id="selStatus" class="form-control">
+                                <option>Waiting Loader</option>
+                                <option>In Loader</option>
+                                <option>In SRMS</option>
+                                <option>In Trolley</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-5" style="">
+                            <div class="row">
+                                <div class="col-4" style="padding:0;">
+                                    <select id="selDateType" name="DateType" class="form-control">
+                                        <option value="C">Created Date</option>
+                                        <option value="U">Updated Date</option>
+                                    </select>
+                                </div>
+                                <div class="col-4" style="padding:0;">
+                                    <input id="dtpDateFrom" name="DateFrom" type="date" class="form-control" placeholder="Date From" />
+                                </div>
+                                <div class="col-4" style="padding:0;">
+                                    <input id="dtpDateTo" name="DateTo" type="date" class="form-control" placeholder="Date To" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-1" style="">
+                            <button type="button" class="btn btn-primary" style="width:100%;" onclick="loadList(1, '')"><i class="bi bi-search"></i> </button>
+                        </div>
+                    </div>
+                    <hr />
+
+                    <!-- Status -->
+                    <div class="status-grid">
+                        <div class="status-card" onclick="loadList(1, 'W')">
+                            <h3>Waiting Loader</h3>
+                            <div class="value" id="txtW">-</div>
+                        </div>
+                        <div class="status-card" onclick="loadList(1, 'L')">
+                            <h3>In Loader</h3>
+                            <div class="value" id="txtL">–</div>
+                        </div>
+                        <div class="status-card" onclick="loadList(1, 'SRMS')">
+                            <h3>In SRMS</h3>
+                            <div class="value" id="txtSRMS">-</div>
+                        </div>
+                        <div class="status-card" onclick="loadList(1, 'T')">
+                            <h3>In Trolley</h3>
+                            <div class="value" id="txtT">-</div>
+                        </div>
+                    </div>
+
+                    <hr />
+                    <div class="table-filter">
+                        <div class="row" style="padding-left:5px;">
+                            <div class="col-sm-12">
+                                <div class="show-entries">
+                                    <label>Show</label>
+                                    <select id="selpageSize" name="pageSize" class="form-control">
+                                        <option value="25">25</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                        <option value="200">250</option>
+                                    </select>
+                                    <span>entries</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-nowrap table-container mt-2">
+                        <table id="listTable" class="row-border dataTable hover order-column" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Reel Code</th>
+                                    <th>Item Code</th>
+                                    <th>Qty</th>
+                                    <th>Status</th>
+                                    <th>Actual Height</th>
+                                    <th>Created Date</th>
+                                    <th>Location</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+
+                    <div class="clearfix">
+                        <div class="hint-text">Showing <b id="lblCurCount">0</b> out of <b id="lblTotal">0</b> entries</div>
+                        <ul class="pagination" id="ulPagination"></ul>
+                        <input type="hidden" id="txtCurPage">
+                        <input type="hidden" id="txtTotalRecord">
+                        <input type="hidden" id="txtPageSize">
+                        <input type="hidden" id="txtTotalPage">
+                    </div>
+
+                  @*   <div class="text-nowrap table-container mt-1">
                         <table id="listTable" class="dataTable row-border hover order-column" style="width:100%">
                             <thead>
                                 <tr>
@@ -19,15 +308,16 @@
                                     <th>Status</th>
                                     <th>Actual Height</th>
                                     <th>Created Date</th>
-                                    @* <th>Action</th> *@
+                                    <th>Action</th> 
                                 </tr>
                             </thead>
                         </table>
-                    </div>
+                    </div> *@
                 </div>
             </div>
         </div>
     </div>
+
 </div>
 
 @section Scripts
@@ -48,13 +338,86 @@
     <script type="text/javascript">
 
         $(document).ready(function () {
-            loadList();
+            $('#txtTotalRecord').val(0);
+            $('#txtTotalPage').val(1);
+
+            var now = new Date();
+
+            var day = ("0" + now.getDate()).slice(-2);
+            var month = ("0" + (now.getMonth() + 1)).slice(-2);
+
+            var today = now.getFullYear()+"-"+(month)+"-"+(day) ;
+            var firstDate = now.getFullYear()+"-01-01" ;
+
+            $('#dtpDateFrom').val(firstDate);
+            $('#dtpDateTo').val(today);
+
+            loadList(1, '');
         });
 
-        function loadList() {
+        function prevPage() {
+            var curPage = $("#txtCurPage").val();
+            if (curPage == 1) {
+                return;
+            }
+            loadList(curPage - 1, '');
+        }
+
+        function nextPage() {
+            var curPage = Number($("#txtCurPage").val());
+            var ttl = Number($("#txtTotalRecord").val());
+            var pageSize = Number($("#txtPageSize").val());
+            var ttlPage = Number($("#txtTotalPage").val());
+            // var ttlPage = ttl / pageSize;
+            // if ((ttl % pageSize) > 0) {
+            //     ttlPage = ttlPage + 1;
+            // }
+            if ((curPage + 1) > ttlPage) {
+                return;
+            }
+            loadList(curPage + 1, '');
+        }
+
+        function loadList(page, stIdx) {
+            var statusIdx = '1,2,3,4,5,6,7,8,9';
+            if (stIdx == 'W') {
+                 statusIdx = '1';
+            }
+            if (stIdx == 'L') {
+                 statusIdx = '2';
+            }
+            if (stIdx == 'SRMS') {
+                 statusIdx = '3,6';
+            }
+            if (stIdx == 'T') {
+                 statusIdx = '7';
+            }
+            $('#txtCurPage').val(page);
+            $('#txtPageSize').val($("#selpageSize").val());
+            var ttlPage = $("#txtTotalPage").val();
+            for (var j = 1; j <= ttlPage; j++) {
+                $('#btnP' + j).removeClass('active');
+            }
+            $('#btnP' + page).addClass('active');
+
+            var data = {
+                DateType: $("#selDateType").val(),
+                DateFrom: $("#dtpDateFrom").val(),
+                DateTo: $("#dtpDateTo").val(),
+                ItemCode: $("#txtItemCode").val(),
+                ReelCode: $("#txtReelCode").val(),
+                StatusIdxList: statusIdx,
+                ItemDesc: "",
+                ItemDesc2: "",
+                Remark: "",
+                page: page,
+                pageSize: $("#selpageSize").val(),
+            }
+
             $.ajax({
                 url: "/Reel/GetAvailableReelList/",
-                type: "GET",
+                type: "POST",
+                data: JSON.stringify(data),
                 dataType: 'JSON',
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
@@ -68,20 +431,37 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
+                    // console.log(result);
                     swal.close()
                     if (result.success == true) {
+
+                        document.getElementById('txtW').innerHTML = result.data[0].totalWaiting;
+                        document.getElementById('txtL').innerHTML = result.data[0].totalInLoader;
+                        document.getElementById('txtSRMS').innerHTML = result.data[0].totalSRMS;
+                        document.getElementById('txtT').innerHTML = result.data[0].totalInTrolley;
+
                         $('#listTable').DataTable( {
                             data: result.data,
-                            paging: true,
-                            pageLength: 50,
-                            lengthMenu: [50, 100, 250, 500, 1000],
+                            paging: false,
+                            searching: false,
+                            "info": false,
+                            pageLength: $("#selpageSize").val(),
+                            // lengthMenu: [50, 100, 250, 500, 1000],
+                            "bDestroy": true,
                             columns: [
                                 { data: 'reelCode' },
-                                { data: 'itemCode' },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        // return '<p>' + row.itemCode + '</p><p>' + row.itemDesc + '</p>';
+                                        return '<p style="margin:0;"><span>' + row.itemCode + '</span><br/>' +
+                                        '<span style="font-size:13px;color:grey;">' + row.itemDesc + '</span></p>';
+                                    }
+                                },
                                 { data: 'qty' },
                                 { data: 'status' },
                                 { data: 'actualHeight' },
-                                { 
+                                {
                                     data: 'createdDate',
                                     render: function (data, type, row) {
                                         const date = new Date(data.split('.')[0]);
@@ -98,24 +478,106 @@
                                         });
                                     }
                                 },
-                                // {
-                                //     data: null,
-                                //     render: function (data, type, row, meta) {
-                                //         return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;" onclick="updateStatusForm(\'' + row.reel_Id + '\', \'' + row.reelCode + '\', \'' + row.status + '\')"><span><i class="bi bi-pencil-square""></i>  Update Status</span></button>' +
-                                //                 '<div style="display:flex;"><button class="btn btn-warning d-grid" style="margin-right:10px;" onclick="updateQtyForm(\'' + row.reel_Id + '\', \'' + row.reelCode + '\', \'' + row.qty + '\')"><span><i class="bi bi-pencil-square""></i>  Update Qty</span></button>';
-                                //                 // '<button class="btn btn-danger deactivate-account" onclick="deleteReel(\'' + row.reel_Id + '\', \'' + row.reelCode + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
-                                //     }
-                                // }
+                                {
+                                    data: '',
+                                    render: function (data, type, row) {
+
+                                        if (row.statusIdx == 2) {
+                                            return `<p>Loader : ` + row.loaderCode + `</p><p> Column : ` + row.loaderColumn + `</p>`;
+                                        }
+                                        else if (row.statusIdx == 3 || row.statusIdx == 6) {
+                                            return `<p>SRMS Slot : ` + row.srmsSlotCode + `</p>`;
+                                        }
+                                        else if (row.statusIdx == 7) {
+                                            return `<p>Trolley : ` + row.trolleyCode + `</p><p> Code : ` + row.trolleySlotCode + `</p>`;
+                                        }
+                                        return ``;
+                                    }
+                                }
                             ],
-                            language: {
-                                searchPlaceholder: "🔍︎ Search",
-                                search: ""
-                            },
-                            ordering: {
-                                indicators: false
-                            },
-                            columnControl: ['orderStatus']
                         });
+
+                        // if is page 1 then need regenerate pagination, else just show current entry
+                        var curCnt = 0;
+                        if (result.totalRecords > 0) {
+                            curCnt = (page) * $("#selpageSize").val();
+                            if (curCnt > result.totalRecords) {
+                                curCnt = result.totalRecords;
+                            }
+                        }
+                        $('#lblCurCount').html(curCnt);
+
+                        if (page == 1) {
+                            $('#lblTotal').html(result.totalRecords);
+                            $('#ulPagination').html('');
+
+                            var pageSize = $("#selpageSize").val();
+                            const myDiv = document.getElementById('ulPagination');
+                            var ttlPage = result.totalRecords / pageSize;
+                            if ((result.totalRecords % pageSize) > 0) {
+                                ttlPage = ttlPage + 1;
+                            }
+                            $('#txtTotalRecord').val(result.totalRecords);
+                            $('#txtTotalPage').val(ttlPage);
+
+                            myDiv.innerHTML += '<li class="page-item disabled"><a href="javascript:prevPage()">Previous</a></li>';
+                            for (var i = 1; i <= ttlPage; i++) {
+                                if (i == 1) {
+                                       myDiv.innerHTML += '<li class="page-item active" id="btnP'+ i +'"><a href="javascript:loadList('+ i +', "-")" class="page-link">'+ i +'</a></li>';
+                                }
+                                else {
+                                       myDiv.innerHTML += '<li class="page-item" id="btnP'+ i +'"><a href="javascript:loadList('+ i +', "-")" class="page-link">'+ i +'</a></li>';
+                                }
+                            }
+                            myDiv.innerHTML += '<li class="page-item disabled"><a href="javascript:nextPage()">Next</a></li>';
+                        }
+
+                        // $('#listTable').DataTable( {
+                        //     data: result.data,
+                        //     paging: true,
+                        //     pageLength: 50,
+                        //     lengthMenu: [50, 100, 250, 500, 1000],
+                        //     columns: [
+                        //         { data: 'reelCode' },
+                        //         { data: 'itemCode' },
+                        //         { data: 'qty' },
+                        //         { data: 'status' },
+                        //         { data: 'actualHeight' },
+                        //         { 
+                        //             data: 'createdDate',
+                        //             render: function (data, type, row) {
+                        //                 const date = new Date(data.split('.')[0]);
+                        //                 if (isNaN(date)) return 'Invalid Date';
+
+                        //                 return date.toLocaleString('en-GB', {
+                        //                     year: 'numeric',
+                        //                     month: 'numeric',
+                        //                     day: 'numeric',
+                        //                     hour: 'numeric',
+                        //                     minute: 'numeric',
+                        //                     hour: 'numeric',
+                        //                     hour12: true
+                        //                 });
+                        //             }
+                        //         },
+                        //         // {
+                        //         //     data: null,
+                        //         //     render: function (data, type, row, meta) {
+                        //         //         return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;" onclick="updateStatusForm(\'' + row.reel_Id + '\', \'' + row.reelCode + '\', \'' + row.status + '\')"><span><i class="bi bi-pencil-square""></i>  Update Status</span></button>' +
+                        //         //                 '<div style="display:flex;"><button class="btn btn-warning d-grid" style="margin-right:10px;" onclick="updateQtyForm(\'' + row.reel_Id + '\', \'' + row.reelCode + '\', \'' + row.qty + '\')"><span><i class="bi bi-pencil-square""></i>  Update Qty</span></button>';
+                        //         //                 // '<button class="btn btn-danger deactivate-account" onclick="deleteReel(\'' + row.reel_Id + '\', \'' + row.reelCode + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
+                        //         //     }
+                        //         // }
+                        //     ],
+                        //     language: {
+                        //         searchPlaceholder: "🔍︎ Search",
+                        //         search: ""
+                        //     },
+                        //     ordering: {
+                        //         indicators: false
+                        //     },
+                        //     columnControl: ['orderStatus']
+                        // });
                     }
                     else {
                         swal.fire({
@@ -133,115 +595,6 @@
                     });
                 }
             });
-        }
-
-        function updateStatusForm(id, binCode, status) {
-            // $("#txtId").val(id);
-            // $("#txtCode").val(binCode);
-            // $("#txtColNo").val(colNo);
-            // $("#txtRowNo").val(rowNo);
-            // if (isAct == "true") {
-            //     document.getElementById("chkIsActive").checked = true;
-            // }
-            // else {
-            //     document.getElementById("chkIsActive").checked = false;
-            // }
-            $("#myModal").modal("show");
-        }
-
-        function updateQtyForm(id, binCode, qty) {
-            // $("#txtId").val(id);
-            // $("#txtCode").val(binCode);
-            // $("#txtColNo").val(colNo);
-            // $("#txtRowNo").val(rowNo);
-            // if (isAct == "true") {
-            //     document.getElementById("chkIsActive").checked = true;
-            // }
-            // else {
-            //     document.getElementById("chkIsActive").checked = false;
-            // }
-            $("#myModal").modal("show");
-        }
-
-        function cancelForm() {
-            $("#myModal").modal("toggle");
-        }
-
-        function deleteReel(id, binCode) {
-
-            swal.fire({
-                title: "Are you sure want to delete?",
-                text: "You will not be able to recover this record!",
-                inputAttributes: {
-                    autocapitalize: 'off'
-                },
-                showCancelButton: true,
-                confirmButtonText: 'ok',
-                cancelButtonText: 'cancel',
-                allowOutsideClick: false
-              }).then(function(r) {
-                if (r.isConfirmed == true) {
-
-                    var data = {
-                        Bin_Id: id,
-                        BinCode: binCode,
-                        ColNo: 0,
-                        RowNo: 0,
-                        IsActive: false
-                    }
-
-                    $.ajax({
-                        url: '/Bin/DeleteBin',
-                        type: 'DELETE',
-                        data: JSON.stringify(data),
-                        dataType: 'json',
-                        contentType: 'application/json; charset=utf-8',
-                        beforeSend: function () {
-                            Swal.fire({
-                                text: 'Please Wait',
-                                width: '300px',
-
-                                allowEscapeKey: false,
-                                allowOutsideClick: false,
-                                showConfirmButton: false,
-                            });
-                            Swal.showLoading()
-                        },
-                        success: function (result) {
-                            if (result.success == true) {
-                                $("#myModal").modal("toggle");
-                                swal.fire({
-                                    icon: 'success',
-                                    title: "Success Deleted",
-                                    text: "",
-                                    didClose: () => {
-                                      window.location.reload();
-                                    }
-                                });
-                            }
-                            else {
-                                swal.fire({
-                                    icon: 'error',
-                                    title: "Wait",
-                                    text: result.errMessage
-                                });
-                            }
-                        },
-                        error: function (error) {
-                            console.log(error);
-                            swal.fire({
-                                icon: 'error',
-                                title: "Wait",
-                                text: error.val
-                            });
-                        }
-                    });
-
-                } else {
-                    return;
-                }
-              });
-
         }
 
     </script>

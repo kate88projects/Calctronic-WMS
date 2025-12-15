@@ -1,0 +1,1618 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutEmpty.cshtml";
+}
+
+<style>
+
+    :root {
+        --bg-main: #2c3e50;
+        --text-color: #ecf0f1;
+        --accent-color: #3498db;
+        --status-ok: #2ecc71;
+        --status-alarm: #e74c3c;
+        --card-bg: #34495e;
+    }
+
+    body {
+        /* font-family: 'Segoe UI', Arial, sans-serif; */
+        background-color: var(--bg-main);
+        color: var(--text-color);
+        margin: 0;
+        padding: 0;
+    }
+
+    header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: var(--card-bg);
+        padding: 20px 20px;
+        /* border-bottom: 3px solid var(--accent-color); */
+    }
+
+    .header-controls {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .select-container label {
+        margin-right: 8px;
+        font-size: 0.9em;
+        color: var(--text-color);
+    }
+
+    select {
+        padding: 8px 12px;
+        background-color: var(--bg-main);
+        color: var(--text-color);
+        border: 1px solid var(--accent-color);
+        border-radius: 4px;
+        appearance: none;
+        cursor: pointer;
+    }
+
+        select:focus {
+            outline: none;
+            border-color: var(--status-ok);
+        }
+
+    .select-container {
+        position: relative;
+    }
+
+        .select-container::after {
+            content: '▼';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: var(--text-color);
+            font-size: 0.7em;
+        }
+
+    input:not([type]), input[type="text"], input[type="number"] {
+        padding: 8px 12px;
+        background-color: var(--bg-main);
+        color: var(--text-color);
+        border: 1px solid var(--accent-color);
+        border-radius: 4px;
+        appearance: none;
+        cursor: pointer;
+    }
+
+    .system-status {
+        text-align: right;
+    }
+
+    button {
+        padding: 10px 20px;
+        margin: 5px;
+        cursor: pointer;
+        background-color: var(--accent-color);
+        border: none;
+        color: white;
+        font-size: 16px;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+    .control-btn {
+        padding: 10px 15px;
+        font-weight: bold;
+        min-width: 100px;
+        margin: 0;
+    }
+
+    .start-btn {
+        background-color: var(--status-ok); /* Green */
+    }
+
+        .start-btn:hover {
+            background-color: #27ae60;
+        }
+
+    .stop-btn {
+        background-color: var(--status-alarm); /* Red */
+    }
+
+        .stop-btn:hover {
+            background-color: #c0392b;
+        }
+
+    .control-btn:disabled {
+        background-color: #7f8c8d;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .single-page-layout {
+        display: flex;
+        justify-content: space-around;
+        padding: 20px;
+        gap: 20px;
+    }
+
+    .control-session {
+        flex-basis: 50%;
+        background-color: var(--card-bg);
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* --- Gantry Specific Styles --- */
+    .process-visualization {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        margin-top: 20px;
+        padding: 20px;
+        background-color: var(--bg-main);
+        border-radius: 8px;
+        min-height: 265px;
+    }
+
+    .station {
+        text-align: center;
+        width: 150px;
+    }
+
+    .trolley-path {
+        flex-grow: 1;
+        height: 10px;
+        background-color: var(--card-bg);
+        position: relative;
+        margin: 0 20px;
+    }
+
+    .trolley-head {
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        // 40px;
+        background-color: var(--accent-color);
+        position: absolute;
+        top: -10px;
+        // -15px;
+        transition: left 2s ease-in-out, background-color 0.3s;
+    }
+
+        .trolley-head[data-position="loader"] {
+            left: 0%;
+        }
+
+        .trolley-head[data-position="pickup"] {
+            left: 100%;
+            transform: translateX(-100%);
+        }
+
+        .trolley-head[data-has-reel="true"] {
+            background-color: var(--status-ok);
+        }
+
+    /* Loader Viewport acts as a mask/window */
+    .loader-viewport {
+        width: 100%;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+
+    /* Loader Track holds all columns and moves */
+    .loader-track {
+        display: flex;
+        width: 100%;
+        transition: transform 0.8s ease-in-out; /* Smooth sliding animation */
+    }
+
+        /* When the loader track has this class, we apply a dimming effect */
+        .loader-track.picking-dim .col {
+            opacity: 0.4;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+            /* The actively selected column should remain fully visible */
+            .loader-track.picking-dim .col.active-pick {
+                opacity: 1.0;
+            }
+
+            /* Ensure the reel counts and labels within dimmed columns are still somewhat readable */
+            .loader-track.picking-dim .col * {
+                /* Optional: Maintain slightly higher visibility for text elements */
+                /* opacity: 1.0; */
+            }
+
+    /* Individual columns within the track */
+    .col {
+        width: 25%;
+        flex-shrink: 0;
+        background-color: var(--bg-main);
+        border: 2px solid var(--card-bg);
+        padding: 5px;
+        border-radius: 5px;
+        position: relative;
+        text-align: center;
+    }
+
+    .col-label {
+        display: block;
+        font-size: 0.8em;
+        margin-bottom: 5px;
+    }
+
+    .reel {
+        width: 100%;
+        height: 40px;
+        background-color: #95a5a6;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+    .col[data-status="full"] {
+        border-color: var(--status-ok);
+    }
+
+    .col[data-status="empty"] {
+        /* border-color: var(--status-alarm); */
+        border-color: grey;
+    }
+
+    .col[data-status="full"] .reel {
+        background-color: #7f8c8d;
+    }
+
+    .col[data-status="empty"] .reel {
+        display: none;
+    }
+
+    .col[data-status="empty"] {
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+
+    .reel-count {
+        display: block;
+        margin-top: 5px;
+        font-size: 0.9em;
+        font-weight: bold;
+        color: var(--text-color);
+    }
+
+        .reel-count[data-count="0"] {
+            /* color: var(--status-alarm); */
+            color: grey;
+        }
+
+    /* Define the position classes managed by JavaScript */
+    .loader-track.pos-col-1 {
+        transform: translateX(0%);
+    }
+
+    .loader-track.pos-col-2 {
+        transform: translateX(-25%);
+    }
+
+    .loader-track.pos-col-3 {
+        transform: translateX(-50%);
+    }
+
+    .loader-track.pos-col-4 {
+        transform: translateX(-75%);
+    }
+
+
+    /* Loader Battery Display (Single instance) */
+    .loader-battery-display {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+
+        .loader-battery-display .battery-container {
+            width: 80px;
+            height: 15px;
+            background-color: var(--bg-main);
+            border: 1px solid var(--text-color);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .loader-battery-display .battery-level {
+            height: 100%;
+            background-color: var(--status-ok);
+            transition: width 0.5s ease-in-out, background-color 0.5s;
+        }
+
+        .loader-battery-display .battery-text {
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-left: 10px;
+            color: var(--text-color);
+        }
+
+        .loader-battery-display .battery-critical {
+            background-color: var(--status-alarm) !important;
+        }
+
+        .loader-battery-display .battery-low {
+            background-color: #f1c40f !important;
+        }
+
+
+    /* Drawer Station */
+    .drawer-station {
+        width: 200px;
+    }
+
+    .drawer {
+        width: 100%;
+        height: 60px;
+        background-color: var(--bg-main);
+        border: 2px solid var(--accent-color);
+        border-radius: 5px;
+        margin-top: 10px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .reel-on-drawer {
+        width: 90%;
+        height: 40px;
+        background-color: transparent;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+    .drawer[data-status="Placed"] .reel-on-drawer {
+        background-color: #7f8c8d;
+    }
+
+    .drawer[data-status="None"] {
+        /* border-color: var(--status-alarm); */
+        border-color: grey;
+    }
+
+    .drawer[data-status="Drawer"] {
+        /* border-color: var(--status-alarm); */
+        border-color: var(--status-ok);
+    }
+
+    .drawer[data-status="Placed"] {
+        border-color: var(--status-alarm);
+        /* background-color: #5d6d7e; */
+    }
+
+    #drawer-status-text.unavailable, #fork-status-text.unavailable {
+        color: var(--status-alarm);
+        font-weight: bold;
+    }
+
+    /* --- Cartesian Specific Styles (Simplified) --- */
+    .simplified-rack-visualization {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 10px;
+        background-color: var(--bg-main);
+        min-height: 265px;
+        margin-top: 20px;
+    }
+
+    .rack-area {
+        flex-basis: 40%;
+        padding: 20px;
+        background-color: var(--card-bg);
+        border: 2px solid transparent;
+        text-align: center;
+        min-height: 100px;
+    }
+
+    .rack-area-tr {
+        flex-basis: 40%;
+        padding: 20px;
+        background-color: var(--card-bg);
+        border: 2px solid transparent;
+        text-align: center;
+        min-height: 100px;
+    }
+
+    .rack-center {
+        flex-basis: 15%;
+        text-align: center;
+    }
+
+    .robot-location {
+        background-color: var(--accent-color);
+        padding: 10px;
+        border-radius: 5px;
+        transition: background-color 0.5s;
+        margin-bottom: 10px;
+    }
+
+    .rack-area.active {
+        border-color: var(--status-ok);
+        background-color: #34495e;
+        box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
+    }
+
+    .rack-area-tr.active {
+        border-color: var(--status-ok);
+        background-color: #34495e;
+        box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
+    }
+
+    /* --- System Log Area --- */
+    .system-log-container {
+        background-color: var(--card-bg);
+        margin: 0px 20px 20px 20px;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid var(--accent-color);
+    }
+
+    #system-log {
+        background-color: var(--bg-main);
+        color: #7f8c8d;
+        height: 150px;
+        overflow-y: auto;
+        padding: 10px;
+        font-family: monospace;
+        font-size: 0.9em;
+        border-radius: 4px;
+    }
+
+    #system-log-2 {
+        background-color: var(--bg-main);
+        color: #7f8c8d;
+        height: 150px;
+        overflow-y: auto;
+        padding: 10px;
+        font-family: monospace;
+        font-size: 0.9em;
+        border-radius: 4px;
+    }
+
+    .log-entry {
+        margin-bottom: 3px;
+        white-space: nowrap;
+    }
+
+    .log-info {
+        color: var(--text-color);
+    }
+
+    .log-alert {
+        color: var(--status-alarm);
+        font-weight: bold;
+    }
+
+    .log-success {
+        color: var(--status-ok);
+    }
+
+    footer {
+        text-align: center;
+        padding: 10px;
+        background-color: var(--card-bg);
+        width: 100%;
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
+
+<header>
+    <h1>SRMS </h1>
+
+    <input type="hidden" id="xToken" value="@ViewBag.xToken" autocomplete="off">
+    <input type="hidden" id="xQId" value="@ViewBag.QId" autocomplete="off">
+    <input type="hidden" id="xDeviceId" value="@ViewBag.DeviceId" autocomplete="off">
+    <input type="hidden" id="xQContinuos" value="@ViewBag.QContinuos" autocomplete="off">
+    <input type="hidden" id="txtTrolleyId" autocomplete="off">
+
+    <div class="header-controls">
+        <div class="input-container">
+            <label for="job-input">Job:</label>
+            <input type="text" id="job-input" value="@ViewBag.QNo" disabled />
+        </div>
+
+        <div class="input-container">
+            <label for="trolley-input">Trolley:</label>
+            <input type="text" id="trolley-input" />
+        </div>
+
+        <button id="cont-btn" onclick="systemCont()" class="control-btn start-btn hidden">Continue</button>
+        <button id="start-btn" onclick="systemStart()" class="control-btn start-btn">Start</button>
+        <button id="stop-btn" onclick="systemStop()" class="control-btn stop-btn">Stop</button>
+    </div>
+
+    <div class="system-status">
+        Status: <span id="master-status">Ready</span>
+        <div class="input-container">
+            <label for="chkAutoRun">Auto:</label>
+            <input type="checkbox" id="chkAutoRun" />
+        </div>
+    </div>
+
+</header>
+
+<main class="single-page-layout">
+    <!-- Trolley Session Interface (Left Column) -->
+    <section id="trolley-session" class="control-session">
+        <h2>Trolley <span style="font-size: 1.2rem;">(Retrieve Empty Drawer)</span></h2>
+
+        <div class="simplified-rack-visualization">
+            <div class="rack-area-tr left-rack-tr" data-area="left">
+                <h4>Col 1</h4>
+                <input type="text" id="left-input-tr" autocomplete="off" />
+                @* <p id="left-status">Status: IDLE</p> *@
+            </div>
+
+            <div class="rack-area-tr center-rack-tr" data-area="center">
+                <h4>Col 2</h4>
+                <input type="text" id="center-input-tr" autocomplete="off" />
+                @* <p id="left-status">Status: IDLE</p> *@
+            </div>
+
+            <div class="rack-area-tr right-rack-tr" data-area="right">
+                <h4>Col 3</h4>
+                <input type="text" id="right-input-tr" autocomplete="off" />
+                @* <p id="left-status">Status: IDLE</p> *@
+            </div>
+        </div>
+
+        <div class="trolley-controls">
+            <br />
+            <button onclick="startRetrieve()">Retrieve</button>
+            <hr />
+            <a href="javascript:loadPLCGetEmptyTraySlot()">Get Reel Slot</a> > <a href="javascript:loadPLCTakeEmptyTray()">Retrieve</a> >
+            @* <p style="margin-top: 10px;">*Note: Drawer status above syncs with this system.</p> *@
+            <br />
+            <a href="javascript:retry_RetrieveStatus()">Retrieve Status</a>
+        </div>
+
+        <input type="text" id="txtRetrieveSlot" placeholder="Retrieve Slot" autocomplete="off">
+
+        <hr />
+        <p style="position: relative; text-align: right; margin-bottom: 0; padding-right: 2px;"><a href="javascript:clearLog();" style="color:red;">Clear Log</a></p>
+        <div id="system-log">
+            <!-- Log entries will be appended here by JavaScript -->
+        </div>
+    </section>
+
+    <!-- Cartesian Session Interface (Right Column) -->
+    <section id="cartesian-session" class="control-session">
+        <h2>Cartesian <span style="font-size: 1.2rem;">(Put Away Empty Drawer)</span></h2>
+        <div class="simplified-rack-visualization">
+            <div class="rack-area left-rack" data-area="left">
+                <h4>Left Rack Area</h4>
+                <input type="text" id="left-input" autocomplete="off" />
+                @* <p id="left-status">Status: IDLE</p> *@
+            </div>
+
+            <div class="rack-center">
+                <div class="robot-location" data-location="center">Robot Arm</div>
+                <p> <span id="cartesian-state-simple">Ready</span></p>
+            </div>
+
+            <div class="rack-area right-rack" data-area="right">
+                <h4>Right Rack Area</h4>
+                <input type="text" id="right-input" autocomplete="off" />
+                @* <p id="right-status">Status: IDLE</p> *@
+            </div>
+        </div>
+        <div class="cartesian-controls">
+            <br />
+            <button onclick="startPutAway()">Put Away</button>
+            <hr />
+            <a href="javascript:loadPLCGetSlot()">Get Valid Slot</a> > <a href="javascript:loadPLCPutAway()">Put Away</a>
+            <br />
+            <a href="javascript:retry_PutAwayStatus()">Put Away Status</a>
+        </div>
+
+        <input type="text" id="txtPutSlot" placeholder="Put Slot" autocomplete="off">
+
+        <hr />
+        <p style="position: relative; text-align: right; margin-bottom: 0; padding-right: 2px;"><a href="javascript:clearLog2();" style="color:red;">Clear Log</a></p>
+        <div id="system-log-2">
+            <!-- Log entries will be appended here by JavaScript -->
+        </div>
+    </section>
+</main>
+
+@section Scripts
+{
+    <link href="~/css/datatables.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/datatables.min.js"></script>
+    <script src="~/js/sweetalert2.all.min.js"></script>
+
+    <script type="text/javascript">
+
+        // Centralized state management with system status
+        let sharedDrawerState = {
+            drawerStatus: 'None', // States: 'Drawer', 'None'
+            cartesianRobotState: 'Ready', // 'Ready', 'Retrieving', 'Proceed Put Away'
+            cartesianLocation: 'center',
+            systemRunning: false, // Overall system run status
+            trolleyLocation: 'none', // 'PickedAndHolding', 'Placing', 'Returning'
+        };
+
+        var cartesianAutoTimer;
+        let inRetrieveMove = false;
+        let inPutAwayMove = false;
+
+        let endTask = false;
+
+        let token = '';
+        let qId = 0;
+        let deviceId = '';
+        let qCont = 0;
+
+        let attemptsRetrieve = 1;
+        let attemptsPutAway = 1;
+        let changeTakeSlot = false;
+        let changePutSlot = false;
+
+        let colNo = 1;
+
+        $(document).ready(function () {
+            document.getElementById('chkAutoRun').checked = true;
+            disableDivContent(true);
+            $("#txtTrolleyId").val('0');
+            $("#txtActHeight").val('0');
+            updateSystemStatusUI();
+            updateJson();
+
+            token = $('#xToken').val();
+            qId = Number($('#xQId').val());
+            deviceId = $('#xDeviceId').val();
+            qCont = $('#xQContinuos').val();
+
+            $("#left-input-tr").val('1');
+            $("#center-input-tr").val('1');
+            $("#right-input-tr").val('1');
+            
+
+            // if (qCont == "1") {
+            //     $('#cont-btn').removeClass('hidden');
+            //     $('#start-btn').addClass('hidden');
+            //     readyContinuos();
+            // }
+        });
+
+        /**
+         * Appends a timestamped message to the HMI log display.
+         */
+        function logMessage(message, type = 'info') {
+            const logContainer = document.getElementById('system-log');
+            if (!logContainer) return;
+
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.classList.add('log-entry', `log-${type}`);
+            logEntry.textContent = `[${timestamp}] ${message}`;
+
+            logContainer.appendChild(logEntry);
+
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function logMessage2(message, type = 'info') {
+            const logContainer = document.getElementById('system-log-2');
+            if (!logContainer) return;
+
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.classList.add('log-entry', `log-${type}`);
+            logEntry.textContent = `[${timestamp}] ${message}`;
+
+            logContainer.appendChild(logEntry);
+
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function clearLog() {
+            const logContainer = document.getElementById('system-log');
+            if (logContainer) {
+                logContainer.innerHTML = '';
+                logMessage("Log cleared by operator.", 'alert');
+            }
+        }
+
+        function clearLog2() {
+            const logContainer = document.getElementById('system-log-2');
+            if (logContainer) {
+                logContainer.innerHTML = '';
+                logMessage2("Log cleared by operator.", 'alert');
+            }
+        }
+
+        // async function readyContinuos() {
+        //     var data = await getJson();
+        //     // console.log(data);
+
+        //     if (data == true) {
+        //         await getLoader($("#trolley-input").val(), true);
+
+        //         // console.log(sharedDrawerState);
+
+        //         // updateSystemStatusUI();
+        //         updateGantryUIState();
+        //         updateCartesianUIState();
+
+        //     }
+        // }
+
+        // System Start Handler
+
+        async function systemStart() {
+            if (sharedDrawerState.systemRunning) return;
+
+            // checking is loader valid and get loader info
+            var tr = $("#trolley-input").val();
+            if (tr == undefined) {
+                logMessage('Trolley :: Please scan Trolley', 'alert');
+                return;
+            }
+            if (tr == '') {
+                logMessage('Trolley :: Please scan Trolley', 'alert');
+                return;
+            }
+            var ok = await getTrolley(tr, false);
+            if (ok == false) {
+                return;
+            }
+
+            // 3. Continue UI
+            disableDivContent(false);
+
+            sharedDrawerState.systemRunning = true;
+            updateSystemStatusUI();
+            // logMessage("System Start command issued.", 'alert');
+
+             updateJson();
+
+            // 4. Continue
+             cartesianAutoTimer = setInterval(cartesianAuto, 3000); //3 second workout
+
+        }
+
+        // System Continue Handler
+        async function systemCont() {
+
+            // 3. Continue UI
+            disableDivContent(false);
+
+            updateActiveColumn(colNum);
+
+            sharedDrawerState.systemRunning = true;
+            updateSystemStatusUI();
+
+            // 4. Continue
+             cartesianAutoTimer = setInterval(cartesianAuto, 3000); //3 second workout
+
+        }
+
+        // System Stop Handler
+        function systemStop() {
+            if (!sharedDrawerState.systemRunning) return;
+            sharedDrawerState.systemRunning = false;
+            updateSystemStatusUI();
+            // logMessage("System Stop command issued. System idling.", 'alert');
+
+            updateJson();
+
+            clearInterval(cartesianAutoTimer);
+
+        }
+
+        // Function to update the main header status text and button states
+        function updateSystemStatusUI() {
+            const masterStatusSpan = document.getElementById('master-status');
+            const startBtn = document.getElementById('start-btn');
+            const stopBtn = document.getElementById('stop-btn');
+            const contBtn = document.getElementById('cont-btn');
+
+            if (sharedDrawerState.systemRunning) {
+                masterStatusSpan.textContent = 'RUNNING';
+                masterStatusSpan.style.color = 'var(--status-ok)';
+                startBtn.disabled = true;
+                contBtn.disabled = true;
+                stopBtn.disabled = false;
+            } else {
+                masterStatusSpan.textContent = 'STOPPED';
+                masterStatusSpan.style.color = 'var(--status-alarm)';
+                startBtn.disabled = false;
+                contBtn.disabled = false;
+                stopBtn.disabled = true;
+            }
+        }
+
+        function updateCartesianUIState() {
+            document.querySelectorAll('.rack-area').forEach(area => {
+                area.classList.remove('active');
+            });
+
+            if (sharedDrawerState.cartesianLocation === 'left') {
+                document.querySelector('.left-rack').classList.add('active');
+                // document.getElementById('left-status').textContent = "ROBOT PRESENT";
+                // document.getElementById('right-status').textContent = "Status: IDLE";
+            } else if (sharedDrawerState.cartesianLocation === 'right') {
+                document.querySelector('.right-rack').classList.add('active');
+                // document.getElementById('right-status').textContent = "ROBOT PRESENT";
+                // document.getElementById('left-status').textContent = "Status: IDLE";
+            } else {
+                $("#left-input").val('');
+                $("#right-input").val('');
+                // document.getElementById('left-status').textContent = "Status: IDLE";
+                // document.getElementById('right-status').textContent = "Status: IDLE";
+            }
+
+            document.getElementById('cartesian-state-simple').textContent = sharedDrawerState.cartesianRobotState;
+        }
+
+        function updateTrolleyUIState() {
+            document.querySelectorAll('.rack-area-tr').forEach(area => {
+                area.classList.remove('active');
+            });
+
+            if (sharedDrawerState.trolleyLocation === 'left') {
+                document.querySelector('.left-rack-tr').classList.add('active');
+                // document.getElementById('left-status').textContent = "ROBOT PRESENT";
+                // document.getElementById('right-status').textContent = "Status: IDLE";
+            } else if (sharedDrawerState.trolleyLocation === 'right') {
+                document.querySelector('.right-rack-tr').classList.add('active');
+                // document.getElementById('right-status').textContent = "ROBOT PRESENT";
+                // document.getElementById('left-status').textContent = "Status: IDLE";
+            } else if (sharedDrawerState.trolleyLocation === 'center') {
+                document.querySelector('.center-rack-tr').classList.add('active');
+                // document.getElementById('right-status').textContent = "ROBOT PRESENT";
+                // document.getElementById('left-status').textContent = "Status: IDLE";
+            } else {
+                $("#left-input-tr").val('');
+                $("#center-input-tr").val('');
+                $("#right-input-tr").val('');
+                // document.getElementById('left-status').textContent = "Status: IDLE";
+                // document.getElementById('right-status').textContent = "Status: IDLE";
+            }
+        }
+
+        function disableDivContent(status) {
+            const div2 = document.getElementById('trolley-session');
+            if (div2) {
+                const interactiveElements = div2.querySelectorAll('button'); // input, select, textarea,
+                interactiveElements.forEach(element => {
+                    element.setAttribute('disabled', status);
+                    if (status == false) {
+                        element.removeAttribute('disabled');
+                    }
+                });
+            }
+
+            const div = document.getElementById('cartesian-session');
+            if (div) {
+                const interactiveElements = div.querySelectorAll('button'); // input, select, textarea,
+                interactiveElements.forEach(element => {
+                    element.setAttribute('disabled', status);
+                    if (status == false) {
+                        element.removeAttribute('disabled');
+                    }
+                });
+            }
+
+            if (status == true) {
+                const links = document.querySelectorAll('a');
+                links.forEach(link => {
+                  // Store the original href in a data attribute
+                  link.dataset.originalHref = link.href;
+                  // Remove the href attribute to prevent navigation
+                  link.removeAttribute('href');
+                  // Optionally, add a class for visual styling and set aria-disabled for accessibility
+                  link.classList.add('disabled-link');
+                  link.setAttribute('aria-disabled', 'true');
+                });
+            }
+            else {
+                const links = document.querySelectorAll('a');
+                links.forEach(link => {
+                  // Restore the original href from the data attribute
+                  if (link.dataset.originalHref) {
+                    link.href = link.dataset.originalHref;
+                    delete link.dataset.originalHref; // Clean up the data attribute
+                  }
+                  // Remove the styling class and aria-disabled attribute
+                  link.classList.remove('disabled-link');
+                  link.removeAttribute('aria-disabled');
+                });
+            }
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // ----------- HMI Action
+        function updateJson() {
+        //     var data = {
+        //         SystemStart: sharedDrawerState.systemRunning,
+
+        //         LoaderCode: $("#trolley-input").val(),
+        //         LoaderId: Number($("#txtLoaderId").val()),
+
+        //         DrawerStatus: sharedDrawerState.drawerStatus,
+        //         GantryStatus: sharedDrawerState.gantrySequenceState,
+
+        //         SetUnload: Number($("#txtSetUnload").val()),
+        //         ReelId: $("#txtReelId").val(),
+        //         ReelCode: $("#txtReelCode").val(),
+        //         ActualHeight: Number($("#txtActHeight").val()),
+
+        //         CartesianRobotState: sharedDrawerState.cartesianRobotState,
+        //         CartesianLocation: sharedDrawerState.cartesianLocation,
+
+        //         RetrieveSlot: $("#txtRetrieveSlot").val(),
+        //         PutAwaySlot: $("#txtPutSlot").val(),
+        //         SlotTake: Number($("#txtPutSlotTake").val()),
+
+        //         ReelIdC: $("#txtReelIdC").val(),
+        //         ReelCodeC: $("#txtReelCodeC").val(),
+        //         ActualHeightC: Number($("#txtActHeightC").val()),
+
+        //         HalfPickMove: halfPickMove,
+        //         HalfPickMoveStep: halfPickMoveStep,
+        //         HalfPlaceMove: halfPlaceMove,
+        //         HalfPlaceMoveStep: halfPlaceMoveStep,
+
+        //         Col1TotalReels: Number($("#txtCol1TotalReels").val()),
+        //         Col2TotalReels: Number($("#txtCol2TotalReels").val()),
+        //         Col3TotalReels: Number($("#txtCol3TotalReels").val()),
+        //         Col4TotalReels: Number($("#txtCol4TotalReels").val()),
+
+        //         ColNum: colNum,
+        //     }
+
+        //     $.ajax({
+        //         url: '/api/PLCHubIn/UpdateRackJobJson',
+        //         type: 'POST',
+        //         headers: {
+        //             'Authorization': 'Bearer ' + token
+        //         },
+        //         data: JSON.stringify(data),
+        //         dataType: 'JSON',
+        //         contentType: 'application/json; charset=utf-8',
+        //         beforeSend: function () {
+        //         },
+        //         success: function (result) {
+        //             if (result.success == true) {
+        //             }
+        //             else {
+        //                 console.log(result.errMessage);
+        //             }
+        //         },
+        //         error: function (error) {
+        //             console.log(error);
+        //         }
+        //     });
+        }
+
+        async function getJson() {
+        //     var fResult = false;
+
+        //     await $.ajax({
+        //         url: '/api/PLCHubIn/GetRackJobJson',
+        //         type: 'GET',
+        //         headers: {
+        //             'Authorization': 'Bearer ' + token
+        //         },
+        //         dataType: 'JSON',
+        //         contentType: 'application/json; charset=utf-8',
+        //         beforeSend: function () {
+        //         },
+        //         success: function (result) {
+        //             sharedDrawerState.systemRunning = result.data.systemRunning;
+
+        //             sharedDrawerState.drawerStatus = result.data.drawerStatus;
+        //             sharedDrawerState.gantrySequenceState = result.data.gantryStatus;
+
+        //             $("#loader-input").val(result.data.loaderCode);
+        //             $("#txtLoaderId").val(result.data.loaderId);
+
+        //             $("#txtSetUnload").val(result.data.setUnload);
+        //             $("#txtReelId").val(result.data.reelId);
+        //             $("#txtReelCode").val(result.data.reelCode);
+        //             $("#txtActHeight").val(result.data.actualHeight);
+
+        //             sharedDrawerState.cartesianRobotState = result.data.cartesianRobotState;
+        //             sharedDrawerState.cartesianLocation = result.data.cartesianLocation;
+
+        //             $("#txtRetrieveSlot").val(result.data.retrieveSlot);
+        //             $("#txtPutSlot").val(result.data.putAwaySlot);
+        //             $("#txtPutSlotTake").val(result.data.slotTake);
+
+        //             $("#txtReelIdC").val(result.data.reelIdC);
+        //             $("#txtReelCodeC").val(result.data.reelCodeC);
+        //             $("#txtActHeightC").val(result.data.actualHeightC);
+
+        //             halfPickMove = result.data.HalfPickMove;
+        //             halfPickMoveStep = result.data.halfPickMoveStep;
+        //             halfPlaceMove = result.data.halfPlaceMove;
+        //             halfPlaceMoveStep = result.data.halfPlaceMoveStep;
+
+        //             colNum = result.data.colNum;
+
+        //             fResult = true;
+
+        //             return fResult;
+        //         },
+        //         error: function (error) {
+        //             console.log(error);
+        //         }
+        //     });
+
+        //     return fResult;
+        }
+
+        // ----------- Action (Auto Mode)
+
+        function cartesianAuto() {
+            if (endTask == true) { return; }
+
+            const chkAutoRun = document.getElementById('chkAutoRun');
+            if (chkAutoRun.checked) {
+                // 1. if no drawer just take (reelId MUST have first cause need get actual height)
+                if (sharedDrawerState.systemRunning == true && sharedDrawerState.drawerStatus == "None" && inRetrieveMove == false && inPutAwayMove == false) {
+                    startRetrieve();
+                }
+
+                // 2. if have drawer and placed then just put away
+                if (sharedDrawerState.systemRunning == true && sharedDrawerState.drawerStatus == "Drawer" && inRetrieveMove == false && inPutAwayMove == false) {
+                    startPutAway();
+                }
+
+            }
+        }
+
+        // ----------- Action
+
+        // Cartesian Start Retrieve Empty Drawer
+        async function startRetrieve() {
+            if (inRetrieveMove == true) {
+                return;
+            }
+            if (sharedDrawerState.systemRunning != true) {
+                logMessage2(`System not yet start.`, 'alert');
+                return;
+            }
+            // if (sharedDrawerState.cartesianRobotState == "Retrieving") {
+            //     var chkStatus = await loadPLCGetRetrieveTrayStatus();
+            //     if (chkStatus == false) {
+            //     }
+            //     else {
+            //         attemptsRetrieve = 1;
+
+            //         totalReels = totalReels - 1;
+
+            //         sharedDrawerState.drawerStatus = "Drawer";
+            //         sharedDrawerState.cartesianRobotState = 'Retrieved';
+            //         sharedDrawerState.cartesianLocation = '';
+            //         updateCartesianUIState();
+            //         updateTrolleyUIState();
+            //         logMessage2(`Cartesian cycle end: Retrieved.`, 'info');
+            //         inRetrieveMove = false;
+
+            //         updateJson();
+            //     }
+            //     return;
+            // }
+            if (sharedDrawerState.cartesianRobotState != "Ready") {
+                logMessage2(`Cartesian is ${sharedDrawerState.cartesianRobotState}, please check.`, 'alert');
+                return;
+            }
+            if (sharedDrawerState.drawerStatus != "None") {
+                logMessage2(`Cartesian has tray on hold, please check.`, 'alert');
+                return;
+            }
+
+            sharedDrawerState.cartesianRobotState = 'Retrieving';
+            logMessage2(`Cartesian cycle started: Retrieve Empty Drawer.`, 'info');
+            inRetrieveMove = true;
+
+            sharedDrawerState.trolleyLocation = 'left';
+            if (colNo == 1 && Number($('#left-input-tr').val) >= 50) {
+                colNo = 2;
+                sharedDrawerState.trolleyLocation = 'center';
+            }
+            if (colNo == 2 && Number($('#left-input-tr').val) >= 50) {
+                colNo = 3;
+                sharedDrawerState.trolleyLocation = 'right';
+            }
+            if (colNo == 3 && Number($('#left-input-tr').val) >= 50) {
+                // logMessage2(`Trolley is done retrieve, please change another side.`, 'alert');
+                return;
+            }
+
+            changeTakeSlot = false;
+
+            updateCartesianUIState();
+            var getSlot = await loadPLCRetrieveTray();
+            if (getSlot == false) {
+                sharedDrawerState.cartesianRobotState = 'Ready';
+                inRetrieveMove = false;
+                return;
+            }
+            await delay(5000);
+
+            var chkStatus = await loadPLCGetRetrieveTrayStatus();
+            if (chkStatus == false) {
+                sharedDrawerState.cartesianRobotState = 'Ready';
+                inRetrieveMove = false;
+                changeTakeSlot = true;
+
+                if (attemptsRetrieve > 3) {
+                    logMessage2('Retrieve Empty Drawer :: Tried ' + (attemptsRetrieve - 1) + ', auto stop now.', 'info');
+                    document.getElementById('chkAutoRun').checked = false;
+                    return false;
+                }
+
+                return;
+            }
+
+            attemptsRetrieve = 1;
+
+            totalReels = totalReels - 1;
+
+            sharedDrawerState.drawerStatus = "Drawer";
+            sharedDrawerState.cartesianRobotState = 'Retrieved';
+            sharedDrawerState.cartesianLocation = '';
+            updateCartesianUIState();
+            updateTrolleyUIState();
+            logMessage2(`Cartesian cycle end: Retrieved.`, 'info');
+            inRetrieveMove = false;
+
+            updateJson();
+        }
+
+        // Cartesian Start Put Away
+        async function startPutAway() {
+            if (inPutAwayMove == true) {
+                return;
+            }
+            if (sharedDrawerState.systemRunning != true) {
+                logMessage(`System not yet start.`, 'alert');
+                return;
+            }
+            if (sharedDrawerState.cartesianRobotState != "Retrieved") {
+                logMessage(`Cartesian is ${sharedDrawerState.cartesianRobotState}, please check.`, 'alert');
+                return;
+            }
+            if (sharedDrawerState.drawerStatus != "Drawer") {
+                logMessage(`Cartesian not yet get tray, please check.`, 'alert');
+                return;
+            }
+
+            sharedDrawerState.cartesianRobotState = 'In Put Away';
+            logMessage(`Cartesian cycle started: Put Away Reel.`, 'info');
+            inPutAwayMove = true;
+
+            var getSlotCode = await loadPLCGetEmptySlot();
+            if (getSlotCode == false) {
+                sharedDrawerState.cartesianRobotState = 'Retrieved';
+                inPutAwayMove = false;
+                return;
+            }
+
+            changePutSlot = false;
+
+            updateCartesianUIState();
+            var getSlot = await loadPLCPutAway();
+            if (getSlot == false) {
+                sharedDrawerState.cartesianRobotState = 'Retrieved';
+                inPutAwayMove = false;
+                return;
+            }
+            await delay(5000);
+
+            var chkStatus = await loadPLCGetPutAwayStatus();
+            if (chkStatus == false) {
+                sharedDrawerState.cartesianRobotState = 'Retrieved';
+                inPutAwayMove = false;
+                changePutSlot = true;
+
+                if (attemptsPutAway > 3) {
+                    logMessage('Put Away Drawer :: Tried ' + (attemptsPutAway - 1) + ', auto stop now.', 'info');
+                    document.getElementById('chkAutoRun').checked = false;
+                    return false;
+                }
+
+                return;
+            }
+
+            attemptsPutAway = 1;
+
+            sharedDrawerState.cartesianRobotState = 'Ready';
+            sharedDrawerState.cartesianLocation = '';
+            sharedDrawerState.trolleyLocation = '';
+            updateCartesianUIState();
+            updateTrolleyUIState();
+
+            sharedDrawerState.drawerStatus = "None";
+            logMessage2(`Cartesian cycle end: Put Away Done.`, 'info');
+            inPutAwayMove = false;
+
+            // means all is out
+            if (totalReels <= 0) {
+                loadDBEnd();
+                systemStop();
+            }
+
+            updateJson();
+        }
+
+
+        // ----------- Action :: retry
+        async function retry_RetrieveStatus() {
+            var chkStatus = await loadPLCGetRetrieveTrayStatus();
+            if (chkStatus == false) {
+                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                return;
+            }
+
+            sharedDrawerState.drawerStatus = "Drawer";
+            updateDrawerStatus('Drawer', 'Empty Drawer');
+
+            sharedDrawerState.cartesianRobotState = 'Ready';
+            sharedDrawerState.cartesianLocation = '';
+            updateCartesianUIState();
+            updateDrawerStatus('Drawer', 'Empty Drawer Ready');
+
+            updateJson();
+        }
+
+        async function retry_PutAwayStatus() {
+            var chkStatus = await loadPLCGetPutAwayStatus();
+            if (chkStatus == false) {
+                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                return;
+            }
+
+            var chkDB = await loadDBReelRack();
+
+            sharedDrawerState.cartesianRobotState = 'Ready';
+            sharedDrawerState.cartesianLocation = '';
+            updateCartesianUIState();
+
+            sharedDrawerState.drawerStatus = "None";
+            updateDrawerStatus('None', 'No Drawer');
+
+            updateJson();
+        }
+
+
+        // ----------- Database
+        async function loadDBEnd() {
+
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCTrolley/StopHubOut/" + qId,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('10::' + JSON.stringify(result));
+                    // swal.close();
+                    logMessage('End Loader :: OK ', 'info');
+                    return true;
+                },
+                error: function (error) {
+                    logMessage('End Loader :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        // ----------- Trolley
+        async function getTrolley(code, isCont) {
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCTrolley/StartDrawerIn/" + code + "/" + qId,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    // console.log(result);
+                    swal.close();
+
+                    if (result.success == true) {
+                        fResult = true;
+
+                        $("#txtTrolleyId").val(result.data.trolleyInfo.trolley_Id);
+                        colNo = 1;
+
+                        logMessage('Trolley :: Done check ' + code, 'info');
+                        logMessage('Trolley :: totalReels  ' + totalReels, 'info');
+                    }
+                    else {
+                        logMessage('Trolley :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    logMessage('Trolley :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        // ----------- Cartesian :: Take Reel
+        async function loadPLCRetrieveTray() {
+
+            var tr = $("#txtTrolleyId").val();
+            var rowNo = Number($('#left-input-tr').val)
+            if (colNo == 2) {
+                rowNo = Number($('#center-input-tr').val)
+            }
+            if (colNo == 3) {
+                rowNo = Number($('#right-input-tr').val)
+            }
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCTrolley/RetrieveTray/" + tr + "/A/" + colNo + "/" + rowNo,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('3::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success) {
+                        logMessage('Retrieve :: Done ', 'info');
+                    }
+                    else {
+                        logMessage('Retrieve :: ' + result.errMessage, 'alert');
+                    }
+
+                    fResult = result.success;
+                },
+                error: function (error) {
+                    logMessage('Retrieve :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCGetRetrieveTrayStatus() {
+
+            var fResult = false;
+            var rowNo = Number($('#left-input-tr').val);
+            if (colNo == 2) {
+                rowNo = Number($('#center-input-tr').val);
+            }
+            if (colNo == 3) {
+                rowNo = Number($('#right-input-tr').val);
+            }
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCTrolley/GetRetrieveTrayStatus/",
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('3::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        if (colNo == 1) {
+                            $('#left-input-tr').val(rowNo + 1);
+                            if (rowNo + 1 > 50) {
+                                $('#left-input-tr').val(50);
+                            }
+                        }
+                        if (colNo == 2) {
+                            $('#center-input-tr').val(rowNo + 1);
+                            if (rowNo + 1 > 50) {
+                                $('#center-input-tr').val(50);
+                            }
+                        }
+                        if (colNo == 3) {
+                            $('#right-input-tr').val(rowNo + 1);
+                            if (rowNo + 1 > 50) {
+                                $('#right-input-tr').val(50);
+                            }
+                        }
+                        logMessage2('Retrieve Status :: OK ', 'info');
+                    }
+                    else {
+                        logMessage2('Retrieve Status :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    logMessage2('Retrieve Status :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        // ----------- Cartesian :: Put Away
+        async function loadPLCGetEmptySlot() {
+
+            var fResult = false;
+
+            var chkSlot = '-';
+            if (changePutSlot == true) {
+                chkSlot = $("#txtPutSlot").val();
+                attemptsPutAway += 1;
+            }
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCTrolley/GetEmptySlot/" + chkSlot,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('4::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        logMessage2('Get Put Away Slot :: Done ', 'info');
+                        $("#txtPutSlot").val(result.data.slotCode);
+                        if (result.data.isLeft == 1) {
+                            sharedDrawerState.cartesianLocation = 'left';
+                            $("#left-input-tr").val(result.data.slotCode);
+                        }
+                        else {
+                            sharedDrawerState.trolleyLocation = 'right';
+                            $("#right-input-tr").val(result.data.slotCode);
+                        }
+                    }
+                    else {
+                        logMessage2('Get Put Away Slot :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    logMessage2('Get Put Away Slot :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCPutAway() {
+
+            var sCode = $("#txtPutSlot").val();
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCTrolley/PutAway/" + sCode,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('4::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        logMessage2('Put Away :: Done ', 'info');
+                    }
+                    else {
+                        logMessage2('Put Away :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    logMessage2('Put Away :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCGetPutAwayStatus() {
+
+            var sCode = $("#txtPutSlot").val();
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCTrolley/GetPutAwayStatus/" + sCode,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('4::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+
+                        logMessage2('Put Away Status :: Done ', 'info');
+                    }
+                    else {
+                        logMessage2('Put Away Status :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    logMessage2('Put Away Status :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+    </script>
+
+}
