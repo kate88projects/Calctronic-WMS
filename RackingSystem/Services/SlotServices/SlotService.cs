@@ -848,5 +848,109 @@ namespace RackingSystem.Services.SlotServices
             }
             return result;
         }
+
+        public async Task<ServiceResponseModel<List<SlotUsageDTO>>> GetSlotUsage()
+        {
+            ServiceResponseModel<List<SlotUsageDTO>> result = new ServiceResponseModel<List<SlotUsageDTO>>();
+            var activeAmt = 0;
+            var inactiveAmt = 0;
+            var forEmptyQty = 0;
+            var hasTrayQty = 0;
+            var hasReelQty = 0;
+            var needCheckQty = 0;
+            var inactiveCheckQty = 0;
+
+            try
+            {
+                var slotList = await _dbContext.Slot.OrderBy(x => x.SlotCode).ToListAsync();
+                var slotListDTO = _mapper.Map<List<SlotListDTO>>(slotList).ToList();
+
+                foreach(var slot in slotListDTO)
+                {
+                    if (slot.IsActive == true)
+                    {
+                        activeAmt++;
+                        if (slot.HasEmptyTray)
+                        {
+                            hasTrayQty++;
+                        }
+                        else if (slot.ForEmptyTray)
+                        {
+                            forEmptyQty++;
+                        }
+                        else if (slot.HasReel)
+                        {
+                            hasReelQty++;
+                        }
+                        //else //need check slot
+                        //{
+                        //    needCheckQty++;
+                        //}
+                    }
+                    else
+                    {
+                        if (slot.NeedCheck)
+                        {
+                            inactiveCheckQty++;
+                        }
+                        else
+                        {
+                            inactiveAmt++;
+                        }
+                    }
+                }
+
+
+                double calculatePercent(int value, int activeQty) =>
+                    activeQty == 0 ? 0: Math.Round((double)value / activeQty * 100, 2);
+
+                result.data = new List<SlotUsageDTO>
+                {
+                    new SlotUsageDTO
+                    {
+                        title = "Has Empty Tray",
+                        available = true,
+                        slotQty = hasTrayQty,
+                        percentage = calculatePercent(hasTrayQty, activeAmt),
+                    },
+                    new SlotUsageDTO
+                    {
+                        title = "For Empty Tray",
+                        available = true,
+                        slotQty = forEmptyQty,
+                        percentage = calculatePercent(forEmptyQty, activeAmt),
+                    },
+                    new SlotUsageDTO
+                    {
+                        title = "Has Reel",
+                        available = true,
+                        slotQty = hasReelQty,
+                        percentage = calculatePercent(hasReelQty, activeAmt),
+                    },
+                    new SlotUsageDTO
+                    {
+                        title = "Inactive Slot",
+                        available = false,
+                        slotQty = inactiveAmt,
+                        percentage = 0,
+                    },
+                    new SlotUsageDTO
+                    {
+                        title = "Error Slot",
+                        available = false,
+                        slotQty = needCheckQty,
+                        percentage = 0,
+                    }
+                };
+                result.success = true;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
     }
 }
