@@ -16,5 +16,7 @@
         public int RowNo { get; set; } = 0;
 
         public int Priority { get; set; } = 0;
+        public string CheckRemark { get; set; } = "";
+        public bool NeedCheck { get; set; } = false;
     }
 }

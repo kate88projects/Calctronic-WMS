@@ -172,9 +172,9 @@
                                         const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
                                         return `<div style="display:flex;">
                                             <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
-                                                <span><i class="bi bi-pencil-square""></i>  Edit</span></button>
+                                                <span><i class="bi bi-pencil-square pe-1"></i>Edit</span></button>
                                             <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.loader_Id}" data-code="${row.loaderCode}">
-                                                <span><i class="bi bi-trash""></i>  Delete</span>
+                                                <span><i class="bi bi-trash pe-1"></i>Delete</span>
                                             </button></div>`;
                                     }
                                 }

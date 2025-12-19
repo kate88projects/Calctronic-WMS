@@ -12,6 +12,7 @@ using RackingSystem.Models.BOM;
 using RackingSystem.Data.JO;
 using RackingSystem.Models.JO;
 using RackingSystem.Models.RackJob;
+using RackingSystem.Data.RackJob;
 
 namespace RackingSystem.Data
 {
@@ -30,6 +31,7 @@ namespace RackingSystem.Data
             CreateMap<SlotCalculation, SlotCalculationDTO>();
             CreateMap<SlotCalculation, SlotCalculationListDTO>();
             CreateMap<SlotColumnSetting, SlotColumnSettingDTO>();
+            CreateMap<Slot, SlotUsageDTO>();
 
             CreateMap<Loader, LoaderDTO>();
             CreateMap<Loader, LoaderListDTO>()
@@ -56,6 +58,7 @@ namespace RackingSystem.Data
             CreateMap<JobOrderEmergency, JOEmergencyReqDTO>();
             CreateMap<JobOrderEmergency, RackJobHubOutEDtlDTO>();
             CreateMap<JobOrderEmergencyDetail, JOEmergencyDetailReqDTO>();
+            CreateMap<RackJob.RackJob, RackJobDTO>();
 
         }
     }

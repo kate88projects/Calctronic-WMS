@@ -1,17 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using RackingSystem.Data;
-using RackingSystem.Models.Slot;
-using RackingSystem.Models;
-using RackingSystem.Services.SlotServices;
 using Newtonsoft.Json;
+using RackingSystem.Data;
+using RackingSystem.Models;
+using RackingSystem.Models.Slot;
 using RackingSystem.Models.User;
+using RackingSystem.Services.SlotServices;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Channels;
+using System.Threading.Tasks;
 
 namespace RackingSystem.Controllers
 {
@@ -236,6 +237,20 @@ namespace RackingSystem.Controllers
             ViewData["ActiveTab"] = "SlotDetailList";
             ViewData["Title"] = "Slot Detail List";
             return View();
+        }
+
+        [HttpGet]
+        public async Task<ServiceResponseModel<List<SlotUsageDTO>>> GetSlotUsage()
+        {
+            ServiceResponseModel<List<SlotUsageDTO>> result = await _slotService.GetSlotUsage();
+            return result;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateWarningSlot([FromBody] SlotStatusReqDTO slotReq)
+        {
+            ServiceResponseModel<SlotStatusReqDTO> result = await _slotService.UpdateWarningSlot(slotReq);
+            return new JsonResult(result);
         }
 
     }

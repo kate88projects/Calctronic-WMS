@@ -952,5 +952,38 @@ namespace RackingSystem.Services.SlotServices
 
             return result;
         }
+        public async Task<ServiceResponseModel<SlotStatusReqDTO>> UpdateWarningSlot(SlotStatusReqDTO slotReq)
+        {
+            ServiceResponseModel<SlotStatusReqDTO> result = new ServiceResponseModel<SlotStatusReqDTO>();
+
+            try
+            {
+                if (slotReq == null)
+                {
+                    result.errMessage = "Invalid Slot.";
+                    return result;
+                }
+
+                Slot? _slot = _dbContext.Slot.Find(slotReq.Slot_Id);
+                if (_slot == null)
+                {
+                    result.errMessage = "Cannot find this slot, please refresh the list.";
+                    return result;
+                }
+
+                _slot.NeedCheck = false;
+                _slot.CheckRemark = slotReq.CheckRemark;
+                _dbContext.Slot.Update(_slot);
+                await _dbContext.SaveChangesAsync();
+                result.success = true;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
     }
 }

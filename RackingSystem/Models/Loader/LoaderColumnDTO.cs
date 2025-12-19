@@ -13,5 +13,9 @@
         public int BalancePercentage { get; set; } = 0;
         public int UsagePercentage { get; set; } = 0;
 
+        //for progress overview
+        public int ReelQty { get; set; } = 0;
+        public int totalProgressPercentage { get; set; } = 0;
+
     }
 }

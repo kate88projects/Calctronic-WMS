@@ -127,7 +127,7 @@
   </div>
 </div>
 
-<div class="modal fade" data-bs-backdrop="static" id="myModal" role="dialog">
+<div class="modal fade" data-bs-backdrop="static" data-bs-focus="false" id="myModal" role="dialog">
     <div class="modal-dialog">
 
         <!-- Modal content-->
@@ -253,7 +253,7 @@
     </div>
 </div>
 
-<div class="modal fade" data-bs-backdrop="static" id="colModal" role="dialog">
+<div class="modal fade" data-bs-backdrop="static" data-bs-focus="false" id="colModal" role="dialog">
     <div class="modal-dialog modal-lg">
 
         <div class="modal-content">
@@ -427,12 +427,12 @@
                 <span id="textlink2" class="text-link" tabindex="0" onclick="customPulses('colModal', true)"><i class="fas fa-plus-circle"></i> Additional Pulses</span>
 
                 <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkIsActive">
-                    <label class="form-check-label" for="chkIsActive">Is Active</label>
+                    <input type="checkbox" class="form-check-input" id="chkIsActive1">
+                    <label class="form-check-label" for="chkIsActive1">Is Active</label>
                 </div>
                 <div class="col form-check mb-3">
-                    <input type="checkbox" class="form-check-input" id="chkIsLeft">
-                    <label class="form-check-label" for="chkIsLeft">Is Left</label>
+                    <input type="checkbox" class="form-check-input" id="chkIsLeft1">
+                    <label class="form-check-label" for="chkIsLeft1">Is Left</label>
                 </div>
                     
                 <input type="hidden" id="txtId">
@@ -652,10 +652,10 @@
                                         const rawData = JSON.stringify(row).replace(/"/g, "&quot;");
                                         return `<div style="display:flex;">
                                                     <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rawData}">
-                                                        <span><i class="bi bi-pencil-square"></i>Edit</span>
+                                                        <span><i class="bi bi-pencil-square pe-1"></i>Edit</span>
                                                     </button>
                                                     <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.trolleySlot_Id}" data-code=${row.trolleySlotCode}">
-                                                        <span><i class="bi bi-trash"></i>Delete</span>
+                                                        <span><i class="bi bi-trash pe-1"></i>Delete</span>
                                                     </button>
                                                 </div>`;
                                     }
@@ -1156,8 +1156,8 @@
                     Add5PulseIncrement: parseInt($('#txtAddPulse5Inc').val()) || 0,
                     Add6Pulse: parseInt($('#txtStartAddPulse6').val()) || 0,
                     Add6PulseIncrement: parseInt($('#txtAddPulse6Inc').val()) || 0,
-                    IsActive: $('#colModal').find('#chkIsActive').prop("checked"),
-                    IsLeft: $('#colModal').find('#chkIsLeft').prop("checked"),
+                    IsActive: $('#colModal').find('#chkIsActive1').prop("checked"),
+                    IsLeft: $('#colModal').find('#chkIsLeft1').prop("checked"),
                 };
 
                 $.ajax({

@@ -8,6 +8,7 @@ using RackingSystem.Models.User;
 using RackingSystem.Services.GRNServices;
 using RackingSystem.Services.RackServices;
 using RackingSystem.General;
+using RackingSystem.Data.RackJob;
 
 namespace RackingSystem.Controllers
 {
@@ -67,18 +68,18 @@ namespace RackingSystem.Controllers
                     }
                 }
 
-                var srms = _context.RackJob.FirstOrDefault();
-                if (srms != null)
-                {
-                    if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
-                    {
+                //var srms = _context.RackJob.FirstOrDefault();
+                //if (srms != null)
+                //{
+                //    if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
+                //    {
                         return View("RackJobHubInView");
-                    }
-                    if (srms.RackJobQueue_Id != 0 && srms.LoginIP == ViewBag.DeviceId)
-                    {
-                        ViewBag.QContinuos = "1";
-                    }
-                }
+                //    }
+                //    if (srms.RackJobQueue_Id != 0 && srms.LoginIP == ViewBag.DeviceId)
+                //    {
+                //        ViewBag.QContinuos = "1";
+                //    }
+                //}
             }
 
             ViewData["ActiveGroup"] = "grpRACKING";
@@ -252,5 +253,18 @@ namespace RackingSystem.Controllers
             return View();
         }
 
+        [HttpGet]
+        public async Task<ServiceResponseModel<RackJobDTO>> GetRackJob()
+        {
+            ServiceResponseModel<RackJobDTO> result = await _rackService.GetRackJob();
+            return result;
+        }
+
+        [HttpGet]
+        public async Task<ServiceResponseModel<RackJobLog>> GetEndRackJob(long jobQId)
+        {
+            ServiceResponseModel<RackJobLog> result = await _rackService.GetEndRackJob(jobQId);
+            return result;
+        }
     }
 }

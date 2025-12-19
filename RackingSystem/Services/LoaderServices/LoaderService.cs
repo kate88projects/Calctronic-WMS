@@ -400,15 +400,25 @@ namespace RackingSystem.Services.LoaderServices
                                                l.ColHeight
                                            }).ToListAsync();
 
+                var jobReelQty = await _dbContext.RackJob.Where(r => r.Loader_Id == loaderId).OrderByDescending(r => r.StartDate).FirstOrDefaultAsync();
+                var reelInLoaderQty = 0;
+
                 var loaderColListDTO = loaderColList.Select(x =>
                 {
                     var dto = _mapper.Map<LoaderColumnDTO>(x.lc);
                     dto.ColHeight = x.ColHeight;
                     double usage = ((x.ColHeight - dto.BalanceHeight) / (double)x.ColHeight);
                     dto.UsagePercentage = (int)(usage * 100);
-
+                    dto.ReelQty = _dbContext.LoaderReel.Count(r => r.Loader_Id == loaderId && r.ColNo == x.lc.ColNo);
+                    reelInLoaderQty += dto.ReelQty;
                     return dto;
                 }).ToList();
+
+                var progressPercentage = (jobReelQty.TotalCount - (double)reelInLoaderQty) / jobReelQty.TotalCount * 100;
+                if (loaderColListDTO.Count > 0)
+                {
+                    loaderColListDTO[0].totalProgressPercentage = (int)progressPercentage;
+                }
 
                 result.success = true;
                 result.data = loaderColListDTO;

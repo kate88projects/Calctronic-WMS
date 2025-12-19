@@ -86,70 +86,80 @@ namespace RackingSystem.Services.TrolleyServices
                 //    result.errMessage = "Please insert Total Column.";
                 //    return result;
                 //}
-                if (trolley.TotalRow <= 0)
+                if (trolley.IPAdd1RowNo <= 0)
                 {
-                    result.errMessage = "Please insert Total Row.";
+                    result.errMessage = "Please insert IP Address 1 Row No";
+                    return result;
+                }
+                if (trolley.IPAdd2RowNo <= 0)
+                {
+                    result.errMessage = "Please insert IP Address 2 Row No";
+                    return result;
+                }
+                if (trolley.IPAdd3RowNo <= 0)
+                {
+                    result.errMessage = "Please insert IP Address 3 Row No";
                     return result;
                 }
                 if (string.IsNullOrEmpty(trolley.IPAdd1))
                 {
-                    result.errMessage = "Please insert IP Address.";
+                    result.errMessage = "Please insert IP Address 1";
                     return result;
                 }
                 if (!IPAddress.TryParse(trolley.IPAdd1, out _)) //only verify on IPv4 and IPv6
                 {
-                    result.errMessage = "Invalid IP Address format. Please insert again.";
+                    result.errMessage = "Invalid IP Address1 format. Please insert again.";
                     return result;
                 }
                 if (string.IsNullOrEmpty(trolley.IPAdd2))
                 {
-                    result.errMessage = "Please insert IP Address.";
+                    result.errMessage = "Please insert IP Address 2";
                     return result;
                 }
                 if (!IPAddress.TryParse(trolley.IPAdd2, out _)) //only verify on IPv4 and IPv6
                 {
-                    result.errMessage = "Invalid IP Address format. Please insert again.";
+                    result.errMessage = "Invalid IP Address2 format. Please insert again.";
                     return result;
                 }
                 if (string.IsNullOrEmpty(trolley.IPAdd3))
                 {
-                    result.errMessage = "Please insert IP Address.";
+                    result.errMessage = "Please insert IP Address 3";
                     return result;
                 }
                 if (!IPAddress.TryParse(trolley.IPAdd3, out _)) //only verify on IPv4 and IPv6
                 {
-                    result.errMessage = "Invalid IP Address format. Please insert again.";
+                    result.errMessage = "Invalid IP Address3 format. Please insert again.";
                     return result;
                 }
 
-                if (trolley.IPAdd1Col1 == 0)
+                if (trolley.IPAdd1AColNo == 0)
                 {
-                    result.errMessage = "Please insert IP Address 1 -> 1st Column No.";
+                    result.errMessage = "Please insert IP Address 1 -> Side A Column No";
                     return result;
                 }
-                if (trolley.IPAdd1Col2 == 0)
+                if (trolley.IPAdd1BColNo == 0)
                 {
-                    result.errMessage = "Please insert IP Address 1 -> 2nd Column No.";
+                    result.errMessage = "Please insert IP Address 1 -> Side B Column No";
                     return result;
                 }
-                if (trolley.IPAdd2Col1 == 0)
+                if (trolley.IPAdd2AColNo == 0)
                 {
-                    result.errMessage = "Please insert IP Address 2 -> 1st Column No.";
+                    result.errMessage = "Please insert IP Address 2 -> Side A Column No";
                     return result;
                 }
-                if (trolley.IPAdd2Col2 == 0)
+                if (trolley.IPAdd2BColNo == 0)
                 {
-                    result.errMessage = "Please insert IP Address 2 -> 2nd Column No.";
+                    result.errMessage = "Please insert IP Address 2 -> Side B Column No";
                     return result;
                 }
-                if (trolley.IPAdd3Col1 == 0)
+                if (trolley.IPAdd3AColNo == 0)
                 {
-                    result.errMessage = "Please insert IP Address 3 -> 1st Column No.";
+                    result.errMessage = "Please insert IP Address 3 -> Side A Column No";
                     return result;
                 }
-                if (trolley.IPAdd3Col2 == 0)
+                if (trolley.IPAdd3BColNo == 0)
                 {
-                    result.errMessage = "Please insert IP Address 3 -> 2nd Column No.";
+                    result.errMessage = "Please insert IP Address 3 -> Side B Column No";
                     return result;
                 }
 
@@ -182,16 +192,18 @@ namespace RackingSystem.Services.TrolleyServices
                         IPAdd1 = trolley.IPAdd1,
                         IPAdd2 = trolley.IPAdd2,
                         IPAdd3 = trolley.IPAdd3,
-                        IPAdd1Col1 = trolley.IPAdd1Col1,
-                        IPAdd1Col2 = trolley.IPAdd1Col2,
-                        IPAdd2Col1 = trolley.IPAdd2Col1,
-                        IPAdd2Col2 = trolley.IPAdd2Col2,
-                        IPAdd3Col1 = trolley.IPAdd3Col1,
-                        IPAdd3Col2 = trolley.IPAdd3Col2,
+                        IPAdd1AColNo = trolley.IPAdd1AColNo,
+                        IPAdd1BColNo = trolley.IPAdd1BColNo,
+                        IPAdd2AColNo = trolley.IPAdd2AColNo,
+                        IPAdd2BColNo = trolley.IPAdd2BColNo,
+                        IPAdd3AColNo = trolley.IPAdd3AColNo,
+                        IPAdd3BColNo = trolley.IPAdd3BColNo,
                         IsActive = trolley.IsActive,
                         Remark = trolley.Remark,
                         //TotalCol = trolley.TotalCol,
-                        TotalRow = trolley.TotalRow,
+                        IPAdd1RowNo = trolley.IPAdd1RowNo,
+                        IPAdd2RowNo = trolley.IPAdd2RowNo,
+                        IPAdd3RowNo = trolley.IPAdd3RowNo,
                         //Side = (int)trolley.Side,
                     };
                     _dbContext.Trolley.Add(_trolley);
@@ -209,15 +221,17 @@ namespace RackingSystem.Services.TrolleyServices
                     _trolley.IPAdd1 = trolley.IPAdd1;
                     _trolley.IPAdd2 = trolley.IPAdd2;
                     _trolley.IPAdd3 = trolley.IPAdd3;
-                    _trolley.IPAdd1Col1 = trolley.IPAdd1Col1;
-                    _trolley.IPAdd1Col2 = trolley.IPAdd1Col2;
-                    _trolley.IPAdd2Col1 = trolley.IPAdd2Col1;
-                    _trolley.IPAdd2Col2 = trolley.IPAdd2Col2;
-                    _trolley.IPAdd3Col1 = trolley.IPAdd3Col1;
-                    _trolley.IPAdd3Col2 = trolley.IPAdd3Col2;
+                    _trolley.IPAdd1AColNo = trolley.IPAdd1AColNo;
+                    _trolley.IPAdd1BColNo = trolley.IPAdd1BColNo;
+                    _trolley.IPAdd1BColNo = trolley.IPAdd1BColNo;
+                    _trolley.IPAdd2AColNo = trolley.IPAdd2AColNo;
+                    _trolley.IPAdd3AColNo = trolley.IPAdd3AColNo;
+                    _trolley.IPAdd3BColNo = trolley.IPAdd3BColNo;
                     _trolley.Remark = trolley.Remark;
                     //_trolley.TotalCol = trolley.TotalCol;
-                    _trolley.TotalRow = trolley.TotalRow;
+                    _trolley.IPAdd1RowNo = trolley.IPAdd1RowNo;
+                    _trolley.IPAdd2RowNo = trolley.IPAdd2RowNo;
+                    _trolley.IPAdd3RowNo = trolley.IPAdd3RowNo;
                     _trolley.IsActive = trolley.IsActive;
                     //_trolley.Side = (int)trolley.Side;
                     _dbContext.Trolley.Update(_trolley);

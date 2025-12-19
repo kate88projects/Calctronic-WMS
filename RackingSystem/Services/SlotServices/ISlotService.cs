@@ -21,6 +21,7 @@ namespace RackingSystem.Services.SlotServices
         public Task<ServiceResponseModel<List<SlotListDTO>>> UpdateExcelPulses (List<SlotListDTO> slotPulses);
         public Task<ServiceResponseModel<List<Slot_DrawerFreeDTO>>> GetFreeSlot_Drawer_ByColumn();
         public Task<ServiceResponseModel<List<SlotUsageDTO>>> GetSlotUsage();
+        public Task<ServiceResponseModel<SlotStatusReqDTO>> UpdateWarningSlot(SlotStatusReqDTO slotReq);
 
     }
 }

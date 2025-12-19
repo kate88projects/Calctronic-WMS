@@ -19,6 +19,8 @@ namespace RackingSystem.Models.RackJob
         public string LoginIP { get; set; } = "";
 
         public string Json { get; set; } = "";
+        public int TotalCount { get; set; } = 0;
+        public int ProgressPercentage { get; set; } = 0;
 
     }
 }

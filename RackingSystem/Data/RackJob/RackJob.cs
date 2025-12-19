@@ -29,6 +29,8 @@ namespace RackingSystem.Data.RackJob
 
         [Required]
         public string Json { get; set; } = "";
-        
+
+        [Required]
+        public int TotalCount { get; set; } = 0;
     }
 }

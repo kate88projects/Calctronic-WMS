@@ -13,10 +13,10 @@
 
     .sectionTitle {
         text-align: center;
-        border-bottom: 1px solid black;
         padding: 5px;
         margin-bottom: 10px;
         width :100%;
+        background-color: #E6E6E6;
     }
 </style>
 
@@ -44,7 +44,7 @@
                                     @* <th>IP Address</th> *@
                                     <th>Remark</th>
                                     @* <th>Total Column</th> *@
-                                    <th>Total Row</th>
+                                    @* <th>Row No</th> *@
                                     <th>Is Active</th>
                                     @* <th>Status</th> *@
                                     @* <th>Side</th> *@
@@ -59,17 +59,17 @@
     </div>
 </div>
 
-<div class="modal fade" data-bs-backdrop="static" id="myModal" role="dialog">
+<div class="modal fade" data-bs-backdrop="static" data-bs-focus="false" id="myModal" role="dialog">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Update Universal Trolley</h4>
+                <h4 class="modal-title" id="modalTitle">Update Universal Trolley</h4>
             </div>
             <div class="modal-body">
                 <div class="row mb-3">
                     <div class="col">
                         <label class="form-label" for="txtCode">Universal Trolley Code</label>
-                        <input type="text" class="form-control" name="LoaderCode" id="txtCode" aria-describedby="Trolley Code">
+                        <input type="text" class="form-control" name="LoaderCode" id="txtCode" aria-describedby="Trolley Code" oninput="removeErrMsg(this.id)">
                         <div id="txtCodeError" class="error-message"></div>
                     </div>
                     <div class="col">
@@ -86,9 +86,9 @@
                             <div id="txtIP1Error" class="error-message"></div>
                         </div>
                         <div class="col">
-                            <label class="form-label" for="txtTotalRow">Total Row</label>
-                            <input type="number" class="form-control" name="TotalRow" id="txtTotalRow" aria-describedby="Total Row">
-                            <div id="txtTotalRowError" class="error-message"></div>
+                            <label class="form-label" for="txtIpAdd1RowNo">Row No (Per Column)</label>
+                            <input type="number" class="form-control" name="txtIpAdd1RowNo" id="txtIpAdd1RowNo" aria-describedby="Total Row" oninput="removeErrMsg(this.id)">
+                            <div id="txtIpAdd1RowNoError" class="error-message"></div>
                             @* <label class="form-label" for="txtTotalCol">Total Column</label>
                     <input type="number" class="form-control" name="TotalCol" id="txtTotalCol" aria-describedby="Total Column">
                     <div id="txtTotalColError" class="error-message"></div> *@
@@ -96,14 +96,14 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col">
-                            <label class="form-label" for="txtAdd1Col1">1st Column</label>
-                            <input type="number" class="form-control" name="txtAdd1Col1" id="txtAdd1Col1" aria-describedby="IP1 Column 1">
-                            <div id="txtAdd1Col1Error" class="error-message"></div>
+                            <label class="form-label" for="txtAdd1AColNo">Side A Column No</label>
+                            <input type="number" class="form-control" name="txtAdd1AColNo" id="txtAdd1AColNo" aria-describedby="IP1 Column 1" oninput="removeErrMsg(this.id)">
+                            <div id="txtAdd1AColNoError" class="error-message"></div>
                         </div>
                         <div class="col">
-                            <label class="form-label" for="txtAdd1Col2">2nd Column</label>
-                            <input type="number" class="form-control" name="txtAdd1Col2" id="txtAdd1Col2" aria-describedby="IP1 Column2">
-                            <div id="txtAdd1Col2Error" class="error-message"></div>
+                            <label class="form-label" for="txtAdd1BColNo">Side B Column No</label>
+                            <input type="number" class="form-control" name="txtAdd1BColNo" id="txtAdd1BColNo" aria-describedby="IP1 Column2" oninput="removeErrMsg(this.id)">
+                            <div id="txtAdd1BColNoError" class="error-message"></div>
                         </div>
                     </div>
                 </div>
@@ -117,9 +117,9 @@
                             <div id="txtIP2Error" class="error-message"></div>
                         </div>
                         <div class="col">
-                            <label class="form-label" for="txtTotalRow2">Total Row</label>
-                            <input type="number" class="form-control" name="txtTotalRow2" id="txtTotalRow2" aria-describedby="Total Row2">
-                            <div id="txtTotalRow2Error" class="error-message"></div>
+                            <label class="form-label" for="txtIpAdd2RowNo">Row No (Per Column)</label>
+                            <input type="number" class="form-control" name="txtIpAdd2RowNo" id="txtIpAdd2RowNo" aria-describedby="Total Row2" oninput="removeErrMsg(this.id)">
+                            <div id="txtIpAdd2RowNoError" class="error-message"></div>
                             @* <label class="form-label" for="txtTotalCol">Total Column</label>
                     <input type="number" class="form-control" name="TotalCol" id="txtTotalCol" aria-describedby="Total Column">
                     <div id="txtTotalColError" class="error-message"></div> *@
@@ -127,14 +127,14 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col">
-                            <label class="form-label" for="txtAdd2Col1">1st Column</label>
-                            <input type="number" class="form-control" name="txtAdd2Col1" id="txtAdd2Col1" aria-describedby="IP2 Column 1">
-                            <div id="txtAdd2Col1Error" class="error-message"></div>
+                            <label class="form-label" for="txtAdd2AColNo">Side A Column No</label>
+                            <input type="number" class="form-control" name="txtAdd2AColNo" id="txtAdd2AColNo" aria-describedby="IP2 Column 1" oninput="removeErrMsg(this.id)">
+                            <div id="txtAdd2AColNoError" class="error-message"></div>
                         </div>
                         <div class="col">
-                            <label class="form-label" for="txtAdd2Col2">2nd Column</label>
-                            <input type="number" class="form-control" name="txtAdd2Col2" id="txtAdd2Col2" aria-describedby="IP2 Column2">
-                            <div id="txtAdd2Col2Error" class="error-message"></div>
+                            <label class="form-label" for="txtAdd2BColNo">Side B Column No</label>
+                            <input type="number" class="form-control" name="txtAdd2BColNo" id="txtAdd2BColNo" aria-describedby="IP2 Column2" oninput="removeErrMsg(this.id)">
+                            <div id="txtAdd2BColNoError" class="error-message"></div>
                         </div>
                     </div>
                 </div>
@@ -148,9 +148,9 @@
                             <div id="txtIP3Error" class="error-message"></div>
                         </div>
                         <div class="col">
-                            <label class="form-label" for="txtTotalRow3">Total Row</label>
-                            <input type="number" class="form-control" name="txtTotalRow3" id="txtTotalRow3" aria-describedby="Total Row3">
-                            <div id="txtTotalRow3Error" class="error-message"></div>
+                            <label class="form-label" for="txtIpAdd3RowNo">Row No (Per Column)</label>
+                            <input type="number" class="form-control" name="txtIpAdd3RowNo" id="txtIpAdd3RowNo" aria-describedby="Total Row3" oninput="removeErrMsg(this.id)">
+                            <div id="txtIpAdd3RowNoError" class="error-message"></div>
                             @* <label class="form-label" for="txtTotalCol">Total Column</label>
                     <input type="number" class="form-control" name="TotalCol" id="txtTotalCol" aria-describedby="Total Column">
                     <div id="txtTotalColError" class="error-message"></div> *@
@@ -158,14 +158,14 @@
                     </div>
                     <div class="row mb-3">
                         <div class="col">
-                            <label class="form-label" for="txtAdd3Col1">1st Column</label>
-                            <input type="number" class="form-control" name="txtAdd3Col1" id="txtAdd3Col1" aria-describedby="IP3 Column 1">
-                            <div id="txtAdd3Col1Error" class="error-message"></div>
+                            <label class="form-label" for="txtAdd3AColNo">Side A Column No</label>
+                            <input type="number" class="form-control" name="txtAdd3AColNo" id="txtAdd3AColNo" aria-describedby="IP3 Column 1" oninput="removeErrMsg(this.id)">
+                            <div id="txtAdd3AColNoError" class="error-message"></div>
                         </div>
                         <div class="col">
-                            <label class="form-label" for="txtAdd3Col2">2nd Column</label>
-                            <input type="number" class="form-control" name="txtAdd3Col2" id="txtAdd3Col2" aria-describedby="IP3 Column2">
-                            <div id="txtAdd3Col2Error" class="error-message"></div>
+                            <label class="form-label" for="txtAdd3BColNo">Side B Column No</label>
+                            <input type="number" class="form-control" name="txtAdd3BColNo" id="txtAdd3BColNo" aria-describedby="IP3 Column2" oninput="removeErrMsg(this.id)">
+                            <div id="txtAdd3BColNoError" class="error-message"></div>
                         </div>
                     </div>
                 </div>
@@ -248,97 +248,6 @@
                     swal.close()
                     if (result.success == true) {
                         console.log(result.data);
-                        /*
-                        if (gridInstance) {
-                            gridInstance.destroy();
-                        }
-                        gridInstance = new gridjs.Grid({
-                            columns: [
-                                { name: 'Trolley Code', id: 'trolleyCode', width: '150px' },
-                                { name: 'IP Address', id: 'ipAddress', width: '145px' },
-                                { name: 'Remark', id: 'remark' },
-                                { 
-                                    name: 'Total Column', 
-                                    id: 'totalCol', 
-                                    width: '155px',
-                                    formatter: (cell) => 
-                                        gridjs.html(`<div style="text-align:center;">${cell}</div>`)
-                                },
-                                { 
-                                    name: 'Total Row', 
-                                    id: 'totalRow', 
-                                    width: '130px',
-                                    formatter: (cell) =>
-                                        gridjs.html(`<div style="text-align:center;">${cell}</div>`)
-                                },
-                                { 
-                                    name: 'Active State', 
-                                    id: 'isActive', 
-                                    width: '150px',
-                                    formatter: (cell, row) => {
-                                        const badgeHtml = row.cells[5].data === true
-                                          ? '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
-                                          : '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>';
-                                        return gridjs.html(`<div style="text-align:center;">${badgeHtml}</div>`);
-                                    }
-                                },
-                                { name: 'Status', id: 'status', width: '110px' },
-                                { 
-                                    name: 'Side', 
-                                    id: 'side', 
-                                    width: '90px',
-                                    data: row => row.side, 
-                                    formatter: cell => { 
-                                        const sideMap = { 0: 'Left', 1: 'Right' }; 
-                                        return sideMap[cell] || cell; 
-                                    }
-                                },
-                                { name: 'TrolleyId', id: 'trolley_Id', hidden: true }, 
-                                { 
-                                    name: 'Action',
-                                    formatter: (cell, row) => {
-                                        const cleanRow = {
-                                            trolleyCode: row.cells[0]?.data,
-                                            ipAddress: row.cells[1]?.data,
-                                            remark: row.cells[2]?.data,
-                                            totalCol: row.cells[3]?.data,
-                                            totalRow: row.cells[4]?.data,
-                                            isActive: row.cells[5]?.data,
-                                            status: row.cells[6]?.data,
-                                            side: row.cells[7]?.data,
-                                            trolley_Id: row.cells[8]?.data,
-                                        };
-                                        const rawData = btoa(JSON.stringify(cleanRow)); // base64 encoding
-                                        return gridjs.html(`
-                                            <div style="display:flex;">
-                                                <button class="btn btn-warning d-grid edit-trolley-btn me-2" data-row="${rawData}">
-                                                    <span><i class="bi bi-pencil-square"></i> Edit</span>
-                                                </button>
-                                                <button class="btn btn-danger d-grid delete-trolley-btn" data-id="${cleanRow.trolley_Id}" data-code="${cleanRow.trolleyCode}">
-                                                    <span><i class="bi bi-trash"></i> Delete</span>
-                                                </button>
-                                            </div>
-                                        `);
-                                    }
-                                }
-                            ],
-                            data: result.data,
-                            pagination: true,   
-                            search: true,
-                            sort: true,
-                            resizable: true,
-                            className: {
-                                table: 'custom-table',
-                            }
-                        }).render(document.getElementById("gridTable"));
-
-                        //remove grid-footer class
-                        const footer = document.querySelector('#gridTable .gridjs-footer');
-                        if (footer) {
-                            footer.id = "gridFooter";
-                        }
-                        document.getElementById("gridFooter").classList.remove("gridjs-footer");
-                        */
                         
                         $('#listTable').DataTable( {
                             data: result.data,
@@ -348,7 +257,6 @@
                             columns: [
                                 { data: 'trolleyCode' },
                                 { data: 'remark' },
-                                { data: 'totalRow' },
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
@@ -366,34 +274,23 @@
                                         const rawData = JSON.stringify(row).replace(/"/g, "&quot;");
                                         return `<div style="display:flex;">
                                                     <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rawData}">
-                                                        <span><i class="bi bi-pencil-square"></i>Edit</span>
+                                                        <span><i class="bi bi-pencil-square pe-1"></i>Edit</span>
                                                     </button>
                                                     <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.trolley_Id}" data-code="${row.trolleyCode}">
-                                                        <span><i class="bi bi-trash"></i>Delete</span>
+                                                        <span><i class="bi bi-trash pe-1"></i>Delete</span>
                                                     </button>
                                                 </div>`;
                                     }
                                 },
-                                { data: 'ipAdd1', visible: false },
-                                { data: 'ipAdd2', visible: false },
-                                { data: 'ipAdd3', visible: false },
-                                { data: 'ipAdd1Col1', visible: false },
-                                { data: 'ipAdd1Col2', visible: false },
-                                { data: 'ipAdd2Col1', visible: false },
-                                { data: 'ipAdd2Col2', visible: false },
-                                { data: 'ipAdd3Col1', visible: false },
-                                { data: 'ipAdd3Col2', visible: false },
-                                // { data: 'totalCol' },
-                                // { data: 'status' },
-                                // {   data: 'side', 
-                                //     render: function(data, type, row, meta) {
-                                //         const sideMap = {
-                                //             0: 'A',
-                                //             1: 'B'
-                                //         };
-                                //         return sideMap[data];
-                                //     }
-                                // }, 
+                                // { data: 'ipAdd1', visible: false },
+                                // { data: 'ipAdd2', visible: false },
+                                // { data: 'ipAdd3', visible: false },
+                                // { data: 'ipAdd1AColNo', visible: false },
+                                // { data: 'ipAdd1BColNo', visible: false },
+                                // { data: 'ipAdd2AColNo', visible: false },
+                                // { data: 'ipAdd2BColNo', visible: false },
+                                // { data: 'ipAdd3AColNo', visible: false },
+                                // { data: 'ipAdd3BColNo', visible: false },
                             ],
                             language: {
                                 searchPlaceholder: "🔍︎ Search",
@@ -424,18 +321,20 @@
         }
 
         function newTrolleyForm()
-        {   
-            removeErrMsg(true);
+        {
             $("#txtId").val("0");
-            $('#txtIP1, #txtCode, #txtTotalRow, #txtRemark, #txtAdd1Col1, #txtAdd1Col2, #txtIP2, #txtAdd2Col1, #txtAdd2Col2, #txtIP3, #txtAdd3Col1, #txtAdd3Col2').val("");
+            $('#txtIP1, #txtCode, #txtIpAdd1RowNo, #txtRemark, #txtAdd1AColNo, #txtAdd1BColNo, #txtIP2, #txtIpAdd2RowNo, #txtAdd2AColNo, #txtAdd2BColNo, #txtIP3, #txtIpAdd3RowNo, #txtAdd3AColNo, #txtAdd3BColNo').val("");
             // document.getElementById("sideL").checked = true;
             document.getElementById("chkIsActive").checked = true;
+            $('#modalTitle').text('New Universal Trolley');
             $("#myModal").modal("show");
         }
 
         function cancelForm() {
             $('#myModal').modal("toggle");
-            removeErrMsg(true);
+            const fields = ['txtCode', 'txtIP1', 'txtIP2', 'txtIP3', 'txtAdd1AColNo', 'txtAdd1BColNo', 'txtAdd2AColNo', 'txtAdd2BColNo', 'txtAdd3AColNo', 'txtAdd3BColNo', 'txtIpAdd1RowNo', 'txtIpAdd2RowNo', 'txtIpAdd3RowNo']
+            
+            removeErrMsg(fields, true);
         }
 
         $('#listTable').on('click', '.edit-btn', function() {
@@ -449,21 +348,16 @@
             $("#txtIP1").val(row.ipAdd1);
             $("#txtIP2").val(row.ipAdd2);
             $("#txtIP3").val(row.ipAdd3);
-            $("#txtAdd1Col1").val(row.ipAdd1Col1);
-            $("#txtAdd1Col2").val(row.ipAdd1Col2);
-            $("#txtAdd2Col1").val(row.ipAdd2Col1);
-            $("#txtAdd2Col2").val(row.ipAdd2Col2);
-            $("#txtAdd3Col1").val(row.ipAdd3Col1);
-            $("#txtAdd3Col2").val(row.ipAdd3Col2);
-            $("#txtTotalRow").val(row.totalRow);
+            $("#txtAdd1AColNo").val(row.ipAdd1AColNo);
+            $("#txtAdd1BColNo").val(row.ipAdd1BColNo);
+            $("#txtAdd2AColNo").val(row.ipAdd2AColNo);
+            $("#txtAdd2BColNo").val(row.ipAdd2BColNo);
+            $("#txtAdd3AColNo").val(row.ipAdd3AColNo);
+            $("#txtAdd3BColNo").val(row.ipAdd3BColNo);
+            $("#txtIpAdd1RowNo").val(row.ipAdd1RowNo);
+            $("#txtIpAdd2RowNo").val(row.ipAdd2RowNo);
+            $("#txtIpAdd3RowNo").val(row.ipAdd3RowNo);
             $("#txtRemark").val(row.remark);
-
-            // if (row.side == "0") {
-            //     document.getElementById("sideL").checked = true;
-            // } 
-            // else {
-            //     document.getElementById("sideR").checked = true;
-            // }
 
             if (row.isActive == true) {
                 document.getElementById("chkIsActive").checked = true;
@@ -471,43 +365,39 @@
             else {
                 document.getElementById("chkIsActive").checked = false;
             }
+            $('#modalTitle').text('Edit Universal Trolley');
             $("#myModal").modal("show");
         }
 
-        function removeErrMsg(clearValue = false) {
-            const fields = [
-                { id: 'txtCode', name: 'Trolley Code', required: true, numeric: false },
-                { id: 'txtIP1', name: 'IP Address', required: true, numeric: false },
-                { id: 'txtIP2', name: 'IP Address', required: true, numeric: false },
-                { id: 'txtIP3', name: 'IP Address', required: true, numeric: false },
-                { id: 'txtAdd1Col1', name: 'IP Address 1 - 1st Column', required: true, numeric: true, min: 1 },
-                { id: 'txtAdd1Col2', name: 'IP Address 1 - 2nd Column', required: true, numeric: true, min: 1 },
-                { id: 'txtAdd2Col1', name: 'IP Address 2 - 1st Column', required: true, numeric: true, min: 1 },
-                { id: 'txtAdd2Col2', name: 'IP Address 2 - 2nd Column', required: true, numeric: true, min: 1 },
-                { id: 'txtAdd3Col1', name: 'IP Address 3 - 1st Column', required: true, numeric: true, min: 1 },
-                { id: 'txtAdd3Col2', name: 'IP Address 3 - 2nd Column', required: true, numeric: true, min: 1 },
-                // { id: 'txtRemark', name: 'Remark', required: true, numeric: false },
-                // { id: 'txtTotalCol', name: 'Total Column', required: true, numeric: true, min: 1 },
-                { id: 'txtTotalRow', name: 'Total Row', required: true, numeric: true, min: 1 },
-            ];
+        function removeErrMsg(fields, clearValue = false) {
+            if (fields != null) {
 
-            fields.forEach(function(field) {
-                const input = document.getElementById(field.id);
-                const errorline = document.getElementById(field.id + 'Error');
-
-                if (input)
-                {
-                    input.classList.remove('is-invalid');
-                    input.classList.remove('is-valid');
-                    if (clearValue) input.value = '';
+                if (!Array.isArray(fields)) {
+                    fields = [fields];
                 }
+                fields.forEach(function(field) {
+                    // const input = document.getElementById(field.id);
+                    // const errorline = document.getElementById(field.id + 'Error');
 
-                if (errorline)
-                {
-                    errorline.textContent = '';
-                }
-            });
+                    // if (input)
+                    // {
+                    //     input.classList.remove('is-invalid');
+                    //     input.classList.remove('is-valid');
+                    //     if (clearValue) input.value = '';
+                    // }
 
+                    // if (errorline)
+                    // {
+                    //     errorline.textContent = '';
+                    // }
+                    document.getElementById(field).classList.remove('is-invalid');
+                    document.getElementById(field).classList.remove('is-valid');
+                    document.getElementById(field + 'Error').textContent = '';
+                    if (clearValue) document.getElementById(field).value = '';
+
+                });
+            }
+            
             if (clearValue) document.getElementById('chkIsActive').checked = false;
         }
 
@@ -517,6 +407,8 @@
         }
 
         function formatIP(input) {
+
+            removeErrMsg(input.id);
             let value = input.value.replace(/[^\d]/g, '');
 
             if (input.value.length > 15) {
@@ -525,29 +417,29 @@
         }
 
         function validateTrolley() {
-            //remove previous err msg
-            removeErrMsg();
-
             let isValid = true;
             const fields = [
                 { id: 'txtCode', name: 'Trolley Code', required: true, numeric: false },
                 { id: 'txtIP1', name: 'IP Address1', required: true, numeric: false },
                 { id: 'txtIP2', name: 'IP Address2', required: true, numeric: false },
                 { id: 'txtIP3', name: 'IP Address3', required: true, numeric: false },
-                { id: 'txtAdd1Col1', name: 'IP Address 1 - 1st Column', required: true, numeric: true, min: 1 },
-                { id: 'txtAdd1Col2', name: 'IP Address 1 - 2nd Column', required: true, numeric: true, min: 1 },
-                { id: 'txtAdd2Col1', name: 'IP Address 2 - 1st Column', required: true, numeric: true, min: 1 },
-                { id: 'txtAdd2Col2', name: 'IP Address 2 - 2nd Column', required: true, numeric: true, min: 1 },
-                { id: 'txtAdd3Col1', name: 'IP Address 3 - 1st Column', required: true, numeric: true, min: 1 },
-                { id: 'txtAdd3Col2', name: 'IP Address 3 - 2nd Column', required: true, numeric: true, min: 1 },
-                { id: 'txtTotalRow', name: 'Total Row', required: true, numeric: true, min: 1 },
+                { id: 'txtAdd1AColNo', name: 'IP Address 1 - SideA Column No', required: true, numeric: true, min: 1 },
+                { id: 'txtAdd1BColNo', name: 'IP Address 1 - SideB Column No', required: true, numeric: true, min: 1 },
+                { id: 'txtAdd2AColNo', name: 'IP Address 2 - SideA Column No', required: true, numeric: true, min: 1 },
+                { id: 'txtAdd2BColNo', name: 'IP Address 2 - SideB Column No', required: true, numeric: true, min: 1 },
+                { id: 'txtAdd3AColNo', name: 'IP Address 3 - SideA Column No', required: true, numeric: true, min: 1 },
+                { id: 'txtAdd3BColNo', name: 'IP Address 3 - SideB Column No', required: true, numeric: true, min: 1 },
+                { id: 'txtIpAdd1RowNo', name: 'Row No', required: true, numeric: true, min: 1 },
+                { id: 'txtIpAdd2RowNo', name: 'Row No', required: true, numeric: true, min: 1 },
+                { id: 'txtIpAdd3RowNo', name: 'Row No', required: true, numeric: true, min: 1 },
             ];
 
+            removeErrMsg(fields.map(f => f.id));
             fields.forEach(field => {
                 const value = document.getElementById(field.id).value.trim();
 
                 if (field.required && value === '') {
-                    showError(field.id, `Please enter a ${field.name}.`);
+                    showError(field.id, `Please enter ${field.name}.`);
                     isValid = false;
                     return;
                 }
@@ -571,15 +463,17 @@
                     IPAdd1: $('#txtIP1').val(),
                     IPAdd2: $('#txtIP2').val(),
                     IPAdd3: $('#txtIP3').val(),
-                    IPAdd1Col1: parseInt($('#txtAdd1Col1').val()) || 0,
-                    IPAdd1Col2: parseInt($('#txtAdd1Col2').val()) || 0,
-                    IPAdd2Col1: parseInt($('#txtAdd2Col1').val()) || 0,
-                    IPAdd2Col2: parseInt($('#txtAdd2Col2').val()) || 0,
-                    IPAdd3Col1: parseInt($('#txtAdd3Col1').val()) || 0,
-                    IPAdd3Col2: parseInt($('#txtAdd3Col2').val()) || 0,
+                    IPAdd1AColNo: parseInt($('#txtAdd1AColNo').val()) || 0,
+                    IPAdd1BColNo: parseInt($('#txtAdd1BColNo').val()) || 0,
+                    IPAdd2AColNo: parseInt($('#txtAdd2AColNo').val()) || 0,
+                    IPAdd2BColNo: parseInt($('#txtAdd2BColNo').val()) || 0,
+                    IPAdd3AColNo: parseInt($('#txtAdd3AColNo').val()) || 0,
+                    IPAdd3BColNo: parseInt($('#txtAdd3BColNo').val()) || 0,
                     Remark: $('#txtRemark').val(),
                     // TotalCol: parseInt($('#txtTotalCol').val()) || 0,
-                    TotalRow: parseInt($('#txtTotalRow').val()) || 0,
+                    IPAdd1RowNo: parseInt($('#txtIpAdd1RowNo').val()) || 0,  
+                    IPAdd2RowNo: parseInt($('#txtIpAdd2RowNo').val()) || 0,
+                    IPAdd3RowNo: parseInt($('#txtIpAdd3RowNo').val()) || 0,
                     IsActive: chkIsActive.checked ? true : false,
                     // Side: parseInt($("input[name='side']:checked").val()) || 0,
                 };
