@@ -10,9 +10,11 @@ using RackingSystem.Data.RackJobQueue;
 using RackingSystem.Models.BOM;
 using RackingSystem.Models.GRN;
 using RackingSystem.Models.Item;
+using RackingSystem.Models.Loader;
 using RackingSystem.Models.RackJobQueue;
 using RackingSystem.Models.Reel;
 using RackingSystem.Models.Slot;
+using RackingSystem.Models.Trolley;
 
 namespace RackingSystem.Data
 {
@@ -108,5 +110,8 @@ namespace RackingSystem.Data
 
         public DbSet<ReelAvailableListDTO> SP_ReelGetAvailSearchList { get; set; }
 
+        public DbSet<TrolleyReelDtlDTO> SP_TrolleyReelDtlList { get; set; }
+
+        public DbSet<LoaderReelDtlDTO> SP_LoaderReelDtlList { get; set; }
     }
 }

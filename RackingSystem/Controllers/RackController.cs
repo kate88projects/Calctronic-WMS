@@ -138,7 +138,7 @@ namespace RackingSystem.Controllers
                 {
                     if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
                     {
-                        return View("RackJobHubOutView");
+                        //return View("RackJobHubOutView");
                     }
                     if (srms.RackJobQueue_Id != 0 && srms.LoginIP == ViewBag.DeviceId)
                     {
@@ -238,7 +238,7 @@ namespace RackingSystem.Controllers
                 {
                     if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
                     {
-                        return View("RackDrawerInView");
+                        //return View("RackDrawerInView");
                     }
                     if (srms.RackJobQueue_Id != 0 && srms.LoginIP == ViewBag.DeviceId)
                     {

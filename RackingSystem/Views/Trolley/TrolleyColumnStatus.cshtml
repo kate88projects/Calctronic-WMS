@@ -241,7 +241,7 @@
         }
 
     .yellow {
-        background: yellow;
+        background: #ffc107;
     }
 
     .circle {
@@ -271,6 +271,8 @@
     <header class="d-flex align-items-center justify-content-between w-100">
         <h2 class="pageTitle">Trolley Column Status</h2>
         <div class="d-flex gap-2">
+            <input type="checkbox" id="chkAuto" />
+            <label for="chkAuto" style="align-content:center; margin-right:10px;">Auto Refresh</label>
             <button type="button" class="btn btn-warning" onclick="export()">
                 Export
             </button>
@@ -286,7 +288,7 @@
     <div class="row" style="padding:5px;">
         @* <div class="col-sm-4" style=""></div>
             <div class="col-sm-4" style=""></div> *@
-        <div class="col-sm-4" style="">
+        <div class="col-sm-6" style="">
             <div class="row">
                 <div class="col-3" style="padding:0;">
                     @* <select id="selDateType" name="DateType" class="form-control">
@@ -295,11 +297,15 @@
                         </select> *@
                     <label>Trolley : </label>
                 </div>
-                <div class="col-5" style="padding:0;">
+                <div class="col-3" style="padding:0;">
                     <input id="txtTrolley" type="text" class="form-control" style="" placeholder="Trolley" />
                 </div>
-                <div class="col-4" style="padding:0;">
-                    <button type="button" class="btn btn-primary" style="width:100%;" onclick="loadList()"><i class="bi bi-search"></i> </button>
+                <div class="col-3" style="padding:0;">
+                    <button type="button" class="btn btn-primary" style="width:100%;" onclick="generate()"><i class="bi bi-search"></i> </button>
+                </div>
+                <div class="col-3" style="padding:0 10px; align-content:center; ">
+                    <input type="checkbox" id="chkAutoRun" onclick="autoChanged()" />
+                    <label for="chkAutoRun" style="margin-right:10px;">Auto Refresh</label>
                 </div>
             </div>
         </div>
@@ -319,7 +325,7 @@
         <div class="status-card">
             <h3>Occupied Slot</h3>
             <div class="value" id="txtOT">Empty Tray : -</div>
-            <div class="value" id="txtOTR">Tray w Reel : -</div>
+            <div class="value" id="txtOTR">Total Reel : -</div>
             <div class="value" id="txtOTRN">Slot w Reel : -</div>
         </div>
         <div class="status-card">
@@ -394,11 +400,48 @@
 
     <script type="text/javascript">
 
+        var autoTimer1;
+        var autoTimer2;
+
         $(document).ready(function () {
             $('#txtTrolley').val('Trolley1A');
             loadListA();
             loadListB();
         });
+
+        function autoChanged() {
+            const chkAutoRun = document.getElementById('chkAutoRun')
+            if (chkAutoRun.checked) {
+                if (autoTimer1 == undefined) {
+                    autoTimer1 = setInterval(loadListA, 5000);
+                    autoTimer2 = setInterval(loadListB, 5000);
+                }
+            }
+            else {
+                if (autoTimer1 != undefined) {
+                    clearInterval(autoTimer1);
+                    clearInterval(autoTimer2);
+                }
+            }
+        }
+
+        function generate() {
+            const chkAutoRun = document.getElementById('chkAutoRun');
+            if (chkAutoRun.checked) {
+                if (autoTimer1 == undefined) {
+                    autoTimer1 = setInterval(loadListA, 5000);
+                    autoTimer2 = setInterval(loadListB, 5000);
+                }
+            }
+            else {
+                loadListA();
+                loadListB();
+                if (autoTimer1 != undefined) {
+                    clearInterval(autoTimer1);
+                    clearInterval(autoTimer2);
+                }
+            }
+        }
 
         function loadList() {
             loadListA();
@@ -539,8 +582,8 @@
                         document.getElementById('txtInactive').innerHTML = spText[0];
                         document.getElementById('txtCheck').innerHTML = spText[1];
                         document.getElementById('txtOT').innerHTML = 'Empty Tray : ' + spText[2];
-                        document.getElementById('txtOTR').innerHTML = 'Tray w Reel : ' + spText[3];
-                        document.getElementById('txtOTRN').innerHTML = 'Slot w Reel : ' + spText[4];
+                        document.getElementById('txtOTR').innerHTML = 'Total Reel : ' + spText[3];
+                        document.getElementById('txtOTRN').innerHTML = 'Slot w Reel : ' + (Number(spText[3]) + Number(spText[4]));
                         document.getElementById('txtA').innerHTML = spText[5];
 
 

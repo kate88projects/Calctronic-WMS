@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using RackingSystem.Models.User;
 using Microsoft.AspNetCore.Http.HttpResults;
 using RackingSystem.General;
+using RackingSystem.Models.Trolley;
 
 namespace RackingSystem.Controllers
 {
@@ -108,6 +109,53 @@ namespace RackingSystem.Controllers
             ViewData["ActiveTab"] = "LoaderDetailList";
             ViewData["Title"] = "Loader Detail List";
             return View();
+        }
+
+        [HttpGet]
+        public async Task<ServiceResponseModel<List<LoaderReelDtlDTO>>> GetTrolleyDetailList(long id)
+        {
+            ServiceResponseModel<List<LoaderReelDtlDTO>> result = await _loaderService.GetLoaderReelDtlList(id);
+            result.errMessage = "-,-,-,-,0,0,0,0,-";
+            if (result.success)
+            {
+                var loader = _context.Loader.Where(x => x.Loader_Id == id).FirstOrDefault();
+                if (loader == null)
+                {
+                    result.success = false;
+                    result.errMessage = "Cannot find this loader.";
+                    return result;
+                }
+                //string grpInfo = "";
+                //var grps = result.data.GroupBy(x => x.ItemGroupCode);
+                //foreach (var igrp in grps)
+                //{
+                //    grpInfo += igrp.Key;
+                //}
+                string u1 = "-";
+                string u2 = "-";
+                string u3 = "-";
+                string u4 = "-";
+                if (result.data.Count > 0)
+                {
+                    int ttlU1 = loader.ColHeight - (result.data.Where(x => x.ColNo == 1).Count() > 0 ? result.data.Where(x => x.ColNo == 1).First().BalanceHeight : 0);
+                    u1 = ttlU1.ToString() + " mm";
+                    int ttlU2 = loader.ColHeight - (result.data.Where(x => x.ColNo == 2).Count() > 0 ? result.data.Where(x => x.ColNo == 2).First().BalanceHeight : 0);
+                    u2 = ttlU2.ToString() + " mm";
+                    int ttlU3 = loader.ColHeight - (result.data.Where(x => x.ColNo == 3).Count() > 0 ? result.data.Where(x => x.ColNo == 3).First().BalanceHeight : 0);
+                    u3 = ttlU3.ToString() + " mm";
+                    int ttlU4 = loader.ColHeight - (result.data.Where(x => x.ColNo == 4).Count() > 0 ? result.data.Where(x => x.ColNo == 4).First().BalanceHeight : 0);
+                    u4 = ttlU4.ToString() + " mm";
+                }
+
+                int ttlR1 = result.data.Where(x => x.ColNo == 1).Count();
+                int ttlR2 = result.data.Where(x => x.ColNo == 1).Count();
+                int ttlR3 = result.data.Where(x => x.ColNo == 1).Count();
+                int ttlR4 = result.data.Where(x => x.ColNo == 1).Count();
+
+                result.errStackTrace = u1 + "," + u2 + "," + u3 + "," + u4 + "," + ttlR1 + "," + ttlR2 + "," + ttlR3 + "," + ttlR4 + "," + loader?.Status;
+            }
+
+            return result;
         }
 
     }

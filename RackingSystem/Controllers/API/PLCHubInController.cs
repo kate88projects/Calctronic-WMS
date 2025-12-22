@@ -309,13 +309,13 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            //// *** testing
-            //result.success = true;
-            //result.errMessage = "Right is locked. Left is locked. ";
-            //result.data.Add(2);
-            //result.data.Add(2);
-            //return result;
-            //// *** testing
+            // *** testing
+            result.success = true;
+            result.errMessage = "Right is locked. Left is locked. ";
+            result.data.Add(1);
+            result.data.Add(1);
+            return result;
+            // *** testing
 
             string decimalText = "";
             string lock1 = "0";
@@ -387,11 +387,11 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            //// *** testing
-            //result.success = true;
-            //result.data = 1;
-            //return result;
-            //// *** testing
+            // *** testing
+            result.success = true;
+            result.data = 1;
+            return result;
+            // *** testing
 
             // 2. check plc which column is ready
             string plcIp = _loader.IPAddr;
@@ -452,14 +452,14 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            //// *** testing
-            //result.success = true;
-            //result.errMessage = "";
-            //result.errStackTrace = "";
-            //result.data.Add("2");
-            //result.data.Add("16");
-            //return result;
-            //// *** testing
+            // *** testing
+            result.success = true;
+            result.errMessage = "";
+            result.errStackTrace = "";
+            result.data.Add("2");
+            result.data.Add("16");
+            return result;
+            // *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -841,11 +841,11 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            //// *** testing
-            //result.success = true;
-            //result.data = 1;
-            //return result;
-            //// *** testing
+            // *** testing
+            result.success = true;
+            result.data = 1;
+            return result;
+            // *** testing
 
             // 2. check plc which column is ready
             string plcIp = ipAddr;
@@ -955,11 +955,11 @@ namespace RackingSystem.Controllers.API
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             string methodName = "StartBarcodeScanner";
 
-            //// *** testing
-            //result.success = true;
-            //result.data = 1;
-            //return result;
-            //// *** testing
+            // *** testing
+            result.success = true;
+            result.data = 1;
+            return result;
+            // *** testing
 
             // 2. check plc which column is ready
             string plcIp = ipAddr;
@@ -1058,12 +1058,12 @@ namespace RackingSystem.Controllers.API
             result.data = "";
             string methodName = "GetReelIDByIP";
 
-            //// *** testing
-            //result.success = true;
-            //result.errMessage = "Cannot get Reel ID, please try again.";
-            //result.data = "A00000018";
-            //return result;
-            //// *** testing
+            // *** testing
+            result.success = true;
+            result.errMessage = "Cannot get Reel ID, please try again.";
+            result.data = "A00000018";
+            return result;
+            // *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -1232,11 +1232,11 @@ namespace RackingSystem.Controllers.API
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             string methodName = "SetActualHeight";
 
-            //// *** testing
-            //result.success = true;
-            //result.data = 1;
-            //return result;
-            //// *** testing
+            // *** testing
+            result.success = true;
+            result.data = 1;
+            return result;
+            // *** testing
 
             // 2. check plc which column is ready
             string plcIp = ipAddr;
@@ -1330,12 +1330,12 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            //// *** testing
-            //result.success = true;
-            //result.errMessage = "Done";
-            //result.data = 2;
-            //return result;
-            //// *** testings
+            // *** testing
+            result.success = false;
+            result.errMessage = "0";
+            result.data = 2;
+            return result;
+            // *** testings
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -1368,7 +1368,7 @@ namespace RackingSystem.Controllers.API
                     {
                         exit = true;
                     }
-                    if ((DateTime.Now - dtRun).TotalSeconds > 30)
+                    if ((DateTime.Now - dtRun).TotalSeconds > 15)
                     {
                         result.errMessage = "Timeout. Cannot get Empty Tray Status.";
                         exit = true;
@@ -1386,6 +1386,84 @@ namespace RackingSystem.Controllers.API
             {
                 modbusClient.Disconnect();
                 PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Disconnected.", "");
+            }
+
+            if (value == 0)
+            {
+                int valueErr = -1;
+                modbusClient = new ModbusClient(plcIp, port);
+                try
+                {
+                    modbusClient.Connect();
+
+                    PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+
+                    int startAddress = 4231;
+                    int numRegisters = 1;
+                    int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                    for (int i = 0; i < registers.Length; i++)
+                    {
+                        PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                        valueErr = registers[i];
+                    }
+
+                    if (valueErr == 0)
+                    {
+                        try
+                        {
+                            exit = false;
+                            //modbusClient.Connect();
+
+                            PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+
+                            while (!exit)
+                            {
+                                startAddress = 4212;
+                                numRegisters = 1;
+                                registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                                for (int i = 0; i < registers.Length; i++)
+                                {
+                                    PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                                    value = registers[i];
+                                }
+
+                                if (value == 1)
+                                {
+                                    exit = true;
+                                }
+                                if ((DateTime.Now - dtRun).TotalSeconds > 15)
+                                {
+                                    result.errMessage = "Timeout. Cannot get Empty Tray Status.";
+                                    exit = true;
+                                }
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+                            PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                            result.errMessage = ex.Message;
+                            result.errStackTrace = ex.StackTrace ?? "";
+                        }
+                        finally
+                        {
+                            //modbusClient.Disconnect();
+                            PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Disconnected.", "");
+                        }
+                    }
+                    result.errMessage = valueErr.ToString();
+                }
+                catch (Exception ex)
+                {
+                    PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                    result.errMessage = ex.Message;
+                    result.errStackTrace = ex.StackTrace ?? "";
+                }
+                finally
+                {
+                    modbusClient.Disconnect();
+                    PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Disconnected.", "");
+                }
             }
 
             result.success = value == 1;
@@ -1410,11 +1488,11 @@ namespace RackingSystem.Controllers.API
             }
 
             //// *** testing
-            //result.success = true;
-            //result.errMessage = "Done Picked.";
-            //result.data = 3;
-            //return result;
-            //// *** testing
+            result.success = true;
+            result.errMessage = "Done Picked.";
+            result.data = 3;
+            return result;
+            // *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -1487,11 +1565,11 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            //// *** testing
-            //result.success = true;
-            //result.data = 1;
-            //return result;
-            //// *** testing
+            // *** testing
+            result.success = true;
+            result.data = 1;
+            return result;
+            // *** testing
 
             // 2. check plc which column is ready
             int value = 0;
@@ -1545,12 +1623,12 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            //// *** testing
-            //result.success = true;
-            //result.errMessage = "Done Placed.";
-            //result.data = 0;
-            //return result;
-            //// *** testing
+            // *** testing
+            result.success = true;
+            result.errMessage = "Done Placed.";
+            result.data = 0;
+            return result;
+            // *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -1752,11 +1830,11 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            //// *** testing
-            //result.success = true;
-            //result.data = 1;
-            //return result;
-            //// *** testing
+            // *** testing
+            result.success = true;
+            result.data = 1;
+            return result;
+            // *** testing
 
             // 2. check plc which column is ready
             int value = 0;
@@ -1857,12 +1935,12 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            //// *** testing
-            //result.success = true;
-            //result.errMessage = "Done Put Away.";
-            //result.data = 0;
-            //return result;
-            //// *** testing
+            // *** testing
+            result.success = true;
+            result.errMessage = "Done Put Away.";
+            result.data = 0;
+            return result;
+            // *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -2245,12 +2323,12 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            //// *** testing
-            //result.success = true;
-            //result.errMessage = "Done Placed.";
-            //result.data = 0;
-            //return result;
-            //// *** testing
+            // *** testing
+            result.success = true;
+            result.errMessage = "Done Placed.";
+            result.data = 0;
+            return result;
+            // *** testing
 
             string plcIp = _loader.IPAddr;
             int port = 502;
@@ -2365,7 +2443,7 @@ namespace RackingSystem.Controllers.API
             {
                 modbusClient.Connect();
 
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Connected to Delta PLC.", curCol.ToString());
 
                 int registerAddress = 4296;
                 if (curCol == 2) { registerAddress = 4297; }
@@ -2409,12 +2487,12 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            //// *** testing
-            //result.success = true;
-            //result.errMessage = "Done Picked.";
-            //result.data = 3;
-            //return result;
-            //// *** testing
+            // *** testing
+            result.success = true;
+            result.errMessage = "Done Picked.";
+            result.data = 3;
+            return result;
+            // *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -2489,11 +2567,11 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            //// *** testing
-            //result.success = true;
-            //result.data = 1;
-            //return result;
-            //// *** testing
+            // *** testing
+            result.success = true;
+            result.data = 1;
+            return result;
+            // *** testing
 
             // 2. check plc which column is ready
             string plcIp = _loader.IPAddr;
@@ -2535,10 +2613,10 @@ namespace RackingSystem.Controllers.API
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             string methodName = "GetLoaderMode";
 
-            //// *** testing
-            //result.success = true;
-            //return result;
-            //// *** testing
+            // *** testing
+            result.success = true;
+            return result;
+            // *** testing
 
             var _loader = _dbContext.Loader.Find(loaderId);
             if (_loader == null)

@@ -891,7 +891,7 @@
             clearInterval(cartesianAutoTimer);
 
         }
-
+         
         // Function to update the main header status text and button states
         function updateSystemStatusUI() {
             const masterStatusSpan = document.getElementById('master-status');
@@ -912,6 +912,13 @@
                 contBtn.disabled = false;
                 stopBtn.disabled = true;
             }
+
+            if (endTask == true) {
+                startBtn.disabled = true;
+                contBtn.disabled = true;
+                masterStatusSpan.textContent = 'ALL DONE';
+            }
+
         }
 
         // Helper function to update column status (Gantry side)
@@ -1442,7 +1449,21 @@
             await delay(5000);
 
             var chkStatus = await loadPLCGetRetrieveTrayStatus();
-            if (chkStatus == false) {
+            if (chkStatus == -1) {
+                // sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                // inRetrieveMove = false;
+                // changeTakeSlot = true;
+
+                // if (attemptsRetrieve > 5) {
+                //     logMessage('Retrieve Empty Drawer :: Tried ' + (attemptsRetrieve - 1) + ', auto stop now.', 'info');
+                //     document.getElementById('chkAutoRun').checked = false;
+                //     return false;
+                // }
+                logMessage('Retrieve Empty Drawer :: Please check catesian, auto stop now.', 'info');
+                document.getElementById('chkAutoRun').checked = false;
+                return;
+            }
+            else if (chkStatus == 1) {
                 sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
                 inRetrieveMove = false;
                 changeTakeSlot = true;
@@ -1455,6 +1476,7 @@
 
                 return;
             }
+
 
             attemptsRetrieve = 1;
 
@@ -2348,14 +2370,14 @@
                     // swal.close();
                     if (result.success == true) {
                         fResult = true;
-                        logMessage('Set Empty Column :: Done ', 'info');
+                        logMessage('Set Empty Column [' + curCol + '] :: Done ', 'info');
                     }
                     else {
-                        logMessage('Set Empty Column :: ' + result.errMessage, 'alert');
+                        logMessage('Set Empty Column [' + curCol + '] :: ' + result.errMessage, 'alert');
                     }
                 },
                 error: function (error) {
-                    logMessage('Set Empty Column :: ' + error.val, 'alert');
+                    logMessage('Set Empty Column [' + curCol + '] :: ' + error.val, 'alert');
                 }
             });
 
@@ -2472,6 +2494,8 @@
                 }
             });
 
+
+
             return fResult;
         }
 
@@ -2566,7 +2590,7 @@
 
         async function loadPLCGetRetrieveTrayStatus() {
 
-            var fResult = false;
+            var fResult = -1;
 
             // step 4 : scan item
             await $.ajax({
@@ -2585,11 +2609,17 @@
                     // console.log('3::' + JSON.stringify(result));
                     // swal.close();
                     if (result.success == true) {
-                        fResult = true;
+                        fResult = 0;
                         logMessage2('Retrieve Status :: OK ', 'info');
                     }
                     else {
-                        logMessage2('Retrieve Status :: ' + result.errMessage, 'alert');
+                        if (result.errMessage == "1") {
+                            fResult = 1;
+                            logMessage2('Retrieve Status :: No Drawer to take. ', 'info');
+                        }
+                        else {
+                            logMessage2('Retrieve Status :: ' + result.errMessage, 'alert');
+                        }
                     }
                 },
                 error: function (error) {

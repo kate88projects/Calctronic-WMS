@@ -528,6 +528,10 @@
         <div class="input-container">
             <label for="trolley-input">Trolley:</label>
             <input type="text" id="trolley-input" />
+            <select id="side-input" width="50px;" >
+                <option id="A">A</option>
+                <option id="B">B</option>
+            </select>
         </div>
 
         <button id="cont-btn" onclick="systemCont()" class="control-btn start-btn hidden">Continue</button>
@@ -875,15 +879,13 @@
             } else if (sharedDrawerState.trolleyLocation === 'right') {
                 document.querySelector('.right-rack-tr').classList.add('active');
                 // document.getElementById('right-status').textContent = "ROBOT PRESENT";
-                // document.getElementById('left-status').textContent = "Status: IDLE";
+                // document.getElementById('left-status').textContent = "Status: IDLE";.
             } else if (sharedDrawerState.trolleyLocation === 'center') {
                 document.querySelector('.center-rack-tr').classList.add('active');
                 // document.getElementById('right-status').textContent = "ROBOT PRESENT";
                 // document.getElementById('left-status').textContent = "Status: IDLE";
             } else {
-                $("#left-input-tr").val('');
-                $("#center-input-tr").val('');
-                $("#right-input-tr").val('');
+                $("#txtRetrieveSlot").val('');
                 // document.getElementById('left-status').textContent = "Status: IDLE";
                 // document.getElementById('right-status').textContent = "Status: IDLE";
             }
@@ -1084,8 +1086,6 @@
             }
         }
 
-        // ----------- Action
-
         // Cartesian Start Retrieve Empty Drawer
         async function startRetrieve() {
             if (inRetrieveMove == true) {
@@ -1130,21 +1130,24 @@
             inRetrieveMove = true;
 
             sharedDrawerState.trolleyLocation = 'left';
-            if (colNo == 1 && Number($('#left-input-tr').val) >= 50) {
+            if (colNo == 1 && Number($('#left-input-tr').val()) >= 15) {
                 colNo = 2;
                 sharedDrawerState.trolleyLocation = 'center';
             }
-            if (colNo == 2 && Number($('#left-input-tr').val) >= 50) {
+            if (colNo == 2 && Number($('#center-input-tr').val()) >= 0) {
                 colNo = 3;
                 sharedDrawerState.trolleyLocation = 'right';
             }
-            if (colNo == 3 && Number($('#left-input-tr').val) >= 50) {
+            if (colNo == 3 && Number($('#right-input-tr').val()) >= 0) {
                 // logMessage2(`Trolley is done retrieve, please change another side.`, 'alert');
+                loadDBEnd();
+                systemStop();
                 return;
             }
 
             changeTakeSlot = false;
 
+            updateTrolleyUIState();
             updateCartesianUIState();
             var getSlot = await loadPLCRetrieveTray();
             if (getSlot == false) {
@@ -1152,10 +1155,10 @@
                 inRetrieveMove = false;
                 return;
             }
-            await delay(5000);
+            await delay(3000);
 
             var chkStatus = await loadPLCGetRetrieveTrayStatus();
-            if (chkStatus == false) {
+            if (chkStatus == -1) {
                 sharedDrawerState.cartesianRobotState = 'Ready';
                 inRetrieveMove = false;
                 changeTakeSlot = true;
@@ -1168,10 +1171,16 @@
 
                 return;
             }
+            else if (chkStatus == 1) {
+                sharedDrawerState.cartesianRobotState = 'Ready';
+                logMessage2(`Cartesian cycle end: Next Row.`, 'info');
+                inRetrieveMove = false;
+                changeTakeSlot = false;
+                attemptsRetrieve = 1;
+                return;
+            }
 
             attemptsRetrieve = 1;
-
-            totalReels = totalReels - 1;
 
             sharedDrawerState.drawerStatus = "Drawer";
             sharedDrawerState.cartesianRobotState = 'Retrieved';
@@ -1252,10 +1261,11 @@
             inPutAwayMove = false;
 
             // means all is out
-            if (totalReels <= 0) {
+            if (colNo == 3 && Number($('#left-input-tr').val()) >= 0) {
                 loadDBEnd();
                 systemStop();
             }
+
 
             updateJson();
         }
@@ -1366,7 +1376,7 @@
                         colNo = 1;
 
                         logMessage('Trolley :: Done check ' + code, 'info');
-                        logMessage('Trolley :: totalReels  ' + totalReels, 'info');
+                        logMessage('Trolley :: Start Column  ' + colNo, 'info');
                     }
                     else {
                         logMessage('Trolley :: ' + result.errMessage, 'alert');
@@ -1383,18 +1393,19 @@
         // ----------- Cartesian :: Take Reel
         async function loadPLCRetrieveTray() {
 
+            var s = $('#side-input').val();
             var tr = $("#txtTrolleyId").val();
-            var rowNo = Number($('#left-input-tr').val)
+            var rowNo = Number($('#left-input-tr').val());
             if (colNo == 2) {
-                rowNo = Number($('#center-input-tr').val)
+                rowNo = Number($('#center-input-tr').val())
             }
             if (colNo == 3) {
-                rowNo = Number($('#right-input-tr').val)
+                rowNo = Number($('#right-input-tr').val())
             }
             var fResult = false;
 
             await $.ajax({
-                url: "/api/PLCTrolley/RetrieveTray/" + tr + "/A/" + colNo + "/" + rowNo,
+                url: "/api/PLCTrolley/RetrieveTray/" + tr + "/" + s + "/" + colNo + "/" + rowNo,
                 type: "GET",
                 headers: {
                     'Authorization': 'Bearer ' + token
@@ -1410,6 +1421,8 @@
                     // swal.close();
                     if (result.success) {
                         logMessage('Retrieve :: Done ', 'info');
+                        $('#txtRetrieveSlot').val(result.errStackTrace);
+
                     }
                     else {
                         logMessage('Retrieve :: ' + result.errMessage, 'alert');
@@ -1427,13 +1440,13 @@
 
         async function loadPLCGetRetrieveTrayStatus() {
 
-            var fResult = false;
-            var rowNo = Number($('#left-input-tr').val);
+            var fResult = -1;
+            var rowNo = Number($('#left-input-tr').val());
             if (colNo == 2) {
-                rowNo = Number($('#center-input-tr').val);
+                rowNo = Number($('#center-input-tr').val());
             }
             if (colNo == 3) {
-                rowNo = Number($('#right-input-tr').val);
+                rowNo = Number($('#right-input-tr').val());
             }
 
             // step 4 : scan item
@@ -1453,7 +1466,7 @@
                     // console.log('3::' + JSON.stringify(result));
                     // swal.close();
                     if (result.success == true) {
-                        fResult = true;
+                        fResult = 0;
                         if (colNo == 1) {
                             $('#left-input-tr').val(rowNo + 1);
                             if (rowNo + 1 > 50) {
@@ -1475,7 +1488,31 @@
                         logMessage2('Retrieve Status :: OK ', 'info');
                     }
                     else {
-                        logMessage2('Retrieve Status :: ' + result.errMessage, 'alert');
+                        if (result.errMessage == "1") {
+                            fResult = 1;
+                            if (colNo == 1) {
+                                $('#left-input-tr').val(rowNo + 1);
+                                if (rowNo + 1 > 50) {
+                                    $('#left-input-tr').val(50);
+                                }
+                            }
+                            if (colNo == 2) {
+                                $('#center-input-tr').val(rowNo + 1);
+                                if (rowNo + 1 > 50) {
+                                    $('#center-input-tr').val(50);
+                                }
+                            }
+                            if (colNo == 3) {
+                                $('#right-input-tr').val(rowNo + 1);
+                                if (rowNo + 1 > 50) {
+                                    $('#right-input-tr').val(50);
+                                }
+                            }
+                            logMessage2('Retrieve Status :: No Drawer to take. ', 'info');
+                        }
+                        else {
+                            logMessage2('Retrieve Status :: ' + result.errMessage, 'alert');
+                        }
                     }
                 },
                 error: function (error) {
@@ -1519,11 +1556,11 @@
                         $("#txtPutSlot").val(result.data.slotCode);
                         if (result.data.isLeft == 1) {
                             sharedDrawerState.cartesianLocation = 'left';
-                            $("#left-input-tr").val(result.data.slotCode);
+                            $("#left-input").val(result.data.slotCode);
                         }
                         else {
                             sharedDrawerState.trolleyLocation = 'right';
-                            $("#right-input-tr").val(result.data.slotCode);
+                            $("#right-input").val(result.data.slotCode);
                         }
                     }
                     else {

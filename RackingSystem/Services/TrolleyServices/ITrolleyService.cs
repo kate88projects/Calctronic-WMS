@@ -19,5 +19,7 @@ namespace RackingSystem.Services.TrolleyServices
 
         public Task<ServiceResponseModel<TrolleyDTO>> GetTrolleyInfo(string req);
         public Task<ServiceResponseModel<SlotFreeDTO>> GetFreeTrolleySlot_BySlot_ASC(SlotFreeReqDTO req);
+
+        public Task<ServiceResponseModel<List<TrolleyReelDtlDTO>>> GetTrolleyReelDtlList(long id);
     }
 }

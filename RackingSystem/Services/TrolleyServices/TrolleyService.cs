@@ -852,5 +852,31 @@ namespace RackingSystem.Services.TrolleyServices
             return result;
         }
 
+        public async Task<ServiceResponseModel<List<TrolleyReelDtlDTO>>> GetTrolleyReelDtlList(long id)
+        {
+            ServiceResponseModel<List<TrolleyReelDtlDTO>> result = new ServiceResponseModel<List<TrolleyReelDtlDTO>>();
+
+            try
+            {
+                var parameters = new[]
+                {
+                    new SqlParameter("@Trolley_Id", id),
+                };
+
+                string sql = "EXECUTE dbo.Trolley_GET_REELDTLLIST @Trolley_Id ";
+                var listDTO = await _dbContext.SP_TrolleyReelDtlList.FromSqlRaw(sql, parameters).ToListAsync();
+
+                result.success = true;
+                result.data = listDTO;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
     }
 }

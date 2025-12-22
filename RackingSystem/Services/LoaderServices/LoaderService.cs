@@ -8,6 +8,8 @@ using RackingSystem.General;
 using RackingSystem.Data.Maintenances;
 using RackingSystem.Models.Item;
 using System.Drawing;
+using Microsoft.Data.SqlClient;
+using RackingSystem.Models.Trolley;
 
 namespace RackingSystem.Services.LoaderServices
 {
@@ -423,6 +425,32 @@ namespace RackingSystem.Services.LoaderServices
                 result.success = true;
                 result.data = loaderColListDTO;
                 return result;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceResponseModel<List<LoaderReelDtlDTO>>> GetLoaderReelDtlList(long id)
+        {
+            ServiceResponseModel<List<LoaderReelDtlDTO>> result = new ServiceResponseModel<List<LoaderReelDtlDTO>>();
+
+            try
+            {
+                var parameters = new[]
+                {
+                    new SqlParameter("@Loader_Id", id),
+                };
+
+                string sql = "EXECUTE dbo.Loader_GET_REELDTLLIST @Loader_Id ";
+                var listDTO = await _dbContext.SP_LoaderReelDtlList.FromSqlRaw(sql, parameters).ToListAsync();
+
+                result.success = true;
+                result.data = listDTO;
             }
             catch (Exception ex)
             {

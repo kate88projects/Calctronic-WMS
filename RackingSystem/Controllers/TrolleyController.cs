@@ -225,22 +225,26 @@ namespace RackingSystem.Controllers
         }
 
         [HttpGet]
-        public async Task<ServiceResponseModel<List<TrolleySlotDTO>>> GetTrolleyDetailList(string code)
+        public async Task<ServiceResponseModel<List<TrolleyReelDtlDTO>>> GetTrolleyDetailList(long id)
         {
-            ServiceResponseModel<List<TrolleySlotDTO>> result = await _trolleyService.GetTrolleySlotList();
-            List<TrolleySlotDTO> data = new List<TrolleySlotDTO>();
-            result.errMessage = "0,0,0,0,0,0";
+            ServiceResponseModel<List<TrolleyReelDtlDTO>> result = await _trolleyService.GetTrolleyReelDtlList(id);
+            result.errMessage = "-,0,0,0,0,0";
             if (result.success)
             {
-                int ttlIn = result.data.Where(x => x.IsActive == false).Count();
+                string grpInfo = "";
+                var grps = result.data.GroupBy(x => x.ItemGroupCode);
+                foreach (var igrp in grps)
+                {
+                    grpInfo += igrp.Key;
+                }
                 int ttlC = result.data.Where(x => x.NeedCheck == true).Count();
-                int ttlET = 0; // result.data.Where(x => x.IsLeft == isLeft && x.HasEmptyTray == true).Count();
-                int ttlTR = result.data.Where(x => x.HasReel && x.ReelNo == "0").Count();
-                int ttlTRN = result.data.Where(x => x.HasReel && x.ReelNo != "0").Count();
-                int ttlA = result.data.Where(x => x.HasReel == false && x.IsActive == true && x.NeedCheck == false).Count();
+                int ttlTRA = result.data.Where(x => x.IsLeft && x.HasReel && x.ReelNo == "0").Count();
+                int ttlEA = result.data.Where(x => x.IsLeft && x.HasReel == false && x.IsActive == true && x.NeedCheck == false).Count();
+                int ttlTRB = result.data.Where(x => !x.IsLeft && x.HasReel && x.ReelNo == "0").Count();
+                int ttlEB = result.data.Where(x => !x.IsLeft && x.HasReel == false && x.IsActive == true && x.NeedCheck == false).Count();
 
-                result.errMessage = ttlIn + "," + ttlC + "," + ttlET + "," + ttlTR + "," + ttlTRN + "," + ttlA;
-
+                result.errStackTrace = grpInfo + "," + ttlC + "," + ttlTRA + "," + ttlEA + "," + ttlTRB + "," + ttlEB;
+                result.data = result.data.Where(x => x.HasReel && x.ReelNo == "0").ToList();
             }
 
             return result;

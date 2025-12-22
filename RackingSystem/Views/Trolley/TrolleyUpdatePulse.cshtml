@@ -248,7 +248,7 @@
         }
 
     .yellow {
-        background: yellow;
+        background: #ffc107;
     }
 
     .circle {
@@ -292,7 +292,11 @@
                     <label>Column : </label>
                 </div>
                 <div class="col-4" style="padding:0;">
-                    <input id="txtSide" type="text" class="form-control" style="" placeholder="Side" />
+                    <select id="txtSide" class="form-control">
+                        <option id="A">A</option>
+                        <option id="B">B</option>
+                    </select>
+                    @* <input id="txtSide" type="text" class="form-control" style="" placeholder="Side" /> *@
                 </div>
                 <div class="col-4" style="padding:0;">
                     <input id="txtCol" type="number" class="form-control" style="" placeholder="Col No" />
@@ -397,6 +401,7 @@
         }
 
         $(document).ready(function () {
+            // document.getElementById('mySelect').value = 'a'; // 'a' corresponds to the valu
             const startBtn = document.getElementById('start-btn');
             const stopBtn = document.getElementById('stop-btn');
             startBtn.disabled = false;
@@ -538,7 +543,23 @@
             autoTimer = setInterval(getPulsesAuto, 2000);
         }
 
+        function getContQRPulses() {
+            document.getElementById('chkCont').checked = true;
+
+            const startBtn = document.getElementById('start-btn');
+            const stopBtn = document.getElementById('stop-btn');
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+
+            endTask = false;
+            runningTask = false;
+            autoTimer = setInterval(getPulsesAuto, 2000);
+
+            document.getElementById('txtIdle').innerHTML = "Running Continuosly";
+        }
+
         function stopGet() {
+            document.getElementById('chkCont').checked = false;
             const startBtn = document.getElementById('start-btn');
             const stopBtn = document.getElementById('stop-btn');
             startBtn.disabled = false;
@@ -550,6 +571,7 @@
         }
 
         function stop() {
+            document.getElementById('chkCont').checked = false;
             const startBtn = document.getElementById('start-btn');
             const stopBtn = document.getElementById('stop-btn');
             startBtn.disabled = false;
@@ -616,6 +638,9 @@
                 return false;
             }
 
+            document.getElementById('txtCurRow').innerHTML = rowFrom;
+            document.getElementById('txtErr').innerHTML = "-";
+
             await $.ajax({
                 url: "/api/PLCSlot/SetScanTrolleyPulseStart/" + s + "/" + iCol + "/" + rowFrom,
                 type: "GET",
@@ -649,6 +674,8 @@
             var fResult = false;
             var s = $('#txtSide').val();
 
+            document.getElementById('txtErr').innerHTML = "-";
+
             await $.ajax({
                 url: "/api/PLCSlot/ReadTrolleyPulse/" + s + "/" + iCol + "/" + rowFrom,
                 type: "GET",
@@ -666,6 +693,7 @@
                         fResult = true;
 
                         document.getElementById(iCol + 'R' + rowFrom).innerHTML = result.data;
+                        document.getElementById('txtRead').innerHTML = result.data;
                         logMessage('Read :: Done ' + result.data, 'info');
 
                         rowFrom = Number(rowFrom) + 1;
