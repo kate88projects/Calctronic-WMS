@@ -68,18 +68,18 @@ namespace RackingSystem.Controllers
                     }
                 }
 
-                //var srms = _context.RackJob.FirstOrDefault();
-                //if (srms != null)
-                //{
-                //    if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
-                //    {
-                        return View("RackJobHubInView");
-                //    }
-                //    if (srms.RackJobQueue_Id != 0 && srms.LoginIP == ViewBag.DeviceId)
-                //    {
-                //        ViewBag.QContinuos = "1";
-                //    }
-                //}
+                var srms = _context.RackJob.FirstOrDefault();
+                if (srms != null)
+                {
+                    if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
+                    {
+                        //return View("RackJobHubInView");
+                    }
+                    if (srms.RackJobQueue_Id != 0 && srms.LoginIP == ViewBag.DeviceId)
+                    {
+                        ViewBag.QContinuos = "1";
+                    }
+                }
             }
 
             ViewData["ActiveGroup"] = "grpRACKING";
