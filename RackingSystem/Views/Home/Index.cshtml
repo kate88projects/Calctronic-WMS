@@ -312,16 +312,30 @@
         width: 50px;
         height: 40px;
         background: linear-gradient(to top, #FFCF71, #ffffff);
-        /* border: 2px solid #333; */
         border-radius: 5px;
-        /* Center the text */
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 12px;
         font-weight: bold;
-        /* color: #ffffff; */
     }
+
+    .no-progress-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.8);
+        z-index: 2;
+        font-size: 1.2em;
+        color: #6c757d;
+        font-weight: bold;
+    }
+
 </style>
 
 <div class="container-fluid mt-4">
@@ -362,7 +376,7 @@
         <div class="col-md-6">
             <div class="card card-primary">
                 <div class="card-header primary-header">
-                    <h3 class="card-title">Slot Usage</h3>
+                    <h3 class="card-title">Capacity Overview</h3>
                     <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-bs-toggle="collapse" data-bs-target="#collapsePie" aria-expanded="true" aria-controls="collapsePie" 
                                 id="collapseBtn" onclick="toggleIcon('collapseIcon')">
@@ -407,7 +421,7 @@
         <div class="col-md-6">
             <div class="card card-danger">
                 <div class="card-header danger-header">
-                    <h3 class="card-title">Pending Slots Overview</h3>
+                    <h3 class="card-title">Attention Listing</h3>
                     <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-bs-toggle="collapse" data-bs-target="#collapseChecking" aria-expanded="true" aria-controls="collapseChecking" 
                                 id="collapseBtn1" onclick="toggleIcon('collapseIcon2')">
@@ -426,176 +440,48 @@
 
     <div class="row m-0">
         <span class="section-title">Task Overview: In Progress and Pending</span>
-        <div class="row m-0 p-2 d-flex justify-content-center">
-            <div class="col-sm-3 col-md-3 mx-auto">
-                <div class="description-block d-flex flex-column justify-content-center align-items-center">
-                    @* border-right*@
-                    <h5 class="description-header"></h5>
-                    <span class="description-text d-block">4</span>
-                    <span class="description-title d-block">Reel Quantity Unloaded from Col 1</span>
-                </div>
-            </div>
-            <div class="col-sm-3 col-md-3">
-                <div class="description-block d-flex flex-column justify-content-center align-items-center">
-                    @* border-right*@
-                    <h5 class="description-header"></h5>
-                    <span class="description-text d-block">6</span>
-                    <span class="description-title d-block">Total Reel Load into Racking</span>
-                </div>
-            </div>
-            <div class="col-sm-3 col-md-3">
-                <div class="description-block d-flex flex-column justify-content-center align-items-center" style="background-color: #ECFAE5;">
-                    @* border-right*@
-                    <h5 class="description-header"></h5>
-                    <span class="description-text d-block">2</span>
-                    <span class="description-title d-block">Put Away Quantity : Success </span>
-                </div>
-            </div>
-            <div class="col-sm-3 col-md-3">
-                <div class="description-block d-flex flex-column justify-content-center align-items-center">
-                    <h5 class="description-header"></h5>
-                    <span class="description-text d-block">0</span>
-                    <span class="description-title d-block">Put Away Quantity : Failure</span>
-                </div>
-            </div>
-        </div>
-    @* </div> *@
-    
-    @* <div class="row mt-2"> *@
-        @* <div class="col-md-12">
-            <div class="card card-primary"> 
-                <div class="card-header info-header">
-                    <h3 class="card-title">Task Overview: In Progress and Pending</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-bs-toggle="collapse" data-bs-target="#collapseOngoing" aria-expanded="true" aria-controls="collapseOngoing"
-                                id="collapseBtn" onclick="toggleIcon('collapseIcon3')">
-                            <i class="bi bi-dash-lg" id="collapseIcon3"></i>
-                        </button>
+        <div class="position-relative" id="statsContainer">
+            <div class="row m-0 p-2 d-flex justify-content-center">
+                <div class="col-sm-3 col-md-3 mx-auto">
+                    <div class="description-block d-flex flex-column justify-content-center align-items-center">
+                        <h5 class="description-header"></h5>
+                        <span class="description-text d-block">--</span>
+                        <span class="description-title d-block" id="info1">Reel Quantity Unloaded from Col 1</span>
                     </div>
                 </div>
-                <div class="collapse show ongoing-body" id="collapseOngoing">
-                    <div class="card-body">
-                        <div class="row justify-content-center" style="gap:20px;">
-                            <div class="col-md-4 col-sm-3 text-center " id="usageContainer">
-                                <span>Column Usage</span>
-                                <div class="progress-group mt-3 d-flex align-items-center">
-                                    <i class="bi bi-1-square-fill fs-2" id="icon-c1"></i>
-                                    <div class="ms-3 d-flex flex-column w-100">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span>In Progress</span>
-                                            <b id="percent-c1" class="ms-auto">0%</b>
-                                        </div>
-                                        <div class="progress progress-sm">
-                                            <div class="progress-bar bg-success" id="c1" role="progressbar" style="width: 0%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="progress-group mt-3 d-flex align-items-center">
-                                    <i class="bi bi-2-square fs-2" id="icon-c2"></i>
-                                    <div class="ms-3 d-flex flex-column w-100">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            @* <span>In Progress</span> //
-                                            <b id="percent-c2" class="ms-auto">0%</b>
-                                        </div>
-                                        <div class="progress progress-sm">
-                                            <div class="progress-bar bg-success" id="c2" role="progressbar" style="width: 0%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="progress-group mt-3 d-flex align-items-center">
-                                    <i class="bi bi-3-square fs-2" id="icon-c3"></i>
-                                    <div class="ms-3 d-flex flex-column w-100">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            @* <span>In Progress</span> //
-                                            <b id="percent-c3" class="ms-auto">0%</b>
-                                        </div>
-                                        <div class="progress progress-sm">
-                                            <div class="progress-bar bg-success" id="c3" role="progressbar" style="width: 0%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="progress-group mt-3 d-flex align-items-center" ">
-                                    <i class="bi bi-4-square fs-2" id="icon-c4"></i>
-                                    <div class="ms-3 d-flex flex-column w-100">
-                                        <div class="d-flex justify-content-between align-items-center;">
-                                            @* <span>In Progress</span> //
-                                            <b id="percent-c4" class="ms-auto">0%</b>
-                                        </div>
-                                        <div class="progress progress-sm" style="width: 100%;">
-                                            <div class="progress-bar bg-success" id="c4" role="progressbar" style="width: 0%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3 col-sm-3 d-flex flex-column align-items-center justify-content-center" id="usageContainer">
-                                <span>Overall Progress</span>
-                                <svg viewBox="0 0 36 36" class="circular-chart orange">
-                                    <path class="circle-bg"
-                                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                    <path class="circle" id="circle"
-                                          stroke-dasharray="30, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                    <text x="18" y="20.35" class="percentage">30%</text>
-                                </svg>
-                            </div>
-                            <div class="col-md-4 col-sm-5" id="usageContainer">
-                                <div style="background-color: #ff9f00;" class="text-center p-1 text-white">Current Task</div>
-                                <div class="mb-3" id="currentTask">
-                                    <div class="task-card mt-1">
-                                        <div class="d-flex justify-content-between align-items-center p-2">
-                                            <div>
-                                                <span class="fw-bold" id="currentProcessingName">Unloading Process</span>
-                                                <p class="task-title mb-0">Document Type: <span id="currentDocumentType">Loader</span></p>
-                                            </div>
-                                            <button class="btn btn-primary">View Process</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <hr />
-                                <div class="upcomingBanner">Upcoming Task</div>
-                                <div class="row" id="upComingTask">
-                                    <div class="coming-task"></div>
-                                </div>
-                            </div>
-                        </div>
+                <div class="col-sm-3 col-md-3">
+                    <div class="description-block d-flex flex-column justify-content-center align-items-center" style="background: linear-gradient(135deg, #eff6ff, #dbeafe); "> @*border: 1px solid #93c5fd;*@
+                        <h5 class="description-header"></h5>
+                        <span class="description-text d-block">--</span>
+                        <span class="description-title d-block" id="info2">Total Reel Load into Racking</span>
                     </div>
+                </div>
+                <div class="col-sm-3 col-md-3">
+                    <div class="description-block d-flex flex-column justify-content-center align-items-center" style="background-color: #ECFAE5;">
+                        <h5 class="description-header"></h5>
+                        <span class="description-text d-block">--</span>
+                        <span class="description-title d-block" id="info3">Put Away Quantity : Success </span>
+                    </div>
+                </div>
+                <div class="col-sm-3 col-md-3">
+                    <div class="description-block d-flex flex-column justify-content-center align-items-center">
+                        <h5 class="description-header"></h5>
+                        <span class="description-text d-block">--</span>
+                        <span class="description-title d-block" id="info4">Put Away Quantity : Failure</span>
+                    </div>
+                </div>
+            </div>
 
-                    <div class="card-footer">
-                        <div class="row">
-                            <div class="col-sm-3 col-6">
-                                <div class="description-block border-right">
-                                    <h5 class="description-header"></h5>
-                                    <span class="description-text">Reel Quantity Unloaded from Col 1</span>
-                                </div>
-                            </div>
-                            <div class="col-sm-3 col-6">
-                                <div class="description-block border-right">
-                                    <h5 class="description-header"></h5>
-                                    <span class="description-text">Total Reel Load into Racking</span>
-                                </div>
-                            </div>
-                            <div class="col-sm-3 col-6">
-                                <div class="description-block border-right">
-                                    <h5 class="description-header"></h5>
-                                    <span class="description-text">Put Away Quantity: Success </span>
-                                </div>
-                            </div>
-                            <div class="col-sm-3 col-6">
-                                <div class="description-block">
-                                    <h5 class="description-header"></h5>
-                                    <span class="description-text">Put Away Quantity: Failure</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> *@
+            @* <div id="noDataOverlay" class="no-progress-overlay">
+                <span>No Data Running</span>
+            </div> *@
+        </div>
+        
         <div class="row m-0 mt-2 p-2 align-items-stretch">
             <div class="col-md-4 col-sm-4">
-                <div id="usageContainer" class="flex-column justify-content-center h-100 w-100">
+                <div id="usageContainer" class="flex-column justify-content-center h-100 w-100 position-relative">
                     <span class="sm-title">Column Usage</span>
                     <div class="progress-group mt-3 d-flex align-items-center">
-                        @* <i class="bi bi-1-square-fill fs-5" id="icon-c1"></i> *@
                         <div class="colBox">C1</div>
                         <div class="ms-3 d-flex flex-column w-100">
                             <div class="d-flex justify-content-between align-items-center">
@@ -609,7 +495,6 @@
                         </div>
                     </div>
                     <div class="progress-group mt-3 d-flex align-items-center">
-                        @* <i class="bi bi-2-square fs-5" id="icon-c2"></i> *@
                         <div class="colBox">C2</div>
                         <div class="ms-3 d-flex flex-column w-100">
                             <div class="d-flex justify-content-between align-items-center">
@@ -622,7 +507,6 @@
                         </div>
                     </div>
                     <div class="progress-group mt-3 d-flex align-items-center">
-                        @* <i class="bi bi-3-square fs-5" id="icon-c3"></i> *@
                         <div class="colBox">C3</div>
                         <div class="ms-3 d-flex flex-column w-100">
                             <div class="d-flex justify-content-between align-items-center">
@@ -635,7 +519,6 @@
                         </div>
                     </div>
                     <div class="progress-group mt-3 d-flex align-items-center">
-                        @* <i class="bi bi-4-square fs-5" id="icon-c4"></i> *@
                         <div class="colBox">C4</div>
                         <div class="ms-3 d-flex flex-column w-100">
                             <div class="d-flex justify-content-between align-items-center;">
@@ -647,74 +530,77 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="no-progress-overlay" id="usageOverlay">
+                        <span>No Progress Running</span>
+                    </div>
                 </div>
             </div>
             <div class="col-md-4 col-sm-3 d-flex">
-                <div id="usageContainer" class="d-flex flex-column justify-content-center align-items-center h-100 w-100">
+                <div id="usageContainer" class="d-flex flex-column justify-content-center align-items-center h-100 w-100 position-relative">
                     <span>Overall Progress</span>
                     <svg viewBox="0 0 36 36" class="circular-chart orange">
                         <path class="circle-bg"
                               d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         <path class="circle" id="circle"
-                              stroke-dasharray="30, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        <text x="18" y="20.35" class="percentage">30%</text>
+                              stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <text x="18" y="20.35" class="percentage" id="percentageText">0%</text>
                     </svg>
+
+                    <div class="no-progress-overlay" id="noProgressOverlay">
+                        <span>No Progress Running</span>
+                    </div>
                 </div>
             </div>
+
             <div class="col-md-4 col-sm-5">
                 <div id="usageContainer" class="d-flex flex-column h-100 w-100">
                     <div style="background-color: #ff9f00;" class="text-center p-1 text-white">Current Task</div>
-                    @* <div> *@
-                        <div class="mt-1 position-relative" id="currentTaskCard">
-                            <div class="d-flex justify-content-between align-items-center p-2">
-                                <div>
-                                    <span class="fw-bold" id="currentProcessingName"></span>
-                                    <p class="task-title mb-0">Document Type: <span id="currentDocumentType">-</span></p>
-                                </div>
-                                <button class="btn btn-primary" id="currentTaskBtn">View Process</button>
+                    <div class="mt-1 position-relative" id="currentTaskCard">
+                        <div class="d-flex justify-content-between align-items-center p-2">
+                            <div>
+                                <span class="fw-bold" id="currentProcessingName"></span>
+                                <p class="task-title mb-0">Document Type: <span id="currentDocumentType">-</span></p>
                             </div>
-
-                            <div class="no-task-overlay" id="noTaskOverlay">
-                                <span>No Active Task</span>
-                            </div>
+                            <button class="btn btn-primary" id="currentTaskBtn">View Process</button>
                         </div>
-                    @* </div> *@
+
+                        <div class="no-task-overlay" id="noTaskOverlay">
+                            <span>No Active Task</span>
+                        </div>
+                    </div>
                     <hr />
                     <div class="upcomingBanner">Upcoming Task</div>
-                    @* <div> *@
-                        <div class="mt-1 position-relative" id="upComingTask">
-                            <div class="d-flex justify-content-between align-items-center p-2">
-                                <div>
-                                    <span class="fw-bold" id="upcomingName"></span>
-                                    <p class="task-title mb-0">
-                                        Document Type: <span id="upcomingType"></span>
-                                    </p>
-                                </div>
-                                <button class="btn btn-primary" id="upcomingTaskBtn">View Queue</button>
+                    <div class="mt-1 position-relative" id="upComingTask">
+                        <div class="d-flex justify-content-between align-items-center p-2">
+                            <div>
+                                <span class="fw-bold" id="upcomingName"></span>
+                                <p class="task-title mb-0">
+                                    Document Type: <span id="upcomingType"></span>
+                                </p>
                             </div>
-
-                            <div class="no-task-overlay" id="noUpcomingOverlay">
-                                No Upcoming Tasks
-                            </div>
+                            <button class="btn btn-primary" id="upcomingTaskBtn">View Queue</button>
                         </div>
-                    @* </div> *@
+
+                        <div class="no-task-overlay" id="noUpcomingOverlay">
+                            No Upcoming Tasks
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="row m-0 gridRow">
-        <span class="section-title">Slot View</span>
+        <span class="section-title">Slots Overview</span>
         
         <div class="slot-tabs">
-            @* <div class="btnContainer">  *@
             <button type="button" class="btn btn-dark tab-btn active" data-tab="leftTab" onclick="renderSlotViewGrid(groupedSlots, true)">
                 Left Racking
             </button>
             <button type="button" class="btn btn-outline-dark tab-btn" data-tab="rightTab" onclick="renderSlotViewGrid(groupedSlots, false)">
                 Right Racking
             </button>
-            @* </div> *@
 
             <div class="color-legend">
                 <ul>
@@ -795,8 +681,8 @@
             loadPie(slotUsageList);
             loadSlots();
             loadCurrentTask();
-            loadQueue();
-            loadColumnUsage();
+            // loadQueue();
+            // loadColumnUsage();
             // setInterval(refreshData, 15000);
         });
 
@@ -1128,7 +1014,7 @@
                 contentType: 'application/json; charset=utf-8',
                 success: function (result) {
                     swal.close();
-                    console.log(result.data);
+                    // console.log(result.data);
                     if (result.success == true) {
                         const nameEl = document.getElementById("currentProcessingName");
                         const typeEl = document.getElementById("currentDocumentType");
@@ -1143,9 +1029,9 @@
                             btnEl.disabled = false;
                             overlayEl.classList.add("d-none");
 
+                            currentEqId = data.loader_Id;
                             currentTaskQueueId = data.rackJobQueue_Id;
                             currentDocType = data.currentJobType;
-                            // console.log("cuttnr it", currentTaskQueueId);
                         }
                         else //no task is working
                         {
@@ -1155,6 +1041,9 @@
                             btnEl.disabled = true;
                             overlayEl.classList.remove("d-none");
                         }
+
+                        loadQueue();
+                        loadColumnUsage();
                     }
                     else {
                         swal.fire({
@@ -1192,7 +1081,7 @@
                         } else {
                             filteredTasks = result.data.slice(0, 2);
                         }
-                       
+
                         if (filteredTasks.length > 0) {
                             upcomingContainer.innerHTML = '';
                             filteredTasks.forEach(task => {
@@ -1213,19 +1102,23 @@
 
                                 upcomingContainer.insertAdjacentHTML('beforeend', taskHTML);
                             });
-                            olEl.classList.remove('d-none');
+                            olEl.classList.add('d-none');
                         }
                         else {
-                            olEl.classList.add('d-none');
+                            olEl.classList.remove('d-none');
                         }
                     }
                     else {
+                        console.log("empty queue");
                         swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
                         });
                     }
+
+                    console.log(result.data);
+
                 },
                 error: function (error) {
                     swal.fire({
@@ -1256,7 +1149,6 @@
                         console.log(result);
                         if (result.success == true) {
                             loadCurrentTask();
-                            loadQueue();
                         }
                     },
                     error: function (error) {
@@ -1286,33 +1178,58 @@
 
         function loadColumnUsage() {
             // const url = currentDocType === 'Loader' ? "Loader/GetLoaderColumn/" : "Trolley/GetTrolleyColumn/";
+            const overlayProg = document.getElementById("noProgressOverlay");
+            const overlayUsage = document.getElementById("usageOverlay");
 
-            $.ajax({
-                url: "/Loader/GetLoaderColumn/",
-                type: "POST",
-                data: JSON.stringify('11'),
-                dataType: 'JSON',
-                contentType: 'application/json; charset=utf-8',
-                success: function (result) {
-                    result.data.forEach(item => {
-                        const colNo = item.colNo;
-                        const usagePercentage = item.usagePercentage;
-                        const reelQty = item.reelQty;
-                        const text = (reelQty > 1) ? "reels" : "reel"; 
+            console.log("currentaskqueuidd", currentTaskQueueId);
+            if (currentTaskQueueId != null)
+            {
+                $.ajax({
+                    url: "/Loader/GetLoaderColumn/",
+                    type: "POST",
+                    data: JSON.stringify(currentEqId),
+                    dataType: 'JSON',
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (result) {
+                        if (result.success)
+                        {
+                            result.data.forEach(item => {
+                                const colNo = item.colNo;
+                                const usagePercentage = item.usagePercentage;
+                                const reelQty = item.reelQty;
+                                const text = (reelQty > 1) ? "reels" : "reel"; 
 
-                        $(`#percent-c${colNo}`).text(`${usagePercentage}%`);
-                        $(`#colQty${colNo}`).text(`${reelQty} ${text} remaining`);
-                        $(`#c${colNo}`).css('width', `${usagePercentage}%`);
+                                $(`#percent-c${colNo}`).text(`${usagePercentage}%`);
+                                $(`#colQty${colNo}`).text(`${reelQty} ${text} remaining`);
+                                $(`#c${colNo}`).css('width', `${usagePercentage}%`);
 
-                        
-                    });
+                            });
 
-                    setProgress(result.data[0].totalProgressPercentage);
-                },
-                error: function (error) {
+                            setProgress(result.data[0].totalProgressPercentage);
+                        }
+                        else { //means no task is running
+                            $('#percentageText').text = '--'
+                            overlayProg.style.display = 'flex';
+                            overlayUsage.style.display = 'flex';
 
-                }
-            });
+                        }
+                       
+                    },
+                    error: function (error) {
+
+                    }
+                });
+
+                overlayProg.style.display = 'none';
+                overlayUsage.style.display = 'none';
+            }
+            else 
+            {
+                 overlayProg.style.display = 'flex';
+                 overlayUsage.style.display = 'flex';
+                 $('#percentageText').text = '--'
+            }
+            
         }
     </script>
 }

@@ -135,7 +135,7 @@
                                     <div class="itemContainer">
                                         <div class="row g-4">
                                             <div class="col-4">
-                                                <label for="bomName">Finished Item</label>
+                                                <label for="bomName">Finished Goods</label>
                                                 <select class="bom-select js-example-basic-single form-control" id="bomName" style="width:100%" @(mode == "view" ? "disabled" : "")></select>
                                                 <div id="bomNameError" class="error-message"></div>
                                             </div>
@@ -320,8 +320,6 @@
                                 remark: i.remark,
                             };
                         });
-
-                        console.log("details");
 
                         const container = document.getElementById("itemContainer");
                         const items = container.querySelectorAll(".itemBlock");

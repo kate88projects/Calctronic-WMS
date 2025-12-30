@@ -116,6 +116,10 @@ namespace RackingSystem.Controllers
         {
             ServiceResponseModel<List<LoaderReelDtlDTO>> result = await _loaderService.GetLoaderReelDtlList(id);
             result.errMessage = "-,-,-,-,0,0,0,0,-";
+
+            var columns = new List<Dictionary<string, object>>();
+
+            
             if (result.success)
             {
                 var loader = _context.Loader.Where(x => x.Loader_Id == id).FirstOrDefault();
@@ -148,11 +152,12 @@ namespace RackingSystem.Controllers
                 }
 
                 int ttlR1 = result.data.Where(x => x.ColNo == 1).Count();
-                int ttlR2 = result.data.Where(x => x.ColNo == 1).Count();
-                int ttlR3 = result.data.Where(x => x.ColNo == 1).Count();
-                int ttlR4 = result.data.Where(x => x.ColNo == 1).Count();
+                int ttlR2 = result.data.Where(x => x.ColNo == 2).Count();
+                int ttlR3 = result.data.Where(x => x.ColNo == 3).Count();
+                int ttlR4 = result.data.Where(x => x.ColNo == 4).Count();
 
                 result.errStackTrace = u1 + "," + u2 + "," + u3 + "," + u4 + "," + ttlR1 + "," + ttlR2 + "," + ttlR3 + "," + ttlR4 + "," + loader?.Status;
+
             }
 
             return result;

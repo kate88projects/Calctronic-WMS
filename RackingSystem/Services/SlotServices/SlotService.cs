@@ -908,21 +908,21 @@ namespace RackingSystem.Services.SlotServices
                 {
                     new SlotUsageDTO
                     {
-                        title = "Has Empty Tray",
+                        title = "Occupied: Empty Drawer",
                         available = true,
                         slotQty = hasTrayQty,
                         percentage = calculatePercent(hasTrayQty, activeAmt),
                     },
                     new SlotUsageDTO
                     {
-                        title = "For Empty Tray",
+                        title = "Available",
                         available = true,
                         slotQty = forEmptyQty,
                         percentage = calculatePercent(forEmptyQty, activeAmt),
                     },
                     new SlotUsageDTO
                     {
-                        title = "Has Reel",
+                        title = "Occupied: Reel",
                         available = true,
                         slotQty = hasReelQty,
                         percentage = calculatePercent(hasReelQty, activeAmt),
@@ -952,6 +952,7 @@ namespace RackingSystem.Services.SlotServices
 
             return result;
         }
+
         public async Task<ServiceResponseModel<SlotStatusReqDTO>> UpdateWarningSlot(SlotStatusReqDTO slotReq)
         {
             ServiceResponseModel<SlotStatusReqDTO> result = new ServiceResponseModel<SlotStatusReqDTO>();

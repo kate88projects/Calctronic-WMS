@@ -416,13 +416,15 @@ namespace RackingSystem.Services.LoaderServices
                     return dto;
                 }).ToList();
 
-                var progressPercentage = (jobReelQty.TotalCount - (double)reelInLoaderQty) / jobReelQty.TotalCount * 100;
-                if (loaderColListDTO.Count > 0)
+                var progressPercentage = jobReelQty.TotalCount == 0 ? 0 : (jobReelQty.TotalCount - (double)reelInLoaderQty) / jobReelQty.TotalCount * 100;
+                bool hasRunningTask = loaderColListDTO.Count > 0;
+
+                if (hasRunningTask)
                 {
                     loaderColListDTO[0].totalProgressPercentage = (int)progressPercentage;
                 }
 
-                result.success = true;
+                result.success = hasRunningTask;
                 result.data = loaderColListDTO;
                 return result;
             }

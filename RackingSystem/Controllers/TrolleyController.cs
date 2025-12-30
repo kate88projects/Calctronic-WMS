@@ -175,7 +175,7 @@ namespace RackingSystem.Controllers
             if (result.success)
             {
                 int ttlIn = result.data.Where(x => x.IsActive == false).Count();
-                int ttlC = result.data.Where(x =>  x.NeedCheck == true).Count();
+                int ttlC = result.data.Where(x => x.NeedCheck == true).Count();
                 int ttlET = 0; // result.data.Where(x => x.IsLeft == isLeft && x.HasEmptyTray == true).Count();
                 int ttlTR = result.data.Where(x => x.HasReel && x.ReelNo == "0").Count();
                 int ttlTRN = result.data.Where(x => x.HasReel && x.ReelNo != "0").Count();
@@ -231,24 +231,107 @@ namespace RackingSystem.Controllers
             result.errMessage = "-,0,0,0,0,0";
             if (result.success)
             {
-                string grpInfo = "";
-                var grps = result.data.GroupBy(x => x.ItemGroupCode);
-                foreach (var igrp in grps)
-                {
-                    grpInfo += igrp.Key;
-                }
+                //string grpInfo = "";
+                //var grps = result.data.GroupBy(x => x.ItemGroupCode);
+                //foreach (var igrp in grps)
+                //{
+                //    grpInfo += igrp.Key;
+                //}
                 int ttlC = result.data.Where(x => x.NeedCheck == true).Count();
-                int ttlTRA = result.data.Where(x => x.IsLeft && x.HasReel && x.ReelNo == "0").Count();
-                int ttlEA = result.data.Where(x => x.IsLeft && x.HasReel == false && x.IsActive == true && x.NeedCheck == false).Count();
-                int ttlTRB = result.data.Where(x => !x.IsLeft && x.HasReel && x.ReelNo == "0").Count();
-                int ttlEB = result.data.Where(x => !x.IsLeft && x.HasReel == false && x.IsActive == true && x.NeedCheck == false).Count();
+                int ttlTRAC1 = result.data.Where(x => x.IsLeft && x.IsActive == true && x.ColNo == 1).Count();
+                int ttlTRAC2 = result.data.Where(x => x.IsLeft && x.IsActive == true && x.ColNo == 2).Count();
+                int ttlTRAC3 = result.data.Where(x => x.IsLeft && x.IsActive == true && x.ColNo == 3).Count();
+                int ttlTRAC1R = result.data.Where(x => x.IsLeft && x.HasReel && x.ReelNo == "0" && x.ColNo == 1).Count();
+                int ttlTRAC2R = result.data.Where(x => x.IsLeft && x.HasReel && x.ReelNo == "0" && x.ColNo == 2).Count();
+                int ttlTRAC3R = result.data.Where(x => x.IsLeft && x.HasReel && x.ReelNo == "0" && x.ColNo == 3).Count();
+                int ttlEAC1 = result.data.Where(x => x.IsLeft && x.HasReel == false && x.IsActive == true && x.NeedCheck == false && x.ColNo == 1).Count();
+                int ttlEAC2 = result.data.Where(x => x.IsLeft && x.HasReel == false && x.IsActive == true && x.NeedCheck == false && x.ColNo == 2).Count();
+                int ttlEAC3 = result.data.Where(x => x.IsLeft && x.HasReel == false && x.IsActive == true && x.NeedCheck == false && x.ColNo == 3).Count();
 
-                result.errStackTrace = grpInfo + "," + ttlC + "," + ttlTRA + "," + ttlEA + "," + ttlTRB + "," + ttlEB;
+                int ttlTRAB1 = result.data.Where(x => !x.IsLeft && x.IsActive == true && x.ColNo == 1).Count();
+                int ttlTRAB2 = result.data.Where(x => !x.IsLeft && x.IsActive == true && x.ColNo == 2).Count();
+                int ttlTRAB3 = result.data.Where(x => !x.IsLeft && x.IsActive == true && x.ColNo == 3).Count();
+                int ttlTRBC1R = result.data.Where(x => !x.IsLeft && x.HasReel && x.ReelNo == "0" && x.ColNo == 1).Count();
+                int ttlTRBC2R = result.data.Where(x => !x.IsLeft && x.HasReel && x.ReelNo == "0" && x.ColNo == 2).Count();
+                int ttlTRBC3R = result.data.Where(x => !x.IsLeft && x.HasReel && x.ReelNo == "0" && x.ColNo == 3).Count();
+                int ttlEBC1 = result.data.Where(x => !x.IsLeft && x.HasReel == false && x.IsActive == true && x.NeedCheck == false && x.ColNo == 1).Count();
+                int ttlEBC2 = result.data.Where(x => !x.IsLeft && x.HasReel == false && x.IsActive == true && x.NeedCheck == false && x.ColNo == 2).Count();
+                int ttlEBC3 = result.data.Where(x => !x.IsLeft && x.HasReel == false && x.IsActive == true && x.NeedCheck == false && x.ColNo == 3).Count();
+
+                var colSummary = new[]
+                {
+                    new
+                    {
+                        Side = "A",
+                        Column = "1",
+                        TotalReels = ttlTRAC1R,
+                        Balanced = ttlEAC1,
+                        Used = ttlTRAC1 - ttlEAC1,
+                        Total = ttlTRAC1
+                    },
+                    new
+                    {
+                        Side = "A",
+                        Column = "2",
+                        TotalReels = ttlTRAC2R,
+                        Balanced = ttlEAC2,
+                        Used = ttlTRAC2 - ttlEAC2,
+                        Total = ttlTRAC2
+                    },
+                    new
+                    {
+                        Side = "A",
+                        Column = "3",
+                        TotalReels = ttlTRAC3R,
+                        Balanced = ttlEAC3,
+                        Used = ttlTRAC3 - ttlEAC3,
+                        Total = ttlTRAC3
+                    },
+                    new
+                    {
+                        Side = "B",
+                        Column = "1",
+                        TotalReels = ttlTRBC1R,
+                        Balanced = ttlEBC1,
+                        Used = ttlTRAB1 - ttlEBC1,
+                        Total = ttlTRAB1
+                    },
+                    new
+                    {
+                        Side = "B",
+                        Column = "2",
+                        TotalReels = ttlTRBC2R,
+                        Balanced = ttlEBC2,
+                        Used = ttlTRAB2 - ttlEBC2,
+                        Total = ttlTRAB2
+                    },
+                    new
+                    {
+                        Side = "B",
+                        Column = "3",
+                        TotalReels = ttlTRBC3R,
+                        Balanced = ttlEBC3,
+                        Used = ttlTRAB3 - ttlEBC3,
+                        Total = ttlTRAB3
+                    }
+                };
+
+                result.errList = colSummary.Select(summary =>
+                   $"{summary.Side},{summary.Column},{summary.TotalReels},{summary.Balanced},{summary.Used},{summary.Total}"
+                ).ToList();
+
+                result.errStackTrace = ttlC.ToString();
                 result.data = result.data.Where(x => x.HasReel && x.ReelNo == "0").ToList();
             }
 
             return result;
         }
+
+        //[HttpGet]
+        //public async Task<ServiceResponseModel<List<>>> GetTrolleyColumn()
+        //{
+
+        //}
 
     }
 }
