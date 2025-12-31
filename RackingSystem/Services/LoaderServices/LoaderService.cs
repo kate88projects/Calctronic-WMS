@@ -421,6 +421,7 @@ namespace RackingSystem.Services.LoaderServices
 
                 if (hasRunningTask)
                 {
+                    var progressPercentage = (jobReelQty.TotalCount - (double)reelInLoaderQty) / jobReelQty.TotalCount * 100;
                     loaderColListDTO[0].totalProgressPercentage = (int)progressPercentage;
                 }
 
