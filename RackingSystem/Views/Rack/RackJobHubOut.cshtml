@@ -637,6 +637,42 @@
     </section>
 </main>
 
+<div class="modal fade" id="jobDoneModal" role="dialog" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-body" style="padding: 50px;">
+                <div class="row">
+                    <div class="col-6">
+                        <img src="~/assets/img/task.gif" style="width:100%;" />
+                    </div>
+                    <div class="col-6">
+                        <p style="font-size:2em;">Job is done. Click the 'Close' button to Close this window.</p>
+                        <button class="btn btn-success" style="width: 100%; height: 150px;" onclick="closeTab()">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="trolleyEndModal" role="dialog" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-body" style="padding: 50px;">
+                <div class="row">
+                    <div class="col-6">
+                        <img src="~/assets/img/trolley-slot.gif" style="width:100%;" />
+                    </div>
+                    <div class="col-6">
+                        <p style="font-size:2em;">Trolley is fully loaded. Please change to another side or Trolley.</p>
+                        <button class="btn btn-success" style="width: 100%; height: 150px;" onclick="closeTab()">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts
 {
     <link href="~/css/datatables.min.css" rel="stylesheet">
@@ -1702,6 +1738,7 @@
 
             return fResult;
         }
+
 
     </script>
 
