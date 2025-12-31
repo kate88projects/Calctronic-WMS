@@ -412,7 +412,7 @@
                                 <a href="javascript:none" class="nav-link">
                                     <i class="nav-icon bi bi-hdd-rack"></i>
                                     <p>
-                                        Report
+                                        REPORT
                                         <i class="nav-arrow bi bi-chevron-right"></i>
                                     </p>
                                 </a>
@@ -435,7 +435,7 @@
                                             </a>
                                         </li>
                                     }
-                                    @if (ViewBag.PermissionList.Contains(100) == true)
+                                    @* @if (ViewBag.PermissionList.Contains(100) == true)
                                     {
                                         <li class="nav-item">
                                             <a asp-action="SlotDetailList" asp-controller="Slot" class="nav-link">
@@ -443,7 +443,7 @@
                                                 <p>SRMS Detail List</p>
                                             </a>
                                         </li>
-                                    }
+                                    } *@
                                     @if (ViewBag.PermissionList.Contains(100) == true)
                                     {
                                         <li class="nav-item">
@@ -653,7 +653,7 @@
             
             var myActiveTab = '@ViewData["ActiveTab"]';
             var myActiveGroup = '@ViewData["ActiveGroup"]';
-            console.log(myActiveGroup);
+            // console.log(myActiveGroup);
             $('#' + myActiveGroup).addClass('menu-open');
 
             const allLinks = document.querySelectorAll('a.nav-link'); // Selects all <a> elements on the page

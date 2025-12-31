@@ -468,7 +468,7 @@
                                             cell2.innerHTML = '<img src="../assets/img/tray_full_icon_138077.png" style="display:flex;justify-self: center; height:25px;" />';
                                         }
                                         else {
-                                            cell2.innerHTML = '<span style="display:flex;justify-self: center; font-size:15px;">2</span>';
+                                            cell2.innerHTML = '<span style="display:flex;justify-self: center; font-size:15px;">' + (Number(result.data[idx - 1].reelNo) + 1) + '</span>';
                                         }
                                     }
                                     else {

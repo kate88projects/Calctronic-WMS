@@ -677,6 +677,21 @@
         let currentEqId = null;
 
         $(document).ready(async function () {
+            $.ajax({
+                url: '/Account/getSession',
+                type: 'GET',
+                success: function(data) {
+                    // console.log(data);
+                    if (data == "") {
+                        window.location.href = '@Url.Action("Login", "Account")';
+                        return;
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching data:', error);
+                }
+            });
+
             const slotUsageList = await loadSlotUsage();
             loadPie(slotUsageList);
             loadSlots();

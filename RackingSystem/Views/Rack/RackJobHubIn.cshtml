@@ -730,8 +730,6 @@
 
         $(document).ready(function () {
 
-            $('#jobDoneModal').modal('show');
-
             document.getElementById('chkAutoRun').checked = true;
             disableDivContent(true);
             $("#txtReelId").val('');
@@ -1587,6 +1585,7 @@
                 if (rEnd == true) {
                     await loadDBStopUnload();
                 }
+                $('#jobDoneModal').modal('show');
             }
 
             updateJson();

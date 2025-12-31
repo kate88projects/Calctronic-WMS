@@ -711,6 +711,10 @@
 
         let totalReels = 0;
 
+        function closeTab() {
+            window.close();
+        }
+
         $(document).ready(function () {
             document.getElementById('chkAutoRun').checked = true;
             disableDivContent(true);
@@ -1141,6 +1145,8 @@
                 logMessage2(`Job is done retrieve.`, 'alert');
                 loadDBEnd();
                 systemStop();
+                $('#cont-btn').addClass('hidden');
+                $('#jobDoneModal').modal('show');
                 return;
             }
 
@@ -1158,6 +1164,7 @@
                 sharedDrawerState.cartesianRobotState = 'Ready';
                 inRetrieveMove = false;
                 systemStop();
+                $('#trolleyEndModal').modal('show');
                 return;
             }
 
@@ -1236,6 +1243,7 @@
                 sharedDrawerState.cartesianRobotState = 'Retrieved';
                 inPutAwayMove = false;
                 systemStop();
+                $('#trolleyEndModal').modal('show');
                 return;
             }
 
@@ -1286,7 +1294,7 @@
                 loadDBEnd();
                 systemStop();
                 $('#cont-btn').addClass('hidden');
-
+                $('#jobDoneModal').modal('show');
             }
         }
 

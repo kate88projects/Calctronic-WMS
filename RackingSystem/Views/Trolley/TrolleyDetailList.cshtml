@@ -473,8 +473,9 @@
                 <th>Reel Code</th>
                 <th>Item Code</th>
                 <th>Qty</th>
-                <th>Check?</th>
-                <th>Action</th>
+                <th>Item Group Code</th>
+                @* <th>Check?</th> *@
+                @* <th>Action</th> *@
             </tr>
         </thead>
     </table>
@@ -615,27 +616,27 @@
                                     }
                                 },
                                 { data: 'qty' },
-                                {
-                                    data: null,
-                                    render: function (data, type, row, meta) {
-                                        if (row.needCheck == true) {
-                                            return '<span class="badge rounded-pill bg-warning" style="font-size:13px;">Need Check</span>'
-                                        }
-                                        else {
-                                            return ''
-                                        }
-                                    }
-                                },
+                                // {
+                                //     data: null,
+                                //     render: function (data, type, row, meta) {
+                                //         if (row.needCheck == true) {
+                                //             return '<span class="badge rounded-pill bg-warning" style="font-size:13px;">Need Check</span>'
+                                //         }
+                                //         else {
+                                //             return ''
+                                //         }
+                                //     }
+                                // },
                                 { data: 'itemGroupCode', visible: false },
-                                {
-                                    data: null,
-                                    render: function (data, type, row, meta) {
-                                        const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
-                                        return `<div style="display:flex;">
-                                            <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
-                                                <span><i class="bi bi-pencil-square"></i> </span></button>`;
-                                    }
-                                }
+                                // {
+                                //     data: null,
+                                //     render: function (data, type, row, meta) {
+                                //         const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
+                                //         return `<div style="display:flex;">
+                                //             <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
+                                //                 <span><i class="bi bi-pencil-square"></i> </span></button>`;
+                                //     }
+                                // }
                             ],
                             language: {
                                 searchPlaceholder: "🔍︎ Search",

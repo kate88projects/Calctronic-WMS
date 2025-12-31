@@ -420,7 +420,7 @@
                 <th>Reel Code</th>
                 <th>Item Code</th>
                 <th>Qty</th>
-                <th>Action</th>
+                @* <th>Action</th> *@
             </tr>
         </thead>
     </table>
@@ -535,15 +535,15 @@
                                     }
                                 },
                                 { data: 'qty' },
-                                {
-                                    data: null,
-                                    render: function (data, type, row, meta) {
-                                        const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
-                                        return `<div style="display:flex;">
-                                            <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
-                                                <span><i class="bi bi-pencil-square"></i> </span></button>`;
-                                    }
-                                }
+                                // {
+                                //     data: null,
+                                //     render: function (data, type, row, meta) {
+                                //         const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
+                                //         return `<div style="display:flex;">
+                                //             <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
+                                //                 <span><i class="bi bi-pencil-square"></i> </span></button>`;
+                                //     }
+                                // }
                             ],
                             language: {
                                 searchPlaceholder: "🔍︎ Search",

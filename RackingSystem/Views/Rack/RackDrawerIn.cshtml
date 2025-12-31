@@ -584,10 +584,9 @@
             <br />
             <button onclick="startRetrieve()">Retrieve</button>
             <hr />
-            <a href="javascript:loadPLCGetEmptyTraySlot()">Get Reel Slot</a> > <a href="javascript:loadPLCTakeEmptyTray()">Retrieve</a> >
-            @* <p style="margin-top: 10px;">*Note: Drawer status above syncs with this system.</p> *@
+            @* <a href="javascript:loadPLCGetEmptyTraySlot()">Get Reel Slot</a> > <a href="javascript:loadPLCTakeEmptyTray()">Retrieve</a> >
             <br />
-            <a href="javascript:retry_RetrieveStatus()">Retrieve Status</a>
+            <a href="javascript:retry_RetrieveStatus()">Retrieve Status</a> *@
         </div>
 
         <input type="text" id="txtRetrieveSlot" placeholder="Retrieve Slot" autocomplete="off">
@@ -624,9 +623,9 @@
             <br />
             <button onclick="startPutAway()">Put Away</button>
             <hr />
-            <a href="javascript:loadPLCGetSlot()">Get Valid Slot</a> > <a href="javascript:loadPLCPutAway()">Put Away</a>
+            @* <a href="javascript:loadPLCGetSlot()">Get Valid Slot</a> > <a href="javascript:loadPLCPutAway()">Put Away</a>
             <br />
-            <a href="javascript:retry_PutAwayStatus()">Put Away Status</a>
+            <a href="javascript:retry_PutAwayStatus()">Put Away Status</a> *@
         </div>
 
         <input type="text" id="txtPutSlot" placeholder="Put Slot" autocomplete="off">
@@ -638,6 +637,25 @@
         </div>
     </section>
 </main>
+
+<div class="modal fade" id="jobDoneModal" role="dialog" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-body" style="padding: 50px;">
+                <div class="row">
+                    <div class="col-6">
+                        <img src="~/assets/img/task.gif" style="width:100%;" />
+                    </div>
+                    <div class="col-6">
+                        <p class="" style="font-size:2em;">Job is done. Click the 'Close' button to Close this window.</p>
+                        <button class="btn btn-success" style="width: 100%; height: 150px;" onclick="closeTab()">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts
 {
@@ -676,6 +694,10 @@
         let changePutSlot = false;
 
         let colNo = 1;
+
+        function closeTab() {
+            window.close();
+        }
 
         $(document).ready(function () {
             document.getElementById('chkAutoRun').checked = true;
@@ -1161,12 +1183,14 @@
                 logMessage2(`Trolley is done retrieve, please change another side.`, 'alert');
                 loadDBEnd();
                 systemStop();
+                $('#jobDoneModal').modal('show');
                 return;
             }
             if (colNo == 3 && chkCol3.checked == false) {
                 logMessage2(`Trolley is done retrieve, please change another side.`, 'alert');
                 loadDBEnd();
                 systemStop();
+                $('#jobDoneModal').modal('show');
                 return;
             }
 
@@ -1582,21 +1606,21 @@
                             fResult = 1;
                             if (colNo == 1) {
                                 $('#left-input-tr').val(rowNo + 1);
-                                if (rowNo + 1 > 50) {
-                                    $('#left-input-tr').val(50);
-                                }
+                                // if (rowNo + 1 > 50) {
+                                //     $('#left-input-tr').val(50);
+                                // }
                             }
                             if (colNo == 2) {
                                 $('#center-input-tr').val(rowNo + 1);
-                                if (rowNo + 1 > 50) {
-                                    $('#center-input-tr').val(50);
-                                }
+                                // if (rowNo + 1 > 50) {
+                                //     $('#center-input-tr').val(50);
+                                // }
                             }
                             if (colNo == 3) {
                                 $('#right-input-tr').val(rowNo + 1);
-                                if (rowNo + 1 > 50) {
-                                    $('#right-input-tr').val(50);
-                                }
+                                // if (rowNo + 1 > 50) {
+                                //     $('#right-input-tr').val(50);
+                                // }
                             }
                             logMessage2('Retrieve Status :: No Drawer to take. ', 'info');
                         }
