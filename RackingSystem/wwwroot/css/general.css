@@ -223,7 +223,7 @@ div.table-container .dt-container .dt-paging .dt-paging-button.current:hover {
     background-color: none;
 }
 
-.view-btn, .edit-btn, .delete-btn, #printQR, #printItem, .edit-Pass-btn {
+.view-btn, .edit-btn, .delete-btn, #printQR, #printItem, .edit-Pass-btn, .start-btn {
     height: 33px;
     padding: 5px 10px;
     font-size: 14px;
