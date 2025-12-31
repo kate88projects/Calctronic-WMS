@@ -436,6 +436,7 @@ namespace RackingSystem.Services.JOServices
                             JobOrderEmergency_Id = _jobE.JobOrderEmergency_Id,
                             Item_Id = dtl.Item_Id,
                             Qty = dtl.Qty,
+                            BalQty = dtl.Qty,
                         };
                         _dbContext.JobOrderEmergencyDetail.Add(_jobEDtl);
                     }
@@ -483,6 +484,7 @@ namespace RackingSystem.Services.JOServices
                                 JobOrderEmergency_Id = _jobE.JobOrderEmergency_Id,
                                 Item_Id = dtl.Item_Id,
                                 Qty = dtl.Qty,
+                                BalQty = dtl.Qty,
                             };
                             _dbContext.JobOrderEmergencyDetail.Add(_jobEDtl);
                         }
@@ -497,6 +499,7 @@ namespace RackingSystem.Services.JOServices
 
                             _jobEDtl.Item_Id = dtl.Item_Id;
                             _jobEDtl.Qty = dtl.Qty;
+                            _jobEDtl.BalQty = dtl.Qty;
                             _dbContext.JobOrderEmergencyDetail.Update(_jobEDtl);
                         }
                     }

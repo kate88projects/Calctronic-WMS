@@ -56,7 +56,6 @@ namespace RackingSystem.Data
             CreateMap<JobOrderDetail, JODetailReqDTO>();
             CreateMap<JobOrderDetail, RackJobHubOutDtlDTO>();
             CreateMap<JobOrderEmergency, JOEmergencyReqDTO>();
-            CreateMap<JobOrderEmergency, RackJobHubOutEDtlDTO>();
             CreateMap<JobOrderEmergencyDetail, JOEmergencyDetailReqDTO>();
             CreateMap<RackJob.RackJob, RackJobDTO>();
 

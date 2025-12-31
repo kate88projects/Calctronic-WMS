@@ -218,6 +218,9 @@ namespace RackingSystem.Services.RackJobQueueServices
                     var existingDetails = _dbContext.JobOrderRaws.Where(d => d.JobOrder_Id == req.Doc_Id).ToList();
                     _dbContext.JobOrderRaws.RemoveRange(existingDetails);
                     await _dbContext.SaveChangesAsync();
+
+                    JobOrder jobOrder = _dbContext.JobOrder.First(x => x.JobOrder_Id == req.Doc_Id);
+                    jobOrder.Status = EnumJobOrderStatus.Draft.ToString();
                 }
 
                 // 3. requeue

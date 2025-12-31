@@ -9,6 +9,8 @@ using RackingSystem.Services.GRNServices;
 using RackingSystem.Services.RackServices;
 using RackingSystem.General;
 using RackingSystem.Data.RackJob;
+using RackingSystem.Helpers;
+using System.Reflection;
 
 namespace RackingSystem.Controllers
 {
@@ -31,56 +33,66 @@ namespace RackingSystem.Controllers
             ViewBag.xToken = "";
             ViewBag.DeviceId = "";
             ViewBag.PermissionList = new List<int>();
-            string s = HttpContext.Session.GetString("xSession") ?? "";
-            if (s != "")
+
+            try
             {
-                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
-                ViewBag.PermissionList = data.UACIdList;
-                ViewBag.xToken = data.Token;
-                ViewBag.DeviceId = data.DeviceId;
-
-                var q = _context.RackJobQueue.Where(x => x.RackJobQueue_Id == qId).FirstOrDefault();
-                if (q != null)
+                string s = HttpContext.Session.GetString("xSession") ?? "";
+                if (s != "")
                 {
-                    if (q.DocType == EnumQueueDocType.Loader.ToString())
-                    {
-                        var doc = _context.Loader.Where(x => x.Loader_Id == q.Doc_Id).FirstOrDefault();
-                        if (doc != null)
-                        {
-                            ViewBag.QNo = "HubIn - " + doc.Description;
-                        }
-                    }
-                    else if (q.DocType == EnumQueueDocType.JO.ToString())
-                    {
-                        var doc = _context.JobOrder.Where(x => x.JobOrder_Id == q.Doc_Id).FirstOrDefault();
-                        if (doc != null)
-                        {
-                            ViewBag.QNo = "HubOut - " + doc.DocNo;
-                        }
-                    }
-                    else
-                    {
-                        var doc = _context.JobOrderEmergency.Where(x => x.JobOrderEmergency_Id == q.Doc_Id).FirstOrDefault();
-                        if (doc != null)
-                        {
-                            ViewBag.QNo = "HubOut - " + doc.DocNo;
-                        }
-                    }
-                }
+                    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                    ViewBag.PermissionList = data.UACIdList;
+                    ViewBag.xToken = data.Token;
+                    ViewBag.DeviceId = data.DeviceId;
 
-                var srms = _context.RackJob.FirstOrDefault();
-                if (srms != null)
-                {
-                    if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
+                    var q = _context.RackJobQueue.Where(x => x.RackJobQueue_Id == qId).FirstOrDefault();
+                    if (q != null)
                     {
-                        //return View("RackJobHubInView");
+                        if (q.DocType == EnumQueueDocType.Loader.ToString())
+                        {
+                            var doc = _context.Loader.Where(x => x.Loader_Id == q.Doc_Id).FirstOrDefault();
+                            if (doc != null)
+                            {
+                                ViewBag.QNo = "HubIn - " + doc.Description;
+                            }
+                        }
+                        else if (q.DocType == EnumQueueDocType.JO.ToString())
+                        {
+                            var doc = _context.JobOrder.Where(x => x.JobOrder_Id == q.Doc_Id).FirstOrDefault();
+                            if (doc != null)
+                            {
+                                ViewBag.QNo = "HubOut - " + doc.DocNo;
+                            }
+                        }
+                        else
+                        {
+                            var doc = _context.JobOrderEmergency.Where(x => x.JobOrderEmergency_Id == q.Doc_Id).FirstOrDefault();
+                            if (doc != null)
+                            {
+                                ViewBag.QNo = "HubOut - " + doc.DocNo;
+                            }
+                        }
                     }
-                    if (srms.RackJobQueue_Id != 0 && srms.LoginIP == ViewBag.DeviceId)
+
+                    var srms = _context.RackJob.FirstOrDefault();
+                    if (srms != null)
                     {
-                        ViewBag.QContinuos = "1";
+                        if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
+                        {
+                            //return View("RackJobHubInView");
+                        }
+                        if (srms.RackJobQueue_Id != 0 && srms.LoginIP == ViewBag.DeviceId)
+                        {
+                            ViewBag.QContinuos = "1";
+                        }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                PLCLogHelper.Instance.InsertPLCHubInLog(_context, 0, "grpRACKING", ex.Message, "");
+                PLCLogHelper.Instance.InsertPLCHubInLog(_context, 0, "grpRACKING", ex.StackTrace, "");
+            }
+
 
             ViewData["ActiveGroup"] = "grpRACKING";
             ViewData["ActiveTab"] = "RackJob";

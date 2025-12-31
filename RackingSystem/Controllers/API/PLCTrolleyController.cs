@@ -172,6 +172,52 @@ namespace RackingSystem.Controllers.API
             return result;
         }
 
+        [HttpGet("CheckRetrieveSlot/{trolleyId}/{side}/{colNo}/{rowNo}")]
+        public async Task<ServiceResponseModel<string>> CheckRetrieveSlot(long trolleyId, string side, int colNo, int rowNo)
+        {
+            ServiceResponseModel<string> result = new ServiceResponseModel<string>();
+            result.data = "";
+            string methodName = "CheckRetrieveSlot";
+
+            var configRack = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking1.ToString()).FirstOrDefault();
+            if (configRack == null)
+            {
+                result.errMessage = "Please set IP Address. ";
+                return result;
+            }
+
+            bool left = side == "A";
+            var slot = _dbContext.TrolleySlot.Where(x => x.Trolley_Id == trolleyId && x.IsLeft == left && x.ColNo == colNo && x.RowNo == rowNo).FirstOrDefault();
+            if (slot == null)
+            {
+                result.errMessage = "Cannot find Trolley Slot [" + colNo + " - " + rowNo + "]. ";
+                return result;
+            }
+
+            if (slot.IsActive == false)
+            {
+                result.errMessage = "Trolley Slot [" + colNo + " - " + rowNo + "] is inactive. ";
+                return result;
+            }
+
+            if (slot.HasReel)
+            {
+                result.errMessage = "Trolley Slot [" + colNo + " - " + rowNo + "] has reel. ";
+                return result;
+            }
+
+            result.data = slot.TrolleySlotCode;
+            result.success = true;
+
+            //// *** testing
+            //result.success = true;
+            //result.data = 1;
+            //return result;
+            //// *** testing
+
+            return result;
+        }
+
         [HttpGet("RetrieveTray/{trolleyId}/{side}/{colNo}/{rowNo}")]
         public async Task<ServiceResponseModel<int>> RetrieveTray(long trolleyId, string side, int colNo, int rowNo)
         {

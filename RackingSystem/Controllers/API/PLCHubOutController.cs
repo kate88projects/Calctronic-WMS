@@ -44,6 +44,63 @@ namespace RackingSystem.Controllers.API
             _contextFactory = contextFactory;
         }
 
+        [HttpPost("UpdateRackJobJson")]
+        public async Task<ServiceResponseModel<bool>> UpdateRackJobJson([FromBody] RackJobHubOutJsonDTO req)
+        {
+            ServiceResponseModel<bool> result = new ServiceResponseModel<bool>();
+            result.data = false;
+            if (req == null)
+            {
+                result.errMessage = "No body.";
+                return result;
+            }
+
+            try
+            {
+                var _job = _dbContext.RackJob.FirstOrDefault();
+                if (_job != null)
+                {
+                    _job.Json = JsonConvert.SerializeObject(req);
+                    await _dbContext.SaveChangesAsync();
+                    result.success = true;
+                }
+                else
+                {
+                    result.errMessage = "No RackJob found.";
+                }
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+            }
+            return result;
+        }
+
+        [HttpGet("GetRackJobJson")]
+        public ServiceResponseModel<RackJobHubOutJsonDTO> GetRackJobJson()
+        {
+            ServiceResponseModel<RackJobHubOutJsonDTO> result = new ServiceResponseModel<RackJobHubOutJsonDTO>();
+            result.data = new RackJobHubOutJsonDTO();
+            try
+            {
+                var _job = _dbContext.RackJob.FirstOrDefault();
+                if (_job != null)
+                {
+                    result.data = JsonConvert.DeserializeObject<RackJobHubOutJsonDTO>(_job.Json) ?? new RackJobHubOutJsonDTO();
+                    result.success = true;
+                }
+                else
+                {
+                    result.errMessage = "No RackJob found.";
+                }
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+            }
+            return result;
+        }
+
         [HttpGet("StartHubOut/{req}/{qId}")]
         public async Task<ServiceResponseModel<RackJobHubOutDTO>> StartHubOut(string req, long qId)
         {
@@ -87,36 +144,58 @@ namespace RackingSystem.Controllers.API
                     }
 
                     var srms = _dbContext.RackJob.First();
-                    srms.StartDate = DateTime.Now;
-                    srms.CurrentJobType = rackJob.DocType;
-                    srms.RackJobQueue_Id = qId;
-                    srms.Trolley_Id = r.data.Trolley_Id;
-                    srms.LoginIP = devId;
-                    _dbContext.SaveChanges();
 
                     RackJobHubOutDTO json = JsonConvert.DeserializeObject<RackJobHubOutDTO>(srms.Json) ?? new RackJobHubOutDTO();
                     result.data = json;
                     result.data.TrolleyInfo = r.data;
 
+                    // get outstanding
                     if (rackJob.DocType == EnumQueueDocType.JO.ToString())
                     {
-                        var list = _dbContext.JobOrderDetail.Where(x => x.JobOrder_Id == rackJob.Doc_Id).ToList();
-                        result.data.DtlList = _mapper.Map<List<RackJobHubOutDtlDTO>>(list);
+                        var list = _dbContext.JobOrderRaws.Where(x => x.JobOrder_Id == rackJob.Doc_Id && x.BalQty > 0).ToList();
+                        foreach (var itm in list)
+                        {
+                            result.data.DtlList.Add(new RackJobHubOutDtlDTO
+                            {
+                                Detail_Id = itm.JobOrderDetail_Id,
+                                Id = itm.JobOrder_Id,
+                                Item_Id = itm.Item_Id,
+                                Qty = itm.BalQty,
+                            });
+                        }
                     }
                     else
                     {
-                        var list = _dbContext.JobOrderEmergencyDetail.Where(x => x.JobOrderEmergency_Id == rackJob.Doc_Id).ToList();
-                        result.data.EDtlList = _mapper.Map<List<RackJobHubOutEDtlDTO>>(list);
+                        var list = _dbContext.JobOrderEmergencyDetail.Where(x => x.JobOrderEmergency_Id == rackJob.Doc_Id && x.BalQty > 0).ToList();
+                        foreach (var itm in list)
+                        {
+                            result.data.DtlList.Add(new RackJobHubOutDtlDTO
+                            {
+                                Detail_Id = itm.JobOrderEmergencyDetail_Id,
+                                Id = itm.JobOrderEmergency_Id,
+                                Item_Id = itm.Item_Id,
+                                Qty = itm.Qty,
+                            });
+                        }
                     }
 
-                    //if (result.data.EDtlList.Count == 0 && result.data.DtlList.Count == 0)
-                    //{
-                    //    result.success = false;
-                    //    result.errMessage = "This Job Order is done retrieve.";
-                    //    return result;
-                    //}
+                    if (result.data.DtlList.Count == 0)
+                    {
+                        result.success = false;
+                        result.errMessage = "This Job Order is done retrieve.";
+                        return result;
+                    }
 
-                    result.totalRecords = 2; // result.data.DtlList.Count + result.data.EDtlList.Count;
+                    // update rackjob
+                    srms.StartDate = DateTime.Now;
+                    srms.CurrentJobType = rackJob.DocType;
+                    srms.RackJobQueue_Id = qId;
+                    srms.Trolley_Id = r.data.Trolley_Id;
+                    srms.LoginIP = devId;
+                    srms.TotalCount = result.data.DtlList.Count;
+                    _dbContext.SaveChanges();
+
+                    result.totalRecords = result.data.DtlList.Count;
                     result.success = true;
                     return result;
                 }
@@ -213,8 +292,8 @@ namespace RackingSystem.Controllers.API
             return result;
         }
 
-        [HttpGet("GetReelSlot/{slotCode}")]
-        public async Task<ServiceResponseModel<SlotReelDTO>> GetReelSlot(string slotCode)
+        [HttpGet("GetReelSlot/{slotCode}/{qId}")]
+        public async Task<ServiceResponseModel<SlotReelDTO>> GetReelSlot(string slotCode, long qId)
         {
             ServiceResponseModel<SlotReelDTO> result = new ServiceResponseModel<SlotReelDTO>();
             result.data = new SlotReelDTO();
@@ -224,6 +303,43 @@ namespace RackingSystem.Controllers.API
             {
                 var claims = User.Identities.First().Claims.ToList();
                 string devId = claims?.FirstOrDefault(x => x.Type.Equals("DeviceId", StringComparison.OrdinalIgnoreCase))?.Value ?? "";
+
+                var rackJob = _dbContext.RackJobQueue.Where(x => x.RackJobQueue_Id == qId).First();
+                if (rackJob == null)
+                {
+                    result.success = false;
+                    result.errMessage = "Cannot find this Job in queue.";
+                    return result;
+                }
+                RackJobHubOutDtlDTO item = new RackJobHubOutDtlDTO();
+                if (rackJob.DocType == EnumQueueDocType.JO.ToString())
+                {
+                    var itmFirst = _dbContext.JobOrderRaws.Where(x => x.JobOrder_Id == rackJob.Doc_Id && x.BalQty > 0).OrderBy(x => x.JobOrderDetail_Id).FirstOrDefault();
+                    if (itmFirst != null)
+                    {
+                        item.Detail_Id = itmFirst.JobOrderDetail_Id;
+                        item.Id = itmFirst.JobOrder_Id;
+                        item.Item_Id = itmFirst.Item_Id;
+                        item.Qty = itmFirst.BalQty;
+                    }
+                }
+                else
+                {
+                    var itmFirst = _dbContext.JobOrderEmergencyDetail.Where(x => x.JobOrderEmergency_Id == rackJob.Doc_Id && x.BalQty > 0).FirstOrDefault();
+                    if (itmFirst != null)
+                    {
+                        item.Detail_Id = itmFirst.JobOrderEmergencyDetail_Id;
+                        item.Id = itmFirst.JobOrderEmergency_Id;
+                        item.Item_Id = itmFirst.Item_Id;
+                        item.Qty = itmFirst.BalQty;
+                    }
+                }
+                if (item.Detail_Id == 0)
+                {
+                    result.success = false;
+                    result.errMessage = "No Reel need to take.";
+                    return result;
+                }
 
                 if (slotCode != "-")
                 {
@@ -259,6 +375,41 @@ namespace RackingSystem.Controllers.API
                     return result;
                 }
 
+                // *** special checking in trolley really have at least 1 free slot
+                int bottomSlotRow = 0;
+                int bottomSlotCol = 0;
+
+                //calculate slot
+                var slotUsage = _dbContext.SlotCalculation.Where(x => x.MaxThickness >= reel.ActualHeight).OrderBy(x => x.MaxThickness).FirstOrDefault();
+                if (slotUsage == null)
+                {
+                    result.success = false;
+                    result.errMessage = "Please setup Slot Calculation.";
+                    return result;
+                }
+
+                SlotFreeReqDTO reqSlot = new SlotFreeReqDTO();
+                reqSlot.ColNo = 0;
+                reqSlot.IsLeft = true;
+                reqSlot.TotalSlot = slotUsage.ReserveSlot;
+                ServiceResponseModel<SlotFreeDTO> rSlot = await _trolleyService.GetFreeTrolleySlot_BySlot_ASC(reqSlot);
+                if (rSlot.data != null)
+                {
+                    if (rSlot.data.Row1 > 0)
+                    {
+                        bottomSlotCol = rSlot.data.ColNo;
+                        bottomSlotRow = rSlot.data.Row1;
+                    }
+                }
+
+                if (bottomSlotCol == 0 && bottomSlotRow == 0)
+                {
+                    result.success = false;
+                    result.errMessage = "Trolley no empty slot is ready.";
+                    result.errStackTrace = "-1";
+                    return result;
+                }
+
                 result.success = true;
                 result.data.Slot_Id = rack.Slot_Id;
                 result.data.SlotCode = rack.SlotCode;
@@ -268,6 +419,7 @@ namespace RackingSystem.Controllers.API
                 result.data.ReelId = rack.Reel_Id.ToString();
                 result.data.ReelCode = reel.ReelCode;
                 result.data.ActualHeight = reel.ActualHeight;
+                result.data.Detail_Id = item.Detail_Id;
                 //var slot = _dbContext.Slot.Where(x => x.SlotCode == result.data.SlotCode).FirstOrDefault();
                 //if (slot != null)
                 //{
@@ -489,8 +641,8 @@ namespace RackingSystem.Controllers.API
             return result;
         }
 
-        [HttpGet("GetBottomSlot/{slotCode}/{actHeight}")]
-        public async Task<ServiceResponseModel<TrolleySlotDTO>> GetBottomSlot(string slotCode, int actHeight)
+        [HttpGet("GetBottomSlot/{slotCode}/{actHeight}/{side}")]
+        public async Task<ServiceResponseModel<TrolleySlotDTO>> GetBottomSlot(string slotCode, int actHeight, string side)
         {
             ServiceResponseModel<TrolleySlotDTO> result = new ServiceResponseModel<TrolleySlotDTO>();
             result.data = new TrolleySlotDTO();
@@ -535,7 +687,7 @@ namespace RackingSystem.Controllers.API
 
                 SlotFreeReqDTO reqSlot = new SlotFreeReqDTO();
                 reqSlot.ColNo = 0;
-                reqSlot.IsLeft = true;
+                reqSlot.IsLeft = side == "A";
                 reqSlot.TotalSlot = slotUsage.ReserveSlot;
                 ServiceResponseModel<SlotFreeDTO> rSlot = await _trolleyService.GetFreeTrolleySlot_BySlot_ASC(reqSlot);
                 if (rSlot.data != null)
@@ -551,6 +703,7 @@ namespace RackingSystem.Controllers.API
                 {
                     result.success = false;
                     result.errMessage = "No empty slot is ready.";
+                    result.errStackTrace = "-1";
                     return result;
                 }
 
@@ -772,8 +925,8 @@ namespace RackingSystem.Controllers.API
             return result;
         }
 
-        [HttpGet("UpdateReelIntoTrolley/{trolleyId}/{reelId}/{slotCode}/{slotReserve}")]
-        public async Task<ServiceResponseModel<int>> UpdateReelIntoTrolley(long trolleyId, string reelId, string slotCode, int slotReserve)
+        [HttpGet("UpdateReelIntoTrolley/{trolleyId}/{reelId}/{slotCode}/{slotReserve}/{dtlId}/{qId}")]
+        public async Task<ServiceResponseModel<int>> UpdateReelIntoTrolley(long trolleyId, string reelId, string slotCode, int slotReserve, long dtlId, long qId)
         {
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             result.data = -1;
@@ -800,11 +953,37 @@ namespace RackingSystem.Controllers.API
                     return result;
                 }
 
+                var rackJob = _dbContext.RackJobQueue.Where(x => x.RackJobQueue_Id == qId).First();
+                if (rackJob == null)
+                {
+                    result.success = false;
+                    result.errMessage = "Cannot find this Job in queue.";
+                    return result;
+                }
+
                 // temp hide
                 // 1.1 update reel status
                 _reel.StatusIdx = (int)EnumReelStatus.InTrolley;
                 _reel.Status = EnumReelStatus.Out.ToString();
                 await _dbContext.SaveChangesAsync();
+
+                // 2. update detail tables
+                if (rackJob.DocType == EnumQueueDocType.JO.ToString())
+                {
+                    var itmFirst = _dbContext.JobOrderRaws.Where(x => x.JobOrder_Id == rackJob.Doc_Id && x.BalQty > 0).OrderBy(x => x.JobOrderDetail_Id).FirstOrDefault();
+                    if (itmFirst != null)
+                    {
+                        itmFirst.BalQty = 0;
+                    }
+                }
+                else
+                {
+                    var itmFirst = _dbContext.JobOrderEmergencyDetail.Where(x => x.JobOrderEmergency_Id == rackJob.Doc_Id && x.BalQty > 0).FirstOrDefault();
+                    if (itmFirst != null)
+                    {
+                        itmFirst.BalQty = 0;
+                    }
+                }
 
                 // 4. update slot set reelId
                 _slot.Reel_Id = _reel.Reel_Id;

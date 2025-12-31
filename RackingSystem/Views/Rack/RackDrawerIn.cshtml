@@ -556,19 +556,25 @@
 
         <div class="simplified-rack-visualization">
             <div class="rack-area-tr left-rack-tr" data-area="left">
-                <h4>Col 1</h4>
+                <h4>
+                    <input type="checkbox" id="chkCol1"  /> Col 1
+                </h4>
                 <input type="text" id="left-input-tr" autocomplete="off" />
                 @* <p id="left-status">Status: IDLE</p> *@
             </div>
 
             <div class="rack-area-tr center-rack-tr" data-area="center">
-                <h4>Col 2</h4>
+                <h4>
+                    <input type="checkbox" id="chkCol2"  /> Col 2
+                </h4>
                 <input type="text" id="center-input-tr" autocomplete="off" />
                 @* <p id="left-status">Status: IDLE</p> *@
             </div>
 
             <div class="rack-area-tr right-rack-tr" data-area="right">
-                <h4>Col 3</h4>
+                <h4>
+                    <input type="checkbox" id="chkCol3"  /> Col 3
+                </h4>
                 <input type="text" id="right-input-tr" autocomplete="off" />
                 @* <p id="left-status">Status: IDLE</p> *@
             </div>
@@ -687,7 +693,10 @@
             $("#left-input-tr").val('1');
             $("#center-input-tr").val('1');
             $("#right-input-tr").val('1');
-            
+
+            document.getElementById('chkCol1').checked = true;
+            document.getElementById('chkCol2').checked = true;
+            document.getElementById('chkCol3').checked = true;
 
             // if (qCont == "1") {
             //     $('#cont-btn').removeClass('hidden');
@@ -1129,17 +1138,33 @@
             logMessage2(`Cartesian cycle started: Retrieve Empty Drawer.`, 'info');
             inRetrieveMove = true;
 
+            const chkCol1 = document.getElementById('chkCol1');
+            const chkCol2 = document.getElementById('chkCol2');
+            const chkCol3 = document.getElementById('chkCol3');
+
             sharedDrawerState.trolleyLocation = 'left';
-            if (colNo == 1 && Number($('#left-input-tr').val()) >= 15) {
+            if (colNo == 1 && Number($('#left-input-tr').val()) >= 51) {
                 colNo = 2;
                 sharedDrawerState.trolleyLocation = 'center';
             }
-            if (colNo == 2 && Number($('#center-input-tr').val()) >= 0) {
+            if (colNo == 1 && chkCol1.checked == false) {
+                colNo = 2;
+            }
+            if (colNo == 2 && Number($('#center-input-tr').val()) >= 51) {
                 colNo = 3;
                 sharedDrawerState.trolleyLocation = 'right';
             }
-            if (colNo == 3 && Number($('#right-input-tr').val()) >= 0) {
-                // logMessage2(`Trolley is done retrieve, please change another side.`, 'alert');
+            if (colNo == 2 && chkCol2.checked == false) {
+                colNo = 3;
+            }
+            if (colNo == 3 && Number($('#right-input-tr').val()) >= 51) {
+                logMessage2(`Trolley is done retrieve, please change another side.`, 'alert');
+                loadDBEnd();
+                systemStop();
+                return;
+            }
+            if (colNo == 3 && chkCol3.checked == false) {
+                logMessage2(`Trolley is done retrieve, please change another side.`, 'alert');
                 loadDBEnd();
                 systemStop();
                 return;
@@ -1149,6 +1174,15 @@
 
             updateTrolleyUIState();
             updateCartesianUIState();
+
+            var chkSlot = await loadDBCheckRetrieveSlot();
+            if (chkSlot == false) {
+                sharedDrawerState.cartesianRobotState = 'Ready';
+                inRetrieveMove = false;
+                return;
+            }
+
+
             var getSlot = await loadPLCRetrieveTray();
             if (getSlot == false) {
                 sharedDrawerState.cartesianRobotState = 'Ready';
@@ -1311,6 +1345,62 @@
 
 
         // ----------- Database
+        async function loadDBCheckRetrieveSlot() {
+
+            var s = $('#side-input').val();
+            var tr = $("#txtTrolleyId").val();
+            var rowNo = Number($('#left-input-tr').val());
+            if (colNo == 2) {
+                rowNo = Number($('#center-input-tr').val())
+            }
+            if (colNo == 3) {
+                rowNo = Number($('#right-input-tr').val())
+            }
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCTrolley/CheckRetrieveSlot/" + tr + "/" + s + "/" + colNo + "/" + rowNo,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('10::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        logMessage('Check Slot :: OK ', 'info');
+                        $('#txtRetrieveSlot').val(result.data);
+                    }
+                    else {
+                        logMessage('Check Slot :: ' + result.errMessage, 'alert');
+
+                        if (colNo == 1) {
+                            $('#left-input-tr').val(rowNo + 1);
+                        }
+                        if (colNo == 2) {
+                            $('#center-input-tr').val(rowNo + 1);
+                        }
+                        if (colNo == 3) {
+                            $('#right-input-tr').val(rowNo + 1);
+                        }
+                    }
+                    return true;
+                },
+                error: function (error) {
+                    logMessage('End Loader :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
         async function loadDBEnd() {
 
             var fResult = false;
@@ -1469,21 +1559,21 @@
                         fResult = 0;
                         if (colNo == 1) {
                             $('#left-input-tr').val(rowNo + 1);
-                            if (rowNo + 1 > 50) {
-                                $('#left-input-tr').val(50);
-                            }
+                            // if (rowNo + 1 > 50) {
+                            //     $('#left-input-tr').val(50);
+                            // }
                         }
                         if (colNo == 2) {
                             $('#center-input-tr').val(rowNo + 1);
-                            if (rowNo + 1 > 50) {
-                                $('#center-input-tr').val(50);
-                            }
+                            // if (rowNo + 1 > 50) {
+                            //     $('#center-input-tr').val(50);
+                            // }
                         }
                         if (colNo == 3) {
                             $('#right-input-tr').val(rowNo + 1);
-                            if (rowNo + 1 > 50) {
-                                $('#right-input-tr').val(50);
-                            }
+                            // if (rowNo + 1 > 50) {
+                            //     $('#right-input-tr').val(50);
+                            // }
                         }
                         logMessage2('Retrieve Status :: OK ', 'info');
                     }
@@ -1559,7 +1649,7 @@
                             $("#left-input").val(result.data.slotCode);
                         }
                         else {
-                            sharedDrawerState.trolleyLocation = 'right';
+                            sharedDrawerState.cartesianLocation = 'right';
                             $("#right-input").val(result.data.slotCode);
                         }
                     }

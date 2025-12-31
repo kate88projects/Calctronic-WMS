@@ -15,5 +15,8 @@ namespace RackingSystem.Data.JO
 
         [Required]
         public int Qty { get; set; } = 0;
+
+        [Required]
+        public int BalQty { get; set; } = 0;
     }
 }

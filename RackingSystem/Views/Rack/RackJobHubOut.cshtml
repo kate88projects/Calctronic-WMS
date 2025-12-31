@@ -518,6 +518,7 @@
     <input type="hidden" id="xDeviceId" value="@ViewBag.DeviceId" autocomplete="off">
     <input type="hidden" id="xQContinuos" value="@ViewBag.QContinuos" autocomplete="off">
     <input type="hidden" id="txtTrolleyId" autocomplete="off">
+    <input type="hidden" id="txtDtlId" autocomplete="off">
 
     <div class="header-controls">
         <div class="input-container">
@@ -528,6 +529,10 @@
         <div class="input-container">
             <label for="trolley-input">Trolley:</label>
             <input type="text" id="trolley-input" />
+            <select id="side-input" width="50px;">
+                <option id="A">A</option>
+                <option id="B">B</option>
+            </select>
         </div>
 
         <button id="cont-btn" onclick="systemCont()" class="control-btn start-btn hidden">Continue</button>
@@ -574,9 +579,9 @@
             <br />
             <button onclick="startPutAway()">Put Away</button>
             <hr />
-            <a href="javascript:loadPLCGetSlot()">Get Valid Slot</a> > <a href="javascript:loadPLCPutAway()">Put Away</a>
+            @* <a href="javascript:loadPLCGetSlot()">Get Valid Slot</a> > <a href="javascript:loadPLCPutAway()">Put Away</a>
             <br />
-            <a href="javascript:retry_PutAwayStatus()">Put Away Status</a>
+            <a href="javascript:retry_PutAwayStatus()">Put Away Status</a> *@
         </div>
 
         <input type="text" id="txtPutSlot" placeholder="Put Slot" autocomplete="off">
@@ -615,10 +620,9 @@
             <br />
             <button onclick="startRetrieve()">Retrieve</button>
             <hr />
-            <a href="javascript:loadPLCGetEmptyTraySlot()">Get Reel Slot</a> > <a href="javascript:loadPLCTakeEmptyTray()">Retrieve</a> >
-            @* <p style="margin-top: 10px;">*Note: Drawer status above syncs with this system.</p> *@
+            @* <a href="javascript:loadPLCGetEmptyTraySlot()">Get Reel Slot</a> > <a href="javascript:loadPLCTakeEmptyTray()">Retrieve</a> >
             <br />
-            <a href="javascript:retry_RetrieveStatus()">Retrieve Status</a>
+            <a href="javascript:retry_RetrieveStatus()">Retrieve Status</a> *@
         </div>
 
         <input type="text" id="txtRetrieveSlot" placeholder="Retrieve Slot" autocomplete="off">
@@ -676,19 +680,20 @@
             disableDivContent(true);
             $("#txtTrolleyId").val('0');
             $("#txtActHeight").val('0');
+            $('#side-input').val('A');
+            $('#txtDtlId').val('0');
             updateSystemStatusUI();
-            updateJson();
 
             token = $('#xToken').val();
             qId = Number($('#xQId').val());
             deviceId = $('#xDeviceId').val();
             qCont = $('#xQContinuos').val();
 
-            // if (qCont == "1") {
-            //     $('#cont-btn').removeClass('hidden');
-            //     $('#start-btn').addClass('hidden');
-            //     readyContinuos();
-            // }
+            if (qCont == "1") {
+                $('#cont-btn').removeClass('hidden');
+                $('#start-btn').addClass('hidden');
+                readyContinuos();
+            }
         });
 
         /**
@@ -738,24 +743,23 @@
             }
         }
 
-        // async function readyContinuos() {
-        //     var data = await getJson();
-        //     // console.log(data);
+        async function readyContinuos() {
+            var data = await getJson();
+            // console.log(data);
 
-        //     if (data == true) {
-        //         await getLoader($("#trolley-input").val(), true);
+            if (data == true) {
+                await getTrolley($("#trolley-input").val(), true);
 
-        //         // console.log(sharedDrawerState);
+                // console.log(sharedDrawerState);
 
-        //         // updateSystemStatusUI();
-        //         updateGantryUIState();
-        //         updateCartesianUIState();
+                // updateSystemStatusUI();
+                updateTrolleyUIState();
+                updateCartesianUIState();
 
-        //     }
-        // }
+            }
+        }
 
         // System Start Handler
-
         async function systemStart() {
             if (sharedDrawerState.systemRunning) return;
 
@@ -794,7 +798,7 @@
             // 3. Continue UI
             disableDivContent(false);
 
-            updateActiveColumn(colNum);
+            // updateActiveColumn(colNum);
 
             sharedDrawerState.systemRunning = true;
             updateSystemStatusUI();
@@ -944,123 +948,96 @@
 
         // ----------- HMI Action
         function updateJson() {
-        //     var data = {
-        //         SystemStart: sharedDrawerState.systemRunning,
+            var data = {
+                SystemStart: sharedDrawerState.systemRunning,
 
-        //         LoaderCode: $("#trolley-input").val(),
-        //         LoaderId: Number($("#txtLoaderId").val()),
+                TrolleyCode: $("#trolley-input").val(),
+                TrolleyId: Number($("#txtTrolleyId").val()),
 
-        //         DrawerStatus: sharedDrawerState.drawerStatus,
-        //         GantryStatus: sharedDrawerState.gantrySequenceState,
+                DrawerStatus: sharedDrawerState.drawerStatus,
 
-        //         SetUnload: Number($("#txtSetUnload").val()),
-        //         ReelId: $("#txtReelId").val(),
-        //         ReelCode: $("#txtReelCode").val(),
-        //         ActualHeight: Number($("#txtActHeight").val()),
+                ReelId: $("#txtReelId").val(),
+                ReelCode: $("#txtReelCode").val(),
+                ActualHeight: Number($("#txtActHeight").val()),
 
-        //         CartesianRobotState: sharedDrawerState.cartesianRobotState,
-        //         CartesianLocation: sharedDrawerState.cartesianLocation,
+                CartesianRobotState: sharedDrawerState.cartesianRobotState,
+                CartesianLocation: sharedDrawerState.cartesianLocation,
 
-        //         RetrieveSlot: $("#txtRetrieveSlot").val(),
-        //         PutAwaySlot: $("#txtPutSlot").val(),
-        //         SlotTake: Number($("#txtPutSlotTake").val()),
+                RetrieveSlot: $("#txtRetrieveSlot").val(),
+                PutAwaySlot: $("#txtPutSlot").val(),
+                SlotTake: Number($("#txtPutSlotTake").val()),
 
-        //         ReelIdC: $("#txtReelIdC").val(),
-        //         ReelCodeC: $("#txtReelCodeC").val(),
-        //         ActualHeightC: Number($("#txtActHeightC").val()),
+                TrolleyLocation: sharedDrawerState.trolleyLocation,
+            }
 
-        //         HalfPickMove: halfPickMove,
-        //         HalfPickMoveStep: halfPickMoveStep,
-        //         HalfPlaceMove: halfPlaceMove,
-        //         HalfPlaceMoveStep: halfPlaceMoveStep,
-
-        //         Col1TotalReels: Number($("#txtCol1TotalReels").val()),
-        //         Col2TotalReels: Number($("#txtCol2TotalReels").val()),
-        //         Col3TotalReels: Number($("#txtCol3TotalReels").val()),
-        //         Col4TotalReels: Number($("#txtCol4TotalReels").val()),
-
-        //         ColNum: colNum,
-        //     }
-
-        //     $.ajax({
-        //         url: '/api/PLCHubIn/UpdateRackJobJson',
-        //         type: 'POST',
-        //         headers: {
-        //             'Authorization': 'Bearer ' + token
-        //         },
-        //         data: JSON.stringify(data),
-        //         dataType: 'JSON',
-        //         contentType: 'application/json; charset=utf-8',
-        //         beforeSend: function () {
-        //         },
-        //         success: function (result) {
-        //             if (result.success == true) {
-        //             }
-        //             else {
-        //                 console.log(result.errMessage);
-        //             }
-        //         },
-        //         error: function (error) {
-        //             console.log(error);
-        //         }
-        //     });
+            $.ajax({
+                url: '/api/PLCHubOut/UpdateRackJobJson',
+                type: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                data: JSON.stringify(data),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                    }
+                    else {
+                        console.log(result.errMessage);
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
         }
 
         async function getJson() {
-        //     var fResult = false;
+            var fResult = false;
 
-        //     await $.ajax({
-        //         url: '/api/PLCHubIn/GetRackJobJson',
-        //         type: 'GET',
-        //         headers: {
-        //             'Authorization': 'Bearer ' + token
-        //         },
-        //         dataType: 'JSON',
-        //         contentType: 'application/json; charset=utf-8',
-        //         beforeSend: function () {
-        //         },
-        //         success: function (result) {
-        //             sharedDrawerState.systemRunning = result.data.systemRunning;
+            await $.ajax({
+                url: '/api/PLCHubOut/GetRackJobJson',
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                },
+                success: function (result) {
+                    sharedDrawerState.systemRunning = result.data.systemStart;
 
-        //             sharedDrawerState.drawerStatus = result.data.drawerStatus;
-        //             sharedDrawerState.gantrySequenceState = result.data.gantryStatus;
+                    $("#trolley-input").val(result.data.trolleyCode);
+                    $("#txtTrolleyId").val(result.data.trolleyId);
 
-        //             $("#loader-input").val(result.data.loaderCode);
-        //             $("#txtLoaderId").val(result.data.loaderId);
+                    sharedDrawerState.drawerStatus = result.data.drawerStatus;
 
-        //             $("#txtSetUnload").val(result.data.setUnload);
-        //             $("#txtReelId").val(result.data.reelId);
-        //             $("#txtReelCode").val(result.data.reelCode);
-        //             $("#txtActHeight").val(result.data.actualHeight);
+                    $("#txtReelId").val(result.data.reelId);
+                    $("#txtReelCode").val(result.data.reelCode);
+                    $("#txtActHeight").val(result.data.actualHeight);
 
-        //             sharedDrawerState.cartesianRobotState = result.data.cartesianRobotState;
-        //             sharedDrawerState.cartesianLocation = result.data.cartesianLocation;
+                    sharedDrawerState.cartesianRobotState = result.data.cartesianRobotState;
+                    sharedDrawerState.cartesianLocation = result.data.cartesianLocation;
 
-        //             $("#txtRetrieveSlot").val(result.data.retrieveSlot);
-        //             $("#txtPutSlot").val(result.data.putAwaySlot);
-        //             $("#txtPutSlotTake").val(result.data.slotTake);
+                    $("#txtRetrieveSlot").val(result.data.retrieveSlot);
+                    $("#txtPutSlot").val(result.data.putAwaySlot);
+                    $("#txtPutSlotTake").val(result.data.slotTake);
 
-        //             $("#txtReelIdC").val(result.data.reelIdC);
-        //             $("#txtReelCodeC").val(result.data.reelCodeC);
-        //             $("#txtActHeightC").val(result.data.actualHeightC);
+                    sharedDrawerState.trolleyLocation = result.data.trolleyLocation;
 
-        //             halfPickMove = result.data.HalfPickMove;
-        //             halfPickMoveStep = result.data.halfPickMoveStep;
-        //             halfPlaceMove = result.data.halfPlaceMove;
-        //             halfPlaceMoveStep = result.data.halfPlaceMoveStep;
+                    fResult = true;
 
-        //             colNum = result.data.colNum;
+                    return fResult;
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
 
-        //             fResult = true;
-
-        //             return fResult;
-        //         },
-        //         error: function (error) {
-        //             console.log(error);
-        //         }
-        //     });
-
-        //     return fResult;
+            return fResult;
         }
 
         // ----------- Action (Auto Mode)
@@ -1085,7 +1062,7 @@
 
         // ----------- Action
 
-        // Cartesian Start Retrieve Empty Drawer
+        // Cartesian Start Retrieve Reel
         async function startRetrieve() {
             if (inRetrieveMove == true) {
                 return;
@@ -1124,14 +1101,27 @@
                 return;
             }
 
+            if (totalReels == 0) {
+                logMessage2(`Job is done retrieve.`, 'alert');
+                loadDBEnd();
+                systemStop();
+                return;
+            }
+
             sharedDrawerState.cartesianRobotState = 'Retrieving';
             logMessage2(`Cartesian cycle started: Retrieve Empty Drawer.`, 'info');
             inRetrieveMove = true;
 
             var getSlotCode = await loadPLCGetReelSlot();
-            if (getSlotCode == false) {
+            if (getSlotCode == 0) {
                 sharedDrawerState.cartesianRobotState = 'Ready';
                 inRetrieveMove = false;
+                return;
+            }
+            if (getSlotCode == -1) {
+                sharedDrawerState.cartesianRobotState = 'Ready';
+                inRetrieveMove = false;
+                systemStop();
                 return;
             }
 
@@ -1142,6 +1132,7 @@
             if (getSlot == false) {
                 sharedDrawerState.cartesianRobotState = 'Ready';
                 inRetrieveMove = false;
+                updateJson();
                 return;
             }
             await delay(5000);
@@ -1151,6 +1142,7 @@
                 sharedDrawerState.cartesianRobotState = 'Ready';
                 inRetrieveMove = false;
                 changeTakeSlot = true;
+                updateJson();
 
                 if (attemptsRetrieve > 3) {
                     logMessage2('Retrieve Empty Drawer :: Tried ' + (attemptsRetrieve - 1) + ', auto stop now.', 'info');
@@ -1198,10 +1190,16 @@
             logMessage(`Cartesian cycle started: Put Away Reel.`, 'info');
             inPutAwayMove = true;
 
-            var getSlotCode = await loadPLCGetTrolleySlot();
-            if (getSlotCode == false) {
+            var getTrSlotCode = await loadPLCGetTrolleySlot();
+            if (getTrSlotCode == 0) {
                 sharedDrawerState.cartesianRobotState = 'Retrieved';
                 inPutAwayMove = false;
+                return;
+            }
+            if (getTrSlotCode == -1) {
+                sharedDrawerState.cartesianRobotState = 'Retrieved';
+                inPutAwayMove = false;
+                systemStop();
                 return;
             }
 
@@ -1302,11 +1300,12 @@
             var reelId = $("#txtReelId").val();
             var sCode = $("#txtPutSlot").val();
             var sTake = $("#txtPutSlotTake").val();
+            var dId = $("#txtDtlId").val();
             var fResult = false;
 
             // step 4 : scan item
             await $.ajax({
-                url: "/api/PLCHubOut/UpdateReelIntoTrolley/" + tr + "/" + reelId + "/" + sCode + "/" + sTake,
+                url: "/api/PLCHubOut/UpdateReelIntoTrolley/" + tr + "/" + reelId + "/" + sCode + "/" + sTake + "/" + dId + "/" + qId,
                 type: "GET",
                 headers: {
                     'Authorization': 'Bearer ' + token
@@ -1433,7 +1432,7 @@
         // ----------- Cartesian :: Take Reel
         async function loadPLCGetReelSlot() {
 
-            var fResult = false;
+            var fResult = 0;
             var chkSlot = '-';
             if (changeTakeSlot == true) {
                 chkSlot = $("#txtRetrieveSlot").val();
@@ -1442,7 +1441,7 @@
 
             // step 2 : scan item
             await $.ajax({
-                url: "/api/PLCHubOut/GetReelSlot/" + chkSlot,
+                url: "/api/PLCHubOut/GetReelSlot/" + chkSlot + "/" + qId,
                 type: "GET",
                 headers: {
                     'Authorization': 'Bearer ' + token
@@ -1457,13 +1456,15 @@
                     // console.log('3::' + JSON.stringify(result));
                     // swal.close();
                     if (result.success == true) {
-                        fResult = true;
+                        fResult = 1;
                         logMessage('Get Reel Slot :: Done ', 'info');
                         $("#txtRetrieveSlot").val(result.data.slotCode);
                         $("#txtActHeight").val(result.data.actualHeight);
 
                         $("#txtReelId").val(result.data.reelId);
                         $("#txtReelCode").val(result.data.reelCode);
+
+                        $("#txtDtlId").val(result.data.detail_Id);
 
                         if (result.data.isLeft == true) {
                             sharedDrawerState.cartesianLocation = 'left';
@@ -1475,6 +1476,9 @@
                         }
                     }
                     else {
+                        if (result.errStackTrace == "-1") {
+                            fResult = -1;
+                        }
                         logMessage('Get Reel Slot :: ' + result.errMessage, 'alert');
                     }
                 },
@@ -1562,7 +1566,7 @@
         // ----------- Cartesian :: Put Away
         async function loadPLCGetTrolleySlot() {
 
-            var fResult = false;
+            var fResult = 0;
 
             var chkSlot = '-';
             if (changePutSlot == true) {
@@ -1571,10 +1575,11 @@
             }
 
             var actH = $("#txtActHeight").val();
+            var s = $('#side-input').val();
 
             // step 4 : scan item
             await $.ajax({
-                url: "/api/PLCHubOut/GetBottomSlot/" + chkSlot + "/" + actH,
+                url: "/api/PLCHubOut/GetBottomSlot/" + chkSlot + "/" + actH + "/" + s,
                 type: "GET",
                 headers: {
                     'Authorization': 'Bearer ' + token
@@ -1589,7 +1594,7 @@
                     // console.log('4::' + JSON.stringify(result));
                     // swal.close();
                     if (result.success == true) {
-                        fResult = true;
+                        fResult = 1;
                         logMessage2('Get Put Away Slot :: Done ', 'info');
                         $("#txtPutSlot").val(result.data.trolleySlotCode);
                         $("#txtPutSlotTake").val(result.data.totalSlot);
@@ -1607,6 +1612,9 @@
                         }
                     }
                     else {
+                        if (result.errStackTrace == "-1") {
+                            fResult = -1;
+                        }
                         logMessage2('Get Put Away Slot :: ' + result.errMessage, 'alert');
                     }
                 },

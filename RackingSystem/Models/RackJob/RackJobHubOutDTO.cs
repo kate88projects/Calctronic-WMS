@@ -12,34 +12,29 @@ namespace RackingSystem.Models.RackJob
         public string TrolleyCode { get; set; } = "";
         public long TrolleyId { get; set; } = 0;
 
-        public string GantryStatus { get; set; } = "";
+        public string DrawerStatus { get; set; } = "";
 
         public string ReelId { get; set; } = "";
         public string ReelCode { get; set; } = "";
+        public int ActualHeight { get; set; } = 0;
 
         public string CartesianRobotState { get; set; } = "";
         public string CartesianLocation { get; set; } = "";
 
         public string RetrieveSlot { get; set; } = "";
         public string PutAwaySlot { get; set; } = "";
+        public int SlotTake { get; set; } = 0;
+
+        public string TrolleyLocation { get; set; } = "";
 
         public List<RackJobHubOutDtlDTO> DtlList { get; set; } = new List<RackJobHubOutDtlDTO>();
-        public List<RackJobHubOutEDtlDTO> EDtlList { get; set; } = new List<RackJobHubOutEDtlDTO>();
 
     }
 
     public class RackJobHubOutDtlDTO
     {
-        public long JobOrderDetail_Id { get; set; }
-        public long JobOrder_Id { get; set; }
-        public long Item_Id { get; set; }
-        public int Qty { get; set; } = 0;
-    }
-
-    public class RackJobHubOutEDtlDTO
-    {
-        public long JobOrderEmergencyDetail_Id { get; set; }
-        public long JobOrderEmergency_Id { get; set; }
+        public long Detail_Id { get; set; }
+        public long Id { get; set; }
         public long Item_Id { get; set; }
         public int Qty { get; set; } = 0;
     }
@@ -51,15 +46,20 @@ namespace RackingSystem.Models.RackJob
         public string TrolleyCode { get; set; } = "";
         public long TrolleyId { get; set; } = 0;
 
-        public string GantryStatus { get; set; } = "";
+        public string DrawerStatus { get; set; } = "";
 
         public string ReelId { get; set; } = "";
         public string ReelCode { get; set; } = "";
+        public int ActualHeight { get; set; } = 0;
 
         public string CartesianRobotState { get; set; } = "";
         public string CartesianLocation { get; set; } = "";
 
         public string RetrieveSlot { get; set; } = "";
         public string PutAwaySlot { get; set; } = "";
+        public int SlotTake { get; set; } = 0;
+
+        public string TrolleyLocation { get; set; } = "";
+
     }
 }

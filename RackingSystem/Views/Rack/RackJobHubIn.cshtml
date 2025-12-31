@@ -501,15 +501,17 @@
     <input type="hidden" id="xDeviceId" value="@ViewBag.DeviceId" autocomplete="off">
     <input type="hidden" id="xQContinuos" value="@ViewBag.QContinuos" autocomplete="off">
 
+    <input type="hidden" id="txtSetUnload" autocomplete="off">
+    <input type="hidden" id="txtLoaderId" autocomplete="off">
+    <input type="hidden" id="txtCol1TotalReels" autocomplete="off">
+    <input type="hidden" id="txtCol2TotalReels" autocomplete="off">
+    <input type="hidden" id="txtCol3TotalReels" autocomplete="off">
+    <input type="hidden" id="txtCol4TotalReels" autocomplete="off">
+
     <div class="header-controls">
         <div class="input-container">
             <label for="job-input">Job:</label>
             <input type="text" id="job-input" value="@ViewBag.QNo" disabled />
-            @* <select id="job-select" onchange="handleJobChange(this.value)">
-                <option value="job001">Job 001: Assemble A</option>
-                <option value="job002">Job 002: Assemble B</option>
-                <option value="job003">Job 003: Test Run</option>
-            </select> *@
         </div>
 
         <div class="input-container">
@@ -589,23 +591,12 @@
             <button onclick="startPick()">Pick</button>
             <button onclick="startPlace()">Place</button>
             <hr />
-            <a href="javascript:loadPLCSetLoaderUnload()">Set Unload</a> > <a href="javascript:loadPLCScanReelID()">Scan QR</a> > <a href="javascript:loadPLCScanReelID()">Reed Reel</a> > <a href="javascript:loadPLCSetActualHeight()">Set Height (Pick)</a>
+            @* <a href="javascript:loadPLCSetLoaderUnload()">Set Unload</a> > <a href="javascript:loadPLCScanReelID()">Scan QR</a> > <a href="javascript:loadPLCScanReelID()">Reed Reel</a> > <a href="javascript:loadPLCSetActualHeight()">Set Height (Pick)</a>
             <br />
             <a href="javascript:retry_PickStatus()">Pick Status</a> > <a href="javascript:loadPLCPlaceReel()">Place</a> > <a href="javascript:retry_PlaceStatus()">Place Status</a>
             <br />
-            <a href="javascript:loadPLCEndTask()">All Empty</a>
+            <a href="javascript:loadPLCEndTask()">All Empty</a> *@
         </div>
-
-        <input type="hidden" id="txtSetUnload" autocomplete="off">
-        <input type="hidden" id="txtLoaderId" autocomplete="off">
-        <input type="hidden" id="txtCol1TotalReels" autocomplete="off">
-        <input type="hidden" id="txtCol2TotalReels" autocomplete="off">
-        <input type="hidden" id="txtCol3TotalReels" autocomplete="off">
-        <input type="hidden" id="txtCol4TotalReels" autocomplete="off">
-
-        <input type="hidden" id="xToken" value="@ViewBag.xToken" autocomplete="off">
-        <input type="hidden" id="xQId" value="@ViewBag.QId" autocomplete="off">
-        <input type="hidden" id="xDeviceId" value="@ViewBag.DeviceId" autocomplete="off">
 
         <div style="height:20px;"></div>
         <input type="text" id="txtReelId" placeholder="Reel Id" autocomplete="off">
@@ -645,11 +636,9 @@
             <button onclick="startRetrieve()">Retrieve</button>
             <button onclick="startPutAway()">Put Away</button>
             <hr />
-            <a href="javascript:loadPLCGetEmptyTraySlot()">Get Drawer Slot</a> > <a href="javascript:loadPLCTakeEmptyTray()">Retrieve</a> >
+            @* <a href="javascript:loadPLCGetEmptyTraySlot()">Get Drawer Slot</a> > <a href="javascript:loadPLCTakeEmptyTray()">Retrieve</a> >
             <a href="javascript:loadPLCGetSlot()">Get Valid Slot</a> > <a href="javascript:loadPLCPutAway()">Put Away</a>
-            @* <p style="margin-top: 10px;">*Note: Drawer status above syncs with this system.</p> *@
-            <br />
-            <a href="javascript:retry_RetrieveStatus()">Retrieve Status</a> > <a href="javascript:retry_PutAwayStatus()">Put Away Status</a>
+            <a href="javascript:retry_RetrieveStatus()">Retrieve Status</a> > <a href="javascript:retry_PutAwayStatus()">Put Away Status</a> *@
         </div>
 
         <input type="text" id="txtRetrieveSlot" placeholder="Retrieve Slot" autocomplete="off">
@@ -723,6 +712,7 @@
         $(document).ready(function () {
             document.getElementById('chkAutoRun').checked = true;
             disableDivContent(true);
+            $("#txtReelId").val('');
             $("#txtActHeight").val('0');
             $("#txtActHeightC").val('0');
             $("#txtSetUnload").val('0');
@@ -741,6 +731,7 @@
                 $('#start-btn').addClass('hidden');
                 readyContinuos();
             }
+
         });
 
         /**
@@ -1308,6 +1299,7 @@
                 }
                 attemptsPick = 1;
             }
+            updateJson();
 
             if (halfPickMove == false || (halfPickMove == true && halfPickMoveStep<=5)) {
                 var setH = await loadPLCSetActualHeight();
@@ -1702,6 +1694,8 @@
             var loaderId = $("#txtLoaderId").val();
             var reelId = $("#txtReelId").val();
             var fResult = -1;
+
+            if (reelId == '') { return 0; }
 
             // step 4 : scan item
             await $.ajax({
@@ -2571,14 +2565,14 @@
                 success: function (result) {
                     // console.log('3::' + JSON.stringify(result));
                     // swal.close();
-                    if (result.data.successTray) {
+                    if (result.success) {
                         logMessage2('Retrieve :: Done ', 'info');
                     }
                     else {
-                        logMessage2('Retrieve :: ' + result.data.errMessageTray, 'alert');
+                        logMessage2('Retrieve :: ' + result.errMessage, 'alert');
                     }
 
-                    fResult = result.data.successTray;
+                    fResult = result.success;
                 },
                 error: function (error) {
                     logMessage2('Retrieve :: ' + error.val, 'alert');

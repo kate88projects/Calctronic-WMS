@@ -47,24 +47,34 @@ namespace RackingSystem.Controllers
             //{
             //    return View(model);
             //}
-
-            //var result2 = await _signInManager.PasswordSignInAsync(model.Username, model.Password, false, false);
-            var result = await _service.Login(req);
-            if (result.success)
+            try
             {
-                string json = JsonConvert.SerializeObject(result.data);
-                HttpContext.Session.SetString("xSession", json);
+                //var result2 = await _signInManager.PasswordSignInAsync(model.Username, model.Password, false, false);
+                var result = await _service.Login(req);
+                if (result.success)
+                {
+                    string json = JsonConvert.SerializeObject(result.data);
+                    HttpContext.Session.SetString("xSession", json);
 
-                //var claims = new List<Claim>
-                //    {
-                //        new Claim(ClaimTypes.Name, result.data.Fullname)
-                //    };
-                //var claimsIdn = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                //await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdn));
-                //HttpContext.User = new ClaimsPrincipal(claimsIdn);
+                    //var claims = new List<Claim>
+                    //    {
+                    //        new Claim(ClaimTypes.Name, result.data.Fullname)
+                    //    };
+                    //var claimsIdn = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    //await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdn));
+                    //HttpContext.User = new ClaimsPrincipal(claimsIdn);
+                }
+
+                return new JsonResult(result);
+            }
+            catch (Exception ex)
+            {
+                ServiceResponseModel<string> r = new ServiceResponseModel<string>();
+                r.errMessage = ex.Message;
+                r.errStackTrace = ex.StackTrace;
+                return new JsonResult(r);
             }
 
-            return new JsonResult(result);
         }
 
         [HttpPost]

@@ -192,6 +192,7 @@ namespace RackingSystem.Controllers.API
                     srms.RackJobQueue_Id = qId;
                     srms.Loader_Id = r.data.Loader_Id;
                     srms.LoginIP = devId;
+                    srms.TotalCount = r.data.Col1TotalReels + r.data.Col2TotalReels + r.data.Col3TotalReels + r.data.Col4TotalReels;
                     _dbContext.SaveChanges();
 
                     RackJobHubInDTO json = JsonConvert.DeserializeObject<RackJobHubInDTO>(srms.Json) ?? new RackJobHubInDTO();
@@ -268,31 +269,6 @@ namespace RackingSystem.Controllers.API
             return result;
         }
 
-        //[HttpGet("GetColumnInfo/{req}")]
-        //public async Task<ServiceResponseModel<RackJobHubInDTO>> GetColumnInfo(string req)
-        //{
-        //    ServiceResponseModel<RackJobHubInDTO> result = new ServiceResponseModel<RackJobHubInDTO>();
-        //    result.data = new RackJobHubInDTO();
-
-        //    try
-        //    {
-        //        ServiceResponseModel<LoaderDTO> r = await _loaderService.GetLoaderInfo(req, false, EnumLoaderStatus.Loaded, null);
-        //        if (r.data == null)
-        //        {
-        //            result.success = false;
-        //            result.errMessage = "Loader Not Found.";
-        //            return result;
-        //        }
-        //        result.data.LoaderInfo = r.data;
-        //        result.success = true;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        result.errMessage = ex.Message;
-        //    }
-        //    return result;
-        //}
-
         [HttpGet("GetFlexilockStatus")]
         public ServiceResponseModel<List<int>> GetFlexilockStatus()
         {
@@ -309,13 +285,13 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "Right is locked. Left is locked. ";
-            result.data.Add(1);
-            result.data.Add(1);
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "Right is locked. Left is locked. ";
+            //result.data.Add(1);
+            //result.data.Add(1);
+            //return result;
+            //// *** testing
 
             string decimalText = "";
             string lock1 = "0";
@@ -387,11 +363,11 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.data = 1;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.data = 1;
+            //return result;
+            //// *** testing
 
             // 2. check plc which column is ready
             string plcIp = _loader.IPAddr;
@@ -452,14 +428,14 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "";
-            result.errStackTrace = "";
-            result.data.Add("2");
-            result.data.Add("16");
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "";
+            //result.errStackTrace = "";
+            //result.data.Add("2");
+            //result.data.Add("16");
+            //return result;
+            //// *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -707,86 +683,86 @@ namespace RackingSystem.Controllers.API
             return r2;
         }
 
-        [HttpGet("RetrieveTrayAndReel/{slotCode}/{loaderId}/{actHeight}")]
-        public async Task<ServiceResponseModel<TrayReelDTO>> RetrieveTrayAndReel(string slotCode, long loaderId, int actHeight)
-        {
-            ServiceResponseModel<TrayReelDTO> result = new ServiceResponseModel<TrayReelDTO>();
-            result.data = new TrayReelDTO();
-            string methodName = "RetrieveTrayAndReel";
+        //[HttpGet("RetrieveTrayAndReel/{slotCode}/{loaderId}/{actHeight}")]
+        //public async Task<ServiceResponseModel<TrayReelDTO>> RetrieveTrayAndReel(string slotCode, long loaderId, int actHeight)
+        //{
+        //    ServiceResponseModel<TrayReelDTO> result = new ServiceResponseModel<TrayReelDTO>();
+        //    result.data = new TrayReelDTO();
+        //    string methodName = "RetrieveTrayAndReel";
 
-            var configRack = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking1.ToString()).FirstOrDefault();
-            if (configRack == null)
-            {
-                result.errMessage = "Please set IP Address. ";
-                return result;
-            }
+        //    var configRack = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking1.ToString()).FirstOrDefault();
+        //    if (configRack == null)
+        //    {
+        //        result.errMessage = "Please set IP Address. ";
+        //        return result;
+        //    }
 
-            var configGantry = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Gantry1.ToString()).FirstOrDefault();
-            if (configGantry == null)
-            {
-                result.errMessage = "Please set IP Address. ";
-                return result;
-            }
+        //    var configGantry = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Gantry1.ToString()).FirstOrDefault();
+        //    if (configGantry == null)
+        //    {
+        //        result.errMessage = "Please set IP Address. ";
+        //        return result;
+        //    }
 
-            var slot = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
-            if (slot == null)
-            {
-                result.errMessage = "Cannot find Slot [" + slotCode + "]. ";
-                return result;
-            }
+        //    var slot = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
+        //    if (slot == null)
+        //    {
+        //        result.errMessage = "Cannot find Slot [" + slotCode + "]. ";
+        //        return result;
+        //    }
 
-            var _loader = _dbContext.Loader.Where(x => x.Loader_Id == loaderId).FirstOrDefault();
-            if (_loader == null)
-            {
-                result.errMessage = "Loader is not found.";
-                return result;
-            }
+        //    var _loader = _dbContext.Loader.Where(x => x.Loader_Id == loaderId).FirstOrDefault();
+        //    if (_loader == null)
+        //    {
+        //        result.errMessage = "Loader is not found.";
+        //        return result;
+        //    }
 
-            // SET Retrieve first
-            ServiceResponseModel<int> r1 = await RetrieveEmptyTray(configRack.ConfigValue, slotCode);
+        //    // SET Retrieve first
+        //    ServiceResponseModel<int> r1 = await RetrieveEmptyTray(configRack.ConfigValue, slotCode);
 
-            await Task.Delay(2000);
+        //    await Task.Delay(2000);
 
-            // SET Actual Height
-            ServiceResponseModel<TrayReelDTO> r2 = new ServiceResponseModel<TrayReelDTO>();
-            r2.data = new TrayReelDTO();
-            r2.data.successStartScan = true;
-            r2.data.successScan = true;
-            var r2c = await SetActualHeightByIP(_loader.IPAddr, actHeight);
-            if (r2c.success)
-            {
-                r2.data.successSetH = true;
-                r2.success = true;
-            }
-            else
-            {
-                r2.data.errMessageSetH = r2c.errMessage;
-            }
+        //    // SET Actual Height
+        //    ServiceResponseModel<TrayReelDTO> r2 = new ServiceResponseModel<TrayReelDTO>();
+        //    r2.data = new TrayReelDTO();
+        //    r2.data.successStartScan = true;
+        //    r2.data.successScan = true;
+        //    var r2c = await SetActualHeightByIP(_loader.IPAddr, actHeight);
+        //    if (r2c.success)
+        //    {
+        //        r2.data.successSetH = true;
+        //        r2.success = true;
+        //    }
+        //    else
+        //    {
+        //        r2.data.errMessageSetH = r2c.errMessage;
+        //    }
 
-            try
-            {
-                result.data = r2.data;
-                result.data.successTray = r1.success;
-                result.data.errMessageTray = r1.errMessage;
+        //    try
+        //    {
+        //        result.data = r2.data;
+        //        result.data.successTray = r1.success;
+        //        result.data.errMessageTray = r1.errMessage;
 
-                result.success = r1.success && r2.success;
-                return result;
-            }
-            catch (Exception ex)
-            {
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
-                result.errMessage = ex.Message;
-                result.errStackTrace = ex.StackTrace ?? "";
-            }
+        //        result.success = r1.success && r2.success;
+        //        return result;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+        //        result.errMessage = ex.Message;
+        //        result.errStackTrace = ex.StackTrace ?? "";
+        //    }
 
-            return result;
-        }
+        //    return result;
+        //}
 
         [HttpGet("RetrieveTray/{slotCode}")]
-        public async Task<ServiceResponseModel<TrayReelDTO>> RetrieveTray(string slotCode)
+        public async Task<ServiceResponseModel<int>> RetrieveTray(string slotCode)
         {
-            ServiceResponseModel<TrayReelDTO> result = new ServiceResponseModel<TrayReelDTO>();
-            result.data = new TrayReelDTO();
+            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
+            result.data = 0;
             string methodName = "RetrieveTray";
 
             var configRack = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking1.ToString()).FirstOrDefault();
@@ -803,52 +779,8 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            try
-            {
-                ServiceResponseModel<int> r1 = await RetrieveEmptyTray(configRack.ConfigValue, slotCode);
-                result.data.successTray = r1.success;
-                result.data.errMessageTray = r1.errMessage;
-                return result;
-            }
-            catch (Exception ex)
-            {
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
-                result.errMessage = ex.Message;
-                result.errStackTrace = ex.StackTrace ?? "";
-            }
-
-            return result;
-        }
-
-        internal async Task<ServiceResponseModel<int>> RetrieveEmptyTray(string ipAddr, string slotCode)
-        {
-            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
-            string methodName = "RetrieveEmptyTray";
-
-            //var configRack = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking1.ToString()).FirstOrDefault();
-            //if (configRack == null)
-            //{
-            //    result.errMessage = "Please set IP Address. ";
-            //    result.data = 0;
-            //    return result;
-            //}
-
-            var slot = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
-            if (slot == null)
-            {
-                result.errMessage = "Cannot find Slot [" + slotCode + "]. ";
-                result.data = 0;
-                return result;
-            }
-
-            // *** testing
-            result.success = true;
-            result.data = 1;
-            return result;
-            // *** testing
-
             // 2. check plc which column is ready
-            string plcIp = ipAddr;
+            string plcIp = configRack.ConfigValue;
             int port = 502;
 
             ModbusClient modbusClient = new ModbusClient(plcIp, port);
@@ -856,7 +788,7 @@ namespace RackingSystem.Controllers.API
             {
                 modbusClient.Connect();
 
-                //PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
                 // step 1 : left or right
                 int registerAddress = 4298;
@@ -918,18 +850,130 @@ namespace RackingSystem.Controllers.API
             }
             catch (Exception ex)
             {
-                //PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
             }
             finally
             {
                 modbusClient.Disconnect();
-                //PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Disconnected.", "");
+                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Disconnected.", "");
             }
+
 
             return result;
         }
+
+        //internal async Task<ServiceResponseModel<int>> RetrieveEmptyTray(string ipAddr, string slotCode)
+        //{
+        //    ServiceResponseModel<int> result = new ServiceResponseModel<int>();
+        //    string methodName = "RetrieveEmptyTray";
+
+        //    //var configRack = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking1.ToString()).FirstOrDefault();
+        //    //if (configRack == null)
+        //    //{
+        //    //    result.errMessage = "Please set IP Address. ";
+        //    //    result.data = 0;
+        //    //    return result;
+        //    //}
+
+        //    var slot = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
+        //    if (slot == null)
+        //    {
+        //        result.errMessage = "Cannot find Slot [" + slotCode + "]. ";
+        //        result.data = 0;
+        //        return result;
+        //    }
+
+        //    //// *** testing
+        //    //result.success = true;
+        //    //result.data = 1;
+        //    //return result;
+        //    //// *** testing
+
+        //    // 2. check plc which column is ready
+        //    string plcIp = ipAddr;
+        //    int port = 502;
+
+        //    ModbusClient modbusClient = new ModbusClient(plcIp, port);
+        //    try
+        //    {
+        //        modbusClient.Connect();
+
+        //        //PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+
+        //        // step 1 : left or right
+        //        int registerAddress = 4298;
+        //        //int valueToWrite = 0;
+        //        int valueToWrite = slot.IsLeft ? 0 : 1;
+        //        modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+
+        //        // step 2 : x-pulses
+        //        //byte[] bytes = BitConverter.GetBytes(57832);
+        //        byte[] bytes = BitConverter.GetBytes(slot.XPulse);
+        //        int highBinary = BitConverter.ToUInt16(bytes, 0);
+        //        int lowBinary = BitConverter.ToUInt16(bytes, 2);
+        //        registerAddress = 4300;
+        //        valueToWrite = 0;
+        //        modbusClient.WriteSingleRegister(registerAddress, lowBinary);
+        //        registerAddress = 4299;
+        //        valueToWrite = 0;
+        //        modbusClient.WriteSingleRegister(registerAddress, highBinary);
+
+        //        // step 3 : y-pulses
+        //        //bytes = BitConverter.GetBytes(4930);
+        //        bytes = BitConverter.GetBytes(slot.YPulse);
+        //        highBinary = BitConverter.ToUInt16(bytes, 0);
+        //        lowBinary = BitConverter.ToUInt16(bytes, 2);
+        //        registerAddress = 4301;
+        //        valueToWrite = 0;
+        //        modbusClient.WriteSingleRegister(registerAddress, highBinary);
+        //        registerAddress = 4302;
+        //        valueToWrite = 0;
+        //        modbusClient.WriteSingleRegister(registerAddress, lowBinary);
+
+        //        // step 4 : 
+        //        registerAddress = 4310;
+        //        //valueToWrite = 634;
+        //        valueToWrite = slot.QRXPulse;
+        //        modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+
+        //        // step 5 : 
+        //        registerAddress = 4311;
+        //        //valueToWrite = 377;
+        //        valueToWrite = slot.QRYPulse;
+        //        modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+
+        //        // step 6 : 
+        //        registerAddress = 4312;
+        //        valueToWrite = 7;
+        //        modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+
+        //        // step Last : 
+        //        registerAddress = 4297;
+        //        valueToWrite = 2;
+        //        modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+
+        //        result.success = true;
+        //        result.data = 1;
+
+        //        slot.HasEmptyTray = false;
+        //        await _dbContext.SaveChangesAsync();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        //PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+        //        result.errMessage = ex.Message;
+        //        result.errStackTrace = ex.StackTrace ?? "";
+        //    }
+        //    finally
+        //    {
+        //        modbusClient.Disconnect();
+        //        //PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Disconnected.", "");
+        //    }
+
+        //    return result;
+        //}
 
         [HttpGet("StartBarcodeScanner")]
         public async Task<ServiceResponseModel<int>> StartBarcodeScanner()
@@ -955,11 +999,11 @@ namespace RackingSystem.Controllers.API
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             string methodName = "StartBarcodeScanner";
 
-            // *** testing
-            result.success = true;
-            result.data = 1;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.data = 1;
+            //return result;
+            //// *** testing
 
             // 2. check plc which column is ready
             string plcIp = ipAddr;
@@ -1058,12 +1102,12 @@ namespace RackingSystem.Controllers.API
             result.data = "";
             string methodName = "GetReelIDByIP";
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "Cannot get Reel ID, please try again.";
-            result.data = "A00000018";
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "Cannot get Reel ID, please try again.";
+            //result.data = "A00000018";
+            //return result;
+            //// *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -1232,11 +1276,11 @@ namespace RackingSystem.Controllers.API
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             string methodName = "SetActualHeight";
 
-            // *** testing
-            result.success = true;
-            result.data = 1;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.data = 1;
+            //return result;
+            //// *** testing
 
             // 2. check plc which column is ready
             string plcIp = ipAddr;
@@ -1330,12 +1374,12 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = false;
-            result.errMessage = "0";
-            result.data = 2;
-            return result;
-            // *** testings
+            //// *** testing
+            //result.success = false;
+            //result.errMessage = "0";
+            //result.data = 2;
+            //return result;
+            //// *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -1488,11 +1532,11 @@ namespace RackingSystem.Controllers.API
             }
 
             //// *** testing
-            result.success = true;
-            result.errMessage = "Done Picked.";
-            result.data = 3;
-            return result;
-            // *** testing
+            //result.success = true;
+            //result.errMessage = "Done Picked.";
+            //result.data = 3;
+            //return result;
+            //// *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -1565,11 +1609,11 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.data = 1;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.data = 1;
+            //return result;
+            //// *** testing
 
             // 2. check plc which column is ready
             int value = 0;
@@ -1623,12 +1667,12 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "Done Placed.";
-            result.data = 0;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "Done Placed.";
+            //result.data = 0;
+            //return result;
+            //// *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -1830,11 +1874,11 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.data = 1;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.data = 1;
+            //return result;
+            //// *** testing
 
             // 2. check plc which column is ready
             int value = 0;
@@ -1935,12 +1979,12 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "Done Put Away.";
-            result.data = 0;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "Done Put Away.";
+            //result.data = 0;
+            //return result;
+            //// *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -2313,7 +2357,7 @@ namespace RackingSystem.Controllers.API
         {
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             result.data = 0;
-            string methodName = "GetPlaceStatus";
+            string methodName = "UnloadEndTask";
 
             var _loader = _dbContext.Loader.Find(loaderId);
             if (_loader == null)
@@ -2323,12 +2367,12 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "Done Placed.";
-            result.data = 0;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "Done EndTask.";
+            //result.data = 0;
+            //return result;
+            //// *** testing
 
             string plcIp = _loader.IPAddr;
             int port = 502;
@@ -2487,12 +2531,12 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "Done Picked.";
-            result.data = 3;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "Done Picked.";
+            //result.data = 3;
+            //return result;
+            //// *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -2567,11 +2611,11 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.data = 1;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.data = 1;
+            //return result;
+            //// *** testing
 
             // 2. check plc which column is ready
             string plcIp = _loader.IPAddr;
@@ -2613,10 +2657,10 @@ namespace RackingSystem.Controllers.API
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             string methodName = "GetLoaderMode";
 
-            // *** testing
-            result.success = true;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //return result;
+            //// *** testing
 
             var _loader = _dbContext.Loader.Find(loaderId);
             if (_loader == null)

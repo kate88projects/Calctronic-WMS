@@ -11,5 +11,8 @@
         public string ReelId { get; set; } = "";
         public string ReelCode { get; set; } = "";
         public int ActualHeight { get; set; } = 0;
+
+        public long Detail_Id { get; set; } = 0;
+
     }
 }
