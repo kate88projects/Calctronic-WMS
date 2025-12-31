@@ -1242,14 +1242,16 @@
             sharedDrawerState.drawerStatus = "None";
             logMessage2(`Cartesian cycle end: Put Away Done.`, 'info');
             inPutAwayMove = false;
+            
+            updateJson();
 
             // means all is out
             if (totalReels <= 0) {
                 loadDBEnd();
                 systemStop();
-            }
+                $('#cont-btn').addClass('hidden');
 
-            updateJson();
+            }
         }
 
 
