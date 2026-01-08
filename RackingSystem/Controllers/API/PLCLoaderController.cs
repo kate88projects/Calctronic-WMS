@@ -46,13 +46,15 @@ namespace RackingSystem.Controllers.API
         }
 
         [HttpGet("GetLoaderId/{loaderId}")]
-        public ServiceResponseModel<string> GetLoaderId(long loaderId)
+        public async Task<ServiceResponseModel<string>> GetLoaderId(long loaderId)
         {
             ServiceResponseModel<string> result = new ServiceResponseModel<string>();
             string methodName = "GetLoaderId";
 
             try
             {
+                await PLCLogHelper.Instance.DeleteLog(_dbContext);
+
                 var _loader = _dbContext.Loader.Find(loaderId);
                 if (_loader == null)
                 {

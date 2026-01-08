@@ -2,7 +2,9 @@
 using RackingSystem.Data;
 using RackingSystem.Data.Log;
 using RackingSystem.Data.Maintenances;
+using RackingSystem.General;
 using System.Drawing;
+using System.Threading.Tasks;
 
 namespace RackingSystem.Helpers
 {
@@ -16,36 +18,108 @@ namespace RackingSystem.Helpers
 
         public void InsertPLCLoaderLog(AppDbContext _dbContext, long id, string evt, string r1, string r2)
         {
-
-
-            PLCLoaderLog log = new PLCLoaderLog()
+            var logExist = _dbContext.PLCLoaderLog.Where(x => x.Loader_Id == id && x.EventName == evt && x.Remark1 == r1 && x.Remark2 == r2).FirstOrDefault();
+            if (logExist != null)
             {
-                Loader_Id = id,
-                EventName = evt,
-                Remark1 = r1,
-                Remark2 = r2,
-                CreatedDate = DateTime.Now,
-            };
-            _dbContext.PLCLoaderLog.Add(log);
+                logExist.CreatedDate = DateTime.Now;
+            }
+            else
+            {
+                PLCLoaderLog log = new PLCLoaderLog()
+                {
+                    Loader_Id = id,
+                    EventName = evt,
+                    Remark1 = r1,
+                    Remark2 = r2,
+                    CreatedDate = DateTime.Now,
+                };
+                _dbContext.PLCLoaderLog.Add(log);
+            }
             _dbContext.SaveChanges();
 
         }
 
         public void InsertPLCHubInLog(AppDbContext _dbContext, long id, string evt, string r1, string r2)
         {
-
-
-            PLCHubInLog log = new PLCHubInLog()
+            var logExist = _dbContext.PLCHubInLog.Where(x => x.Loader_Id == id && x.EventName == evt && x.Remark1 == r1 && x.Remark2 == r2).FirstOrDefault();
+            if (logExist != null)
             {
-                Loader_Id = id,
-                EventName = evt,
-                Remark1 = r1,
-                Remark2 = r2,
-                CreatedDate = DateTime.Now,
-            };
-            _dbContext.PLCHubInLog.Add(log);
+                logExist.CreatedDate = DateTime.Now;
+            }
+            else
+            {
+                PLCHubInLog log = new PLCHubInLog()
+                {
+                    Loader_Id = id,
+                    EventName = evt,
+                    Remark1 = r1,
+                    Remark2 = r2,
+                    CreatedDate = DateTime.Now,
+                };
+                _dbContext.PLCHubInLog.Add(log);
+            }
             _dbContext.SaveChanges();
 
         }
+
+        public void InsertPLCHubOutLog(AppDbContext _dbContext, long id, string evt, string r1, string r2)
+        {
+            var logExist = _dbContext.PLCHubOutLog.Where(x => x.Loader_Id == id && x.EventName == evt && x.Remark1 == r1 && x.Remark2 == r2).FirstOrDefault();
+            if (logExist != null)
+            {
+                logExist.CreatedDate = DateTime.Now;
+            }
+            else
+            {
+                PLCHubOutLog log = new PLCHubOutLog()
+                {
+                    Loader_Id = id,
+                    EventName = evt,
+                    Remark1 = r1,
+                    Remark2 = r2,
+                    CreatedDate = DateTime.Now,
+                };
+                _dbContext.PLCHubOutLog.Add(log);
+            }
+            _dbContext.SaveChanges();
+
+        }
+
+        public void InsertPLCTrolleyLog(AppDbContext _dbContext, long id, string evt, string r1, string r2)
+        {
+            var logExist = _dbContext.PLCTrolleyLog.Where(x => x.Loader_Id == id && x.EventName == evt && x.Remark1 == r1 && x.Remark2 == r2).FirstOrDefault();
+            if (logExist != null)
+            {
+                logExist.CreatedDate = DateTime.Now;
+            }
+            else
+            {
+                PLCTrolleyLog log = new PLCTrolleyLog()
+                {
+                    Loader_Id = id,
+                    EventName = evt,
+                    Remark1 = r1,
+                    Remark2 = r2,
+                    CreatedDate = DateTime.Now,
+                };
+                _dbContext.PLCTrolleyLog.Add(log);
+            }
+            _dbContext.SaveChanges();
+
+        }
+
+        public async Task DeleteLog(AppDbContext _dbContext)
+        {
+            try
+            {
+                var sqlSP = await _dbContext.Database.ExecuteSqlInterpolatedAsync($"EXEC {GeneralStatic.SP_Log_Delete} ");
+            }
+            catch (Exception ex)
+            {
+                string a = ex.Message;
+            }
+
+        }
+
     }
 }

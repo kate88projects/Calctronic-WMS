@@ -160,6 +160,8 @@ namespace RackingSystem.Controllers.API
 
             try
             {
+                await PLCLogHelper.Instance.DeleteLog(_dbContext);
+
                 var claims = User.Identities.First().Claims.ToList();
                 string devId = claims?.FirstOrDefault(x => x.Type.Equals("DeviceId", StringComparison.OrdinalIgnoreCase))?.Value ?? "";
 

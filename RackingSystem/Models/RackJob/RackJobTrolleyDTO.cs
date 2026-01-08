@@ -1,9 +1,8 @@
-﻿using RackingSystem.Models.Loader;
-using RackingSystem.Models.Trolley;
+﻿using RackingSystem.Models.Trolley;
 
 namespace RackingSystem.Models.RackJob
 {
-    public class RackJobHubOutDTO
+    public class RackJobTrolleyDTO
     {
         public TrolleyDTO TrolleyInfo { get; set; } = new TrolleyDTO();
 
@@ -14,32 +13,25 @@ namespace RackingSystem.Models.RackJob
 
         public string DrawerStatus { get; set; } = "";
 
-        public string ReelId { get; set; } = "";
-        public string ReelCode { get; set; } = "";
-        public int ActualHeight { get; set; } = 0;
-
         public string CartesianRobotState { get; set; } = "";
         public string CartesianLocation { get; set; } = "";
 
         public string RetrieveSlot { get; set; } = "";
         public string PutAwaySlot { get; set; } = "";
-        public int SlotTake { get; set; } = 0;
 
         public string TrolleyLocation { get; set; } = "";
 
-        public List<RackJobHubOutDtlDTO> DtlList { get; set; } = new List<RackJobHubOutDtlDTO>();
+        public bool chkCol1 { get; set; } = true;
+        public bool chkCol2 { get; set; } = true;
+        public bool chkCol3 { get; set; } = true;
+
+        public int CurrentRowCol1 { get; set; } = 1;
+        public int CurrentRowCol2 { get; set; } = 1;
+        public int CurrentRowCol3 { get; set; } = 1;
 
     }
 
-    public class RackJobHubOutDtlDTO
-    {
-        public long Detail_Id { get; set; }
-        public long Id { get; set; }
-        public long Item_Id { get; set; }
-        public int Qty { get; set; } = 0;
-    }
-
-    public class RackJobHubOutJsonDTO
+    public class RackJobTrolleyJsonDTO
     {
         public bool SystemStart { get; set; } = false;
 
@@ -48,20 +40,21 @@ namespace RackingSystem.Models.RackJob
 
         public string DrawerStatus { get; set; } = "";
 
-        public string ReelId { get; set; } = "";
-        public string ReelCode { get; set; } = "";
-        public int ActualHeight { get; set; } = 0;
-
         public string CartesianRobotState { get; set; } = "";
         public string CartesianLocation { get; set; } = "";
 
         public string RetrieveSlot { get; set; } = "";
         public string PutAwaySlot { get; set; } = "";
-        public int SlotTake { get; set; } = 0;
 
         public string TrolleyLocation { get; set; } = "";
 
-        public int ReelBalance { get; set; } = 0;
+        public bool chkCol1 { get; set; } = true;
+        public bool chkCol2 { get; set; } = true;
+        public bool chkCol3 { get; set; } = true;
+
+        public int CurrentRowCol1 { get; set; } = 1;
+        public int CurrentRowCol2 { get; set; } = 1;
+        public int CurrentRowCol3 { get; set; } = 1;
 
     }
 }

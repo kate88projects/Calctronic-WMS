@@ -978,66 +978,57 @@
 
         // ----------- HMI Action
         function updateJson() {
-        //     var data = {
-        //         SystemStart: sharedDrawerState.systemRunning,
+            const chkCol1 = document.getElementById('chkCol1');
+            const chkCol2 = document.getElementById('chkCol2');
+            const chkCol3 = document.getElementById('chkCol3');
 
-        //         LoaderCode: $("#trolley-input").val(),
-        //         LoaderId: Number($("#txtLoaderId").val()),
+            var data = {
+                SystemStart: sharedDrawerState.systemRunning,
 
-        //         DrawerStatus: sharedDrawerState.drawerStatus,
-        //         GantryStatus: sharedDrawerState.gantrySequenceState,
+                TrolleyCode: $("#trolley-input").val(),
+                TrolleyId: Number($("#txtTrolleyId").val()),
 
-        //         SetUnload: Number($("#txtSetUnload").val()),
-        //         ReelId: $("#txtReelId").val(),
-        //         ReelCode: $("#txtReelCode").val(),
-        //         ActualHeight: Number($("#txtActHeight").val()),
+                DrawerStatus: sharedDrawerState.drawerStatus,
 
-        //         CartesianRobotState: sharedDrawerState.cartesianRobotState,
-        //         CartesianLocation: sharedDrawerState.cartesianLocation,
+                CartesianRobotState: sharedDrawerState.cartesianRobotState,
+                CartesianLocation: sharedDrawerState.cartesianLocation,
 
-        //         RetrieveSlot: $("#txtRetrieveSlot").val(),
-        //         PutAwaySlot: $("#txtPutSlot").val(),
-        //         SlotTake: Number($("#txtPutSlotTake").val()),
+                RetrieveSlot: $("#txtRetrieveSlot").val(),
+                PutAwaySlot: $("#txtPutSlot").val(),
 
-        //         ReelIdC: $("#txtReelIdC").val(),
-        //         ReelCodeC: $("#txtReelCodeC").val(),
-        //         ActualHeightC: Number($("#txtActHeightC").val()),
+                TrolleyLocation: sharedDrawerState.trolleyLocation,
 
-        //         HalfPickMove: halfPickMove,
-        //         HalfPickMoveStep: halfPickMoveStep,
-        //         HalfPlaceMove: halfPlaceMove,
-        //         HalfPlaceMoveStep: halfPlaceMoveStep,
+                chkCol1: chkCol1.checked,
+                chkCol2: chkCol2.checked,
+                chkCol3: chkCol3.checked,
 
-        //         Col1TotalReels: Number($("#txtCol1TotalReels").val()),
-        //         Col2TotalReels: Number($("#txtCol2TotalReels").val()),
-        //         Col3TotalReels: Number($("#txtCol3TotalReels").val()),
-        //         Col4TotalReels: Number($("#txtCol4TotalReels").val()),
+                CurrentRowCol1: Number($('#left-input-tr').val()),
+                CurrentRowCol2: Number($('#center-input-tr').val()),
+                CurrentRowCol3: Number($('#right-input-tr').val()),
+            }
 
-        //         ColNum: colNum,
-        //     }
-
-        //     $.ajax({
-        //         url: '/api/PLCHubIn/UpdateRackJobJson',
-        //         type: 'POST',
-        //         headers: {
-        //             'Authorization': 'Bearer ' + token
-        //         },
-        //         data: JSON.stringify(data),
-        //         dataType: 'JSON',
-        //         contentType: 'application/json; charset=utf-8',
-        //         beforeSend: function () {
-        //         },
-        //         success: function (result) {
-        //             if (result.success == true) {
-        //             }
-        //             else {
-        //                 console.log(result.errMessage);
-        //             }
-        //         },
-        //         error: function (error) {
-        //             console.log(error);
-        //         }
-        //     });
+            $.ajax({
+                url: '/api/PLCTrolley/UpdateRackJobJson',
+                type: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                data: JSON.stringify(data),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                    }
+                    else {
+                        console.log(result.errMessage);
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
         }
 
         async function getJson() {
@@ -1098,7 +1089,6 @@
         }
 
         // ----------- Action (Auto Mode)
-
         function cartesianAuto() {
             if (endTask == true) { return; }
 
@@ -1763,7 +1753,7 @@
 
             return fResult;
         }
-
+         
     </script>
 
 }

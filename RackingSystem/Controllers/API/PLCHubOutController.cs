@@ -109,6 +109,8 @@ namespace RackingSystem.Controllers.API
 
             try
             {
+                await PLCLogHelper.Instance.DeleteLog(_dbContext);
+
                 var claims = User.Identities.First().Claims.ToList();
                 string devId = claims?.FirstOrDefault(x => x.Type.Equals("DeviceId", StringComparison.OrdinalIgnoreCase))?.Value ?? "";
 
@@ -248,14 +250,14 @@ namespace RackingSystem.Controllers.API
             {
                 modbusClient.Connect();
 
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
                 int startAddress = 4208;
                 int numRegisters = 1;
                 int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                 for (int i = 0; i < registers.Length; i++)
                 {
-                    PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                    PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
                     lock1 = registers[i].ToString();
                 }
 
@@ -266,7 +268,7 @@ namespace RackingSystem.Controllers.API
                 //registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                 //for (int i = 0; i < registers.Length; i++)
                 //{
-                //    PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                //    PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
                 //    decimalText = getDecimalText(registers[i]);
                 //    lock2 = decimalText;
                 //}
@@ -274,14 +276,14 @@ namespace RackingSystem.Controllers.API
             }
             catch (Exception ex)
             {
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
             }
             finally
             {
                 modbusClient.Disconnect();
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Disconnected.", "");
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Disconnected.", "");
             }
 
             if (string.IsNullOrEmpty(lock1)) { lock1 = "0"; }
@@ -430,7 +432,7 @@ namespace RackingSystem.Controllers.API
             }
             catch (Exception ex)
             {
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
             }
@@ -474,7 +476,7 @@ namespace RackingSystem.Controllers.API
             {
                 modbusClient.Connect();
 
-                //PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+                //PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
                 // step 1 : left or right
                 int registerAddress = 4298;
@@ -549,14 +551,14 @@ namespace RackingSystem.Controllers.API
             }
             catch (Exception ex)
             {
-                //PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                //PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
             }
             finally
             {
                 modbusClient.Disconnect();
-                //PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Disconnected.", "");
+                //PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Disconnected.", "");
             }
 
             return result;
@@ -598,7 +600,7 @@ namespace RackingSystem.Controllers.API
             {
                 modbusClient.Connect();
 
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
                 while (!exit)
                 {
@@ -607,7 +609,7 @@ namespace RackingSystem.Controllers.API
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
                     {
-                        PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                        PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
                         value = registers[i];
                     }
 
@@ -625,14 +627,14 @@ namespace RackingSystem.Controllers.API
             }
             catch (Exception ex)
             {
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
             }
             finally
             {
                 modbusClient.Disconnect();
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Disconnected.", "");
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Disconnected.", "");
             }
 
             result.success = value == 1;
@@ -724,7 +726,7 @@ namespace RackingSystem.Controllers.API
             }
             catch (Exception ex)
             {
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
             }
@@ -772,7 +774,7 @@ namespace RackingSystem.Controllers.API
             {
                 modbusClient.Connect();
 
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
                 // step 1 : left or right
                 int registerAddress = 4298;
@@ -833,14 +835,14 @@ namespace RackingSystem.Controllers.API
             }
             catch (Exception ex)
             {
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
             }
             finally
             {
                 modbusClient.Disconnect();
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Disconnected.", "");
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Disconnected.", "");
             }
 
             return result;
@@ -882,7 +884,7 @@ namespace RackingSystem.Controllers.API
             {
                 modbusClient.Connect();
 
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
                 while (!exit)
                 {
@@ -891,7 +893,7 @@ namespace RackingSystem.Controllers.API
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
                     {
-                        PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                        PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
                         value = registers[i];
                     }
 
@@ -912,14 +914,14 @@ namespace RackingSystem.Controllers.API
             }
             catch (Exception ex)
             {
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
             }
             finally
             {
                 modbusClient.Disconnect();
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Disconnected.", "");
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Disconnected.", "");
             }
 
             return result;
@@ -1027,7 +1029,7 @@ namespace RackingSystem.Controllers.API
             }
             catch (Exception ex)
             {
-                //PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                //PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
             }

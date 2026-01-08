@@ -38,11 +38,11 @@ namespace RackingSystem.Controllers
         }
 
         [HttpPost]
-        public async Task<ServiceResponseModel<List<ReelAvailableListDTO>>> GetAvailableReelList([FromBody] ReelAvailableSearchReqDTO req)
+        public async Task<ServiceResponseModel<ReelAvailableResponseDTO>> GetAvailableReelList([FromBody] ReelAvailableSearchReqDTO req)
         {
             if (req == null)
             {
-                ServiceResponseModel<List<ReelAvailableListDTO>> rErr = new ServiceResponseModel<List<ReelAvailableListDTO>>();
+                ServiceResponseModel<ReelAvailableResponseDTO> rErr = new ServiceResponseModel<ReelAvailableResponseDTO>();
                 rErr.errMessage = "Empty parameter.";
                 return rErr;
             }
@@ -64,18 +64,24 @@ namespace RackingSystem.Controllers
                 }
                 else
                 {
-                    ServiceResponseModel<List<ReelAvailableListDTO>> rErr = new ServiceResponseModel<List<ReelAvailableListDTO>>();
+                    ServiceResponseModel<ReelAvailableResponseDTO> rErr = new ServiceResponseModel<ReelAvailableResponseDTO>();
                     rErr.errMessage = rTotal.errMessage;
                     rErr.errStackTrace = rTotal.errStackTrace;
                     return rErr;
                 }
             }
-            ServiceResponseModel<List<ReelAvailableListDTO>> result = await _reelService.GetAvailableReelList(req);
+
+            ServiceResponseModel<List<ReelAvailableListDTO>> r = await _reelService.GetAvailableReelList(req);
+            ServiceResponseModel<ReelAvailableResponseDTO> result = new ServiceResponseModel<ReelAvailableResponseDTO>();
+            result.success = true;
             result.totalRecords = ttl;
-            result.data[0].TotalWaiting = ttlW;
-            result.data[0].TotalInLoader = ttlL;
-            result.data[0].TotalSRMS = ttlSRMS;
-            result.data[0].TotalInTrolley = ttlT;
+            result.data = new ReelAvailableResponseDTO();
+            result.data.ReelList = r.data;
+            result.data.TotalWaiting = ttlW;
+            result.data.TotalInLoader = ttlL;
+            result.data.TotalSRMS = ttlSRMS;
+            result.data.TotalInTrolley = ttlT;
+
             return result;
         }
 

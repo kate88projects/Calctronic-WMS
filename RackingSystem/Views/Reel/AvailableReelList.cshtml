@@ -231,7 +231,7 @@
                             </div>
                         </div>
                         <div class="col-sm-1" style="">
-                            <button type="button" class="btn btn-primary" style="width:100%;" onclick="loadList(1, '')"><i class="bi bi-search"></i> </button>
+                            <button type="button" class="btn btn-primary" style="width:100%;" onclick="loadList(1, 0)"><i class="bi bi-search"></i> </button>
                         </div>
                     </div>
                     <hr />
@@ -352,7 +352,7 @@
             $('#dtpDateFrom').val(firstDate);
             $('#dtpDateTo').val(today);
 
-            loadList(1, '');
+            loadList(1, 0);
         });
 
         function prevPage() {
@@ -360,7 +360,7 @@
             if (curPage == 1) {
                 return;
             }
-            loadList(curPage - 1, '');
+            loadList(curPage - 1, 0);
         }
 
         function nextPage() {
@@ -375,7 +375,7 @@
             if ((curPage + 1) > ttlPage) {
                 return;
             }
-            loadList(curPage + 1, '');
+            loadList(curPage + 1, 0);
         }
 
         function loadList(page, stIdx) {
@@ -435,13 +435,13 @@
                     swal.close()
                     if (result.success == true) {
 
-                        document.getElementById('txtW').innerHTML = result.data[0].totalWaiting;
-                        document.getElementById('txtL').innerHTML = result.data[0].totalInLoader;
-                        document.getElementById('txtSRMS').innerHTML = result.data[0].totalSRMS;
-                        document.getElementById('txtT').innerHTML = result.data[0].totalInTrolley;
+                        document.getElementById('txtW').innerHTML = result.data.totalWaiting;
+                        document.getElementById('txtL').innerHTML = result.data.totalInLoader;
+                        document.getElementById('txtSRMS').innerHTML = result.data.totalSRMS;
+                        document.getElementById('txtT').innerHTML = result.data.totalInTrolley;
 
                         $('#listTable').DataTable( {
-                            data: result.data,
+                            data: result.data.reelList,
                             paging: false,
                             searching: false,
                             "info": false,
@@ -523,10 +523,10 @@
                             myDiv.innerHTML += '<li class="page-item disabled"><a href="javascript:prevPage()">Previous</a></li>';
                             for (var i = 1; i <= ttlPage; i++) {
                                 if (i == 1) {
-                                       myDiv.innerHTML += '<li class="page-item active" id="btnP'+ i +'"><a href="javascript:loadList('+ i +', "-")" class="page-link">'+ i +'</a></li>';
+                                       myDiv.innerHTML += '<li class="page-item active" id="btnP'+ i +'"><a href="javascript:loadList('+ i +', 0)" class="page-link">'+ i +'</a></li>';
                                 }
                                 else {
-                                       myDiv.innerHTML += '<li class="page-item" id="btnP'+ i +'"><a href="javascript:loadList('+ i +', "-")" class="page-link">'+ i +'</a></li>';
+                                       myDiv.innerHTML += '<li class="page-item" id="btnP'+ i +'"><a href="javascript:loadList('+ i +', 0)" class="page-link">'+ i +'</a></li>';
                                 }
                             }
                             myDiv.innerHTML += '<li class="page-item disabled"><a href="javascript:nextPage()">Next</a></li>';

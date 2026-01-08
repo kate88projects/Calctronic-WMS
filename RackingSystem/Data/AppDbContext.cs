@@ -90,6 +90,8 @@ namespace RackingSystem.Data
         // ------------        Log       ------------
         public DbSet<PLCLoaderLog> PLCLoaderLog { get; set; }
         public DbSet<PLCHubInLog> PLCHubInLog { get; set; }
+        public DbSet<PLCHubOutLog> PLCHubOutLog { get; set; }
+        public DbSet<PLCTrolleyLog> PLCTrolleyLog { get; set; }
 
         // ------------ Stored Procedure ------------
         public DbSet<ItemListDTO> SP_ItemSearchList { get; set; }
@@ -113,5 +115,6 @@ namespace RackingSystem.Data
         public DbSet<TrolleyReelDtlDTO> SP_TrolleyReelDtlList { get; set; }
 
         public DbSet<LoaderReelDtlDTO> SP_LoaderReelDtlList { get; set; }
+
     }
 }

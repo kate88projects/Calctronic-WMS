@@ -15,6 +15,9 @@ using EasyModbus;
 using RackingSystem.Helpers;
 using RackingSystem.Data.RackJob;
 using RackingSystem.Models.Slot;
+using RackingSystem.Data.Maintenances;
+using Newtonsoft.Json.Linq;
+using System.Reflection;
 
 namespace RackingSystem.Controllers.API
 {
@@ -38,14 +41,96 @@ namespace RackingSystem.Controllers.API
             _contextFactory = contextFactory;
         }
 
-        [HttpGet("StartDrawerIn/{req}/{qId}")]
-        public async Task<ServiceResponseModel<RackJobHubOutDTO>> StartDrawerIn(string req, long qId)
+        internal string getDecimalText(int input)
         {
-            ServiceResponseModel<RackJobHubOutDTO> result = new ServiceResponseModel<RackJobHubOutDTO>();
-            result.data = new RackJobHubOutDTO();
+            if (input == 0) { return ""; }
+            try
+            {
+                int intValue = input;
+                string hexString = intValue.ToString("X");
+                string resultText = "";
+                for (int i = 0; i < hexString.Length; i += 2)
+                {
+                    string hexPair = hexString.Substring(i, 2);
+                    int charCode = Convert.ToInt32(hexPair, 16);
+                    resultText += (char)charCode;
+                }
+                return resultText;
+            }
+            catch
+            {
+
+            }
+            return "";
+        }
+
+        [HttpPost("UpdateRackJobJson")]
+        public async Task<ServiceResponseModel<bool>> UpdateRackJobJson([FromBody] RackJobTrolleyJsonDTO req)
+        {
+            ServiceResponseModel<bool> result = new ServiceResponseModel<bool>();
+            result.data = false;
+            if (req == null)
+            {
+                result.errMessage = "No body.";
+                return result;
+            }
 
             try
             {
+                var _job = _dbContext.RackJob.FirstOrDefault();
+                if (_job != null)
+                {
+                    _job.Json = JsonConvert.SerializeObject(req);
+                    await _dbContext.SaveChangesAsync();
+                    result.success = true;
+                }
+                else
+                {
+                    result.errMessage = "No RackJob found.";
+                }
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+            }
+            return result;
+        }
+
+        [HttpGet("GetRackJobJson")]
+        public ServiceResponseModel<RackJobTrolleyJsonDTO> GetRackJobJson()
+        {
+            ServiceResponseModel<RackJobTrolleyJsonDTO> result = new ServiceResponseModel<RackJobTrolleyJsonDTO>();
+            result.data = new RackJobTrolleyJsonDTO();
+            try
+            {
+                var _job = _dbContext.RackJob.FirstOrDefault();
+                if (_job != null)
+                {
+                    result.data = JsonConvert.DeserializeObject<RackJobTrolleyJsonDTO>(_job.Json) ?? new RackJobTrolleyJsonDTO();
+                    result.success = true;
+                }
+                else
+                {
+                    result.errMessage = "No RackJob found.";
+                }
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+            }
+            return result;
+        }
+
+        [HttpGet("StartDrawerIn/{req}/{qId}")]
+        public async Task<ServiceResponseModel<RackJobTrolleyDTO>> StartDrawerIn(string req, long qId)
+        {
+            ServiceResponseModel<RackJobTrolleyDTO> result = new ServiceResponseModel<RackJobTrolleyDTO>();
+            result.data = new RackJobTrolleyDTO();
+
+            try
+            {
+                await PLCLogHelper.Instance.DeleteLog(_dbContext);
+
                 var claims = User.Identities.First().Claims.ToList();
                 string devId = claims?.FirstOrDefault(x => x.Type.Equals("DeviceId", StringComparison.OrdinalIgnoreCase))?.Value ?? "";
 
@@ -80,7 +165,7 @@ namespace RackingSystem.Controllers.API
                 srms.LoginIP = devId;
                 _dbContext.SaveChanges();
 
-                RackJobHubOutDTO json = JsonConvert.DeserializeObject<RackJobHubOutDTO>(srms.Json) ?? new RackJobHubOutDTO();
+                RackJobTrolleyDTO json = JsonConvert.DeserializeObject<RackJobTrolleyDTO>(srms.Json) ?? new RackJobTrolleyDTO();
                 result.data = json;
                 result.data.TrolleyInfo = r.data;
                 result.success = true;
@@ -128,14 +213,14 @@ namespace RackingSystem.Controllers.API
             {
                 modbusClient.Connect();
 
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
                 int startAddress = 4208;
                 int numRegisters = 1;
                 int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                 for (int i = 0; i < registers.Length; i++)
                 {
-                    PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                    PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
                     lock1 = registers[i].ToString();
                 }
 
@@ -146,7 +231,7 @@ namespace RackingSystem.Controllers.API
                 //registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                 //for (int i = 0; i < registers.Length; i++)
                 //{
-                //    PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                //    PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
                 //    decimalText = getDecimalText(registers[i]);
                 //    lock2 = decimalText;
                 //}
@@ -154,14 +239,14 @@ namespace RackingSystem.Controllers.API
             }
             catch (Exception ex)
             {
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
             }
             finally
             {
                 modbusClient.Disconnect();
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Disconnected.", "");
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Disconnected.", "");
             }
 
             if (string.IsNullOrEmpty(lock1)) { lock1 = "0"; }
@@ -197,6 +282,12 @@ namespace RackingSystem.Controllers.API
             if (slot.IsActive == false)
             {
                 result.errMessage = "Trolley Slot [" + colNo + " - " + rowNo + "] is inactive. ";
+                return result;
+            }
+
+            if (slot.NeedCheck == true)
+            {
+                result.errMessage = "Trolley Slot [" + colNo + " - " + rowNo + "] is needed for checking. ";
                 return result;
             }
 
@@ -242,11 +333,13 @@ namespace RackingSystem.Controllers.API
 
             result.errStackTrace = slot.TrolleySlotCode;
 
-            //// *** testing
-            //result.success = true;
-            //result.data = 1;
-            //return result;
-            //// *** testing
+            // *** testing
+            result.success = true;
+            result.data = 1;
+            // double check slot_id
+
+            return result;
+            // *** testing
 
             // 2. check plc which column is ready
             string plcIp = configRack.ConfigValue;
@@ -257,7 +350,7 @@ namespace RackingSystem.Controllers.API
             {
                 modbusClient.Connect();
 
-                //PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+                //PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
                 // step 1 : left or right
                 int registerAddress = 4298;
@@ -314,24 +407,338 @@ namespace RackingSystem.Controllers.API
                 result.success = true;
                 result.data = 1;
 
+                // double check slot_id
+
             }
             catch (Exception ex)
             {
-                //PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                //PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
             }
             finally
             {
                 modbusClient.Disconnect();
-                //PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Disconnected.", "");
+                //PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Disconnected.", "");
+            }
+
+            return result;
+        }
+
+        internal string GetSlotIDByIP(string ip)
+        {
+            string methodName = "GetSlotIDByIP";
+            string result = "";
+
+            DateTime dtRun = DateTime.Now;
+            bool exit = false;
+
+            string decimalText = "";
+            string slotID = "";
+            int value = 0;
+
+            string plcIp = ip;
+            int port = 502;
+
+            ModbusClient modbusClient = new ModbusClient(plcIp, port);
+            try
+            {
+                modbusClient.Connect();
+
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+
+                int startAddress = 4201;
+                int numRegisters = 1;
+
+                while (!exit)
+                {
+                    int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                    for (int i = 0; i < registers.Length; i++)
+                    {
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                        value = registers[i];
+                        decimalText = getDecimalText(registers[i]);
+                    }
+
+                    if (value > 0)
+                    {
+                        exit = true;
+                        slotID = slotID + decimalText;
+                    }
+                    if ((DateTime.Now - dtRun).TotalSeconds > 10)
+                    {
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Timeout. Cannot get Slot ID..", "");
+                        exit = true;
+                    }
+                }
+
+                if (slotID != "")
+                {
+                    // second addr
+                    startAddress = 4202;
+                    numRegisters = 1;
+                    int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                    for (int i = 0; i < registers.Length; i++)
+                    {
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                        decimalText = getDecimalText(registers[i]);
+                        if (decimalText.Contains("\0"))
+                        {
+                            decimalText = decimalText.Substring(0, 1);
+                        }
+                        slotID = slotID + decimalText;
+                    }
+
+                    // third addr
+                    startAddress = 4203;
+                    numRegisters = 1;
+                    registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                    for (int i = 0; i < registers.Length; i++)
+                    {
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                        decimalText = getDecimalText(registers[i]);
+                        if (decimalText.Contains("\0"))
+                        {
+                            decimalText = decimalText.Substring(0, 1);
+                        }
+                        slotID = slotID + decimalText;
+                    }
+
+                    // forth addr
+                    startAddress = 4204;
+                    numRegisters = 1;
+                    registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                    for (int i = 0; i < registers.Length; i++)
+                    {
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                        decimalText = getDecimalText(registers[i]);
+                        if (decimalText.Contains("\0"))
+                        {
+                            decimalText = decimalText.Substring(0, 1);
+                        }
+                        slotID = slotID + decimalText;
+                    }
+
+                    // fifth addr
+                    startAddress = 4205;
+                    numRegisters = 1;
+                    registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                    for (int i = 0; i < registers.Length; i++)
+                    {
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                        decimalText = getDecimalText(registers[i]);
+                        if (decimalText.Contains("\0"))
+                        {
+                            decimalText = decimalText.Substring(0, 1);
+                        }
+                        slotID = slotID + decimalText;
+                    }
+
+                    // sixth addr
+                    startAddress = 4206;
+                    numRegisters = 1;
+                    registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                    for (int i = 0; i < registers.Length; i++)
+                    {
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                        decimalText = getDecimalText(registers[i]);
+                        if (decimalText.Contains("\0"))
+                        {
+                            decimalText = decimalText.Substring(0, 1);
+                        }
+                        slotID = slotID + decimalText;
+                    }
+
+                    // seventh addr
+                    startAddress = 4207;
+                    numRegisters = 1;
+                    registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                    for (int i = 0; i < registers.Length; i++)
+                    {
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                        decimalText = getDecimalText(registers[i]);
+                        if (decimalText.Contains("\0"))
+                        {
+                            decimalText = decimalText.Substring(0, 1);
+                        }
+                        slotID = slotID + decimalText;
+                    }
+
+                    PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Get Reel ID {slotID}", "");
+
+                    // *** testing
+                    //slotID = "A00000018";
+                    result = slotID;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                //result.errMessage = ex.Message;
+                //result.errStackTrace = ex.StackTrace ?? "";
+            }
+            finally
+            {
+                modbusClient.Disconnect();
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Disconnected.", "");
+            }
+
+            return result;
+        }
+
+        internal List<int> ReadPulse(string ip, string slotCode)
+        {
+            List<int> result = new List<int>();
+            result.Add(0);
+            result.Add(0);
+            string methodName = "StartBarcodeScanner";
+
+            //// *** testing
+            //result.success = true;
+            //result.data = 1;
+            //return result;
+            //// *** testing
+
+            // 2. check plc which column is ready
+            string plcIp = ip;
+            int port = 502;
+
+            DateTime dtRun = DateTime.Now;
+            bool exit = false;
+            string decimalText = "";
+            string qrXText = "";
+            string qrYText = "";
+            int value = 0;
+
+            ModbusClient modbusClient = new ModbusClient(plcIp, port);
+            try
+            {
+                modbusClient.Connect();
+
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+
+                int startAddress = 4223;
+                int numRegisters = 1;
+
+                while (!exit)
+                {
+                    int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                    for (int i = 0; i < registers.Length; i++)
+                    {
+                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                        value = registers[i];
+                    }
+
+                    if (value > 0)
+                    {
+                        exit = true;
+                    }
+                    if ((DateTime.Now - dtRun).TotalSeconds > 10)
+                    {
+                        //result.errMessage = "Timeout. Cannot get Status.";
+                        exit = true;
+                    }
+                }
+
+                if (value > 0)
+                {
+                    // first addr
+                    startAddress = 4208;
+                    numRegisters = 1;
+                    int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                    for (int i = 0; i < registers.Length; i++)
+                    {
+                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                        decimalText = getDecimalText(registers[i]);
+                        if (decimalText.Contains("\0"))
+                        {
+                            decimalText = decimalText.Substring(0, 1);
+                        }
+                        qrXText = qrXText + decimalText;
+                    }
+
+                    // second addr
+                    startAddress = 4209;
+                    numRegisters = 1;
+                    registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                    for (int i = 0; i < registers.Length; i++)
+                    {
+                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                        decimalText = getDecimalText(registers[i]);
+                        if (decimalText.Contains("\0"))
+                        {
+                            decimalText = decimalText.Substring(0, 1);
+                        }
+                        qrXText = qrXText + decimalText;
+                    }
+
+                    // third addr
+                    startAddress = 4210;
+                    numRegisters = 1;
+                    registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                    for (int i = 0; i < registers.Length; i++)
+                    {
+                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                        decimalText = getDecimalText(registers[i]);
+                        if (decimalText.Contains("\0"))
+                        {
+                            decimalText = decimalText.Substring(0, 1);
+                        }
+                        qrYText = qrYText + decimalText;
+                    }
+
+                    // forth addr
+                    startAddress = 4211;
+                    numRegisters = 1;
+                    registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                    for (int i = 0; i < registers.Length; i++)
+                    {
+                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                        decimalText = getDecimalText(registers[i]);
+                        if (decimalText.Contains("\0"))
+                        {
+                            decimalText = decimalText.Substring(0, 1);
+                        }
+                        qrYText = qrYText + decimalText;
+                    }
+
+                    PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Get X {qrXText} Y {qrYText}", "");
+
+                    int qrX = 0;
+                    int qrY = 0;
+                    int.TryParse(qrXText, out qrX);
+                    int.TryParse(qrYText, out qrY);
+                    if (qrX > 0 || qrY > 0)
+                    {
+                        //slot.QRXPulse = qrX;
+                        //slot.QRYPulse = qrY;
+                        //_dbContext.SaveChanges();
+
+                        result[0] = qrX;
+                        result[1] = qrY;
+                    }
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                //result.errMessage = ex.Message;
+                //result.errStackTrace = ex.StackTrace ?? "";
+            }
+            finally
+            {
+                modbusClient.Disconnect();
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");
             }
 
             return result;
         }
 
         [HttpGet("GetRetrieveTrayStatus")]
-        public ServiceResponseModel<int> GetRetrieveTrayStatus()
+        public async Task<ServiceResponseModel<int>> GetRetrieveTrayStatus()
         {
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             result.data = 0;
@@ -345,17 +752,16 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            //// *** testing
-            //result.success = true;
-            //result.errMessage = "Done";
-            //result.data = 2;
-            //return result;
-            //// *** testings
+            // *** testing
+            result.success = true;
+            result.errMessage = "Done";
+            result.data = 2;
+            return result;
+            // *** testings
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
 
-            string decimalText = "";
             int value = 0;
 
             string plcIp = configRack.ConfigValue;
@@ -366,7 +772,7 @@ namespace RackingSystem.Controllers.API
             {
                 modbusClient.Connect();
 
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
                 while (!exit)
                 {
@@ -375,7 +781,7 @@ namespace RackingSystem.Controllers.API
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
                     {
-                        PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
                         value = registers[i];
                     }
 
@@ -393,14 +799,14 @@ namespace RackingSystem.Controllers.API
             }
             catch (Exception ex)
             {
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
             }
             finally
             {
                 modbusClient.Disconnect();
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Disconnected.", "");
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Disconnected.", "");
             }
 
             if (value == 0)
@@ -409,16 +815,18 @@ namespace RackingSystem.Controllers.API
                 modbusClient = new ModbusClient(plcIp, port);
                 try
                 {
+                    await Task.Delay(1000);
+
                     modbusClient.Connect();
 
-                    PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+                    PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
                     int startAddress = 4231;
                     int numRegisters = 1;
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
                     {
-                        PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
                         valueErr = registers[i];
                     }
 
@@ -429,7 +837,7 @@ namespace RackingSystem.Controllers.API
                             exit = false;
                             //modbusClient.Connect();
 
-                            PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+                            PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
                             while (!exit)
                             {
@@ -438,7 +846,7 @@ namespace RackingSystem.Controllers.API
                                 registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                                 for (int i = 0; i < registers.Length; i++)
                                 {
-                                    PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                                    PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
                                     value = registers[i];
                                 }
 
@@ -456,28 +864,28 @@ namespace RackingSystem.Controllers.API
                         }
                         catch (Exception ex)
                         {
-                            PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                            PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
                             result.errMessage = ex.Message;
                             result.errStackTrace = ex.StackTrace ?? "";
                         }
                         finally
                         {
                             //modbusClient.Disconnect();
-                            PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Disconnected.", "");
+                            PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Disconnected.", "");
                         }
                     }
                     result.errMessage = valueErr.ToString();
                 }
                 catch (Exception ex)
                 {
-                    PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                    PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
                     result.errMessage = ex.Message;
                     result.errStackTrace = ex.StackTrace ?? "";
                 }
                 finally
                 {
                     modbusClient.Disconnect();
-                    PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Disconnected.", "");
+                    PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Disconnected.", "");
                 }
             }
 
@@ -557,7 +965,7 @@ namespace RackingSystem.Controllers.API
             }
             catch (Exception ex)
             {
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
             }
@@ -587,11 +995,11 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            //// *** testing
-            //result.success = true;
-            //result.data = 1;
-            //return result;
-            //// *** testing
+            // *** testing
+            result.success = true;
+            result.data = 1;
+            return result;
+            // *** testing
 
             // 2. check plc which column is ready
             int value = 0;
@@ -605,7 +1013,7 @@ namespace RackingSystem.Controllers.API
             {
                 modbusClient.Connect();
 
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
                 // step 1 : left or right
                 int registerAddress = 4298;
@@ -666,14 +1074,14 @@ namespace RackingSystem.Controllers.API
             }
             catch (Exception ex)
             {
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
             }
             finally
             {
                 modbusClient.Disconnect();
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Disconnected.", "");
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Disconnected.", "");
             }
 
             return result;
@@ -702,14 +1110,14 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            //// *** testing
-            //result.success = true;
-            //result.errMessage = "Done Put Away.";
-            //result.data = 0;
-            //slot.HasEmptyTray = true;
-            //_dbContext.SaveChanges();
-            //return result;
-            //// *** testing
+            // *** testing
+            result.success = true;
+            result.errMessage = "Done Put Away.";
+            result.data = 0;
+            slot.HasEmptyTray = true;
+            _dbContext.SaveChanges();
+            return result;
+            // *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -725,7 +1133,7 @@ namespace RackingSystem.Controllers.API
             {
                 modbusClient.Connect();
 
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
                 while (!exit)
                 {
@@ -734,7 +1142,7 @@ namespace RackingSystem.Controllers.API
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
                     {
-                        PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
                         value = registers[i];
                     }
 
@@ -758,14 +1166,14 @@ namespace RackingSystem.Controllers.API
             }
             catch (Exception ex)
             {
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
             }
             finally
             {
                 modbusClient.Disconnect();
-                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Disconnected.", "");
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Disconnected.", "");
             }
 
             return result;
