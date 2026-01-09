@@ -18,5 +18,11 @@ namespace RackingSystem.Data.Maintenances
         [Required]
         public bool IsActive { get; set; } = true;
 
+        [Required]
+        public int ExpiredYears { get; set; } = 0;
+
+        [Required]
+        public int ExpiredMonths { get; set; } = 0;
+
     }
 }

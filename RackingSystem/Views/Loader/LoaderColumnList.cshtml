@@ -1,0 +1,281 @@
+﻿
+@section PageHeader {
+    <header class="d-flex align-items-center justify-content-between w-100">
+        <h2 class="pageTitle">Loader Column List</h2>
+    </header>
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body pt-0">
+                    <div class="text-nowrap table-container mt-1">
+                        <table id="listTable" class="row-border dataTable hover order-column" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Auto Loader Code</th>
+                                    <th>Column No</th>
+                                    <th>Active State</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Update Auto Loader Column</h4>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" for="txtCode">Loader Code</label>
+                    <input type="text" class="form-control" name="LoaderCode" id="txtCode" aria-describedby="Loader Code" maxlength="50" disabled>
+                    <div id="txtCodeError" class="error-message"></div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="txtColNo">Column No</label>
+                    <input type="text" class="form-control" name="ColNo" id="txtColNo" aria-describedby="ColNo" maxlength="255" disabled>
+                    <div id="txtColNoError" class="error-message"></div>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="chkIsActive">
+                    <label class="form-check-label" for="chkIsActive">Is Active</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="saveItem()">Save</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="cancelForm()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+    <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
+    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="../js/dataTables.js"></script>
+    <script src="../js/dataTables.columnControl.js"></script>
+    <script src="../js/columnControl.dataTables.js"></script>
+    <script src="~/js/sweetalert2.all.min.js"></script>
+
+    <script type="text/javascript">
+        let loaderList = [];
+
+        $(document).ready(function () {
+           getLoaderList().then(function (resultGet) {
+                if (resultGet) {
+                    loadList();
+                }
+            });
+        });
+
+        function getLoaderList() {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: "/Loader/GetLoaderList/",
+                    type: "POST",
+                    dataType: 'JSON',
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (result) {
+                        if (result.success == true) {
+                            loaderList = result.data.map(function(l) {
+                                return {
+                                    loaderId: l.loader_Id,
+                                    loaderCode: l.loaderCode,
+                                };
+                            });
+                            resolve(true);
+                        } else {
+                            resolve(false);
+                        }
+                    },
+                    error: function (error) {
+                        swal.fire({
+                            icon: 'error',
+                            title: 'Wait',
+                            text: error.val
+                        });
+                        resolve(false);
+                    }
+                });
+            });
+        }
+
+        function loadList() {
+            $.ajax({
+                url: "/Loader/GetLoaderColumnList/",
+                type: "GET",
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading();
+                },
+                success: function (result) {
+                    swal.close();
+                    if (result.success == true) {
+                        $('#listTable').DataTable( {
+                            data: result.data,
+                            paging: true,
+                            pageLength: 50,
+                            lengthMenu: [50, 100, 250, 500, 1000],
+                            columns: [
+                                { 
+                                    data: 'loader_Id',
+                                    render: function (data, type, row) {
+                                        var loader = loaderList.find(function(i) {
+                                            return i.loaderId === data;
+                                        });
+                                        return loader? loader.loaderCode: '';
+                                    }
+                                },
+                                { data: 'colNo' },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        if (row.isActive == true) {
+                                            return '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
+                                        }
+                                        else {
+                                            return '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>'
+                                        }
+                                    }
+                                },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
+                                        return `<div style="display:flex;">
+                                            <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
+                                                <span><i class="bi bi-pencil-square pe-1"></i>Edit</span></button>
+                                            </div>`;
+                                    }
+                                }
+                            ],
+                            language: {
+                                searchPlaceholder: "🔍︎ Search",
+                                search: ""
+                            },
+                            ordering: {
+                                indicators: false
+                            },
+                            columnControl: ['orderStatus']
+                        });
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+        }
+
+        $('#listTable').on('click', '.edit-btn', function () {
+            const row = JSON.parse($(this).attr('data-row'));
+            console.log(row);
+            editItemForm(row);
+        });
+
+        function editItemForm(row) {
+            const loader = loaderList.find(l => l.loaderId === row.loader_Id);
+            $("#txtCode").val(loader ? loader.loaderCode : '');
+            $("#txtColNo").val(row.colNo);
+            if (row.isActive == true) {
+                document.getElementById("chkIsActive").checked = true;
+            }
+            else {
+                document.getElementById("chkIsActive").checked = false;
+            }
+
+            $('#myModal').data("id", row.loaderColumn_Id);
+            $("#myModal").modal("show");
+        }
+
+        function cancelForm() {
+            $("#myModal").modal("toggle");
+        }
+
+        function saveItem() {
+            const chkIsAct = document.querySelector('#chkIsActive');
+            var data = {
+                LoaderColumn_Id: $('#myModal').data("id"),
+                IsActive: chkIsAct.checked ? true : false,
+            }
+
+            $.ajax({
+                url: '/Loader/SaveLoaderColumn',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading();
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                        $("#myModal").modal("toggle");
+                        swal.fire({
+                            icon: 'success',
+                            title: "Success Update",
+                            text: "",
+                            didClose: () => {
+                              window.location.reload();
+                            }
+                        });
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+        }
+
+    </script>
+
+}

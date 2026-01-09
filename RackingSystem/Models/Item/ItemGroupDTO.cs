@@ -11,5 +11,8 @@ namespace RackingSystem.Models.Item
         public string Description { get; set; } = "";
 
         public bool IsActive { get; set; } = true;
+
+        public int ExpiredYears { get; set; } = 0;
+        public int ExpiredMonths { get; set; } = 0;
     }
 }

@@ -6,6 +6,7 @@ namespace RackingSystem.Services.ItemServices
 {
     public interface IItemService
     {
+        public Task<ServiceResponseModel<ItemGroupDTO>> GetSingleItemGroup(long id);
         public Task<ServiceResponseModel<List<ItemGroupListDTO>>> GetItemGroupList();
         public Task<ServiceResponseModel<ItemGroupDTO>> SaveItemGroup(ItemGroupDTO itemReq);
         public Task<ServiceResponseModel<ItemGroupDTO>> DeleteItemGroup(ItemGroupDTO itemReq);

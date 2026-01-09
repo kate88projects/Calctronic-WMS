@@ -453,7 +453,7 @@
                             tableBody.innerHTML = '';
 
                             for (let i = 0; i < 25; i++) { // Example: Add 5 rows
-                                if (idx >= 111) { continue; }
+                                // if (idx >= 111) { continue; }
                                 if (idx-1 < result.data.length) {
                                     const rawData = JSON.stringify(result.data[idx - 1]);
                                     const newRow = tbl.insertRow(); // or document.createElement('tr');

@@ -838,6 +838,7 @@ namespace RackingSystem.Controllers.API
 
                 int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                 value = registers[0];
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress}: {value}", "");
 
                 modbusClient.Disconnect();
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");

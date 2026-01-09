@@ -598,7 +598,7 @@
                         }
                         document.getElementById("gridFooter").classList.remove("gridjs-footer");
                         */
-                        console.log("trolley get", trolleyCodeList);
+                        // console.log("trolley get", trolleyCodeList);
                         $('#listTable').DataTable({
                             data: result.data,
                             paging: true,
@@ -611,7 +611,6 @@
                                         var trolley = trolleyCodeList.find(function(i) {
                                             return i.trolleyId === data;
                                         });
-                                        console.log("trolley", trolley);
 
                                         return trolley ? trolley.trolleyCode: '';
                                     }
@@ -723,7 +722,7 @@
                                     trolleyCode: t.trolleyCode,
                                 };
                             });
-                            console.log("trolley list", trolleyCodeList);
+
                             const dropdownIds = ['ddTrolley', 'ddTrolley1'];
                             dropdownIds.forEach(function (id) {
                                 const dropdown = document.getElementById(id);

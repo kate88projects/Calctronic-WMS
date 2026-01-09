@@ -106,6 +106,13 @@ namespace RackingSystem.Controllers
         }
 
         [HttpGet]
+        public async Task<ServiceResponseModel<ItemGroupDTO>> GetSingleItemGroup(long id)
+        {
+            ServiceResponseModel<ItemGroupDTO> result = await _itemService.GetSingleItemGroup(id);
+            return result;
+        }
+
+        [HttpGet]
         public async Task<ServiceResponseModel<List<ItemGroupListDTO>>> GetItemGroupList()
         {
             ServiceResponseModel<List<ItemGroupListDTO>> result = await _itemService.GetItemGroupList();

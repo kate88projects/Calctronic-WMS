@@ -16,5 +16,8 @@ namespace RackingSystem.Data.Maintenances
         [Required]
         public int BalanceHeight { get; set; } = 0;
 
+        [Required]
+        public bool IsActive { get; set; } = false;
+
     }
 }

@@ -103,10 +103,22 @@
                                         </div>
                                         <div class="row mt-3">
                                             <div class="col-md-4">
+                                                <label for="txtItem">Item</label>
+                                                <input id="txtItem" type="button" class="form-control" style="" placeholder="" onclick="showItemForm('New')">
+                                                <div id="txtItemError" class="error-message"></div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="txtQty">Qty</label>
+                                                <input id="txtQty" type="number" class="form-control" style="" placeholder="" oninput="removeErrMsg(this.id)">
+                                                <div id="txtQtyError" class="error-message"></div>
+                                            </div>
+                                            <div class="col-md-4">
                                                 <label for="dtpExDate">Expiry Date</label>
                                                 <input id="dtpExDate" name="DateFrom" type="date" class="form-control" placeholder="Expiry Date" oninput="removeErrMsg(this.id)" >
                                                 <div id="dtpExDateError" class="error-message"></div>
                                             </div>
+                                        </div>
+                                        <div class="row mt-3">
                                             <div class="col-md-4">
                                                 <label for="txtSupplierName">Supplier Name</label>
                                                 <input id="txtSupplierName" type="text" class="form-control" style="" placeholder="" onclick="" maxlength="255" oninput="removeErrMsg(this.id)">
@@ -116,18 +128,6 @@
                                                 <label for="txtSupplierRefNo">Supplier Ref No</label>
                                                 <input id="txtSupplierRefNo" type="text" class="form-control" style="" placeholder="" maxlength="50" oninput="removeErrMsg(this.id)">
                                                 <div id="txtSupplierRefNoError" class="error-message"></div>
-                                            </div>
-                                        </div>
-                                        <div class="row mt-3">
-                                            <div class="col-md-4">
-                                                <label for="txtItem">Item</label>
-                                                <input id="txtItem" type="button" class="form-control" style="" placeholder="" onclick="showItemForm('New')" >
-                                                <div id="txtItemError" class="error-message"></div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <label for="txtQty">Qty</label>
-                                                <input id="txtQty" type="number" class="form-control" style="" placeholder="" oninput="removeErrMsg(this.id)">
-                                                <div id="txtQtyError" class="error-message"></div>
                                             </div>
                                         </div>
                                         <div class="row mt-3">
@@ -319,7 +319,6 @@
                     Swal.fire({
                         text: 'Please Wait',
                         width: '300px',
-
                         allowEscapeKey: false,
                         allowOutsideClick: false,
                         showConfirmButton: false,
@@ -640,6 +639,36 @@
 
             removeErrMsg('txtItem');
             $("#itemModal").modal("toggle");
+
+            //get expired date range
+            $.ajax({
+                url: "/Item/GetSingleItemGroup",
+                type: "GET",
+                dataType: 'JSON',
+                data: { id: row.itemGroup_Id },
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    if (result.success) {
+                        const today = new Date();
+                        const years = result.data.expiredYears;
+                        const months = result.data.expiredMonths;
+
+                        const expiredDate = new Date(today);
+                        expiredDate.setFullYear(expiredDate.getFullYear() + years);
+                        expiredDate.setMonth(expiredDate.getMonth() + months);
+                        const formattedDate = expiredDate.toISOString().split('T')[0];
+
+                        document.getElementById("dtpExDate").value = formattedDate;
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
         }
 
         function validateInput(inputChecks) {

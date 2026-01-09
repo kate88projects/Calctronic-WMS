@@ -294,6 +294,10 @@ namespace RackingSystem.Controllers.API
 
                     PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Get X {qrXText} Y {qrYText}", "");
 
+                    slot.LastQRXPulse = slot.QRXPulse;
+                    slot.LastQRYPulse = slot.QRYPulse;
+                    slot.LastQRReadTime = DateTime.Now;
+
                     int qrX = 0;
                     int qrY = 0;
                     int.TryParse(qrXText, out qrX);
@@ -565,6 +569,10 @@ namespace RackingSystem.Controllers.API
                     }
 
                     PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Get X {qrXText} Y {qrYText}", "");
+
+                    slot.LastQRXPulse = slot.QRXPulse;
+                    slot.LastQRYPulse = slot.QRYPulse;
+                    slot.LastQRReadTime = DateTime.Now;
 
                     int qrX = 0;
                     int qrY = 0;

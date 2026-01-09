@@ -23,6 +23,10 @@ namespace RackingSystem.Models.Slot
 
         public int XPulse { get; set; } = 0;
         public int YPulse { get; set; } = 0;
+        public int LastQRXPulse { get; set; } = 0;
+        public int LastQRYPulse { get; set; } = 0;
+
+        public DateTime LastQRReadTime { get; set; }
         public int QRXPulse { get; set; } = 0;
         public int QRYPulse { get; set; } = 0;
         public int Add1Pulse { get; set; } = 0;

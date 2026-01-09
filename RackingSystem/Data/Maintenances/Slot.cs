@@ -48,6 +48,15 @@ namespace RackingSystem.Data.Maintenances
         public int QRYPulse { get; set; } = 0;
 
         [Required]
+        public int LastQRXPulse { get; set; } = 0;
+
+        [Required]
+        public int LastQRYPulse { get; set; } = 0;
+
+        [Required]
+        public DateTime LastQRReadTime { get; set; }
+
+        [Required]
         public int Add1Pulse { get; set; } = 0;
 
         [Required]

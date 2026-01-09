@@ -1,4 +1,42 @@
-﻿
+﻿<style>
+
+    .grid-container {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 5px; 
+        align-items: center;
+    }
+
+    .grid-item {
+        display: flex;
+        align-items: center;
+    }
+
+    .input-wrapper {
+        display: flex;
+        align-items: center;
+        margin-right: 5px; 
+    }
+
+    .input-wrapper input {
+        width: 60px;
+        margin-right: 2px;
+    }
+
+    .input-wrapper .input-label {
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .error-message {
+        font-size: 12px;
+        color: red;
+        margin-top: 3px;
+    }
+
+
+</style>
+
 @section PageHeader {
     <header class="d-flex align-items-center justify-content-between w-100">
         <h2 class="pageTitle">Item Group List</h2>
@@ -53,6 +91,25 @@
                     <label class="form-label" for="txtDesc">Description</label>
                     <input type="text" class="form-control" name="Description" id="txtDesc" aria-describedby="Description" maxlength="255">
                     <div id="txtDescError" class="error-message"></div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Expired Date Range</label>
+                    <div class="grid-container">
+                        <div class="grid-item">
+                            <div class="input-wrapper">
+                                <input type="number" class="form-control" name="Years" id="txtYears" aria-describedby="Years" style="width: 80px;" >
+                                <span class="ms-1">Years</span>
+                            </div>
+                            <div id="txtYearsError" class="error-message"></div>
+                        </div>
+                        <div class="grid-item">
+                            <div class="input-wrapper">
+                                <input type="number" class="form-control" name="Months" id="txtMonths" aria-describedby="Months" style="width: 80px;">
+                                <span class="ms-1">Months</span>
+                            </div>
+                            <div id="txtMonthsError" class="error-message"></div>
+                        </div>
+                    </div>
                 </div>
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="chkIsActive">
@@ -242,8 +299,7 @@
         function newItemForm() {
             removeErrMsg([]);
             $("#txtId").val("0");
-            $("#txtCode").val("");
-            $("#txtDesc").val("");
+            $("#txtDesc, #txtCode, #txtYears, #txtMonths").val("");
             document.getElementById("chkIsActive").checked = true;
             $("#myModal").modal("show");
         }
@@ -258,6 +314,9 @@
             $("#txtId").val(row.itemGroup_Id);
             $("#txtCode").val(row.itemGroupCode);
             $("#txtDesc").val(row.description);
+            $("#txtYears").val(row.expiredYears);
+            $("#txtMonths").val(row.expiredMonths);
+
             if (row.isActive == true) {
                 document.getElementById("chkIsActive").checked = true;
             }
@@ -312,6 +371,8 @@
                 ItemGroup_Id: $("#txtId").val(),
                 ItemGroupCode: $("#txtCode").val(),
                 Description: $("#txtDesc").val(),
+                ExpiredYears: $("#txtYears").val() || 0,
+                ExpiredMonths: $("#txtMonths").val() || 0,
                 IsActive: chkIsAct.checked ? true : false,
             }
 

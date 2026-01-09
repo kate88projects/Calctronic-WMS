@@ -83,6 +83,13 @@ namespace RackingSystem.Controllers
         }
 
         [HttpGet]
+        public async Task<ServiceResponseModel<TrolleySlotDTO>> GetTrolleySlot(long id)
+        {
+            ServiceResponseModel<TrolleySlotDTO> result = await _trolleyService.GetTrolleySlot(id);
+            return result;
+        }
+
+        [HttpGet]
         public async Task<ServiceResponseModel<List<TrolleySlotDTO>>> GetTrolleySlotList()
         {
             ServiceResponseModel<List<TrolleySlotDTO>> result = await _trolleyService.GetTrolleySlotList();

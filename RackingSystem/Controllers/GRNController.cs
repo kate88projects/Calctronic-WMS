@@ -110,12 +110,14 @@ namespace RackingSystem.Controllers
 
         public IActionResult NewAutoLoaderTask()
         {
+            ViewBag.xToken = "";
             ViewBag.PermissionList = new List<int>();
             string s = HttpContext.Session.GetString("xSession") ?? "";
             if (s != "")
             {
                 UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
                 ViewBag.PermissionList = data.UACIdList;
+                ViewBag.xToken = data.Token;
             }
 
             ViewData["ActiveGroup"] = "grpGRN";

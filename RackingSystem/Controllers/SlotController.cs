@@ -44,6 +44,13 @@ namespace RackingSystem.Controllers
         }
 
         [HttpGet]
+        public async Task<ServiceResponseModel<SlotDTO>> GetSlot(long id)
+        {
+            ServiceResponseModel<SlotDTO> result = await _slotService.GetSlot(id);
+            return result;
+        }
+
+        [HttpGet]
         public async Task<ServiceResponseModel<List<SlotListDTO>>> GetSlotList()
         {
             ServiceResponseModel<List<SlotListDTO>> result = await _slotService.GetSlotList();

@@ -23,6 +23,25 @@ namespace RackingSystem.Services.ItemServices
             _mapper = mapper;
         }
 
+        public async Task<ServiceResponseModel<ItemGroupDTO>> GetSingleItemGroup(long id)
+        {
+            ServiceResponseModel<ItemGroupDTO> result = new ServiceResponseModel<ItemGroupDTO>();
+
+            try
+            {
+                var item = await _dbContext.ItemGroup.FirstOrDefaultAsync(x => x.ItemGroup_Id == id);
+                var itemDTO = _mapper.Map<ItemGroupDTO>(item);
+                result.success = true;
+                result.data = itemDTO;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+            return result;
+        }
+
         public async Task<ServiceResponseModel<List<ItemGroupListDTO>>> GetItemGroupList()
         {
             ServiceResponseModel<List<ItemGroupListDTO>> result = new ServiceResponseModel<List<ItemGroupListDTO>>();
@@ -93,6 +112,8 @@ namespace RackingSystem.Services.ItemServices
                         ItemGroupCode = itemReq.ItemGroupCode,
                         Description = itemReq.Description,
                         IsActive = itemReq.IsActive,
+                        ExpiredYears = itemReq.ExpiredYears,
+                        ExpiredMonths = itemReq.ExpiredMonths,
                     };
                     _dbContext.ItemGroup.Add(_item);
                 }
@@ -107,6 +128,8 @@ namespace RackingSystem.Services.ItemServices
                     _item.ItemGroupCode = itemReq.ItemGroupCode;
                     _item.Description = itemReq.Description;
                     _item.IsActive = itemReq.IsActive;
+                    _item.ExpiredYears = itemReq.ExpiredYears;
+                    _item.ExpiredMonths = itemReq.ExpiredMonths;
                     _dbContext.ItemGroup.Update(_item);
                 }
                 await _dbContext.SaveChangesAsync();

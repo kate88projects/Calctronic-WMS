@@ -22,6 +22,9 @@ namespace RackingSystem.Models.Trolley
         public int YPulse { get; set; } = 0;
         public int QRXPulse { get; set; } = 0;
         public int QRYPulse { get; set; } = 0;
+        public int LastQRXPulse { get; set; } = 0;
+        public int LastQRYPulse { get; set; } = 0;
+        public DateTime LastQRReadTime { get; set; }
         public int Add1Pulse { get; set; } = 0;
         public int Add2Pulse { get; set; } = 0;
         public int Add3Pulse { get; set; } = 0;

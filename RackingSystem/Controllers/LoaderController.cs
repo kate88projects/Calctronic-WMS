@@ -163,5 +163,35 @@ namespace RackingSystem.Controllers
             return result;
         }
 
+        public IActionResult LoaderColumnList()
+        {
+            ViewBag.PermissionList = new List<int>();
+            string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (s != "")
+            {
+                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+                ViewBag.PermissionList = data.UACIdList;
+            }
+
+            ViewData["ActiveGroup"] = "grpMM";
+            ViewData["ActiveTab"] = "LoaderColumnList";
+            ViewData["Title"] = "Loader Column List";
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetLoaderColumnList()
+        {
+            ServiceResponseModel<List<LoaderColumnDTO>> result = await _loaderService.GetLoaderColumnList();
+            return new JsonResult(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveLoaderColumn([FromBody] LoaderColumnDTO loaderCol)
+        {
+            ServiceResponseModel<LoaderColumnDTO> result = await _loaderService.SaveLoaderColumn(loaderCol);
+            return new JsonResult(result);
+        }
+
     }
 }

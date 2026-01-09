@@ -149,6 +149,15 @@
                                             </a>
                                         </li>
                                     }
+                                    @if (ViewBag.PermissionList.Contains(1) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="LoaderColumnList" asp-controller="Loader" class="nav-link">
+                                                <i class="nav-icon bi bi-circle"></i>
+                                                <p>Loader Column List</p>
+                                            </a>
+                                        </li>
+                                    }
                                     @if (ViewBag.PermissionList.Contains(2) == true)
                                     {
                                         <li class="nav-item">

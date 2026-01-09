@@ -25,6 +25,26 @@ namespace RackingSystem.Services.SlotServices
             _mapper = mapper;
         }
 
+        public async Task<ServiceResponseModel<SlotDTO>> GetSlot(long id)
+        {
+            ServiceResponseModel<SlotDTO> result = new ServiceResponseModel<SlotDTO>();
+
+            try
+            {
+                var slot = await _dbContext.Slot.FirstOrDefaultAsync(x => x.Slot_Id == id);
+                var slotDTO = _mapper.Map<SlotDTO>(slot);
+                result.success = true;
+                result.data = slotDTO;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+            return result;
+
+        }
         public async Task<ServiceResponseModel<List<SlotListDTO>>> GetSlotList()
         {
             ServiceResponseModel<List<SlotListDTO>> result = new ServiceResponseModel<List<SlotListDTO>>();

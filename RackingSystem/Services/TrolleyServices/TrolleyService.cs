@@ -26,7 +26,6 @@ namespace RackingSystem.Services.TrolleyServices
             _dbContext = context;
             _mapper = mapper;
         }
-
         public async Task<ServiceResponseModel<List<TrolleyListDTO>>> GetTrolleyList()
         {
             ServiceResponseModel<List<TrolleyListDTO>> result = new ServiceResponseModel<List<TrolleyListDTO>>();
@@ -283,6 +282,27 @@ namespace RackingSystem.Services.TrolleyServices
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
             }
+            return result;
+        }
+
+        public async Task<ServiceResponseModel<TrolleySlotDTO>> GetTrolleySlot(long id)
+        {
+            ServiceResponseModel<TrolleySlotDTO> result = new ServiceResponseModel<TrolleySlotDTO>();
+
+            try
+            {
+                var trolley = await _dbContext.TrolleySlot.FirstOrDefaultAsync(x => x.TrolleySlot_Id == id);
+                var trolleyDTO = _mapper.Map<TrolleySlotDTO>(trolley);
+                result.success = true;
+                result.data = trolleyDTO;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
             return result;
         }
 

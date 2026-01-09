@@ -6,6 +6,7 @@ namespace RackingSystem.Services.SlotServices
 {
     public interface ISlotService
     {
+        public Task<ServiceResponseModel<SlotDTO>> GetSlot(long id);
         public Task<ServiceResponseModel<List<SlotListDTO>>> GetSlotList();
         public Task<ServiceResponseModel<SlotDTO>> SaveSlot(SlotDTO slotReq);
         public Task<ServiceResponseModel<SlotDTO>> DeleteSlot(SlotDTO slotReq);

@@ -24,7 +24,7 @@ namespace RackingSystem.Services.LoaderServices
             _mapper = mapper;
         }
 
-        public async Task<ServiceResponseModel<List<LoaderListDTO>>> GetLoaderList()
+        public async Task<ServiceResponseModel<List<LoaderListDTO>>> GetLoaderList() 
         {
             ServiceResponseModel<List<LoaderListDTO>> result = new ServiceResponseModel<List<LoaderListDTO>>();
 
@@ -247,6 +247,12 @@ namespace RackingSystem.Services.LoaderServices
                     return result;
                 }
 
+                //if (_item.Status == Convert.ToString(EnumLoaderStatus.Loaded))
+                //{
+                //    result.errMessage = "Loader is not allow to deleted.";
+                //    return result;
+                //}
+
                 var loadColExist = _dbContext.LoaderColumn.Where(x => x.Loader_Id == _item.Loader_Id).ToList();
                 for (var iCol = loadColExist.Count - 1; iCol >= 0; iCol--)
                 {
@@ -416,12 +422,15 @@ namespace RackingSystem.Services.LoaderServices
                     return dto;
                 }).ToList();
 
-                var progressPercentage = jobReelQty.TotalCount == 0 ? 0 : (jobReelQty.TotalCount - (double)reelInLoaderQty) / jobReelQty.TotalCount * 100;
                 bool hasRunningTask = loaderColListDTO.Count > 0;
 
-                if (hasRunningTask)
+                if (jobReelQty != null)
                 {
-                    loaderColListDTO[0].totalProgressPercentage = (int)progressPercentage;
+                    var progressPercentage = jobReelQty.TotalCount == 0 ? 0 : (jobReelQty.TotalCount - (double)reelInLoaderQty) / jobReelQty.TotalCount * 100;
+                    if (hasRunningTask)
+                    {
+                        loaderColListDTO[0].totalProgressPercentage = (int)progressPercentage;
+                    }
                 }
 
                 result.success = hasRunningTask;
@@ -463,5 +472,59 @@ namespace RackingSystem.Services.LoaderServices
             return result;
         }
 
+        public async Task<ServiceResponseModel<List<LoaderColumnDTO>>> GetLoaderColumnList()
+        {
+            ServiceResponseModel<List<LoaderColumnDTO>> result = new ServiceResponseModel<List<LoaderColumnDTO>>();
+
+            try
+            {
+                var loaderColList = await _dbContext.LoaderColumn.OrderBy(x => x.Loader_Id).ToListAsync();
+                var loaderColListDTO = _mapper.Map<List<LoaderColumnDTO>>(loaderColList).ToList();
+                result.success = true;
+                result.data = loaderColListDTO;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceResponseModel<LoaderColumnDTO>> SaveLoaderColumn(LoaderColumnDTO loaderCol)
+        {
+            ServiceResponseModel<LoaderColumnDTO> result = new ServiceResponseModel<LoaderColumnDTO>();
+
+            try
+            {
+                if (loaderCol.LoaderColumn_Id == 0)
+                {
+                    result.errMessage = "Cannot find this loader column, please refresh the list.";
+                    return result;
+                }
+
+                LoaderColumn? _lCol = _dbContext.LoaderColumn.Find(loaderCol.LoaderColumn_Id);
+                if (_lCol == null)
+                {
+                    result.errMessage = "Cannot find this loader column, please refresh the list.";
+                    return result;
+                }
+
+                _lCol.IsActive = loaderCol.IsActive;
+                _dbContext.LoaderColumn.Update(_lCol);
+
+                await _dbContext.SaveChangesAsync();
+                result.success = true;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
     }
 }
