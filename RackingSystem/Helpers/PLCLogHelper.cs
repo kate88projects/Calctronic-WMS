@@ -16,9 +16,9 @@ namespace RackingSystem.Helpers
         private PLCLogHelper() { }
         #endregion
 
-        public void InsertPLCLoaderLog(AppDbContext _dbContext, long id, string evt, string r1, string r2)
+        public void InsertPLCLoaderLog(AppDbContext _dbContext, long id, string evt, string r1, string r2, bool isErr)
         {
-            var logExist = _dbContext.PLCLoaderLog.Where(x => x.Loader_Id == id && x.EventName == evt && x.Remark1 == r1 && x.Remark2 == r2).FirstOrDefault();
+            var logExist = isErr ? null : _dbContext.PLCLoaderLog.Where(x => x.Loader_Id == id && x.EventName == evt && x.Remark1 == r1 && x.Remark2 == r2).FirstOrDefault();
             if (logExist != null)
             {
                 logExist.CreatedDate = DateTime.Now;
@@ -39,9 +39,9 @@ namespace RackingSystem.Helpers
 
         }
 
-        public void InsertPLCHubInLog(AppDbContext _dbContext, long id, string evt, string r1, string r2)
+        public void InsertPLCHubInLog(AppDbContext _dbContext, long id, string evt, string r1, string r2, bool isErr)
         {
-            var logExist = _dbContext.PLCHubInLog.Where(x => x.Loader_Id == id && x.EventName == evt && x.Remark1 == r1 && x.Remark2 == r2).FirstOrDefault();
+            var logExist = isErr ? null : _dbContext.PLCHubInLog.Where(x => x.Loader_Id == id && x.EventName == evt && x.Remark1 == r1 && x.Remark2 == r2).FirstOrDefault();
             if (logExist != null)
             {
                 logExist.CreatedDate = DateTime.Now;
@@ -62,9 +62,9 @@ namespace RackingSystem.Helpers
 
         }
 
-        public void InsertPLCHubOutLog(AppDbContext _dbContext, long id, string evt, string r1, string r2)
+        public void InsertPLCHubOutLog(AppDbContext _dbContext, long id, string evt, string r1, string r2, bool isErr)
         {
-            var logExist = _dbContext.PLCHubOutLog.Where(x => x.Loader_Id == id && x.EventName == evt && x.Remark1 == r1 && x.Remark2 == r2).FirstOrDefault();
+            var logExist = isErr ? null : _dbContext.PLCHubOutLog.Where(x => x.Loader_Id == id && x.EventName == evt && x.Remark1 == r1 && x.Remark2 == r2).FirstOrDefault();
             if (logExist != null)
             {
                 logExist.CreatedDate = DateTime.Now;
@@ -85,9 +85,9 @@ namespace RackingSystem.Helpers
 
         }
 
-        public void InsertPLCTrolleyLog(AppDbContext _dbContext, long id, string evt, string r1, string r2)
+        public void InsertPLCTrolleyLog(AppDbContext _dbContext, long id, string evt, string r1, string r2, bool isErr)
         {
-            var logExist = _dbContext.PLCTrolleyLog.Where(x => x.Loader_Id == id && x.EventName == evt && x.Remark1 == r1 && x.Remark2 == r2).FirstOrDefault();
+            var logExist = isErr ? null : _dbContext.PLCTrolleyLog.Where(x => x.Loader_Id == id && x.EventName == evt && x.Remark1 == r1 && x.Remark2 == r2).FirstOrDefault();
             if (logExist != null)
             {
                 logExist.CreatedDate = DateTime.Now;

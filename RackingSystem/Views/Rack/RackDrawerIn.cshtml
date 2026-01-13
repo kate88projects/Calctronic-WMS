@@ -720,11 +720,11 @@
             document.getElementById('chkCol2').checked = true;
             document.getElementById('chkCol3').checked = true;
 
-            // if (qCont == "1") {
-            //     $('#cont-btn').removeClass('hidden');
-            //     $('#start-btn').addClass('hidden');
-            //     readyContinuos();
-            // }
+            if (qCont == "1") {
+                $('#cont-btn').removeClass('hidden');
+                $('#start-btn').addClass('hidden');
+                readyContinuos();
+            }
         });
 
         /**
@@ -774,21 +774,21 @@
             }
         }
 
-        // async function readyContinuos() {
-        //     var data = await getJson();
-        //     // console.log(data);
+        async function readyContinuos() {
+            var data = await getJson();
+            // console.log(data);
 
-        //     if (data == true) {
-        //         await getLoader($("#trolley-input").val(), true);
+            if (data == true) {
+                await getTrolley($("#trolley-input").val(), true);
 
-        //         // console.log(sharedDrawerState);
+                // console.log(sharedDrawerState);
 
-        //         // updateSystemStatusUI();
-        //         updateGantryUIState();
-        //         updateCartesianUIState();
+                // updateSystemStatusUI();
+                updateGantryUIState();
+                updateCartesianUIState();
 
-        //     }
-        // }
+            }
+        }
 
         // System Start Handler
 
@@ -830,7 +830,7 @@
             // 3. Continue UI
             disableDivContent(false);
 
-            updateActiveColumn(colNum);
+            // updateActiveColumn(colNum);
 
             sharedDrawerState.systemRunning = true;
             updateSystemStatusUI();
@@ -987,6 +987,7 @@
 
                 TrolleyCode: $("#trolley-input").val(),
                 TrolleyId: Number($("#txtTrolleyId").val()),
+                TrolleySide: $('#side-input').val(),
 
                 DrawerStatus: sharedDrawerState.drawerStatus,
 
@@ -997,6 +998,8 @@
                 PutAwaySlot: $("#txtPutSlot").val(),
 
                 TrolleyLocation: sharedDrawerState.trolleyLocation,
+
+                ColNum: colNo,
 
                 chkCol1: chkCol1.checked,
                 chkCol2: chkCol2.checked,
@@ -1032,60 +1035,55 @@
         }
 
         async function getJson() {
-        //     var fResult = false;
+            var fResult = false;
 
-        //     await $.ajax({
-        //         url: '/api/PLCHubIn/GetRackJobJson',
-        //         type: 'GET',
-        //         headers: {
-        //             'Authorization': 'Bearer ' + token
-        //         },
-        //         dataType: 'JSON',
-        //         contentType: 'application/json; charset=utf-8',
-        //         beforeSend: function () {
-        //         },
-        //         success: function (result) {
-        //             sharedDrawerState.systemRunning = result.data.systemRunning;
+            await $.ajax({
+                url: '/api/PLCTrolley/GetRackJobJson',
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                },
+                success: function (result) {
+                    sharedDrawerState.systemRunning = result.data.systemRunning;
 
-        //             sharedDrawerState.drawerStatus = result.data.drawerStatus;
-        //             sharedDrawerState.gantrySequenceState = result.data.gantryStatus;
+                    $("#trolley-input").val(result.data.trolleyCode);
+                    $("#txtTrolleyId").val(result.data.trolleyId);
+                    $("#side-input").val(result.data.trolleySide);
 
-        //             $("#loader-input").val(result.data.loaderCode);
-        //             $("#txtLoaderId").val(result.data.loaderId);
+                    sharedDrawerState.drawerStatus = result.data.drawerStatus;
 
-        //             $("#txtSetUnload").val(result.data.setUnload);
-        //             $("#txtReelId").val(result.data.reelId);
-        //             $("#txtReelCode").val(result.data.reelCode);
-        //             $("#txtActHeight").val(result.data.actualHeight);
+                    sharedDrawerState.cartesianRobotState = result.data.cartesianRobotState;
+                    sharedDrawerState.cartesianLocation = result.data.cartesianLocation;
 
-        //             sharedDrawerState.cartesianRobotState = result.data.cartesianRobotState;
-        //             sharedDrawerState.cartesianLocation = result.data.cartesianLocation;
+                    $("#txtRetrieveSlot").val(result.data.retrieveSlot);
+                    $("#txtPutSlot").val(result.data.putAwaySlot);
 
-        //             $("#txtRetrieveSlot").val(result.data.retrieveSlot);
-        //             $("#txtPutSlot").val(result.data.putAwaySlot);
-        //             $("#txtPutSlotTake").val(result.data.slotTake);
+                    sharedDrawerState.trolleyLocation = result.data.trolleyLocation;
 
-        //             $("#txtReelIdC").val(result.data.reelIdC);
-        //             $("#txtReelCodeC").val(result.data.reelCodeC);
-        //             $("#txtActHeightC").val(result.data.actualHeightC);
+                    colNo = result.data.colNum;
 
-        //             halfPickMove = result.data.HalfPickMove;
-        //             halfPickMoveStep = result.data.halfPickMoveStep;
-        //             halfPlaceMove = result.data.halfPlaceMove;
-        //             halfPlaceMoveStep = result.data.halfPlaceMoveStep;
+                    document.getElementById('chkCol1').checked = result.data.chkCol1;
+                    document.getElementById('chkCol2').checked = result.data.chkCol2;
+                    document.getElementById('chkCol3').checked = result.data.chkCol3;
 
-        //             colNum = result.data.colNum;
+                    $("#left-input-tr").val(result.data.currentRowCol1);
+                    $("#center-input-tr").val(result.data.currentRowCol2);
+                    $("#right-input-tr").val(result.data.currentRowCol3);
 
-        //             fResult = true;
+                    fResult = true;
 
-        //             return fResult;
-        //         },
-        //         error: function (error) {
-        //             console.log(error);
-        //         }
-        //     });
+                    return fResult;
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
 
-        //     return fResult;
+            return fResult;
         }
 
         // ----------- Action (Auto Mode)
@@ -1193,6 +1191,7 @@
             if (chkSlot == false) {
                 sharedDrawerState.cartesianRobotState = 'Ready';
                 inRetrieveMove = false;
+                updateJson();
                 return;
             }
 
@@ -1201,6 +1200,7 @@
             if (getSlot == false) {
                 sharedDrawerState.cartesianRobotState = 'Ready';
                 inRetrieveMove = false;
+                updateJson();
                 return;
             }
             await delay(3000);
@@ -1225,6 +1225,7 @@
                 inRetrieveMove = false;
                 changeTakeSlot = false;
                 attemptsRetrieve = 1;
+                updateJson();
                 return;
             }
 
@@ -1267,6 +1268,7 @@
             if (getSlotCode == false) {
                 sharedDrawerState.cartesianRobotState = 'Retrieved';
                 inPutAwayMove = false;
+                updateJson();
                 return;
             }
 
@@ -1277,6 +1279,7 @@
             if (getSlot == false) {
                 sharedDrawerState.cartesianRobotState = 'Retrieved';
                 inPutAwayMove = false;
+                updateJson();
                 return;
             }
             await delay(5000);
@@ -1477,7 +1480,12 @@
                         fResult = true;
 
                         $("#txtTrolleyId").val(result.data.trolleyInfo.trolley_Id);
-                        colNo = 1;
+                        if (isCont) {
+                            colNo = result.data.colNum;
+                        }
+                        else {
+                            colNo = 1;
+                        }
 
                         logMessage('Trolley :: Done check ' + code, 'info');
                         logMessage('Trolley :: Start Column  ' + colNo, 'info');
@@ -1524,9 +1532,12 @@
                     // console.log('3::' + JSON.stringify(result));
                     // swal.close();
                     if (result.success) {
+                        if (result.data != s) {
+                            $('#side-input').val(result.data);
+                            logMessage('Retrieve :: Is Side[' + result.data + '] ', 'info');
+                        }
                         logMessage('Retrieve :: Done ', 'info');
                         $('#txtRetrieveSlot').val(result.errStackTrace);
-
                     }
                     else {
                         logMessage('Retrieve :: ' + result.errMessage, 'alert');

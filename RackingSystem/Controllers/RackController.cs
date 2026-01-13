@@ -80,9 +80,13 @@ namespace RackingSystem.Controllers
                         {
                             //return View("RackJobHubInView");
                         }
-                        if (srms.RackJobQueue_Id != 0 && srms.LoginIP == ViewBag.DeviceId)
+                        if (srms.RackJobQueue_Id != 0 && srms.LoginIP == ViewBag.DeviceId && srms.Json != "")
                         {
-                            ViewBag.QContinuos = "1";
+                            RackJobHubInDTO json = JsonConvert.DeserializeObject<RackJobHubInDTO>(srms.Json) ?? new RackJobHubInDTO();
+                            if (json.LoaderCode != "")
+                            {
+                                ViewBag.QContinuos = "1";
+                            }
                         }
                     }
                 }

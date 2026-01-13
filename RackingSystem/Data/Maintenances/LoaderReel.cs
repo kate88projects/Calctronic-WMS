@@ -16,5 +16,8 @@ namespace RackingSystem.Data.Maintenances
         [Required]
         public Guid Reel_Id { get; set; }
 
+        [Required]
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+
     }
 }

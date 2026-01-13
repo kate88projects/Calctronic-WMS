@@ -310,10 +310,10 @@ namespace RackingSystem.Controllers.API
         }
 
         [HttpGet("RetrieveTray/{trolleyId}/{side}/{colNo}/{rowNo}")]
-        public async Task<ServiceResponseModel<int>> RetrieveTray(long trolleyId, string side, int colNo, int rowNo)
+        public async Task<ServiceResponseModel<string>> RetrieveTray(long trolleyId, string side, int colNo, int rowNo)
         {
-            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
-            result.data = 0;
+            ServiceResponseModel<string> result = new ServiceResponseModel<string>();
+            result.data = side;
             string methodName = "RetrieveTray";
 
             var configRack = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking1.ToString()).FirstOrDefault();
@@ -333,13 +333,23 @@ namespace RackingSystem.Controllers.API
 
             result.errStackTrace = slot.TrolleySlotCode;
 
-            // *** testing
-            result.success = true;
-            result.data = 1;
-            // double check slot_id
-
-            return result;
-            // *** testing
+            //// *** testing
+            //// double check slot_id
+            //string slotCode = GetSlotIDByIP(configRack.ConfigValue);
+            //var slotChk = _dbContext.TrolleySlot.Where(x => x.Trolley_Id == trolleyId && x.TrolleySlotCode == slotCode).FirstOrDefault();
+            //if (slotChk == null)
+            //{
+            //    result.errMessage = "Cannot find Trolley Slot Returned [" + slotCode+ "]. ";
+            //}
+            //else
+            //{
+            //    side= slotChk.IsLeft ? "A" : "B";
+            //    ReadPulseByIP(configRack.ConfigValue, trolleyId, slotCode);    
+            //}
+            //result.success = true;
+            //result.data = side;
+            //return result;
+            //// *** testing
 
             // 2. check plc which column is ready
             string plcIp = configRack.ConfigValue;
@@ -404,10 +414,23 @@ namespace RackingSystem.Controllers.API
                 valueToWrite = 2;
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
 
-                result.success = true;
-                result.data = 1;
+                await Task.Delay(2000);
 
                 // double check slot_id
+                string slotCode = GetSlotIDByIP(configRack.ConfigValue);
+                var slotChk = _dbContext.TrolleySlot.Where(x => x.Trolley_Id == trolleyId && x.TrolleySlotCode == slotCode).FirstOrDefault();
+                if (slotChk == null)
+                {
+                    result.errMessage = "Cannot find Trolley Slot Returned [" + slotCode + "]. ";
+                }
+                else
+                {
+                    side = slotChk.IsLeft ? "A" : "B";
+                    ReadPulseByIP(configRack.ConfigValue, trolleyId, slotCode);
+                }
+
+                result.success = true;
+                result.data = side;
 
             }
             catch (Exception ex)
@@ -465,7 +488,7 @@ namespace RackingSystem.Controllers.API
                         exit = true;
                         slotID = slotID + decimalText;
                     }
-                    if ((DateTime.Now - dtRun).TotalSeconds > 10)
+                    if ((DateTime.Now - dtRun).TotalSeconds > 3)
                     {
                         PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Timeout. Cannot get Slot ID..", "");
                         exit = true;
@@ -587,12 +610,20 @@ namespace RackingSystem.Controllers.API
             return result;
         }
 
-        internal List<int> ReadPulse(string ip, string slotCode)
+        internal List<int> ReadPulseByIP(string ip, long trolleyId, string slotCode)
         {
             List<int> result = new List<int>();
             result.Add(0);
             result.Add(0);
-            string methodName = "StartBarcodeScanner";
+
+            string methodName = "ReadPulse";
+
+            var slot = _dbContext.TrolleySlot.Where(x => x.Trolley_Id == trolleyId && x.TrolleySlotCode == slotCode).FirstOrDefault();
+            if (slot == null)
+            {
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Error: Cannot find Trolley Id [" + trolleyId + "] Slot Code [" + slotCode + "].", "");
+                return result;
+            }
 
             //// *** testing
             //result.success = true;
@@ -616,7 +647,7 @@ namespace RackingSystem.Controllers.API
             {
                 modbusClient.Connect();
 
-                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
 
                 int startAddress = 4223;
                 int numRegisters = 1;
@@ -626,7 +657,7 @@ namespace RackingSystem.Controllers.API
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
                     {
-                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "");
                         value = registers[i];
                     }
 
@@ -634,7 +665,7 @@ namespace RackingSystem.Controllers.API
                     {
                         exit = true;
                     }
-                    if ((DateTime.Now - dtRun).TotalSeconds > 10)
+                    if ((DateTime.Now - dtRun).TotalSeconds > 3)
                     {
                         //result.errMessage = "Timeout. Cannot get Status.";
                         exit = true;
@@ -711,9 +742,9 @@ namespace RackingSystem.Controllers.API
                     int.TryParse(qrYText, out qrY);
                     if (qrX > 0 || qrY > 0)
                     {
-                        //slot.QRXPulse = qrX;
-                        //slot.QRYPulse = qrY;
-                        //_dbContext.SaveChanges();
+                        slot.QRXPulse = qrX;
+                        slot.QRYPulse = qrY;
+                        _dbContext.SaveChanges();
 
                         result[0] = qrX;
                         result[1] = qrY;
@@ -724,14 +755,14 @@ namespace RackingSystem.Controllers.API
             }
             catch (Exception ex)
             {
-                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
                 //result.errMessage = ex.Message;
                 //result.errStackTrace = ex.StackTrace ?? "";
             }
             finally
             {
                 modbusClient.Disconnect();
-                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "");
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Disconnected.", "");
             }
 
             return result;
@@ -752,12 +783,12 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "Done";
-            result.data = 2;
-            return result;
-            // *** testings
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "Done";
+            //result.data = 2;
+            //return result;
+            //// *** testings
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -995,11 +1026,11 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.data = 1;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.data = 1;
+            //return result;
+            //// *** testing
 
             // 2. check plc which column is ready
             int value = 0;
@@ -1110,14 +1141,14 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "Done Put Away.";
-            result.data = 0;
-            slot.HasEmptyTray = true;
-            _dbContext.SaveChanges();
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "Done Put Away.";
+            //result.data = 0;
+            //slot.HasEmptyTray = true;
+            //_dbContext.SaveChanges();
+            //return result;
+            //// *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;

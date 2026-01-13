@@ -10,6 +10,7 @@ namespace RackingSystem.Models.RackJob
 
         public string TrolleyCode { get; set; } = "";
         public long TrolleyId { get; set; } = 0;
+        public string TrolleySide { get; set; } = "A";
 
         public string DrawerStatus { get; set; } = "";
 
@@ -20,6 +21,8 @@ namespace RackingSystem.Models.RackJob
         public string PutAwaySlot { get; set; } = "";
 
         public string TrolleyLocation { get; set; } = "";
+
+        public int ColNum { get; set; } = 1;
 
         public bool chkCol1 { get; set; } = true;
         public bool chkCol2 { get; set; } = true;
@@ -37,6 +40,7 @@ namespace RackingSystem.Models.RackJob
 
         public string TrolleyCode { get; set; } = "";
         public long TrolleyId { get; set; } = 0;
+        public string TrolleySide { get; set; } = "A";
 
         public string DrawerStatus { get; set; } = "";
 
@@ -47,6 +51,8 @@ namespace RackingSystem.Models.RackJob
         public string PutAwaySlot { get; set; } = "";
 
         public string TrolleyLocation { get; set; } = "";
+
+        public int ColNum { get; set; } = 1;
 
         public bool chkCol1 { get; set; } = true;
         public bool chkCol2 { get; set; } = true;

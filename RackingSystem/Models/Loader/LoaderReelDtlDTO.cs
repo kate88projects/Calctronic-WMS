@@ -5,7 +5,7 @@ namespace RackingSystem.Models.Loader
     public class LoaderReelDtlDTO
     {
         public long Loader_Id { get; set; } = 0;
-        public string LoaderCode { get; set; }
+        public string LoaderCode { get; set; } = "";
         public int ColHeight { get; set; } = 0;
         public int BalanceHeight { get; set; } = 0;
         public int ColNo { get; set; } = 0;
