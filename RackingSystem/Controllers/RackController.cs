@@ -93,8 +93,8 @@ namespace RackingSystem.Controllers
             }
             catch (Exception ex)
             {
-                PLCLogHelper.Instance.InsertPLCHubInLog(_context, 0, "grpRACKING", ex.Message, "");
-                PLCLogHelper.Instance.InsertPLCHubInLog(_context, 0, "grpRACKING", ex.StackTrace, "");
+                PLCLogHelper.Instance.InsertPLCHubInLog(_context, 0, "grpRACKING", ex.Message, "", true);
+                PLCLogHelper.Instance.InsertPLCHubInLog(_context, 0, "grpRACKING", ex.StackTrace, "", true);
             }
 
 

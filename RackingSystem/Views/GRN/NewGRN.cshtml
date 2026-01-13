@@ -208,7 +208,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="itemModal" role="dialog">
+<div class="modal fade" id="itemModal" role="dialog" style="background-color: rgba(0, 0, 0, 0.2);">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
@@ -613,8 +613,8 @@
         }
 
         function showItemForm(mode) {
-            $('#itemModal').modal("show");
             $('#txtItemStatus').val(mode);
+            $('#itemModal').modal("show");
         }
 
         $('#itemTable').on('click', '.addItem-btn', function() {

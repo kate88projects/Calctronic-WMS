@@ -199,15 +199,23 @@
 
     .description-block {
         display: block;
-        margin: 10px 0;
+        /* margin: 10px 0; */
         text-align: center;
         font-size: 14px;
+        @*below is add for new design*@
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        height: 80px;
     }
 
     .description-header {
         font-weight: 600;
         margin: 0;
         padding: 0;
+    }
+
+    .description-title {
+        font-size: 12px;
     }
 
     .border-right {
@@ -255,8 +263,10 @@
     #usageContainer {
         /* border: 1px solid black; */
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        border-radius: 20px;
+        border-radius: 5px;
         padding: 15px;
+        /* min-height: 356px;
+            min-width: 340px; */
     }
 
     .progress-bar {
@@ -272,10 +282,64 @@
         text-align: center;
         padding: 5px;
     }
+
+    .sm-title {
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .section-title {
+        font-size: 26px;
+        margin-top: 20px;
+        font-variant: all-petite-caps;
+        font-weight: 600;
+    }
+
+    .no-task-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(248, 249, 250, 0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: #6c757d;
+        border-radius: 6px;
+        backdrop-filter: blur(1px);
+    }
+
+    .colBox {
+        width: 50px;
+        height: 40px;
+        background: linear-gradient(to top, #FFCF71, #ffffff);
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .no-progress-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.8);
+        z-index: 2;
+        font-size: 1.2em;
+        color: #6c757d;
+        font-weight: bold;
+    }
+
 </style>
 
 <div class="container-fluid mt-4">
-    <h3 class="mb-2">SRMS</h3>
+    <span class="mb-2 section-title">SRMS</span>
     @*
         <div class="row g-3 mb-4">
         <div class="col-md-4">
@@ -312,7 +376,7 @@
         <div class="col-md-6">
             <div class="card card-primary">
                 <div class="card-header primary-header">
-                    <h3 class="card-title">Slot Usage</h3>
+                    <h3 class="card-title">Capacity Overview</h3>
                     <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-bs-toggle="collapse" data-bs-target="#collapsePie" aria-expanded="true" aria-controls="collapsePie"
                                 id="collapseBtn" onclick="toggleIcon('collapseIcon')">
@@ -357,7 +421,7 @@
         <div class="col-md-6">
             <div class="card card-danger">
                 <div class="card-header danger-header">
-                    <h3 class="card-title">Pending Slots Overview</h3>
+                    <h3 class="card-title">Attention Listing</h3>
                     <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-bs-toggle="collapse" data-bs-target="#collapseChecking" aria-expanded="true" aria-controls="collapseChecking"
                                 id="collapseBtn1" onclick="toggleIcon('collapseIcon2')">
@@ -374,130 +438,153 @@
         </div>
     </div>
 
-    <div class="row mt-2">
-        <div class="col-md-12">
-            <div class="card card-primary">
-                <div class="card-header info-header">
-                    <h3 class="card-title">Task Overview: In Progress and Pending</h3>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-tool" data-bs-toggle="collapse" data-bs-target="#collapseOngoing" aria-expanded="true" aria-controls="collapseOngoing"
-                                id="collapseBtn" onclick="toggleIcon('collapseIcon3')">
-                            <i class="bi bi-dash-lg" id="collapseIcon3"></i>
-                        </button>
+    <div class="row m-0">
+        <span class="section-title">Task Overview: In Progress and Pending</span>
+        <div class="position-relative" id="statsContainer">
+            <div class="row m-0 p-2 d-flex justify-content-center">
+                <div class="col-sm-3 col-md-3 mx-auto">
+                    <div class="description-block d-flex flex-column justify-content-center align-items-center">
+                        <h5 class="description-header"></h5>
+                        <span class="description-text d-block">--</span>
+                        <span class="description-title d-block" id="info1">Reel Quantity Unloaded from Col 1</span>
                     </div>
                 </div>
-                <div class="collapse show ongoing-body" id="collapseOngoing">
-                    <div class="card-body">
-                        <div class="row justify-content-center" style="gap:20px;">
-                            <div class="col-md-4 col-sm-3 text-center " id="usageContainer">
-                                <span>UnLoading Column Usage</span>
-                                <div class="progress-group mt-3 d-flex align-items-center">
-                                    <i class="bi bi-1-square-fill fs-2" id="icon-c1"></i>
-                                    <div class="ms-3 d-flex flex-column w-100">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span>In Progress</span>
-                                            <b id="percent-c1" class="ms-auto">0%</b>
-                                        </div>
-                                        <div class="progress progress-sm">
-                                            <div class="progress-bar bg-success" id="c1" role="progressbar" style="width: 0%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="progress-group mt-3 d-flex align-items-center">
-                                    <i class="bi bi-2-square fs-2" id="icon-c2"></i>
-                                    <div class="ms-3 d-flex flex-column w-100">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            @* <span>In Progress</span> *@
-                                            <b id="percent-c2" class="ms-auto">0%</b>
-                                        </div>
-                                        <div class="progress progress-sm">
-                                            <div class="progress-bar bg-success" id="c2" role="progressbar" style="width: 0%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="progress-group mt-3 d-flex align-items-center">
-                                    <i class="bi bi-3-square fs-2" id="icon-c3"></i>
-                                    <div class="ms-3 d-flex flex-column w-100">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            @* <span>In Progress</span> *@
-                                            <b id="percent-c3" class="ms-auto">0%</b>
-                                        </div>
-                                        <div class="progress progress-sm">
-                                            <div class="progress-bar bg-success" id="c3" role="progressbar" style="width: 0%"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="progress-group mt-3 d-flex align-items-center" ">
-                                    <i class="bi bi-4-square fs-2" id="icon-c4"></i>
-                                    <div class="ms-3 d-flex flex-column w-100">
-                                        <div class="d-flex justify-content-between align-items-center;">
-                                            @* <span>In Progress</span> *@
-                                            <b id="percent-c4" class="ms-auto">0%</b>
-                                        </div>
-                                        <div class="progress progress-sm" style="width: 100%;">
-                                            <div class="progress-bar bg-success" id="c4" role="progressbar" style="width: 0%"></div>
-                                        </div>
-                                    </div>
-                                </div>
+                <div class="col-sm-3 col-md-3">
+                    <div class="description-block d-flex flex-column justify-content-center align-items-center" style="background: linear-gradient(135deg, #eff6ff, #dbeafe); ">
+                        @*border: 1px solid #93c5fd;*@
+                        <h5 class="description-header"></h5>
+                        <span class="description-text d-block">--</span>
+                        <span class="description-title d-block" id="info2">Total Reel Load into Racking</span>
+                    </div>
+                </div>
+                <div class="col-sm-3 col-md-3">
+                    <div class="description-block d-flex flex-column justify-content-center align-items-center" style="background-color: #ECFAE5;">
+                        <h5 class="description-header"></h5>
+                        <span class="description-text d-block">--</span>
+                        <span class="description-title d-block" id="info3">Put Away Quantity : Success </span>
+                    </div>
+                </div>
+                <div class="col-sm-3 col-md-3">
+                    <div class="description-block d-flex flex-column justify-content-center align-items-center">
+                        <h5 class="description-header"></h5>
+                        <span class="description-text d-block">--</span>
+                        <span class="description-title d-block" id="info4">Put Away Quantity : Failure</span>
+                    </div>
+                </div>
+            </div>
+
+            @* <div id="noDataOverlay" class="no-progress-overlay">
+                <span>No Data Running</span>
+            </div> *@
+        </div>
+
+        <div class="row m-0 mt-2 p-2 align-items-stretch">
+            <div class="col-md-4 col-sm-4">
+                <div id="usageContainer" class="flex-column justify-content-center h-100 w-100 position-relative">
+                    <span class="sm-title">Column Usage</span>
+                    <div class="progress-group mt-3 d-flex align-items-center">
+                        <div class="colBox">C1</div>
+                        <div class="ms-3 d-flex flex-column w-100">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small id="colQty1">-</small>
+                                <small id="percent-c1" class="ms-auto">0%</small>
                             </div>
-                            <div class="col-md-3 col-sm-3 d-flex flex-column align-items-center justify-content-center" id="usageContainer">
-                                <span>Overall Progress</span>
-                                <svg viewBox="0 0 36 36" class="circular-chart orange">
-                                    <path class="circle-bg"
-                                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                    <path class="circle" id="circle"
-                                          stroke-dasharray="30, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                                    <text x="18" y="20.35" class="percentage">30%</text>
-                                </svg>
+
+                            <div class="progress progress-sm">
+                                <div class="progress-bar progress-bar-striped" id="c1" role="progressbar" style="width: 0%"></div>
                             </div>
-                            <div class="col-md-4 col-sm-5" id="usageContainer">
-                                <div style="background-color: #ff9f00;" class="text-center p-1 text-white">Current Task</div>
-                                <div class="mb-3" id="currentTask">
-                                    <div class="task-card mt-1">
-                                        <div class="d-flex justify-content-between align-items-center p-2">
-                                            <div>
-                                                <span class="fw-bold" id="currentProcessingName">Unloading Process</span>
-                                                <p class="task-title mb-0">Document Type: <span id="currentDocumentType">Loader</span></p>
-                                            </div>
-                                            <button class="btn btn-primary">View Process</button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <hr />
-                                <div class="upcomingBanner">Upcoming Task</div>
-                                <div class="row" id="upComingTask">
-                                    <div class="coming-task"></div>
-                                </div>
+                        </div>
+                    </div>
+                    <div class="progress-group mt-3 d-flex align-items-center">
+                        <div class="colBox">C2</div>
+                        <div class="ms-3 d-flex flex-column w-100">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small id="colQty2">6 items remaining</small>
+                                <small id="percent-c2" class="ms-auto">30%</small>
+                            </div>
+                            <div class="progress progress-sm">
+                                <div class="progress-bar progress-bar-striped" id="c2" role="progressbar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress-group mt-3 d-flex align-items-center">
+                        <div class="colBox">C3</div>
+                        <div class="ms-3 d-flex flex-column w-100">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small id="colQty3">-</small>
+                                <small id="percent-c3" class="ms-auto">0%</small>
+                            </div>
+                            <div class="progress progress-sm">
+                                <div class="progress-bar progress-bar-striped" id="c3" role="progressbar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progress-group mt-3 d-flex align-items-center">
+                        <div class="colBox">C4</div>
+                        <div class="ms-3 d-flex flex-column w-100">
+                            <div class="d-flex justify-content-between align-items-center;">
+                                <small id="colQty4">-</small>
+                                <small id="percent-c4" class="ms-auto">0%</small>
+                            </div>
+                            <div class="progress progress-sm" style="width: 100%;">
+                                <div class="progress-bar progress-bar-striped" id="c4" role="progressbar" style="width: 0%"></div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="card-footer">
-                        <div class="row">
-                            <div class="col-sm-3 col-6">
-                                <div class="description-block border-right">
-                                    <h5 class="description-header"></h5>
-                                    <span class="description-text">Reel Quantity Unloaded from Col 1</span>
-                                </div>
+                    <div class="no-progress-overlay" id="usageOverlay">
+                        <span>No Progress Running</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-3 d-flex">
+                <div id="usageContainer" class="d-flex flex-column justify-content-center align-items-center h-100 w-100 position-relative">
+                    <span>Overall Progress</span>
+                    <svg viewBox="0 0 36 36" class="circular-chart orange">
+                        <path class="circle-bg"
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path class="circle" id="circle"
+                              stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <text x="18" y="20.35" class="percentage" id="percentageText">0%</text>
+                    </svg>
+
+                    <div class="no-progress-overlay" id="noProgressOverlay">
+                        <span>No Progress Running</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-5">
+                <div id="usageContainer" class="d-flex flex-column h-100 w-100">
+                    <div style="background-color: #ff9f00;" class="text-center p-1 text-white">Current Task</div>
+                    <div class="mt-1 position-relative" id="currentTaskCard">
+                        <div class="d-flex justify-content-between align-items-center p-2">
+                            <div>
+                                <span class="fw-bold" id="currentProcessingName"></span>
+                                <p class="task-title mb-0">Document Type: <span id="currentDocumentType">-</span></p>
                             </div>
-                            <div class="col-sm-3 col-6">
-                                <div class="description-block border-right">
-                                    <h5 class="description-header"></h5>
-                                    <span class="description-text">Total Reel Load into Racking</span>
-                                </div>
+                            <button class="btn btn-primary" id="currentTaskBtn">View Process</button>
+                        </div>
+
+                        <div class="no-task-overlay" id="noTaskOverlay">
+                            <span>No Active Task</span>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="upcomingBanner">Upcoming Task</div>
+                    <div class="mt-1 position-relative" id="upComingTask">
+                        <div class="d-flex justify-content-between align-items-center p-2">
+                            <div>
+                                <span class="fw-bold" id="upcomingName"></span>
+                                <p class="task-title mb-0">
+                                    Document Type: <span id="upcomingType"></span>
+                                </p>
                             </div>
-                            <div class="col-sm-3 col-6">
-                                <div class="description-block border-right">
-                                    <h5 class="description-header"></h5>
-                                    <span class="description-text">Put Away Quantity: Success </span>
-                                </div>
-                            </div>
-                            <div class="col-sm-3 col-6">
-                                <div class="description-block">
-                                    <h5 class="description-header"></h5>
-                                    <span class="description-text">Put Away Quantity: Failure</span>
-                                </div>
-                            </div>
+                            <button class="btn btn-primary" id="upcomingTaskBtn">View Queue</button>
+                        </div>
+
+                        <div class="no-task-overlay" id="noUpcomingOverlay">
+                            No Upcoming Tasks
                         </div>
                     </div>
                 </div>
@@ -505,18 +592,16 @@
         </div>
     </div>
 
-    <div class="row mt-3 gridRow">
-        <h4>Slot View</h4>
+    <div class="row m-0 gridRow">
+        <span class="section-title">Slots Overview</span>
 
         <div class="slot-tabs">
-            @* <div class="btnContainer">  *@
-            <button type="button" class="btn btn-dark tab-btn active" data-tab="leftTab" onclick="renderGrid(groupedSlots, true)">
+            <button type="button" class="btn btn-dark tab-btn active" data-tab="leftTab" onclick="renderSlotViewGrid(groupedSlots, true)">
                 Left Racking
             </button>
-            <button type="button" class="btn btn-outline-dark tab-btn" data-tab="rightTab" onclick="renderGrid(groupedSlots, false)">
+            <button type="button" class="btn btn-outline-dark tab-btn" data-tab="rightTab" onclick="renderSlotViewGrid(groupedSlots, false)">
                 Right Racking
             </button>
-            @* </div> *@
 
             <div class="color-legend">
                 <ul>
@@ -549,49 +634,28 @@
         <div class="modal-content">
 
             <div class="modal-header">
-                <h6 class="modal-title">Update Slot</h6>
+                <h6 class="modal-title">Update Slot Status</h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
             <div class="modal-body">
-                <input type="hidden" id="updateTaskId" />
-                <label for="slotInput">Slot Name</label>
-                <input type="text" class="form-control form-control-sm" id="slotInput" placeholder="Enter slot" disabled />
-
+                <div>
+                    <i class="bi bi-exclamation-lg text-danger"></i>
+                    This update may impact slot availability.
+                    Please review the slot and provide remarks to proceed with the update.<i class="bi bi-exclamation-lg text-danger"></i>
+                </div>
                 <div class="mb-2 mt-2">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="forEmptyTrayCheckbox">
-                        <label class="form-check-label" for="forEmptyTrayCheckbox">
-                            For Empty Tray
-                        </label>
-                    </div>
-
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="hasEmptyTrayCheckbox">
-                        <label class="form-check-label" for="hasEmptyTrayCheckbox">
-                            Has Empty Tray
-                        </label>
-                    </div>
-
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="hasReelCheckbox">
-                        <label class="form-check-label" for="hasReelCheckbox">
-                            Has Reel
-                        </label>
-                    </div>
-
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="isActiveCheckbox">
-                        <label class="form-check-label" for="isActiveCheckbox">
-                            Active
-                        </label>
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="txtCheckRemark" placeholder="Please enter check Remark">
+                        <label for="txtCheckRemark">Post-check Remarks</label>
+                        <div id="txtCheckRemarkError" class="error-message"></div>
                     </div>
                 </div>
             </div>
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" onclick="saveUpdateSlot()">Save</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="cancelForm()">Cancel</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
             </div>
 
         </div>
@@ -600,474 +664,589 @@
 
 @section Scripts {
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+    <script src="~/js/chart.umd.min.js"></script>
+    <script src="~/js/chartjs-plugin-datalabels.min.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
 
+    @* <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script> *@
+
     <script type="text/javascript">
-        let groupedSlots = {};
-        let currentTaskQueueId = null;
+        ;
+                let groupedSlots = {};
+                let currentTaskQueueId = null;
+                let currentDocType = null;
+                let currentEqId = null;
 
-        $(document).ready(async function () {
-            var slotUsageList = await loadSlotUsage();
-            loadPie(slotUsageList);
-            loadCurrentTask();
-            loadQueue();
-            loadSlots();
-        });
-
-        function loadPie(value) {
-            const availableData = value.data.filter(x => x.available === true);
-            const labels = availableData.map(x => x.title);
-            const data = availableData.map(x => x.slotQty);
-            const percentages = availableData.map(x => x.percentage);
-            const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'];
-
-            const totalActive = availableData.reduce((sum, x) => sum + x.slotQty, 0);
-            document.getElementById('activeValue').textContent = totalActive;
-
-            if (window.slotPieChart) {
-                window.slotPieChart.destroy();
-            }
-
-            new Chart(document.getElementById('pieChart'), {
-                type: 'pie',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: colors.slice(0, data.length)
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        // tooltip: {
-                        //     enabled: true,
-                        //     mode: 'nearest',
-                        //     intersect: true,
-                        //     events: ['click']
-                        // },
-                        datalabels: {
-                            color: '#fff',
-                            font: {
-                                weight: 'bold',
-                                size: 14
-                            },
-                            formatter: (value, ctx) => {
-                                // const percentage = ((value / total) * 100).toFixed(1) + '%';
-                                const index = ctx.dataIndex;
-                                return (percentages[index] == 0 ) ? '' : percentages[index] + '%';
+                $(document).ready(async function () {
+                    $.ajax({
+                        url: '/Account/getSession',
+                        type: 'GET',
+                        success: function(data) {
+                            // console.log(data);
+                            if (data == "") {
+                                window.location.href = '@Url.Action("Login", "Account")';
+                                return;
                             }
                         },
-                        legend: { position: 'top' },
-                        // title: { display: true, text: 'Slot Usage' }
-                    }
-                },
-                plugins: [ChartDataLabels]
-            });
-
-            const inactiveData = value.data.filter(x => x.available === false && x.title === 'Inactive Slot');
-            document.getElementById('inactiveValue').textContent = inactiveData.map(x => x.slotQty);
-
-            const errorSlot  = value.data.filter(x => x.available === false && x.title === 'Error Slot');
-            document.getElementById('warningValue').textContent = errorSlot.map(x => x.slotQty);
-
-        }
-
-        function toggleIcon(iconId) {
-            const icon = document.getElementById(iconId);
-            icon.classList.toggle('bi-dash-lg');
-            icon.classList.toggle('bi-plus-lg');
-        }
-
-        async function loadSlotUsage() {
-            return $.ajax({
-                url: "/Slot/GetSlotUsage/",
-                type: "GET",
-                dataType: 'JSON',
-                contentType: 'application/json; charset=utf-8',
-                beforeSend: function () {
-                    Swal.fire({
-                        text: 'Please Wait',
-                        width: '300px',
-                        allowEscapeKey: false,
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
+                        error: function(xhr, status, error) {
+                            console.error('Error fetching data:', error);
+                        }
                     });
-                    Swal.showLoading();
-                },
-                success: function (result) {
-                    swal.close();
-                    if (result.success == false) {
-                        swal.fire({
-                            icon: 'error',
-                            title: "Wait",
-                            text: result.errMessage
-                        });
-                    }
-                },
-                error: function (error) {
-                    swal.fire({
-                        icon: 'error',
-                        title: "Wait",
-                        text: error.val
-                    });
-                }
-            });
-        }
 
-        function loadSlots() {
-            $.ajax({
-                url: "/Slot/GetSlotList/",
-                type: "GET",
-                dataType: 'JSON',
-                contentType: 'application/json; charset=utf-8',
-                beforeSend: function () {
-                    Swal.fire({
-                        text: 'Please Wait',
-                        width: '300px',
-                        allowEscapeKey: false,
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
-                    });
-                    Swal.showLoading()
-                },
-                success: function (result) {
-                    swal.close()
-                    if (result.success == true) {
-                        groupedSlots = result.data;
-                        renderGrid(result.data, true);
-                        loadWarning();
-                    } else {
-                        swal.fire({
-                            icon: 'error',
-                            title: "Wait",
-                            text: result.errMessage
-                        });
-                    }
-                },
-                error: function (error) {
-                    swal.fire({
-                        icon: 'error',
-                        title: "Wait",
-                        text: error.val
-                    });
-                }
-            });
-        };
-
-        function renderGrid(slots, isLeft) {
-            const loadSlot = isLeft === true ? slots.filter(s => s.isLeft) : slots.filter(s => !s.isLeft);
-
-            var grouped = {};
-            loadSlot.forEach(slot => {
-                const colKey = slot.colNo;
-
-                if (!grouped[colKey]) {
-                    grouped[colKey] = [];
-                }
-                grouped[colKey].push(slot);
-            });
-
-            const gridPrefix = isLeft ? 'left' : 'right';
-            const grid = isLeft === true ? document.getElementById("slotGrid") : document.getElementById("rightSlotGrid");
-            while (grid.firstChild) {
-                grid.removeChild(grid.firstChild);
-            }
-
-            // sort columns numerically (important)
-            const sortedCols = Object.keys(grouped).map(Number).sort((a, b) => a - b);
-
-            sortedCols.forEach(colNo => {
-                const colDiv = document.createElement("div");
-                colDiv.className = "slot-column";
-                colDiv.id = `${gridPrefix}-col${colNo}`;
-
-                colDiv.innerHTML = `
-                    <div class="column-title">Column ${colNo}</div>
-                    <div class="slots"></div>
-                `;
-
-                grid.appendChild(colDiv);
-            });
-
-            sortedCols.forEach(colNo => {
-                const container = document.querySelector(`#${gridPrefix}-col${colNo} .slots`);
-
-                // sort by row so UI is top → bottom
-                grouped[colNo].sort((a, b) => a.rowNo - b.rowNo)
-                .forEach(slot => {
-                    const div = document.createElement("div");
-                    div.className = `slot ${slot.needCheck ? "needCheck" : (slot.isActive ? "active" : "inactive")}`;
-                    div.dataset.code = slot.slotCode;
-
-                    container.appendChild(div);
-                });
-            });
-        }
-
-        document.querySelectorAll(".tab-btn").forEach(btn => {
-            btn.addEventListener("click", () => {
-                document.querySelectorAll(".tab-btn").forEach(b => {
-                    b.classList.remove("active", "btn-dark");
-                    b.classList.add("btn-outline-dark");;
+                    const slotUsageList = await loadSlotUsage();
+                    loadPie(slotUsageList);
+                    loadSlots();
+                    loadCurrentTask();
+                    // loadQueue();
+                    // loadColumnUsage();
+                    // setInterval(refreshData, 15000);
                 });
 
-                //clicked button is now active
-                btn.classList.add("active", "btn-dark");
-                btn.classList.remove("btn-outline-dark");
+                function refreshData() {
+                    checkTaskProcess();
+                    console.log("done refresh on task");
+                }
 
-                document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
-                document.getElementById(btn.dataset.tab).classList.add("active");
-            });
-        });
-
-        function loadWarning() {
-            const warningSlots = groupedSlots.filter(s => s.needCheck);
-
-            if (warningSlots.length > 0) {
-                document.getElementById('warningValue').textContent = warningSlots.length;
-                const warningContainer = document.getElementById('collapsePending');
-                warningContainer.innerHTML = '';
-
-                warningSlots.forEach(slot => {
-                    const warningDiv = document.createElement('div');
-                    warningDiv.className = 'warning-slot d-flex justify-content-between align-items-center mb-2 p-2 border rounded';
-
-                    const slotDetails = document.createElement('div');
-                    slotDetails.className = 'slot-details';
-
-                    const slotCode = document.createElement('span');
-                    slotCode.className = 'slot-code';
-                    slotCode.textContent = `Slot Code: ${slot.slotCode}`;
-
-                    const slotInfo = document.createElement('div');
-                    slotInfo.className = 'slot-info';
-                    slotInfo.textContent = `Column: ${slot.colNo}  Row: ${slot.rowNo}  (${slot.isLeft ? 'Left Racking' : 'Right Racking'})`;
-
-                    const actionButton = document.createElement('button');
-                    actionButton.type = 'button';
-                    actionButton.className = 'btn btn-warning btn-sm';
-                    actionButton.textContent = 'Update';
-                    // actionButton.dataset.id = slot.slot_Id;
-                    // actionButton.dataset.slotCode = slot.slotCode;
-                    // actionButton.dataset.forEmptyTray = slot.forEmptyTray;
-                    // actionButton.dataset.hasEmptyTray = slot.hasEmptyTray;
-                    // actionButton.dataset.hasReel = slot.hasReel;
-                    // actionButton.dataset.isActive = slot.isActive;
-
-                    console.log(slot);
-
-                    actionButton.addEventListener('click', function () {
-
-                        // const { slotCode, forEmptyTray, hasEmptyTray, hasReel, isActive } = this.dataset;
-                        document.getElementById('updateTaskId').value = slot.slot_Id;
-                        document.getElementById('slotInput').value = slot.slotCode;
-                        document.getElementById('forEmptyTrayCheckbox').checked = slot.forEmptyTray;
-                        document.getElementById('hasEmptyTrayCheckbox').checked = slot.hasEmptyTray;
-                        document.getElementById('hasReelCheckbox').checked = slot.hasReel;
-                        document.getElementById('isActiveCheckbox').checked = slot.isActive;
-                        $('#updateSlotModal').modal("show");
+                /* slot usage - chart section*/
+                async function loadSlotUsage() {
+                    return $.ajax({
+                        url: "/Slot/GetSlotUsage/",
+                        type: "GET",
+                        dataType: 'JSON',
+                        contentType: 'application/json; charset=utf-8',
+                        beforeSend: function () {
+                            Swal.fire({
+                                text: 'Please Wait',
+                                width: '300px',
+                                allowEscapeKey: false,
+                                allowOutsideClick: false,
+                                showConfirmButton: false,
+                            });
+                            Swal.showLoading();
+                        },
+                        success: function (result) {
+                            swal.close();
+                            if (result.success == false) {
+                                swal.fire({
+                                    icon: 'error',
+                                    title: "Wait",
+                                    text: result.errMessage
+                                });
+                            }
+                        },
+                        error: function (error) {
+                            swal.fire({
+                                icon: 'error',
+                                title: "Wait",
+                                text: error.val
+                            });
+                        }
                     });
-                    // actionButton.onclick = () => {
-                    //     console.log(`Checking slot: ${slot.slot_Id}`);
-                    // };
+                }
 
-                    slotDetails.appendChild(slotCode);
-                    slotDetails.appendChild(slotInfo);
-                    warningDiv.appendChild(slotDetails);
-                    warningDiv.appendChild(actionButton);
+                function loadPie(value) {
+                    const availableData = value.data.filter(x => x.available === true);
+                    const labels = availableData.map(x => x.title);
+                    const data = availableData.map(x => x.slotQty);
+                    const percentages = availableData.map(x => x.percentage);
+                    const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'];
 
-                    warningContainer.appendChild(warningDiv);
+                    const totalActive = availableData.reduce((sum, x) => sum + x.slotQty, 0);
+                    document.getElementById('activeValue').textContent = totalActive;
+
+                    if (window.slotPieChart) {
+                        window.slotPieChart.destroy();
+                    }
+
+                    new Chart(document.getElementById('pieChart'), {
+                        type: 'pie',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                data: data,
+                                backgroundColor: colors.slice(0, data.length)
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                // tooltip: {
+                                //     enabled: true,
+                                //     mode: 'nearest',
+                                //     intersect: true,
+                                //     events: ['click']
+                                // },
+                                datalabels: {
+                                    color: '#fff',
+                                    font: {
+                                        weight: 'bold',
+                                        size: 14
+                                    },
+                                    formatter: (value, ctx) => {
+                                        // const percentage = ((value / total) * 100).toFixed(1) + '%';
+                                        const index = ctx.dataIndex;
+                                        return (percentages[index] == 0 ) ? '' : percentages[index] + '%';
+                                    }
+                                },
+                                legend: { position: 'top' },
+                                // title: { display: true, text: 'Slot Usage' }
+                            }
+                        },
+                        plugins: [ChartDataLabels]
+                    });
+
+                    const inactiveData = value.data.filter(x => x.available === false && x.title === 'Inactive Slot');
+                    document.getElementById('inactiveValue').textContent = inactiveData.map(x => x.slotQty);
+
+                    const errorSlot  = value.data.filter(x => x.available === false && x.title === 'Error Slot');
+                    document.getElementById('warningValue').textContent = errorSlot.map(x => x.slotQty);
+
+                }
+
+                function toggleIcon(iconId) {
+                    const icon = document.getElementById(iconId);
+                    icon.classList.toggle('bi-dash-lg');
+                    icon.classList.toggle('bi-plus-lg');
+                }
+
+                /* slot view section */
+                function loadSlots() {
+                    $.ajax({
+                        url: "/Slot/GetSlotList/",
+                        type: "GET",
+                        dataType: 'JSON',
+                        contentType: 'application/json; charset=utf-8',
+                        beforeSend: function () {
+                            Swal.fire({
+                                text: 'Please Wait',
+                                width: '300px',
+                                allowEscapeKey: false,
+                                allowOutsideClick: false,
+                                showConfirmButton: false,
+                            });
+                            Swal.showLoading()
+                        },
+                        success: function (result) {
+                            swal.close()
+                            if (result.success == true) {
+                                groupedSlots = result.data;
+                                loadWarning();
+                                renderSlotViewGrid(result.data, true);
+                            } else {
+                                swal.fire({
+                                    icon: 'error',
+                                    title: "Wait",
+                                    text: result.errMessage
+                                });
+                            }
+                        },
+                        error: function (error) {
+                            swal.fire({
+                                icon: 'error',
+                                title: "Wait",
+                                text: error.val
+                            });
+                        }
+                    });
+                }
+
+                function renderSlotViewGrid(slots, isLeft) {
+                    const loadSlot = isLeft === true ? slots.filter(s => s.isLeft) : slots.filter(s => !s.isLeft);
+
+                    let grouped = {};
+                    loadSlot.forEach(slot => {
+                       const colKey = slot.colNo;
+
+                        if (!grouped[colKey]) {
+                            grouped[colKey] = [];
+                       }
+                        grouped[colKey].push(slot);
+                    });
+
+                    const gridPrefix = isLeft ? 'left' : 'right';
+                    const grid = isLeft === true ? document.getElementById("slotGrid") : document.getElementById("rightSlotGrid");
+                    while (grid.firstChild) {
+                       grid.removeChild(grid.firstChild);
+                    }
+
+                    // sort columns numerically (important)
+                    const sortedCols = Object.keys(grouped).map(Number).sort((a, b) => a - b);
+
+                    sortedCols.forEach(colNo => {
+                        const colDiv = document.createElement("div");
+                        colDiv.className = "slot-column";
+                        colDiv.id = `${gridPrefix}-col${colNo}`;
+
+                        colDiv.innerHTML = `
+                          <div class="column-title">Column ${colNo}</div>
+                          <div class="slots"></div>
+                        `;
+
+                        grid.appendChild(colDiv);
+                    });
+
+                    sortedCols.forEach(colNo => {
+                        const container = document.querySelector(`#${gridPrefix}-col${colNo} .slots`);
+
+                        // sort by row so UI is top → bottom
+                        grouped[colNo].sort((a, b) => a.rowNo - b.rowNo)
+                        .forEach(slot => {
+                            const div = document.createElement("div");
+                            div.className = `slot ${slot.needCheck ? "needCheck" : (slot.isActive ? "active" : "inactive")}`;
+                            div.dataset.code = slot.slotCode;
+
+                            container.appendChild(div);
+                        });
+                    });
+                }
+
+                document.querySelectorAll(".tab-btn").forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        document.querySelectorAll(".tab-btn").forEach(b => {
+                            b.classList.remove("active", "btn-dark");
+                            b.classList.add("btn-outline-dark");;
+                        });
+
+                        //clicked button is now active
+                        btn.classList.add("active", "btn-dark");
+                        btn.classList.remove("btn-outline-dark");
+
+                        document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+                        document.getElementById(btn.dataset.tab).classList.add("active");
+                    });
                 });
-            }
-        }
 
-        function loadQueue() {
-            $.ajax({
-                url: "/RackJobQueue/GetQueueList/",
-                type: "GET",
-                dataType: 'JSON',
-                contentType: 'application/json; charset=utf-8',
-                beforeSend: function () {
-                    Swal.fire({
-                        text: 'Please Wait',
-                        width: '300px',
-                        allowEscapeKey: false,
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
-                    });
-                    Swal.showLoading()
-                },
-                success: function (result) {
-                    swal.close()
-                    if (result.success == true) {
-                        const filteredTasks = result.data.filter(task => task.rackJobQueue_Id !== currentTaskQueueId).slice(0, 2);
-                        const container = document.querySelector('.coming-task');
+                /* warning slot section */
+                function loadWarning() {
+                    const warningSlots = groupedSlots.filter(s => s.needCheck);
 
-                        container.innerHTML = '';
-                        filteredTasks.forEach(task => {
+                    if (warningSlots.length > 0) {
+                        document.getElementById('warningValue').textContent = warningSlots.length;
+                        const warningContainer = document.getElementById('collapsePending');
+                        warningContainer.innerHTML = '';
 
-                            const taskName = task.docType === 'Loader' ? 'Unloading Process': (task.docType === 'JOE' ? 'Emergency Job Order' : 'Job Order');
-                            const taskHTML = `
-                                <div class="task-card mt-1">
-                                    <div class="d-flex justify-content-between align-items-center p-2">
-                                        <div>
-                                            <span class="fw-bold">${taskName}</span>
-                                            <p class="task-title mb-0">
-                                                Document Type: <span>${task.docType}</span>
-                                            </p>
-                                        </div>
-                                        <button class="btn btn-primary disabled">View Process</button>
-                                    </div>
-                                </div>
-                            `;
+                        warningSlots.forEach(slot => {
+                            const warningDiv = document.createElement('div');
+                            warningDiv.className = 'warning-slot d-flex justify-content-between align-items-center mb-2 p-2 border rounded';
 
-                            container.insertAdjacentHTML('beforeend', taskHTML);
-                        });
+                            const slotDetails = document.createElement('div');
+                            slotDetails.className = 'slot-details';
 
-                    }
-                    else {
-                        swal.fire({
-                            icon: 'error',
-                            title: "Wait",
-                            text: result.errMessage
+                            const slotCode = document.createElement('span');
+                            slotCode.className = 'slot-code';
+                            slotCode.textContent = `Slot Code: ${slot.slotCode}`;
+
+                            const slotInfo = document.createElement('div');
+                            slotInfo.className = 'slot-info';
+                            slotInfo.textContent = `Column: ${slot.colNo}  Row: ${slot.rowNo}  (${slot.isLeft ? 'Left Racking' : 'Right Racking'})`;
+
+                            const actionButton = document.createElement('button');
+                            actionButton.type = 'button';
+                            actionButton.className = 'btn btn-warning btn-sm';
+                            actionButton.textContent = 'Update';
+
+                            actionButton.addEventListener('click', function () {
+                                const modal = document.getElementById('updateSlotModal');
+                                modal.dataset.slotId = slot.slot_Id;
+                                $('#updateSlotModal').modal("show");
+                            });
+
+                            slotDetails.appendChild(slotCode);
+                            slotDetails.appendChild(slotInfo);
+                            warningDiv.appendChild(slotDetails);
+                            warningDiv.appendChild(actionButton);
+
+                            warningContainer.appendChild(warningDiv);
                         });
                     }
-                },
-                error: function (error) {
-                    swal.fire({
-                        icon: 'error',
-                        title: "Wait",
-                        text: error.val
+                }
+
+                function saveUpdateSlot() {
+                    const modal = document.getElementById('updateSlotModal');
+                    const data = {
+                        Slot_Id: parseInt(modal.dataset.slotId),
+                        CheckRemark: $('#txtCheckRemark').val(),
+                    }
+
+                    $.ajax({
+                        url: "/Slot/UpdateWarningSlot/",
+                        type: "POST",
+                        data: JSON.stringify(data),
+                        contentType: 'application/json; charset=utf-8',
+                        beforeSend: function () {
+                            Swal.fire({
+                                text: 'Please Wait',
+                                width: '300px',
+                                allowEscapeKey: false,
+                                allowOutsideClick: false,
+                                showConfirmButton: false,
+                            });
+                            Swal.showLoading()
+                        },
+                        success: function (result) {
+                            swal.close()
+                            if (result.success == true) {
+                                $('#slotUpdateModal').modal("toggle");
+                                swal.fire({
+                                    icon: 'success',
+                                    title: "Success Update",
+                                    text: "",
+                                    didClose: () => {
+                                        window.location.reload();
+                                    }
+                                });
+                            }
+                            else {
+                                swal.fire({
+                                    icon: 'error',
+                                    title: "Wait",
+                                    text: result.errMessage
+                                });
+                            }
+                            console.log("result", result.success);
+                        },
+                        error: function (error) {
+                            swal.fire({
+                                icon: 'error',
+                                title: "Wait",
+                                text: error.val
+                            });
+                        }
                     });
                 }
-            });
-        }
 
-        function setProgress(percentage) {
-            if (percentage < 0 || percentage > 100) return;
-            const circle = document.getElementById('circle');
-            const text = document.querySelector('.percentage');
+                const updateSlotModal = document.getElementById('updateSlotModal');
+                updateSlotModal.addEventListener('hidden.bs.modal', function() {
+                    document.getElementById('txtCheckRemark').value = '';
+                })
 
-            const radius = 15.9155;
-            const circumference = 2 * Math.PI * radius;
+                /* task section */
+                function loadCurrentTask() {
+                    $.ajax({
+                        url: "/Rack/GetRackJob/",
+                        type: "GET",
+                        dataType: 'JSON',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (result) {
+                            swal.close();
+                            // console.log(result.data);
+                            if (result.success == true) {
+                                const nameEl = document.getElementById("currentProcessingName");
+                                const typeEl = document.getElementById("currentDocumentType");
+                                const btnEl  = document.getElementById("currentTaskBtn");
+                                const overlayEl = document.getElementById("noTaskOverlay");
 
-            circle.style.strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`;
-            text.textContent = `${percentage}%`;
-        }
+                                if (result.data) {
+                                    const data = result.data;
+                                    const taskName = data.currentJobType === 'Loader' ? 'Unloading Process': (data.currentJobType === 'JOE' ? 'Emergency Job Order' : 'Job Order');
+                                    nameEl.innerText = taskName;
+                                    typeEl.innerText = data.currentJobType;
+                                    btnEl.disabled = false;
+                                    overlayEl.classList.add("d-none");
 
-        function loadCurrentTask() {
-            $.ajax({
-                url: "/Rack/GetRackJob/",
-                type: "GET",
-                dataType: 'JSON',
-                contentType: 'application/json; charset=utf-8',
-                beforeSend: function () {
-                    Swal.fire({
-                        text: 'Please Wait',
-                        width: '300px',
-                        allowEscapeKey: false,
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
-                    });
-                    Swal.showLoading()
-                },
-                success: function (result) {
-                    swal.close()
-                    if (result.success == true) {
-                        const data = result.data
-                        const taskName = data.docType === 'Loader' ? 'Unloading Process': (data.docType === 'JOE' ? 'Emergency Job Order' : 'Job Order');
-                        document.getElementById("currentProcessingName").innerText = taskName;
-                        document.getElementById("currentDocumentType").innerText = data.currentJobType;
-                        currentTaskQueueId = data.rackJobQueue_Id;
-                    }
-                    else {
-                        swal.fire({
-                            icon: 'error',
-                            title: "Wait",
-                            text: result.errMessage
-                        });
-                    }
-                },
-                error: function (error) {
-                    swal.fire({
-                        icon: 'error',
-                        title: "Wait",
-                        text: error.val
+                                    currentEqId = data.loader_Id;
+                                    currentTaskQueueId = data.rackJobQueue_Id;
+                                    currentDocType = data.currentJobType;
+                                }
+                                else //no task is working
+                                {
+                                    currentTaskQueueId = 0;
+                                    nameEl.innerText = "-";
+                                    typeEl.innerText = "-";
+                                    btnEl.disabled = true;
+                                    overlayEl.classList.remove("d-none");
+                                }
+
+                                loadQueue();
+                                loadColumnUsage();
+                            }
+                            else {
+                                swal.fire({
+                                    icon: 'error',
+                                    title: "Wait",
+                                    text: result.errMessage
+                                });
+                            }
+                        },
+                        error: function (error) {
+                            swal.fire({
+                                icon: 'error',
+                                title: "Wait",
+                                text: error.val
+                            });
+                        }
                     });
                 }
-            });
-        }
 
-        function cancelForm() {
-            $('#updateSlotModal').modal("toggle");
-        }
+                function loadQueue() {
+                    $.ajax({
+                        url: "/RackJobQueue/GetQueueList/",
+                        type: "GET",
+                        dataType: 'JSON',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (result) {
+                            swal.close()
+                            if (result.success == true) {
+                                let filteredTasks;
+                                const upcomingContainer = document.getElementById("upComingTask");
+                                const olEl = document.getElementById('noUpcomingOverlay');
 
-        function saveUpdateSlot() {
-            const chkIsAct = document.querySelector('#isActiveCheckbox');
-            const chkForEmptyTray = document.querySelector('#forEmptyTrayCheckbox');
-            const chkHasEmptyTray = document.querySelector('#hasEmptyTrayCheckbox');
-            const chkHasReel = document.querySelector('#hasReelCheckbox');
+                                if (currentTaskQueueId > 0) {
+                                    filteredTasks = result.data.filter(task => task.rackJobQueue_Id !== currentTaskQueueId).slice(0, 2);
+                                } else {
+                                    filteredTasks = result.data.slice(0, 2);
+                                }
 
-            var data = {
-                Slot_Id: $("#updateTaskId").val(),
-                IsActive: chkIsAct.checked ? true : false,
-                ForEmptyTray: chkForEmptyTray.checked ? true : false,
-                HasEmptyTray: chkHasEmptyTray.checked ? true : false,
-                HasReel: chkHasReel.checked ? true : false,
-                ReelNo: $("#txtReelNo").val(),
-                RowNo: $("#txtRowNo").val(),
-            }
+                                if (filteredTasks.length > 0) {
+                                    upcomingContainer.innerHTML = '';
+                                    filteredTasks.forEach(task => {
+                                        const taskName = task.docType === 'Loader' ? 'Unloading Process': (task.docType === 'JOE' ? 'Emergency Job Order' : 'Job Order');
+                                        const taskHTML = `
+                                            <div class="mt-1">
+                                                <div class="d-flex justify-content-between align-items-center p-2">
+                                                    <div>
+                                                        <span class="fw-bold">${taskName}</span>
+                                                        <p class="task-title mb-0">
+                                                            Document Type: <span>${task.docType}</span>
+                                                        </p>
+                                                    </div>
+                                                    <button class="btn btn-primary disabled">View Queue</button>
+                                                </div>
+                                            </div>
+                                        `;
 
-            $.ajax({
-                url: "/Slot/UpdateSlotStatus/",
-                type: "POST",
-                dataType: JSON.stringify(data),
-                contentType: 'application/json; charset=utf-8',
-                beforeSend: function () {
-                    Swal.fire({
-                        text: 'Please Wait',
-                        width: '300px',
-                        allowEscapeKey: false,
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
+                                        upcomingContainer.insertAdjacentHTML('beforeend', taskHTML);
+                                    });
+                                    olEl.classList.add('d-none');
+                                }
+                                else {
+                                    olEl.classList.remove('d-none');
+                                }
+                            }
+                            else {
+                                console.log("empty queue");
+                                swal.fire({
+                                    icon: 'error',
+                                    title: "Wait",
+                                    text: result.errMessage
+                                });
+                            }
+
+                            console.log(result.data);
+
+                        },
+                        error: function (error) {
+                            swal.fire({
+                                icon: 'error',
+                                title: "Wait",
+                                text: error.val
+                            });
+                        }
                     });
-                    Swal.showLoading()
-                },
-                success: function (result) {
-                    swal.close()
-                    if (result.success == true) {
-                        $('#slotUpdateModal').modal("toggle");
-                        swal.fire({
-                            icon: 'success',
-                            title: "Success Update",
-                            text: "",
-                            didClose: () => {
-                                window.location.reload();
+                }
+
+                function checkTaskProcess() {
+                    const jobQId = currentTaskQueueId;
+                    if (jobQId == 0) {
+                        loadCurrentTask();
+                        loadQueue();
+                    }
+                    else
+                    {
+                        $.ajax({
+                            url: "/Rack/GetEndRackJob",
+                            type: "GET",
+                            data: { jobQId: jobQId },
+                            dataType: 'JSON',
+                            contentType: 'application/json; charset=utf-8',
+                            success: function (result) {
+                                swal.close()
+                                console.log(result);
+                                if (result.success == true) {
+                                    loadCurrentTask();
+                                }
+                            },
+                            error: function (error) {
+                                swal.fire({
+                                    icon: 'error',
+                                    title: "Wait",
+                                    text: error.val
+                                });
                             }
                         });
                     }
-                    else {
-                        swal.fire({
-                            icon: 'error',
-                            title: "Wait",
-                            text: result.errMessage
-                        });
-                    }
-                },
-                error: function (error) {
-                    swal.fire({
-                        icon: 'error',
-                        title: "Wait",
-                        text: error.val
-                    });
                 }
-            });
-        }
 
+
+                /* progress status section */
+                function setProgress(percentage) {
+                    if (percentage < 0 || percentage > 100) return;
+                    const circle = document.getElementById('circle');
+                    const text = document.querySelector('.percentage');
+
+                    const radius = 15.9155;
+                    const circumference = 2 * Math.PI * radius;
+
+                    circle.style.strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`;
+                    text.textContent = `${percentage}%`;
+                }
+
+                function loadColumnUsage() {
+                    // const url = currentDocType === 'Loader' ? "Loader/GetLoaderColumn/" : "Trolley/GetTrolleyColumn/";
+                    const overlayProg = document.getElementById("noProgressOverlay");
+                    const overlayUsage = document.getElementById("usageOverlay");
+
+                    console.log("currentaskqueuidd", currentTaskQueueId);
+                    if (currentTaskQueueId != null)
+                    {
+                        $.ajax({
+                            url: "/Loader/GetLoaderColumn/",
+                            type: "POST",
+                            data: JSON.stringify(currentEqId),
+                            dataType: 'JSON',
+                            contentType: 'application/json; charset=utf-8',
+                            success: function (result) {
+                                if (result.success)
+                                {
+                                    result.data.forEach(item => {
+                                        const colNo = item.colNo;
+                                        const usagePercentage = item.usagePercentage;
+                                        const reelQty = item.reelQty;
+                                        const text = (reelQty > 1) ? "reels" : "reel";
+
+                                        $(`#percent-c${colNo}`).text(`${usagePercentage}%`);
+                                        $(`#colQty${colNo}`).text(`${reelQty} ${text} remaining`);
+                                        $(`#c${colNo}`).css('width', `${usagePercentage}%`);
+
+                                    });
+
+                                    setProgress(result.data[0].totalProgressPercentage);
+                                }
+                                else { //means no task is running
+                                    $('#percentageText').text = '--'
+                                    overlayProg.style.display = 'flex';
+                                    overlayUsage.style.display = 'flex';
+
+                                }
+
+                            },
+                            error: function (error) {
+
+                            }
+                        });
+
+                        overlayProg.style.display = 'none';
+                        overlayUsage.style.display = 'none';
+                    }
+                    else
+                    {
+                         overlayProg.style.display = 'flex';
+                         overlayUsage.style.display = 'flex';
+                         $('#percentageText').text = '--'
+                    }
+
+                }
     </script>
 }
