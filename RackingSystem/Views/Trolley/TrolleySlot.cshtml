@@ -471,8 +471,9 @@
         // let gridInstance = null;
 
         $(document).ready(function () {
-            var resultGet = getDropdownTrolley();
-            if (resultGet) { loadList(); }
+            getDropdownTrolley().then(function(resultGet) {
+                if (resultGet) { loadList(); }
+            });
         });
 
         function loadList() {

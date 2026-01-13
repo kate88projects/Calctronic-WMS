@@ -114,6 +114,18 @@ namespace RackingSystem.Services.BOMServices
                     }
                 }
 
+                var aggregatedSubItems = bom.SubItems
+                    .GroupBy(x => x.Item_Id)
+                    .Select(g => new
+                    {
+                        Item_Id = g.Key,
+                        Qty = g.Sum(x => x.Qty),
+                        Remark = string.Join(",", g.Select(x => x.Remark).Where(r => !string.IsNullOrEmpty(r))),
+                        BOMDetail_Id = g.First().BOMDetail_Id,
+                        BOM_Id = g.First().BOM_Id
+                    })
+                    .ToList();
+
                 if (bom.BOM_Id == 0)
                 {
                     BOM _bom = new BOM()
@@ -129,7 +141,7 @@ namespace RackingSystem.Services.BOMServices
 
                     //Console.WriteLine($"Generated BOM Id: {_bom.BOM_Id}");
 
-                    foreach (var subitem in bom.SubItems)
+                    foreach (var subitem in aggregatedSubItems)
                     {
                         BOMDetail _bomDtl = new BOMDetail()
                         {
@@ -182,7 +194,7 @@ namespace RackingSystem.Services.BOMServices
                     }
 
                     //update the latest detail
-                    foreach (var subitem in bom.SubItems)
+                    foreach (var subitem in aggregatedSubItems)
                     {
                         if (subitem.BOMDetail_Id == 0)
                         {
