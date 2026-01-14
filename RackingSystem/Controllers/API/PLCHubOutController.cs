@@ -159,7 +159,7 @@ namespace RackingSystem.Controllers.API
                         {
                             result.data.DtlList.Add(new RackJobHubOutDtlDTO
                             {
-                                Detail_Id = itm.JobOrderDetail_Id,
+                                Detail_Id = itm.JobOrderRaws_Id.ToString(),
                                 Id = itm.JobOrder_Id,
                                 Item_Id = itm.Item_Id,
                                 Qty = itm.BalQty,
@@ -173,7 +173,7 @@ namespace RackingSystem.Controllers.API
                         {
                             result.data.DtlList.Add(new RackJobHubOutDtlDTO
                             {
-                                Detail_Id = itm.JobOrderEmergencyDetail_Id,
+                                Detail_Id = itm.JobOrderEmergencyDetail_Id.ToString(),
                                 Id = itm.JobOrderEmergency_Id,
                                 Item_Id = itm.Item_Id,
                                 Qty = itm.Qty,
@@ -316,10 +316,10 @@ namespace RackingSystem.Controllers.API
                 RackJobHubOutDtlDTO item = new RackJobHubOutDtlDTO();
                 if (rackJob.DocType == EnumQueueDocType.JO.ToString())
                 {
-                    var itmFirst = _dbContext.JobOrderRaws.Where(x => x.JobOrder_Id == rackJob.Doc_Id && x.BalQty > 0).OrderBy(x => x.JobOrderDetail_Id).FirstOrDefault();
+                    var itmFirst = _dbContext.JobOrderRaws.Where(x => x.JobOrder_Id == rackJob.Doc_Id && x.BalQty > 0).OrderBy(x => x.CreatedDate).FirstOrDefault();
                     if (itmFirst != null)
                     {
-                        item.Detail_Id = itmFirst.JobOrderDetail_Id;
+                        item.Detail_Id = itmFirst.JobOrderRaws_Id.ToString();
                         item.Id = itmFirst.JobOrder_Id;
                         item.Item_Id = itmFirst.Item_Id;
                         item.Qty = itmFirst.BalQty;
@@ -327,16 +327,16 @@ namespace RackingSystem.Controllers.API
                 }
                 else
                 {
-                    var itmFirst = _dbContext.JobOrderEmergencyDetail.Where(x => x.JobOrderEmergency_Id == rackJob.Doc_Id && x.BalQty > 0).FirstOrDefault();
+                    var itmFirst = _dbContext.JobOrderEmergencyDetail.Where(x => x.JobOrderEmergency_Id == rackJob.Doc_Id && x.BalQty > 0).OrderBy(x => x.CreatedDate).FirstOrDefault();
                     if (itmFirst != null)
                     {
-                        item.Detail_Id = itmFirst.JobOrderEmergencyDetail_Id;
+                        item.Detail_Id = itmFirst.JobOrderEmergencyDetail_Id.ToString();
                         item.Id = itmFirst.JobOrderEmergency_Id;
                         item.Item_Id = itmFirst.Item_Id;
                         item.Qty = itmFirst.BalQty;
                     }
                 }
-                if (item.Detail_Id == 0)
+                if (item.Detail_Id.ToString() == "")
                 {
                     result.success = false;
                     result.errMessage = "No Reel need to take.";
@@ -421,7 +421,7 @@ namespace RackingSystem.Controllers.API
                 result.data.ReelId = rack.Reel_Id.ToString();
                 result.data.ReelCode = reel.ReelCode;
                 result.data.ActualHeight = reel.ActualHeight;
-                result.data.Detail_Id = item.Detail_Id;
+                result.data.Id = item.Detail_Id;
                 //var slot = _dbContext.Slot.Where(x => x.SlotCode == result.data.SlotCode).FirstOrDefault();
                 //if (slot != null)
                 //{
@@ -928,7 +928,7 @@ namespace RackingSystem.Controllers.API
         }
 
         [HttpGet("UpdateReelIntoTrolley/{trolleyId}/{reelId}/{slotCode}/{slotReserve}/{dtlId}/{qId}")]
-        public async Task<ServiceResponseModel<int>> UpdateReelIntoTrolley(long trolleyId, string reelId, string slotCode, int slotReserve, long dtlId, long qId)
+        public async Task<ServiceResponseModel<int>> UpdateReelIntoTrolley(long trolleyId, string reelId, string slotCode, int slotReserve, string dtlId, long qId)
         {
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             result.data = -1;
@@ -972,7 +972,7 @@ namespace RackingSystem.Controllers.API
                 // 2. update detail tables
                 if (rackJob.DocType == EnumQueueDocType.JO.ToString())
                 {
-                    var itmFirst = _dbContext.JobOrderRaws.Where(x => x.JobOrder_Id == rackJob.Doc_Id && x.BalQty > 0).OrderBy(x => x.JobOrderDetail_Id).FirstOrDefault();
+                    var itmFirst = _dbContext.JobOrderRaws.Where(x => x.JobOrderRaws_Id.ToString() == dtlId).OrderBy(x => x.JobOrderDetail_Id).FirstOrDefault();
                     if (itmFirst != null)
                     {
                         itmFirst.BalQty = 0;
@@ -980,7 +980,7 @@ namespace RackingSystem.Controllers.API
                 }
                 else
                 {
-                    var itmFirst = _dbContext.JobOrderEmergencyDetail.Where(x => x.JobOrderEmergency_Id == rackJob.Doc_Id && x.BalQty > 0).FirstOrDefault();
+                    var itmFirst = _dbContext.JobOrderEmergencyDetail.Where(x => x.JobOrderEmergency_Id == Convert.ToInt64(dtlId)).FirstOrDefault();
                     if (itmFirst != null)
                     {
                         itmFirst.BalQty = 0;
@@ -1084,6 +1084,110 @@ namespace RackingSystem.Controllers.API
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
             }
+
+            return result;
+        }
+
+        [HttpGet("GetUpcomingReels/{qId}/{skipRow}/{lastId}")]
+        public async Task<ServiceResponseModel<List<RackJobHubOutDtlDTO>>> GetUpcomingReels(long qId, int skipRow, string lastId)
+        {
+            ServiceResponseModel<List<RackJobHubOutDtlDTO>> result = new ServiceResponseModel<List<RackJobHubOutDtlDTO>>();
+
+            var rackJob = _dbContext.RackJobQueue.Where(x => x.RackJobQueue_Id == qId).First();
+            if (rackJob == null)
+            {
+                result.success = false;
+                result.data = new List<RackJobHubOutDtlDTO>();
+                result.errMessage = "Cannot find this Job in queue.";
+                return result;
+            }
+
+            List<RackJobHubOutDtlDTO> huboutReels = new List<RackJobHubOutDtlDTO>();
+            int takeRow = skipRow > 0 ? 1 : 10;
+            bool exist = true;
+
+            if (rackJob.DocType == EnumQueueDocType.JO.ToString())
+            {
+                //var itemList = _dbContext.JobOrderRaws.Where(x => x.JobOrder_Id == rackJob.Doc_Id && x.BalQty > 0 && x.JobOrderRaws_Id.ToString() > "").OrderBy(x => x.JobOrderDetail_Id).OrderBy(x => x.CreatedDate).Skip(skipRow).Take(takeRow).ToList();
+                var itemList = _dbContext.JobOrderRaws
+                        .AsEnumerable()
+                        .Where(x => x.JobOrder_Id == rackJob.Doc_Id && x.BalQty > 0 && string.Compare(x.JobOrderRaws_Id.ToString(), lastId) >= 0)
+                        .OrderBy(x => x.JobOrderDetail_Id).OrderBy(x => x.CreatedDate).Skip(skipRow).Take(takeRow).ToList();
+
+                foreach (var dtl in itemList)
+                {
+                    exist = true;
+                    var item = _dbContext.Item.Where(x => x.Item_Id == dtl.Item_Id).FirstOrDefault();
+                    var reelList = _dbContext.Reel.Where(x => x.Item_Id == dtl.Item_Id && x.IsReady == true).OrderBy(x => x.ExpiryDate).ToList();
+                    foreach (var r in reelList)
+                    {
+                        if (!huboutReels.Where(x => x.Reel_Id == r.Reel_Id.ToString()).Any())
+                        {
+                            exist = true;
+                            huboutReels.Add(new RackJobHubOutDtlDTO
+                            {
+                                Detail_Id = dtl.JobOrderRaws_Id.ToString(),
+                                Reel_Id = r == null ? "" : r.Reel_Id.ToString(),
+                                Item_Id = dtl.Item_Id,
+                                ItemCode = item == null ? "" : item.ItemCode,
+                                Qty = dtl.Qty,
+                            });
+                            break;
+                        }
+                    }
+                    if (!exist)
+                    {
+                        huboutReels.Add(new RackJobHubOutDtlDTO
+                        {
+                            Detail_Id = dtl.JobOrderRaws_Id.ToString(),
+                            Reel_Id = "",
+                            Item_Id = dtl.Item_Id,
+                            ItemCode = item == null ? "" : item.ItemCode,
+                            Qty = dtl.Qty,
+                        });
+                    }
+                }
+            }
+            else
+            {
+                var itemList = _dbContext.JobOrderEmergencyDetail.Where(x => x.JobOrderEmergency_Id == rackJob.Doc_Id && x.BalQty > 0 && x.JobOrderEmergency_Id > Convert.ToInt64(lastId)).OrderBy(x => x.CreatedDate).OrderBy(x => x.CreatedDate).Skip(skipRow).Take(takeRow).ToList();
+                foreach (var dtl in itemList)
+                {
+                    exist = true;
+                    var item = _dbContext.Item.Where(x => x.Item_Id == dtl.Item_Id).FirstOrDefault();
+                    var reelList = _dbContext.Reel.Where(x => x.Item_Id == dtl.Item_Id && x.IsReady == true).OrderBy(x => x.ExpiryDate).ToList();
+                    foreach (var r in reelList)
+                    {
+                        if (!huboutReels.Where(x => x.Reel_Id == r.Reel_Id.ToString()).Any())
+                        {
+                            exist = true;
+                            huboutReels.Add(new RackJobHubOutDtlDTO
+                            {
+                                Detail_Id = dtl.JobOrderEmergencyDetail_Id.ToString(),
+                                Reel_Id = r == null ? "" : r.Reel_Id.ToString(),
+                                Item_Id = dtl.Item_Id,
+                                ItemCode = item == null ? "" : item.ItemCode,
+                                Qty = dtl.Qty,
+                            });
+                            break;
+                        }
+                    }
+                    if (!exist)
+                    {
+                        huboutReels.Add(new RackJobHubOutDtlDTO
+                        {
+                            Detail_Id = dtl.JobOrderEmergencyDetail_Id.ToString(),
+                            Reel_Id = "",
+                            Item_Id = dtl.Item_Id,
+                            ItemCode = item == null ? "" : item.ItemCode,
+                            Qty = dtl.Qty,
+                        });
+                    }
+                }
+            }
+
+            result.data = huboutReels;
+            result.totalRecords = huboutReels.Count;
 
             return result;
         }

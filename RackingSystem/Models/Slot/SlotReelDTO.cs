@@ -14,5 +14,6 @@
 
         public long Detail_Id { get; set; } = 0;
 
+        public string Id { get; set; } = "";
     }
 }

@@ -33,10 +33,12 @@ namespace RackingSystem.Models.RackJob
 
     public class RackJobHubOutDtlDTO
     {
-        public long Detail_Id { get; set; }
+        public string Detail_Id { get; set; }
         public long Id { get; set; }
         public long Item_Id { get; set; }
         public int Qty { get; set; } = 0;
+        public string Reel_Id { get; set; } = "";
+        public string ItemCode { get; set; } = "";
     }
 
     public class RackJobHubOutJsonDTO

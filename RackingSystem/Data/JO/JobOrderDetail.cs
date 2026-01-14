@@ -13,5 +13,7 @@ namespace RackingSystem.Data.JO
         [Required]
         public int Qty { get; set; } = 0;
 
+        [Required]
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
     }
 }
