@@ -762,7 +762,7 @@
                     <div class="col-6">
                         <p class="" style="font-size:2em;">Job is done. Click the 'Close' button to close this window.</p>
                         <button class="btn btn-success w-100" style="height: 100px;" onclick="closeTab()">Close</button>
-                        <button class="btn btn-secondary w-100" style="height: 100px;" onclick="">Export Log</button>
+                        <button class="btn btn-secondary w-100" style="height: 100px;" onclick="exportLogFile()">Export Log</button>
                     </div>
                 </div>
             </div>
@@ -797,6 +797,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/datatables.min.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
+    <script src="../js/xlsx.full.min.js"></script>
 
     <script type="text/javascript">
 
@@ -845,7 +846,6 @@
         const formJSON = document.getElementById("formJSON");
 
         $(document).ready(function () {
-
             document.getElementById('chkAutoRun').checked = true;
             disableDivContent(true);
             $("#txtReelId").val('');
@@ -3154,6 +3154,22 @@
         function closeTab() {
             window.close();
         }
+
+        function exportLogFile() {
+            const wb = XLSX.utils.book_new();
+            wb.Props = {
+                Title: "Log File",
+                Subject: "Rack Job Hub In Task",
+                Author: "Flex Software Consulting Sdn Bhd",
+                CreatedDate: new Date()
+            }
+
+            const ws = XLSX.utils.aoa_to_sheet([]); //worksheet data
+
+            XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+            XLSX.writeFile(wb, "HubIn Log.xlsx");
+        }
+
 
     </script>
 

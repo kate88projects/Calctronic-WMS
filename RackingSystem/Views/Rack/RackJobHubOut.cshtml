@@ -647,7 +647,8 @@
                     </div>
                     <div class="col-6">
                         <p style="font-size:2em;">Job is done. Click the 'Close' button to Close this window.</p>
-                        <button class="btn btn-success" style="width: 100%; height: 150px;" onclick="closeTab()">Close</button>
+                        <button class="btn btn-success w-100" style="height: 100px;" onclick="closeTab()">Close</button>
+                        <button class="btn btn-secondary w-100" style="height: 100px;" onclick="exportLogFile()">Export Log</button>
                     </div>
                 </div>
             </div>
@@ -681,6 +682,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/datatables.min.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
+    <script src="../js/xlsx.full.min.js"></script>
 
     <script type="text/javascript">
 
@@ -1751,6 +1753,21 @@
 
         function closeTab() {
             window.close();
+        }
+
+        function exportLogFile() {
+            const wb = XLSX.utils.book_new();
+            wb.Props = {
+                Title: "Log File",
+                Subject: "Rack Job Hub Out Task",
+                Author: "Flex Software Consulting Sdn Bhd",
+                CreatedDate: new Date()
+            }
+
+            const ws = XLSX.utils.aoa_to_sheet([]); //worksheet data
+
+            XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+            XLSX.writeFile(wb, "HubOut Log.xlsx");
         }
 
     </script>
