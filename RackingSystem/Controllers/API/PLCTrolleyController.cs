@@ -1402,5 +1402,82 @@ namespace RackingSystem.Controllers.API
             return result;
         }
 
+        [HttpPost("TurnOffTrolleyOut")]
+        public async Task<ServiceResponseModel<bool>> TurnOffTrolleyOut([FromBody] List<long> req)
+        {
+            ServiceResponseModel<bool> result = new ServiceResponseModel<bool>();
+            result.data = false;
+            string methodName = "TurnOffTrolleyOut";
+            if (req == null)
+            {
+                result.errMessage = "No body.";
+                return result;
+            }
+
+            try
+            {
+                var listDTO = _dbContext.TrolleySlot.Where(x => req.Contains(x.TrolleySlot_Id)).ToList();
+                int port = 1502;
+                foreach (var dtl in listDTO)
+                {
+                    var tr = _dbContext.Trolley.Where(x => x.Trolley_Id == dtl.Trolley_Id).FirstOrDefault();
+                    if (tr == null) { continue; }
+
+                    string plcIp = tr.IPAdd1;
+                    if (dtl.ColNo == 2) { plcIp = tr.IPAdd2; }
+                    if (dtl.ColNo == 3) { plcIp = tr.IPAdd3; }
+                    ModbusClient modbusClient = new ModbusClient(plcIp, port);
+                    try
+                    {
+                        modbusClient.Connect();
+
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
+
+                        modbusClient.WriteSingleCoil(dtl.RowNo - 1, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Error: " + ex.Message, "", true);
+                        result.errMessage = ex.Message;
+                        result.errStackTrace = ex.StackTrace ?? "";
+                    }
+                    finally
+                    {
+                        modbusClient.Disconnect();
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Disconnected.", "", false);
+                    }
+                }
+
+                foreach (var dtl in listDTO)
+                {
+                    var tr = _dbContext.Trolley.Where(x => x.Trolley_Id == dtl.Trolley_Id).FirstOrDefault();
+                    if (tr == null) { continue; }
+
+                    var _slotOList = _dbContext.TrolleySlot.Where(x => x.Reel_Id == dtl.Reel_Id).ToList();
+                    foreach (var _so in _slotOList)
+                    {
+                        _so.Reel_Id = new Guid("00000000-0000-0000-0000-000000000000");
+                        _so.ReelNo = "0";
+                        _so.HasReel = false;
+                    }
+
+                    var slot = _dbContext.TrolleySlot.Where(x => x.TrolleySlot_Id == dtl.TrolleySlot_Id).FirstOrDefault();
+                    if (slot != null)
+                    {
+                        slot.Reel_Id = new Guid("00000000-0000-0000-0000-000000000000");
+                        slot.ReelNo = "0";
+                        slot.HasReel = false;
+                    }
+                }
+                await _dbContext.SaveChangesAsync();
+                result.success = true;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+            }
+            return result;
+        }
+
     }
 }

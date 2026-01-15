@@ -334,6 +334,12 @@ namespace RackingSystem.Services.LoaderServices
 
                 for (int iCol = 1; iCol <= 4; iCol++)
                 {
+                    var ttl = _dbContext.LoaderReel.Where(x => x.Loader_Id == loaderDTO.Loader_Id && x.ColNo == iCol).Count();
+                    if (iCol == 1) { loaderDTO.Col1TotalReels = ttl; }
+                    if (iCol == 2) { loaderDTO.Col2TotalReels = ttl; }
+                    if (iCol == 3) { loaderDTO.Col3TotalReels = ttl; }
+                    if (iCol == 4) { loaderDTO.Col4TotalReels = ttl; }
+
                     var col = _dbContext.LoaderColumn.Where(x => x.Loader_Id == loaderDTO.Loader_Id && x.ColNo == iCol).FirstOrDefault();
                     if (col != null)
                     {
@@ -347,12 +353,12 @@ namespace RackingSystem.Services.LoaderServices
                         if (iCol == 3) { loaderDTO.Col3UsedPercentage = (loaderDTO.Col3UsedHeight * 100) / loaderDTO.ColHeight; }
                         if (iCol == 4) { loaderDTO.Col4UsedPercentage = (loaderDTO.Col4UsedHeight * 100) / loaderDTO.ColHeight; }
 
+                        if (iCol == 1 && col.IsActive == false) { loaderDTO.Col1UsedHeight = 0; loaderDTO.Col1UsedPercentage = 0; loaderDTO.Col1TotalReels = 0; }
+                        if (iCol == 2 && col.IsActive == false) { loaderDTO.Col2UsedHeight = 0; loaderDTO.Col2UsedPercentage = 0; loaderDTO.Col2TotalReels = 0; }
+                        if (iCol == 3 && col.IsActive == false) { loaderDTO.Col3UsedHeight = 0; loaderDTO.Col3UsedPercentage = 0; loaderDTO.Col3TotalReels = 0; }
+                        if (iCol == 4 && col.IsActive == false) { loaderDTO.Col4UsedHeight = 0; loaderDTO.Col4UsedPercentage = 0; loaderDTO.Col4TotalReels = 0; }
+
                     }
-                    var ttl = _dbContext.LoaderReel.Where(x => x.Loader_Id == loaderDTO.Loader_Id && x.ColNo == iCol).Count();
-                    if (iCol == 1) { loaderDTO.Col1TotalReels = ttl; }
-                    if (iCol == 2) { loaderDTO.Col2TotalReels = ttl; }
-                    if (iCol == 3) { loaderDTO.Col3TotalReels = ttl; }
-                    if (iCol == 4) { loaderDTO.Col4TotalReels = ttl; }
                 }
 
 

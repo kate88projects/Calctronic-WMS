@@ -313,14 +313,48 @@
         document.getElementById('loadBtn').addEventListener('click',loadTrolley);
         document.getElementById('findBtn').addEventListener('click',findReel);
         // document.getElementById('reelId').addEventListener('keydown',e=>{if(e.key==='Enter')findReel();});
-        document.getElementById('turnOffBtn').addEventListener('click',turnOffReel);
 
-        function clearAll(){
+        function turnOffReel(){
             // call api to close
+            var arr = [];
+            const divs = document.getElementsByClassName('on');
+            for (let i = 0; i < divs.length; i++) {
+                // Access each div using divs[i]
+                var id = divs[i].getAttribute('data-id');
+                arr.push(id);
+            }
 
+            $.ajax({
+                url: '/api/PLCTrolley/TurnOffTrolleyOut',
+                type: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                data: JSON.stringify(arr),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                        //
+                    }
+                    else {
+                        console.log(result.errMessage);
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
 
             // set ui to off
-            document.querySelectorAll('.cell.on').forEach(c=>c.classList.remove('on'));
+            document.querySelectorAll('.cell.on').forEach(c => {
+                c.classList.remove('on');
+                var id = c.getAttribute('data-id');
+                var cell3 = document.getElementById('C3' + id);
+                cell3.innerHTML = "";
+            });
         }
 
         // function highlightByReelId(reelId){
@@ -405,10 +439,6 @@
 
         }
 
-        async function turnOffReel() {
-
-        }
-
         async function loadTrolley() {
             const tr = document.getElementById('trolleyId').value.trim();
             if (tr == "") {
@@ -459,6 +489,7 @@
 
                             for (let i = 0; i < 25; i++) { // Example: Add 5 rows
 
+                                var slotId = "";
                                 var reelNo = "";
                                 var hasReel = false;
                                 result.data.forEach(x => {
@@ -466,7 +497,8 @@
                                     hasReel = true;
                                     }
                                     if (x.isLeft == true && x.colNo == colNo && x.rowNo === idx) {
-                                    reelNo = x.reelNo;
+                                        reelNo = x.reelNo;
+                                        slotId = x.trolleySlot_Id; 
                                     }
                                 });
 
@@ -477,9 +509,10 @@
                                 $(cell1).addClass("tblRow tblCol1");
                                 const cell2 = newRow.insertCell();
                                 cell2.id = 'A' + iC + "R" + idx;
-                                cell2.innerHTML = ' <div class="cell"></div> ';
+                                cell2.innerHTML = ' <div class="cell" data-id="' + slotId + '"></div> ';
                                 $(cell2).addClass("tblRow tblCol2 ");
                                 const cell3 = newRow.insertCell(); // or document.createElement('td');
+                                cell3.id = 'C3' + slotId;
                                 cell3.innerHTML = hasReel == true ? "xxx" : '   ';
                                 $(cell3).addClass("tblRow tblCol3");
 
@@ -554,56 +587,56 @@
 
         }
 
-        async function loadPLCOn(colNo, rowNo) {
-            // console.log(colNo + " || " + rowNo);
+        // async function loadPLCOn(colNo, rowNo) {
+        //     // console.log(colNo + " || " + rowNo);
 
-            await $.ajax({
-                url: "/api/PLCHubIn/SetTrolleyOn/" + colNo + "/" + rowNo,
-                type: "GET",
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-                dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
-                contentType: 'application/json; charset=utf-8',
-                beforeSend: function () {
-                    Swal.fire({
-                        text: 'Please Wait',
-                        width: '300px',
+        //     await $.ajax({
+        //         url: "/api/PLCHubIn/SetTrolleyOn/" + colNo + "/" + rowNo,
+        //         type: "GET",
+        //         headers: {
+        //             'Authorization': 'Bearer ' + token
+        //         },
+        //         dataType: 'JSON',
+        //         // data: JSON.stringify(jsonInput),
+        //         contentType: 'application/json; charset=utf-8',
+        //         beforeSend: function () {
+        //             Swal.fire({
+        //                 text: 'Please Wait',
+        //                 width: '300px',
 
-                        allowEscapeKey: false,
-                        allowOutsideClick: false,
-                        showConfirmButton: false,
-                    });
-                    Swal.showLoading()
-                },
-                success: function (result) {
-                    // console.log(result);
-                    swal.close();
+        //                 allowEscapeKey: false,
+        //                 allowOutsideClick: false,
+        //                 showConfirmButton: false,
+        //             });
+        //             Swal.showLoading()
+        //         },
+        //         success: function (result) {
+        //             // console.log(result);
+        //             swal.close();
 
-                    if (result.success == true) {
+        //             if (result.success == true) {
 
-                    }
-                    else {
-                        alert('ON :: ' + result.errMessage, 'alert');
-                    }
-                },
-                error: function (error) {
-                    alert('ON :: ' + error.val, 'alert');
-                }
-            });
+        //             }
+        //             else {
+        //                 alert('ON :: ' + result.errMessage, 'alert');
+        //             }
+        //         },
+        //         error: function (error) {
+        //             alert('ON :: ' + error.val, 'alert');
+        //         }
+        //     });
 
 
-        }
+        // }
 
         // Turn off LED with optional Auto Close
         let autoOffTimeout;
         document.getElementById('turnOffBtn').addEventListener('click',()=>{
-          clearAll();
-          if(document.getElementById('autoClose').checked){
-            if(autoOffTimeout) clearTimeout(autoOffTimeout);
-            autoOffTimeout = setTimeout(clearAll, 5*60*1000);
-          }
+          turnOffReel();
+          // if(document.getElementById('autoClose').checked){
+          //   if(autoOffTimeout) clearTimeout(autoOffTimeout);
+          //   autoOffTimeout = setTimeout(clearAll, 5*60*1000);
+          // }
         });
 
         // window._debug={reelMap,rawMatMap,bomMap};
