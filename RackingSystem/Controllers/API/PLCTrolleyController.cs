@@ -1274,7 +1274,7 @@ namespace RackingSystem.Controllers.API
                 var srms = await _dbContext.RackJobLog.Where(x => x.RackJobQueue_Id == qId).FirstOrDefaultAsync();
                 if (srms != null)
                 {
-                    var list = await _dbContext.PLCTrolleyLog.Where(x => x.CreatedDate >= srms.StartDate && x.CreatedDate <= srms.EndDate).ToListAsync();
+                    var list = await _dbContext.PLCTrolleyLog.Where(x => x.CreatedDate >= srms.StartDate && x.CreatedDate <= srms.EndDate && x.IsErr).ToListAsync();
                     foreach (var l in list)
                     {
                         result.data.Add(new LogDTO
@@ -1450,6 +1450,13 @@ namespace RackingSystem.Controllers.API
 
                 foreach (var dtl in listDTO)
                 {
+                    var _reel = _dbContext.Reel.Where(x => x.Reel_Id == dtl.Reel_Id).FirstOrDefault();
+                    if (_reel == null)
+                    {
+                        result.errMessage = "Reel is not found.";
+                        return result;
+                    }
+
                     var tr = _dbContext.Trolley.Where(x => x.Trolley_Id == dtl.Trolley_Id).FirstOrDefault();
                     if (tr == null) { continue; }
 
@@ -1468,6 +1475,11 @@ namespace RackingSystem.Controllers.API
                         slot.ReelNo = "0";
                         slot.HasReel = false;
                     }
+
+                    _reel.Status = EnumReelStatus.Out.ToString();
+                    _reel.StatusIdx = (int)EnumReelStatus.Out;
+                    _reel.IsReady = false;
+                    
                 }
                 await _dbContext.SaveChangesAsync();
                 result.success = true;

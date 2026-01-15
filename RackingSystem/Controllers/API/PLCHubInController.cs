@@ -2313,6 +2313,7 @@ namespace RackingSystem.Controllers.API
                 // 1.1 update reel status
                 _reel.StatusIdx = (int)EnumReelStatus.IsReady;
                 _reel.Status = EnumReelStatus.IsReady.ToString();
+                _reel.IsReady = true;
                 await _dbContext.SaveChangesAsync();
 
                 // 4. update slot set reelId
@@ -2820,7 +2821,7 @@ namespace RackingSystem.Controllers.API
                 var srms = await _dbContext.RackJobLog.Where(x => x.RackJobQueue_Id == qId).FirstOrDefaultAsync();
                 if (srms != null)
                 {
-                    var list = await _dbContext.PLCHubInLog.Where(x => x.CreatedDate >= srms.StartDate && x.CreatedDate <= srms.EndDate).ToListAsync();
+                    var list = await _dbContext.PLCHubInLog.Where(x => x.CreatedDate >= srms.StartDate && x.CreatedDate <= srms.EndDate && x.IsErr).ToListAsync();
                     foreach (var l in list)
                     {
                         result.data.Add(new LogDTO

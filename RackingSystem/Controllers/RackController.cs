@@ -156,7 +156,7 @@ namespace RackingSystem.Controllers
                     {
                         //return View("RackJobHubOutView");
                     }
-                    if (srms.RackJobQueue_Id != 0 && srms.LoginIP == ViewBag.DeviceId)
+                    if (srms.RackJobQueue_Id != 0 && srms.LoginIP == ViewBag.DeviceId && srms.Json != "")
                     {
                         ViewBag.QContinuos = "1";
                     }

@@ -584,9 +584,9 @@
             <br />
             <button onclick="startRetrieve()">Retrieve</button>
             <hr />
-            @* <a href="javascript:loadPLCGetEmptyTraySlot()">Get Reel Slot</a> > <a href="javascript:loadPLCTakeEmptyTray()">Retrieve</a> >
+            <a href="javascript:loadDBCheckRetrieveSlot()">Get Trolley Slot</a> > <a href="javascript:loadPLCRetrieveTray()">Retrieve</a> >
             <br />
-            <a href="javascript:retry_RetrieveStatus()">Retrieve Status</a> *@
+            <a href="javascript:retry_RetrieveStatus()">Retrieve Status</a>
         </div>
 
         <input type="text" id="txtRetrieveSlot" placeholder="Retrieve Slot" autocomplete="off">
@@ -623,9 +623,9 @@
             <br />
             <button onclick="startPutAway()">Put Away</button>
             <hr />
-            @* <a href="javascript:loadPLCGetSlot()">Get Valid Slot</a> > <a href="javascript:loadPLCPutAway()">Put Away</a>
+            <a href="javascript:loadPLCGetEmptySlot()">Get Empty Slot</a> > <a href="javascript:loadPLCPutAway()">Put Away</a>
             <br />
-            <a href="javascript:retry_PutAwayStatus()">Put Away Status</a> *@
+            <a href="javascript:retry_PutAwayStatus()">Put Away Status</a>
         </div>
 
         <input type="text" id="txtPutSlot" placeholder="Put Slot" autocomplete="off">
@@ -1467,37 +1467,63 @@
         // ----------- Action :: retry
         async function retry_RetrieveStatus() {
             var chkStatus = await loadPLCGetRetrieveTrayStatus();
-            if (chkStatus == false) {
-                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+            if (chkStatus == -1) {
+                sharedDrawerState.cartesianRobotState = 'Ready';
+                inRetrieveMove = false;
+                changeTakeSlot = true;
+
+                return;
+            }
+            else if (chkStatus == 1) {
+                sharedDrawerState.cartesianRobotState = 'Ready';
+                logMessage2(`Cartesian cycle end: Next Row.`, 'info');
+                inRetrieveMove = false;
+                changeTakeSlot = false;
+                attemptsRetrieve = 1;
+                updateJson();
                 return;
             }
 
-            sharedDrawerState.drawerStatus = "Drawer";
-            updateDrawerStatus('Drawer', 'Empty Drawer');
+            attemptsRetrieve = 1;
 
-            sharedDrawerState.cartesianRobotState = 'Ready';
+            sharedDrawerState.drawerStatus = "Drawer";
+            sharedDrawerState.cartesianRobotState = 'Retrieved';
             sharedDrawerState.cartesianLocation = '';
             updateCartesianUIState();
-            updateDrawerStatus('Drawer', 'Empty Drawer Ready');
+            updateTrolleyUIState();
+            logMessage2(`Cartesian cycle end: Retrieved.`, 'info');
+            inRetrieveMove = false;
 
             updateJson();
+
         }
 
         async function retry_PutAwayStatus() {
             var chkStatus = await loadPLCGetPutAwayStatus();
             if (chkStatus == false) {
-                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                sharedDrawerState.cartesianRobotState = 'Retrieved';
+                inPutAwayMove = false;
+                changePutSlot = true;
                 return;
             }
 
-            var chkDB = await loadDBReelRack();
+            attemptsPutAway = 1;
 
             sharedDrawerState.cartesianRobotState = 'Ready';
             sharedDrawerState.cartesianLocation = '';
+            sharedDrawerState.trolleyLocation = '';
             updateCartesianUIState();
+            updateTrolleyUIState();
 
             sharedDrawerState.drawerStatus = "None";
-            updateDrawerStatus('None', 'No Drawer');
+            logMessage2(`Cartesian cycle end: Put Away Done.`, 'info');
+            inPutAwayMove = false;
+
+            // means all is out
+            if (colNo == 3 && Number($('#left-input-tr').val()) >= 0) {
+                loadDBEnd();
+                systemStop();
+            }
 
             updateJson();
         }

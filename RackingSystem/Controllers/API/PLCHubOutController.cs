@@ -1020,6 +1020,9 @@ namespace RackingSystem.Controllers.API
 
                 // 1.2 update slot id
                 _reel.Slot_Id = _slot.TrolleySlot_Id;
+                _reel.Status = EnumReelStatus.InTrolley.ToString();
+                _reel.StatusIdx = (int)EnumReelStatus.InTrolley;
+                _reel.IsReady = false;
                 await _dbContext.SaveChangesAsync();
 
                 // 6. Checking loader all column status and update
@@ -1125,7 +1128,7 @@ namespace RackingSystem.Controllers.API
                 {
                     exist = true;
                     var item = _dbContext.Item.Where(x => x.Item_Id == dtl.Item_Id).FirstOrDefault();
-                    var reelList = _dbContext.Reel.Where(x => x.Item_Id == dtl.Item_Id && x.IsReady == true).OrderBy(x => x.ExpiryDate).ToList();
+                    var reelList = _dbContext.Reel.Where(x => x.Item_Id == dtl.Item_Id && x.IsReady == true && x.Status == EnumReelStatus.IsReady.ToString()).OrderBy(x => x.ExpiryDate).ToList();
                     foreach (var r in reelList)
                     {
                         if (!huboutReels.Where(x => x.Reel_Id == r.Reel_Id.ToString()).Any())
@@ -1210,7 +1213,7 @@ namespace RackingSystem.Controllers.API
                 var srms = await _dbContext.RackJobLog.Where(x => x.RackJobQueue_Id == qId).FirstOrDefaultAsync();
                 if (srms != null)
                 {
-                    var list = await _dbContext.PLCHubOutLog.Where(x => x.CreatedDate >= srms.StartDate && x.CreatedDate <= srms.EndDate).ToListAsync();
+                    var list = await _dbContext.PLCHubOutLog.Where(x => x.CreatedDate >= srms.StartDate && x.CreatedDate <= srms.EndDate && x.IsErr).ToListAsync();
                     foreach (var l in list)
                     {
                         result.data.Add(new LogDTO
