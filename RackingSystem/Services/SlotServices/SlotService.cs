@@ -606,6 +606,14 @@ namespace RackingSystem.Services.SlotServices
             {
                 var slotList = await _dbContext.Slot.Where(x => x.ColNo == req).OrderByDescending(x => x.RowNo).ToListAsync();
                 var slotListDTO = _mapper.Map<List<SlotListDTO>>(slotList).ToList();
+                foreach (var s in slotListDTO)
+                {
+                    var r = _dbContext.Reel.Where(x => x.Reel_Id == s.Reel_Id).FirstOrDefault();
+                    if (r != null)
+                    {
+                        s.ReelCode = r.ReelCode;
+                    }
+                }
                 result.success = true;
                 result.data = slotListDTO;
                 return result;
@@ -718,12 +726,33 @@ namespace RackingSystem.Services.SlotServices
                     result.errMessage = "Cannot find this slot, please refresh the list.";
                     return result;
                 }
+                _slot.Priority = slotReq.Priority;
                 _slot.IsActive = slotReq.IsActive;
-                _slot.ForEmptyTray = slotReq.ForEmptyTray;
+                //_slot.ForEmptyTray = slotReq.ForEmptyTray;
                 _slot.HasEmptyTray = slotReq.HasEmptyTray;
                 _slot.HasReel = slotReq.HasReel;
                 _slot.ReelNo = slotReq.ReelNo;
-                _slot.Priority = slotReq.Priority;
+
+                if (slotReq.HasReel)
+                {
+                    if (slotReq.ReelCode != "")
+                    {
+                        var r = _dbContext.Reel.Where(x => x.ReelCode == slotReq.ReelCode).FirstOrDefault();
+                        if (r != null)
+                        {
+                            _slot.Reel_Id = r.Reel_Id;
+                        }
+                    }
+                    else
+                    {
+                        _slot.Reel_Id = Guid.Empty;
+                    }
+                }
+                else
+                {
+                    _slot.Reel_Id = Guid.Empty;
+                }
+
                 _dbContext.Slot.Update(_slot);
                 await _dbContext.SaveChangesAsync();
 

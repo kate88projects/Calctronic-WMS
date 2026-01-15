@@ -15,6 +15,7 @@ using RackingSystem.Migrations;
 using RackingSystem.Models;
 using RackingSystem.Models.API;
 using RackingSystem.Models.Loader;
+using RackingSystem.Models.Log;
 using RackingSystem.Models.RackJob;
 using RackingSystem.Models.Reel;
 using RackingSystem.Models.Slot;
@@ -574,6 +575,9 @@ namespace RackingSystem.Controllers.API
                         slot.NeedCheck = true;
                         slot.CheckRemark = "Cannot get Empty Drawer";
                         _dbContext.SaveChanges();
+
+                        PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Slot Error: Cannot get Empty Drawer on [" + slot.SlotCode + "].", "", true);
+
                     }
                 }
 
@@ -1765,10 +1769,11 @@ namespace RackingSystem.Controllers.API
                         rpt.InfoMessage1 = "Cannot put Reel on [" + slotChg.SlotCode + "].";
                         _dbContext.RackJobReport.Add(rpt);
 
-
                         slotChg.NeedCheck = true;
                         slotChg.CheckRemark = "Cannot put Reel.";
                         _dbContext.SaveChanges();
+
+                        PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Slot Error: Cannot put Reel on [" + slotChg.SlotCode + "].", "", true);
                     }
                 }
 
@@ -2800,6 +2805,41 @@ namespace RackingSystem.Controllers.API
             }
             result.data = reels;
             result.totalRecords = reels.Count;
+
+            return result;
+        }
+
+        [HttpGet("GetErrorLog/{qId}")]
+        public async Task<ServiceResponseModel<List<LogDTO>>> GetErrorLog(long qId)
+        {
+            ServiceResponseModel<List<LogDTO>> result = new ServiceResponseModel<List<LogDTO>>();
+            result.data = new List<LogDTO>();
+
+            try
+            {
+                var srms = await _dbContext.RackJobLog.Where(x => x.RackJobQueue_Id == qId).FirstOrDefaultAsync();
+                if (srms != null)
+                {
+                    var list = await _dbContext.PLCHubInLog.Where(x => x.CreatedDate >= srms.StartDate && x.CreatedDate <= srms.EndDate).ToListAsync();
+                    foreach (var l in list)
+                    {
+                        result.data.Add(new LogDTO
+                        {
+                            CreatedDate = l.CreatedDate,
+                            EventName = l.EventName,
+                            Remark1 = l.Remark1,
+                            Remark2 = l.Remark2,
+                            Id = l.Loader_Id
+                        });
+                    }
+                    result.success = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
 
             return result;
         }

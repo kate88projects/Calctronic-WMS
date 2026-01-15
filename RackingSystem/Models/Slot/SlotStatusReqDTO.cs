@@ -15,6 +15,9 @@
 
         public int RowNo { get; set; } = 0;
 
+        public string ReelID { get; set; } = "";
+        public string ReelCode { get; set; } = "";
+
         public int Priority { get; set; } = 0;
         public string CheckRemark { get; set; } = "";
         public bool NeedCheck { get; set; } = false;

@@ -18,5 +18,8 @@ namespace RackingSystem.Data.Log
 
         [Required]
         public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+        public bool IsErr { get; set; } = false;
+
     }
 }

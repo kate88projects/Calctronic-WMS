@@ -116,5 +116,7 @@ namespace RackingSystem.Data
 
         public DbSet<LoaderReelDtlDTO> SP_LoaderReelDtlList { get; set; }
 
+        public DbSet<TrolleySlotReelDTO> SP_TrolleySlotSearchList { get; set; }
+
     }
 }

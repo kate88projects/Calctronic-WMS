@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using RackingSystem.Data;
 using RackingSystem.Models;
+using RackingSystem.Models.Slot;
 using RackingSystem.Models.Trolley;
 using RackingSystem.Models.User;
 using RackingSystem.Services.TrolleyServices;
@@ -199,6 +200,13 @@ namespace RackingSystem.Controllers
             return result;
         }
 
+        [HttpPost]
+        public async Task<IActionResult> UpdateTrolleySlotStatus([FromBody] SlotStatusReqDTO slotReq)
+        {
+            ServiceResponseModel<TrolleySlotDTO> result = await _trolleyService.UpdateTrolleySlotStatus(slotReq);
+            return new JsonResult(result);
+        }
+
         public IActionResult TrolleyColumnStatus()
         {
             ViewBag.PermissionList = new List<int>();
@@ -333,12 +341,6 @@ namespace RackingSystem.Controllers
 
             return result;
         }
-
-        //[HttpGet]
-        //public async Task<ServiceResponseModel<List<>>> GetTrolleyColumn()
-        //{
-
-        //}
 
     }
 }

@@ -47,6 +47,7 @@ namespace RackingSystem.Models.RackJob
 
         public string TrolleyCode { get; set; } = "";
         public long TrolleyId { get; set; } = 0;
+        public string TrolleySide { get; set; } = "A";
 
         public string DrawerStatus { get; set; } = "";
 

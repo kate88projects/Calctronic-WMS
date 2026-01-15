@@ -3156,18 +3156,45 @@
         }
 
         function exportLogFile() {
-            const wb = XLSX.utils.book_new();
-            wb.Props = {
-                Title: "Log File",
-                Subject: "Rack Job Hub In Task",
-                Author: "Flex Software Consulting Sdn Bhd",
-                CreatedDate: new Date()
-            }
 
-            const ws = XLSX.utils.aoa_to_sheet([]); //worksheet data
+            
+            $.ajax({
+                url: "/api/PLCHubIn/GetErrorLog/" + qId,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                },
+                success: function (result) {
+                    // console.log('Export Err::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        
+                        const wb = XLSX.utils.book_new();
+                        wb.Props = {
+                            Title: "Log File",
+                            Subject: "Rack Job Hub In Task",
+                            Author: "Flex Software Consulting Sdn Bhd",
+                            CreatedDate: new Date()
+                        }
 
-            XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-            XLSX.writeFile(wb, "HubIn Log.xlsx");
+                        // const ws = XLSX.utils.aoa_to_sheet([]); //worksheet data
+                        const ws = XLSX.utils.json_to_sheet(result.data);
+
+                        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+                        XLSX.writeFile(wb, "HubIn Log.xlsx");
+
+                    }
+                },
+                error: function (error) {
+                    console.log('Export Err::' + error.val);
+                }
+            });
+
         }
 
 

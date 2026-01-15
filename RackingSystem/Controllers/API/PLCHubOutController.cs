@@ -19,6 +19,7 @@ using RackingSystem.Models.Slot;
 using EasyModbus;
 using RackingSystem.Models.API;
 using RackingSystem.Data.Maintenances;
+using RackingSystem.Models.Log;
 
 namespace RackingSystem.Controllers.API
 {
@@ -359,6 +360,9 @@ namespace RackingSystem.Controllers.API
                         slot.NeedCheck = true;
                         slot.CheckRemark = "Cannot get Reel";
                         _dbContext.SaveChanges();
+
+                        PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Slot Error: Cannot get Reel on [" + slot.SlotCode + "].", "", true);
+
                     }
                 }
 
@@ -672,6 +676,9 @@ namespace RackingSystem.Controllers.API
                         slotChg.NeedCheck = true;
                         slotChg.CheckRemark = "Cannot put Reel.";
                         _dbContext.SaveChanges();
+
+                        PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Slot Error: Cannot put Reel on [" + slotChg.TrolleySlotCode + "].", "", true);
+
                     }
                 }
 
@@ -1188,6 +1195,41 @@ namespace RackingSystem.Controllers.API
 
             result.data = huboutReels;
             result.totalRecords = huboutReels.Count;
+
+            return result;
+        }
+
+        [HttpGet("GetErrorLog/{qId}")]
+        public async Task<ServiceResponseModel<List<LogDTO>>> GetErrorLog(long qId)
+        {
+            ServiceResponseModel<List<LogDTO>> result = new ServiceResponseModel<List<LogDTO>>();
+            result.data = new List<LogDTO>();
+
+            try
+            {
+                var srms = await _dbContext.RackJobLog.Where(x => x.RackJobQueue_Id == qId).FirstOrDefaultAsync();
+                if (srms != null)
+                {
+                    var list = await _dbContext.PLCHubOutLog.Where(x => x.CreatedDate >= srms.StartDate && x.CreatedDate <= srms.EndDate).ToListAsync();
+                    foreach (var l in list)
+                    {
+                        result.data.Add(new LogDTO
+                        {
+                            CreatedDate = l.CreatedDate,
+                            EventName = l.EventName,
+                            Remark1 = l.Remark1,
+                            Remark2 = l.Remark2,
+                            Id = l.Loader_Id
+                        });
+                    }
+                    result.success = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
 
             return result;
         }

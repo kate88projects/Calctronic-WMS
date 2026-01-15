@@ -314,6 +314,14 @@ namespace RackingSystem.Services.TrolleyServices
             {
                 var trolleySlotList = await _dbContext.TrolleySlot.OrderBy(x => x.TrolleySlotCode).ToListAsync();
                 var trolleySlotListDTO = _mapper.Map<List<TrolleySlotDTO>>(trolleySlotList).ToList();
+                foreach (var s in trolleySlotListDTO)
+                {
+                    var r = _dbContext.Reel.Where(x => x.Reel_Id == s.Reel_Id).FirstOrDefault();
+                    if (r != null)
+                    {
+                        s.ReelCode = r.ReelCode;
+                    }
+                }
                 result.success = true;
                 result.data = trolleySlotListDTO;
                 return result;
@@ -888,6 +896,64 @@ namespace RackingSystem.Services.TrolleyServices
 
                 result.success = true;
                 result.data = listDTO;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceResponseModel<TrolleySlotDTO>> UpdateTrolleySlotStatus(SlotStatusReqDTO slotReq)
+        {
+            ServiceResponseModel<TrolleySlotDTO> result = new ServiceResponseModel<TrolleySlotDTO>();
+
+            try
+            {
+                // 1. checking Data
+                if (slotReq == null)
+                {
+                    result.errMessage = "Please select Slot.";
+                    return result;
+                }
+
+                TrolleySlot? _slot = _dbContext.TrolleySlot.Find(slotReq.Slot_Id);
+                if (_slot == null)
+                {
+                    result.errMessage = "Cannot find this slot, please refresh the list.";
+                    return result;
+                }
+                _slot.Priority = slotReq.Priority;
+                _slot.IsActive = slotReq.IsActive;
+                _slot.HasReel = slotReq.HasReel;
+                _slot.ReelNo = slotReq.ReelNo;
+
+                if (slotReq.HasReel)
+                {
+                    if (slotReq.ReelCode != "")
+                    {
+                        var r = _dbContext.Reel.Where(x => x.ReelCode == slotReq.ReelCode).FirstOrDefault();
+                        if (r != null)
+                        {
+                            _slot.Reel_Id = r.Reel_Id;
+                        }
+                    }
+                    else
+                    {
+                        _slot.Reel_Id = Guid.Empty;
+                    }
+                }
+                else
+                {
+                    _slot.Reel_Id = Guid.Empty;
+                }
+
+                _dbContext.TrolleySlot.Update(_slot);
+                await _dbContext.SaveChangesAsync();
+
+                result.success = true;
             }
             catch (Exception ex)
             {

@@ -38,5 +38,9 @@ namespace RackingSystem.Models.Slot
         public bool NeedCheck { get; set; } = false;
         public string CheckRemark { get; set; } = "";
         public int Priority { get; set; } = 0;
+
+        public Guid Reel_Id { get; set; }
+        public string ReelCode { get; set; } = "";
+
     }
 }

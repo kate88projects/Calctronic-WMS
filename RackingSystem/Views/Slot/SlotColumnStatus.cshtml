@@ -371,6 +371,57 @@
 
 </div>
 
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Update Slot</h4>
+            </div>
+            @* <form action="/bin/SaveBin" method="post"> *@
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" for="txtRowNo">Row No</label>
+                    <input type="text" class="form-control" name="RowNo" id="txtRowNo" aria-describedby="Row No" disabled>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="txtPriority">Priority</label>
+                    <input type="number" class="form-control" name="Priority" id="txtPriority" aria-describedby="Priority">
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="chkIsActive">
+                    <label class="form-check-label" for="chkIsActive">Is Active</label>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="chkHasEmptyTray">
+                    <label class="form-check-label" for="chkHasEmptyTray">Has Empty Tray</label>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="chkHasReel">
+                    <label class="form-check-label" for="chkHasReel">Has Reel</label>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="txtReelNo">Reel No</label>
+                    <input type="number" class="form-control" name="ReelNo" id="txtReelNo" aria-describedby="Reel No">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="txtReelCode">Reel Code</label>
+                    <input type="text" class="form-control" name="txtReelCode" id="txtReelCode" aria-describedby="Reel Code">
+                </div>
+
+                <input type="hidden" id="txtId">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="updateSlotStatus()">Update</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="cancelForm()">Cancel</button>
+            </div>
+            @* </form> *@
+        </div>
+    </div>
+</div>
+
 @section Scripts
 {
     <link href="~/css/datatables.min.css" rel="stylesheet">
@@ -458,7 +509,7 @@
                                     const rawData = JSON.stringify(result.data[idx - 1]);
                                     const newRow = tbl.insertRow(); // or document.createElement('tr');
                                     const cell1 = newRow.insertCell(); // or document.createElement('td');
-                                    cell1.innerHTML = `<a style="font-size:10px;"
+                                    cell1.innerHTML = `<a style="font-size:10px;" class="edit-btn"
                                     href='javascript:none;' id='btnUpdate' data-row='${rawData}' > ` + result.data[idx - 1].rowNo + '</a>';
                                     // cell1.innerHTML = '<span style="font-size:10px;">' + result.data[idx - 1].rowNo + '</span>';
                                     $(cell1).addClass("tblRow tblCol1");
@@ -516,6 +567,131 @@
                     });
                 }
             });
+        }
+
+        $('#list1Table').on('click', '.edit-btn', function () {
+            const row = JSON.parse($(this).attr('data-row'));
+            updateForm(row);
+        });
+
+        $('#list2Table').on('click', '.edit-btn', function () {
+            const row = JSON.parse($(this).attr('data-row'));
+            updateForm(row);
+        });
+
+        $('#list3Table').on('click', '.edit-btn', function () {
+            const row = JSON.parse($(this).attr('data-row'));
+            updateForm(row);
+        });
+
+        $('#list4Table').on('click', '.edit-btn', function () {
+            const row = JSON.parse($(this).attr('data-row'));
+            updateForm(row);
+        });
+
+        $('#list5Table').on('click', '.edit-btn', function () {
+            const row = JSON.parse($(this).attr('data-row'));
+            updateForm(row);
+        });
+
+        function updateForm(row) {
+            $("#txtId").val(row.slot_Id);
+            $("#txtRowNo").val(row.rowNo);
+            if (row.isActive == true) {
+                document.getElementById("chkIsActive").checked = true;
+            }
+            else {
+                document.getElementById("chkIsActive").checked = false;
+            }
+            if (row.hasEmptyTray == true) {
+                document.getElementById("chkHasEmptyTray").checked = true;
+            }
+            else {
+                document.getElementById("chkHasEmptyTray").checked = false;
+            }
+            if (row.hasReel == true) {
+                document.getElementById("chkHasReel").checked = true;
+            }
+            else {
+                document.getElementById("chkHasReel").checked = false;
+            }
+            $("#txtReelNo").val(row.reelNo);
+            $("#txtPriority").val(row.priority);
+            $("#txtReelCode").val(row.reelCode);
+            $("#myModal").modal("show");
+        }
+
+        function updateSlotStatus() {
+            const chkIsAct = document.querySelector('#chkIsActive');
+            const chkHasEmptyTray = document.querySelector('#chkHasEmptyTray');
+            const chkHasReel = document.querySelector('#chkHasReel');
+
+            var data = {
+                Slot_Id: $("#txtId").val(),
+                RowNo: Number($("#txtRowNo").val()),
+                Priority: Number($("#txtPriority").val()),
+                IsActive: chkIsAct.checked ? true : false,
+                HasEmptyTray: chkHasEmptyTray.checked ? true : false,
+                HasReel: chkHasReel.checked ? true : false,
+                ReelNo: $("#txtReelNo").val(),
+                ReelCode: $("#txtReelCode").val(),
+            }
+
+            //console.log(JSON.stringify(data));
+
+            $.ajax({
+                url: '/Slot/UpdateSlotStatus',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    // console.log(result);
+                    if (result.success == true) {
+                        $("#myModal").modal("toggle");
+                        swal.fire({
+                            icon: 'success',
+                            title: "Success Update",
+                            text: "",
+                            didClose: () => {
+                              window.location.reload();
+                            }
+                        });
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+
+            // console.log(id);
+        }
+
+        function cancelForm() {
+            $("#myModal").modal("toggle");
         }
 
     </script>

@@ -18,6 +18,8 @@ using RackingSystem.Models.Slot;
 using RackingSystem.Data.Maintenances;
 using Newtonsoft.Json.Linq;
 using System.Reflection;
+using RackingSystem.Models.Log;
+using Microsoft.Data.SqlClient;
 
 namespace RackingSystem.Controllers.API
 {
@@ -1258,6 +1260,145 @@ namespace RackingSystem.Controllers.API
                 result.errStackTrace = ex.StackTrace ?? "";
             }
 
+            return result;
+        }
+
+        [HttpGet("GetErrorLog/{qId}")]
+        public async Task<ServiceResponseModel<List<LogDTO>>> GetErrorLog(long qId)
+        {
+            ServiceResponseModel<List<LogDTO>> result = new ServiceResponseModel<List<LogDTO>>();
+            result.data = new List<LogDTO>();
+
+            try
+            {
+                var srms = await _dbContext.RackJobLog.Where(x => x.RackJobQueue_Id == qId).FirstOrDefaultAsync();
+                if (srms != null)
+                {
+                    var list = await _dbContext.PLCTrolleyLog.Where(x => x.CreatedDate >= srms.StartDate && x.CreatedDate <= srms.EndDate).ToListAsync();
+                    foreach (var l in list)
+                    {
+                        result.data.Add(new LogDTO
+                        {
+                            CreatedDate = l.CreatedDate,
+                            EventName = l.EventName,
+                            Remark1 = l.Remark1,
+                            Remark2 = l.Remark2,
+                            Id = l.Loader_Id
+                        });
+                    }
+                    result.success = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        [HttpGet("StartTrolleyOut/{code}")]
+        public async Task<ServiceResponseModel<List<TrolleySlotDTO>>> StartTrolleyOut(string code)
+        {
+            ServiceResponseModel<List<TrolleySlotDTO>> result = new ServiceResponseModel<List<TrolleySlotDTO>>();
+            result.data = new List<TrolleySlotDTO>();
+
+            try
+            {
+                var claims = User.Identities.First().Claims.ToList();
+                string devId = claims?.FirstOrDefault(x => x.Type.Equals("DeviceId", StringComparison.OrdinalIgnoreCase))?.Value ?? "";
+
+                var tr = await _dbContext.Trolley.Where(x => x.TrolleyCode == code).FirstOrDefaultAsync();
+                if (tr == null)
+                {
+                    result.errMessage = "Cannot find this Trolley.";
+                    return result;
+                }
+
+                var r = await _trolleyService.GetTrolleySlotList();
+                result.success = true;
+                result.data = r.data;
+
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+            }
+            return result;
+        }
+
+        [HttpGet("SearchTrolleyOut/{trCode}/{itemCode}")]
+        public async Task<ServiceResponseModel<List<TrolleySlotReelDTO>>> SearchTrolleyOut(string trCode, string itemCode)
+        {
+            ServiceResponseModel<List<TrolleySlotReelDTO>> result = new ServiceResponseModel<List<TrolleySlotReelDTO>>();
+            result.data = new List<TrolleySlotReelDTO>();
+            string methodName = "SearchTrolleyOut";
+
+            try
+            {
+                var claims = User.Identities.First().Claims.ToList();
+                string devId = claims?.FirstOrDefault(x => x.Type.Equals("DeviceId", StringComparison.OrdinalIgnoreCase))?.Value ?? "";
+
+                var tr = await _dbContext.Trolley.Where(x => x.TrolleyCode == trCode).FirstOrDefaultAsync();
+                if (tr == null)
+                {
+                    result.errMessage = "Cannot find this Trolley.";
+                    return result;
+                }
+
+                var parameters = new[]
+                {
+                    new SqlParameter("@TrolleyCode", trCode),
+                    new SqlParameter("@ItemCode", itemCode),
+                };
+
+                string sql = "EXECUTE dbo.TrolleySlot_GET_SEARCHLIST @TrolleyCode,@ItemCode ";
+                var listDTO = await _dbContext.SP_TrolleySlotSearchList.FromSqlRaw(sql, parameters).ToListAsync();
+                if (listDTO.Count == 0)
+                {
+                    result.success = false;
+                    result.errMessage = "No item found in this Trolley.";
+                }
+                else
+                {
+                    result.success = true;
+                    result.data = listDTO;
+
+                    int port = 1502;
+                    foreach (var dtl in listDTO)
+                    {
+                        string plcIp = dtl.IPAdd1;
+                        if (dtl.ColNo == 2) { plcIp = dtl.IPAdd2; }
+                        if (dtl.ColNo == 3) { plcIp = dtl.IPAdd3; }
+                        ModbusClient modbusClient = new ModbusClient(plcIp, port);
+                        try
+                        {
+                            modbusClient.Connect();
+
+                            PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
+
+                            modbusClient.WriteSingleCoil(dtl.RowNo - 1, true);
+                        }
+                        catch (Exception ex)
+                        {
+                            PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Error: " + ex.Message, "", true);
+                            result.errMessage = ex.Message;
+                            result.errStackTrace = ex.StackTrace ?? "";
+                        }
+                        finally
+                        {
+                            modbusClient.Disconnect();
+                            PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Disconnected.", "", false);
+                        }
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+            }
             return result;
         }
 

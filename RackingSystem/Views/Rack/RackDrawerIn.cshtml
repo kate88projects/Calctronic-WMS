@@ -511,7 +511,7 @@
 </style>
 
 <header>
-    <h1>SRMS </h1>
+    <h1 onclick="showJSONModal()">SRMS </h1>
 
     <input type="hidden" id="xToken" value="@ViewBag.xToken" autocomplete="off">
     <input type="hidden" id="xQId" value="@ViewBag.QId" autocomplete="off">
@@ -658,6 +658,25 @@
     </div>
 </div>
 
+<div class="modal fade" id="jsonModal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="columnMatchingLabel">Update</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="csvColumns">
+                <div class="row">
+                    <div id="jsonColumns"></div>
+                </div>
+            </div>
+            <div class="modal-footer matching-btn">
+                <button type="button" class="btn btn-primary" onclick="updateJSONModal()">Submit@* <i class="bi bi-upload fs-5"></i> *@</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts
 {
     <link href="~/css/datatables.min.css" rel="stylesheet">
@@ -697,6 +716,9 @@
 
         let colNo = 1;
 
+        const jsonModal = document.getElementById("jsonModal");
+        const formJSON = document.getElementById("formJSON");
+
         function closeTab() {
             window.close();
         }
@@ -728,6 +750,124 @@
                 readyContinuos();
             }
         });
+
+        async function showJSONModal() {
+
+            var data = "";
+
+            await $.ajax({
+                url: '/api/PLCTrolley/GetRackJobJson',
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                },
+                success: function (result) {
+                    data = result.data;
+                },
+                error: function (error) {
+                }
+            });
+
+
+            let cols = [ 'SystemStart', 'TrolleyCode', 'TrolleyId', 'TrolleySide', 'DrawerStatus',
+            'CartesianRobotState', 'CartesianLocation',
+            'RetrieveSlot', 'PutAwaySlot', 'TrolleyLocation', 'ColNum',
+            'chkCol1', 'chkCol2', 'chkCol3',
+            'CurrentRowCol1', 'CurrentRowCol2', 'CurrentRowCol3' ];
+
+            let columnInputs = '';
+            let v = '';
+
+            cols.forEach((column, index) => {
+                Object.entries(data).forEach(([key, value]) => {
+                  // console.log(`${key}: ${value}`);
+                  if (key.toUpperCase() == column.toUpperCase()) {
+                      v = value;
+                  }
+                });
+
+                columnInputs += `
+                    <div class="row justify-content-center align-items-center mb-3">
+                        <div class="col-5">
+                            <label class="form-label mb-0">${column}</label>
+                        </div>
+                        <div class="col-5">
+                            <input type="text" id="col${column}" class="form-modal" value="${v}" />
+                        </div>
+                    </div>`;
+            });
+
+
+            document.getElementById('jsonColumns').innerHTML = columnInputs;
+            $('#jsonModal').modal("show");
+        }
+
+        async function updateJSONModal() {
+
+            const chkCol1 = document.getElementById('chkCol1');
+            const chkCol2 = document.getElementById('chkCol2');
+            const chkCol3 = document.getElementById('chkCol3');
+
+            var data = {
+                SystemStart: $("#colSystemStart").val() === "true",
+
+                TrolleyCode: $("#colTrolleyCode").val(),
+                TrolleyId: Number($("#colTrolleyId").val()),
+                TrolleySide: $("#colTrolleySide").val(),
+
+                DrawerStatus: $("#colDrawerStatus").val(),
+
+                CartesianRobotState: $("#colCartesianRobotState").val(),
+                CartesianLocation: $("#colCartesianLocation").val(),
+
+                RetrieveSlot: $("#colRetrieveSlot").val(),
+                PutAwaySlot: $("#colPutAwaySlot").val(),
+
+                TrolleyLocation: $("#colTrolleyLocation").val(),
+
+                ColNum: colNo,
+
+                chkCol1: chkCol1.checked,
+                chkCol2: chkCol2.checked,
+                chkCol3: chkCol3.checked,
+
+                CurrentRowCol1: Number($("#colCurrentRowCol1").val()),
+                CurrentRowCol2: Number($("#colCurrentRowCol2").val()),
+                CurrentRowCol3: Number($("#colCurrentRowCol3").val()),
+
+            }
+
+            // console.log(data);
+
+            $.ajax({
+                url: '/api/PLCTrolley/UpdateRackJobJson',
+                type: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                data: JSON.stringify(data),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                        $("#jsonModal").modal("toggle");
+                        getJson();
+                    }
+                    else {
+                        console.log(result.errMessage);
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
 
         /**
          * Appends a timestamped message to the HMI log display.
@@ -1768,18 +1908,45 @@
         }
 
         function exportLogFile() {
-            const wb = XLSX.utils.book_new();
-            wb.Props = {
-                Title: "Log File",
-                Subject: "Return Empty Drawer Task",
-                Author: "Flex Software Consulting Sdn Bhd",
-                CreatedDate: new Date()
-            }
 
-            const ws = XLSX.utils.aoa_to_sheet([]); //worksheet data
+            $.ajax({
+                url: "/api/PLCTrolley/GetErrorLog/" + qId,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                },
+                success: function (result) {
+                    // console.log('Export Err::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
 
-            XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-            XLSX.writeFile(wb, "Return-EmptyDrawer Log.xlsx");
+                        const wb = XLSX.utils.book_new();
+                        wb.Props = {
+                            Title: "Log File",
+                            Subject: "Return Empty Drawer Task",
+                            Author: "Flex Software Consulting Sdn Bhd",
+                            CreatedDate: new Date()
+                        }
+
+                        // const ws = XLSX.utils.aoa_to_sheet([]); //worksheet data
+                        const ws = XLSX.utils.json_to_sheet(result.data);
+
+                        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+                        XLSX.writeFile(wb, "Return-EmptyDrawer Log.xlsx");
+
+                    }
+                },
+                error: function (error) {
+                    console.log('Export Err::' + error.val);
+                }
+            });
+
+
         }
     </script>
 

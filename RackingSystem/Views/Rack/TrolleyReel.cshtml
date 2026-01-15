@@ -205,13 +205,13 @@
 
     <div class="search-box">
         <input id="reelId" class="form-control" type="text" placeholder="Enter Reel ID / Raw Mat Code / BOM Code" />
-        <select id="bomId" class="form-control">
+        @* <select id="bomId" class="form-control">
             <option>- </option>
             <option>BOM 1 </option>
             <option>BOM 2 </option>
             <option>BOM 3 </option>
-        </select>
-        <button id="findBtn" class="btn btn-success">Find</button>
+        </select> *@
+        <button id="findBtn" class="btn btn-success">Turn ON LED</button>
         <button id="turnOffBtn" class="btn btn-danger">Turn Off LED</button>
     </div>
 
@@ -306,88 +306,6 @@
     <script type="text/javascript">
         let token = '';
 
-        // const COLUMNS_PER_SIDE = 3;
-        // const ROWS = 50;
-        // const rawMatMap = { "RM1001": "R0005", "RM2001": "R0120" };
-        // const bomMap = {}; // { "BOM-A1": "R0020", "BOM-B7": "R0150" };
-        // const reelMap = {};
-        // let idCounter = 1;
-        // const SIDES = ['front','back'];
-
-        // SIDES.forEach(side=>{
-        //   for(let c=0;c<COLUMNS_PER_SIDE;c++){
-        //     for(let r=0;r<ROWS;r++){
-        //       const id = 'R'+(idCounter++).toString().padStart(4,'0');
-        //       reelMap[id] = {side, column:c, row:r};
-        //     }
-        //   }
-        // });
-        // const emptyReels = new Set(["R0010","R0020"]);
-        // const posMap = {};
-        // for(const [id, p] of Object.entries(reelMap)){
-        //   posMap[`${p.side}-${p.column}-${p.row}`] = id;
-        // }
-
-        // const trolley = document.getElementById('trolley');
-        // SIDES.forEach(side=>{
-        //   const sideDiv = document.createElement('div');
-        //   sideDiv.className = 'side';
-        //   sideDiv.innerHTML = `<div class="title">${side==='front'?'A SIDE':'B SIDE'}</div>`;
-        //   const grid = document.createElement('div');
-        //   grid.className = 'grid';
-        //   for(let c=0;c<COLUMNS_PER_SIDE;c++){
-        //     const col = document.createElement('div');
-        //     col.className = 'column';
-        //     col.dataset.side = side;
-        //     col.dataset.col = c;
-        //     const colLabel = document.createElement('div');
-        //     colLabel.className = 'col-label';
-        //     colLabel.textContent = (side==='front'?'A':'B') + (c+1);
-        //     col.appendChild(colLabel);
-        //     const subCols = [document.createElement('div'), document.createElement('div')];
-        //     subCols.forEach(sub => sub.className = 'sub-column');
-        //     for(let r=0;r<ROWS;r++){
-        //       const rowWrap = document.createElement('div');
-        //       rowWrap.className = 'row-wrap';
-        //       const rowLabel = document.createElement('div');
-        //       rowLabel.className = 'row-label';
-        //       rowLabel.textContent = r+1;
-        //       const cell = document.createElement('div');
-        //       cell.className = 'cell';
-        //       cell.dataset.row = r;
-        //       cell.title = `${colLabel.textContent} - Row ${r+1}`;
-        //       cell.addEventListener('click',()=>{
-        //           cell.classList.toggle('on');
-        //           loadPLCOn(c, r);
-        //       });
-        //       const reelCode = document.createElement('div');
-        //       reelCode.style.color = '#6cf';
-        //       reelCode.style.fontSize = '11px';
-        //       reelCode.textContent = '' + posMap[`${side}-${c}-${r}`];
-        //       // if(emptyReels.has(reelCode.textContent)){
-        //       //   cell.classList.add('empty');
-        //       //   reelCode.style.color = '#555';
-        //       //   reelCode.textContent = 'EMPTY';
-        //       // }
-        //       if (r % 2 == 0) {
-        //         cell.classList.add('empty');
-        //         reelCode.style.color = '#555';
-        //         reelCode.textContent = 'EMPTY';
-        //       }
-        //       rowWrap.appendChild(rowLabel);
-        //       rowWrap.appendChild(cell);
-        //       rowWrap.appendChild(reelCode);
-        //       if(r<25) subCols[0].appendChild(rowWrap);
-        //       else subCols[1].appendChild(rowWrap);
-        //     }
-        //     const subContainer=document.createElement('div');subContainer.className='sub-container';subCols.forEach(sub=>subContainer.appendChild(sub));
-        //     col.appendChild(subContainer);
-        //     grid.appendChild(col);
-        //   }
-        //   sideDiv.appendChild(grid);
-        //   trolley.appendChild(sideDiv);
-        // });
-
         $(document).ready(function () {
             token = $('#xToken').val();
         });
@@ -395,6 +313,7 @@
         document.getElementById('loadBtn').addEventListener('click',loadTrolley);
         document.getElementById('findBtn').addEventListener('click',findReel);
         // document.getElementById('reelId').addEventListener('keydown',e=>{if(e.key==='Enter')findReel();});
+        document.getElementById('turnOffBtn').addEventListener('click',turnOffReel);
 
         function clearAll(){
             // call api to close
@@ -419,37 +338,17 @@
         //     return false;
         // }
 
-        function findReel() {
-            // var cell = 
-            cell.classList.add('on');
-            // const q = document.getElementById('trolleyId').value.trim();
-            // if(!q)return
-
-            // alert('Please enter a search value');
-
-            // if(reelMap[q]){
-            //     highlightByReelId(q);return;
-            // }
-            // if(rawMatMap[q]){
-            //     const rid=rawMatMap[q];
-            //     if(highlightByReelId(rid))return;
-            // }
-            //     if(bomMap[q]){
-            //         const rid=bomMap[q];
-            //         if(highlightByReelId(rid))return;
-            //     }
-            //     alert('No match found');
-        }
-
-        async function loadTrolley() {
+        async function findReel() {
             const tr = document.getElementById('trolleyId').value.trim();
             if (tr == "") {
                 alert('Please insert Trolley Code');
                 return;
             }
 
+            const r = document.getElementById('reelId').value.trim();
+
             await $.ajax({
-                url: "/api/PLCHubIn/Trolley/" + tr,
+                url: "/api/PLCTrolley/SearchTrolleyOut/" + tr + "/" + r,
                 type: "GET",
                 headers: {
                     'Authorization': 'Bearer ' + token
@@ -469,9 +368,79 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
-                    console.log(result);
+                    console.log(result); 
                     swal.close();
 
+                    var colNo = 1;
+                    if (result.success == true) {
+
+                        for (let i = 0; i < result.data.length; i++) {
+
+                            var side = result.data[i].isLeft == true ? 'A' : 'B';
+                            var parentDiv = document.getElementById(side + result.data[i].colNo + 'R' + result.data[i].rowNo);
+                            const cell = parentDiv.firstElementChild;
+                            cell.classList.add('on');
+
+                        }
+
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                        // alert('Trolley :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                    // alert('Trolley :: ' + error.val, 'alert');
+                }
+            });
+
+        }
+
+        async function turnOffReel() {
+
+        }
+
+        async function loadTrolley() {
+            const tr = document.getElementById('trolleyId').value.trim();
+            if (tr == "") {
+                alert('Please insert Trolley Code');
+                return;
+            }
+
+            await $.ajax({
+                url: "/api/PLCTrolley/StartTrolleyOut/" + tr,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    // console.log(result);
+                    swal.close();
+
+                    var colNo = 1;
                     if (result.success == true) {
 
                         var idx = 1;
@@ -484,7 +453,23 @@
                                 idx = 1;
                             }
 
+                            colNo = 1;
+                            if (iC >=5) { colNo = 3; }
+                            if (iC >=3) { colNo = 2; }
+
                             for (let i = 0; i < 25; i++) { // Example: Add 5 rows
+
+                                var reelNo = "";
+                                var hasReel = false;
+                                result.data.forEach(x => {
+                                    if (x.isLeft == true && x.hasReel == true && x.colNo == colNo && x.rowNo === idx && x.reelNo == "0") {
+                                    hasReel = true;
+                                    }
+                                    if (x.isLeft == true && x.colNo == colNo && x.rowNo === idx) {
+                                    reelNo = x.reelNo;
+                                    }
+                                });
+
                                 // const rawData = JSON.stringify(result.data[idx - 1]);
                                 const newRow = tbl.insertRow(); // or document.createElement('tr');
                                 const cell1 = newRow.insertCell(); // or document.createElement('td');
@@ -495,7 +480,7 @@
                                 cell2.innerHTML = ' <div class="cell"></div> ';
                                 $(cell2).addClass("tblRow tblCol2 ");
                                 const cell3 = newRow.insertCell(); // or document.createElement('td');
-                                cell3.innerHTML = ' - ';
+                                cell3.innerHTML = hasReel == true ? "xxx" : '   ';
                                 $(cell3).addClass("tblRow tblCol3");
 
                                 idx = idx + 1;
@@ -512,7 +497,23 @@
                                 idx = 1;
                             }
 
+                            colNo = 1;
+                            if (iC >=5) { colNo = 3; }
+                            if (iC >=3) { colNo = 2; }
+
                             for (let i = 0; i < 25; i++) { // Example: Add 5 rows
+
+                                var reelNo = "";
+                                var hasReel = false;
+                                result.data.forEach(x => {
+                                    if (x.isLeft == false && x.hasReel == true && x.colNo == colNo && x.rowNo === idx && x.reelNo == "0") {
+                                    hasReel = true;
+                                    }
+                                    if (x.isLeft == false && x.colNo == colNo && x.rowNo === idx) {
+                                    reelNo = x.reelNo;
+                                    }
+                                });
+
                                 // const rawData = JSON.stringify(result.data[idx - 1]);
                                 const newRow = tbl.insertRow(); // or document.createElement('tr');
                                 const cell1 = newRow.insertCell(); // or document.createElement('td');
@@ -523,7 +524,7 @@
                                 cell2.innerHTML = ' <div class="cell"></div> ';
                                 $(cell2).addClass("tblRow tblCol2 ");
                                 const cell3 = newRow.insertCell(); // or document.createElement('td');
-                                cell3.innerHTML = ' - ';
+                                cell3.innerHTML = hasReel == true ? "xxx" : '   ';
                                 $(cell3).addClass("tblRow tblCol3");
 
                                 idx = idx + 1;

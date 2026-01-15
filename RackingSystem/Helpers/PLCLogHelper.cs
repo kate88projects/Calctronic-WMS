@@ -32,6 +32,7 @@ namespace RackingSystem.Helpers
                     Remark1 = r1,
                     Remark2 = r2,
                     CreatedDate = DateTime.Now,
+                    IsErr = isErr,
                 };
                 _dbContext.PLCLoaderLog.Add(log);
             }
@@ -55,6 +56,7 @@ namespace RackingSystem.Helpers
                     Remark1 = r1,
                     Remark2 = r2,
                     CreatedDate = DateTime.Now,
+                    IsErr = isErr,
                 };
                 _dbContext.PLCHubInLog.Add(log);
             }
@@ -78,6 +80,7 @@ namespace RackingSystem.Helpers
                     Remark1 = r1,
                     Remark2 = r2,
                     CreatedDate = DateTime.Now,
+                    IsErr = isErr,
                 };
                 _dbContext.PLCHubOutLog.Add(log);
             }
@@ -101,6 +104,7 @@ namespace RackingSystem.Helpers
                     Remark1 = r1,
                     Remark2 = r2,
                     CreatedDate = DateTime.Now,
+                    IsErr = isErr,
                 };
                 _dbContext.PLCTrolleyLog.Add(log);
             }
