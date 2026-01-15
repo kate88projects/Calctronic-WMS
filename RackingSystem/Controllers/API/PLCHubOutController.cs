@@ -1126,7 +1126,7 @@ namespace RackingSystem.Controllers.API
 
                 foreach (var dtl in itemList)
                 {
-                    exist = true;
+                    exist = false;
                     var item = _dbContext.Item.Where(x => x.Item_Id == dtl.Item_Id).FirstOrDefault();
                     var reelList = _dbContext.Reel.Where(x => x.Item_Id == dtl.Item_Id && x.IsReady == true && x.Status == EnumReelStatus.IsReady.ToString()).OrderBy(x => x.ExpiryDate).ToList();
                     foreach (var r in reelList)
@@ -1163,7 +1163,7 @@ namespace RackingSystem.Controllers.API
                 var itemList = _dbContext.JobOrderEmergencyDetail.Where(x => x.JobOrderEmergency_Id == rackJob.Doc_Id && x.BalQty > 0 && x.JobOrderEmergency_Id > Convert.ToInt64(lastId)).OrderBy(x => x.CreatedDate).OrderBy(x => x.CreatedDate).Skip(skipRow).Take(takeRow).ToList();
                 foreach (var dtl in itemList)
                 {
-                    exist = true;
+                    exist = false;
                     var item = _dbContext.Item.Where(x => x.Item_Id == dtl.Item_Id).FirstOrDefault();
                     var reelList = _dbContext.Reel.Where(x => x.Item_Id == dtl.Item_Id && x.IsReady == true).OrderBy(x => x.ExpiryDate).ToList();
                     foreach (var r in reelList)
