@@ -732,6 +732,7 @@ namespace RackingSystem.Services.SlotServices
                 _slot.HasEmptyTray = slotReq.HasEmptyTray;
                 _slot.HasReel = slotReq.HasReel;
                 _slot.ReelNo = slotReq.ReelNo;
+                _slot.NeedCheck = slotReq.NeedCheck;
 
                 if (slotReq.HasReel)
                 {

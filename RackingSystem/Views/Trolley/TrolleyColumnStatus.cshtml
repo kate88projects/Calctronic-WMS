@@ -419,6 +419,10 @@
                     <input type="checkbox" class="form-check-input" id="chkHasReel">
                     <label class="form-check-label" for="chkHasReel">Has Reel</label>
                 </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="chkNeedChk">
+                    <label class="form-check-label" for="chkNeedChk">Need Check</label>
+                </div>
                 <div class="mb-3">
                     <label class="form-label" for="txtReelNo">Reel No</label>
                     <input type="number" class="form-control" name="ReelNo" id="txtReelNo" aria-describedby="Reel No">
@@ -772,6 +776,12 @@
             $("#txtReelNo").val(row.reelNo);
             $("#txtPriority").val(row.priority);
             $("#txtReelCode").val(row.reelCode);
+            if (row.needCheck == true) {
+                document.getElementById("chkNeedChk").checked = true;
+            }
+            else {
+                document.getElementById("chkNeedChk").checked = false;
+            }
             $("#myModal").modal("show");
         }
 
@@ -779,6 +789,7 @@
             const chkIsAct = document.querySelector('#chkIsActive');
             const chkHasEmptyTray = document.querySelector('#chkHasEmptyTray');
             const chkHasReel = document.querySelector('#chkHasReel');
+            const chkNeedChk = document.querySelector('#chkNeedChk');
 
             var data = {
                 Slot_Id: $("#txtId").val(),
@@ -788,6 +799,7 @@
                 HasReel: chkHasReel.checked ? true : false,
                 ReelNo: $("#txtReelNo").val(),
                 ReelCode: $("#txtReelCode").val(),
+                NeedCheck: chkNeedChk.checked ? true : false,
             }
 
             //console.log(JSON.stringify(data));

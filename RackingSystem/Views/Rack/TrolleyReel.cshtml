@@ -508,7 +508,7 @@
                                 cell1.innerHTML = idx;
                                 $(cell1).addClass("tblRow tblCol1");
                                 const cell2 = newRow.insertCell();
-                                cell2.id = 'A' + iC + "R" + idx;
+                                cell2.id = 'A' + colNo + "R" + idx;
                                 cell2.innerHTML = ' <div class="cell" data-id="' + slotId + '"></div> ';
                                 $(cell2).addClass("tblRow tblCol2 ");
                                 const cell3 = newRow.insertCell(); // or document.createElement('td');
@@ -553,7 +553,7 @@
                                 cell1.innerHTML = idx;
                                 $(cell1).addClass("tblRow tblCol1");
                                 const cell2 = newRow.insertCell();
-                                cell2.id = 'B' +iC + "R" + idx;
+                                cell2.id = 'B' + colNo + "R" + idx;
                                 cell2.innerHTML = ' <div class="cell"></div> ';
                                 $(cell2).addClass("tblRow tblCol2 ");
                                 const cell3 = newRow.insertCell(); // or document.createElement('td');

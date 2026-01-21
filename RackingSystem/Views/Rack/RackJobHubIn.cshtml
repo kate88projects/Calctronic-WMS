@@ -829,6 +829,8 @@
         let halfPutAwayMoveStep = 1;
 
         let endTask = false;
+        
+        let begining = true;
 
         let token = '';
         let qId = 0;
@@ -863,6 +865,7 @@
             qCont = $('#xQContinuos').val();
 
             if (qCont == "1") {
+                begining = false;
                 $('#cont-btn').removeClass('hidden');
                 $('#start-btn').addClass('hidden');
                 readyContinuos();
@@ -1554,12 +1557,15 @@
             logMessage(`Gantry cycle started: Picking from Column ${colNum}.`, 'info');
             inPickMove = true;
 
-            var chkGantry = await loadPLCCheckUnlodingStatus();
-            if (chkGantry == false) {
-                sharedDrawerState.gantrySequenceState = 'Returning';
-                updateGantryUIState();
-                inPickMove = false;
-                return;
+            if (begining == true) { 
+                var chkGantry = await loadPLCCheckUnlodingStatus();
+                if (chkGantry == false) {
+                    sharedDrawerState.gantrySequenceState = 'Returning';
+                    updateGantryUIState();
+                    inPickMove = false;
+                    return;
+                }
+                begining = false;
             }
 
             var turn = await turnCol(1);
@@ -2029,13 +2035,14 @@
 
             var loaderId = $("#txtLoaderId").val();
             var reelId = $("#txtReelId").val();
+            var reelCode = $("#txtReelCode").val();
             var fResult = -1;
 
             if (reelId == '') { return 0; }
 
             // step 4 : scan item
             await $.ajax({
-                url: "/api/PLCHubIn/UpdateLoaderCount/" + loaderId + "/" + colNum + "/" + reelId,
+                url: "/api/PLCHubIn/UpdateLoaderCount/" + loaderId + "/" + colNum + "/" + reelCode,
                 type: "GET",
                 headers: {
                     'Authorization': 'Bearer ' + token
@@ -2070,11 +2077,12 @@
             var reelIdC = $("#txtReelIdC").val();
             var sCode = $("#txtPutSlot").val();
             var sTake = $("#txtPutSlotTake").val();
+            var reelCodeC = $("#txtReelCodeC").val();
             var fResult = false;
 
             // step 4 : scan item
             await $.ajax({
-                url: "/api/PLCHubIn/UpdateReelRack/" + reelIdC + "/" + sCode + "/" + sTake,
+                url: "/api/PLCHubIn/UpdateReelRack/" + reelCodeC + "/" + sCode + "/" + sTake,
                 type: "GET",
                 headers: {
                     'Authorization': 'Bearer ' + token
@@ -3014,6 +3022,13 @@
                             logMessage2('Retrieve Status :: ' + result.errMessage, 'alert');
                         }
                     }
+                    
+                    logMessage2('Retrieve Slot Code :: ' + result.data.slotCode, 'info');
+                    logMessage2('Retrieve QR X :: ' + result.data.qrxPulse, 'info');
+                    logMessage2('Retrieve QR Z :: ' + result.data.qryPulse, 'info');
+                    logMessage2('Retrieve QR X Differ :: ' + result.data.qrxPulseDiffer, 'info');
+                    logMessage2('Retrieve QR Z Differ :: ' + result.data.qryPulseDiffer, 'info');
+
                 },
                 error: function (error) {
                     logMessage2('Retrieve Status :: ' + error.val, 'alert');
@@ -3142,6 +3157,12 @@
                     else {
                         logMessage2('Put Away Status :: ' + result.errMessage, 'alert');
                     }
+
+                    logMessage2('Retrieve Slot Code :: ' + result.data.slotCode, 'info');
+                    logMessage2('Retrieve QR X :: ' + result.data.qrxPulse, 'info');
+                    logMessage2('Retrieve QR Z :: ' + result.data.qryPulse, 'info');
+                    logMessage2('Retrieve QR X Differ :: ' + result.data.qrxPulseDiffer, 'info');
+                    logMessage2('Retrieve QR Z Differ :: ' + result.data.qryPulseDiffer, 'info');
                 },
                 error: function (error) {
                     logMessage2('Put Away Status :: ' + error.val, 'alert');

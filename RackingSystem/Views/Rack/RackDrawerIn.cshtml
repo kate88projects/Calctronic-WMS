@@ -1294,17 +1294,15 @@
             const chkCol2 = document.getElementById('chkCol2');
             const chkCol3 = document.getElementById('chkCol3');
 
-            sharedDrawerState.trolleyLocation = 'left';
             if (colNo == 1 && Number($('#left-input-tr').val()) >= 51) {
                 colNo = 2;
-                sharedDrawerState.trolleyLocation = 'center';
+                
             }
             if (colNo == 1 && chkCol1.checked == false) {
                 colNo = 2;
             }
             if (colNo == 2 && Number($('#center-input-tr').val()) >= 51) {
                 colNo = 3;
-                sharedDrawerState.trolleyLocation = 'right';
             }
             if (colNo == 2 && chkCol2.checked == false) {
                 colNo = 3;
@@ -1323,6 +1321,11 @@
                 $('#jobDoneModal').modal('show');
                 return;
             }
+
+            sharedDrawerState.trolleyLocation = 'left';
+            if (colNo == 2) { sharedDrawerState.trolleyLocation = 'center'; }
+            if (colNo == 3) { sharedDrawerState.trolleyLocation = 'right'; }
+            
 
             changeTakeSlot = false;
 
@@ -1722,6 +1725,8 @@
         }
 
         async function loadPLCGetRetrieveTrayStatus() {
+            
+            var tr = $("#txtTrolleyId").val();
 
             var fResult = -1;
             var rowNo = Number($('#left-input-tr').val());
@@ -1734,7 +1739,7 @@
 
             // step 4 : scan item
             await $.ajax({
-                url: "/api/PLCTrolley/GetRetrieveTrayStatus/",
+                url: "/api/PLCTrolley/GetRetrieveTrayStatus/" + tr,
                 type: "GET",
                 headers: {
                     'Authorization': 'Bearer ' + token
@@ -1797,6 +1802,12 @@
                             logMessage2('Retrieve Status :: ' + result.errMessage, 'alert');
                         }
                     }
+
+                    logMessage2('Retrieve Slot Code :: ' + result.data.slotCode, 'info');
+                    logMessage2('Retrieve QR X :: ' + result.data.qrxPulse, 'info');
+                    logMessage2('Retrieve QR Z :: ' + result.data.qryPulse, 'info');
+                    logMessage2('Retrieve QR X Differ :: OK ' + result.data.qrxPulseDiffer, 'info');
+                    logMessage2('Retrieve QR Z Differ :: OK ' + result.data.qryPulseDiffer, 'info');
                 },
                 error: function (error) {
                     logMessage2('Retrieve Status :: ' + error.val, 'alert');
@@ -1924,6 +1935,12 @@
                     else {
                         logMessage2('Put Away Status :: ' + result.errMessage, 'alert');
                     }
+
+                    logMessage2('Retrieve Slot Code :: ' + result.data.slotCode, 'info');
+                    logMessage2('Retrieve QR X :: ' + result.data.qrxPulse, 'info');
+                    logMessage2('Retrieve QR Z :: ' + result.data.qryPulse, 'info');
+                    logMessage2('Retrieve QR X Differ :: OK ' + result.data.qrxPulseDiffer, 'info');
+                    logMessage2('Retrieve QR Z Differ :: OK ' + result.data.qryPulseDiffer, 'info');
                 },
                 error: function (error) {
                     logMessage2('Put Away Status :: ' + error.val, 'alert');

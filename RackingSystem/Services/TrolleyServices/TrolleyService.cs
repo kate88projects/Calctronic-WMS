@@ -929,6 +929,7 @@ namespace RackingSystem.Services.TrolleyServices
                 _slot.IsActive = slotReq.IsActive;
                 _slot.HasReel = slotReq.HasReel;
                 _slot.ReelNo = slotReq.ReelNo;
+                _slot.NeedCheck = slotReq.NeedCheck;
 
                 if (slotReq.HasReel)
                 {

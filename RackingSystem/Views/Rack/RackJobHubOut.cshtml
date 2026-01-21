@@ -942,7 +942,9 @@
                 $('#start-btn').addClass('hidden');
                 readyContinuos();
             }
-            loadDBUpcoming();
+            // loadDBUpcoming();
+
+            var a = loadPLCGetRetrieveTrayStatus();
         });
 
         async function showJSONModal() {
@@ -1702,11 +1704,12 @@
             var sCode = $("#txtPutSlot").val();
             var sTake = $("#txtPutSlotTake").val();
             var dId = $("#txtDtlId").val();
+            var reelCode = $("#txtReelCode").val();
             var fResult = false;
 
             // step 4 : scan item
             await $.ajax({
-                url: "/api/PLCHubOut/UpdateReelIntoTrolley/" + tr + "/" + reelId + "/" + sCode + "/" + sTake + "/" + dId + "/" + qId,
+                url: "/api/PLCHubOut/UpdateReelIntoTrolley/" + tr + "/" + reelCode + "/" + sCode + "/" + sTake + "/" + dId + "/" + qId,
                 type: "GET",
                 headers: {
                     'Authorization': 'Bearer ' + token
@@ -2038,6 +2041,12 @@
                     else {
                         logMessage2('Retrieve Status :: ' + result.errMessage, 'alert');
                     }
+
+                    logMessage2('Retrieve Slot Code :: ' + result.data.slotCode, 'info');
+                    logMessage2('Retrieve QR X :: ' + result.data.qrxPulse, 'info');
+                    logMessage2('Retrieve QR Z :: ' + result.data.qryPulse, 'info');
+                    logMessage2('Retrieve QR X Differ :: ' + result.data.qrxPulseDiffer, 'info');
+                    logMessage2('Retrieve QR Z Differ :: ' + result.data.qryPulseDiffer, 'info');
                 },
                 error: function (error) {
                     logMessage2('Retrieve Status :: ' + error.val, 'alert');
@@ -2151,10 +2160,11 @@
         async function loadPLCGetPutAwayStatus() {
 
             var fResult = false;
+            var tr = $("#txtTrolleyId").val();
 
             // step 4 : scan item
             await $.ajax({
-                url: "/api/PLCHubOut/GetPutAwayStatus/",
+                url: "/api/PLCHubOut/GetPutAwayStatus/" + tr,
                 type: "GET",
                 headers: {
                     'Authorization': 'Bearer ' + token
@@ -2176,6 +2186,12 @@
                     else {
                         logMessage2('Put Away Status :: ' + result.errMessage, 'alert');
                     }
+
+                    logMessage2('Put Away Slot Code :: ' + result.data.slotCode, 'info');
+                    logMessage2('Put Away QR X :: ' + result.data.qrxPulse, 'info');
+                    logMessage2('Put Away QR Z :: ' + result.data.qryPulse, 'info');
+                    logMessage2('Put Away QR X Differ :: ' + result.data.qrxPulseDiffer, 'info');
+                    logMessage2('Put Away QR Z Differ :: ' + result.data.qryPulseDiffer, 'info');
                 },
                 error: function (error) {
                     logMessage2('Put Away Status :: ' + error.val, 'alert');
