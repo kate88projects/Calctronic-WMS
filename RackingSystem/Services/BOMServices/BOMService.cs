@@ -347,5 +347,105 @@ namespace RackingSystem.Services.BOMServices
             }
             return result;
         }
+        public async Task<ServiceResponseModel<BOMExcelReqDTO>> SaveExcelBOM(BOMExcelReqDTO boms)
+        {
+            ServiceResponseModel<BOMExcelReqDTO> result = new ServiceResponseModel<BOMExcelReqDTO>();
+
+            try
+            {
+                if (boms != null)
+                {
+                    bool isError = false;
+
+                    if (!string.IsNullOrEmpty(boms.FinishedGoods))
+                    {
+                        var itemCode = boms.FinishedGoods.Trim();
+                        Item? itemExist = _dbContext.Item.FirstOrDefault(i => i.ItemCode == itemCode && i.IsActive == true && i.IsFinishGood == true);
+                        if (itemExist == null)
+                        {
+                            result.errMessage = $"Finished Goods Item Code: {itemCode} not found.";
+                            boms.ErrorMsg = result.errMessage;
+                            isError = true;
+                        }
+
+                        if (!isError)
+                        {
+                            BOM? bomExist = _dbContext.BOM.FirstOrDefault(b => b.Item_Id == itemExist.Item_Id && b.IsActive == true && b.Description == boms.Description);
+                            if (bomExist == null)
+                            {
+                                BOM b = new BOM()
+                                {
+                                    Item_Id = itemExist.Item_Id,
+                                    Description = boms.Description,
+                                    IsActive = true,
+                                };
+
+                                List<BOMDetail> validDetails = new();
+
+                                foreach (var dtl in boms.SubItems)
+                                {
+                                    var subItemCode = dtl.ItemCode.Trim();
+                                    Item? subItemExist = _dbContext.Item.FirstOrDefault(i => i.ItemCode == subItemCode && i.IsActive);
+                                    if (subItemExist == null)
+                                    {
+                                        dtl.DtlErrorMsg = $"Sub Item Code: {subItemCode} not found.";
+                                        continue;
+                                    }
+
+                                    validDetails.Add(new BOMDetail
+                                    {
+                                        BOM_Id = 0,
+                                        Item_Id = subItemExist.Item_Id,
+                                        Qty = dtl.Quantity,
+                                        Remark = dtl.Remark,
+                                        CreatedBy = "Import by Excel",
+                                        CreatedDate = DateTime.Now
+                                    });
+                                }
+
+                                if (validDetails.Count != boms.SubItems.Count)
+                                {
+                                    var errorDetails = boms.SubItems.Where(x => !string.IsNullOrEmpty(x.DtlErrorMsg)).ToList();
+                                    if (errorDetails.Any())
+                                    {
+                                        boms.SubItems = errorDetails;
+                                        result.success = false;
+                                        result.data = boms;
+                                        return result;
+                                    }
+                                }
+
+                                _dbContext.BOM.Add(b);
+                                await _dbContext.SaveChangesAsync();
+
+                                long bomid = b.BOM_Id;
+                                foreach (var detail in validDetails)
+                                {
+                                    detail.BOM_Id = bomid;
+                                }
+
+                                _dbContext.BOMDetail.AddRange(validDetails);
+                                await _dbContext.SaveChangesAsync();
+
+                                result.success = true;
+                            }
+                            else
+                            {
+                                boms.ErrorMsg = "This BOM Item Code with same description already exist.";
+                                result.success = false;
+                                result.data = boms;
+                                return result;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+            return result;
+        }
     }
 }

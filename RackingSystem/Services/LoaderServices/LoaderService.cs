@@ -144,6 +144,7 @@ namespace RackingSystem.Services.LoaderServices
                             Loader_Id = _loader.Loader_Id,
                             ColNo = iCol,
                             BalanceHeight = req.ColHeight,
+                            IsActive = true
                         };
                         _dbContext.LoaderColumn.Add(_loaderCol);
                     }
@@ -174,7 +175,7 @@ namespace RackingSystem.Services.LoaderServices
                     _loader.ColHeight = req.ColHeight;
                     _loader.IPAddr = req.IPAddr;
                     _dbContext.Loader.Update(_loader);
-                    await _dbContext.SaveChangesAsync();
+                    //await _dbContext.SaveChangesAsync();
 
                     if (oldTtlCol > req.TotalCol)
                     {
@@ -200,14 +201,51 @@ namespace RackingSystem.Services.LoaderServices
                                     Loader_Id = _loader.Loader_Id,
                                     ColNo = iCol,
                                     BalanceHeight = req.ColHeight,
+                                    IsActive = true,
                                 };
                                 _dbContext.LoaderColumn.Add(_loaderCol);
+                            } 
+                        }
+                    }
+                    else
+                    {
+                        var loadColExist = _dbContext.LoaderColumn.Where(x => x.Loader_Id == _loader.Loader_Id).ToList();
+                        if (req.ColHeight > oldColH)
+                        {
+                            var incHeight = req.ColHeight - oldColH;
+                            if (loadColExist.Count > 0)
+                            {
+                                foreach (var col in loadColExist)
+                                {
+                                    col.BalanceHeight += incHeight;
+                                }
                             }
                         }
+                        else
+                        {
+                            var decHeight = oldColH - req.ColHeight;
+                            if (decHeight > 0)
+                            {
+                                bool isNegative = loadColExist.Any(col => col.BalanceHeight - decHeight < 0);
+                                if (!isNegative)
+                                {
+                                    foreach (var col in loadColExist)
+                                    {
+                                        col.BalanceHeight -= decHeight;
+                                    }
+                                }
+                                else
+                                {
+                                    result.success = false;
+                                    result.errMessage = "The loader column’s balance height is insufficient to change the column size";
+                                    return result;
+                                }
+                            }
+                        }
+                        _dbContext.LoaderColumn.UpdateRange(loadColExist);
                     }
                 }
                 await _dbContext.SaveChangesAsync();
-
                 result.success = true;
             }
             catch (Exception ex)
@@ -246,12 +284,6 @@ namespace RackingSystem.Services.LoaderServices
                     result.errMessage = "Cannot find this loader, please refresh the list.";
                     return result;
                 }
-
-                //if (_item.Status == Convert.ToString(EnumLoaderStatus.Loaded))
-                //{
-                //    result.errMessage = "Loader is not allow to deleted.";
-                //    return result;
-                //}
 
                 var loadColExist = _dbContext.LoaderColumn.Where(x => x.Loader_Id == _item.Loader_Id).ToList();
                 for (var iCol = loadColExist.Count - 1; iCol >= 0; iCol--)

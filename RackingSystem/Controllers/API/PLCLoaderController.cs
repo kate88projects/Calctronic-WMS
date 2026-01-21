@@ -259,6 +259,12 @@ namespace RackingSystem.Controllers.API
                     result.data = 0;
                     return result;
                 }
+                if (_loaderCol.IsActive == false)
+                {
+                    result.errMessage = "Loader Column is not active.";
+                    result.data = 0;
+                    return result;
+                }
 
                 result.data = _loaderCol.BalanceHeight;
                 if (_loaderCol.BalanceHeight <= minHeight && minHeight != 0)

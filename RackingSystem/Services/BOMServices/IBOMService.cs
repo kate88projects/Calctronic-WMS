@@ -15,6 +15,7 @@ namespace RackingSystem.Services.BOMServices
         public Task<ServiceResponseModel<int>> GetBOMTotalCount(BOMSearchReqDTO req);
 
         public Task<ServiceResponseModel<List<BOMListReqDTO>>> GetActiveBOMList();
+        public Task<ServiceResponseModel<BOMExcelReqDTO>> SaveExcelBOM(BOMExcelReqDTO boms);
 
 
     }

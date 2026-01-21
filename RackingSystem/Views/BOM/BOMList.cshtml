@@ -88,10 +88,18 @@
 @section PageHeader {
     <header class="d-flex align-items-center justify-content-between w-100">
         <h2 class="pageTitle">BOM List</h2>
-        <div class="d-flex">
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-warning" onclick="downloadTemp()">
+                Download Import Template
+            </button>
+            <button type="button" class="btn btn-primary" onclick="triggerFileInput()">
+                Import BOM By Excel
+            </button>
+            <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleFileUpload(event)">
             <button type="button" class="btn btn-success" onclick="navigateToNew('new')">
                 Add New BOM
             </button>
+
         </div>
     </header>
 }
@@ -175,22 +183,22 @@
     <script src="../js/dataTables.columnControl.js"></script>
     <script src="../js/columnControl.dataTables.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
-
-    @* <script src="~/js/datatables.min.js"></script> *@
-    @* <link href="~/css/datatables.min.css" rel="stylesheet"> *@
-    @* <script src="~/js/gridjs.umd.js"></script> *@
-    @* <link rel="stylesheet" href="~/css/gridjs.min.css"> *@
+    <script src="../js/xlsx.full.min.js"></script>
+    <script src="../js/exceljs.min.js"></script>
 
     <script type="text/javascript">
         let itemIndex = 1;
         var itemList = [];
+        let originalFileContent = null;
 
         $(document).ready(async function () {
             $('#txtTotalRecord').val(0);
             $('#txtTotalPage').val(1);
-            getFinishedItemList();
+            getFinishedItemList().then(function(resultGet) {
+                if (resultGet) { loadList(1); }
+            });
             // getRawItemList();
-            loadList(1);
+            // loadList(1);
         });
 
         function prevPage() {
@@ -250,125 +258,6 @@
                 success: function (result) {
                     swal.close()
                     if (result.success == true) {
-                        /*
-                        if (gridInstance) { 
-                            gridInstance.destroy();
-                        }
-
-                        gridInstance = new gridjs.Grid({
-                            columns: [
-                                { name: 'BOM ID', id: 'boM_Id', width: '115px' },
-                                { 
-                                    name: 'Item Code', 
-                                    id: 'item_Id',
-                                    formatter: (cell) => {
-                                        const item = itemList.find(i => i.itemId === cell);
-                                        return item ? item.itemCode : '';
-                                    },
-                                    width: '135px',
-                                },
-                                { 
-                                    name: 'Description', 
-                                    id: 'description' ,
-                                    formatter: (cell) => {
-                                        const maxLength = 50;
-                                        if (!cell) return '';
-                                        return cell.length > maxLength
-                                            ? gridjs.html(`<span title="${cell}">${cell.substring(0, maxLength)}...</span>`)
-                                            : cell;
-                                    }
-                                },
-                                { 
-                                    name: 'Status', 
-                                    id: 'isActive',
-                                    width: '99px',
-                                    formatter: (cell, row) => {
-                                        return row.cells[3].data === true
-                                          ? gridjs.html('<span class="badge rounded-pill bg-success">Active</span>')
-                                          : gridjs.html('<span class="badge rounded-pill bg-secondary">InActive</span>');
-                                      }
-
-                                      //return row.cells[3].data === true
-                                          // ? gridjs.html('<span><i class="bi bi-check-square" style="color: darkgreen;"></i></span>')
-                                          // : gridjs.html('<span><i class="bi bi-app"></i></span>');
-                                },
-                                { 
-                                    name: 'Created Date', 
-                                    formatter: (cell, row) => {
-                                        const dateString = row.cells[4].data.split('.')[0];
-                                        const date = new Date(dateString);
-
-                                        if (isNaN(date)) {
-                                            return 'Invalid Date';
-                                        }
-                                        return date.toLocaleString('en-GB', {
-                                            year: 'numeric',
-                                            month: 'numeric',
-                                            day: 'numeric',
-                                            hour: 'numeric',
-                                            minute: 'numeric',
-                                            hour12: true,
-                                        });
-                                    }
-                                },
-                                { name: 'Created By', id: 'createdBy', width: '135px' },
-                                // { 
-                                //     name: 'Updated Date', 
-                                //     formatter: (cell, row) => {
-                                //         const dateString = row.cells[6].data.split('.')[0];
-                                //         const date = new Date(dateString);
-
-                                //         if(isNaN(date)) {
-                                //             return 'Invalid Date';
-                                //         }
-                                //         return date.toLocaleString('en-GB', {
-                                //             year: 'numeric',
-                                //             month: 'numeric',
-                                //             day: 'numeric',
-                                //             hour: 'numeric',
-                                //             minute: 'numeric',
-                                //             hour12: true,
-                                //         });
-                                //     }
-                                // },
-                                { 
-                                    name: 'Action',
-                                    formatter: (cell, row) => {
-                                        // const rawData = JSON.stringify({
-                                        //     boM_Id: row.cells[0].data,
-                                        //     item_Id: row.cells[1].data,
-                                        //     description: row.cells[2].data,
-                                        //     isActive: row.cells[3].data,
-                                        //     createdDate: row.cells[4].data,
-                                        //     createdBy: row.cells[5].data,
-                                        //     updatedDate: row.cells[6].data,
-                                        // });
-                                        const rawData = JSON.stringify(row);
-                                        return gridjs.html(`
-                                           <div style="display:flex;">
-                                                <button class="btn btn-primary d-grid view-bom-btn me-2" data-row='${rawData}' onclick="navigateToView(${row.cells[0].data}, 'view')">
-                                                    <span><i class="bi bi-eye"></i> View</span>
-                                                </button>
-                                                <button class="btn btn-warning d-grid edit-bom-btn me-2" data-row='${rawData}' onclick="navigateToEdit(${row.cells[0].data}, 'edit')">
-                                                    <span><i class="bi bi-pencil-square"></i> Edit</span>
-                                                </button>
-                                                <button class="btn btn-danger d-grid delete-bom-btn" data-id="${row.cells[0].data}">
-                                                    <span><i class="bi bi-trash"></i> Delete</span>
-                                                </button>
-                                            </div>
-                                        `);
-                                    }
-                                },
-                            ],
-                            data: result.data,
-                            pagination: false,
-                            search: false,
-                            sort: true,
-                            className: {
-                                table: 'custom-table',
-                            }
-                        }).render(document.getElementById("gridTable"));
-                        */
                         $('#listTable').DataTable({
                             data: result.data,
                             paging: false,
@@ -435,7 +324,6 @@
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         const rawData = JSON.stringify(row).replace(/"/g, "&quot;");
-                                        console.log(row);
                                         return `<div style="display:flex;">
                                                     <button class="btn btn-primary d-grid view-btn me-2" data-row='${rawData}' onclick="navigateToView(${row.boM_Id}, 'view')">
                                                     <span><i class="bi bi-eye"></i> View</span>
@@ -516,343 +404,43 @@
             // $('#newModal').modal("show");
         }
 
-        // function cancelForm() {
-        //     $('#newModal').modal("toggle");
-        //     clearForm();
-        // }
-
-        // function clearForm() {
-        //     removeErrMsg(['bomName', 'txtdesc', 'txtCreatedBy'], true);
-        //     document.getElementById('txtBomId').value = '';
-
-        //     document.getElementById("chkIsActive").checked = false;
-
-        //     const firstItem = document.querySelector(".item");
-        //     if (firstItem) {
-        //         const subitem = firstItem.querySelector("select").id;
-        //         const qty = firstItem.querySelector('input[type="number"]').id;
-        //         const remark = firstItem.querySelector('input[type="text"]').id;
-        //         const detailId = firstItem.querySelector('input[type="hidden"]');
-        //         detailId.value = "";
-        //         removeErrMsg([subitem, qty, remark], true);
-        //     }
-
-        //     const itemBlock = document.querySelectorAll(".itemBlock");
-        //     itemBlock.forEach((item, index) => {
-        //         if (index != 0) {
-        //             item.remove();
-        //         }
-        //     });
-
-        //     bgAdjust();
-        //     itemIndex = 1;
-        // }
-
         function getFinishedItemList() {
-             $.ajax({
-                url: "/Item/GetFinishedItemList/",
-                type: "GET",
-                dataType: 'JSON',
-                contentType: 'application/json; charset=utf-8',
-                success: function (result) {
-                    if (result.success == true) {
-                        itemList = result.data.map(function (i) {
-                            return {
-                                itemId : i.item_Id,
-                                itemCode: i.itemCode,
-                                itemDescription: i.description,
-                            };
-                        });
-                    } else {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: "/Item/GetFinishedItemList/",
+                    type: "GET",
+                    dataType: 'JSON',
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (result) {
+                        if (result.success == true) {
+                            itemList = result.data.map(function (i) {
+                                return {
+                                    itemId : i.item_Id,
+                                    itemCode: i.itemCode,
+                                    itemDescription: i.description,
+                                };
+                            });
+                            resolve(true);
+                        } else {
+                            swal.fire({
+                                icon: 'error',
+                                title: 'Wait',
+                                text: result.errMessage
+                            });
+                            resolve(false);
+                        }
+                    },
+                    error: function (error) {
                         swal.fire({
                             icon: 'error',
                             title: 'Wait',
-                            text: result.errMessage
+                            text: error.val
                         });
+                        resolve(false);
                     }
-                },
-                error: function (error) {
-                    swal.fire({
-                        icon: 'error',
-                        title: 'Wait',
-                        text: error.val
-                    });
-                }
+                });
             });
         }
-
-        // function getRawItemList () {
-        //     $.ajax({
-        //         url: "/Item/GetRawItemList/",
-        //         type: "GET",
-        //         dataType: 'JSON',
-        //         contentType: 'application/json; charset=utf-8',
-        //         success: function (result) {
-        //             if (result.success == true) {
-        //                 // itemList = result.data.map(function (i) {
-        //                 //     return {
-        //                 //         itemId : i.item_Id,
-        //                 //         itemCode: i.itemCode,
-        //                 //         itemDescription: i.description,
-        //                 //     };
-        //                 // });
-
-        //                 const dropdown = document.getElementById('subItem1');
-        //                 if (dropdown)
-        //                 {
-        //                     dropdown.innerHTML = "";
-        //                     const defaultOption = document.createElement("option");
-        //                     defaultOption.value = "";
-        //                     defaultOption.textContent = "Choose an Item";
-        //                     defaultOption.disabled = true;
-        //                     defaultOption.selected = true;
-        //                     dropdown.appendChild(defaultOption);
-
-        //                     result.data.forEach(function (i) {
-        //                         const option = document.createElement("option");
-        //                         option.value = i.item_Id;
-        //                         option.textContent = i.itemCode;
-        //                         dropdown.appendChild(option);
-        //                     });
-        //                 }
-
-                        
-        //             } else {
-        //                 swal.fire({
-        //                     icon: 'error',
-        //                     title: 'Wait',
-        //                     text: result.errMessage
-        //                 });
-        //             }
-        //         },
-        //         error: function (error) {
-        //             swal.fire({
-        //                 icon: 'error',
-        //                 title: 'Wait',
-        //                 text: error.val
-        //             });
-        //         }
-        //     });
-        // }
-
-        // document.getElementById("textlink").addEventListener("click", function () {
-        //    itemIndex++;
-        //    createNewInputField(null, itemIndex, false);
-        //    bgAdjust();
-
-        // });
-
-        // function createNewInputField(dtl, index, isEditing = false) {
-        //     const container = document.getElementById("itemContainer");
-        //     const firstItem = container.querySelector(".itemBlock");
-        //     const dataIdx = firstItem.getAttribute("data-index");
-
-        //     const newItem = firstItem.cloneNode(true);
-        //     newItem.setAttribute("data-index", index);
-
-        //     const select = newItem.querySelector("select");
-        //     const qtyInput = newItem.querySelector('input[type="number"]');
-        //     const remarkInput = newItem.querySelector('input[type="text"]');
-        //     const detailId = newItem.querySelector('input[type="hidden"]');
-
-        //     const newItemIndex = index;
-        //     select.id = `subItem${newItemIndex}`;
-        //     qtyInput.id = `txtQty${newItemIndex}`;
-        //     remarkInput.id = `txtRemark${newItemIndex}`;
-        //     detailId.id = `txtBomDtlId${newItemIndex}`;
-
-        //     newItem.querySelector(`label[for^="subItem"]`).setAttribute("for", `subItem${newItemIndex}`);
-        //     newItem.querySelector(`label[for^="txtQty"]`).setAttribute("for", `txtQty${newItemIndex}`);
-        //     newItem.querySelector(`label[for^="txtRemark"]`).setAttribute("for", `txtRemark${newItemIndex}`);
-
-        //     select.value = isEditing ? dtl.itemId : "";
-        //     qtyInput.value = isEditing ? dtl.qty : "";
-        //     remarkInput.value = isEditing ? dtl.remark : "";
-        //     detailId.value = isEditing ? dtl.bomDetailId : "";
-
-        //     const errBlock1 = newItem.querySelector(`#subItem${dataIdx}Error`);
-        //     errBlock1.id = `subItem${newItemIndex}Error`;
-        //     const errBlock2 = newItem.querySelector(`#txtQty${dataIdx}Error`);
-        //     errBlock2.id = `txtQty${newItemIndex}Error`;
-        //     const errBlock3 = newItem.querySelector(`#txtRemark${dataIdx}Error`);
-        //     errBlock3.id = `txtRemark${newItemIndex}Error`;
-
-        //     container.appendChild(newItem);
-        //     removeErrMsg([`subItem${newItemIndex}`, `txtQty${newItemIndex}`, `txtRemark${newItemIndex}`]);
-
-        // };
-
-        // function bgAdjust() {
-        //     const allBlocks = document.querySelectorAll(".itemBlock");
-        //     allBlocks.forEach((block, index) => {
-        //         block.style.backgroundColor = "";
-
-        //         if ((index + 1) % 2 === 0) {
-        //             block.style.backgroundColor = "#E3F4F4";
-        //             block.style.border = "1px solid #E3F4F4";
-        //         }
-        //     });
-        // }
-
-        // function removeItem(icon) {
-        //     const item = icon.closest('.itemBlock');
-        //     const container = document.getElementById("itemContainer");
-        //     const items = container.querySelectorAll(".itemBlock");
-        //     const itemCount = items.length;
-
-        //     if (itemCount > 1)
-        //     {
-        //         item.remove();
-        //         bgAdjust();
-        //         // const allBlocks = document.querySelectorAll(".itemBlock");
-        //         // allBlocks.forEach((block, index) => {
-        //         //     block.style.backgroundColor = "";
-        //         //     block.style.border = "";
-
-        //         //     if ((index + 1) % 2 === 0) {
-        //         //         block.style.backgroundColor = "#E3F4F4";
-        //         //         block.style.border = "1px solid #E3F4F4";
-        //         //     }
-        //         // });
-        //     } else {
-        //         swal.fire({
-        //             icon: 'info',
-        //             title: "Cannot Remove",
-        //             text: "At least one sub-item must remain."
-        //         });
-        //     }
-        // };
-
-        // function saveBOM() {
-        //     const items = document.querySelectorAll('.item');
-        //     const itemCount  = items.length;
-        //     const formData = [];
-        //     let isValid = true;
-
-        //     var fields = ['bomName', 'txtdesc'];
-        //     removeErrMsg(fields);
-
-        //     //validation for BOM header
-        //     fields.forEach(field => {
-        //         if (!document.getElementById(field).value.trim()) {
-        //             isValid = false;
-        //             const label = document.querySelector(`label[for="${field}"]`).textContent;
-        //             showError(field, `${label} is required.`);
-        //         }
-        //     });
-
-        //     //validation for subItem
-        //     items.forEach(item => {
-        //         removeErrMsg([item.querySelector("select").id, item.querySelector('input[type="number"]').id, item.querySelector('input[type="text"]').id]);
-        //         const subitem = item.querySelector("select").value;
-        //         const qty = item.querySelector('input[type="number"]').value;
-        //         const remark = item.querySelector('input[type="text"]').value;
-        //         const bomDtlId = item.querySelector('input[type="hidden"]').value;
-
-        //         if (!subitem) {
-        //             isValid = false;
-        //             showError(item.querySelector("select").id, "Please choose a sub item.");
-        //         }
-        //         if (!qty || isNaN(qty) || qty <=0) {
-        //             isValid = false;
-        //             showError(item.querySelector('input[type="number"]').id, "Please enter a valid quantity (number >= 1)");
-        //         }
-
-        //         formData.push({
-        //             BOMDetail_Id: parseInt(bomDtlId) || 0,
-        //             BOM_Id: parseInt($('#txtBomId').val()) || 0,
-        //             Item_Id: parseInt(subitem),
-        //             Qty: parseInt(qty),
-        //             Remark: remark
-        //         });
-        //     });
-
-        //     // const container = document.getElementById('newModal');
-        //     // console.log("after container", container);
-        //     if (isValid) {
-        //        var bomData = {
-        //             BOM_Id: parseInt($('#txtBomId').val()) || 0,
-        //             Item_Id: parseInt($('#bomName').val()),
-        //             CreatedBy: $('#txtCreatedBy').val(),
-        //             Description: $('#txtdesc').val(),
-        //             IsActive: $('#chkIsActive').prop("checked"),
-        //             SubItems: formData,
-        //        };
-
-        //         $.ajax({
-        //             url: '/BOM/SaveBOM',
-        //             type: 'POST',
-        //             data: JSON.stringify(bomData),
-        //             dataType: 'JSON',
-        //             contentType: 'application/json; charset=utf-8',
-        //             beforeSend: function () {
-        //                 Swal.fire({
-        //                     text: 'Please Wait',
-        //                     width: '300px',
-
-        //                     allowEscapeKey: false,
-        //                     allowOutsideClick: false,
-        //                     showConfirmButton: false,
-        //                 });
-        //                 Swal.showLoading()
-        //             },
-        //             success: function (result) {
-        //                 if (result.success == true) {
-        //                     swal.fire({
-        //                         icon: 'success',
-        //                         title: "Success Save",
-        //                         text: "",
-        //                         didClose: () => {
-        //                           window.location.reload();
-        //                         }
-        //                     });
-        //                 }
-        //                 else {
-        //                     swal.fire({
-        //                         icon: 'error',
-        //                         title: "Wait",
-        //                         text: result.errMessage
-        //                     });
-        //                 }
-        //             },
-        //             error: function (error) {
-        //                 console.log(error);
-        //                 swal.fire({
-        //                     icon: 'error',
-        //                     title: "Wait",
-        //                     text: error.val
-        //                 });
-        //             }
-        //         });
-        //     }
-
-        //     console.log(bomData);
-        // }
-
-        // function showError(fieldId, message) {
-        //     document.getElementById(fieldId).classList.add('is-invalid');
-        //     document.getElementById(fieldId + 'Error').textContent = message;
-        // }
-
-        // function removeErrMsg(fields, clearValue = false) {
-        //     if (fields != null)
-        //     {
-        //         if (!Array.isArray(fields)) {
-        //             fields = [fields];
-        //         }
-        //         fields.forEach(function(field) {
-        //             document.getElementById(field).classList.remove('is-invalid');
-        //             document.getElementById(field).classList.remove('is-valid');
-        //             document.getElementById(field + 'Error').textContent = '';
-        //             if (clearValue) document.getElementById(field).value = '';
-        //         });
-        //     }
-        // }
-
-        // $('#gridTable').on('click', '.edit-bom-btn', function () {
-        //     const row = JSON.parse($(this).attr('data-row').replace(/&quot;/g, '"'));
-        //     editBOMForm(row);
-        // });
 
         function navigateToView(id, mode) {
             window.location.href = '@Url.Action("BOMDetails", "BOM", new { id = "_id_", mode = "_mode_" })'.replace('_id_', id).replace('_mode_', mode);
@@ -860,97 +448,7 @@
 
         function navigateToEdit(id, mode) {
             window.location.href = '@Url.Action("BOMDetails", "BOM", new { id = "_id_", mode = "_mode_" })'.replace('_id_', id).replace('_mode_', mode);
-            //`/edit?id=${id}`;
-            // var url = '@Url.Action("BOMDetails", "BOM", new { id = "_id_" })'.replace('_id_', id);
-
-            // $.ajax({
-            //     url: url,
-            //     type: 'GET',
-            //     fata: { id: id },
-            //     success: function(response) {
-            //         $('#content-area').html(response);
-            //         history.pushState({ path: url }, '', url);
-            //     },
-            //     error: function(xhs, status, error) {
-            //         console.error('Error fetching BOM details:', error);
-            //     }
-            // });
         }
-
-        // async function editBOMForm(row) {
-        //     var hasValue = false;
-        //     console.log(row);
-
-        //     $('#bomName').val(row.item_Id);
-        //     $('#txtdesc').val(row.description);
-        //     $('#txtCreatedBy').val(row.createdBy);
-        //     $('#txtBomId').val(row.boM_Id);
-        //     document.getElementById("chkIsActive").checked = row.isActive == true ? true : false;
-
-        //     //fetch details
-        //     var bomDtls = [];
-
-            // $.ajax({
-            //     url: '/BOM/GetBOMDetail',
-            //     type: 'POST',
-            //     data: JSON.stringify(row.boM_Id),
-            //     dataType: 'JSON',
-            //     contentType: 'application/json; charset=utf-8',
-            //     success: function (result) {
-            //         if (result.success == true) {
-            //            bomDtls = result.data.map(function (i) {
-            //                 return {
-            //                     bomId: i.boM_Id,
-            //                     bomDetailId: i.bomDetail_Id,
-            //                     itemId: i.item_Id,
-            //                     qty: i.qty,
-            //                     remark: i.remark,
-            //                 };
-            //             });
-
-            //             const container = document.getElementById("itemContainer");
-            //             const items = container.querySelectorAll(".itemBlock");
-            //             const itemCount = items.length;
-
-            //             bomDtls.forEach((dtl, index) => {
-            //                 if (index === 0) {
-            //                     const firstItem = container.querySelector(".itemBlock");
-            //                     const select = firstItem.querySelector("select");
-            //                     const qtyInput = firstItem.querySelector('input[type="number"]');
-            //                     const remarkInput = firstItem.querySelector('input[type="text"]');
-            //                     const detailId = firstItem.querySelector('input[type="hidden"]');
-
-            //                     select.value = dtl.itemId;  
-            //                     qtyInput.value = dtl.qty;
-            //                     remarkInput.value = dtl.remark;
-            //                     detailId.value = dtl.bomDetailId;
-
-            //                 } else if (itemCount < bomDtls.length) {
-            //                     createNewInputField(dtl, index+1, true);
-            //                 }
-            //                 index++;
-            //             });
-            //             bgAdjust();
-            //         }
-            //         else {
-            //             swal.fire({
-            //                 icon: 'error',
-            //                 title: "Wait",
-            //                 text: result.errMessage
-            //             });
-            //         }
-            //     },
-            //     error: function (error) {
-            //         console.log(error);
-            //         swal.fire({
-            //             icon: 'error',
-            //             title: "Wait",
-            //             text: error.val
-            //         });
-            //     }
-            // });
-        //     $("#newModal").modal("show");
-        // }
 
         $('#listTable').on('click', '.delete-btn', function () {
             const id = $(this).attr('data-id');
@@ -969,7 +467,7 @@
                 confirmButtonText: 'ok',
                 cancelButtonText: 'cancel',
                 allowOutsideClick: false
-              }).then(function(r) {
+            }).then(function(r) {
                 if (r.isConfirmed == true) {
                     var data = {
                         BOM_Id: id,
@@ -1025,6 +523,282 @@
                 }
               });
         }
+
+        function downloadTemp() {
+            var workbook = new ExcelJS.Workbook();
+            workbook.creator = "Flex Software Consulting Sdn Bhd";
+            workbook.created = new Date();
+            workbook.properties.title = "Template";
+            workbook.properties.subject = "Import BOM";
+
+            var worksheet = workbook.addWorksheet("Sheet1");
+            var book_header = [
+                ["Finished Goods", "Description"],
+                [],
+                [],
+                ["Sub Item", "Qty", "Remark"]
+            ];
+
+            book_header.forEach(function(row) {
+                worksheet.addRow(row);
+            });
+            worksheet.columns = [
+                { width: 15 },
+                { width: 15 },
+                { width: 15 }
+            ];
+
+            // worksheet.getRow(1).font = { bold: true };
+            // worksheet.getRow(4).font = { bold: true };
+
+            workbook.xlsx.writeBuffer().then(function(buffer) {
+                var blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+                var link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = "BOM_TEMPLATE.xlsx";
+                link.click();
+                URL.revokeObjectURL(link.href);
+            }).catch(function(err) {
+                console.error("Error creating Excel file:", err);
+            });
+        }
+
+        function triggerFileInput() {
+            const input = document.getElementById('fileInput');
+            input.ariaValueMax = "";
+            input.dataset.source
+            input.click();
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            const source = event.target.dataset.source;
+
+            if (!file) return;
+            
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+            if (fileExtension !== 'xlsx' && fileExtension !== 'xls') {
+                alert("Only XLSX and XLS files are supported.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                originalFileContent = content;
+                processFileContent(content, source)
+                    .then((excelData) => {
+                        saveExcelBOM(excelData);
+                    })
+                    .catch((err) => {
+                        console.error("Error processing the file:", err);
+                    })
+                    .finally(function() {
+                        fileInput.value = '';
+                    });
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function processFileContent(arraybuffer, source) {
+            const workbook = new ExcelJS.Workbook();
+            return workbook.xlsx.load(arraybuffer).then(function() {
+                const worksheet = workbook.worksheets[0];
+
+                if (!worksheet) {
+                    alert("The upload file appears to be empty.");
+                    return;
+                }
+
+                const finishedGood = worksheet.getRow(2).getCell(1).value || "";
+                const description = worksheet.getRow(2).getCell(2).value || "";
+
+                if (!finishedGood) {
+                    alert("Finished Good is missing.");
+                    return;
+                }
+
+                let headerRow = -1;
+                for (let r = 1; r <= 50; r++) {
+                    const cellVal = worksheet.getRow(r).getCell(1).value;
+                    if (cellVal && String(cellVal).toLowerCase().trim() === "sub item") {
+                        headerRow = r;
+                        break;
+                    }
+                }
+
+                if (headerRow === -1) {
+                    alert("Invalid template: 'Sub Item' header not found.");
+                    return;
+                }
+
+                const subItems = [];
+                let rowNum = headerRow + 1;
+                while (worksheet.getRow(rowNum).getCell(1).value) {
+                    subItems.push({
+                        ExcelRowNo: rowNum,
+                        ItemCode: worksheet.getRow(rowNum).getCell(1).value || "",
+                        Quantity: Number(worksheet.getRow(rowNum).getCell(2).value || 0),
+                        Remark: String(worksheet.getRow(rowNum).getCell(3).value || "")
+                    });
+                    rowNum++;
+                }
+
+                if (subItems.length === 0) {
+                    alert("No sub items found.");
+                    return;
+                }
+
+                const excelData = {
+                    FinishedGoods: finishedGood,
+                    Description: description,
+                    SubItems: subItems
+                };
+
+                console.log("Parsed BOM:", excelData);
+                return excelData;
+            }).catch(function(err) {
+                console.error("Error processing the file:", err);
+                throw err;
+            });
+        }
+
+        function saveExcelBOM(excelData) {
+            $.ajax({
+                url: '/BOM/SaveExcelBOM',
+                type: 'POST',
+                data: JSON.stringify(excelData),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    console.log(result);
+
+                    if (result.success == true) {
+                        swal.fire({
+                            icon: 'success',
+                            title: "Success Update",
+                            text: "",
+                            didClose: () => {
+                                window.location.reload();
+                            }
+                        });
+                    }
+                    else {
+                        if (result.data && result.data.subItems.length > 0) {
+                            generateErrorExcelFile(originalFileContent, result.data);
+                            swal.fire({
+                                icon: 'warning',
+                                title: "Validation Issues Found",
+                                text: "Review on returned file and fix errors."
+                            });
+
+                        } else {
+                            swal.fire({
+                                icon: 'error',
+                                title: "Wait",
+                                text: result.errMessage
+                            });
+                        }
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+        }
+
+        function generateErrorExcelFile(buffer, errorData) {
+
+            const workbook = new ExcelJS.Workbook();
+            workbook.xlsx.load(buffer).then(() => {
+                var worksheet = workbook.worksheets[0];
+                var headerRowNumber = -1;
+                for (let r = 1; r <= 50; r++) {
+                    const cellValue = worksheet.getCell(`A${r}`).value;
+                    if (cellValue && cellValue.toString().toLowerCase().trim() === "sub item") {
+                        headerRowNumber = r;
+                        break;
+                    }
+                }
+
+                if (headerRowNumber === -1) {
+                    alert("Header 'sub item' not found");
+                    return;
+                }
+
+                const headerCell = worksheet.getCell(`D${headerRowNumber}`);
+                headerCell.value = "Error Message";
+                headerCell.font = { bold: true };
+
+                const errorFill = {
+                    type: "pattern",
+                    pattern: "solid",
+                    fgColor: { argb: "FFFFC7CE" }
+                };
+                const errorFont = { color: {argb: "FF9C0006" } };
+
+                if (errorData.errorMsg) {
+                    const fgErrorCell = worksheet.getCell("D2");
+                    fgErrorCell.value = errorData.errorMsg;
+                    fgErrorCell.fill = errorFill;
+                    fgErrorCell.font = errorFont;
+                }
+                else 
+                {
+                    errorData.subItems.forEach(item => {
+                        if (item.dtlErrorMsg) {
+                            const rowNumber = item.excelRowNo;
+                            const cell = worksheet.getCell(`D${rowNumber}`);
+                            cell.value = item.dtlErrorMsg;
+                            cell.fill = errorFill;
+                            cell.font = errorFont;
+                        }
+                    });
+                }
+
+                worksheet.columns = [
+                    { width: 20 },
+                    { width: 12 },
+                    { width: 18 }, 
+                    { width: 50 }
+                ];
+
+                workbook.xlsx.writeBuffer().then(function(buffer) {
+                    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `BOM_IMPORT_ERRORS_${new Date().toISOString().slice(0,10)}.xlsx`;
+                    link.click();
+                });
+
+            }).catch(err => {
+                console.error("Error loading workbook:", err);
+            });
+        }
+
+        // function extendSheetRange(sheet, colIndex, rowIndex) {
+        //     const range = XLSX.utils.decode_range(sheet["!ref"]);
+        //     if (rowIndex > range.e.r) range.e.r = rowIndex;
+        //     if (colIndex > range.e.c) range.e.c = colIndex;
+
+        //     sheet["!ref"] = XLSX.utils.encode_range(range);
+        // }
 
     </script>
 }

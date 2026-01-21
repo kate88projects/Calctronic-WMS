@@ -86,7 +86,7 @@ namespace RackingSystem.Controllers
         public async Task<IActionResult> SaveBOM([FromBody] BOMDtlReqDTO bom)
         {
             ServiceResponseModel<BOMDtlReqDTO> result = await _bomService.SaveBOM(bom);
-            return new JsonResult(result); ;
+            return new JsonResult(result);
         }
 
         [HttpDelete]
@@ -129,6 +129,13 @@ namespace RackingSystem.Controllers
             }
 
             return View(bomData);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveExcelBOM([FromBody] BOMExcelReqDTO boms)
+        {
+            ServiceResponseModel<BOMExcelReqDTO> result = await _bomService.SaveExcelBOM(boms);
+            return new JsonResult(result);
         }
     }
 }
