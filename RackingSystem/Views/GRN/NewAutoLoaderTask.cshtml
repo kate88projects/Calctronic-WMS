@@ -457,6 +457,13 @@
         padding: 10px !important;
     } */
 
+    .unavailable {
+      position: relative;
+      filter: grayscale(100%);
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
 </style>
 
 @section PageHeader { 
@@ -497,9 +504,9 @@
                                     <div class="col-12">
                                         <p class="text-center"><strong>- Loader  <span id="loaderName"></span> - </strong></p>
                                         <br />
-                                         <div class="progress-group">
+                                         <div class="progress-group" id="pg-c1">
                                             <i class="" style="color: red;" id="icon-c1"></i>
-                                            Column 1
+											<span data-active="" id="title-c1">Column 1</span>
                                             <div class="float-end" style="display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 5px;">
                                                 <span style="font-size: 14px; line-height: 1.2;">
                                                     <b id="percent-c1">0%</b>
@@ -512,9 +519,9 @@
                                                 <div class="progress-bar bg-success" id="c1" role="progressbar" style="width: 0%"></div>
                                             </div>
                                         </div>
-                                        <div class="progress-group mt-3">
+                                        <div class="progress-group mt-3" id="pg-c2">
                                             <i class="" style="color: red;" id="icon-c2"></i>
-                                            Column 2
+                                            <span data-active="" id="title-c2">Column 2</span>
                                             <div class="float-end" style="display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 5px;">
                                                 <span style="font-size: 14px; line-height: 1.2;">
                                                     <b id="percent-c2">0%</b>
@@ -527,9 +534,9 @@
                                                 <div class="progress-bar bg-success" id="c2" role="progressbar" style="width: 0%"></div>
                                             </div>
                                         </div>
-                                        <div class="progress-group mt-3">
+                                        <div class="progress-group mt-3" id="pg-c3">
                                             <i class="" style="color: red;" id="icon-c3"></i>
-                                            Column 3
+                                            <span data-active="" id="title-c3">Column 3</span>
                                             <div class="float-end" style="display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 5px;">
                                                 <span style="font-size: 14px; line-height: 1.2;">
                                                     <b id="percent-c3">0%</b>
@@ -542,9 +549,9 @@
                                                 <div class="progress-bar bg-success" id="c3" role="progressbar" style="width: 0%"></div>
                                             </div>
                                         </div>
-                                        <div class="progress-group mt-3">
+                                        <div class="progress-group mt-3" id="pg-c4">
                                             <i class="" style="color: red;" id="icon-c4"></i>
-                                            Column 4
+                                            <span data-active="" id="title-c4">Column 4</span>
                                             <div class="float-end" style="display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 5px;">
                                                 <span style="font-size: 14px; line-height: 1.2;">
                                                     <b id="percent-c4">0%</b>
@@ -918,7 +925,6 @@
                     Swal.fire({
                         text: 'Please Wait',
                         width: '300px',
-
                         allowEscapeKey: false,
                         allowOutsideClick: false,
                         showConfirmButton: false,
@@ -1016,6 +1022,10 @@
                     $(`#icon-c${i}`).removeClass("bi bi-fire");
                     $('#c' + i).removeClass("progress-bar-striped progress-bar-animated bg-warning");
                     $('#c' + i).addClass("bg-success");
+                }
+                else if ($(`#icon-c${i}`).hasClass("bi bi-exclamation-square"))
+                {
+                    $(`#icon-c${i}`).removeClass("bi bi-exclamation-square");
                 }
 
                 $(`#percent-c${i}`).text("0%");
@@ -1337,7 +1347,7 @@
                     $('#btnRetryTurn').removeClass('hidden');
                     $('#btnRetryTurn').text('Retry on Turn Column');
                 }
-                else{
+                else {
                     turnCol(5);
                 }
             }
@@ -1356,7 +1366,6 @@
         function warnBeforeTurnCol(action) {
             let warnText = document.getElementById('warnText');
             let turnBtn = document.getElementById('turnBtn');
-            // var iCol = $("#txtICol").val();
             turnBtn.disabled = false;
 
             if (action == 2) {
@@ -1373,7 +1382,6 @@
                         $('#btnRetry2').removeClass('hidden');
                         $('#btnRetry2').text('Retry on Turn Column');
                     } else {
-                        // console.log("wait");
                         turnCol(2);
                     }
                 };
@@ -1408,83 +1416,146 @@
             var loaderId = $("#txtLoaderId").val();
             var iCol = $("#txtICol").val();
             var realCol = await loadPLCGetCurrentColumn(loaderId);
-            if (Number(realCol) == 0) {
-                if (index == 2) {
-                    $('#btnRetry2').removeClass("hidden");
-                }
-                else {
-                    $('#btnRetry4').removeClass("hidden");
+
+            //check if iCol is inactive
+            let isActive = false;
+            let skipCol = iCol > 2 ? iCol - realCol : 1;
+            while (!isActive && iCol <= 4) {
+                const el = document.getElementById(`title-c${iCol}`);
+                if (!el) break;
+
+                isActive = el.dataset.active === "true";
+
+                if (!isActive) {
+                    skipCol++;
+                    iCol++;
                 }
             }
-            else {
-                if (realCol < iCol) {
-                    var turnCol = await loadPLCTurnColumn(loaderId, Number(iCol));
-                    if (turnCol == false) {
-                        if (index == 2) {
-                            $('#colStatus2').text('');
-                            $('#btnRetry2').removeClass('hidden');
-                            $('#errCol2').text('Failed to Turn Column').css('color', 'red');
-                        }
-                        else {
-                            $('#errActHeight').text('Failed to Turn Column').css('color', 'red');
-                            $('#btnRetry4').removeClass('hidden');
-                        }
-                        return;
-                    }
-                    else 
-                    {
-                        $('#loadProcess4').addClass("error-message"); 
-                        $('#loadProcess4').text('');
-                    }
-                    realCol = iCol; // (realCol) + 1;
-                }
-                const oldCol = iCol-1;
-                $('#c' + (oldCol)).addClass("bg-success");
-                $('#c' + (oldCol)).removeClass("progress-bar-striped progress-bar-animated bg-warning");
-                $(`#icon-c${oldCol}`).removeClass("bi bi-fire");
 
-                $('#c' + iCol).addClass("progress-bar-striped progress-bar-animated bg-warning");
-                $(`#icon-c${iCol}`).addClass("bi bi-fire");
+            if (iCol > 4) {
+                let countdown = 5;
+                $('#loadingBlk').addClass('d-none');
+                $('#errActHeight').text(`All active columns are full. The task will end automatically in ${countdown} seconds.`);
 
-                // wait for fork is ready
-                // await delay(3000);
-                var chkColFork = await loadPLCCheckColFork(loaderId, iCol);
-                if (chkColFork == false) {
+                let timer = setInterval(async () => {
+                    countdown--;
+                    $('#errActHeight').text(`All active columns are full. The task will end automatically in ${countdown} seconds.`);
+
+                    if (countdown <= 0) {
+                        clearInterval(timer);
+                        var success = false;
+
+                        while (Number(realCol) <= 4) {
+                            var endstate = await loadPLCSetColumnState(loaderId, realCol);
+                            success = true;
+                            realCol++;
+                            if (endstate == false)  {
+                                $('#errActHeight').text('Failed to end the task. Check the connection and try again.');
+                                success = false;
+                                break;
+                            }
+                        }
+
+                        if (success) {
+                            restartStep();
+                        }
+                    }
+                }, 1000);
+            }
+            else 
+            {
+                if (Number(realCol) == 0) {
                     if (index == 2) {
                         $('#btnRetry2').removeClass("hidden");
-                        $('#errFork2').text('Fork Not Ready.').css('color', 'red');
-                    } 
+                    }
                     else {
-
+                        $('#btnRetry4').removeClass("hidden");
                     }
                 }
                 else {
-                    if (index == 2) {
-                        $('#btnNext2').removeClass("hidden");
-                        $('#btnRetry2').addClass("hidden");
-                        //disabled stop & end task button
-                        document.getElementById("btnStop").removeAttribute("disabled");
-                        document.getElementById("btnEnd").removeAttribute("disabled");
-                    } 
-                    else {
-                        $('#btnRetryTurn').addClass("hidden");
-                        $('#exclamIcon').removeClass("bi-exclamation-triangle-fill");
-                        $('#exclamIcon').addClass("bi-info-circle-fill");
-                        $('#exclamIcon').css('color', 'green');
-                        $('#exclamIcon').removeClass("hidden");
-
-                        $('#errActHeight').text("Column turned successfully. Please try again on reel height measurement.").css('color', 'green');
-                        $('#loadCol4').text(iCol);
-                        $('#btnRetry4').removeClass("hidden");
-                        
-                        document.getElementById('btnRetry4').onclick = function() {
-                            retry5(0);
-                        };
-                        //back to pre-load stage
-                        // resetColorPLCForm(4);
+                    const oldCol = iCol - skipCol; //oldCol suppose is same as realCol
+                    //set full for the skipped col before turn
+                    for (let col = oldCol + 1; col < iCol; col++) {
+                        var endstate = await loadPLCSetColumnState(loaderId, col);
+                        if (!endstate)  {
+                            $('#errActHeight').text('Failed to end the task. Check the connection and try again.');
+                            success = false;
+                            break;
+                        }
                     }
+
+                    if (realCol < iCol) {
+                        var turnCol = await loadPLCTurnColumn(loaderId, Number(iCol));
+                        if (turnCol == false) {
+                            if (index == 2) {
+                                $('#colStatus2').text('');
+                                $('#btnRetry2').removeClass('hidden');
+                                $('#errCol2').text('Failed to Turn Column').css('color', 'red');
+                            }
+                            else {
+                                $('#errActHeight').text('Failed to Turn Column').css('color', 'red');
+                                $('#btnRetry4').removeClass('hidden');
+                            }
+                            return;
+                        }
+                        else
+                        {
+                            $('#loadProcess4').addClass("error-message");
+                            $('#loadProcess4').text('');
+                        }
+                        realCol = iCol; // (realCol) + 1;
+                    }
+
+                    console.log("double check", "icol", iCol, "realCol", realCol, "oldCol", oldCol);
+
+                    $(`#c${oldCol}`).removeClass("progress-bar-striped progress-bar-animated bg-warning");
+                    $(`#icon-c${oldCol}`).removeClass("bi bi-fire");
+                    $(`#c${oldCol}`).addClass("bg-success");
+
+                    $(`#c${iCol}`).addClass("progress-bar-striped progress-bar-animated bg-warning");
+                    $(`#icon-c${iCol}`).addClass("bi bi-fire");
+
+                    // wait for fork is ready
+                    // await delay(3000);
+                    var chkColFork = await loadPLCCheckColFork(loaderId, iCol);
+                    if (chkColFork == false) {
+                        if (index == 2) {
+                            $('#btnRetry2').removeClass("hidden");
+                            $('#errFork2').text('Fork Not Ready.').css('color', 'red');
+                        }
+                        else {
+
+                        }
+                    }
+                    else {
+                        if (index == 2) {
+                            $('#btnNext2').removeClass("hidden");
+                            $('#btnRetry2').addClass("hidden");
+                            //disabled stop & end task button
+                            document.getElementById("btnStop").removeAttribute("disabled");
+                            document.getElementById("btnEnd").removeAttribute("disabled");
+                        }
+                        else {
+                            $('#btnRetryTurn').addClass("hidden");
+                            $('#exclamIcon').removeClass("bi-exclamation-triangle-fill");
+                            $('#exclamIcon').addClass("bi-info-circle-fill");
+                            $('#exclamIcon').css('color', 'green');
+                            $('#exclamIcon').removeClass("hidden");
+
+                            $('#errActHeight').text("Column turned successfully. Please try again on reel height measurement.").css('color', 'green');
+                            $('#loadCol4').text(iCol);
+                            $('#btnRetry4').removeClass("hidden");
+
+                            document.getElementById('btnRetry4').onclick = function() {
+                                $("#txtICol").val(iCol);
+                                retry5(0);
+                            };
+                            //back to pre-load stage
+                            // resetColorPLCForm(4);
+                        }
+                    }
+                    $('#loadingBlk').addClass('d-none');
                 }
-                $('#loadingBlk').addClass('d-none');
             }
         }
 
@@ -1620,30 +1691,10 @@
             if (idx == 4) {
                 $('#btnRetryStart').addClass('hidden');
                 var loaderId = $("#txtLoaderId").val();
-                // var callStart;
-                // if ($('#loadProcess4').hasClass("error-message")) {
-                //      callStart = await loadPLCStartPutReel(loaderId);
-                // }
-                // else {
-                //     callStart = true;
-                // }
                 var callStart = await loadPLCStartPutReel(loaderId);
-
                 if (callStart == true) {
-                    // var chkColFork = await loadPLCCheckColFork(loaderId, iCol);
-                    // if (chkColFork == false) {
-                    //     $('#btnRetryStart').removeClass('hidden');
-                    //     $('#btnRetryStart').text('Retry on Checking Status');
-                    //     $('#loadConfirm4').addClass("error-message");
-                    //     $('#loadConfirm4').text('Not ready to load.').css('color', '');
-
-                    // }
-                    // else {
-                        // $('#loadConfirm4').text('Ready to Load Reel.').css('color', 'black');
-                        $('#btnRetryStart').addClass("hidden");
-                        $("#putModal").modal("show"); 
-                        // loadPLC(5);
-                    // }
+                    $('#btnRetryStart').addClass("hidden");
+                    $("#putModal").modal("show"); 
                 }
                 return; 
             }
@@ -1843,10 +1894,10 @@
                             let countdown = 5;
                             // $('#btnRetry2').addClass('hidden');
                             $('#colStatus2').text('');
-                            $('#errCol2').text(`All columns are full. The task will end automatically in ${countdown} seconds.`);
+                            $('#errCol2').text(`All active columns are full. The task will end automatically in ${countdown} seconds.`);
                             let timer = setInterval(async () => {
                                 countdown--;
-                                $('#errCol2').text(`All columns are full. The task will end automatically in ${countdown} seconds.`);
+                                $('#errCol2').text(`All active columns are full. The task will end automatically in ${countdown} seconds.`);
 
                                 if (countdown <= 0) {
                                     clearInterval(timer);
@@ -2559,6 +2610,14 @@
                         const usagePercentage = item.usagePercentage;
                         const colHeight = item.colHeight;
                         const balanceHeight = item.balanceHeight;
+
+                        if (!item.isActive) {
+                            $(`#icon-c${colNo}`).addClass('bi bi-exclamation-square');
+                            $(`#pg-c${colNo}`).addClass('unavailable');
+                            // $(`#percent-c${colNo}`).css('color', 'grey');
+                        }
+
+                        document.querySelector(`#title-c${colNo}`).dataset.active = item.isActive;
 
                         $(`#percent-c${colNo}`).text(`${usagePercentage}%`);
                         $(`#balance-c${colNo}`).text(`${balanceHeight}`);
