@@ -1337,7 +1337,34 @@
             $('#errActHeight').text('');
 
             var iCol = $("#txtICol").val();
-            var colstate = await loadPLCSetColumnState($("#txtLoaderId").val(), iCol-1);
+            var realCol = await loadPLCGetCurrentColumn(loaderId);
+
+            let isActive = false;
+            let skipCol = iCol > 2 ? iCol - realCol : 1;
+            while (!isActive && iCol <= 4) {
+                const el = document.getElementById(`title-c${iCol}`);
+                if (!el) break;
+
+                isActive = el.dataset.active === "true";
+
+                if (!isActive) {
+                    skipCol++; //2 
+                    iCol++;//3
+                }
+            }
+
+            const oldCol = iCol - skipCol; //oldCol suppose is same as realCol
+            //set full for the skipped col before turn
+            for (let col = oldCol + 1; col < iCol; col++) {
+                var endstate = await loadPLCSetColumnState($("#txtLoaderId").val(), col);
+                if (!endstate)  {
+                    $('#errActHeight').text('Failed to end the task. Check the connection and try again.');
+                    success = false;
+                    break;
+                }
+            }
+
+            // var colstate = await loadPLCSetColumnState($("#txtLoaderId").val(), iCol-1);
             if (colstate == true) {
                 var chkColTurn = await loadPLCCheckColTurn($("#txtLoaderId").val());
                 if (chkColTurn == false) {
@@ -1417,21 +1444,6 @@
             var iCol = $("#txtICol").val();
             var realCol = await loadPLCGetCurrentColumn(loaderId);
 
-            //check if iCol is inactive
-            let isActive = false;
-            let skipCol = iCol > 2 ? iCol - realCol : 1;
-            while (!isActive && iCol <= 4) {
-                const el = document.getElementById(`title-c${iCol}`);
-                if (!el) break;
-
-                isActive = el.dataset.active === "true";
-
-                if (!isActive) {
-                    skipCol++;
-                    iCol++;
-                }
-            }
-
             if (iCol > 4) {
                 let countdown = 5;
                 $('#loadingBlk').addClass('d-none');
@@ -1473,16 +1485,8 @@
                     }
                 }
                 else {
-                    const oldCol = iCol - skipCol; //oldCol suppose is same as realCol
-                    //set full for the skipped col before turn
-                    for (let col = oldCol + 1; col < iCol; col++) {
-                        var endstate = await loadPLCSetColumnState(loaderId, col);
-                        if (!endstate)  {
-                            $('#errActHeight').text('Failed to end the task. Check the connection and try again.');
-                            success = false;
-                            break;
-                        }
-                    }
+                    // const oldCol = iCol - skipCol; //oldCol suppose is same as realCol
+                    const oldCol = realCol;
 
                     if (realCol < iCol) {
                         var turnCol = await loadPLCTurnColumn(loaderId, Number(iCol));
@@ -1505,8 +1509,6 @@
                         }
                         realCol = iCol; // (realCol) + 1;
                     }
-
-                    console.log("double check", "icol", iCol, "realCol", realCol, "oldCol", oldCol);
 
                     $(`#c${oldCol}`).removeClass("progress-bar-striped progress-bar-animated bg-warning");
                     $(`#icon-c${oldCol}`).removeClass("bi bi-fire");
