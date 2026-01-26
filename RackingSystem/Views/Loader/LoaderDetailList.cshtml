@@ -485,7 +485,7 @@
             const id = document.getElementById("selLoader").value;
 
             $.ajax({
-                url: "/Loader/GetTrolleyDetailList?id=" + id,
+                url: "/Loader/GetLoaderDetailList?id=" + id,
                 type: "GET",
                 dataType: 'JSON',
                 contentType: 'application/json; charset=utf-8',
@@ -517,8 +517,21 @@
 
                         document.getElementById('txtStatus').innerHTML = spText[8];
 
+                        //filter out the duplicate reel-id
+                        const dup = new Set();
+                        const filteredData = result.data.filter(row => {
+                            if (dup.has(row.reelCode) || row.reel_Id == "00000000-0000-0000-0000-000000000000") {
+                                return false;
+                            }
+                            console.log(row);
+                            dup.add(row.reelCode);
+                            return true;
+                        });
+
+                        console.log(filteredData);
+
                         $('#listTable').DataTable( {
-                            data: result.data,
+                            data: filteredData,
                             paging: true,
                             pageLength: 50,
                             lengthMenu: [50, 100, 250, 500, 1000],
@@ -535,15 +548,6 @@
                                     }
                                 },
                                 { data: 'qty' },
-                                // {
-                                //     data: null,
-                                //     render: function (data, type, row, meta) {
-                                //         const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
-                                //         return `<div style="display:flex;">
-                                //             <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
-                                //                 <span><i class="bi bi-pencil-square"></i> </span></button>`;
-                                //     }
-                                // }
                             ],
                             language: {
                                 searchPlaceholder: "🔍︎ Search",
@@ -571,6 +575,7 @@
                     else {
                         swal.fire({
                             icon: 'error',
+
                             title: "Wait",
                             text: result.errMessage
                         });
