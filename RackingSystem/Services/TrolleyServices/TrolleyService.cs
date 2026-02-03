@@ -1,5 +1,6 @@
 ﻿using AspNetCoreGeneratedDocument;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using RackingSystem.Data;
@@ -16,6 +17,7 @@ using static System.Reflection.Metadata.BlobBuilder;
 
 namespace RackingSystem.Services.TrolleyServices
 {
+    [Authorize(AuthenticationSchemes = "MyAuthCookie")]
     public class TrolleyService : ITrolleyService
     {
         private readonly AppDbContext _dbContext;

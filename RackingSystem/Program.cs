@@ -1,7 +1,4 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.CodeAnalysis.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using RackingSystem.Data;
@@ -35,28 +32,38 @@ builder.Services.AddDbContextFactory<AppDbContext>(options =>
          , ServiceLifetime.Scoped
      );
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = false,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
-        };
-    });
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = "MyAuthCookie";
+    options.DefaultSignInScheme = "MyAuthCookie";
+    options.DefaultChallengeScheme = "MyAuthCookie";
+})
+.AddCookie("MyAuthCookie", options =>
+{
+    options.Cookie.Name = "MyAuthCookie";
+    options.LoginPath = "/Account/Login";
+    options.LogoutPath = "/Account/Logout";
 
-//builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-//    .AddCookie(options =>
-//    {
-//        options.ExpireTimeSpan = TimeSpan.FromMinutes(1); // Default timeout for inactive sessions
-//        options.SlidingExpiration = true; // Enable sliding expiration
-//        options.LoginPath = "/Account/Login"; // Redirect path on timeout
-//                                                       // Other options like AccessDeniedPath, LogoutPath, etc.
-//    });
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(1);
+    options.SlidingExpiration = true;
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.Cookie.SameSite = SameSiteMode.Strict;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
+    };
+});
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddRazorPages();
 builder.Services.AddScoped<ISettingService, SettingService>();
@@ -72,8 +79,6 @@ builder.Services.AddScoped<IJOService, JOService>();
 builder.Services.AddScoped<IRackJobQueueService, RackJobQueueService>();
 builder.Services.AddScoped<IRackService, RackService>();
 
-builder.Services.AddAuthorization();
-
 builder.Services.AddIdentityApiEndpoints<User>(options =>
 {
     options.Password.RequiredLength = 8;
@@ -82,18 +87,18 @@ builder.Services.AddIdentityApiEndpoints<User>(options =>
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
 })
-    .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
-
+.AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultTokenProviders();
 
 builder.Services.AddAutoMapper(cfg => cfg.AddProfile<AutoMapperProfile>(), AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddDistributedMemoryCache();
 
-builder.Services.AddDistributedMemoryCache(); 
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(3600); 
     options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
+    //options.Cookie.IsEssential = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 });
 
 var app = builder.Build();

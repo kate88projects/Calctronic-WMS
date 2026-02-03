@@ -1,12 +1,15 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RackingSystem.Data;
-using RackingSystem.Models.Loader;
 using RackingSystem.Models;
+using RackingSystem.Models.Loader;
 using RackingSystem.Services.LoaderServices;
 
 namespace RackingSystem.Controllers.API
 {
+    [Authorize(AuthenticationSchemes = $"{JwtBearerDefaults.AuthenticationScheme}")]
     [Route("api/[controller]")]
     [ApiController]
     public class LoaderController : ControllerBase

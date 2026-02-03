@@ -1,15 +1,11 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using RackingSystem.Data;
-using RackingSystem.Data.Maintenances;
 using RackingSystem.Models;
-using RackingSystem.Models.User;
 
 namespace RackingSystem.Controllers
 {
+    [Authorize(AuthenticationSchemes = "MyAuthCookie")]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -22,16 +18,25 @@ namespace RackingSystem.Controllers
         public IActionResult Index()
         {
             ViewBag.PermissionList = new List<int>();
-            string s = HttpContext.Session.GetString("xSession") ?? "";
-            if (s != "")
+            //string s = HttpContext.Session.GetString("xSession") ?? "";
+            //if (s != "")
+            //{
+            //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+            //    ViewBag.PermissionList = data.UACIdList;
+            //}
+            if (User.Identity?.IsAuthenticated ?? false)
             {
-                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
-                ViewBag.PermissionList = data.UACIdList;
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
+                {
+                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
+                    ViewBag.PermissionList = uacIdList;
+                }
             }
 
             ViewData["ActiveGroup"] = "Home";
-            ViewData["ActiveTab"] = "Home";
-            ViewData["Title"] = "Home";
+            ViewData["ActiveTab"] = "Index";
+            ViewData["Title"] = "Index";
             return View();
         }
 

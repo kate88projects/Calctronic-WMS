@@ -528,7 +528,7 @@
                             return true;
                         });
 
-                        console.log(filteredData);
+                        console.log("filteredData", filteredData);
 
                         $('#listTable').DataTable( {
                             data: filteredData,
@@ -570,7 +570,6 @@
                             $(this).find('[data-type="used"]').text(colData.used);
                             $(this).find('[data-type="total"]').text(colData.total);
                         });
-
                     }
                     else {
                         swal.fire({
@@ -617,15 +616,15 @@
             return usage;
         }
 
-        function filterByColumn(colNumber) {
-            const table = $('#listTable').DataTable();
-            table.column(0).search('').draw();
+        // function filterByColumn(colNumber) {
+        //     const table = $('#listTable').DataTable();
+        //     table.column(0).search('').draw();
 
-            const filteredData = globalData.filter(row => row.colNo == colNumber);
-            table.clear();
-            table.rows.add(filteredData);
-            table.draw();
-        }
+        //     const filteredData = globalData.filter(row => row.colNo == colNumber);
+        //     table.clear();
+        //     table.rows.add(filteredData);
+        //     table.draw();
+        // }
 
         $('.col-reel-btn').on('click', function() {
             const col = $(this).data('col');
@@ -645,7 +644,7 @@
             $('.col-reel-btn').removeClass('active');
             $(this).addClass('active');
 
-            const filteredData = globalData.filter(x => x.colNo == col);
+            const filteredData = globalData.filter(x => x.colNo == col && x.qty != 0);
             table.clear();
             table.rows.add(filteredData);
             table.draw();

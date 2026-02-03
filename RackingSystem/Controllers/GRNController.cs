@@ -1,20 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RackingSystem.Data;
-using RackingSystem.Models.Slot;
 using RackingSystem.Models;
-using RackingSystem.Services.GRNServices;
 using RackingSystem.Models.GRN;
-using Newtonsoft.Json;
-using RackingSystem.Models.User;
-using EasyModbus;
-using Microsoft.EntityFrameworkCore;
-using RackingSystem.General;
-using RackingSystem.Helpers;
-using System.Reflection;
-using RackingSystem.Models.Loader;
+using RackingSystem.Services.GRNServices;
 
 namespace RackingSystem.Controllers
 {
+    [Authorize(AuthenticationSchemes = "MyAuthCookie")]
     public class GRNController : Controller
     {
         private readonly AppDbContext _context;
@@ -29,11 +22,20 @@ namespace RackingSystem.Controllers
         public IActionResult NewGRN()
         {
             ViewBag.PermissionList = new List<int>();
-            string s = HttpContext.Session.GetString("xSession") ?? "";
-            if (s != "")
+            //string s = HttpContext.Session.GetString("xSession") ?? "";
+            //if (s != "")
+            //{
+            //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+            //    ViewBag.PermissionList = data.UACIdList;
+            //}
+            if (User.Identity?.IsAuthenticated ?? false)
             {
-                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
-                ViewBag.PermissionList = data.UACIdList;
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
+                {
+                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
+                    ViewBag.PermissionList = uacIdList;
+                }
             }
 
             ViewData["ActiveGroup"] = "grpGRN";
@@ -65,11 +67,20 @@ namespace RackingSystem.Controllers
         public IActionResult GRNDetailList()
         {
             ViewBag.PermissionList = new List<int>();
-            string s = HttpContext.Session.GetString("xSession") ?? "";
-            if (s != "")
+            //string s = HttpContext.Session.GetString("xSession") ?? "";
+            //if (s != "")
+            //{
+            //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+            //    ViewBag.PermissionList = data.UACIdList;
+            //}
+            if (User.Identity?.IsAuthenticated ?? false)
             {
-                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
-                ViewBag.PermissionList = data.UACIdList;
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
+                {
+                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
+                    ViewBag.PermissionList = uacIdList;
+                }
             }
 
             ViewData["ActiveGroup"] = "grpGRN";
@@ -112,12 +123,22 @@ namespace RackingSystem.Controllers
         {
             ViewBag.xToken = "";
             ViewBag.PermissionList = new List<int>();
-            string s = HttpContext.Session.GetString("xSession") ?? "";
-            if (s != "")
+            //string s = HttpContext.Session.GetString("xSession") ?? "";
+            //if (s != "")
+            //{
+            //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+            //    ViewBag.PermissionList = data.UACIdList;
+            //    ViewBag.xToken = data.Token;
+            //}
+            if (User.Identity?.IsAuthenticated ?? false)
             {
-                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
-                ViewBag.PermissionList = data.UACIdList;
-                ViewBag.xToken = data.Token;
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
+                {
+                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
+                    ViewBag.PermissionList = uacIdList;
+                    ViewBag.xToken = User.FindFirst("Token")?.Value;
+                }
             }
 
             ViewData["ActiveGroup"] = "grpGRN";
@@ -149,5 +170,29 @@ namespace RackingSystem.Controllers
             return result;
         }
 
+        public IActionResult LoadInTaskManual()
+        {
+            ViewBag.PermisssionList = new List<string>();
+            //string s = HttpContext.Session.GetString("xSession") ?? "";
+            //if (s != "")
+            //{
+            //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+            //    ViewBag.PermissionList = data.UACIdList;
+            //}
+            if (User.Identity?.IsAuthenticated ?? false)
+            {
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
+                {
+                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
+                    ViewBag.PermissionList = uacIdList;
+                }
+            }
+
+            ViewData["ActiveGroup"] = "grpGRN";
+            ViewData["ActiveTab"] = "LoadInTaskManual";
+            ViewData["Title"] = "Load In Task";
+            return View();
+        }
     }
 }

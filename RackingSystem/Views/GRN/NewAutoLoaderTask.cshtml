@@ -1037,6 +1037,10 @@
                 {
                     $(`#pg-c${i}`).removeClass("unavailable");
                 }
+                if ($(`#icon-c${i}`).hasClass('bi bi-exclamation-square'))
+                {
+                    $(`#icon-c${i}`).removeClass("bi bi-exclamation-square");
+                }
             }
         }
         /*
@@ -1381,6 +1385,7 @@
                 if (chkColTurn == false) {
                     //if not column not ready to turn
                     $('#exclamIcon').removeClass("hidden");
+
                     $('#errActHeight').text('Failed to Turn Column.');
                     $('#btnRetryTurn').removeClass('hidden');
                     $('#btnRetryTurn').text('Retry on Turn Column');

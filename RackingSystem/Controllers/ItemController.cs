@@ -1,16 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RackingSystem.Data;
-using RackingSystem.Models.Slot;
 using RackingSystem.Models;
-using RackingSystem.Services.ItemServices;
 using RackingSystem.Models.Item;
-using Microsoft.CodeAnalysis.Elfie.Model.Tree;
-using RackingSystem.Models.GRN;
-using Newtonsoft.Json;
-using RackingSystem.Models.User;
+using RackingSystem.Services.ItemServices;
 
 namespace RackingSystem.Controllers
 {
+    [Authorize(AuthenticationSchemes = "MyAuthCookie")]
     public class ItemController : Controller
     {
         private readonly AppDbContext _context;
@@ -25,11 +22,20 @@ namespace RackingSystem.Controllers
         public IActionResult ItemList()
         {
             ViewBag.PermissionList = new List<int>();
-            string s = HttpContext.Session.GetString("xSession") ?? "";
-            if (s != "")
+            //string s = HttpContext.Session.GetString("xSession") ?? "";
+            //if (s != "")
+            //{
+            //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+            //    ViewBag.PermissionList = data.UACIdList;
+            //}
+            if (User.Identity?.IsAuthenticated ?? false)
             {
-                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
-                ViewBag.PermissionList = data.UACIdList;
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
+                {
+                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
+                    ViewBag.PermissionList = uacIdList;
+                }
             }
 
             ViewData["ActiveGroup"] = "grpSTOCK";
@@ -92,11 +98,20 @@ namespace RackingSystem.Controllers
         public IActionResult ItemGroupList()
         {
             ViewBag.PermissionList = new List<int>();
-            string s = HttpContext.Session.GetString("xSession") ?? "";
-            if (s != "")
+            //string s = HttpContext.Session.GetString("xSession") ?? "";
+            //if (s != "")
+            //{
+            //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+            //    ViewBag.PermissionList = data.UACIdList;
+            //}
+            if (User.Identity?.IsAuthenticated ?? false)
             {
-                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
-                ViewBag.PermissionList = data.UACIdList;
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
+                {
+                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
+                    ViewBag.PermissionList = uacIdList;
+                }
             }
 
             ViewData["ActiveGroup"] = "grpSTOCK";

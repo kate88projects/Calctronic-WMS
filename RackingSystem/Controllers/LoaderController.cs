@@ -1,17 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RackingSystem.Data;
-using RackingSystem.Models;
-using RackingSystem.Services.LoaderServices;
-using RackingSystem.Models.Loader;
-using RackingSystem.Models.Item;
-using Newtonsoft.Json;
-using RackingSystem.Models.User;
-using Microsoft.AspNetCore.Http.HttpResults;
 using RackingSystem.General;
-using RackingSystem.Models.Trolley;
+using RackingSystem.Models;
+using RackingSystem.Models.Loader;
+using RackingSystem.Services.LoaderServices;
 
 namespace RackingSystem.Controllers
 {
+    [Authorize(AuthenticationSchemes = "MyAuthCookie")]
     public class LoaderController : Controller
     {
         private readonly AppDbContext _context;
@@ -26,11 +23,20 @@ namespace RackingSystem.Controllers
         public IActionResult LoaderList()
         {
             ViewBag.PermissionList = new List<int>();
-            string s = HttpContext.Session.GetString("xSession") ?? "";
-            if (s != "")
+            //string s = HttpContext.Session.GetString("xSession") ?? "";
+            //if (s != "")
+            //{
+            //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+            //    ViewBag.PermissionList = data.UACIdList;
+            //}
+            if (User.Identity?.IsAuthenticated ?? false)
             {
-                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
-                ViewBag.PermissionList = data.UACIdList;
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
+                {
+                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
+                    ViewBag.PermissionList = uacIdList;
+                }
             }
 
             ViewData["ActiveGroup"] = "grpMM";
@@ -98,11 +104,20 @@ namespace RackingSystem.Controllers
         public IActionResult LoaderDetailList()
         {
             ViewBag.PermissionList = new List<int>();
-            string s = HttpContext.Session.GetString("xSession") ?? "";
-            if (s != "")
+            //string s = HttpContext.Session.GetString("xSession") ?? "";
+            //if (s != "")
+            //{
+            //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+            //    ViewBag.PermissionList = data.UACIdList;
+            //}
+            if (User.Identity?.IsAuthenticated ?? false)
             {
-                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
-                ViewBag.PermissionList = data.UACIdList;
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
+                {
+                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
+                    ViewBag.PermissionList = uacIdList;
+                }
             }
 
             ViewData["ActiveGroup"] = "grpRACKING";
@@ -112,7 +127,7 @@ namespace RackingSystem.Controllers
         }
 
         [HttpGet]
-        public async Task<ServiceResponseModel<List<LoaderReelDtlDTO>>> GetTrolleyDetailList(long id)
+        public async Task<ServiceResponseModel<List<LoaderReelDtlDTO>>> GetLoaderDetailList(long id)
         {
             ServiceResponseModel<List<LoaderReelDtlDTO>> result = await _loaderService.GetLoaderReelDtlList(id);
             result.errMessage = "-,-,-,-,0,0,0,0,-";
@@ -150,14 +165,17 @@ namespace RackingSystem.Controllers
                     int ttlU4 = loader.ColHeight - (result.data.Where(x => x.ColNo == 4).Count() > 0 ? result.data.Where(x => x.ColNo == 4).First().BalanceHeight : 0);
                     u4 = ttlU4.ToString() + " mm";
                 }
+                else
+                {
 
-                int ttlR1 = result.data.Where(x => x.ColNo == 1).Count();
-                int ttlR2 = result.data.Where(x => x.ColNo == 2).Count();
-                int ttlR3 = result.data.Where(x => x.ColNo == 3).Count();
-                int ttlR4 = result.data.Where(x => x.ColNo == 4).Count();
+                }
+
+                int ttlR1 = result.data.Where(x => x.ColNo == 1 && x.Qty != 0).Count();
+                int ttlR2 = result.data.Where(x => x.ColNo == 2 && x.Qty != 0).Count();
+                int ttlR3 = result.data.Where(x => x.ColNo == 3 && x.Qty != 0).Count();
+                int ttlR4 = result.data.Where(x => x.ColNo == 4 && x.Qty != 0).Count();
 
                 result.errStackTrace = u1 + "," + u2 + "," + u3 + "," + u4 + "," + ttlR1 + "," + ttlR2 + "," + ttlR3 + "," + ttlR4 + "," + loader?.Status;
-
             }
 
             return result;
@@ -166,11 +184,20 @@ namespace RackingSystem.Controllers
         public IActionResult LoaderColumnList()
         {
             ViewBag.PermissionList = new List<int>();
-            string s = HttpContext.Session.GetString("xSession") ?? "";
-            if (s != "")
+            //string s = HttpContext.Session.GetString("xSession") ?? "";
+            //if (s != "")
+            //{
+            //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+            //    ViewBag.PermissionList = data.UACIdList;
+            //}
+            if (User.Identity?.IsAuthenticated ?? false)
             {
-                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
-                ViewBag.PermissionList = data.UACIdList;
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
+                {
+                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
+                    ViewBag.PermissionList = uacIdList;
+                }
             }
 
             ViewData["ActiveGroup"] = "grpMM";

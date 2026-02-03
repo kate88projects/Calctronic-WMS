@@ -1,21 +1,16 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using RackingSystem.Data;
+using RackingSystem.Data.GRN;
 using RackingSystem.Data.Maintenances;
-using RackingSystem.Models.User;
+using RackingSystem.General;
 using RackingSystem.Models;
+using RackingSystem.Models.User;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.EntityFrameworkCore;
-using RackingSystem.Models.Setting;
-using RackingSystem.Data;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Components.Web;
-using System;
-using RackingSystem.General;
-using RackingSystem.Data.GRN;
 
 namespace RackingSystem.Services.AccountServices
 {
@@ -25,7 +20,7 @@ namespace RackingSystem.Services.AccountServices
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _config;
 
-        public AccountService(AppDbContext dbContext, UserManager<User> userManager, IConfiguration config)
+        public AccountService(AppDbContext dbContext, UserManager<User> userManager, IConfiguration config, IHttpContextAccessor httpContextAccessor)
         {
             _dbContext = dbContext;
             _userManager = userManager;
@@ -35,78 +30,106 @@ namespace RackingSystem.Services.AccountServices
         public async Task<ServiceResponseModel<UserSessionDTO>> Login([FromBody] LoginDTO model)
         {
             ServiceResponseModel<UserSessionDTO> response = new ServiceResponseModel<UserSessionDTO>();
-            if (string.IsNullOrEmpty(model.Username))
-            {
-                response.errMessage = "User cannot empty.";
-                return response;
-            }
-            if (string.IsNullOrEmpty(model.Password))
-            {
-                response.errMessage = "Password cannot empty.";
-                return response;
-            }
 
-            User rUser;
-            var user = await _userManager.FindByNameAsync(model.Username);
-            if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
+            try
             {
-                if (user.IsActive == false)
+                if (string.IsNullOrEmpty(model.Username))
                 {
-                    response.errMessage = "User is inactive.";
+                    response.errMessage = "User cannot empty.";
                     return response;
                 }
-                rUser = user;
-            }
-            else
-            {
-                var user2 = await _userManager.FindByEmailAsync(model.Username);
-                if (user2 != null && await _userManager.CheckPasswordAsync(user2, model.Password))
+                if (string.IsNullOrEmpty(model.Password))
                 {
-                    if (user2.IsActive == false)
-                    {
-                        response.errMessage = "User is inactive.";
-                        return response;
-                    }
-                    rUser = user2;
-                }
-                else
-                {
-                    response.data = new UserSessionDTO();
-                    response.errMessage = "Username or Password wrong.";
+                    response.errMessage = "Password cannot empty.";
                     return response;
                 }
-            }
 
-            var uacIdList = _dbContext.UserAccessRight.Where(x => x.User_Id == rUser.Id).Select(x => x.UAC_Id).ToList();
+                //try
+                //{
+                //var user = await _userManager.FindByNameAsync(model.Username);
 
-            string devId = Guid.NewGuid().ToString();
 
-            var authClaims = new List<Claim>
+                //if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
+                //{
+                //    if (user.IsActive == false)
+                //    {
+                //        response.errMessage = "User is inactive.";
+                //        return response;
+                //    }
+                //    rUser = user;
+                //}
+                //else
+                //{
+                //    var user2 = await _userManager.FindByEmailAsync(model.Username);
+                //    if (user2 != null && await _userManager.CheckPasswordAsync(user2, model.Password))
+                //    {
+                //        if (user2.IsActive == false)
+                //        {
+                //            response.errMessage = "User is inactive.";
+                //            return response;
+                //        }
+                //        rUser = user2;
+                //    }
+                //    else
+                //    {
+                //        response.data = new UserSessionDTO();
+                //        response.errMessage = "Username or Password wrong.";
+                //        return response;
+                //    }
+                //}
+                var user = await _userManager.FindByNameAsync(model.Username) ?? await _userManager.FindByEmailAsync(model.Username);
+                if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
+                {
+                    response.errMessage = "Invalid username or password.";
+                    return response;
+                }
+                if (!user.IsActive)
+                {
+                    response.errMessage = "User is inactive";
+                    return response;
+                }
+                User rUser = user;
+
+                var uacIdList = _dbContext.UserAccessRight.Where(x => x.User_Id == rUser.Id).Select(x => x.UAC_Id).ToList();
+
+                string devId = Guid.NewGuid().ToString();
+
+                var authClaims = new List<Claim>
                 {
                     new Claim(JwtRegisteredClaimNames.Sub, rUser.UserName!),
                     new Claim(JwtRegisteredClaimNames.Jti, devId),
                     new Claim("DeviceId", devId),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new Claim(ClaimTypes.Name, user.UserName!),
+                    new Claim("UACIdList", string.Join(",", uacIdList))
                 };
 
-            var token = new JwtSecurityToken(
-                issuer: _config["Jwt:Issuer"],
-                expires: DateTime.Now.AddMinutes(double.Parse(_config["Jwt:ExpiryMinutes"]!)),
-                //audience: _audience,
-                claims: authClaims,
-                signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!)), SecurityAlgorithms.HmacSha256)
-            );
-            string tokenR = new JwtSecurityTokenHandler().WriteToken(token);
-            response.success = true;
-            response.data = new UserSessionDTO()
-            {
-                Fullname = rUser.FullName,
-                Username = rUser.UserName ?? "",
-                Token = tokenR,
-                UACIdList = uacIdList,
-                DeviceId = devId,
-            };
-            return response;
+                var token = new JwtSecurityToken(
+                    issuer: _config["Jwt:Issuer"],
+                    expires: DateTime.Now.AddMinutes(double.Parse(_config["Jwt:ExpiryMinutes"]!)),
+                    //audience: _audience,
+                    claims: authClaims,
+                    signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!)), SecurityAlgorithms.HmacSha256)
+                );
+                string tokenR = new JwtSecurityTokenHandler().WriteToken(token);
+                response.success = true;
+                response.data = new UserSessionDTO()
+                {
+                    Fullname = rUser.FullName,
+                    Username = rUser.UserName ?? "",
+                    Token = tokenR,
+                    UACIdList = uacIdList,
+                    DeviceId = devId,
+                    authClaims = authClaims,
+                };
 
+            }
+            catch (Exception ex)
+            {
+                response.errMessage = ex.Message;
+                response.errStackTrace = ex.StackTrace ?? "";
+            }
+            return response;
         }
 
 

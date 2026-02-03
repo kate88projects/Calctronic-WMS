@@ -132,49 +132,49 @@
 
         function login() {
 
-                    var data = {
-                        Username: $('#txtUsername').val(),
-                        Password: $('#txtPassword').val(),
-                    }
+            var data = {
+                Username: $('#txtUsername').val(),
+                Password: $('#txtPassword').val(),
+            }
 
-                    $.ajax({
-                        url: '/Account/LoginAccount',
-                        type: 'POST',
-                        data: JSON.stringify(data),
-                        dataType: 'json',
-                        contentType: 'application/json; charset=utf-8',
-                        beforeSend: function () {
-                            Swal.fire({
-                                text: 'Please Wait',
-                                width: '300px',
+            $.ajax({
+                url: '/Account/LoginAccount',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
 
-                                allowEscapeKey: false,
-                                allowOutsideClick: false,
-                                showConfirmButton: false,
-                            });
-                            Swal.showLoading()
-                        },
-                        success: function (result) {
-                            if (result.success == true) {
-                                 window.location.href = "/Home/Index";
-                            }
-                            else {
-                                swal.fire({
-                                    icon: 'error',
-                                    title: "Wait",
-                                    text: result.errMessage
-                                });
-                            }
-                        },
-                        error: function (error) {
-                            console.log(error);
-                            swal.fire({
-                                icon: 'error',
-                                title: "Wait",
-                                text: error.val
-                            });
-                        }
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
                     });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                            window.location.href = "/Home/Index";
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.responseJSON ? error.responseJSON.message : error.message || 'An unknown error occurred',
+                    });
+                }
+            });
 
         }
 

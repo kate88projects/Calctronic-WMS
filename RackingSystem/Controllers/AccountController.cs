@@ -1,47 +1,65 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using System.Security.Claims;
-using RackingSystem.Models.User;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using RackingSystem.Data.Maintenances;
-using RackingSystem.Services.AccountServices;
-using RackingSystem.Models.Setting;
 using RackingSystem.Models;
-using RackingSystem.Models.Loader;
+using RackingSystem.Models.User;
+using RackingSystem.Services.AccountServices;
+using System.Security.Claims;
 
 namespace RackingSystem.Controllers
 {
+    [AllowAnonymous]
     public class AccountController : Controller
     {
         private readonly IAccountService _service;
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
 
-        public AccountController(IAccountService service)
+        public AccountController(IAccountService service, UserManager<User> userManager, SignInManager<User> signInManager)
         {
             _service = service;
+            _signInManager = signInManager;
+            _userManager = userManager;
         }
 
         [HttpGet]
         public string getSession()
         {
-            string s = HttpContext.Session.GetString("xSession") ?? "";
-            return s;
+            //string s = HttpContext.Session.GetString("xSession") ?? "";
+            if (User.Identity?.IsAuthenticated ?? false)
+            {
+                var uacIds = User.FindFirst("UACIdList")?.Value;
+                return uacIds;
+            }
+
+            return "";
         }
 
         public IActionResult Login()
         {
-            ViewBag.PermissionList = new List<int>();
+            //ViewBag.PermissionList = new List<int>();
             string s = HttpContext.Session.GetString("xSession") ?? "";
-            if (s != "")
+            //if (s != "")
+            //{
+            //    return RedirectToAction("Index", "Home");
+            //}
+            if (User.Identity?.IsAuthenticated ?? false)
             {
-                return RedirectToAction("Index", "Home");
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
+                {
+                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
+                    ViewBag.PermissionList = uacIdList;
+                }
             }
+
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> LoginAccount([FromBody] LoginDTO req)
+        public async Task<IActionResult> LoginAccount([FromBody] LoginDTO req) 
         {
             //if (!ModelState.IsValid)
             //{
@@ -51,21 +69,31 @@ namespace RackingSystem.Controllers
             {
                 //var result2 = await _signInManager.PasswordSignInAsync(model.Username, model.Password, false, false);
                 var result = await _service.Login(req);
-                if (result.success)
-                {
-                    string json = JsonConvert.SerializeObject(result.data);
-                    HttpContext.Session.SetString("xSession", json);
+                //if (result.success)
+                //{
+                //    string json = JsonConvert.SerializeObject(result.data);
+                //    HttpContext.Session.SetString("xSession", json);
+                //}
 
-                    //var claims = new List<Claim>
-                    //    {
-                    //        new Claim(ClaimTypes.Name, result.data.Fullname)
-                    //    };
-                    //var claimsIdn = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    //await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdn));
-                    //HttpContext.User = new ClaimsPrincipal(claimsIdn);
-                }
+                //return new JsonResult(result);
 
-                return new JsonResult(result);
+                if (!result.success)
+                    return Json(result);
+
+                var claims = result.data.authClaims;
+                var identity = new ClaimsIdentity(
+                    claims,
+                    "MyAuthCookie"
+                );
+
+                await HttpContext.SignInAsync(
+                    "MyAuthCookie",
+                    new ClaimsPrincipal(identity)
+                );
+                var principal = new ClaimsPrincipal(identity);
+                var uacIds = principal.FindFirst("UACIdList")?.Value;
+
+                return Json(new { success = true });
             }
             catch (Exception ex)
             {
@@ -74,24 +102,34 @@ namespace RackingSystem.Controllers
                 r.errStackTrace = ex.StackTrace;
                 return new JsonResult(r);
             }
-
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            //await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await _signInManager.SignOutAsync();
             return RedirectToAction("Login", "Account");
         }
 
         public IActionResult UserList()
         {
             ViewBag.PermissionList = new List<int>();
-            string s = HttpContext.Session.GetString("xSession") ?? "";
-            if (s != "")
+            //string s = HttpContext.Session.GetString("xSession") ?? "";
+            //if (s != "")
+            //{
+            //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+            //    ViewBag.PermissionList = data.UACIdList;
+            //}
+            if (User.Identity?.IsAuthenticated ?? false)
             {
-                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
-                ViewBag.PermissionList = data.UACIdList;
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
+                {
+                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
+                    ViewBag.PermissionList = uacIdList;
+                }
             }
 
             ViewData["ActiveGroup"] = "grpSETTINGS";
@@ -131,11 +169,22 @@ namespace RackingSystem.Controllers
         public IActionResult UserAccessRightList()
         {
             ViewBag.PermissionList = new List<int>();
-            string s = HttpContext.Session.GetString("xSession") ?? "";
-            if (s != "")
+            //string s = HttpContext.Session.GetString("xSession") ?? "";
+            //if (s != "")
+            //{
+            //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+            //    var uacIds = User.FindFirst("UACIdList")?.Value;
+
+            //    ViewBag.PermissionList = data.UACIdList;
+            //}
+            if (User.Identity?.IsAuthenticated ?? false)
             {
-                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
-                ViewBag.PermissionList = data.UACIdList;
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
+                {
+                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
+                    ViewBag.PermissionList = uacIdList;
+                }
             }
 
             ViewData["ActiveGroup"] = "grpSETTINGS";

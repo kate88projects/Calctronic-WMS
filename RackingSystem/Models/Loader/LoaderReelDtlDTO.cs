@@ -1,7 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace RackingSystem.Models.Loader
 {
+    [Keyless]
     public class LoaderReelDtlDTO
     {
         public long Loader_Id { get; set; } = 0;
@@ -9,8 +10,6 @@ namespace RackingSystem.Models.Loader
         public int ColHeight { get; set; } = 0;
         public int BalanceHeight { get; set; } = 0;
         public int ColNo { get; set; } = 0;
-
-        [Key]
         public Guid Reel_Id { get; set; }
         public string ReelCode { get; set; } = "";
         public int Qty { get; set; } = 0;
