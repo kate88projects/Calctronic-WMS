@@ -215,18 +215,19 @@ namespace RackingSystem.Controllers.API
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
                     {
-                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
                         value = registers[i];
                     }
 
                     if (value > 0)
                     {
                         exit = true;
+                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress}: {value}", "", false);
                     }
-                    if ((DateTime.Now - dtRun).TotalSeconds > 15)
+                    if ((DateTime.Now - dtRun).TotalSeconds > 10)
                     {
                         result.errMessage = "Timeout. Cannot get Status.";
                         exit = true;
+                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress}: {value}", "", false);
                     }
                 }
 
@@ -491,18 +492,19 @@ namespace RackingSystem.Controllers.API
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
                     {
-                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "" , false);
                         value = registers[i];
                     }
 
                     if (value > 0)
                     {
                         exit = true;
+                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress}: {value}", "", false);
                     }
-                    if ((DateTime.Now - dtRun).TotalSeconds > 15)
+                    if ((DateTime.Now - dtRun).TotalSeconds > 10)
                     {
                         result.errMessage = "Timeout. Cannot get Status.";
                         exit = true;
+                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress}: {value}", "", false);
                     }
                 }
 

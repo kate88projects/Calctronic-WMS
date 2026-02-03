@@ -418,18 +418,18 @@ namespace RackingSystem.Controllers.API
 
                 await Task.Delay(2000);
 
-                // double check slot_id
-                string slotCode = GetSlotIDByIP(configRack.ConfigValue);
-                var slotChk = _dbContext.TrolleySlot.Where(x => x.Trolley_Id == trolleyId && x.TrolleySlotCode == slotCode).FirstOrDefault();
-                if (slotChk == null)
-                {
-                    result.errMessage = "Cannot find Trolley Slot Returned [" + slotCode + "]. ";
-                }
-                else
-                {
-                    side = slotChk.IsLeft ? "A" : "B";
-                    ReadTrolleyPulseByIP(configRack.ConfigValue, trolleyId, slotCode);
-                }
+                //// double check slot_id
+                //string slotCode = GetSlotIDByIP(configRack.ConfigValue);
+                //var slotChk = _dbContext.TrolleySlot.Where(x => x.Trolley_Id == trolleyId && x.TrolleySlotCode == slotCode).FirstOrDefault();
+                //if (slotChk == null)
+                //{
+                //    result.errMessage = "Cannot find Trolley Slot Returned [" + slotCode + "]. ";
+                //}
+                //else
+                //{
+                //    side = slotChk.IsLeft ? "A" : "B";
+                //    ReadTrolleyPulseByIP(configRack.ConfigValue, trolleyId, slotCode);
+                //}
 
                 result.success = true;
                 result.data = side;
@@ -603,22 +603,22 @@ namespace RackingSystem.Controllers.API
                 }
             }
 
-            // double check slot_id
-            string slotCode = GetSlotIDByIP(configRack.ConfigValue);
-            var slotChk = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
-            if (slotChk == null)
-            {
-                result.errMessage = "Cannot find Slot Retrieve [" + slotCode + "]. ";
-            }
-            else
-            {
-                var pulses = ReadTrolleyPulseByIP(configRack.ConfigValue, trolleyId, slotCode);
-                result.data.SlotCode = slotCode;
-                result.data.QRXPulse = pulses[0];
-                result.data.QRYPulse = pulses[1];
-                result.data.QRXPulseDiffer = pulses[2];
-                result.data.QRXPulseDiffer = pulses[3];
-            }
+            //// double check slot_id
+            //string slotCode = GetSlotIDByIP(configRack.ConfigValue);
+            //var slotChk = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
+            //if (slotChk == null)
+            //{
+            //    result.errMessage = "Cannot find Slot Retrieve [" + slotCode + "]. ";
+            //}
+            //else
+            //{
+            //    var pulses = ReadTrolleyPulseByIP(configRack.ConfigValue, trolleyId, slotCode);
+            //    result.data.SlotCode = slotCode;
+            //    result.data.QRXPulse = pulses[0];
+            //    result.data.QRYPulse = pulses[1];
+            //    result.data.QRXPulseDiffer = pulses[2];
+            //    result.data.QRXPulseDiffer = pulses[3];
+            //}
 
             result.success = value == 1;
             result.data.data = value.ToString();
@@ -889,22 +889,22 @@ namespace RackingSystem.Controllers.API
                     }
                 }
 
-                // double check slot_id
-                string slotCodeRead = GetSlotIDByIP(configRack.ConfigValue);
-                var slotChk = _dbContext.Slot.Where(x => x.SlotCode == slotCodeRead).FirstOrDefault();
-                if (slotChk == null)
-                {
-                    result.errMessage = "Cannot find Slot Retrieve [" + slotCodeRead + "]. ";
-                }
-                else
-                {
-                    var pulses = ReadPulseByIP(configRack.ConfigValue, slotCodeRead);
-                    result.data.SlotCode = slotCode;
-                    result.data.QRXPulse = pulses[0];
-                    result.data.QRYPulse = pulses[1];
-                    result.data.QRXPulseDiffer = pulses[2];
-                    result.data.QRXPulseDiffer = pulses[3];
-                }
+                //// double check slot_id
+                //string slotCodeRead = GetSlotIDByIP(configRack.ConfigValue);
+                //var slotChk = _dbContext.Slot.Where(x => x.SlotCode == slotCodeRead).FirstOrDefault();
+                //if (slotChk == null)
+                //{
+                //    result.errMessage = "Cannot find Slot Retrieve [" + slotCodeRead + "]. ";
+                //}
+                //else
+                //{
+                //    var pulses = ReadPulseByIP(configRack.ConfigValue, slotCodeRead);
+                //    result.data.SlotCode = slotCode;
+                //    result.data.QRXPulse = pulses[0];
+                //    result.data.QRYPulse = pulses[1];
+                //    result.data.QRXPulseDiffer = pulses[2];
+                //    result.data.QRXPulseDiffer = pulses[3];
+                //}
 
                 result.success = value == 0;
                 result.data.data = value.ToString();

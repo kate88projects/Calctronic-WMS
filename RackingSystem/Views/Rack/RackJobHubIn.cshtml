@@ -664,7 +664,7 @@
             <button onclick="startPick()">Pick</button>
             <button onclick="startPlace()">Place</button>
             <hr />
-            <a href="javascript:loadPLCSetLoaderUnload()">Set Unload</a> > <a href="javascript:loadPLCScanReelID()">Scan QR</a> > <a href="javascript:loadPLCScanReelID()">Reed Reel</a> > <a href="javascript:loadPLCSetActualHeight()">Set Height (Pick)</a>
+            <a href="javascript:loadPLCSetLoaderUnload()">Set Unload</a> > <a href="javascript:loadPLCStartBarcodeScanner()">Scan QR</a> > <a href="javascript:loadPLCScanReelID()">Reed Reel</a> > <a href="javascript:loadPLCSetActualHeight()">Set Height (Pick)</a>
             <br />
             <a href="javascript:retry_PickStatus()">Pick Status</a> > <a href="javascript:loadPLCPlaceReel()">Place</a> > <a href="javascript:retry_PlaceStatus()">Place Status</a>
             <br />  
@@ -1702,6 +1702,8 @@
             halfPlaceMoveStep = 1;
             
             updateJson();
+
+            await delay(1500);
         }
 
         // Cartesian Start Retrieve Empty Drawer

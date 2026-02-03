@@ -82,25 +82,34 @@ namespace RackingSystem.Controllers
                             }
                         }
 
-                        var srms = _context.RackJob.FirstOrDefault();
-                        if (srms != null)
+                    var srms = _context.RackJob.FirstOrDefault();
+                    if (srms != null)
+                    {
+                        bool isCont = false;
+
+                        if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
                         {
-                            if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
+                            //return View("RackJobHubInView");
+                        }
+                        if (srms.RackJobQueue_Id == qId && srms.LoginIP == ViewBag.DeviceId && srms.Json != "")
+                        {
+                            RackJobHubInDTO json = JsonConvert.DeserializeObject<RackJobHubInDTO>(srms.Json) ?? new RackJobHubInDTO();
+                            if (json.LoaderCode != "")
                             {
-                                //return View("RackJobHubInView");
+                                ViewBag.QContinuos = "1";
+                                isCont = true;
                             }
-                            if (srms.RackJobQueue_Id != 0 && srms.LoginIP == ViewBag.DeviceId && srms.Json != "")
-                            {
-                                RackJobHubInDTO json = JsonConvert.DeserializeObject<RackJobHubInDTO>(srms.Json) ?? new RackJobHubInDTO();
-                                if (json.LoaderCode != "")
-                                {
-                                    ViewBag.QContinuos = "1";
-                                }
-                            }
+                        }
+
+                        if (!isCont)
+                        {
+                            srms.Loader_Id = 0;
+                            srms.RackJobQueue_Id = 0;
+                            srms.Json = "";
+                            _context.SaveChangesAsync();
                         }
                     }
                 }
-                
             }
             catch (Exception ex)
             {
@@ -170,17 +179,27 @@ namespace RackingSystem.Controllers
                         }
                     }
 
-                    var srms = _context.RackJob.FirstOrDefault();
-                    if (srms != null)
+                var srms = _context.RackJob.FirstOrDefault();
+                if (srms != null)
+                {
+                    bool isCont = false;
+
+                    if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
                     {
-                        if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
-                        {
-                            //return View("RackJobHubOutView");
-                        }
-                        if (srms.RackJobQueue_Id != 0 && srms.LoginIP == ViewBag.DeviceId && srms.Json != "")
-                        {
-                            ViewBag.QContinuos = "1";
-                        }
+                        //return View("RackJobHubOutView");
+                    }
+                    if (srms.RackJobQueue_Id == qId && srms.LoginIP == ViewBag.DeviceId && srms.Json != "")
+                    {
+                        ViewBag.QContinuos = "1";
+                        isCont = true;
+                    }
+
+                    if (!isCont)
+                    {
+                        srms.Loader_Id = 0;
+                        srms.RackJobQueue_Id = 0;
+                        srms.Json = "";
+                        _context.SaveChangesAsync();
                     }
                 }
             }
@@ -312,21 +331,31 @@ namespace RackingSystem.Controllers
                         }
                     }
 
-                    var srms = _context.RackJob.FirstOrDefault();
-                    if (srms != null)
+                var srms = _context.RackJob.FirstOrDefault();
+                if (srms != null)
+                {
+                    bool isCont = false;
+
+                    if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
                     {
-                        if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
-                        {
-                            //return View("RackDrawerInView");
-                        }
-                        if (srms.RackJobQueue_Id != 0 && srms.LoginIP == ViewBag.DeviceId)
-                        {
-                            ViewBag.QContinuos = "1";
-                        }
+                        //return View("RackDrawerInView");
+                    }
+                    if (srms.RackJobQueue_Id == qId && srms.LoginIP == ViewBag.DeviceId)
+                    {
+                        ViewBag.QContinuos = "1";
+                        isCont = true;
+                    }
+
+                    if (!isCont)
+                    {
+                        srms.Loader_Id = 0;
+                        srms.RackJobQueue_Id = 0;
+                        srms.Json = "";
+                        _context.SaveChangesAsync();
                     }
                 }
             }
-            
+
             ViewData["ActiveGroup"] = "grpRACKING";
             ViewData["ActiveTab"] = "RackJob";
             ViewData["Title"] = "Rack Job Drawer In";
