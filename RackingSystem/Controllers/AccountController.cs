@@ -81,6 +81,8 @@ namespace RackingSystem.Controllers
                     return Json(result);
 
                 var claims = result.data.authClaims;
+                claims.Add(new Claim("token", result.data.Token));
+
                 var identity = new ClaimsIdentity(
                     claims,
                     "MyAuthCookie"
