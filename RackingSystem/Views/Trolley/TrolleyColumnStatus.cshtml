@@ -324,9 +324,25 @@
         </div>
         <div class="status-card">
             <h3>Occupied Slot</h3>
-            <div class="value" id="txtOT">Empty Tray : -</div>
+            @* <div class="value" id="txtOT">Empty Tray : -</div>
             <div class="value" id="txtOTR">Total Reel : -</div>
-            <div class="value" id="txtOTRN">Slot w Reel : -</div>
+            <div class="value" id="txtOTRN">Slot w Reel : -</div> *@
+            <div class="usage-card mt-1">
+                <div class="d-flex justify-content-center gap-2 fs-8 mb-1">
+                    <div class="usage-left">
+                        <span class="label">Total Reel : </span>
+                        <span data-type="balanced" id="txtOTR">-</span>
+                    </div>
+                    <div class="usage-used">
+                        <span class="label">Slot w Reel : </span>
+                        <span data-type="used" id="txtOTRN">-</span>
+                    </div>
+                </div>
+                <div class="fs-8">
+                    <span class="label">Empty Tray : </span>
+                    <span data-type="total" id="txtOT">-</span>
+                </div>
+            </div>
         </div>
         <div class="status-card">
             <h3>Available Slot</h3>
@@ -636,9 +652,9 @@
                         var spText = result.errMessage.split(',');
                         document.getElementById('txtInactive').innerHTML = spText[0];
                         document.getElementById('txtCheck').innerHTML = spText[1];
-                        document.getElementById('txtOT').innerHTML = 'Empty Tray : ' + spText[2];
-                        document.getElementById('txtOTR').innerHTML = 'Total Reel : ' + spText[3];
-                        document.getElementById('txtOTRN').innerHTML = 'Slot w Reel : ' + (Number(spText[3]) + Number(spText[4]));
+                        document.getElementById('txtOT').innerHTML = spText[2];
+                        document.getElementById('txtOTR').innerHTML = spText[3];
+                        document.getElementById('txtOTRN').innerHTML = (Number(spText[3]) + Number(spText[4]));
                         document.getElementById('txtA').innerHTML = spText[5];
 
 

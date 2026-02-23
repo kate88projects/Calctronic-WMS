@@ -180,15 +180,22 @@
                             </thead>
                         </table>
                     </div>
-
-                    <div class="clearfix">
-                        <div class="hint-text">Showing <b id="lblCurCount">0</b> of <b id="lblTotal">0</b> entries</div>
-                        <ul class="pagination" id="ulPagination">
-                        </ul>
-                        <input type="hidden" id="txtCurPage">
-                        <input type="hidden" id="txtTotalRecord">
-                        <input type="hidden" id="txtPageSize">
-                        <input type="hidden" id="txtTotalPage">
+                    <div class="dt-container dt-empty-footer">
+                        <div class="dt-layout-row">
+                            <div class="hint-text">Showing <b id="lblCurCount">0</b> of <b id="lblTotal">0</b> entries</div>
+                            @* <ul class="pagination" id="ulPagination">
+                        </ul> *@
+                            <div class="dt-layout-cell dt-layout-end">
+                                <div class="dt-paging">
+                                    <nav aria-label="pagination" id="ulPagination">
+                                    </nav>
+                                </div>
+                            </div>
+                            <input type="hidden" id="txtCurPage">
+                            <input type="hidden" id="txtTotalRecord">
+                            <input type="hidden" id="txtPageSize">
+                            <input type="hidden" id="txtTotalPage">
+                        </div>
                     </div>
 
                 </div>
@@ -354,9 +361,9 @@
             $('#txtPageSize').val($("#selpageSize").val());
             var ttlPage = $("#txtTotalPage").val();
             for (var j = 1; j <= ttlPage; j++) {
-                $('#btnP' + j).removeClass('active');
+                $('#btnP' + j).removeClass('current');
             }
-            $('#btnP' + page).addClass('active');
+            $('#btnP' + page).addClass('current');
 
             var data = {
                 ItemCode: $("#txtItemCode").val(),
@@ -617,16 +624,31 @@
                             $('#txtTotalRecord').val(result.totalRecords);
                             $('#txtTotalPage').val(ttlPage);
 
-                            myDiv.innerHTML += '<li class="page-item disabled"><a href="javascript:prevPage()">Previous</a></li>';
+                            // myDiv.innerHTML += '<li class="page-item disabled"><a href="javascript:prevPage()">Previous</a></li>';
+                            // for (var i = 1; i <= ttlPage; i++) {
+                            //     if (i == 1) {
+                            //            myDiv.innerHTML += '<li class="page-item active" id="btnP'+ i +'"><a href="javascript:loadList('+ i +')" class="page-link">'+ i +'</a></li>';
+                            //     }
+                            //     else {
+                            //            myDiv.innerHTML += '<li class="page-item" id="btnP'+ i +'"><a href="javascript:loadList('+ i +')" class="page-link">'+ i +'</a></li>';
+                            //     }
+                            // }
+                            // myDiv.innerHTML += '<li class="page-item disabled"><a href="javascript:nextPage()">Next</a></li>';
+
+                            var lastPage = 1;
+                            myDiv.innerHTML += '<button class="dt-paging-button disabled first" onclick="loadList(1)" role="link" type="button" aria-controls="listTable"><<</button>';
+                            myDiv.innerHTML += '<button class="dt-paging-button disabled" onclick="prevPage()" role="link" type="button" aria-controls="listTable"><</button>';
                             for (var i = 1; i <= ttlPage; i++) {
                                 if (i == 1) {
-                                       myDiv.innerHTML += '<li class="page-item active" id="btnP'+ i +'"><a href="javascript:loadList('+ i +')" class="page-link">'+ i +'</a></li>';
+                                       myDiv.innerHTML += '<button class="dt-paging-button current" id="btnP'+ i +'" onclick="loadList('+ i +')" role="link" type="button" aria-controls="listTable">'+ i +'</button>';
                                 }
                                 else {
-                                       myDiv.innerHTML += '<li class="page-item" id="btnP'+ i +'"><a href="javascript:loadList('+ i +')" class="page-link">'+ i +'</a></li>';
+                                       myDiv.innerHTML += '<button class="dt-paging-button" id="btnP'+ i +'" onclick="loadList('+ i +')" role="link" type="button" aria-controls="listTable">'+ i +'</button>';
                                 }
+                                lastPage = i;
                             }
-                            myDiv.innerHTML += '<li class="page-item disabled"><a href="javascript:nextPage()">Next</a></li>';
+                            myDiv.innerHTML += '<button class="dt-paging-button disabled" onclick="nextPage()" role="link" type="button" aria-controls="listTable">></button>';
+                            myDiv.innerHTML += '<button class="dt-paging-button last disabled" onclick="loadList(' + lastPage + ')" role="link" type="button" aria-controls="listTable">>></button>';
                         }
 
                     }

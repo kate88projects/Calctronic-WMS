@@ -1,6 +1,4 @@
 ﻿
-@{
-}
 <style type="text/css">
     .show-entries select.form-control {
         width: 60px;
@@ -52,45 +50,6 @@
         opacity: 0.7;
     }
 
-    .pagination {
-        float: right;
-        margin: 0 0 5px;
-    }
-
-    .pagination li a {
-        border: none;
-        font-size: 13px;
-        min-width: 30px;
-        min-height: 30px;
-        color: #999;
-        margin: 0 2px;
-        line-height: 30px;
-        border-radius: 2px !important;
-        text-align: center;
-        padding: 0 6px;
-    }
-
-    .pagination li a:hover {
-        color: #666;
-    }
-
-    .pagination li.active a {
-        background: #03A9F4;
-    }
-
-    .pagination li.active a:hover {
-        background: #0397d6;
-    }
-
-    .pagination li.disabled i {
-        color: #ccc;
-    }
-
-    .pagination li i {
-        font-size: 16px;
-        padding-top: 6px
-    }
-
     .text-success {
         color: #10c469;
     }
@@ -105,45 +64,6 @@
 
     .text-danger {
         color: #ff5b5b;
-    }
-
-    .pagination {
-        float: right;
-        margin: 0 0 5px;
-    }
-
-    .pagination li a {
-        border: none;
-        font-size: 13px;
-        min-width: 30px;
-        min-height: 30px;
-        color: #999;
-        margin: 0 2px;
-        line-height: 30px;
-        border-radius: 2px !important;
-        text-align: center;
-        padding: 0 6px;
-    }
-
-    .pagination li a:hover {
-        color: #666;
-    }
-
-    .pagination li.active a {
-        background: #03A9F4;
-    }
-
-    .pagination li.active a:hover {
-        background: #0397d6;
-    }
-
-    .pagination li.disabled i {
-        color: #ccc;
-    }
-
-    .pagination li i {
-        font-size: 16px;
-        padding-top: 6px
     }
 
     .hint-text {
@@ -225,23 +145,108 @@
                                     <th>Qty</th>
                                     <th>Reel Code</th>
                                     @* <th>Reel Status</th> *@
-                                    <th>Created / Updated</th>
+                                    <th>Created Date</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
                         </table>
                     </div>
 
-                    <div class="clearfix">
-                        <div class="hint-text">Showing <b id="lblCurCount">0</b> out of <b id="lblTotal">0</b> entries</div>
-                        <ul class="pagination" id="ulPagination"></ul>
-                        <input type="hidden" id="txtCurPage">
-                        <input type="hidden" id="txtTotalRecord">
-                        <input type="hidden" id="txtPageSize">
-                        <input type="hidden" id="txtTotalPage">
+                    <div class="dt-container dt-empty-footer">
+                        <div class="dt-layout-row">
+                            <div class="hint-text">Showing <b id="lblCurCount">0</b> of <b id="lblTotal">0</b> entries</div>
+                            @* <ul class="pagination" id="ulPagination">
+                        </ul> *@
+                            <div class="dt-layout-cell dt-layout-end">
+                                <div class="dt-paging">
+                                    <nav aria-label="pagination" id="ulPagination">
+                                    </nav>
+                                </div>
+                            </div>
+                            <input type="hidden" id="txtCurPage">
+                            <input type="hidden" id="txtTotalRecord">
+                            <input type="hidden" id="txtPageSize">
+                            <input type="hidden" id="txtTotalPage">
+                        </div>
                     </div>
-
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" data-bs-backdrop="static" id="myEditModal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Update GRN</h4>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label>Supplier Name</label>
+                    <input id="txtSupplierName2" type="text" class="form-control" style="" placeholder="" onclick="" maxlength="255" oninput="removeErrMsg(this.id)" />
+                    <div id="txtSupplierName2Error" class="error-message"></div>
+                </div>
+                <div class="mb-3">
+                    <label>Supplier Ref No</label>
+                    <input id="txtSupplierRefNo2" type="text" class="form-control" style="" placeholder="" maxlength="50" oninput="removeErrMsg(this.id)" />
+                    <div id="txtSupplierRefNo2Error" class="error-message"></div>
+                </div>
+                <div class="mb-3">
+                    <label>Item</label>
+                    <input id="txtItem2" type="button" class="form-control" style="" placeholder="" onclick="showItemForm('Edit')" />
+                    <div id="txtItem2Error" class="error-message"></div>
+                </div>
+                <div class="mb-3">
+                    <label>Qty</label>
+                    <input id="txtQty2" type="number" class="form-control" style="" placeholder="" oninput="removeErrMsg(this.id)" />
+                    <div id="txtQty2Error" class="error-message"></div>
+                </div>
+                <div class="mb-3">
+                    <label>Expiry Date</label>
+                    <input id="dtpExDate2" name="DateFrom" type="date" class="form-control" placeholder="Expiry Date" oninput="removeErrMsg(this.id)" />
+                    <div id="dtpExDate2Error" class="error-message"></div>
+                </div>
+                <div class="mb-3">
+                    <label>Remark</label>
+                    <input id="txtRemark2" type="text" class="form-control" style="" placeholder="" maxlength="255" />
+                    <div id="txtRemark2Error" class="error-message"></div>
+                </div>
+
+                <input type="hidden" id="txtGRN2">
+                <input type="hidden" id="txtId2">
+                <input type="hidden" id="txtItemId2">
+                <input type="hidden" id="txtLoaderId2">
+                <input type="hidden" id="txtReelCode2">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="updateReceive()">Save</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="cancelEditForm()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="itemModal" role="dialog" style="background-color: rgba(0, 0, 0, 0.2);">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h4 class="modal-title">Select Item</h4>
+            </div>
+            <div class="modal-body">
+                <table id="itemTable" class="row-border dataTable hover order-column mb-2 mt-2" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Item Code</th>
+                            <th>UOM</th>
+                            <th>Description</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <input type="hidden" id="txtItemStatus">
             </div>
         </div>
     </div>
@@ -277,6 +282,7 @@
             $('#dtpDateTo').val(today);
 
             loadList(1);
+            loadItemList();
         });
 
         function prevPage() {
@@ -302,14 +308,98 @@
             loadList(curPage + 1);
         }
 
+        function loadItemList() {
+            $.ajax({
+                url: "/Item/GetActiveItemList/",
+                type: "GET",
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading();
+                },
+                success: function (result) {
+                    swal.close();
+                    if (result.success == true) {
+                        $('#itemTable').DataTable( {
+                            dom: 'frtip',
+                            ordering: false,
+                            data: result.data,
+                            paging: true,
+                            pageLength: 25,
+                            lengthMenu: [25, 50, 100, 250, 500],
+                            columns: [
+                                { data: 'itemCode' },
+                                { data: 'uom' },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        return '<p><span>' + row.description + '</span><br/>' +
+                                        '<span style="font-size:13px;color:grey;">' + row.desc2 + '</span></p>';
+                                    }
+                                },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
+                                        return `<div style="display:flex;">
+                                                    <button class="btn btn-success d-grid addItem-btn" data-row="${rowData}">
+                                                        <span><i class="bi bi-plus""></i> Add</span>
+                                                    </button>
+                                                </div>`;
+                                    }
+                                }
+                            ],
+                            language: {
+                                searchPlaceholder: "🔍︎ Search",
+                                search: ""
+                            },
+                            ordering: {
+                                indicators: false
+                            },
+                            columnControl: ['orderStatus'],
+                            columnDefs: [
+                                { width: '15%', targets: 0 },
+                                { width: '10%', targets: 1 },
+                                { width: '60%', targets: 2 },
+                                { width: '15%', targets: 3 }
+                            ]
+                        });
+
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+        }
+
         function loadList(page) {
             $('#txtCurPage').val(page);
             $('#txtPageSize').val($("#selpageSize").val());
             var ttlPage = $("#txtTotalPage").val();
             for (var j = 1; j <= ttlPage; j++) {
-                $('#btnP' + j).removeClass('active');
+                $('#btnP' + j).removeClass('current');
             }
-            $('#btnP' + page).addClass('active');
+            $('#btnP' + page).addClass('current');
 
             var data = {
                 GRNBatchNo: $("#txtGRN").val(),
@@ -372,21 +462,24 @@
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
-                                        if (row.createdDateDisplay == row.updatedDateDisplay) {
-                                            return `<p style="margin:0;">${row.createdDateDisplay}</p>`;
-                                        }
-                                        else {
-                                            return '<p style="margin:0;"><span>' + row.updatedDateDisplay + '</span><br/>' +
-                                            '<span style="font-size:13px;color:grey;">' + row.createdDateDisplay + '</span></p>';
-                                        }
-                                        // return '<p>' + row.createdDateDisplay + '</p><p>' + row.updatedDateDisplay + '</p>';
+                                        // if (row.createdDateDisplay == row.updatedDateDisplay) {
+                                        //     return `<p style="margin:0;">${row.createdDateDisplay}</p>`;
+                                        // }
+                                        // else {
+                                        //     return '<p style="margin:0;"><span>' + row.updatedDateDisplay + '</span><br/>' +
+                                        //     '<span style="font-size:13px;color:grey;">' + row.createdDateDisplay + '</span></p>';
+                                        // }
+                                        return '<p>' + row.createdDateDisplay + '</p> ';
                                     }
                                 },
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
-                                        return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;" onclick="editBinForm(\'' + row.bin_Id + '\', \'' + row.binCode + '\', \'' + row.colNo + '\', \'' + row.rowNo + '\', \'' + row.isActive + '\')"><span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
-                                                '<button class="btn btn-danger deactivate-account" onclick="deleteBin(\'' + row.bin_Id + '\', \'' + row.binCode + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
+                                        // console.log(row);
+                                        const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
+                                        return `<button class="btn btn-warning edit-btn" data-row="${rowData}" id="editBtn" data-bs-toggle="tooltip" title="Edit">
+                                                <i class="bi bi-pencil-square"></i> Edit</button>
+                                                <button class="btn btn-danger deactivate-account delete-btn" data-row="${rowData}" data-id="${row.grnDetail_Id}" data-code="${row.reelCode}"> Delete</button>`;
                                     }
                                 }
                             ],
@@ -407,26 +500,45 @@
                             $('#ulPagination').html('');
 
                             var pageSize = $("#selpageSize").val();
-                            const myDiv = document.getElementById('ulPagination');
-                            var ttlPage = result.totalRecords / pageSize;
+                            var ttlPage = parseInt(result.totalRecords / pageSize);
                             if ((result.totalRecords % pageSize) > 0) {
                                 ttlPage = ttlPage + 1;
                             }
                             $('#txtTotalRecord').val(result.totalRecords);
                             $('#txtTotalPage').val(ttlPage);
 
-                            myDiv.innerHTML += '<li class="page-item disabled"><a href="javascript:prevPage()">Previous</a></li>';
-                            for (var i = 1; i <= ttlPage; i++) {
-                                if (i == 1) {
-                                       myDiv.innerHTML += '<li class="page-item active" id="btnP'+ i +'"><a href="javascript:loadList('+ i +')" class="page-link">'+ i +'</a></li>';
-                                }
-                                else {
-                                       myDiv.innerHTML += '<li class="page-item" id="btnP'+ i +'"><a href="javascript:loadList('+ i +')" class="page-link">'+ i +'</a></li>';
-                                }
-                            }
-                            myDiv.innerHTML += '<li class="page-item disabled"><a href="javascript:nextPage()">Next</a></li>';
                         }
 
+                        var isC = "";
+                        var ttlPage = Number($("#txtTotalPage").val());
+                        const myDiv = document.getElementById('ulPagination');
+                        myDiv.innerHTML = "";
+                        var pages = getVisiblePages(Number($('#lblTotal').html()), page, 8);
+
+                        myDiv.innerHTML += '<button class="dt-paging-button disabled first" onclick="loadList(1)" role="link" type="button" aria-controls="listTable">«</button>';
+                        myDiv.innerHTML += '<button class="dt-paging-button disabled" onclick="prevPage()" role="link" type="button" aria-controls="listTable">‹</button>';
+                        // for (var i = 1; i <= ttlPage; i++) {
+                        //     if (i == 1) {
+                        //            myDiv.innerHTML += '<button class="dt-paging-button current" id="btnP'+ i +'" onclick="loadList('+ i +')" role="link" type="button" aria-controls="listTable">'+ i +'</button>';
+                        //     }
+                        //     else {
+                        //            myDiv.innerHTML += '<button class="dt-paging-button" id="btnP'+ i +'" onclick="loadList('+ i +')" role="link" type="button" aria-controls="listTable">'+ i +'</button>';
+                        //     }
+                        //     lastPage = i;
+                        // }
+                        pages.forEach(function(val, idx) {
+                            if (page == val) {
+                                isC = "current";
+                            }
+                            else {
+                                isC = "";
+                            }
+                            if (val <= ttlPage) {
+                                myDiv.innerHTML += '<button class="dt-paging-button ' + isC + '" id="btnP'+ val +'" onclick="loadList('+ val +')" role="link" type="button" aria-controls="listTable">'+ val +'</button>';
+                            }
+                        });
+                        myDiv.innerHTML += '<button class="dt-paging-button disabled" onclick="nextPage()" role="link" type="button" aria-controls="listTable">›</button>';
+                        myDiv.innerHTML += '<button class="dt-paging-button last disabled" onclick="loadList(' + ttlPage + ')" role="link" type="button" aria-controls="listTable">»</button>';
 
                     }
                     else {
@@ -447,6 +559,279 @@
             });
         }
 
+        function removeErrMsg(fields, clearValue = false) {
+            if (!Array.isArray(fields)) {
+                fields = [fields];
+            }
 
+            fields.forEach(function(field) {
+                document.getElementById(field).classList.remove('is-invalid');
+                document.getElementById(field).classList.remove('is-valid');
+                document.getElementById(field + 'Error').textContent = '';
+                if (clearValue) document.getElementById(field).value = '';
+            });
+        }
+
+        function showItemForm(mode) {
+            $('#txtItemStatus').val(mode);
+            $('#itemModal').modal("show");
+        }
+
+        $('#itemTable').on('click', '.addItem-btn', function() {
+            const row = JSON.parse($(this).attr('data-row'));
+            addItemForm(row);
+        });
+
+        function addItemForm(row) {
+            $("#txtItem2").val(row.itemCode);
+            $("#txtItemId2").val(row.item_Id);
+
+            // removeErrMsg('txtItem');
+            $("#itemModal").modal("toggle");
+
+            // //get expired date range
+            // $.ajax({
+            //     url: "/Item/GetSingleItemGroup",
+            //     type: "GET",
+            //     dataType: 'JSON',
+            //     data: { id: row.itemGroup_Id },
+            //     contentType: 'application/json; charset=utf-8',
+            //     success: function (result) {
+            //         if (result.success) {
+            //             const today = new Date();
+            //             const years = result.data.expiredYears;
+            //             const months = result.data.expiredMonths;
+
+            //             const expiredDate = new Date(today);
+            //             expiredDate.setFullYear(expiredDate.getFullYear() + years);
+            //             expiredDate.setMonth(expiredDate.getMonth() + months);
+            //             const formattedDate = expiredDate.toISOString().split('T')[0];
+
+            //             document.getElementById("dtpExDate").value = formattedDate;
+            //         }
+            //     },
+            //     error: function (error) {
+            //         swal.fire({
+            //             icon: 'error',
+            //             title: "Wait",
+            //             text: error.val
+            //         });
+            //     }
+            // });
+        }
+
+        $('#listTable').on('click', '.edit-btn', function () {
+            const row = JSON.parse($(this).attr('data-row'));
+            console.log("edit here", row);
+            editItemForm(row);
+
+        });
+
+        function editItemForm(row) {
+            removeErrMsg(['txtSupplierName2', 'txtSupplierRefNo2', 'txtItem2', 'txtQty2', 'dtpExDate2', 'txtRemark2']);
+            $("#txtId2").val(row.grnDetail_Id);
+            $("#txtItemId2").val(row.item_Id);
+            // $("#txtLoaderId2").val(row.loader_Id);
+            $("#txtReelCode2").val(row.reelCode);
+            $("#txtSupplierName2").val(row.supplierName);
+            $("#txtSupplierRefNo2").val(row.supplierRefNo);
+            $("#txtItem2").val(row.itemCode);
+            $("#txtQty2").val(row.qty);
+            $("#txtGRN2").val(row.grnBatchNo);
+
+            const expiryDate = row.expiryDate.split('T')[0];
+            $("#dtpExDate2").val(expiryDate);
+            $("#txtRemark2").val(row.remark);
+            $("#myEditModal").modal("show");
+        }
+
+        function cancelEditForm() {
+            $("#myEditModal").modal("toggle");
+        }
+
+        function validateInput(inputChecks) {
+            let isValid = true;
+
+            inputChecks.forEach(input => {
+                const el = document.getElementById(input.id);
+                if (el && el.value.trim() === "") {
+                    showError(input.id, `Please enter ${input.label}.`);
+                    isValid = false;
+                }
+            });
+
+            return isValid;
+        }
+
+        function updateReceive() {
+            const inputChecks = [
+                { id: "txtSupplierName2", label: "Supplier Name" },
+                { id: "txtSupplierRefNo2", label: "Supplier Ref No" },
+                { id: "txtItem2", label: "Item" },
+                { id: "txtQty2", label: "Qty" },
+                { id: "dtpExDate2", label: "Exipry Date" },
+            ];
+            removeErrMsg(inputChecks.map(input => input.id));
+            if (validateInput(inputChecks) == false) {
+                return;
+            }
+
+            var data = {
+                GRNBatchNo: $("#txtGRN2").val(),
+                ReelCode: $("#txtReelCode2").val(),
+                GRNDetail_Id: $("#txtId2").val(),
+                SupplierName: $("#txtSupplierName2").val(),
+                SupplierRefNo: $("#txtSupplierRefNo2").val(),
+                Item_Id: $("#txtItemId2").val(),
+                Qty: $("#txtQty2").val(),
+                ExpiryDate: $("#dtpExDate2").val(),
+                Remark: $("#txtRemark2").val()
+            }
+
+            $.ajax({
+                url: '/GRN/SaveGRNDtl',
+                type: 'POST',
+                data: JSON.stringify(data),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                        swal.fire({
+                            icon: 'success',
+                            title: "Succes Save",
+                            text: "",
+                        });
+                        $('#myEditModal').modal("toggle");
+                        // refreshListTable(data.GRNDetail_Id);
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+
+            // console.log(id);
+        }
+
+        $('#listTable').on('click', '.delete-btn', function() {
+            const id = $(this).attr('data-id');
+            const reelCode = $(this).attr('data-code');
+            deleteItem(id, reelCode);
+        });
+
+        function deleteItem(id, reelCode) {
+            swal.fire({
+                title: "Are you sure want to delete?",
+                text: "You will not be able to recover this record!",
+                inputAttributes: {
+                    autocapitalize: 'off'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'ok',
+                cancelButtonText: 'cancel',
+                allowOutsideClick: false
+            }).then(function(r) {
+                if (r.isConfirmed == true) {
+
+                    var data = {
+                        GRNDetail_Id: id,
+                        ReelCode: reelCode,
+                    };
+
+                    $.ajax({
+                        url: '/GRN/DeleteGRNDtl',
+                        type: 'DELETE',
+                        data: JSON.stringify(data),
+                        dataType: 'json',
+                        contentType: 'application/json; charset=utf-8',
+                        beforeSend: function () {
+                            Swal.fire({
+                                text: 'Please Wait',
+                                width: '300px',
+                                allowEscapeKey: false,
+                                allowOutsideClick: false,
+                                showConfirmButton: false,
+                            });
+                            Swal.showLoading()
+                        },
+                        success: function (result) {
+                            if (result.success == true) {
+                                swal.fire({
+                                    icon: 'success',
+                                    title: "Success Deleted",
+                                    text: "",
+                                    didClose: () => {
+                                      window.location.reload();
+                                    }
+                                });
+                            }
+                            else {
+                                swal.fire({
+                                    icon: 'error',
+                                    title: "Wait",
+                                    text: result.errMessage
+                                });
+                            }
+                        },
+                        error: function (error) {
+                            swal.fire({
+                                icon: 'error',
+                                title: "Wait",
+                                text: error.val
+                            });
+                        }
+                    });
+                }
+                else {
+                    return;
+                }
+            });
+        }
+
+        function getVisiblePages(totalPages, currentPage, range = 5) {
+            if (totalPages <= range) {
+                // If total pages are less than or equal to the range, show all of them
+                return Array.from({ length: totalPages }, (_, i) => i + 1);
+            }
+
+            let startPage = Math.max(1, currentPage - Math.floor(range / 2));
+            let endPage = Math.min(totalPages, startPage + range - 1);
+
+            // Adjust startPage if endPage hits totalPages boundary
+            if (endPage === totalPages) {
+                startPage = Math.max(1, endPage - range + 1);
+            }
+
+            // Create an array of page numbers within the calculated range
+            const pages = [];
+            for (let i = startPage; i <= endPage; i++) {
+                pages.push(i);
+            }
+
+            return pages;
+        }
     </script>
 }

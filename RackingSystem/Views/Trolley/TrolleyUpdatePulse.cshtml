@@ -324,6 +324,11 @@
 @section PageHeader {
     <header class="d-flex align-items-center justify-content-between w-100">
         <h2 class="pageTitle">Update Trolley Slot QR Pulse</h2>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-warning" onclick="exportLogFile()">
+                Export Pulses
+            </button>
+        </div>
     </header>
 }
 
@@ -435,6 +440,9 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/datatables.min.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
+
+    <script src="~/js/xlsx.full.min.js"></script>
+    <script src="~/js/exceljs.min.js"></script>
 
     <script type="text/javascript">
 
@@ -939,6 +947,59 @@
         // function cancelForm() {
         //     $("#myModal").modal("toggle");
         // }
+
+
+        function exportLogFile() {
+
+            var col = Number($('#txtCol').val());
+            $.ajax({
+                url: "/Trolley/GetTrolleySlotPulsesExcel?colNo=" + col,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                },
+                success: function (result) {
+                    // console.log('Export Err::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+
+                        const wb = XLSX.utils.book_new();
+                        wb.Props = {
+                            Title: "Trolley - QR Pulses",
+                            Subject: "Get Compare Trolley QR Pulses",
+                            Author: "Flex Software Consulting Sdn Bhd",
+                            CreatedDate: new Date()
+                        }
+
+                        // const ws = XLSX.utils.aoa_to_sheet([]); //worksheet data
+                        const ws = XLSX.utils.json_to_sheet(result.data);
+
+                        ws.A1.v = "Trolley Slot Code";
+                        ws.B1.v = "Col No";
+                        ws.C1.v = "Row No";
+                        ws.D1.v = "QR X Pulse";
+                        ws.E1.v = "QR Z Pulse";
+                        ws.F1.v = "Last Reading Time";
+                        ws.G1.v = "Previous QR X Pulse";
+                        ws.H1.v = "Previous QR Z Pulse";
+
+                        XLSX.utils.book_append_sheet(wb, ws, col.toString());
+                        XLSX.writeFile(wb, "TrolleyQRPulses.xlsx");
+
+                    }
+                },
+                error: function (error) {
+                    console.log('Export Err::' + error.val);
+                }
+            });
+
+
+        }
 
 
     </script>

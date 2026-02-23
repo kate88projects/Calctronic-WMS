@@ -659,11 +659,42 @@
     }
 
     .tab-panel {
-        padding: 30px 0;
+        padding: 30px 0 0 0;
         height: 90vh;
         /* border-top: 1px solid #ccc; */
     }
 
+    .sideList {
+        height: 100%; /* Full-height */
+        width: 0; /* 0 width - change this with JavaScript */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Stay on top */
+        top: 0;
+        right: 0;
+        background-color: #111; /* Black background color */
+        overflow-x: hidden; /* Disable horizontal scroll */
+        /* padding-top: 60px; /* Place content 60px from the top */ */
+        transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
+    }
+
+    #list-btn {
+        transition: margin-left .5s; /* Transition effect for main content */
+    }
+
+    .fixed-button {
+        position: fixed; /* Positions the button relative to the browser window */
+        top: 20px; /* Aligns the button to the top edge of the window */
+        right: 0; /* Aligns the button to the right edge of the window */
+        /* Optional: Add some margin for better aesthetics and prevent touching the edge */
+        margin: 10px;
+        /* Optional: Add other styling */
+        padding: 10px 15px;
+        background-color: var(--accent-color); /*  green;*/
+        color: white;
+        border: none;
+        cursor: pointer;
+        z-index: 1000; /* Ensures the button is above other content */
+    }
 </style>
 
 <header>
@@ -694,6 +725,8 @@
         <button id="cont-btn" onclick="systemCont()" class="control-btn start-btn hidden">Continue</button>
         <button id="start-btn" onclick="systemStart()" class="control-btn start-btn">Start</button>
         <button id="stop-btn" onclick="systemStop()" class="control-btn stop-btn">Stop</button>
+
+        <button id="list-btn" onclick="openList()" class="control-btn list-btn">List</button>
     </div>
 
     <div class="system-status">
@@ -794,31 +827,6 @@
         </div>
     </section>
 
-    <section id="reel-session" class="control-session-list">
-
-        <div class="tabset">
-            <!-- Tab 1 -->
-            <input type="radio" name="tabset" id="tab1" aria-controls="Upcoming" checked>
-            <label for="tab1">Upcoming</label>
-            <!-- Tab 2 -->
-            <input type="radio" name="tabset" id="tab2" aria-controls="Insufficient">
-            <label for="tab2">Insufficient</label>
-
-            <div class="tab-panels">
-                <section id="tb1" class="tab-panel">
-                    <div id="system-log-3">
-                    </div>
-                </section>
-                <section id="tb2" class="tab-panel">
-                    <div id="system-log-4">
-                    </div>
-                </section>
-            </div>
-
-        </div>
-
-
-    </section>
 </main>
 
 <div class="modal fade" id="jobDoneModal" role="dialog" data-bs-backdrop="static">
@@ -875,6 +883,33 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- Modal Pending / Insufficient List -->
+<div id="mySideList" class="sideList">
+    <section id="reel-session" class="control-session-list">
+        <div class="tabset">
+            <!-- Tab 1 -->
+            <input type="radio" name="tabset" id="tab1" aria-controls="Upcoming" checked>
+            <label for="tab1">Upcoming</label>
+            <!-- Tab 2 -->
+            <input type="radio" name="tabset" id="tab2" aria-controls="Insufficient">
+            <label for="tab2">Insufficient</label>
+
+            <div class="tab-panels">
+                <section id="tb1" class="tab-panel">
+                    <div id="system-log-3">
+                    </div>
+                </section>
+                <section id="tb2" class="tab-panel">
+                    <div id="system-log-4">
+                    </div>
+                </section>
+            </div>
+
+            <button id="close-btn" onclick="closeList()" class=" fixed-button hidden">Close</button>
+        </div>
+    </section>
 </div>
 
 @section Scripts
@@ -944,8 +979,18 @@
             }
             // loadDBUpcoming();
 
-            var a = loadPLCGetRetrieveTrayStatus();
+            // var a = loadPLCGetRetrieveTrayStatus();
         });
+
+        function openList() {
+            document.getElementById("mySideList").style.width = "30%"; // Set the width of the side navigation
+            document.querySelector('#close-btn').classList.remove('hidden');
+        }
+
+        function closeList() {
+            document.getElementById("mySideList").style.width = "0"; // Set the width of the side navigation back to 0
+            document.querySelector('#close-btn').classList.add('hidden');
+        }
 
         async function showJSONModal() {
 

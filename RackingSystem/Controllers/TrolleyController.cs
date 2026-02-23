@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RackingSystem.Data;
 using RackingSystem.Models;
@@ -390,6 +391,40 @@ namespace RackingSystem.Controllers
 
                 result.errStackTrace = ttlC.ToString();
                 result.data = result.data.Where(x => x.HasReel && x.ReelNo == "0").ToList();
+            }
+
+            return result;
+        }
+
+        [HttpGet]
+        public async Task<ServiceResponseModel<List<SlotPulsesExcelDTO>>> GetTrolleySlotPulsesExcel(int colNo)
+        {
+            ServiceResponseModel<List<SlotPulsesExcelDTO>> result = new ServiceResponseModel<List<SlotPulsesExcelDTO>>();
+            result.data = new List<SlotPulsesExcelDTO>();
+
+            try
+            {
+                var slotList = await _context.TrolleySlot.Where(x => x.ColNo == colNo).OrderBy(x => x.RowNo).ToListAsync();
+                foreach (var s in slotList)
+                {
+                    result.data.Add(new SlotPulsesExcelDTO
+                    {
+                        SlotCode = s.TrolleySlotCode,
+                        ColNo = s.ColNo,
+                        RowNo = s.RowNo,
+                        QRXPulse = s.QRXPulse,
+                        QRZPulse = s.QRYPulse,
+                        LastReadingTime = s.LastQRReadTime.ToString("yyyy-MM-dd HH:mm"),
+                        PreviousQRXPulse = s.LastQRXPulse,
+                        PreviousQRZPulse = s.LastQRYPulse,
+                    });
+                }
+                result.success = true;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
             }
 
             return result;

@@ -23,7 +23,7 @@ using RackingSystem.Models.Log;
 
 namespace RackingSystem.Controllers.API
 {
-    [Authorize(AuthenticationSchemes = $"{JwtBearerDefaults.AuthenticationScheme}")]
+    //[Authorize(AuthenticationSchemes = $"{JwtBearerDefaults.AuthenticationScheme}")]
     [ApiController]
     [Route("api/[controller]")]
     public class PLCHubOutController : Controller
@@ -635,18 +635,19 @@ namespace RackingSystem.Controllers.API
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
                     {
-                        PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
                         value = registers[i];
                     }
 
                     if (value == 1)
                     {
                         exit = true;
+                        PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, $"Register {startAddress}: {value}", "", false);
                     }
                     if ((DateTime.Now - dtRun).TotalSeconds > 30)
                     {
                         result.errMessage = "Timeout. Cannot get Empty Tray Status.";
                         exit = true;
+                        PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, $"Register {startAddress}: {value}", "", false);
                     }
                 }
 
@@ -663,22 +664,22 @@ namespace RackingSystem.Controllers.API
                 PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Disconnected.", "", false);
             }
 
-            //// double check slot_id
-            //string slotCode = GetSlotIDByIP(configRack.ConfigValue);
-            //var slotChk = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
-            //if (slotChk == null)
-            //{
-            //    result.errMessage = "Cannot find Slot Retrieved [" + slotCode + "]. ";
-            //}
-            //else
-            //{
-            //    var pulses = ReadPulseByIP(configRack.ConfigValue, slotCode);
-            //    result.data.SlotCode = slotCode;
-            //    result.data.QRXPulse = pulses[0];
-            //    result.data.QRYPulse = pulses[1];
-            //    result.data.QRXPulseDiffer = pulses[2];
-            //    result.data.QRXPulseDiffer = pulses[3];
-            //}
+            // double check slot_id
+            string slotCode = GetSlotIDByIP(configRack.ConfigValue);
+            var slotChk = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
+            if (slotChk == null)
+            {
+                result.errMessage = "Cannot find Slot Retrieved [" + slotCode + "]. ";
+            }
+            else
+            {
+                var pulses = ReadPulseByIP(configRack.ConfigValue, slotCode);
+                result.data.SlotCode = slotCode;
+                result.data.QRXPulse = pulses[0];
+                result.data.QRYPulse = pulses[1];
+                result.data.QRXPulseDiffer = pulses[2];
+                result.data.QRXPulseDiffer = pulses[3];
+            }
 
 
             result.success = value == 1;
@@ -939,37 +940,38 @@ namespace RackingSystem.Controllers.API
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
                     {
-                        PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
                         value = registers[i];
                     }
 
                     if (value == 0) // 1 means tengah buat, 0 means complete
                     {
                         exit = true;
+                        PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, $"Register {startAddress} :  {value}", "", false);
                     }
                     if ((DateTime.Now - dtRun).TotalSeconds > 30)
                     {
                         result.errMessage = "Timeout. Cannot get Reel ID.";
                         exit = true;
+                        PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, $"Register {startAddress} :  {value}", "", false);
                     }
                 }
 
-                //// double check slot_id
-                //string slotCode = GetSlotIDByIP(configRack.ConfigValue);
-                //var slotChk = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
-                //if (slotChk == null)
-                //{
-                //    result.errMessage = "Cannot find Slot Put Away [" + slotCode + "]. ";
-                //}
-                //else
-                //{
-                //    var pulses = ReadTrolleyPulseByIP(configRack.ConfigValue, trolleyId, slotCode);
-                //    result.data.SlotCode = slotCode;
-                //    result.data.QRXPulse = pulses[0];
-                //    result.data.QRYPulse = pulses[1];
-                //    result.data.QRXPulseDiffer = pulses[2];
-                //    result.data.QRXPulseDiffer = pulses[3];
-                //}
+                // double check slot_id
+                string slotCode = GetSlotIDByIP(configRack.ConfigValue);
+                var slotChk = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
+                if (slotChk == null)
+                {
+                    result.errMessage = "Cannot find Slot Put Away [" + slotCode + "]. ";
+                }
+                else
+                {
+                    var pulses = ReadTrolleyPulseByIP(configRack.ConfigValue, trolleyId, slotCode);
+                    result.data.SlotCode = slotCode;
+                    result.data.QRXPulse = pulses[0];
+                    result.data.QRYPulse = pulses[1];
+                    result.data.QRXPulseDiffer = pulses[2];
+                    result.data.QRXPulseDiffer = pulses[3];
+                }
 
                 result.success = value == 0;
                 result.data.data = value.ToString();
@@ -1331,11 +1333,11 @@ namespace RackingSystem.Controllers.API
                     {
                         exit = true;
                         slotID = slotID + decimalText;
-                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress}: {value}", "", false);
+                        PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, $"Register {startAddress}: {value}", "", false);
                     }
                     if ((DateTime.Now - dtRun).TotalSeconds > 3)
                     {
-                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Timeout. Cannot get Slot ID..", "", false);
+                        PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Timeout. Cannot get Slot ID..", "", false);
                         exit = true;
                     }
                 }
@@ -1504,18 +1506,19 @@ namespace RackingSystem.Controllers.API
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
                     {
-                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
                         value = registers[i];
                     }
 
                     if (value > 0)
                     {
                         exit = true;
+                        PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
                     }
                     if ((DateTime.Now - dtRun).TotalSeconds > 1)
                     {
                         //result.errMessage = "Timeout. Cannot get Status.";
                         exit = true;
+                        PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
                     }
                 }
 
@@ -1657,7 +1660,7 @@ namespace RackingSystem.Controllers.API
             {
                 modbusClient.Connect();
 
-                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
 
                 int startAddress = 4223;
                 int numRegisters = 1;
@@ -1667,18 +1670,19 @@ namespace RackingSystem.Controllers.API
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
                     {
-                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
                         value = registers[i];
                     }
 
                     if (value > 0)
                     {
                         exit = true;
+                        PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
                     }
                     if ((DateTime.Now - dtRun).TotalSeconds > 1)
                     {
                         //result.errMessage = "Timeout. Cannot get Status.";
                         exit = true;
+                        PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
                     }
                 }
 

@@ -23,7 +23,7 @@ using Microsoft.Data.SqlClient;
 
 namespace RackingSystem.Controllers.API
 {
-    [Authorize(AuthenticationSchemes = $"{JwtBearerDefaults.AuthenticationScheme}")]
+    //[Authorize(AuthenticationSchemes = $"{JwtBearerDefaults.AuthenticationScheme}")]
     [ApiController]
     [Route("api/[controller]")]
     public class PLCTrolleyController : Controller
@@ -494,18 +494,19 @@ namespace RackingSystem.Controllers.API
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
                     {
-                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
                         value = registers[i];
                     }
 
                     if (value == 1)
                     {
                         exit = true;
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
                     }
                     if ((DateTime.Now - dtRun).TotalSeconds > 2)
                     {
                         result.errMessage = "Timeout. Cannot get Empty Tray Status.";
                         exit = true;
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
                     }
                 }
 
@@ -560,18 +561,19 @@ namespace RackingSystem.Controllers.API
                                 registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                                 for (int i = 0; i < registers.Length; i++)
                                 {
-                                    PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
                                     value = registers[i];
                                 }
 
                                 if (value == 1)
                                 {
                                     exit = true;
+                                    PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
                                 }
                                 if ((DateTime.Now - dtRun).TotalSeconds > 15)
                                 {
                                     result.errMessage = "Timeout. Cannot get Empty Tray Status.";
                                     exit = true;
+                                    PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
                                 }
                             }
 
@@ -871,7 +873,6 @@ namespace RackingSystem.Controllers.API
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
                     {
-                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
                         value = registers[i];
                     }
 
@@ -881,11 +882,13 @@ namespace RackingSystem.Controllers.API
                         _dbContext.SaveChanges();
 
                         exit = true;
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
                     }
                     if ((DateTime.Now - dtRun).TotalSeconds > 30)
                     {
                         result.errMessage = "Timeout. Cannot get Reel ID.";
                         exit = true;
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
                     }
                 }
 
@@ -1234,7 +1237,6 @@ namespace RackingSystem.Controllers.API
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
                     {
-                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
                         value = registers[i];
                         decimalText = getDecimalText(registers[i]);
                     }
@@ -1243,11 +1245,13 @@ namespace RackingSystem.Controllers.API
                     {
                         exit = true;
                         slotID = slotID + decimalText;
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
                     }
                     if ((DateTime.Now - dtRun).TotalSeconds > 3)
                     {
                         PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Timeout. Cannot get Slot ID..", "", false);
                         exit = true;
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
                     }
                 }
 
@@ -1415,18 +1419,19 @@ namespace RackingSystem.Controllers.API
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
                     {
-                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
                         value = registers[i];
                     }
 
                     if (value > 0)
                     {
                         exit = true;
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
                     }
                     if ((DateTime.Now - dtRun).TotalSeconds > 3)
                     {
                         //result.errMessage = "Timeout. Cannot get Status.";
                         exit = true;
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
                     }
                 }
 
@@ -1576,18 +1581,19 @@ namespace RackingSystem.Controllers.API
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
                     {
-                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
                         value = registers[i];
                     }
 
                     if (value > 0)
                     {
                         exit = true;
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
                     }
                     if ((DateTime.Now - dtRun).TotalSeconds > 3)
                     {
                         //result.errMessage = "Timeout. Cannot get Status.";
                         exit = true;
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
                     }
                 }
 

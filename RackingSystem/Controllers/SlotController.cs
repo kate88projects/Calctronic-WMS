@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using RackingSystem.Data;
 using RackingSystem.Models;
+using RackingSystem.Models.Log;
 using RackingSystem.Models.Slot;
 using RackingSystem.Models.User;
 using RackingSystem.Services.SlotServices;
@@ -331,6 +332,40 @@ namespace RackingSystem.Controllers
         {
             ServiceResponseModel<SlotStatusReqDTO> result = await _slotService.UpdateWarningSlot(slotReq);
             return new JsonResult(result);
+        }
+
+        [HttpGet]
+        public async Task<ServiceResponseModel<List<SlotPulsesExcelDTO>>> GetSlotPulsesExcel(int colNo)
+        {
+            ServiceResponseModel<List<SlotPulsesExcelDTO>> result = new ServiceResponseModel<List<SlotPulsesExcelDTO>>();
+            result.data = new List<SlotPulsesExcelDTO>();
+
+            try
+            {
+                var slotList = await _context.Slot.Where(x => x.ColNo == colNo).OrderBy(x => x.RowNo).ToListAsync();
+                foreach (var s in slotList)
+                {
+                    result.data.Add(new SlotPulsesExcelDTO
+                    {
+                        SlotCode = s.SlotCode,
+                        ColNo = s.ColNo,
+                        RowNo = s.RowNo,
+                        QRXPulse = s.QRXPulse,
+                        QRZPulse = s.QRYPulse,
+                        LastReadingTime = s.LastQRReadTime.ToString("yyyy-MM-dd HH:mm"),
+                        PreviousQRXPulse = s.LastQRXPulse,
+                        PreviousQRZPulse = s.LastQRYPulse,
+                    });
+                }
+                result.success = true;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
         }
 
     }

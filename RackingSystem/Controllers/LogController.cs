@@ -22,11 +22,21 @@ namespace RackingSystem.Controllers
         public IActionResult HubInLogView()
         {
             ViewBag.PermissionList = new List<int>();
-            string s = HttpContext.Session.GetString("xSession") ?? "";
-            if (s != "")
+            //string s = HttpContext.Session.GetString("xSession") ?? "";
+            //if (s != "")
+            //{
+            //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+            //    ViewBag.PermissionList = data.UACIdList;
+            //}
+
+            if (User.Identity?.IsAuthenticated ?? false)
             {
-                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
-                ViewBag.PermissionList = data.UACIdList;
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
+                {
+                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
+                    ViewBag.PermissionList = uacIdList;
+                }
             }
 
             ViewData["ActiveGroup"] = "grpRACKING";
@@ -59,11 +69,21 @@ namespace RackingSystem.Controllers
         public IActionResult HubOutLogView()
         {
             ViewBag.PermissionList = new List<int>();
-            string s = HttpContext.Session.GetString("xSession") ?? "";
-            if (s != "")
+            //string s = HttpContext.Session.GetString("xSession") ?? "";
+            //if (s != "")
+            //{
+            //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+            //    ViewBag.PermissionList = data.UACIdList;
+            //}
+
+            if (User.Identity?.IsAuthenticated ?? false)
             {
-                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
-                ViewBag.PermissionList = data.UACIdList;
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
+                {
+                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
+                    ViewBag.PermissionList = uacIdList;
+                }
             }
 
             ViewData["ActiveGroup"] = "grpRACKING";
@@ -84,7 +104,7 @@ namespace RackingSystem.Controllers
             int ttl = -1;
             if (req.page == 1)
             {
-                ttl = _context.PLCHubInLog.Count();
+                ttl = _context.PLCHubOutLog.Count();
             }
             ServiceResponseModel<List<PLCHubOutLog>> result = new ServiceResponseModel<List<PLCHubOutLog>>();
             result.success = true;
@@ -96,11 +116,21 @@ namespace RackingSystem.Controllers
         public IActionResult DrawerInView()
         {
             ViewBag.PermissionList = new List<int>();
-            string s = HttpContext.Session.GetString("xSession") ?? "";
-            if (s != "")
+            //string s = HttpContext.Session.GetString("xSession") ?? "";
+            //if (s != "")
+            //{
+            //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+            //    ViewBag.PermissionList = data.UACIdList;
+            //}
+
+            if (User.Identity?.IsAuthenticated ?? false)
             {
-                UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
-                ViewBag.PermissionList = data.UACIdList;
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
+                {
+                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
+                    ViewBag.PermissionList = uacIdList;
+                }
             }
 
             ViewData["ActiveGroup"] = "grpRACKING";
@@ -121,7 +151,7 @@ namespace RackingSystem.Controllers
             int ttl = -1;
             if (req.page == 1)
             {
-                ttl = _context.PLCHubInLog.Count();
+                ttl = _context.PLCTrolleyLog.Count();
             }
             ServiceResponseModel<List<PLCTrolleyLog>> result = new ServiceResponseModel<List<PLCTrolleyLog>>();
             result.success = true;

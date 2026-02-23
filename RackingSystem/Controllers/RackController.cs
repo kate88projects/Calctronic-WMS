@@ -32,55 +32,44 @@ namespace RackingSystem.Controllers
             ViewBag.DeviceId = "";
             ViewBag.PermissionList = new List<int>();
 
-            try
+            if (User.Identity?.IsAuthenticated ?? false)
             {
-                //string s = HttpContext.Session.GetString("xSession") ?? "";
-                //if (s != "")
-                //{
-                //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
-                //    ViewBag.PermissionList = data.UACIdList;
-                //    ViewBag.xToken = data.Token;
-                //    ViewBag.DeviceId = data.DeviceId;
-                //}
-
-                if (User.Identity?.IsAuthenticated ?? false)
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
                 {
-                    var uacClaim = User.FindFirst("UACIdList")?.Value;
-                    if (uacClaim != null)
-                    {
-                        List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
-                        ViewBag.PermissionList = uacIdList;
-                        ViewBag.xToken = User.FindFirst("Token")?.Value;
-                        ViewBag.DeviceId = User.FindFirst("DeviceId")?.Value;
+                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
+                    ViewBag.PermissionList = uacIdList;
+                    ViewBag.xToken = User.FindFirst("Token")?.Value;
+                    ViewBag.DeviceId = User.FindFirst("DeviceId")?.Value;
 
-                        var q = _context.RackJobQueue.Where(x => x.RackJobQueue_Id == qId).FirstOrDefault();
-                        if (q != null)
+                    var q = _context.RackJobQueue.Where(x => x.RackJobQueue_Id == qId).FirstOrDefault();
+                    if (q != null)
+                    {
+                        if (q.DocType == EnumQueueDocType.Loader.ToString())
                         {
-                            if (q.DocType == EnumQueueDocType.Loader.ToString())
+                            var doc = _context.Loader.Where(x => x.Loader_Id == q.Doc_Id).FirstOrDefault();
+                            if (doc != null)
                             {
-                                var doc = _context.Loader.Where(x => x.Loader_Id == q.Doc_Id).FirstOrDefault();
-                                if (doc != null)
-                                {
-                                    ViewBag.QNo = "HubIn - " + doc.Description;
-                                }
-                            }
-                            else if (q.DocType == EnumQueueDocType.JO.ToString())
-                            {
-                                var doc = _context.JobOrder.Where(x => x.JobOrder_Id == q.Doc_Id).FirstOrDefault();
-                                if (doc != null)
-                                {
-                                    ViewBag.QNo = "HubOut - " + doc.DocNo;
-                                }
-                            }
-                            else
-                            {
-                                var doc = _context.JobOrderEmergency.Where(x => x.JobOrderEmergency_Id == q.Doc_Id).FirstOrDefault();
-                                if (doc != null)
-                                {
-                                    ViewBag.QNo = "HubOut - " + doc.DocNo;
-                                }
+                                ViewBag.QNo = "HubIn - " + doc.Description;
                             }
                         }
+                        else if (q.DocType == EnumQueueDocType.JO.ToString())
+                        {
+                            var doc = _context.JobOrder.Where(x => x.JobOrder_Id == q.Doc_Id).FirstOrDefault();
+                            if (doc != null)
+                            {
+                                ViewBag.QNo = "HubOut - " + doc.DocNo;
+                            }
+                        }
+                        else
+                        {
+                            var doc = _context.JobOrderEmergency.Where(x => x.JobOrderEmergency_Id == q.Doc_Id).FirstOrDefault();
+                            if (doc != null)
+                            {
+                                ViewBag.QNo = "HubOut - " + doc.DocNo;
+                            }
+                        }
+                    }
 
                     var srms = _context.RackJob.FirstOrDefault();
                     if (srms != null)
@@ -111,10 +100,9 @@ namespace RackingSystem.Controllers
                     }
                 }
             }
-            catch (Exception ex)
+            else
             {
-                PLCLogHelper.Instance.InsertPLCHubInLog(_context, 0, "grpRACKING", ex.Message, "", true);
-                PLCLogHelper.Instance.InsertPLCHubInLog(_context, 0, "grpRACKING", ex.StackTrace, "", true);
+                return RedirectToAction("Login", "Account");
             }
 
             ViewData["ActiveGroup"] = "grpRACKING";
@@ -179,29 +167,34 @@ namespace RackingSystem.Controllers
                         }
                     }
 
-                var srms = _context.RackJob.FirstOrDefault();
-                if (srms != null)
-                {
-                    bool isCont = false;
+                    var srms = _context.RackJob.FirstOrDefault();
+                    if (srms != null)
+                    {
+                        bool isCont = false;
 
-                    if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
-                    {
-                        //return View("RackJobHubOutView");
-                    }
-                    if (srms.RackJobQueue_Id == qId && srms.LoginIP == ViewBag.DeviceId && srms.Json != "")
-                    {
-                        ViewBag.QContinuos = "1";
-                        isCont = true;
-                    }
+                        if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
+                        {
+                            //return View("RackJobHubOutView");
+                        }
+                        if (srms.RackJobQueue_Id == qId && srms.LoginIP == ViewBag.DeviceId && srms.Json != "")
+                        {
+                            ViewBag.QContinuos = "1";
+                            isCont = true;
+                        }
 
-                    if (!isCont)
-                    {
-                        srms.Loader_Id = 0;
-                        srms.RackJobQueue_Id = 0;
-                        srms.Json = "";
-                        _context.SaveChangesAsync();
+                        if (!isCont)
+                        {
+                            srms.Loader_Id = 0;
+                            srms.RackJobQueue_Id = 0;
+                            srms.Json = "";
+                            _context.SaveChangesAsync();
+                        }
                     }
                 }
+            }
+            else
+            {
+                return RedirectToAction("Login", "Account");
             }
 
             ViewData["ActiveGroup"] = "grpRACKING";
@@ -210,7 +203,39 @@ namespace RackingSystem.Controllers
             return View();
         }
 
-        public IActionResult NewTransferHubInTask()
+        //public IActionResult NewTransferHubInTask()
+        //{
+        //    ViewBag.xToken = "";
+        //    ViewBag.PermissionList = new List<int>();
+        //    //string s = HttpContext.Session.GetString("xSession") ?? "";
+        //    //if (s != "")
+        //    //{
+        //    //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+        //    //    ViewBag.PermissionList = data.UACIdList;
+        //    //    ViewBag.xToken = data.Token;
+        //    //}
+        //    if (User.Identity?.IsAuthenticated ?? false)
+        //    {
+        //        var uacClaim = User.FindFirst("UACIdList")?.Value;
+        //        if (uacClaim != null)
+        //        {
+        //            List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
+        //            ViewBag.PermissionList = uacIdList;
+        //            ViewBag.xToken = User.FindFirst("Token")?.Value;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        return RedirectToAction("Login", "Account");
+        //    }
+
+        //    ViewData["ActiveGroup"] = "grpRACKING";
+        //    ViewData["ActiveTab"] = "NewTransferHubInTask";
+        //    ViewData["Title"] = "New Hub In Task";
+        //    return View();
+        //}
+
+        public IActionResult ManualHubInTask()
         {
             ViewBag.xToken = "";
             ViewBag.PermissionList = new List<int>();
@@ -233,36 +258,8 @@ namespace RackingSystem.Controllers
             }
 
             ViewData["ActiveGroup"] = "grpRACKING";
-            ViewData["ActiveTab"] = "NewTransferHubInTask";
-            ViewData["Title"] = "New Hub In Task";
-            return View();
-        }
-
-        public IActionResult NewHubInTask()
-        {
-            ViewBag.xToken = "";
-            ViewBag.PermissionList = new List<int>();
-            //string s = HttpContext.Session.GetString("xSession") ?? "";
-            //if (s != "")
-            //{
-            //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
-            //    ViewBag.PermissionList = data.UACIdList;
-            //    ViewBag.xToken = data.Token;
-            //}
-            if (User.Identity?.IsAuthenticated ?? false)
-            {
-                var uacClaim = User.FindFirst("UACIdList")?.Value;
-                if (uacClaim != null)
-                {
-                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
-                    ViewBag.PermissionList = uacIdList;
-                    ViewBag.xToken = User.FindFirst("Token")?.Value;
-                }
-            }
-
-            ViewData["ActiveGroup"] = "grpRACKING";
-            ViewData["ActiveTab"] = "NewHubInTask";
-            ViewData["Title"] = "New Hub In Task";
+            ViewData["ActiveTab"] = "ManualHubInTask";
+            ViewData["Title"] = "Manual Hub In Task";
             return View();
         }
 
@@ -331,29 +328,34 @@ namespace RackingSystem.Controllers
                         }
                     }
 
-                var srms = _context.RackJob.FirstOrDefault();
-                if (srms != null)
-                {
-                    bool isCont = false;
+                    var srms = _context.RackJob.FirstOrDefault();
+                    if (srms != null)
+                    {
+                        bool isCont = false;
 
-                    if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
-                    {
-                        //return View("RackDrawerInView");
-                    }
-                    if (srms.RackJobQueue_Id == qId && srms.LoginIP == ViewBag.DeviceId)
-                    {
-                        ViewBag.QContinuos = "1";
-                        isCont = true;
-                    }
+                        if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
+                        {
+                            //return View("RackDrawerInView");
+                        }
+                        if (srms.RackJobQueue_Id == qId && srms.LoginIP == ViewBag.DeviceId)
+                        {
+                            ViewBag.QContinuos = "1";
+                            isCont = true;
+                        }
 
-                    if (!isCont)
-                    {
-                        srms.Loader_Id = 0;
-                        srms.RackJobQueue_Id = 0;
-                        srms.Json = "";
-                        _context.SaveChangesAsync();
+                        if (!isCont)
+                        {
+                            srms.Loader_Id = 0;
+                            srms.RackJobQueue_Id = 0;
+                            srms.Json = "";
+                            _context.SaveChangesAsync();
+                        }
                     }
                 }
+            }
+            else
+            {
+                return RedirectToAction("Login", "Account");
             }
 
             ViewData["ActiveGroup"] = "grpRACKING";
