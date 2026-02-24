@@ -504,7 +504,6 @@
                     if (result.success == true) {
                         var spText = result.errStackTrace.split(',');
                         console.log(result.data);
-                        globalData = result.data;
                         // document.getElementById('txtCol1').innerHTML = "Usage Col 1 : " + spText[0];
                         // document.getElementById('txtCol2').innerHTML = "Usage Col 2 : " + spText[1];
                         // document.getElementById('txtCol3').innerHTML = "Usage Col 3 : " + spText[2];
@@ -528,7 +527,8 @@
                             return true;
                         });
 
-                        console.log("filteredData", filteredData);
+                        // console.log("filteredData", filteredData);
+                        globalData = filteredData;
 
                         $('#listTable').DataTable( {
                             data: filteredData,
