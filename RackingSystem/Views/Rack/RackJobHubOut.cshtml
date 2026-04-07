@@ -735,6 +735,10 @@
             <label for="chkAutoRun">Auto:</label>
             <input type="checkbox" id="chkAutoRun" />
         </div>
+        <div class="input-container">
+            <label for="chkSensor">Sensor:</label>
+            <input type="checkbox" id="chkSensor" />
+        </div>
     </div>
 
 </header>
@@ -938,6 +942,7 @@
         let inPutAwayMove = false;
 
         let endTask = false;
+        let heightMeasureProcess = false;
 
         let token = '';
         let qId = 0;
@@ -1627,6 +1632,41 @@
             changePutSlot = false;
 
             updateCartesianUIState();
+
+            //add sensor for height measurement 
+            const chkSensor = document.getElementById('chkSensor');
+            if (chkSensor.checked)
+            {
+                var setActiveState = await loadPLCSetHeightMeasureState(1);
+                await delay(1000);
+                var setDirection = await loadPLCSetHeightMeasureDirection();
+                await delay(5000);
+                var getMeasureState = await loadPLCGetHeightMeasureStatus();
+                if (getMeasureState == true)
+                {
+                    var getMeasureState = await loadPLCGetHeightMeasureSlotCount();
+                    if (getMeasureState == false) {
+                        $("#txtPutSlot").val('');
+                        $("#txtPutSlotTake").val('');
+                        sharedDrawerState.trolleyLocation = '';
+                        $("#left-input-tr").val('');
+                        $("#center-input-tr").val('');
+                        $("#right-input-tr").val('');
+
+                        //get new slot
+                        var getTrSlotCode = await loadPLCGetTrolleySlot();
+                        if (getTrSlotCode == 0) {
+                            sharedDrawerState.cartesianRobotState = 'Retrieved';
+                            inPutAwayMove = false;
+                            return;
+                        }
+                    }
+                }
+                //set turn off height cheking measurement
+                setActiveState = await loadPLCSetHeightMeasureState(0);
+            }
+
+            updateCartesianUIState();
             var getSlot = await loadPLCPutAway();
             if (getSlot == false) {
                 sharedDrawerState.cartesianRobotState = 'Retrieved';
@@ -2290,6 +2330,153 @@
             });
 
 
+        }
+
+        // ----------- Put Away :: Height Measurement
+        async function loadPLCSetHeightMeasureState(state) {
+            try {
+                const result = await new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: "/api/PLCHubOut/SetHeightMeasureState",
+                        type: "POST",
+                        dataType: 'JSON',
+                        data: JSON.stringify(state),
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        },
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (result) {
+                            if (result.success == true) {
+                                logMessage('Turn Height Measure On/Off :: Done ', 'info');
+                                resolve(true);
+                            } else {
+                                logMessage('Turn Height Measure On/Off :: ' + result.errMessage, 'alert');
+                                resolve(false);
+                            }
+                        },
+                        error: function (error) {
+                            logMessage('Turn Height Measure On/Off :: ' + error.val, 'alert');
+                            resolve(false);
+                        }
+                    });
+                });
+                return result;
+            } catch (err) {
+                return false;
+            }
+        }
+
+        async function loadPLCSetHeightMeasureDirection() {
+            try {
+                const result = await new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: "/api/PLCHubOut/SetHeightMeasureDirection",
+                        type: "POST",
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        },
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (result) {
+                            if (result.success == true) {
+                                logMessage('Height Measure Retrieve :: Done ', 'info');
+                                resolve(true);
+                            } else {
+                                logMessage('Height Measure Retrieve :: Failed : ' + result.errMessage, 'alert');
+                                resolve(false);
+                            }
+                        },
+                        error: function (error) {
+                            logMessage('Height Measure Retrieve :: Failed : ' + result.errMessage, 'alert');
+                            resolve(false);
+                        }
+                    });
+                });
+                return result;
+            } catch (err) {
+                return false;
+            }
+        }
+
+        async function loadPLCGetHeightMeasureStatus() {
+            try {
+                const result = await new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: "/api/PLCHubOut/GetHeightMeasureStatus",
+                        type: "GET",
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        },
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (result) {
+                            if (result.success == true) {
+                                logMessage('Height Measure Status :: Done ', 'info');
+                                resolve(true);
+                            }
+                            else 
+                            {
+                                logMessage('Height Measure Status :: Failed : ' + result.errMessage, 'alert');
+                                resolve(false);
+                            }
+                        },
+                        error: function (error) {
+                            logMessage('Height Measure Status :: Failed : ' + error.val, 'alert');
+                            resolve(false);
+                        } 
+                    });
+                });
+                return result;
+            } catch (err) {
+                return false;
+            }
+        }
+
+        async function loadPLCGetHeightMeasureSlotCount() {
+
+            var sTake = $("#txtPutSlotTake").val();
+            var reelCode = $("#txtReelCodeC").val();
+
+            try {
+                const result = await new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: "/api/PLCHubOut/GetHeightMeasureSlotCount/" + reelCode + "/" + sTake,
+                        type: "GET",
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        },
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (result) {
+                            if (result.success == true) {
+
+                                if (Number(sTake) < result.data) {
+                                    resolve(false);
+                                }
+                                logMessage('Height Meas ReelSlot :: Slot ' + result.data, 'info');
+                                resolve(true);
+                            }
+                            else
+                            {
+                                if (result.errList.length >= 2 ) {
+                                    logMessage('Height Meas ReelSlot :: ' + result.errList[0], 'alert');
+                                    logMessage('Height Meas ReelSlot :: ' + result.errList[1], 'alert');
+                                }
+                                else {
+                                    if (result.errList.length > 0 ) {
+                                        logMessage('Height Meas ReelSlot :: ' + result.errList[0], 'alert');
+                                    }
+                                }
+                                resolve(false);
+                            }
+                        },
+                        error: function (error) {
+                            logMessage('Height Meas ReelSlot :: ' + error.val, 'alert');
+                            resolve(false);
+                        }
+                    });
+                });
+                return result;
+            } catch (err) {
+                return false;
+            }
         }
 
     </script>

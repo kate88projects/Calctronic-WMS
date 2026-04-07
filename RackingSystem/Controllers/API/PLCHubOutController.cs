@@ -1295,6 +1295,259 @@ namespace RackingSystem.Controllers.API
             return result;
         }
 
+        [HttpGet("GetHeightMeasureStatus")]
+        public async Task<ServiceResponseModel<int>> GetHeightMeasureStatus()
+        {
+            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
+            string methodName = "GetHeightMeasureStatus";
+
+            var configRack = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking1.ToString()).FirstOrDefault();
+            if (configRack == null)
+            {
+                result.errMessage = "Please set IP Address. ";
+                result.data = 0;
+                return result;
+            }
+
+            string plcIp = configRack.ConfigValue;
+            int port = 502;
+            int value = 0;
+            DateTime dtRun = DateTime.Now;
+            bool exit = false;
+
+            ModbusClient modbusClient = new ModbusClient(plcIp, port);
+            try
+            {
+                modbusClient.Connect();
+
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
+
+                int startAddress = 4322;
+                int numRegisters = 1;
+
+                while (!exit)
+                {
+                    int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                    value = registers[0];
+
+                    if (value == 2) // 1 means measuring, 2 means done measurement
+                    {
+                        exit = true;
+                        PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
+                    }
+                    if ((DateTime.Now - dtRun).TotalSeconds > 30)
+                    {
+                        result.errMessage = "Timeout. Cannot get Measurement Status.";
+                        exit = true;
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
+                        return result;
+                    }
+                }
+
+                result.data = value;
+                result.success = true;
+                modbusClient.Disconnect();
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "", false);
+
+            }
+            catch (Exception ex)
+            {
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Error: " + ex.Message, "", true);
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+            finally
+            {
+                modbusClient.Disconnect();
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Disconnected.", "", false);
+            }
+
+            return result;
+        }
+
+        [HttpPost("SetHeightMeasureState")]
+        public async Task<ServiceResponseModel<int>> SetHeightMeasureState([FromBody] int state)
+        {
+            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
+            string methodName = "SetHeightMeasureState";
+
+            var configRack = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking1.ToString()).FirstOrDefault();
+            if (configRack == null)
+            {
+                result.errMessage = "Please set IP Address. ";
+                result.data = 0;
+                return result;
+            }
+
+            string plcIp = configRack.ConfigValue;
+            int port = 502;
+
+            ModbusClient modbusClient = new ModbusClient(plcIp, port);
+            try
+            {
+                modbusClient.Connect();
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
+
+                int registerAddress = 4320;
+                int valueToWrite = state; 
+                modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Successfully wrote value {valueToWrite} to register {registerAddress}.", "", false);
+                result.success = true;
+            }
+            catch (Exception ex)
+            {
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Error: " + ex.Message, "", true);
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+            finally
+            {
+                modbusClient.Disconnect();
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Disconnected.", "", false);
+            }
+
+            return result;
+        }
+
+        [HttpPost("SetHeightMeasureDirection")]
+        public async Task<ServiceResponseModel<int>> SetHeightMeasureDirection()
+        {
+            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
+            string methodName = "SetHeightMeasureDirection";
+
+            var configRack = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking1.ToString()).FirstOrDefault();
+            if (configRack == null)
+            {
+                result.errMessage = "Please set IP Address. ";
+                result.data = 0;
+                return result;
+            }
+
+            string plcIp = configRack.ConfigValue; 
+            int port = 502;
+
+            ModbusClient modbusClient = new ModbusClient(plcIp, port);
+            try
+            {
+                modbusClient.Connect();
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
+                
+                int registerAddress = 4321;
+                int valueToWrite = 2; //retrieval from rack use 2
+                modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Successfully wrote value {valueToWrite} to register {registerAddress}.", "", false);
+                result.success = true;
+            }
+            catch (Exception ex)
+            {
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Error: " + ex.Message, "", true);
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+            finally
+            {
+                modbusClient.Disconnect();
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Disconnected.", "", false);
+            }
+
+            return result;
+        }
+
+        [HttpGet("GetHeightMeasureSlotCount/{reelCode}/{dSlotTake}")]
+        public async Task<ServiceResponseModel<int>> GetHeightMeasureSlotCount(string reelCode, int dbSlotTake)
+        {
+            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
+            string methodName = "GetHeightMeasureSlotCount";
+
+            var configRack = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking1.ToString()).FirstOrDefault();
+            if (configRack == null)
+            {
+                result.errMessage = "Please set IP Address. ";
+                return result;
+            }
+
+            DateTime dtRun = DateTime.Now;
+            bool exit = false;
+
+            int valueSlot = 0;
+            string plcIp = configRack.ConfigValue;
+            int port = 502;
+
+            ModbusClient modbusClient = new ModbusClient(plcIp, port);
+
+            try
+            {
+                exit = false;
+                modbusClient.Connect();
+
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
+
+                while (!exit)
+                {
+                    int startAddress = 4323;
+                    int numRegisters = 1;
+                    int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                    for (int i = 0; i < registers.Length; i++)
+                    {
+                        valueSlot = registers[i];
+                    }
+
+                    if (valueSlot > 0)
+                    {
+                        exit = true;
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {valueSlot}", "", false);
+                    }
+                    if ((DateTime.Now - dtRun).TotalSeconds > 3)
+                    {
+                        result.errList.Add("Timeout. Cannot get Measurement Slot.");
+                        exit = true;
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {valueSlot}", "", false);
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Error: " + ex.Message, "", true);
+                result.errList.Add(ex.Message);
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+            finally
+            {
+                modbusClient.Disconnect();
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Disconnected.", "", false);
+            }
+
+            //int newHeight = 0;
+            if (valueSlot > 0)
+            {
+                if (dbSlotTake < valueSlot)
+                {
+                    var slotUsage = _dbContext.SlotCalculation.Where(x => x.ReserveSlot == valueSlot).OrderByDescending(x => x.MaxThickness).FirstOrDefault();
+                    if (slotUsage != null)
+                    {
+                        Reel? reel = _dbContext.Reel.FirstOrDefault(x => x.ReelCode == reelCode);
+                        if (reel != null)
+                        {
+                            reel.ActualHeight = slotUsage.MaxThickness;
+                            _dbContext.SaveChanges();
+
+                            //newHeight = slotUsage.MaxThickness;
+                        }
+                    }
+                }
+            }
+
+            result.success = valueSlot > 0;
+            //result.data.Add(2);
+            result.data = valueSlot;
+            //result.data.Add(newHeight);
+
+            return result;
+        }
+
         internal string GetSlotIDByIP(string ip)
         {
             string methodName = "GetSlotIDByIP";
