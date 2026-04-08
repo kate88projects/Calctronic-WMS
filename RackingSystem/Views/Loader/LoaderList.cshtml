@@ -1,5 +1,5 @@
 ﻿<style>
-    .edit-btn, .delete-btn {
+    .edit-btn, .delete-btn, .empty-btn {
         height: 33px;
         padding: 5px 10px;
         font-size: 14px;
@@ -173,8 +173,11 @@
                                         return `<div style="display:flex;">
                                             <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
                                                 <span><i class="bi bi-pencil-square pe-1"></i>Edit</span></button>
-                                            <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.loader_Id}" data-code="${row.loaderCode}">
+                                            <button class="btn btn-danger deactivate-account delete-btn" style="margin-right:10px; data-id="${row.loader_Id}" data-code="${row.loaderCode}">
                                                 <span><i class="bi bi-trash pe-1"></i>Delete</span>
+                                            </button>
+                                            <button class="btn btn-primary empty-btn" data-id="${row.loader_Id}" data-code="${row.loaderCode}">
+                                                <span><i class="bi bi-trash pe-1"></i>Empty</span>
                                             </button></div>`;
                                     }
                                 }
@@ -485,6 +488,81 @@
                                 swal.fire({
                                     icon: 'success',
                                     title: "Success Deleted",
+                                    text: "",
+                                    didClose: () => {
+                                      window.location.reload();
+                                    }
+                                });
+                            }
+                            else {
+                                swal.fire({
+                                    icon: 'error',
+                                    title: "Wait",
+                                    text: result.errMessage
+                                });
+                            }
+                        },
+                        error: function (error) {
+                            swal.fire({
+                                icon: 'error',
+                                title: "Wait",
+                                text: error.val
+                            });
+                        }
+                    });
+
+                } else {
+                    return;
+                }
+            });
+        }
+
+        $('#listTable').on('click', '.empty-btn', function () {
+            const id = $(this).attr('data-id');
+            const code = $(this).attr('data-code');
+            emptyItem(id, code);
+        });
+
+        function emptyItem(id, code) {
+            swal.fire({
+                title: "Are you sure want to empty this loader data?",
+                text: "You will not be able to recover this record!",
+                inputAttributes: {
+                    autocapitalize: 'off'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'ok',
+                cancelButtonText: 'cancel',
+                allowOutsideClick: false
+            }).then(function(r) {
+                if (r.isConfirmed == true) {
+
+                    var data = {
+                        Loader_Id: id,
+                        LoaderCode: code
+                    }
+
+                    $.ajax({
+                        url: '/Loader/EmptyLoader',
+                        type: 'POST',
+                        data: JSON.stringify(data),
+                        dataType: 'json',
+                        contentType: 'application/json; charset=utf-8',
+                        beforeSend: function () {
+                            Swal.fire({
+                                text: 'Please Wait',
+                                width: '300px',
+                                allowEscapeKey: false,
+                                allowOutsideClick: false,
+                                showConfirmButton: false,
+                            });
+                            Swal.showLoading();
+                        },
+                        success: function (result) {
+                            if (result.success == true) {
+                                swal.fire({
+                                    icon: 'success',
+                                    title: "Success Empty",
                                     text: "",
                                     didClose: () => {
                                       window.location.reload();

@@ -54,6 +54,7 @@ namespace RackingSystem.Models.RackJob
         public string ReelId { get; set; } = "";
         public string ReelCode { get; set; } = "";
         public int ActualHeight { get; set; } = 0;
+        public long DtlId { get; set; } = 0;
 
         public string CartesianRobotState { get; set; } = "";
         public string CartesianLocation { get; set; } = "";

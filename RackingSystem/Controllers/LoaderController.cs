@@ -66,6 +66,13 @@ namespace RackingSystem.Controllers
             return new JsonResult(result);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> EmptyLoader([FromBody] LoaderDTO req)
+        {
+            ServiceResponseModel<LoaderDTO> result = await _loaderService.EmptyLoader(req);
+            return new JsonResult(result);
+        }
+
         [HttpGet]
         public async Task<ServiceResponseModel<List<LoaderListDTO>>> GetLoaderList_ReadyToLoad()
         {

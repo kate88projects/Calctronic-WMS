@@ -475,7 +475,14 @@
         var autoTimer2;
 
         $(document).ready(function () {
-            $('#txtTrolley').val('Trolley1A');
+            // var savedValue = localStorage.getItem('savedTrolley');
+            // if (savedValue) {
+            //     document.getElementById('txtTrolley').value = savedValue;
+            // }
+            // else {
+                $('#txtTrolley').val(''); // Trolley1A
+            // }
+
             loadListA();
             loadListB();
         });
@@ -520,6 +527,8 @@
         }
 
         function loadListA() {
+            // localStorage.setItem('savedTrolley', col);
+
             $.ajax({
                 url: "/Trolley/GetTrolleySlotStatus?side=A",
                 type: "GET",

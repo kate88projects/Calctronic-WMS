@@ -3,10 +3,12 @@
     public enum EnumUAC
     {
         MM_LoaderList_MENU = 1,
+        MM_LoaderColList_MENU = 7,
         MM_TrolleyList_MENU = 2,
         MM_TrolleySlotList_MENU = 3,
         MM_SlotList_MENU = 4,
         MM_SlotUpdatePulse_MENU = 5,
+        MM_TrolleySlotUpdatePulse_MENU = 8,
         MM_SlotUpdateDrawer_MENU = 6,
 
         STOCK_ItemGroupList_MENU = 20,
@@ -25,9 +27,20 @@
         Q_List_MENU = 90,
 
         RACKING_AvailableReelList_MENU = 100,
-        RACKING_RackingStatus_MENU = 101,
-        RACKING_SetEmptyDrawer_MENU = 102,
-        RACKING_Simulation_MENU = 103,
+        //RACKING_RackingStatus_MENU = 101,
+        //RACKING_SetEmptyDrawer_MENU = 102,
+        //RACKING_Simulation_MENU = 103,
+
+        RPT_LoaderDetailList_MENU = 104,
+        RPT_TrolleyDetailList_MENU = 105,
+        RPT_SRMSColumnStatus_MENU = 106,
+        RPT_TrolleyColumnStatus_MENU = 107,
+
+        RACKING_TrolleyReel_MENU = 108,
+
+        RPT_HubInLog_MENU = 109,
+        RPT_HubOutLog_MENU = 110,
+        RPT_PutAwayEmpDrawer_MENU = 111,
 
         SETTINGS_UserList_MENU = 121,
         SETTINGS_UserAccessRight_MENU = 122,

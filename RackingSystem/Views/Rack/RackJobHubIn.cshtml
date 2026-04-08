@@ -564,7 +564,17 @@
         /* This transition duration should match the delay in the JavaScript setTimeout */
         transition: opacity 0.5s ease-out;
     }
+
+    .trolley-controls a {
+        color: palegoldenrod;
+    }
+
+    .cartesian-controls a {
+        color: palegoldenrod;
+    }
 </style>
+
+
 
 <header>
     <h1 onclick="showJSONModal()">SRMS </h1>
@@ -668,11 +678,12 @@
             <button onclick="startPick()">Pick</button>
             <button onclick="startPlace()">Place</button>
             <hr />
-            <a href="javascript:loadPLCSetLoaderUnload()">Set Unload</a> > <a href="javascript:loadPLCStartBarcodeScanner()">Scan QR</a> > <a href="javascript:loadPLCScanReelID()">Reed Reel</a> > <a href="javascript:loadPLCSetActualHeight()">Set Height (Pick)</a>
+            <a href="javascript:loadPLCSetLoaderUnload()">Set Unload</a> > <a href="javascript:loadPLCStartBarcodeScanner()">Scan QR</a> > 
+            <a href="javascript:loadPLCScanReelID()">Reed Reel</a> > <a href="javascript:loadPLCSetActualHeight()">Set Height (Pick)</a> > <a href="javascript:retry_PickStatus()">* Pick Status *</a>
             <br />
-            <a href="javascript:retry_PickStatus()">Pick Status</a> > <a href="javascript:loadPLCPlaceReel()">Place</a> > <a href="javascript:retry_PlaceStatus()">Place Status</a>
+            <a href="javascript:loadPLCPlaceReel()">Place</a> > <a href="javascript:retry_PlaceStatus()">* Place Status *</a>
             <br />  
-            <a href="javascript:loadPLCEndTask()">All Empty</a>
+            <a href="javascript:loadPLCEndTask()">* All Empty *</a>
         </div>
 
         <div style="height:20px;"></div>
@@ -714,9 +725,12 @@
             <button onclick="startPutAway()">Put Away</button>
             <hr />
             <a href="javascript:loadPLCGetEmptyTraySlot()">Get Drawer Slot</a> > <a href="javascript:loadPLCTakeEmptyTray()">Retrieve</a> >
-            <a href="javascript:loadPLCGetSlot()">Get Valid Slot</a> > <a href="javascript:loadPLCPutAway()">Put Away</a>
+            <a href="javascript:retry_RetrieveStatus()">* Retrieve Status *</a>
             <br />
-            <a href="javascript:retry_RetrieveStatus()">Retrieve Status</a> > <a href="javascript:retry_PutAwayStatus()">Put Away Status</a>
+            <a href="javascript:loadPLCGetSlot()">Get Valid Slot</a> > <a href="javascript:loadPLCPutAway()">Put Away</a> > 
+            <a href="javascript:retry_PutAwayStatus()">* Put Away Status *</a>
+            <br />
+            
         </div>
 
         <input type="text" id="txtRetrieveSlot" placeholder="Retrieve Slot" autocomplete="off">
@@ -773,7 +787,6 @@
         </div>
     </div>
 </div>
-
 
 <!-- Modal Pending / Insufficient List -->
 <div class="modal modal-left fade" id="left_modal" tabindex="-1" role="dialog" aria-labelledby="left_modal">    
@@ -1851,33 +1864,33 @@
 
             changePutSlot = false;
 
-            // 260223 add sensor for chekcing reel height
-            const chkSensor = document.getElementById('chkSensor');
-            if (chkSensor.checked) {
-                var hmTurnOn = await loadPLCTurnHeightMeasurement(1);
-                await delay(1000);
-                var hmPutAway = await loadPLCHeightMeasPutAwayToRack();
-                await delay(3000);
-                var hmResult = await loadPLCGetHeightMeasReelSlot();
-                hmTurnOn = await loadPLCTurnHeightMeasurement(0);
+            // // 260223 add sensor for chekcing reel height
+            // const chkSensor = document.getElementById('chkSensor');
+            // if (chkSensor.checked) {
+            //     var hmTurnOn = await loadPLCTurnHeightMeasurement(1);
+            //     await delay(1000);
+            //     var hmPutAway = await loadPLCHeightMeasPutAwayToRack();
+            //     await delay(3000);
+            //     var hmResult = await loadPLCGetHeightMeasReelSlot();
+            //     hmTurnOn = await loadPLCTurnHeightMeasurement(0);
 
-                if (hmResult == false) {
-                    // reset 
-                    $("#txtPutSlot").val('');
-                    $("#txtPutSlotTake").val('');
-                    sharedDrawerState.cartesianLocation = 'center';
-                    $("#left-input").val('');
+            //     if (hmResult == false) {
+            //         // reset 
+            //         $("#txtPutSlot").val('');
+            //         $("#txtPutSlotTake").val('');
+            //         sharedDrawerState.cartesianLocation = 'center';
+            //         $("#left-input").val('');
 
-                    // get new bottom slot
-                    var getSlotCode = await loadPLCGetSlot();
-                    if (getSlotCode == false) {
-                        sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
-                        inPutAwayMove = false;
-                        return;
-                    }
-                }
-            }
-            // 260223 add sensor for chekcing reel height
+            //         // get new bottom slot
+            //         var getSlotCode = await loadPLCGetSlot();
+            //         if (getSlotCode == false) {
+            //             sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+            //             inPutAwayMove = false;
+            //             return;
+            //         }
+            //     }
+            // }
+            // // 260223 add sensor for chekcing reel height
 
             updateCartesianUIState();
             var getSlot = await loadPLCPutAway();

@@ -74,8 +74,20 @@
                                         <label for="txtLoaderList" style="">Loader List </label>
                                     </li>
                                     <li>
+                                        <input class="chkMaintenance" type="checkbox" id="txtLoaderColList" value="7" />
+                                        <label for="txtLoaderColList" style="">Loader Column List </label>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-sm-3" style="padding:0;">
+                                <ul class="checkboxes">
+                                    <li>
                                         <input class="chkMaintenance" type="checkbox" id="txtSlotList" value="4" />
                                         <label for="txtSlotList" style="">Slot List </label>
+                                    </li>
+                                    <li>
+                                        <input class="chkMaintenance" type="checkbox" id="txtSlotPulses" value="8" />
+                                        <label for="txtSlotPulses" style="">Slot Pulses </label>
                                     </li>
                                 </ul>
                             </div>
@@ -85,13 +97,13 @@
                                         <input class="chkMaintenance" type="checkbox" id="txtTrolleyList" value="2" />
                                         <label for="txtTrolleyList" style="">Trolley List </label>
                                     </li>
-                                </ul>
-                            </div>
-                            <div class="col-sm-3" style="padding:0;">
-                                <ul class="checkboxes">
                                     <li>
                                         <input class="chkMaintenance" type="checkbox" id="txtTrolleySlotList" value="3" />
                                         <label for="txtTrolleySlotList">Trolley Slot List </label>
+                                    </li>
+                                    <li>
+                                        <input class="chkMaintenance" type="checkbox" id="txtTrolleyPulses" value="8" />
+                                        <label for="txtTrolleyPulses" style="">Trolley Pulses </label>
                                     </li>
                                 </ul>
                             </div>
@@ -149,9 +161,57 @@
                             </div>
                             <div class="col-sm-3" style="padding:0;">
                                 <ul class="checkboxes">
-                                    <li>
+                                    @* <li>
                                         <input class="chkGRN" type="checkbox" id="txtReprintList" value="62" />
                                         <label for="txtReprintList">Reprint List </label>
+                                    </li> *@
+                                    <li>
+                                        <input class="chkGRN" type="checkbox" id="txtTaskGRN" value="63" />
+                                        <label for="txtTaskGRN">New Loader Task </label>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    @*JO*@
+                    <div id="joGroup">
+                        <input type="checkbox" name="jo" id="txtJO" />
+                        <label for="txtJO">Job Order </label>
+
+                        <div class="row">
+                            <label class="col-sm-3 col-form-label" style="padding:0;"> </label>
+                            <div class="col-sm-3" style="padding:0;">
+                                <ul class="checkboxes">
+                                    <li>
+                                        <input class="chkJO" type="checkbox" id="txtJOList" value="80" />
+                                        <label for="txtJOList" style="">JO List </label>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-sm-3" style="padding:0;">
+                                <ul class="checkboxes">
+                                    <li>
+                                        <input class="chkJO" type="checkbox" id="txtJOEList" value="81" />
+                                        <label for="txtJOEList" style="">JO Emergency List </label>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    @*Q*@
+                    <div id="qGroup">
+                        <input type="checkbox" name="jo" id="txtQ" />
+                        <label for="txtQ">Queue System </label>
+
+                        <div class="row">
+                            <label class="col-sm-3 col-form-label" style="padding:0;"> </label>
+                            <div class="col-sm-3" style="padding:0;">
+                                <ul class="checkboxes">
+                                    <li>
+                                        <input class="chkQ" type="checkbox" id="txtQList" value="90" />
+                                        <label for="txtQList" style="">Queue List </label>
                                     </li>
                                 </ul>
                             </div>
@@ -161,7 +221,7 @@
                     @*Racking*@
                     <div id="rackingGroup">
                         <input type="checkbox" name="racking" id="txtRacking" />
-                        <label for="txtRacking">Racking </label>
+                        <label for="txtRacking">Report </label>
 
                         <div class="row">
                             <label class="col-sm-3 col-form-label" style="padding:0;"> </label>
@@ -172,25 +232,53 @@
                                         <label for="txtAvailableReelList" style="">Available Reel List </label>
                                     </li>
                                     <li>
+                                        <input class="chkRacking" type="checkbox" id="txtLoaderDtl" value="104" />
+                                        <label for="txtLoaderDtl" style="">Loader Dtl List </label>
+                                    </li>
+                                    <li>
+                                        <input class="chkRacking" type="checkbox" id="txtTrolleyDtl" value="105" />
+                                        <label for="txtTrolleyDtl" style="">Trolley Dtl List </label>
+                                    </li>
+                                    @* <li>
                                         <input class="chkRacking" type="checkbox" id="txtRackingStatus" value="101" />
                                         <label for="txtRackingStatus" style="">Racking Status </label>
-                                    </li>
+                                    </li> *@
                                 </ul>
                             </div>
                             <div class="col-sm-3" style="padding:0;">
                                 <ul class="checkboxes">
                                     <li>
+                                        <input class="chkRacking" type="checkbox" id="txtSRMSCol" value="106" />
+                                        <label for="txtSRMSCol" style="">SRMS Col Status </label>
+                                    </li>
+                                    <li>
+                                        <input class="chkRacking" type="checkbox" id="txtTrolleyCol" value="107" />
+                                        <label for="txtTrolleyCol" style="">Trolley Col Status </label>
+                                    </li>
+                                    @* <li>
                                         <input class="chkRacking" type="checkbox" id="txtSetEmptyDrawer" value="102" />
                                         <label for="txtSetEmptyDrawer" style="">Set Empty Drawer </label>
-                                    </li>
+                                    </li> *@
                                 </ul>
                             </div>
                             <div class="col-sm-3" style="padding:0;">
                                 <ul class="checkboxes">
                                     <li>
+                                        <input class="chkRacking" type="checkbox" id="txtHubInLog" value="109" />
+                                        <label for="txtHubInLog" style="">Hub In Log </label>
+                                    </li>
+                                    <li>
+                                        <input class="chkRacking" type="checkbox" id="txtHubOutLog" value="110" />
+                                        <label for="txtHubOutLog" style="">Hub Out Log </label>
+                                    </li>
+                                    <li>
+                                        <input class="chkRacking" type="checkbox" id="txtPAEmptyDrawerLog" value="111" />
+                                        <label for="txtPAEmptyDrawerLog" style="">PA Empty Drawer </label>
+                                    </li>
+                                    @* <li>
                                         <input class="chkRacking" type="checkbox" id="txtSimulation" value="103" />
                                         <label for="txtSimulation">Simulation </label>
-                                    </li>
+                                    </li> *@
                                 </ul>
                             </div>
                         </div>
@@ -232,6 +320,10 @@
                                     <li>
                                         <input class="chkSetting" type="checkbox" id="txtReelHeight" value="123" />
                                         <label for="txtReelHeight" style="">Reel Height </label>
+                                    </li>
+                                    <li>
+                                        <input class="chkSetting" type="checkbox" id="txtGlobalSet" value="126" />
+                                        <label for="txtGlobalSet" style="">Global Setting</label>
                                     </li>
                                 </ul>
                             </div>
@@ -493,6 +585,14 @@
                 $("#txtJO").prop('checked', true);
         }
 
+            // Q
+            if (!$(this).is(":checked")) {
+               $("#txtQ").prop('checked', false);
+            }
+            if ($(".chkQ:checked").length == $(".chkQ").length) {
+                $("#txtQ").prop('checked', true);
+        }
+
             // Racking
             if (!$(this).is(":checked")) {
                 $("#txtRacking").prop('checked', false);
@@ -637,6 +737,46 @@
                 }
                 if ($(".chkGRN:checked").length == $(".chkGRN").length) {
                     $("#txtGRN").prop('checked', true);
+                }
+
+            });
+
+            // JO
+            $("#txtJO").click(function () {
+                if ($("#txtJO").is(':checked')) {
+                    $("#joGroup input[type=checkbox]").prop('checked', true);
+                }
+                else {
+                    $("#joGroup input[type=checkbox]").prop('checked', false);
+                }
+            })
+
+            $(".chkJO").on("change", function () {
+                if (!$(this).is(":checked")) {
+                    $("#txtJO").prop('checked', false);
+                }
+                if ($(".chkJO:checked").length == $(".chkJO").length) {
+                    $("#txtJO").prop('checked', true);
+                }
+
+            });
+
+            // Q
+            $("#txtQ").click(function () {
+                if ($("#txtQ").is(':checked')) {
+                    $("#qGroup input[type=checkbox]").prop('checked', true);
+                }
+                else {
+                    $("#qGroup input[type=checkbox]").prop('checked', false);
+                }
+            })
+
+            $(".chkQ").on("change", function () {
+                if (!$(this).is(":checked")) {
+                    $("#txtQ").prop('checked', false);
+                }
+                if ($(".chkQ:checked").length == $(".chkQ").length) {
+                    $("#txtQ").prop('checked', true);
                 }
 
             });

@@ -185,6 +185,44 @@
         width: 50%;
     }
 
+    .disabled-link {
+        color: lightyellow;
+    }
+
+    /* Tooltip container for the cell */
+    .tooltip-cell {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+        color: blue;
+        text-decoration: underline;
+    }
+
+        /* Tooltip text/content */
+        .tooltip-cell::after {
+            content: attr(data-tooltip-text); /* Get content from data-tooltip-text attribute */
+            visibility: hidden;
+            opacity: 0;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; /* Position above the text */
+            left: 50%;
+            margin-left: -60px;
+            transition: opacity 0.3s;
+            width: 120px;
+            text-decoration: none;
+        }
+
+        /* Show the tooltip on hover */
+        .tooltip-cell:hover::after {
+            visibility: visible;
+            opacity: 1;
+        }
 </style>
 
 @section PageHeader {
@@ -491,12 +529,14 @@
 
                                 var slotId = "";
                                 var reelNo = "";
+                                var reelCode = "";
                                 var hasReel = false;
                                 result.data.forEach(x => {
                                     if (x.isLeft == true && x.hasReel == true && x.colNo == colNo && x.rowNo === idx && x.reelNo == "0") {
                                     hasReel = true;
                                     }
                                     if (x.isLeft == true && x.colNo == colNo && x.rowNo === idx) {
+                                        reelCode = x.reelCode;
                                         reelNo = x.reelNo;
                                         slotId = x.trolleySlot_Id; 
                                     }
@@ -513,11 +553,12 @@
                                 $(cell2).addClass("tblRow tblCol2 ");
                                 const cell3 = newRow.insertCell(); // or document.createElement('td');
                                 cell3.id = 'C3' + slotId;
-                                cell3.innerHTML = hasReel == true ? "xxx" : '   ';
-                                $(cell3).addClass("tblRow tblCol3");
+                                cell3.innerHTML = hasReel == true ? '<span class="tooltip-cell" data-tooltip-text="' + reelCode + '">xxx</span>' : '   ';
+                                $(cell3).addClass("tblRow tblCol3 ");
 
                                 idx = idx + 1;
                             }
+
                         }
 
                         idx = 1;
@@ -586,6 +627,14 @@
 
 
         }
+
+        $('#A1').on('draw.dt', function () {
+            // Initialize tooltips on the newly drawn elements
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
 
         // async function loadPLCOn(colNo, rowNo) {
         //     // console.log(colNo + " || " + rowNo);

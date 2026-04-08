@@ -977,11 +977,11 @@
             const id = $(this).attr('data-id');
             const code = $(this).attr('data-code');
             if (code == "JO" || code == "JOE") {
-                var redirectUrl = '@Url.Action("RackJobHubOut", "Rack")';
+                var redirectUrl = '@Url.Action("RackJobHubOutHMI", "Rack")';
                 window.open(redirectUrl + '?qId=' + id, '_blank');
             }
             else if (code == "Trolley") {
-                var redirectUrl = '@Url.Action("RackDrawerIn", "Rack")';
+                var redirectUrl = '@Url.Action("RackDrawerInHMI", "Rack")';
                 window.open(redirectUrl + '?qId=' + id, '_blank');
             }
             else {

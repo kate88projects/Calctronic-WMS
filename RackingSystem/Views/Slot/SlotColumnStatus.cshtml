@@ -457,7 +457,14 @@
         var autoTimer;
 
         $(document).ready(function () {
-            $('#txtCol').val(1);
+            var savedValue = localStorage.getItem('savedColNo');
+            if (savedValue) {
+                document.getElementById('txtCol').value = savedValue;
+            }
+            else {
+                $('#txtCol').val(1);
+            }
+
             loadList();
         });
 
@@ -492,6 +499,8 @@
 
         function loadList() {
             var col = $('#txtCol').val();
+            localStorage.setItem('savedColNo', col);
+
             $.ajax({
                 url: "/Slot/GetSlotStatus_ByColumn?req=" + col,
                 type: "GET",

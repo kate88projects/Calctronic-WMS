@@ -306,6 +306,66 @@ namespace RackingSystem.Services.LoaderServices
             return result;
         }
 
+        public async Task<ServiceResponseModel<LoaderDTO>> EmptyLoader(LoaderDTO req)
+        {
+            ServiceResponseModel<LoaderDTO> result = new ServiceResponseModel<LoaderDTO>();
+
+            try
+            {
+                // 1. checking Data
+                if (req == null)
+                {
+                    result.errMessage = "Please refresh the list.";
+                    return result;
+                }
+
+                // 2. save Data
+                Loader? _item = _dbContext.Loader.Find(req.Loader_Id);
+                if (_item == null)
+                {
+                    result.errMessage = "Cannot find this loader, please refresh the list.";
+                    return result;
+                }
+
+                var _reels = _dbContext.LoaderReel.Where(x => x.Loader_Id == req.Loader_Id).ToList();
+                if (_reels.Count > 0)
+                {
+                    foreach (var lr in _reels)
+                    {
+                        var r = _dbContext.Reel.Where(x => x.Reel_Id == lr.Reel_Id).FirstOrDefault();
+                        if (r != null)
+                        {
+                            r.Status = EnumReelStatus.WaitingLoader.ToString();
+                            r.StatusIdx = 1;
+                        }
+                    }
+                    await _dbContext.SaveChangesAsync();
+
+                    _dbContext.LoaderReel.RemoveRange(_reels);
+                    await _dbContext.SaveChangesAsync();
+                }
+
+                var _cols = _dbContext.LoaderColumn.Where(x => x.Loader_Id == req.Loader_Id).ToList();
+                foreach (var col in _cols)
+                {
+                    col.BalanceHeight = _item.ColHeight;
+                }
+                await _dbContext.SaveChangesAsync();
+
+                _item.Status = EnumLoaderStatus.ReadyToLoad.ToString();
+                await _dbContext.SaveChangesAsync();
+
+                result.success = true;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
         public async Task<ServiceResponseModel<List<LoaderListDTO>>> GetLoaderList_ReadyToLoad()
         {
             ServiceResponseModel<List<LoaderListDTO>> result = new ServiceResponseModel<List<LoaderListDTO>>();

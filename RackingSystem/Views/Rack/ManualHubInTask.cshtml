@@ -1,0 +1,168 @@
+﻿
+@{
+}
+
+
+@section PageHeader {
+    <header class="d-flex align-items-center justify-content-between w-100">
+        <h2 class="pageTitle">Manual Task</h2>
+        <div class="d-flex gap-2">            
+            <button type="button" class="btn btn-danger" id="btnEnd" onclick="endTask(2)" >
+                END TASK
+            </button>
+        </div>
+    </header>
+}
+
+@section Scripts
+{
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/sweetalert2.all.min.js"></script>
+
+    <script type="text/javascript">
+
+        let taskLoad = false;
+        let stopDecision = false;
+        let stopTimer = null;
+        let token = "@ViewBag.xToken";
+
+    $(document).ready(function () {
+    });
+
+        async function endTask(action) {
+            if (stopDecision) stopDecision(true);
+
+            var loaderId = 1;
+
+            var title = action == 2 ? "End Task" : "Stop Task";
+            let timerInterval;
+
+            const swalResult = await swal.fire({
+                title: `${title}?`,
+                text: `You won't be able to revert this.`,
+                icon: "warning",
+                showCancelButton: true,
+                allowOutsideClick: false,
+                // confirmButtonColor: "#3085d6",
+                // cancelButtonColor: "#d33",
+                confirmButtonText: "Yes",
+                html: `
+                  <div>Confirm stop? Auto-cancel in <span id="countdown">3</span>s.</div>
+                  <div style="margin-top:10px; background:#eee; width:100%; height:8px;">
+                      <div id="bar" style="width:100%; height:8px; background:#f66; transition:width 1s linear;"></div>
+                  </div>
+                `,
+                didOpen: () => {
+                    const content = Swal.getHtmlContainer().querySelector('#countdown');
+                    const bar = Swal.getHtmlContainer().querySelector('#bar');
+                    let timeLeft = 3;
+                    timerInterval = setInterval(() => {
+                        timeLeft--;
+                        bar.style.width = (timeLeft / 3 * 100) + '%';
+
+                        if (content) content.textContent = timeLeft;
+                        if (timeLeft <= 0) {
+                            clearInterval(timerInterval);
+                            Swal.close();
+                        }
+                    }, 1000);
+                },
+                willClose: () => {
+                    clearInterval(timerInterval);
+                }
+            });
+
+
+            if (swalResult.dismiss === Swal.DismissReason.close) {
+                console.log('Auto cancelled due to timeout.');
+                if (stopDecision) {
+                    stopDecision(false);
+                }
+                return;
+            }
+
+            if (swalResult.dismiss && swalResult.dismiss !== Swal.DismissReason.cancel) {
+                console.log('Auto cancelled or closed.');
+                stopDecision?.(false);
+                return;
+            }
+
+
+            if (swalResult.isConfirmed) {
+                if (stopDecision) {
+                    stopDecision(true);
+                }
+                console.log('User confirmed stop.');
+                var currentCol = 1;
+                console.log(currentCol);
+
+                if (action == 2) { //set full, loader will auto end task
+                    while (currentCol <= 4) {
+                        var chkFull = await loadPLCSetColumnState(loaderId, currentCol);
+                        currentCol++;
+                    }
+                    restartStep();
+                }
+                else
+                {
+                    var chkEnd = await loadPLCEndTask(loaderId, action);
+                    if (chkEnd == true) {
+                        // if (action == 2) {
+                        //     restartStep();
+                        // } else {
+                        $('#holdStopModal').modal('show');
+                        // }
+                    } else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: "Failed to End Task. Please try again.",
+                        });
+                    }
+                }
+
+            } else {
+                console.log('User cancelled stop');
+                if (stopDecision) {
+                    stopDecision(false);
+                }
+            }
+        }
+
+        async function loadPLCSetColumnState(loaderId, colNo) {
+            try {
+                const result = await new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: "/api/PLCLoader/SetColumnState/" + loaderId + "/" + colNo,
+                        type: "POST",
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        },
+                        dataType: 'JSON',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (result) {
+                            if (result.success == false) {
+                                resolve(false);
+                            }
+                            else
+                            {
+                                resolve(true);
+                            }
+                        },
+                        error: function (error) {
+                            resolve(false);
+                        }
+                    });
+                });
+                return result;
+            } catch (err) {
+                return false;
+            }
+        }
+
+    </script>
+}
+
+

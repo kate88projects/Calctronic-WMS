@@ -341,12 +341,12 @@ namespace RackingSystem.Controllers.API
             //var slotChk = _dbContext.TrolleySlot.Where(x => x.Trolley_Id == trolleyId && x.TrolleySlotCode == slotCode).FirstOrDefault();
             //if (slotChk == null)
             //{
-            //    result.errMessage = "Cannot find Trolley Slot Returned [" + slotCode+ "]. ";
+            //    result.errMessage = "Cannot find Trolley Slot Returned [" + slotCode + "]. ";
             //}
             //else
             //{
-            //    side= slotChk.IsLeft ? "A" : "B";
-            //    ReadPulseByIP(configRack.ConfigValue, trolleyId, slotCode);    
+            //    side = slotChk.IsLeft ? "A" : "B";
+            //    //ReadPulseByIP(configRack.ConfigValue, trolleyId, slotCode);
             //}
             //result.success = true;
             //result.data = side;
@@ -416,7 +416,9 @@ namespace RackingSystem.Controllers.API
                 valueToWrite = 2;
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
 
-                await Task.Delay(2000);
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {registerAddress} : {valueToWrite}", slot.TrolleySlotCode, false);
+
+                //await Task.Delay(2000);
 
                 //// double check slot_id
                 //string slotCode = GetSlotIDByIP(configRack.ConfigValue);
@@ -467,7 +469,7 @@ namespace RackingSystem.Controllers.API
             //// *** testing
             //result.success = true;
             //result.errMessage = "Done";
-            //result.data = 2;
+            ////result.data = 2;
             //return result;
             //// *** testings
 
@@ -489,7 +491,7 @@ namespace RackingSystem.Controllers.API
                 while (!exit)
                 {
                     // address to check retrieve status
-                    int startAddress = 4212;
+                    int startAddress = 4222; // 4212;
                     int numRegisters = 1;
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
@@ -497,12 +499,22 @@ namespace RackingSystem.Controllers.API
                         value = registers[i];
                     }
 
-                    if (value == 1)
+                    if (value == 2) // value 1 :: tengah buat, 2 :: complete, 3 :: retrieve failure, try another slot
                     {
                         exit = true;
                         PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
                     }
-                    if ((DateTime.Now - dtRun).TotalSeconds > 2)
+                    else if (value == 3)
+                    {
+                        exit = true;
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
+                    }
+                    else if (value == 1) // value 1 :: tengah buat, 2 :: complete, 3 :: retrieve failure, try another slot
+                    {
+                        exit = true;
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
+                    }
+                    if ((DateTime.Now - dtRun).TotalSeconds >= 5)
                     {
                         result.errMessage = "Timeout. Cannot get Empty Tray Status.";
                         exit = true;
@@ -523,87 +535,99 @@ namespace RackingSystem.Controllers.API
                 PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Disconnected.", "", false);
             }
 
-            if (value == 0)
+            if (value == 2 || value == 3)
             {
-                int valueErr = -1;
-                modbusClient = new ModbusClient(plcIp, port);
-                try
+                result.errMessage = value == 3 ? "1" : "";
+                return result;
+            }
+
+            //if (value == 0)
+            //{
+            int valueErr = -1;
+            modbusClient = new ModbusClient(plcIp, port);
+            try
+            {
+                //await Task.Delay(1000);
+
+                modbusClient.Connect();
+
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
+
+                // address to check have drawer or not. 0 :: for retrieve if have drawer, 1 :: for retrieve if no drawer, 2 :: for putaway if have drawer
+                int startAddress = 4231;
+                int numRegisters = 1;
+                int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                for (int i = 0; i < registers.Length; i++)
                 {
-                    await Task.Delay(1000);
+                    PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                    valueErr = registers[i];
+                }
 
-                    modbusClient.Connect();
-
-                    PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
-
-                    // address to check have drawer or not. 0 :: for retrieve if have drawer, 1 :: for retrieve if no drawer, 2 :: for putaway if have drawer
-                    int startAddress = 4231;
-                    int numRegisters = 1;
-                    int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
-                    for (int i = 0; i < registers.Length; i++)
+                if (valueErr == 0)
+                {
+                    try
                     {
-                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
-                        valueErr = registers[i];
-                    }
+                        exit = false;
+                        //modbusClient.Connect();
 
-                    if (valueErr == 0)
-                    {
-                        try
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
+
+                        while (!exit)
                         {
-                            exit = false;
-                            //modbusClient.Connect();
-
-                            PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
-
-                            while (!exit)
+                            startAddress = 4222; // value 1 :: tengah buat, 2 :: complete, 3 :: retrieve failure, try another slot // 4212; 
+                            numRegisters = 1;
+                            registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                            for (int i = 0; i < registers.Length; i++)
                             {
-                                startAddress = 4212;
-                                numRegisters = 1;
-                                registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
-                                for (int i = 0; i < registers.Length; i++)
-                                {
-                                    value = registers[i];
-                                }
-
-                                if (value == 1)
-                                {
-                                    exit = true;
-                                    PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
-                                }
-                                if ((DateTime.Now - dtRun).TotalSeconds > 15)
-                                {
-                                    result.errMessage = "Timeout. Cannot get Empty Tray Status.";
-                                    exit = true;
-                                    PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
-                                }
+                                value = registers[i];
                             }
 
+                            if (value == 2)// 1 means tengah buat, 2 means complete, 3 failure to retrieve, try another slot
+                            {
+                                result.success = true;
+                                exit = true;
+                                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
+                            }
+                            else if (value == 3)// 1 means tengah buat, 2 means complete, 3 failure to retrieve, try another slot
+                            {
+                                exit = true;
+                                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
+                            }
+                            if ((DateTime.Now - dtRun).TotalSeconds > 15)
+                            {
+                                result.errMessage = "Timeout. Cannot get Empty Tray Status.";
+                                exit = true;
+                                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
+                            }
                         }
-                        catch (Exception ex)
-                        {
-                            PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Error: " + ex.Message, "", true);
-                            result.errMessage = ex.Message;
-                            result.errStackTrace = ex.StackTrace ?? "";
-                        }
-                        finally
-                        {
-                            //modbusClient.Disconnect();
-                            PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Disconnected.", "", false);
-                        }
+
                     }
-                    result.errMessage = valueErr.ToString();
+                    catch (Exception ex)
+                    {
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Error: " + ex.Message, "", true);
+                        result.errMessage = ex.Message;
+                        result.errStackTrace = ex.StackTrace ?? "";
+                    }
+                    finally
+                    {
+                        //modbusClient.Disconnect();
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Disconnected.", "", false);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Error: " + ex.Message, "", true);
-                    result.errMessage = ex.Message;
-                    result.errStackTrace = ex.StackTrace ?? "";
-                }
-                finally
-                {
-                    modbusClient.Disconnect();
-                    PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Disconnected.", "", false);
-                }
+                result.errMessage = valueErr.ToString();
             }
+            catch (Exception ex)
+            {
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Error: " + ex.Message, "", true);
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+            finally
+            {
+                modbusClient.Disconnect();
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Disconnected.", "", false);
+            }
+            //}
 
             //// double check slot_id
             //string slotCode = GetSlotIDByIP(configRack.ConfigValue);
@@ -622,7 +646,7 @@ namespace RackingSystem.Controllers.API
             //    result.data.QRXPulseDiffer = pulses[3];
             //}
 
-            result.success = value == 1;
+            //result.success = value == 1;
             result.data.data = value.ToString();
 
             return result;
@@ -800,6 +824,8 @@ namespace RackingSystem.Controllers.API
                 valueToWrite = 1;
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
 
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {registerAddress} : {valueToWrite}", slot.SlotCode, false);
+
 
                 result.success = true;
                 result.data = 1;
@@ -844,9 +870,9 @@ namespace RackingSystem.Controllers.API
             //// *** testing
             //result.success = true;
             //result.errMessage = "Done Put Away.";
-            //result.data = 0;
-            //slot.HasEmptyTray = true;
-            //_dbContext.SaveChanges();
+            ////result.data = 0;
+            ////slot.HasEmptyTray = true;
+            ////_dbContext.SaveChanges();
             //return result;
             //// *** testing
 
@@ -876,11 +902,19 @@ namespace RackingSystem.Controllers.API
                         value = registers[i];
                     }
 
-                    if (value == 0) // 1 means tengah buat, 0 means complete
+                    if (value == 2) // 1 means tengah buat, 2 means complete, 3 failure to put, try another slot
                     {
+                        result.success = true;
+
                         slot.HasEmptyTray = true;
                         _dbContext.SaveChanges();
 
+                        exit = true;
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
+                    }
+                    else if (value == 3) // 1 means tengah buat, 2 means complete, 3 failure to put, try another slot
+                    {
+                        result.errMessage = "Have Tray, try another slot.";
                         exit = true;
                         PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
                     }
@@ -888,7 +922,7 @@ namespace RackingSystem.Controllers.API
                     {
                         result.errMessage = "Timeout. Cannot get Reel ID.";
                         exit = true;
-                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value} TimeOut", "", false);
                     }
                 }
 
@@ -909,7 +943,6 @@ namespace RackingSystem.Controllers.API
                 //    result.data.QRXPulseDiffer = pulses[3];
                 //}
 
-                result.success = value == 0;
                 result.data.data = value.ToString();
 
             }

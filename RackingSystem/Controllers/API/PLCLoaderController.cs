@@ -876,10 +876,10 @@ namespace RackingSystem.Controllers.API
                     return result;
                 }
 
-                // *** testing
-                result.success = true;
-                result.data = 1;
-                return result;
+                //// *** testing
+                //result.success = true;
+                //result.data = 1;
+                //return result;
 
                 string plcIp = _loader.IPAddr;
                 int port = 502;

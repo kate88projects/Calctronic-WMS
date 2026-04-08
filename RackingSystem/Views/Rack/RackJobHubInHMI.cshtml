@@ -1,0 +1,304 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutEmpty.cshtml";
+}
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    :root {
+        --bg-main: #2c3e50;
+        --text-color: #ecf0f1;
+        --accent-color: #3498db;
+        --status-ok: #2ecc71;
+        --status-alarm: #e74c3c;
+        --card-bg: #34495e;
+    }
+
+    body {
+        font-family: 'Outfit', sans-serif;
+        margin: 0;
+    }
+
+    .tray {
+        width: 56px;
+        height: 18px;
+        border-radius: 3px;
+        border: 1.5px solid rgba(0,0,0,0.15);
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .arm {
+        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .gripper {
+        transition: all 0.3s ease;
+    }
+
+    @@keyframes pulse-glow {
+        0%, 100%
+
+    {
+        box-shadow: 0 0 8px rgba(16, 185, 129, 0.2);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+    }
+
+    }
+
+    .status-active {
+        animation: pulse-glow 1.5s ease-in-out infinite;
+    }
+
+    @@keyframes slideIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .log-entry {
+        animation: slideIn 0.3s ease;
+    }
+
+    .mono {
+        font-family: 'JetBrains Mono', monospace;
+    }
+
+    .rack-slot {
+        width: 62px;
+        height: 22px;
+        border: 1.5px dashed rgba(0,0,0,0.1);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .rack-slot:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+        }
+
+        .rack-slot.tray-selected {
+            border-color: #10b981;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+            background: rgba(16, 185, 129, 0.08);
+        }
+
+    .trolley-slot {
+        width: 62px;
+        height: 22px;
+        border: 1.5px dashed rgba(0,0,0,0.1);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .trolley-slot:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+        }
+
+        .trolley-slot.empty-selected {
+            border-color: #10b981;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+            background: rgba(16, 185, 129, 0.08);
+        }
+
+    .scene-container {
+        position: relative;
+        width: 100%;
+        height: 400px;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .rack-section, .trolley-column {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5px;
+        align-items: center;
+    }
+
+    .trolley-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5px;
+        padding: 8px;
+        background: rgba(243, 244, 246, 0.6);
+        border-radius: 8px;
+    }
+
+    .rack-selector, .trolley-target {
+        cursor: pointer;
+        border: 2px solid transparent;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        padding: 8px;
+    }
+
+        .rack-selector:hover {
+            border-color: #d1d5db;
+            background: rgba(209, 213, 219, 0.15);
+        }
+
+        .rack-selector.selected {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+        }
+
+    .trolley-target {
+        position: relative;
+    }
+
+        .trolley-target::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .trolley-target:hover::after {
+            border-color: #3b82f6;
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+        }
+
+        .trolley-target.target-selected::after {
+            border-color: #10b981;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+            background: rgba(16, 185, 129, 0.08);
+        }
+</style>
+
+<div id="app" class="h-full w-full overflow-auto" style="background: #f8f9fa;">
+    <!-- Header -->
+    <header class="px-6 py-4 flex items-center justify-between border-b" style="border-color: #e5e7eb;">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: #10b981;">
+                <i class="bi-building-add" style="width:20px;height:20px;color:#fff;"></i>
+            </div>
+            <div>
+                <h1 id="pageTitle" class="text-lg font-bold" style="color:#1f2937;">SRMS</h1>
+                <p id="statusLabel" class="text-xs mono" style="color:#6b7280;">Put away reels from Auto Loader to SRMS</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <div id="statusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mono" style="background:#f3f4f6;color:#6b7280;">
+                <span id="statusDot" class="w-2 h-2 rounded-full" style="background:#6b7280;"></span> <span id="statusText">IDLE</span>
+            </div>
+        </div>
+    </header>
+</div>
+
+
+@section Scripts
+{
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script> 
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;family=Outfit:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+
+    <link href="~/css/datatables.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/datatables.min.js"></script>
+    <script src="~/js/sweetalert2.all.min.js"></script>
+
+    <script type="text/javascript">
+
+        // Centralized state management with system status
+        let sharedDrawerState = {
+            drawerStatus: 'None', // States: 'Drawer', 'Placed', 'None'
+            cartesianRobotState: 'Ready', // 'Ready', 'Retrieving', 'Proceed Put Away'
+            cartesianLocation: 'center',
+            systemRunning: false, // Overall system run status
+            gantrySequenceState: 'Returning', // 'PickedAndHolding', 'Placing', 'Returning'
+        };
+
+        let colNum = 1;
+        var gantryAutoTimer;
+        var cartesianAutoTimer;
+        let inPickMove = false;
+        let inPlaceMove = false;
+        let inRetrieveMove = false;
+        let inPutAwayMove = false;
+
+        let halfPickMove = false;
+        let halfPlaceMove = false;
+        let halfRetrieveMove = false;
+        let halfPutAwayMove = false;
+
+        let halfPickMoveStep = 1;
+        let halfPlaceMoveStep = 1;
+        let halfRetrieveMoveStep = 1;
+        let halfPutAwayMoveStep = 1;
+
+        let endTask = false;
+
+        let begining = true;
+
+        let token = '';
+        let qId = 0;
+        let deviceId = '';
+        let qCont = 0;
+
+        let attemptsPick = 1;
+        let attemptsPlace = 1;
+        let attemptsRetrieve = 1;
+        let attemptsPutAway = 1;
+        let changeTakeSlot = false;
+        let changePutSlot = false;
+
+        const jsonModal = document.getElementById("jsonModal");
+        const formJSON = document.getElementById("formJSON");
+
+        $(document).ready(function () {
+            // document.getElementById('chkAutoRun').checked = true;
+            // disableDivContent(true);
+            // $("#txtReelId").val('');
+            // $("#txtActHeight").val('0');
+            // $("#txtActHeightC").val('0');
+            // $("#txtSetUnload").val('0');
+            // $("#txtLoaderId").val('0');
+            // updateSystemStatusUI();
+            // updateGantryUIState();
+            // // updateJson();
+
+            token = $('#xToken').val();
+            qId = Number($('#xQId').val());
+            deviceId = $('#xDeviceId').val();
+            qCont = $('#xQContinuos').val();
+
+            // if (qCont == "1") {
+            //     begining = false;
+            //     $('#cont-btn').removeClass('hidden');
+            //     $('#start-btn').addClass('hidden');
+            //     readyContinuos();
+            // }
+
+        });
+
+    </script>
+}

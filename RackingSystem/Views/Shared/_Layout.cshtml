@@ -40,26 +40,26 @@
         }
 
         @@media (max-width: 768px) {
-            .card-body {
-                height: auto !important;
-            }
+        .card-body {
+        height: auto !important;
+        }
 
-            .app-wrapper {
-                display: flex;
-                flex-direction: column;
-                height: 100vh;
-            }
+        .app-wrapper {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        }
 
-            .app-main {
-                flex-grow: 1;
-                padding: 20px;
-                overflow: auto;
-            }
+        .app-main {
+        flex-grow: 1;
+        padding: 20px;
+        overflow: auto;
+        }
         }
 
         .page-header-wrapper {
-            background-color: #343A40;
-            height: 3.5rem;
+        background-color: #343A40;
+        height: 3.5rem;
         }
 
     </style>
@@ -91,12 +91,12 @@
             <div id="sideBtn" class="navBtn click flex-start">
                 <i class="bi bi-list"></i>
             </div>
-            
+
             <div class="page-header-slot">
                 @RenderSection("PageHeader", required: false)
             </div>
         </div>
-        
+
         <!--end::Header-->
         <!--begin::Sidebar-->
         <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
@@ -129,7 +129,7 @@
                         </li>
 
                         @if (ViewBag.PermissionList.Contains(1) || ViewBag.PermissionList.Contains(2) || ViewBag.PermissionList.Contains(3) || ViewBag.PermissionList.Contains(4) ||
-                                ViewBag.PermissionList.Contains(5) || ViewBag.PermissionList.Contains(6))
+                        ViewBag.PermissionList.Contains(5) || ViewBag.PermissionList.Contains(6) || ViewBag.PermissionList.Contains(7) || ViewBag.PermissionList.Contains(8))
                         {
                             <li class="nav-item" id="grpMM">
                                 <a href="javascript:none" class="nav-link">
@@ -149,7 +149,7 @@
                                             </a>
                                         </li>
                                     }
-                                    @if (ViewBag.PermissionList.Contains(1) == true)
+                                    @if (ViewBag.PermissionList.Contains(7) == true)
                                     {
                                         <li class="nav-item" style="padding-left:24px;">
                                             <a asp-action="LoaderColumnList" asp-controller="Loader" class="nav-link">
@@ -194,7 +194,7 @@
                                             </a>
                                         </li>
                                     }
-                                    @if (ViewBag.PermissionList.Contains(5) == true)
+                                    @if (ViewBag.PermissionList.Contains(8) == true)
                                     {
                                         <li class="nav-item">
                                             <a asp-action="TrolleyUpdatePulse" asp-controller="Trolley" class="nav-link">
@@ -203,7 +203,7 @@
                                             </a>
                                         </li>
                                     }
-                                   @*  @if (ViewBag.PermissionList.Contains(6) == true)
+                                    @*  @if (ViewBag.PermissionList.Contains(6) == true)
                                     {
                                         <li class="nav-item">
                                             <a asp-action="SlotList" asp-controller="Slot" class="nav-link">
@@ -303,7 +303,7 @@
                                             </a>
                                         </li>
                                     }
-                                   @*  @if (ViewBag.PermissionList.Contains(62) == true)
+                                    @*  @if (ViewBag.PermissionList.Contains(62) == true)
                                     {
                                         <li class="nav-item">
                                             <a asp-action="GRNDetailList" asp-controller="GRN" class="nav-link">
@@ -355,7 +355,7 @@
                             </ul>
                         </li> *@
 
-                        
+
                         @if (ViewBag.PermissionList.Contains(80) || ViewBag.PermissionList.Contains(81))
                         {
                             <li class="nav-item" id="grpJO">
@@ -415,7 +415,9 @@
                         }
 
 
-                        @if (ViewBag.PermissionList.Contains(100) || ViewBag.PermissionList.Contains(101) || ViewBag.PermissionList.Contains(102) || ViewBag.PermissionList.Contains(103))
+                        @if (ViewBag.PermissionList.Contains(100) || ViewBag.PermissionList.Contains(101) || ViewBag.PermissionList.Contains(102) || ViewBag.PermissionList.Contains(103) || 
+                        ViewBag.PermissionList.Contains(104) || ViewBag.PermissionList.Contains(105) || ViewBag.PermissionList.Contains(106) || ViewBag.PermissionList.Contains(107) || 
+                        ViewBag.PermissionList.Contains(108) || ViewBag.PermissionList.Contains(109) || ViewBag.PermissionList.Contains(110) || ViewBag.PermissionList.Contains(111))
                         {
                             <li class="nav-item" id="grpRACKING">
                                 <a href="javascript:none" class="nav-link">
@@ -435,7 +437,7 @@
                                             </a>
                                         </li>
                                     }
-                                    @if (ViewBag.PermissionList.Contains(100) == true)
+                                    @if (ViewBag.PermissionList.Contains(104) == true)
                                     {
                                         <li class="nav-item" style="padding-left:24px;">
                                             <a asp-action="LoaderDetailList" asp-controller="Loader" class="nav-link">
@@ -453,7 +455,7 @@
                                             </a>
                                         </li>
                                     } *@
-                                    @if (ViewBag.PermissionList.Contains(100) == true)
+                                    @if (ViewBag.PermissionList.Contains(105) == true)
                                     {
                                         <li class="nav-item" style="padding-left:24px;">
                                             <a asp-action="TrolleyDetailList" asp-controller="Trolley" class="nav-link">
@@ -471,7 +473,7 @@
                                             </a>
                                         </li>
                                     } *@
-                                    @if (ViewBag.PermissionList.Contains(101) == true)
+                                    @if (ViewBag.PermissionList.Contains(106) == true)
                                     {
                                         <li class="nav-item" style="padding-left:24px;">
                                             <a asp-action="SlotColumnStatus" asp-controller="Slot" class="nav-link">
@@ -480,7 +482,7 @@
                                             </a>
                                         </li>
                                     }
-                                    @if (ViewBag.PermissionList.Contains(101) == true)
+                                    @if (ViewBag.PermissionList.Contains(107) == true)
                                     {
                                         <li class="nav-item" style="padding-left:24px;">
                                             <a asp-action="TrolleyColumnStatus" asp-controller="Trolley" class="nav-link">
@@ -516,34 +518,46 @@
                                     <li class="nav-item">
                                         <a asp-action="ManualHubInTask" asp-controller="Rack" class="nav-link">
                                             <i class="nav-icon bi bi-asterisk"></i>
-                                            <p>Hub In (Manual)</p>
+                                            <p>PLC Task (Manual)</p>
                                         </a>
                                     </li>
-                                    <li class="nav-item">
-                                        <a asp-action="TrolleyReel" asp-controller="Rack" class="nav-link">
-                                            <i class="nav-icon bi bi-asterisk"></i>
-                                            <p>Trolley Reel</p>
-                                        </a>
-                                    </li>
+                                    @if (ViewBag.PermissionList.Contains(108) == true)
+                                    {
+                                        <li class="nav-item">
+                                            <a asp-action="TrolleyReel" asp-controller="Rack" class="nav-link">
+                                                <i class="nav-icon bi bi-asterisk"></i>
+                                                <p>Trolley Reel</p>
+                                            </a>
+                                        </li>
+                                    }
                                     <!-- Show log -->
-                                    <li class="nav-item" style="padding-left:24px;">
-                                        <a asp-action="HubInLogView" asp-controller="Log" class="nav-link">
-                                            @* <i class="nav-icon bi bi-circle"></i> *@
-                                            <p>Hub In Log</p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item" style="padding-left:24px;">
-                                        <a asp-action="HubOutLogView" asp-controller="Log" class="nav-link">
-                                            @* <i class="nav-icon bi bi-circle"></i> *@
-                                            <p>Hub Out Log</p>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item" style="padding-left:24px;">
-                                        <a asp-action="DrawerInView" asp-controller="Log" class="nav-link">
-                                            @* <i class="nav-icon bi bi-circle"></i> *@
-                                            <p>Put Away Empty Drawer Log</p>
-                                        </a>
-                                    </li>
+                                    @if (ViewBag.PermissionList.Contains(109) == true)
+                                    {
+                                        <li class="nav-item" style="padding-left:24px;">
+                                            <a asp-action="HubInLogView" asp-controller="Log" class="nav-link">
+                                                @* <i class="nav-icon bi bi-circle"></i> *@
+                                                <p>Hub In Log</p>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (ViewBag.PermissionList.Contains(110) == true)
+                                    {
+                                        <li class="nav-item" style="padding-left:24px;">
+                                            <a asp-action="HubOutLogView" asp-controller="Log" class="nav-link">
+                                                @* <i class="nav-icon bi bi-circle"></i> *@
+                                                <p>Hub Out Log</p>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (ViewBag.PermissionList.Contains(111) == true)
+                                    {
+                                        <li class="nav-item" style="padding-left:24px;">
+                                            <a asp-action="DrawerInView" asp-controller="Log" class="nav-link">
+                                                @* <i class="nav-icon bi bi-circle"></i> *@
+                                                <p>Put Away Empty Drawer Log</p>
+                                            </a>
+                                        </li>
+                                    }
                                 </ul>
                             </li>
                         }
@@ -639,7 +653,7 @@
             <!--end::To the end-->
             <!--begin::Copyright-->
             <strong>
-                Version 1.0.0.6 Copyright &copy; 2025&nbsp;
+                Version 1.0.1.0 Copyright &copy; 2025&nbsp;
                 <!--<a href="https://adminlte.io" class="text-decoration-none">Flex Software Consulting Sdn Bhd</a>-->
             </strong> 
             <!--end::Copyright-->
