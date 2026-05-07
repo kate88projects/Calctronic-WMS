@@ -190,10 +190,366 @@
             box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
             background: rgba(16, 185, 129, 0.08);
         }
+
+
+    .panel {
+        width: 90%;
+        max-width: 200px;
+        background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
+        border-radius: 5px;
+        border: 1px solid rgba(6, 182, 212, 0.5);
+        /* box-shadow: 0 8px 32px rgba(6, 182, 212, 0.15); */
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        /* animation: fadeIn 0.6s ease-out; */
+    }
+
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    /* --- Gantry Specific Styles --- */
+    .process-visualization {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        margin-top: 20px;
+        padding: 20px;
+        /* background-color: var(--bg-main); */
+        border-radius: 8px;
+        min-height: 265px;
+    }
+
+    .station {
+        text-align: center;
+        width: 150px;
+    }
+
+    .gantry-path {
+        flex-grow: 1;
+        height: 10px;
+        background-color: rgba(6, 182, 212, 0.5);
+        position: relative;
+        margin: 0 20px;
+    }
+
+    .gantry-head {
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        background-color: var(--accent-color);
+        position: absolute;
+        top: -10px;
+        transition: left 2s ease-in-out, background-color 0.3s;
+    }
+
+        .gantry-head[data-position="loader"] {
+            left: 0%;
+        }
+
+        .gantry-head[data-position="pickup"] {
+            left: 100%;
+            transform: translateX(-100%);
+        }
+
+        .gantry-head[data-has-reel="true"] {
+            background-color: var(--status-ok);
+        }
+
+    /* Loader Viewport acts as a mask/window */
+    .loader-viewport {
+        width: 100%;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+
+    /* Loader Track holds all columns and moves */
+    .loader-track {
+        display: flex;
+        width: 100%;
+        transition: transform 0.8s ease-in-out; /* Smooth sliding animation */
+    }
+
+        /* When the loader track has this class, we apply a dimming effect */
+        .loader-track.picking-dim .col {
+            opacity: 0.4;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+            /* The actively selected column should remain fully visible */
+            .loader-track.picking-dim .col.active-pick {
+                opacity: 1.0;
+            }
+
+            /* Ensure the reel counts and labels within dimmed columns are still somewhat readable */
+            .loader-track.picking-dim .col * {
+                /* Optional: Maintain slightly higher visibility for text elements */
+                /* opacity: 1.0; */
+            }
+
+    /* Individual columns within the track */
+    .col {
+        width: 25%;
+        flex-shrink: 0;
+        /* background-color: var(--bg-main); */
+        border: 2px solid rgba(6, 182, 212, 0.5);
+        padding: 5px;
+        border-radius: 5px;
+        position: relative;
+        text-align: center;
+    }
+
+    .col-label {
+        display: block;
+        font-size: 0.8em;
+        margin-bottom: 5px;
+    }
+
+    .reel {
+        width: 100%;
+        height: 40px;
+        background-color: #95a5a6;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+    .col[data-status="full"] {
+        border-color: var(--status-ok);
+    }
+
+    .col[data-status="empty"] {
+        /* border-color: var(--status-alarm); */
+        border-color: grey;
+    }
+
+    .col[data-status="full"] .reel {
+        background-color: #7f8c8d;
+    }
+
+    .col[data-status="empty"] .reel {
+        display: none;
+    }
+
+    .col[data-status="empty"] {
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+
+    .reel-count {
+        display: block;
+        margin-top: 5px;
+        font-size: 0.9em;
+        font-weight: bold;
+        color: var(--text-color);
+    }
+
+        .reel-count[data-count="0"] {
+            /* color: var(--status-alarm); */
+            color: grey;
+        }
+
+    /* Define the position classes managed by JavaScript */
+    .loader-track.pos-col-1 {
+        transform: translateX(0%);
+    }
+
+    .loader-track.pos-col-2 {
+        transform: translateX(-25%);
+    }
+
+    .loader-track.pos-col-3 {
+        transform: translateX(-50%);
+    }
+
+    .loader-track.pos-col-4 {
+        transform: translateX(-75%);
+    }
+
+
+    /* Loader Battery Display (Single instance) */
+    .loader-battery-display {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+    }
+
+        .loader-battery-display .battery-container {
+            width: 80px;
+            height: 15px;
+            background-color: rgba(6, 182, 212, 0.3);
+            border: 1px solid var(--text-color);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .loader-battery-display .battery-level {
+            height: 100%;
+            background-color: rgba(6, 182, 212, 0.8);
+            transition: width 0.5s ease-in-out, background-color 0.5s;
+        }
+
+        .loader-battery-display .battery-text {
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-left: 10px;
+            color: var(--text-color);
+        }
+
+        .loader-battery-display .battery-critical {
+            background-color: var(--status-alarm) !important;
+        }
+
+        .loader-battery-display .battery-low {
+            background-color: #f1c40f !important;
+        }
+
+
+    /* Drawer Station */
+    .drawer-station {
+        width: 200px;
+    }
+
+    .drawer {
+        width: 100%;
+        height: 60px;
+        /* background-color: var(--bg-main); */
+        border: 1px solid lightgrey;
+        border-radius: 5px;
+        margin-top: 10px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .reel-on-drawer {
+        width: 90%;
+        height: 40px;
+        background-color: transparent;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+
+    .drawer[data-status="Placed"] .reel-on-drawer {
+        background-color: #7f8c8d;
+    }
+
+    .drawer[data-status="None"] {
+        /* border-color: var(--status-alarm); */
+        border-color: grey;
+    }
+
+    .drawer[data-status="Drawer"] {
+        /* border-color: var(--status-alarm); */
+        border-color: var(--status-ok);
+    }
+
+    .drawer[data-status="Placed"] {
+        border-color: var(--status-alarm);
+        /* background-color: #5d6d7e; */
+    }
+
+    #drawer-status-text.unavailable, #fork-status-text.unavailable {
+        color: var(--status-alarm);
+        font-weight: bold;
+    }
+
+    .step-line::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 32px;
+        bottom: -8px;
+        width: 2px;
+        background: lightgrey; /* #1e293b; */
+    }
+
+    .step-line:last-child::before {
+        display: none;
+    }
+
+    .step-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid lightgrey; /* #334155; */
+        background: lightgrey; /* #0f172a; */
+        flex-shrink: 0;
+        transition: all 0.3s;
+        position: relative;
+        z-index: 2;
+    }
+
+        .step-dot.active {
+            border-color: #22c55e;
+            background: #22c55e;
+            box-shadow: 0 0 10px rgba(34,197,94,0.5);
+        }
+
+        .step-dot.done {
+            border-color: #22c55e;
+            background: #22c55e;
+        }
+
+        .step-dot.waiting {
+            border-color: lightgrey; /* #475569; */
+            background: lightgrey; /* #1e293b; */
+        }
+
+    .status-badge {
+        font-size: 10px;
+        padding: 2px 8px;
+        border-radius: 9999px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .badge-idle {
+        background: #1e293b;
+        color: #64748b;
+    }
+
+    .badge-running {
+        background: #052e16;
+        color: #4ade80;
+    }
+
+    .badge-done {
+        background: #022c22;
+        color: #34d399;
+    }
+
+
 </style>
 
+<input type="hidden" id="xToken" value="@ViewBag.xToken" autocomplete="off">
+<input type="hidden" id="xQId" value="@ViewBag.QId" autocomplete="off">
+<input type="hidden" id="xDeviceId" value="@ViewBag.DeviceId" autocomplete="off">
+<input type="hidden" id="xQContinuos" value="@ViewBag.QContinuos" autocomplete="off">
+
+<input type="hidden" id="txtSetUnload" autocomplete="off">
+<input type="hidden" id="txtLoaderId" autocomplete="off">
+<input type="hidden" id="txtCol1TotalReels" autocomplete="off">
+<input type="hidden" id="txtCol2TotalReels" autocomplete="off">
+<input type="hidden" id="txtCol3TotalReels" autocomplete="off">
+<input type="hidden" id="txtCol4TotalReels" autocomplete="off">
+
 <div id="app" class="h-full w-full overflow-auto" style="background: #f8f9fa;">
-    <!-- Header -->
+    <!-- Title -->
     <header class="px-6 py-4 flex items-center justify-between border-b" style="border-color: #e5e7eb;">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: #10b981;">
@@ -210,14 +566,463 @@
             </div>
         </div>
     </header>
+    <!-- Body -->
+    <div class="p-6 flex gap-4" style="min-height: 30vh;">
+        <!-- Scene -->
+        <div class="scene-container" style="background: linear-gradient(180deg, #ffffff 0%, #f3f4f6 100%); border: 1px solid #e5e7eb; height: 300px; width:50%;">
+            <!-- Grid overlay -->
+            <svg class="absolute inset-0 w-full h-full" style="opacity:0.08;">
+                <defs>
+                    <pattern id="grid" width="30" height="30" patternunits="userSpaceOnUse">
+                        <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#fff" stroke-width="0.5" />
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+            </svg>
+
+            <div class="process-visualization">
+                <!-- Loader Section (Left Point) -->
+                <div class="station loader">
+                    <h4>Auto Loader</h4>
+                    <div class="loader-viewport">
+                        <!-- The inner track that moves left or right -->
+                        <div class="loader-track picking-dim">
+                            <div class="col" id="col-1" data-status="full"><span class="col-label">C1</span><div class="reel"></div><span class="reel-count" data-count="0">- left</span></div>
+                            <div class="col" id="col-2" data-status="full"><span class="col-label">C2</span><div class="reel"></div><span class="reel-count" data-count="0">- left</span></div>
+                            <div class="col" id="col-3" data-status="full"><span class="col-label">C3</span><div class="reel"></div><span class="reel-count" data-count="0">- left</span></div>
+                            <div class="col" id="col-4" data-status="full"><span class="col-label">C4</span><div class="reel"></div><span class="reel-count" data-count="0">- left</span></div>
+                        </div>
+                    </div>
+                    @* <p>Next Pick: Column <span id="next-pick-col">1</span></p> *@
+                    <br />
+                    <div class="loader-battery-display">
+                        <div class="battery-container">
+                            <div class="battery-level" id="loader-battery-level" data-percent="80" style="width: 80%;"></div>
+                        </div>
+                        <span class="battery-text" id="loader-battery-text">- %</span>
+                    </div>
+                </div>
+
+                <!-- Gantry Path Visual -->
+                <div class="gantry-path">
+                    <div class="gantry-head" data-position="loader" data-has-reel="false"></div>
+                    <br />
+                    <span id="txtReel">Reel : -</span>
+                </div>
+
+                <!-- Drawer/Placement Section (Right Point & Interface) -->
+                <div class="station drawer-station">
+
+                    <h4>Place on Drawer</h4>
+                    <div class="drawer" data-status="None">
+                        <div class="reel-on-drawer"></div>
+                    </div>
+                    <p> <span id="drawer-status-text">No Drawer</span></p>
+                    @* <p>Fork Status: <span id="fork-status-text">Retracted</span></p>  Awaiting Place Command *@
+                    <div id="gantry-hold-status">
+                        🚨 Reel Picked!🚨
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+        <!-- Scene -->
+        <div class="scene-container" style="background: linear-gradient(180deg, #ffffff 0%, #f3f4f6 100%); border: 1px solid #e5e7eb; height: 300px; width:50%;">
+            <!-- Grid overlay -->
+            <svg class="absolute inset-0 w-full h-full" style="opacity:0.08;">
+                <defs>
+                    <pattern id="grid" width="30" height="30" patternunits="userSpaceOnUse">
+                        <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#fff" stroke-width="0.5" />
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+            </svg>
+            <!-- Left Racks -->
+            <div class="absolute left-6 top-10 flex" style="bottom: 16px;">
+                <div class="rack-section rack-selector" id="rackLeftSelector">
+                    <div class="text-xs mono mb-1" style="color:#374151;">
+                        RACK LEFT
+                    </div>
+                    <input type="text" id="left-input" class="w-full px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;color:#374151;background:#fff;" autocomplete="off">
+                    <div class="flex flex-row gap-1.5" id="rackLeftSlots"></div>
+                </div>
+            </div>
+            <!-- PLC Arm Assembly -->
+            <div id="armAssembly" class="arm absolute" style="left: 50%; top: 80px; transform: translateX(-50%);">
+                <!-- Vertical rail -->
+                <div class="absolute left-1/2 -translate-x-1/2" style="width:4px;height:80px;background:#334155;border-radius:2px;top:-30px;">
+                    <div style="width:8px;height:8px;background:#475569;border-radius:50%;position:absolute;top:0;left:-2px;"></div>
+                    <div style="width:8px;height:8px;background:#475569;border-radius:50%;position:absolute;bottom:0;left:-2px;"></div>
+                </div>
+                <!-- Arm head -->
+                <div id="armHead" class="absolute arm" style="left:50%;transform:translateX(-50%);top:0;">
+                    <div style="width:40px;height:14px;background:#3b82f6;border-radius:4px;margin:0 auto;"></div>
+                    <!-- Grippers -->
+                    <div id="gripperLeft" class="gripper" style="width:8px;height:16px;background:#60a5fa;border-radius:0 0 3px 3px;position:absolute;left:4px;top:14px;"></div>
+                    <div id="gripperRight" class="gripper" style="width:8px;height:16px;background:#60a5fa;border-radius:0 0 3px 3px;position:absolute;right:4px;top:14px;"></div><!-- Held tray -->
+                    <div id="heldTray" class="tray absolute hidden" style="left:50%;transform:translateX(-50%);top:28px;"></div>
+                </div>
+            </div>
+            <!-- Trolley Indicator Light -->
+            <div class="absolute right-6 top-10 flex" style="bottom: 16px;">
+                <div class="rack-section rack-selector" id="rackLeftSelector">
+                    <div class="text-xs mono mb-1" style="color:#374151;">
+                        RACK RIGHT
+                    </div>
+                    <input type="text" id="right-input" class="w-full px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;color:#374151;background:#fff;" autocomplete="off">
+                    <div class="flex flex-row gap-1.5" id="rackLeftSlots"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="flex flex-col gap-4" style="min-height: 90vh;">
+        <div class="grid grid-cols-2 gap-4 p-4" style="min-height: calc(100% - 73px);padding-top: 0px !important;">
+            <!-- Left: System Control (3 cols = 50%) -->
+            <div class="col-span-1 flex flex-col gap-4">
+                <!-- System Control -->
+                <div class="rounded-xl p-6 flex flex-col" style="background:#fff;border:1px solid #e5e7eb;">
+                    <h2 class="text-xs font-semibold mb-2 flex items-center gap-2" style="color:#4b5563;">
+                        <i class="bi-controller" data-lucide="sliders-horizontal" style="width:14px;height:14px;"></i> System Control
+                    </h2>
+                    <div class="flex flex-wrap gap-1.5 mb-2">
+                        <div class="flex items-center gap-2">
+                            <label for="job-input" class="text-xs font-semibold" style="color:#4b5563;white-space:nowrap;">Job : </label>
+                            <input type="text" id="job-input" value="@ViewBag.QNo" class="flex-1 px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;color:#374151;background:#fff;" disabled>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label for="loader-input" class="text-xs font-semibold" style="color:#4b5563;white-space:nowrap;">Loader : </label>
+                            <input type="text" id="loader-input" class="flex-1 px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;color:#374151;background:#fff;">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label for="chkAutoRun" class="text-xs font-semibold" style="color:#4b5563;white-space:nowrap;">Auto : </label>
+                            <input type="checkbox" id="chkAutoRun" style="width:14px;height:14px;cursor:pointer;">
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-1.5 mb-2">
+                        <button id="start-btn" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#10b981;color:#fff;"
+                                onclick="systemStart()">
+                            <i class="bi-play-fill" style="width:12px;height:12px;"></i> Start
+                        </button>
+                        <button id="cont-btn" class="hidden flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#f59e0b;color:#fff; "
+                                onclick="systemCont()">
+                            <i class="bi-pause-fill" style="width:12px;height:12px;"></i> Continuos
+                        </button>
+                        <button id="stop-btn" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#e74c3c;color:#fff;"
+                                onclick="systemStop()">
+                            <i class="bi-stop-fill" style="width:12px;height:12px;"></i> Stop
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 mb-6">
+                        <div class="rounded-lg p-3 text-center" style="background:#fef3c7;border:1px solid #fde68a;">
+                            <div class="text-xs mono" style="color:#92400e;">
+                                Pending
+                            </div>
+                            <div id="pendingCount" class="text-2xl font-bold mono" style="color:#f59e0b;">
+                                0
+                            </div>
+                        </div>
+                        <div class="rounded-lg p-3 text-center" style="background:#dbeafe;border:1px solid #bfdbfe;">
+                            <div class="text-xs mono" style="color:#1e40af;">
+                                Completed
+                            </div>
+                            <div id="completedCount" class="text-2xl font-bold mono" style="color:#3b82f6;">
+                                0
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="justify-content: space-between; padding: 10px;">
+                    <!-- Gantry Process Panel -->
+                    <div class="rounded-xl p-6 w-1/2" style="background:#ffffff; border:1px solid #e2e8f0; width: 49%;">
+                        <div class="pb-2 mb-4 border-b" style="border-color:#e2e8f0;">
+                            <div class="flex flex-grid items-start gap-3 py-1">
+                                <input type="text" id="txtReelId" placeholder="Reel Id" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="width: 20%;">
+                                <input type="text" id="txtReelCode" placeholder="Reel Code" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="width: 60%;">
+                                <input type="number" id="txtActHeight" placeholder="Actual Height" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="width: 20%;">
+                            </div>
+                        </div>
+                        <h2 class="text-xs font-semibold mb-2 flex items-center gap-2" style="color:#4b5563;">
+                            <i class="bi-rocket-takeoff" style="width:14px;height:14px;"></i> Pick Reel Process
+                        </h2>
+                        <div class="mb-6" id="gantry-pick-session">
+                            <div class="flex items-center justify-between mb-3">
+                                @* <p class="text-xs font-semibold mono" style="color:#64748b;">GANTRY PROCESS</p> *@
+                                <div class="flex gap-2">
+                                    <button onclick="startPick()" class="px-3 py-1 rounded text-xs font-semibold" id="btnPickStart" style="background:#16a34a; color:#fff;">
+                                        <i class="bi-play-fill" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
+                                        Start Pick
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-2" id="pickStepsContainer" style="border-bottom:1px solid #e2e8f0;">
+                                <div class="step-line relative flex items-start gap-3 py-1">
+                                    <div class="step-dot waiting mt-1" id="rDot1"></div>
+                                    <div>
+                                        <p class="text-sm font-semibold" style="color:#0f172a;">PC → Auto Loader</p>
+                                        <p class="text-xs" style="color:#64748b;">Set Auto Loader Unload</p>
+                                    </div>
+                                    <button onclick="loadPLCSetLoaderUnload()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnR1">
+                                        <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
+                                    </button>
+                                </div>
+                                <div class="step-line relative flex items-start gap-3 py-1">
+                                    <div class="step-dot waiting mt-1" id="rDot2"></div>
+                                    <div>
+                                        <p class="text-sm font-semibold" style="color:#0f172a;">PC → Gantry</p>
+                                        <p class="text-xs" style="color:#64748b;">Scan QR</p>
+                                    </div>
+                                    <button onclick="loadPLCStartBarcodeScanner()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnR2">
+                                        <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
+                                    </button>
+                                </div>
+                                <div class="step-line relative flex items-start gap-3 py-1">
+                                    <div class="step-dot waiting mt-1" id="rDot3"></div>
+                                    <div>
+                                        <p class="text-sm font-semibold" style="color:#0f172a;">PC → DB</p>
+                                        <p class="text-xs" style="color:#64748b;">Reed Reel</p>
+                                    </div>
+                                    <button onclick="loadPLCScanReelID()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnR3">
+                                        <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
+                                    </button>
+                                </div>
+                                <div class="step-line relative flex items-start gap-3 py-1">
+                                    <div class="step-dot waiting mt-1" id="rDot4"></div>
+                                    <div>
+                                        <p class="text-sm font-semibold" style="color:#0f172a;">PC → Auto Loader</p>
+                                        <p class="text-xs" style="color:#64748b;">Set Height (Pick)</p>
+                                    </div>
+                                    <button onclick="loadPLCSetActualHeight()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnR3">
+                                        <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
+                                    </button>
+                                </div>
+                                <div class="step-line relative flex items-start gap-3 py-1">
+                                    <div class="step-dot waiting mt-1" id="rDot5"></div>
+                                    <div>
+                                        <p class="text-sm font-semibold" style="color:#0f172a;">PC → Gantry</p>
+                                        <p class="text-xs" style="color:#64748b;">* Pick Status *</p>
+                                    </div>
+                                    <button onclick="retry_PickStatus()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnR3">
+                                        <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <h2 class="text-xs font-semibold mb-2 flex items-center gap-2" style="color:#4b5563;">
+                            <i class="bi-rocket-takeoff" style="width:14px;height:14px;"></i> Place Reel Process
+                        </h2>
+                        <div class="mb-6" id="gantry-place-session">
+                            <div class="flex items-center justify-between mb-3">
+                                @* <p class="text-xs font-semibold mono" style="color:#64748b;">GANTRY PROCESS</p> *@
+                                <div class="flex gap-2">
+                                    <button onclick="startPlace()" class="px-3 py-1 rounded text-xs font-semibold" id="btnPlaceStart" style="background:#16a34a; color:#fff;">
+                                        <i class="bi-play-fill" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
+                                        Start Place
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-2" id="placeStepsContainer">
+                                <div class="step-line relative flex items-start gap-3 py-1">
+                                    <div class="step-dot waiting mt-1" id="rDot6"></div>
+                                    <div>
+                                        <p class="text-sm font-semibold" style="color:#0f172a;">PC → Gantry</p>
+                                        <p class="text-xs" style="color:#64748b;">Place</p>
+                                    </div>
+                                    <button onclick="loadPLCPlaceReel()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnR1">
+                                        <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
+                                    </button>
+                                </div>
+                                <div class="step-line relative flex items-start gap-3 py-1">
+                                    <div class="step-dot waiting mt-1" id="rDot7"></div>
+                                    <div>
+                                        <p class="text-sm font-semibold" style="color:#0f172a;">PC → Gantry</p>
+                                        <p class="text-xs" style="color:#64748b;">* Place Status *</p>
+                                    </div>
+                                    <button onclick="retry_PlaceStatus()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnR2">
+                                        <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
+                                    </button>
+                                </div>
+                                <div class="step-line relative flex items-start gap-3 py-1">
+                                    <div class="step-dot waiting mt-1" id="rDot8"></div>
+                                    <div>
+                                        <p class="text-sm font-semibold" style="color:#0f172a;">PC → Auto Loader</p>
+                                        <p class="text-xs" style="color:#64748b;">* All Empty *</p>
+                                    </div>
+                                    <button onclick="loadPLCEndTask()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnR3">
+                                        <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Cartesian Steps -->
+                    <div class="rounded-xl p-6 w-1/2" style="background:#fff;border:1px solid #e5e7eb; width: 49%;">
+                        <div class="pb-2 mb-4 border-b" style="border-color:#e2e8f0;">
+                            <div class="flex flex-grid items-start gap-3 py-1">
+                                <input type="text" id="txtRetrieveSlot" placeholder="Reel Id" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="width: 40%;">
+                                <input type="text" id="txtPutSlot" placeholder="Reel Code" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="width: 40%;">
+                                <input type="number" id="txtPutSlotTake" placeholder="Actual Height" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="width: 20%;">
+                            </div>
+                            <div class="flex flex-grid items-start gap-3 py-1">
+                                <input type="text" id="txtReelIdC" placeholder="Reel Id" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="width: 20%;">
+                                <input type="text" id="txtReelCodeC" placeholder="Reel Code" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="width: 60%;">
+                                <input type="number" id="txtActHeightC" placeholder="Actual Height" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="width: 20%;">
+                            </div>
+                        </div>
+                        <h2 class="text-xs font-semibold mb-2 flex items-center gap-2" style="color:#4b5563;">
+                            <i class="bi-rocket-takeoff" style="width:14px;height:14px;"></i> Retrieve Drawer Process
+                        </h2>
+                        <div class="mb-6" id="cart-retrieve-session">
+                            <div class="flex items-center justify-between mb-3">
+                                @* <p class="text-xs font-semibold mono" style="color:#64748b;">GANTRY PROCESS</p> *@
+                                <div class="flex gap-2">
+                                    <button onclick="startRetrieve()" class="px-3 py-1 rounded text-xs font-semibold" id="btnRetrieveStart" style="background:#16a34a; color:#fff;">
+                                        <i class="bi-play-fill" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
+                                        Start Retrieve Empty Drawer
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-2" id="putAwayStepsContainer">
+                                <div class="step-line relative flex items-start gap-3 py-1">
+                                    <div class="step-dot waiting mt-1" id="pDot1"></div>
+                                    <div>
+                                        <p class="text-sm font-semibold" style="color:#0f172a;">PC → DB Slot</p>
+                                        <p class="text-xs" style="color:#64748b;">Get Drawer Slot</p>
+                                    </div>
+                                    <button onclick="loadPLCGetEmptyTraySlot()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnPA1">
+                                        <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
+                                    </button>
+                                </div>
+                                <div class="step-line relative flex items-start gap-3 py-1">
+                                    <div class="step-dot waiting mt-1" id="pDot2"></div>
+                                    <div>
+                                        <p class="text-sm font-semibold" style="color:#0f172a;">Robot → SRMS</p>
+                                        <p class="text-xs" style="color:#64748b;">Retrieve</p>
+                                    </div>
+                                    <button onclick="loadPLCTakeEmptyTray()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnPA2">
+                                        <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
+                                    </button>
+                                </div>
+                                <div class="step-line relative flex items-start gap-3 py-1">
+                                    <div class="step-dot waiting mt-1" id="pDot3"></div>
+                                    <div>
+                                        <p class="text-sm font-semibold" style="color:#0f172a;">Robot → Center</p>
+                                        <p class="text-xs" style="color:#64748b;">* Retrieve Status *</p>
+                                    </div>
+                                    <button onclick="retry_RetrieveStatus()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnPA3">
+                                        <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <h2 class="text-xs font-semibold mb-2 flex items-center gap-2" style="color:#4b5563;">
+                            <i class="bi-rocket-takeoff" style="width:14px;height:14px;"></i> PutAway Drawer Process
+                        </h2>
+                        <div class="mb-6" id="cart-putaway-session">
+                            <div class="flex items-center justify-between mb-3">
+                                @* <p class="text-xs font-semibold mono" style="color:#64748b;">GANTRY PROCESS</p> *@
+                                <div class="flex gap-2">
+                                    <button onclick="startPutAway()" class="px-3 py-1 rounded text-xs font-semibold" id="btnPutAwayStart" style="background:#16a34a; color:#fff;">
+                                        <i class="bi-play-fill" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
+                                        Start PutAway Reel
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-2" id="putAwayStepsContainer">
+                                <div class="step-line relative flex items-start gap-3 py-1">
+                                    <div class="step-dot waiting mt-1" id="pDot4"></div>
+                                    <div>
+                                        <p class="text-sm font-semibold" style="color:#0f172a;">PC → DB Slot</p>
+                                        <p class="text-xs" style="color:#64748b;">Get Valid Slot</p>
+                                    </div>
+                                    <button onclick="loadPLCGetSlot()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnPA1">
+                                        <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
+                                    </button>
+                                </div>
+                                <div class="step-line relative flex items-start gap-3 py-1">
+                                    <div class="step-dot waiting mt-1" id="pDot5"></div>
+                                    <div>
+                                        <p class="text-sm font-semibold" style="color:#0f172a;">Robot → SRMS</p>
+                                        <p class="text-xs" style="color:#64748b;">Put Away</p>
+                                    </div>
+                                    <button onclick="loadPLCPutAway()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnPA2">
+                                        <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
+                                    </button>
+                                </div>
+                                <div class="step-line relative flex items-start gap-3 py-1">
+                                    <div class="step-dot waiting mt-1" id="pDot6"></div>
+                                    <div>
+                                        <p class="text-sm font-semibold" style="color:#0f172a;">Robot → Center</p>
+                                        <p class="text-xs" style="color:#64748b;">* Put Away Status *</p>
+                                    </div>
+                                    <button onclick="retry_PutAwayStatus()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnPA3">
+                                        <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Center: Activity Log (3 cols = 50%) -->
+            <div class="col-span-1 flex flex-col gap-4">
+                <!-- Activity Log -->
+                <div class="rounded-xl p-6 flex flex-col" style="background:#fff;border:1px solid #e5e7eb; height: 100%;">
+                    <h2 class="text-xs font-semibold mb-2 flex items-center gap-2" style="color:#4b5563;"><i class="bi-terminal" style="width:14px;height:14px;"></i> Activity Log</h2>
+                    <div id="logList" class="space-y-1 overflow-y-auto" style="max-height: 35rem;">
+                        <div class="log-entry text-xs" style="color:#64748b;">
+                            [System ready]
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
+<div class="modal fade" id="jobDoneModal" role="dialog" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-body" style="padding: 50px;">
+                <div class="row">
+                    <div class="col-6">
+                        <img src="~/assets/img/task.gif" style="width:100%;" />
+                    </div>
+                    <div class="col-6">
+                        <p class="" style="font-size:2em;">Job is done. Click the 'Close' button to close this window.</p>
+                        <button class="btn btn-success w-100" style="height: 100px;" onclick="closeTab()">Close</button>
+                        <button class="btn btn-secondary w-100" style="height: 100px;" onclick="exportLogFile()">Export Log</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="jsonModal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="columnMatchingLabel">Update</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="csvColumns">
+                <div class="row">
+                    <div id="jsonColumns"></div>
+                </div>
+            </div>
+            <div class="modal-footer matching-btn">
+                <button type="button" class="btn btn-primary" onclick="updateJSONModal()">Submit@* <i class="bi bi-upload fs-5"></i> *@</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts
 {
-    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script> 
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;family=Outfit:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <script src="~/js/tailwindcss_3_4_17.js"></script>
+    <script src="~/js/lucide.min.js"></script>
+    <link href="~/css/jetbrains.css" rel="stylesheet" />
 
     <link href="~/css/datatables.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
@@ -225,6 +1030,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/datatables.min.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
+    <script src="../js/xlsx.full.min.js"></script>
 
     <script type="text/javascript">
 
@@ -271,34 +1077,2500 @@
         let changeTakeSlot = false;
         let changePutSlot = false;
 
+        let totalPending = 0;
+        let totalCompleted = 0;
+
+        const TRAY_COLORS = ['#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899'];
+        let rack = [0,1,2,3,4]; // indices into TRAY_COLORS
+        let trolley = [];
+        let heldTray = null;
+        let running = false;
+        let phase = 'idle'; // idle, picking, moving, placing
+
         const jsonModal = document.getElementById("jsonModal");
         const formJSON = document.getElementById("formJSON");
 
         $(document).ready(function () {
-            // document.getElementById('chkAutoRun').checked = true;
-            // disableDivContent(true);
-            // $("#txtReelId").val('');
-            // $("#txtActHeight").val('0');
-            // $("#txtActHeightC").val('0');
-            // $("#txtSetUnload").val('0');
-            // $("#txtLoaderId").val('0');
-            // updateSystemStatusUI();
-            // updateGantryUIState();
-            // // updateJson();
+            document.getElementById('chkAutoRun').checked = true;
+            disableDivContent(true);
+            $("#txtReelId").val('');
+            $("#txtActHeight").val('0');
+            $("#txtActHeightC").val('0');
+            $("#txtSetUnload").val('0');
+            $("#txtLoaderId").val('0');
+            updateSystemStatusUI();
+            updateGantryUIState();
+            // updateJson();
 
             token = $('#xToken').val();
             qId = Number($('#xQId').val());
             deviceId = $('#xDeviceId').val();
             qCont = $('#xQContinuos').val();
 
-            // if (qCont == "1") {
-            //     begining = false;
-            //     $('#cont-btn').removeClass('hidden');
-            //     $('#start-btn').addClass('hidden');
-            //     readyContinuos();
-            // }
+            if (qCont == "1") {
+                begining = false;
+                $('#cont-btn').removeClass('hidden');
+                $('#start-btn').addClass('hidden');
+                readyContinuos();
+            }
 
         });
+
+        async function showJSONModal() {
+
+            var data = "";
+
+            await $.ajax({
+                url: '/api/PLCHubIn/GetRackJobJson',
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                },
+                success: function (result) {
+                    data = result.data;
+                },
+                error: function (error) {
+                }
+            });
+
+
+            let cols = [ 'SystemStart', 'LoaderCode', 'LoaderId', 'DrawerStatus', 'GantryStatus',
+            'SetUnload', 'ReelId', 'ReelCode', 'ActualHeight', 'CartesianRobotState', 'CartesianLocation',
+            'RetrieveSlot', 'PutAwaySlot', 'SlotTake', 'ReelIdC', 'ReelCodeC', 'ActualHeightC',
+            'HalfPickMove', 'HalfPickMoveStep', 'HalfPlaceMove', 'HalfPlaceMoveStep',
+            'ColNum', 'Col1TotalReels', 'Col2TotalReels', 'Col3TotalReels', 'Col4TotalReels', ];
+
+            let columnInputs = '';
+            let v = '';
+
+            cols.forEach((column, index) => {
+                Object.entries(data).forEach(([key, value]) => {
+                  // console.log(`${key}: ${value}`);
+                  if (key.toUpperCase() == column.toUpperCase()) {
+                      v = value;
+                  }
+                });
+
+                columnInputs += `
+                    <div class="row justify-content-center align-items-center mb-3">
+                        <div class="col-5">
+                            <label class="form-label mb-0">${column}</label>
+                        </div>
+                        <div class="col-5">
+                            <input type="text" id="col${column}" class="form-modal" value="${v}" />
+                        </div>
+                    </div>`;
+            });
+
+
+            document.getElementById('jsonColumns').innerHTML = columnInputs;
+            $('#jsonModal').modal("show");
+        }
+
+        async function updateJSONModal() {
+
+            var data = {
+                SystemStart: $("#colSystemStart").val() === "true",
+
+                LoaderCode: $("#colLoaderCode").val(),
+                LoaderId: Number($("#colLoaderId").val()),
+
+                DrawerStatus: $("#colDrawerStatus").val(),
+                GantryStatus: $("#colGantryStatus").val(),
+
+                SetUnload: Number($("#colSetUnload").val()),
+                ReelId: $("#colReelId").val(),
+                ReelCode: $("#colReelCode").val(),
+                ActualHeight: Number($("#colActualHeight").val()),
+
+                CartesianRobotState: $("#colCartesianRobotState").val(),
+                CartesianLocation: $("#colCartesianLocation").val(),
+
+                RetrieveSlot: $("#colRetrieveSlot").val(),
+                PutAwaySlot: $("#colPutAwaySlot").val(),
+                SlotTake: Number($("#colSlotTake").val()),
+
+                ReelIdC: $("#colReelIdC").val(),
+                ReelCodeC: $("#colReelCodeC").val(),
+                ActualHeightC: Number($("#colActualHeightC").val()),
+
+                HalfPickMove: $("#colHalfPickMove").val() === "true",
+                HalfPickMoveStep: $("#colHalfPickMoveStep").val(),
+                HalfPlaceMove: $("#colHalfPlaceMove").val() === "true",
+                HalfPlaceMoveStep: $("#colHalfPlaceMoveStep").val(),
+
+                Col1TotalReels: Number($("#colCol1TotalReels").val()),
+                Col2TotalReels: Number($("#colCol2TotalReels").val()),
+                Col3TotalReels: Number($("#colCol3TotalReels").val()),
+                Col4TotalReels: Number($("#colCol4TotalReels").val()),
+
+                ColNum: colNum,
+            }
+
+            // console.log(data);
+
+            $.ajax({
+                url: '/api/PLCHubIn/UpdateRackJobJson',
+                type: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                data: JSON.stringify(data),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                        $("#jsonModal").modal("toggle");
+                        getJson();
+                    }
+                    else {
+                        console.log(result.errMessage);
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+
+
+
+        async function readyContinuos() {
+            var data = await getJson();
+            // console.log(data);
+
+            if (data == true) {
+                await getLoader($("#loader-input").val(), true);
+
+                loadDBUpcoming();
+
+                // console.log(sharedDrawerState);
+
+                // updateSystemStatusUI();
+                updateGantryUIState();
+                updateCartesianUIState();
+
+            }
+        }
+
+        // System Start Handler
+        async function systemStart() {
+            if (sharedDrawerState.systemRunning) return;
+
+            // checking is loader valid and get loader info
+            var loader = $("#loader-input").val();
+            if (loader == undefined) {
+                log('Loader :: Please scan loader', 'alert');
+                return;
+            }
+            if (loader == '') {
+                log('Loader :: Please scan loader', 'alert');
+                return;
+            }
+            var ok = await getLoader(loader, false);
+            if (ok == false) {
+                return;
+            }
+
+            loadDBUpcoming();
+
+            // 1. check Need SetUnload
+            var setUnloadVal = $("#txtSetUnload").val();
+            if (setUnloadVal == '0') {
+                var chkMode = await loadPLCCheckMode();
+                if (chkMode == false) {
+                    return;
+                }
+                var setUnload = await loadPLCSetLoaderUnload();
+                if (setUnload == false) {
+                    return;
+                }
+            }
+
+            // 2. Get PLC Current Column
+            var col = await loadPLCGetCurrentColumn();
+            if (col == false) {
+                return;
+            }
+
+            // 3. Continue UI
+            disableDivContent(false);
+
+            updateActiveColumn(colNum);
+
+            sharedDrawerState.systemRunning = true;
+            updateSystemStatusUI();
+            // log("System Start command issued.", 'alert');
+
+             updateJson();
+
+            // 4. Continue
+             gantryAutoTimer = setInterval(gantryAuto, 3000); //3 second workout
+             cartesianAutoTimer = setInterval(cartesianAuto, 3000); //3 second workout
+
+        }
+
+        // System Continue Handler
+        async function systemCont() {
+
+            // 3. Continue UI
+            disableDivContent(false);
+
+            updateActiveColumn(colNum);
+
+            sharedDrawerState.systemRunning = true;
+            updateSystemStatusUI();
+
+            // 4. Continue
+             gantryAutoTimer = setInterval(gantryAuto, 3000); //3 second workout
+             cartesianAutoTimer = setInterval(cartesianAuto, 3000); //3 second workout
+
+        }
+
+        // System Stop Handler
+        function systemStop() {
+            if (!sharedDrawerState.systemRunning) return;
+            sharedDrawerState.systemRunning = false;
+            updateSystemStatusUI();
+            // log("System Stop command issued. System idling.", 'alert');
+
+            updateJson();
+
+            clearInterval(gantryAutoTimer);
+            clearInterval(cartesianAutoTimer);
+
+        }
+
+        // async function systemForceStop() {
+        //     // if (!sharedDrawerState.systemRunning) return;
+
+        //     swal.fire({
+        //         title: "Are you sure want to force stop?",
+        //         text: "",
+        //         inputAttributes: {
+        //             autocapitalize: 'off'
+        //         },
+        //         showCancelButton: true,
+        //         confirmButtonText: 'ok',
+        //         cancelButtonText: 'cancel',
+        //         allowOutsideClick: false
+        //     }).then(function(r) {
+        //         if (r.isConfirmed == true) {
+        //             // continue load
+        //             log(`Gantry and loader going end task.`, 'info');
+        //             var rEnd = await loadPLCEndTask();
+        //             if (rEnd == true) {
+        //                 await loadDBStopUnload();
+        //             }
+        //             $('#jobDoneModal').modal('show');
+        //         }
+        //         else {
+        //             return;
+        //         }
+        //     });
+
+
+        // }
+
+        // Function to update the main header status text and button states
+
+        function updateSystemStatusUI() {
+            const startBtn = document.getElementById('start-btn');
+            const stopBtn = document.getElementById('stop-btn');
+            const contBtn = document.getElementById('cont-btn');
+
+            if (sharedDrawerState.systemRunning) {
+                startBtn.disabled = true;
+                contBtn.disabled = true;
+                stopBtn.disabled = false;
+            } else {
+                startBtn.disabled = false;
+                contBtn.disabled = false;
+                stopBtn.disabled = true;
+            }
+        }
+
+        // Helper function to update column status (Gantry side)
+        function updateColumnStatus(colNo, count) {
+            const colElement = document.getElementById('col-' + colNo);
+
+            const countSpan = colElement.querySelector('.reel-count');
+            countSpan.setAttribute('data-count', count);
+            countSpan.textContent = count + ' left';
+
+            if (count === 0) {
+                colElement.setAttribute('data-status', 'empty');
+            } else {
+                colElement.setAttribute('data-status', 'full');
+            }
+        }
+
+        // Function to update the active pick column visually AND move the loader track
+        function updateActiveColumn(columnNumber) {
+            // Remove active-pick class from previous columns
+            document.querySelectorAll('.col').forEach(col => {
+                col.classList.remove('active-pick');
+            });
+
+            const activeCol = document.getElementById('col-' + columnNumber);
+            if (activeCol) {
+                activeCol.classList.add('active-pick');
+                // document.getElementById('next-pick-col').textContent = columnNumber;
+            }
+
+            // Animate the track to the correct position (existing animation logic)
+            const loaderTrack = document.querySelector('.loader-track');
+            loaderTrack.classList.remove('pos-col-1', 'pos-col-2', 'pos-col-3', 'pos-col-4');
+            loaderTrack.classList.add(`pos-col-${columnNumber}`);
+
+            // // Ensure dimming is off by default when just indexing
+            // loaderTrack.classList.remove('picking-dim');
+        }
+
+        function updateGantryUIState() {
+
+            // const pickBtn = document.getElementById('btnPick');
+            // const placeBtn = document.getElementById('btnPlace');
+            const holdStatusBanner = document.getElementById('gantry-hold-status');
+            const gantryHead = document.querySelector('.gantry-head');
+
+            // Reset visibility/disability first
+            // pickBtn.disabled = false;
+            // placeBtn.disabled = false;
+            holdStatusBanner.style.display = 'none';
+
+            switch (sharedDrawerState.gantrySequenceState) {
+                case 'Returning':
+                    // pickBtn.disabled = false;
+                    gantryHead.setAttribute('data-position', 'loader'); // Start moving right
+                    break;
+                case 'PickedAndHolding':
+                    // pickBtn.disabled = true; // Cannot start new cycle
+                    // placeBtn.disabled = false; // Can now continue
+                    gantryHead.setAttribute('data-position', 'pickup'); // Ensure it stays at loader point
+                    gantryHead.setAttribute('data-has-reel', 'true'); // Visually show it holding
+                    holdStatusBanner.style.display = 'block';
+                    break;
+                case 'Placing':
+                    // pickBtn.disabled = true;
+                    // placeBtn.disabled = true;
+                    break;
+            }
+
+        }
+
+        function updateDrawerStatus(status, text) {
+            const drawer = document.querySelector('.drawer');
+            drawer.setAttribute('data-status', status);
+            document.getElementById('drawer-status-text').textContent = text;
+        }
+
+        function updateCartesianUIState() {
+            document.querySelectorAll('.rack-area').forEach(area => {
+                area.classList.remove('active');
+            });
+
+            if (sharedDrawerState.cartesianLocation === 'left') {
+                document.querySelector('.left-rack').classList.add('active');
+                // document.getElementById('left-status').textContent = "ROBOT PRESENT";
+                // document.getElementById('right-status').textContent = "Status: IDLE";
+            } else if (sharedDrawerState.cartesianLocation === 'right') {
+                document.querySelector('.right-rack').classList.add('active');
+                // document.getElementById('right-status').textContent = "ROBOT PRESENT";
+                // document.getElementById('left-status').textContent = "Status: IDLE";
+            } else {
+                $("#left-input").val('');
+                $("#right-input").val('');
+                // document.getElementById('left-status').textContent = "Status: IDLE";
+                // document.getElementById('right-status').textContent = "Status: IDLE";
+            }
+
+            document.getElementById('cartesian-state-simple').textContent = sharedDrawerState.cartesianRobotState;
+        }
+
+        function disableDivContent(status) {
+            const div2 = document.getElementById('gantry-session');
+            if (div2) {
+                const interactiveElements = div2.querySelectorAll('button'); // input, select, textarea,
+                interactiveElements.forEach(element => {
+                    element.setAttribute('disabled', status);
+                    if (status == false) {
+                        element.removeAttribute('disabled');
+                    }
+                });
+            }
+
+            const div = document.getElementById('cartesian-session');
+            if (div) {
+                const interactiveElements = div.querySelectorAll('button'); // input, select, textarea,
+                interactiveElements.forEach(element => {
+                    element.setAttribute('disabled', status);
+                    if (status == false) {
+                        element.removeAttribute('disabled');
+                    }
+                });
+            }
+
+            if (status == true) {
+                const links = document.querySelectorAll('a');
+                links.forEach(link => {
+                  // Store the original href in a data attribute
+                  link.dataset.originalHref = link.href;
+                  // Remove the href attribute to prevent navigation
+                  link.removeAttribute('href');
+                  // Optionally, add a class for visual styling and set aria-disabled for accessibility
+                  link.classList.add('disabled-link');
+                  link.setAttribute('aria-disabled', 'true');
+                });
+            }
+            else {
+                const links = document.querySelectorAll('a');
+                links.forEach(link => {
+                  // Restore the original href from the data attribute
+                  if (link.dataset.originalHref) {
+                    link.href = link.dataset.originalHref;
+                    delete link.dataset.originalHref; // Clean up the data attribute
+                  }
+                  // Remove the styling class and aria-disabled attribute
+                  link.classList.remove('disabled-link');
+                  link.removeAttribute('aria-disabled');
+                });
+            }
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // ----------- Log
+        function log(msg, typ) {
+          const list = document.getElementById('logList');
+          const d = document.createElement('div');
+          d.className = 'log-entry';
+          const ts = new Date().toLocaleTimeString('en',{hour12:false});
+          if (typ == 'info') {
+            d.innerHTML = `<span style="color:#475569">[${ts}]</span> ${msg}`;
+          }
+          if (typ == 'alert') {
+            d.innerHTML = `<span style="color:#e74c3c">[${ts}]</span> <span style="color:#e74c3c">${msg} </span>`;
+          }
+          list.prepend(d);
+          if (list.children.length > 30) list.lastChild.remove();
+        }
+
+
+        // ----------- HMI Action
+        function updateJson() {
+            var data = {
+                SystemStart: sharedDrawerState.systemRunning,
+
+                LoaderCode: $("#loader-input").val(),
+                LoaderId: Number($("#txtLoaderId").val()),
+
+                DrawerStatus: sharedDrawerState.drawerStatus,
+                GantryStatus: sharedDrawerState.gantrySequenceState,
+
+                SetUnload: Number($("#txtSetUnload").val()),
+                ReelId: $("#txtReelId").val(),
+                ReelCode: $("#txtReelCode").val(),
+                ActualHeight: Number($("#txtActHeight").val()),
+
+                CartesianRobotState: sharedDrawerState.cartesianRobotState,
+                CartesianLocation: sharedDrawerState.cartesianLocation,
+
+                RetrieveSlot: $("#txtRetrieveSlot").val(),
+                PutAwaySlot: $("#txtPutSlot").val(),
+                SlotTake: Number($("#txtPutSlotTake").val()),
+
+                ReelIdC: $("#txtReelIdC").val(),
+                ReelCodeC: $("#txtReelCodeC").val(),
+                ActualHeightC: Number($("#txtActHeightC").val()),
+
+                HalfPickMove: halfPickMove,
+                HalfPickMoveStep: halfPickMoveStep,
+                HalfPlaceMove: halfPlaceMove,
+                HalfPlaceMoveStep: halfPlaceMoveStep,
+
+                Col1TotalReels: Number($("#txtCol1TotalReels").val()),
+                Col2TotalReels: Number($("#txtCol2TotalReels").val()),
+                Col3TotalReels: Number($("#txtCol3TotalReels").val()),
+                Col4TotalReels: Number($("#txtCol4TotalReels").val()),
+
+                ColNum: colNum,
+            }
+
+            $.ajax({
+                url: '/api/PLCHubIn/UpdateRackJobJson',
+                type: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                data: JSON.stringify(data),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                    }
+                    else {
+                        console.log(result.errMessage);
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+
+        async function getJson() {
+            var fResult = false;
+
+            await $.ajax({
+                url: '/api/PLCHubIn/GetRackJobJson',
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                },
+                success: function (result) {
+                    sharedDrawerState.systemRunning = result.data.systemRunning;
+
+                    sharedDrawerState.drawerStatus = result.data.drawerStatus;
+                    sharedDrawerState.gantrySequenceState = result.data.gantryStatus;
+
+                    $("#loader-input").val(result.data.loaderCode);
+                    $("#txtLoaderId").val(result.data.loaderId);
+
+                    $("#txtSetUnload").val(result.data.setUnload);
+                    $("#txtReelId").val(result.data.reelId);
+                    $("#txtReelCode").val(result.data.reelCode);
+                    $("#txtActHeight").val(result.data.actualHeight);
+
+                    sharedDrawerState.cartesianRobotState = result.data.cartesianRobotState;
+                    sharedDrawerState.cartesianLocation = result.data.cartesianLocation;
+
+                    $("#txtRetrieveSlot").val(result.data.retrieveSlot);
+                    $("#txtPutSlot").val(result.data.putAwaySlot);
+                    $("#txtPutSlotTake").val(result.data.slotTake);
+
+                    $("#txtReelIdC").val(result.data.reelIdC);
+                    $("#txtReelCodeC").val(result.data.reelCodeC);
+                    $("#txtActHeightC").val(result.data.actualHeightC);
+
+                    halfPickMove = result.data.HalfPickMove;
+                    halfPickMoveStep = result.data.halfPickMoveStep;
+                    halfPlaceMove = result.data.halfPlaceMove;
+                    halfPlaceMoveStep = result.data.halfPlaceMoveStep;
+
+                    colNum = result.data.colNum;
+
+                    fResult = true;
+
+                    return fResult;
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+            return fResult;
+        }
+
+
+        // ----------- Action (Auto Mode)
+        function gantryAuto() {
+            if (endTask == true) { return; }
+            console.log("AutoGantry");
+            const chkAutoRun = document.getElementById('chkAutoRun');
+            if (chkAutoRun.checked) {
+                // 1. if gantry no pick then just pick
+                if (sharedDrawerState.systemRunning == true && sharedDrawerState.gantrySequenceState == "Returning" && inPickMove == false && inPlaceMove == false) {
+                    var bal = Number($("#txtCol1TotalReels").val());
+                    bal = bal + Number($("#txtCol2TotalReels").val());
+                    bal = bal + Number($("#txtCol3TotalReels").val());
+                    bal = bal + Number($("#txtCol4TotalReels").val());
+                    if (bal == 0) {
+                        return;
+                    }
+                    startPick();
+                }
+
+                // 2. if gantry picked then just place
+                if (sharedDrawerState.systemRunning == true && sharedDrawerState.gantrySequenceState == "PickedAndHolding" && sharedDrawerState.drawerStatus == "Drawer" && inPickMove == false && inPlaceMove == false) {
+                    startPlace();
+                }
+            }
+        }
+
+        function cartesianAuto() {
+            if (endTask == true) { return; }
+            console.log("AutoCartesian");
+            const chkAutoRun = document.getElementById('chkAutoRun');
+            if (chkAutoRun.checked) {
+                // 1. if no drawer just take (reelId MUST have first cause need get actual height)
+                 var actH = $("#txtActHeight").val();
+                if (sharedDrawerState.systemRunning == true && sharedDrawerState.drawerStatus == "None" && actH != "0" && inRetrieveMove == false && inPutAwayMove == false) {
+                    startRetrieve();
+                }
+
+                // 2. if have drawer and placed then just put away
+                 var actHC = $("#txtActHeightC").val();
+                if (sharedDrawerState.systemRunning == true && sharedDrawerState.drawerStatus == "Placed" && actHC != "0" && inRetrieveMove == false && inPutAwayMove == false) {
+                    startPutAway();
+                }
+
+            }
+        }
+
+
+        // ----------- Action
+        // Gantry + Loader Start Pick
+        async function startPick() {
+            if (inPickMove == true) {
+                return;
+            }
+            if (sharedDrawerState.systemRunning != true) {
+                log(`System not yet start.`, 'alert');
+                return;
+            }
+            if (sharedDrawerState.gantrySequenceState != "Returning") {
+                log(`Drawer is ${sharedDrawerState.gantrySequenceState}, please check.`, 'alert');
+                return;
+            }
+            var bal = Number($("#txtCol1TotalReels").val());
+            bal = bal + Number($("#txtCol2TotalReels").val());
+            bal = bal + Number($("#txtCol3TotalReels").val());
+            bal = bal + Number($("#txtCol4TotalReels").val());
+            if (bal == 0) {
+                log(`No Reel to unload.`, 'info');
+                return;
+            }
+
+            log(`Gantry cycle started: Picking from Column ${colNum}.`, 'info');
+            inPickMove = true;
+
+            var chkGantry = await loadPLCCheckUnlodingStatus(begining);
+            if (chkGantry == false) {
+                sharedDrawerState.gantrySequenceState = 'Returning';
+                updateGantryUIState();
+                inPickMove = false;
+                return;
+            }
+            begining = false;
+
+            var turn = await turnCol(1);
+            if (turn == false) {
+                sharedDrawerState.gantrySequenceState = 'Returning';
+                updateGantryUIState();
+                inPickMove = false;
+                return;
+            }
+
+            if (halfPickMove == false || (halfPickMove == true && halfPickMoveStep<=3)) {
+                var setScan = await loadPLCStartBarcodeScanner();
+                if (setScan == false) {
+                    sharedDrawerState.gantrySequenceState = 'Returning';
+                    updateGantryUIState();
+                    inPickMove = false;
+                    halfPickMove = true;
+                    halfPickMoveStep = 3;
+                    updateJson();
+                    return;
+                }
+                await delay(3000);
+            }
+
+            if (halfPickMove == false || (halfPickMove == true && halfPickMoveStep<=4)) {
+                var getReelInfo = await loadPLCScanReelID();
+                if (getReelInfo == false) {
+                    sharedDrawerState.gantrySequenceState = 'Returning';
+                    updateGantryUIState();
+                    inPickMove = false;
+                    halfPickMove = true;
+                    halfPickMoveStep = 4;
+                    updateJson();
+                    return;
+                }
+                attemptsPick = 1;
+            }
+            updateJson();
+
+            if (halfPickMove == false || (halfPickMove == true && halfPickMoveStep<=5)) {
+                var setH = await loadPLCSetActualHeight();
+                if (setH == false) {
+                    sharedDrawerState.gantrySequenceState = 'Returning';
+                    updateGantryUIState();
+                    inPickMove = false;
+                    halfPickMove = true;
+                    halfPickMoveStep = 5;
+                    updateJson();
+                    return;
+                }
+            }
+
+            if (halfPickMove == false || (halfPickMove == true && halfPickMoveStep<=6)) {
+                var chkPicked = await loadPLCGetPickStatus();
+                if (chkPicked == false) {
+                    sharedDrawerState.gantrySequenceState = 'Returning';
+                    updateGantryUIState();
+                    inPickMove = false;
+                    halfPickMove = true;
+                    halfPickMoveStep = 6;
+                    updateJson();
+                    return;
+                }
+            }
+
+            var chkDB = await loadDBLoaderCount();
+            updateColCount();
+
+            sharedDrawerState.gantrySequenceState = 'PickedAndHolding';
+            updateGantryUIState();
+            log(`Gantry cycle end: Picked from Column ${colNum}.`, 'info');
+            inPickMove = false;
+            halfPickMove = false;
+            halfPickMoveStep = 1;
+
+            updateJson();
+            loadDBUpcoming();
+        }
+
+        // Gantry Start Place
+        async function startPlace() {
+            if (inPlaceMove == true) {
+                return;
+            }
+            if (sharedDrawerState.systemRunning != true) {
+                log(`System not yet start.`, 'alert');
+                return;
+            }
+            if (sharedDrawerState.drawerStatus != "Drawer") {
+                log(`Drawer is ${sharedDrawerState.drawerStatus}, please check.`, 'alert');
+                return;
+            }
+
+            // Update the state to 'Picking', which triggers the dimming effect via updateGantryUIState
+            sharedDrawerState.gantrySequenceState = 'Placing';
+            updateGantryUIState();
+            log(`Gantry cycle started: Placing on drawer.`, 'info');
+            inPlaceMove = true;
+
+            if (halfPlaceMove == false) {
+                attemptsPlace = 1;
+            }
+            var setPlace = await loadPLCPlaceReel();
+            if (setPlace == false) {
+                sharedDrawerState.gantrySequenceState = 'PickedAndHolding';
+                updateGantryUIState();
+                inPlaceMove = false;
+                return;
+            }
+            await delay(3000);
+
+            if (halfPlaceMove == false || (halfPlaceMove == true && halfPlaceMoveStep<=2)) {
+                var chkPlaced = await loadPLCGetPlaceStatus();
+                if (chkPlaced == false) {
+                    sharedDrawerState.gantrySequenceState = 'PickedAndHolding';
+                    updateGantryUIState();
+                    inPlaceMove = false;
+                    halfPlaceMove = true;
+                    halfPlaceMoveStep = 2;
+                    updateJson();
+                    return;
+                }
+            }
+
+            sharedDrawerState.drawerStatus = "Placed";
+            updateDrawerStatus('Placed', 'Placed');
+
+            sharedDrawerState.gantrySequenceState = 'Returning';
+            updateGantryUIState();
+            log(`Gantry cycle end: Placed done.`, 'info');
+
+            inPlaceMove = false;
+            halfPlaceMove = false;
+            halfPlaceMoveStep = 1;
+
+            updateJson();
+
+            await delay(1500);
+        }
+
+        // Cartesian Start Retrieve Empty Drawer
+        async function startRetrieve() {
+            if (inRetrieveMove == true) {
+                return;
+            }
+            if (sharedDrawerState.systemRunning != true) {
+                log(`System not yet start.`, 'alert');
+                return;
+            }
+            if (sharedDrawerState.drawerStatus != "None") {
+                log(`Drawer is ${sharedDrawerState.drawerStatus}, please check.`, 'alert');
+                return;
+            }
+
+            var actH = $("#txtActHeight").val();
+            if (actH == "0") {
+                return;
+            }
+
+            sharedDrawerState.cartesianRobotState = 'Retrieving';
+            log(`Cartesian cycle started: Retrieve Empty Drawer.`, 'info');
+            inRetrieveMove = true;
+
+            var getSlotCode = await loadPLCGetEmptyTraySlot();
+            if (getSlotCode == false) {
+                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                inRetrieveMove = false;
+                return;
+            }
+
+            changeTakeSlot = false;
+
+            updateCartesianUIState();
+            var getSlot = await loadPLCTakeEmptyTray();
+            if (getSlot == false) {
+                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                inRetrieveMove = false;
+                return;
+            }
+            await delay(5000);
+
+            var chkStatus = await loadPLCGetRetrieveTrayStatus();
+            if (chkStatus == -1) {
+                // sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                // inRetrieveMove = false;
+                // changeTakeSlot = true;
+
+                // if (attemptsRetrieve > 5) {
+                //     log('Retrieve Empty Drawer :: Tried ' + (attemptsRetrieve - 1) + ', auto stop now.', 'info');
+                //     document.getElementById('chkAutoRun').checked = false;
+                //     return false;
+                // }
+                log('Retrieve Empty Drawer :: Please check catesian, auto stop now.', 'info');
+                document.getElementById('chkAutoRun').checked = false;
+                return;
+            }
+            else if (chkStatus == 1) {
+                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                inRetrieveMove = false;
+                changeTakeSlot = true;
+
+                if (attemptsRetrieve > 5) {
+                    log('Retrieve Empty Drawer :: Tried ' + (attemptsRetrieve - 1) + ', auto stop now.', 'info');
+                    document.getElementById('chkAutoRun').checked = false;
+                    return false;
+                }
+
+                return;
+            }
+
+
+            attemptsRetrieve = 1;
+
+            sharedDrawerState.drawerStatus = "Drawer";
+            updateDrawerStatus('Drawer', 'Empty Drawer');
+
+            sharedDrawerState.cartesianRobotState = 'Ready';
+            sharedDrawerState.cartesianLocation = '';
+            updateCartesianUIState();
+            updateDrawerStatus('Drawer', 'Empty Drawer Ready');
+            log(`Cartesian cycle end: Retrieved.`, 'info');
+            inRetrieveMove = false;
+
+            updateJson();
+        }
+
+        // Cartesian Start Put Away
+        async function startPutAway() {
+            if (inPutAwayMove == true) {
+                return;
+            }
+            if (sharedDrawerState.systemRunning != true) {
+                log(`System not yet start.`, 'alert');
+                return;
+            }
+            if (sharedDrawerState.drawerStatus != "Placed") {
+                log(`Drawer is ${sharedDrawerState.drawerStatus}, please check.`, 'alert');
+                return;
+            }
+
+            var actH = $("#txtActHeightC").val();
+            if (actH == "0") {
+                return;
+            }
+
+            sharedDrawerState.cartesianRobotState = 'In Put Away';
+            log(`Cartesian cycle started: Put Away Reel.`, 'info');
+            inPutAwayMove = true;
+
+            var getSlotCode = await loadPLCGetSlot();
+            if (getSlotCode == false) {
+                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                inPutAwayMove = false;
+                return;
+            }
+
+            changePutSlot = false;
+
+            // // 260223 add sensor for chekcing reel height
+            // const chkSensor = document.getElementById('chkSensor');
+            // if (chkSensor.checked) {
+            //     var hmTurnOn = await loadPLCTurnHeightMeasurement(1);
+            //     await delay(1000);
+            //     var hmPutAway = await loadPLCHeightMeasPutAwayToRack();
+            //     await delay(3000);
+            //     var hmResult = await loadPLCGetHeightMeasReelSlot();
+            //     hmTurnOn = await loadPLCTurnHeightMeasurement(0);
+
+            //     if (hmResult == false) {
+            //         // reset
+            //         $("#txtPutSlot").val('');
+            //         $("#txtPutSlotTake").val('');
+            //         sharedDrawerState.cartesianLocation = 'center';
+            //         $("#left-input").val('');
+
+            //         // get new bottom slot
+            //         var getSlotCode = await loadPLCGetSlot();
+            //         if (getSlotCode == false) {
+            //             sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+            //             inPutAwayMove = false;
+            //             return;
+            //         }
+            //     }
+            // }
+            // // 260223 add sensor for chekcing reel height
+
+            updateCartesianUIState();
+            var getSlot = await loadPLCPutAway();
+            if (getSlot == false) {
+                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                inPutAwayMove = false;
+                return;
+            }
+            await delay(5000);
+
+            var chkStatus = await loadPLCGetPutAwayStatus();
+            if (chkStatus == false) {
+                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                inPutAwayMove = false;
+                changePutSlot = true;
+
+                if (attemptsPutAway > 5) {
+                    log('Put Away Reel :: Tried ' + (attemptsPutAway - 1) + ', auto stop now.', 'info');
+                    document.getElementById('chkAutoRun').checked = false;
+                    return false;
+                }
+
+                return;
+            }
+
+            attemptsPutAway = 1;
+
+            var chkDB = await loadDBReelRack();
+            removeDBUpcoming();
+
+            sharedDrawerState.cartesianRobotState = 'Ready';
+            sharedDrawerState.cartesianLocation = 'center';
+            updateCartesianUIState();
+
+            sharedDrawerState.drawerStatus = "None";
+            updateDrawerStatus('None', 'No Drawer');
+            log(`Cartesian cycle end: Put Away Done.`, 'info');
+            inPutAwayMove = false;
+
+            // means all is out
+            var bal = Number($("#txtCol1TotalReels").val());
+            bal = bal + Number($("#txtCol2TotalReels").val());
+            bal = bal + Number($("#txtCol3TotalReels").val());
+            bal = bal + Number($("#txtCol4TotalReels").val());
+            if (bal == 0 && sharedDrawerState.gantrySequenceState == "Returning" && sharedDrawerState.cartesianRobotState == 'Ready') {
+                log(`Gantry and loader going end task.`, 'info');
+                var rEnd = await loadPLCEndTask();
+                if (rEnd == true) {
+                    await loadDBStopUnload();
+                }
+                $('#jobDoneModal').modal('show');
+            }
+
+            updateJson();
+        }
+
+
+        // ----------- Action :: retry
+        async function retry_PickStatus() {
+            var chkPicked = await loadPLCGetPickStatus();
+            if (chkPicked == false) {
+                sharedDrawerState.gantrySequenceState = 'Returning';
+                updateGantryUIState();
+                inPickMove = false;
+                halfPickMove = true;
+                halfPickMoveStep = 6;
+                updateJson();
+                return;
+            }
+
+            var chkDB = await loadDBLoaderCount();
+            updateColCount();
+
+            sharedDrawerState.gantrySequenceState = 'PickedAndHolding';
+            updateGantryUIState();
+            log(`Gantry cycle end: Picked from Column ${colNum}.`, 'info');
+            inPickMove = false;
+            halfPickMove = false;
+            halfPickMoveStep = 1;
+
+            updateJson();
+            loadDBUpcoming();
+        }
+
+        async function retry_PlaceStatus() {
+            var chkPlaced = await loadPLCGetPlaceStatus();
+            if (chkPlaced == false) {
+                sharedDrawerState.gantrySequenceState = 'PickedAndHolding';
+                updateGantryUIState();
+                inPlaceMove = false;
+                halfPlaceMove = true;
+                halfPlaceMoveStep = 2;
+                updateJson();
+                return;
+            }
+
+            sharedDrawerState.drawerStatus = "Placed";
+            updateDrawerStatus('Placed', 'Placed');
+
+            sharedDrawerState.gantrySequenceState = 'Returning';
+            updateGantryUIState();
+            log(`Gantry cycle end: Placed done.`, 'info');
+
+            inPlaceMove = false;
+            halfPlaceMove = false;
+            halfPlaceMoveStep = 1;
+
+            updateJson();
+        }
+
+        async function retry_RetrieveStatus() {
+            var chkStatus = await loadPLCGetRetrieveTrayStatus();
+            if (chkStatus == -1) {
+                // sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                // inRetrieveMove = false;
+                // changeTakeSlot = true;
+
+                // if (attemptsRetrieve > 5) {
+                //     log('Retrieve Empty Drawer :: Tried ' + (attemptsRetrieve - 1) + ', auto stop now.', 'info');
+                //     document.getElementById('chkAutoRun').checked = false;
+                //     return false;
+                // }
+                log('Retrieve Empty Drawer :: Please check catesian, auto stop now.', 'info');
+                document.getElementById('chkAutoRun').checked = false;
+                return;
+            }
+            else if (chkStatus == 1) {
+                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                inRetrieveMove = false;
+                changeTakeSlot = true;
+                return;
+            }
+
+            attemptsRetrieve = 1;
+
+            sharedDrawerState.drawerStatus = "Drawer";
+            updateDrawerStatus('Drawer', 'Empty Drawer');
+
+            sharedDrawerState.cartesianRobotState = 'Ready';
+            sharedDrawerState.cartesianLocation = '';
+            updateCartesianUIState();
+            updateDrawerStatus('Drawer', 'Empty Drawer Ready');
+            log(`Cartesian cycle end: Retrieved.`, 'info');
+            inRetrieveMove = false;
+
+            updateJson();
+        }
+
+        async function retry_PutAwayStatus() {
+            var chkStatus = await loadPLCGetPutAwayStatus();
+            if (chkStatus == false) {
+                sharedDrawerState.cartesianRobotState = 'Retrieve Failure';
+                inPutAwayMove = false;
+                changePutSlot = true;
+                return;
+            }
+
+            var chkDB = await loadDBReelRack();
+            removeDBUpcoming();
+
+            sharedDrawerState.cartesianRobotState = 'Ready';
+            sharedDrawerState.cartesianLocation = '';
+            updateCartesianUIState();
+
+            sharedDrawerState.drawerStatus = "None";
+            updateDrawerStatus('None', 'No Drawer');
+            log(`Cartesian cycle end: Put Away Done.`, 'info');
+            inPutAwayMove = false;
+
+            updateJson();
+        }
+
+
+        // ----------- Database
+        function updateColCount() {
+            var fResult = false;
+
+            var bal = 0;
+            if (Number(colNum) == 1) {
+                bal = Number($("#txtCol1TotalReels").val());
+                bal = bal - 1;
+                $("#txtCol1TotalReels").val(bal);
+
+                updateColumnStatus(1, bal);
+            }
+            if (Number(colNum) == 2) {
+                bal = Number($("#txtCol2TotalReels").val());
+                bal = bal - 1;
+                $("#txtCol2TotalReels").val(bal);
+
+                updateColumnStatus(2, bal);
+            }
+            if (Number(colNum) == 3) {
+                bal = Number($("#txtCol3TotalReels").val());
+                bal = bal - 1;
+                $("#txtCol3TotalReels").val(bal);
+
+                updateColumnStatus(3, bal);
+            }
+            if (Number(colNum) == 4) {
+                bal = Number($("#txtCol4TotalReels").val());
+                bal = bal - 1;
+                $("#txtCol4TotalReels").val(bal);
+
+                updateColumnStatus(4, bal);
+            }
+
+            return fResult;
+        }
+
+        async function loadDBLoaderCount() {
+
+            var loaderId = $("#txtLoaderId").val();
+            var reelId = $("#txtReelId").val();
+            var reelCode = $("#txtReelCode").val();
+            var fResult = -1;
+
+            if (reelId == '') { return 0; }
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/UpdateLoaderCount/" + loaderId + "/" + colNum + "/" + reelCode,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('4::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = result.data;
+                        log('Update DB Loader Count :: Done ', 'info');
+                    }
+                    else {
+                        log('Update DB Loader Count :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    log('Update DB Loader Count :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadDBReelRack() {
+
+            var reelIdC = $("#txtReelIdC").val();
+            var sCode = $("#txtPutSlot").val();
+            var sTake = $("#txtPutSlotTake").val();
+            var reelCodeC = $("#txtReelCodeC").val();
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/UpdateReelRack/" + reelCodeC + "/" + sCode + "/" + sTake,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('4::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        log('Update DB Rack :: Done ', 'info');
+
+                        $("#txtRetrieveSlot").val('');
+                        $("#txtPutSlot").val('');
+                        $("#txtPutSlotTake").val('');
+
+                        $("#txtReelIdC").val('');
+                        $("#txtReelCodeC").val('');
+                        $("#txtActHeightC").val('0');
+
+                    }
+                    else {
+                        log('Update DB Rack :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    log('Update DB Rack :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadDBStopUnload() {
+
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/StopUnload/" + qId,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('10::' + JSON.stringify(result));
+                    // swal.close();
+                    return true;
+                },
+                error: function (error) {
+                    log('End Loader :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        function loadDBUpcoming() {
+
+            var loaderId = $("#txtLoaderId").val();
+            const count = document.querySelectorAll('.reel-card').length;
+
+            $.ajax({
+                url: "/api/PLCHubIn/GetUpcomingReels/" + loaderId + "/" + count,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log(result);
+
+                    if (result.totalRecords > 0) {
+                        const parentDiv = document.getElementById("system-log-3");
+                        for (var i = 0; i < result.data.length; i++) {
+                            let id = result.data[i].reelCode;
+                            let code = result.data[i].itemCode;
+                            let qty = result.data[i].qty;
+
+                            const newDiv = ` <div class="reel-card">
+                                                <div class="reel-info">
+                                                    <p>${id}</p>
+                                                    <p>Item: ${code}</p>
+                                                    <p>Qty: ${qty}</p>
+                                                </div>
+                                            </div>`;
+                            // parentDiv.innerHTML += newDiv;
+                        }
+                    }
+
+                    return true;
+                },
+                error: function (error) {
+                    log('End Loader :: ' + error.val, 'alert');
+                }
+            });
+
+        }
+
+        function removeDBUpcoming() {
+            const parentDiv = document.getElementById("system-log-3");
+
+            const firstDivToRemove = parentDiv.querySelector('.reel-card:first-child'); // Replace 'childClassName' with the target class name
+
+            // 3. Check if the element exists and then remove it
+            if (firstDivToRemove) {
+                firstDivToRemove.classList.add('fade-out');
+
+                // 2. Wait for the animation to finish (500ms in this example) and then remove the element
+                setTimeout(() => {
+                    firstDivToRemove.remove(); // The .remove() method is simple and widely supported
+                }, 500); // The delay must match the CSS transition duration
+            }
+        }
+
+
+        // ----------- Gantry
+        async function getLoader(code, isCont) {
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/StartUnload/" + code + "/" + qId,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    // console.log(result);
+                    swal.close();
+
+                    if (result.success == true) {
+                        fResult = true;
+
+                        $("#txtLoaderId").val(result.data.loaderInfo.loader_Id);
+
+                        updateColumnStatus(1, result.data.loaderInfo.col1TotalReels);
+                        updateColumnStatus(2, result.data.loaderInfo.col2TotalReels);
+                        updateColumnStatus(3, result.data.loaderInfo.col3TotalReels);
+                        updateColumnStatus(4, result.data.loaderInfo.col4TotalReels);
+
+                        $("#txtCol1TotalReels").val(result.data.loaderInfo.col1TotalReels);
+                        $("#txtCol2TotalReels").val(result.data.loaderInfo.col2TotalReels);
+                        $("#txtCol3TotalReels").val(result.data.loaderInfo.col3TotalReels);
+                        $("#txtCol4TotalReels").val(result.data.loaderInfo.col4TotalReels);
+
+                        log('Loader :: Done check ' + code, 'info');
+                    }
+                    else {
+                        updateColumnStatus(1, 0);
+                        updateColumnStatus(2, 0);
+                        updateColumnStatus(3, 0);
+                        updateColumnStatus(4, 0);
+
+                        $("#txtCol1TotalReels").val(0);
+                        $("#txtCol2TotalReels").val(0);
+                        $("#txtCol3TotalReels").val(0);
+                        $("#txtCol4TotalReels").val(0);
+
+                        log('Loader :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    log('Loader :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCCheckMode() {
+
+            var loaderId = $("#txtLoaderId").val();
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/GetLoaderMode/" + loaderId,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('2::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        log('Loader Mode :: Auto ', 'info');
+                    }
+                    else {
+                        log('Loader Mode :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    log('Set Unload :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCSetLoaderUnload() {
+
+            var loaderId = $("#txtLoaderId").val();
+            var fResult = false;
+
+            var setUnloadVal = $("#txtSetUnload").val();
+            if (setUnloadVal == '1') {
+                return;
+            }
+
+            await $.ajax({
+                url: "/api/PLCHubIn/SetLoaderUnload/" + loaderId,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    console.log('2::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+
+                        $("#txtSetUnload").val("1");
+
+                        log('Set Unload :: Done ', 'info');
+                    }
+                    else {
+                        log('Set Unload :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    log('Set Unload :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCCheckUnlodingStatus(beg) {
+
+            var loaderId = $("#txtLoaderId").val();
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/GetUnlodingStatus/" + loaderId + "/" + beg,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                        log('Check Unload :: OK ', 'info');
+
+                        fResult = true;
+                    }
+                    else {
+                        if (result.data[0] != "2") {
+                            log('Check Unload :: Err Gripper ' + result.errMessage, 'alert');
+                        }
+                        if (result.data[1] != "16") {
+                            log('Check Unload :: Err Fork ' + result.errMessage, 'alert');
+                        }
+                    }
+                },
+                error: function (error) {
+                    log('Check Unload :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCStartBarcodeScanner() {
+
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/StartBarcodeScanner/",
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('2::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        log('Start Scan :: Done ', 'info');
+
+                        fResult = true;
+                    }
+                    else {
+                        log('Start Scan :: Err Gripper ' + result.errMessage, 'alert');
+                        // $('#pSetUnload').html('Set Unload : <span class="error-message" id="errSetUnload"> ' + result.errMessage + ' </span>');
+                    }
+                },
+                error: function (error) {
+                    log('Start Scan :: ' + error.val, 'alert');
+                    // $('#pSetUnload').html('Set Unload : <span class="error-message" id="errSetUnload"> ' + error.val + ' </span>');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCScanReelID() {
+
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/GetReelID/",
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    if (result.data.successReel) {
+                        fResult = true;
+
+                        $("#txtReelId").val(result.data.reel_Id);
+                        $("#txtReelCode").val(result.data.reelCode);
+                        $("#txtActHeight").val(result.data.actualHeight);
+
+                        $('#txtReel').html('Reel : ' + result.data.reelCode);
+
+                        log('Get Scanned :: OK ' + result.data.scannedBarcode, 'info');
+                        log('Get Scanned :: Item Code ' + result.data.itemCode, 'info');
+                        log('Get Scanned :: Reel Id ' + result.data.reel_Id, 'info');
+                        log('Get Scanned :: Reel Code ' + result.data.reelCode, 'info');
+                        log('Get Scanned :: Actual Height ' + result.data.actualHeight, 'info');
+                    }
+                    else {
+                        log('Get Scanned :: ' + result.data.errMessageReel, 'alert');
+                    }
+                },
+                error: function (error) {
+                    log('Get Scanned :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCSetActualHeight() {
+
+            var loaderId = $("#txtLoaderId").val();
+            var actH = $("#txtActHeight").val();
+            var fResult = false;
+
+            if (attemptsPick > 3) {
+                log('Set Height :: Tried ' + attemptsPick + ', auto stop now.', 'info');
+                document.getElementById('chkAutoRun').checked = false;
+                attemptsPick = 1;
+                return false;
+            }
+            attemptsPick += 1;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/SetActualHeight/" + loaderId + "/" + actH,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                        fResult = true;
+
+                        log('Set Height :: Done ' + result.data.scannedBarcode, 'info');
+                    }
+                    else {
+                        log('Set Height :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    log('Set Height :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCGetPickStatus() {
+
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/GetPickStatus/",
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('3::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        log('Pick Status :: OK ', 'info');
+                    }
+                    else {
+                        log('Pick Status :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    log('Pick Status :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCPlaceReel() {
+
+            var fResult = false;
+
+            if (attemptsPlace > 3) {
+                log('Place :: Tried ' + attemptsPlace + ', auto stop now.', 'info');
+                document.getElementById('chkAutoRun').checked = false;
+                attemptsPlace = 1;
+                return false;
+            }
+            attemptsPlace += 1;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/PutReelOnTray/",
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('4::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        log('Place :: Done ', 'info');
+                    }
+                    else {
+                        log('Place :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    log('Place :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCGetPlaceStatus() {
+
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/GetPlaceStatus/",
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('4::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        log('Place Status :: OK ', 'info');
+
+                        $("#txtReelIdC").val($("#txtReelId").val());
+                        $("#txtReelCodeC").val($("#txtReelCode").val());
+                        $("#txtActHeightC").val($("#txtActHeight").val());
+
+                        $("#txtReelId").val('');
+                        $("#txtReelCode").val('');
+                        $("#txtActHeight").val('0');
+
+                        $('#txtReel').html('Reel : - ');
+                    }
+                    else {
+                        log('Place Status :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    log('Place Status :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+
+        // ----------- Loader
+        async function loadPLCGetCurrentColumn() {
+
+            var loaderId = $("#txtLoaderId").val();
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCLoader/GetCurrentColumn/" + loaderId,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('2.3::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        colNum = result.data;
+                        fResult = true;
+                        log('PLC Column :: ' + result.data, 'info');
+                    }
+                    else {
+                        log('PLC Column :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    log('PLC Column :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function turnCol(idx) {
+            var fResult = false;
+
+            var loaderId = $("#txtLoaderId").val();
+
+            var bal = $("#txtCol1TotalReels").val();
+            if (Number(colNum) == 2) { bal = $("#txtCol2TotalReels").val(); }
+            if (Number(colNum) == 3) { bal = $("#txtCol3TotalReels").val(); }
+            if (Number(colNum) == 4) { bal = $("#txtCol4TotalReels").val(); }
+            // $('#txtBal').html(bal);
+
+            if (bal > 0) {
+                return true;
+            }
+            else {
+                var nextCol = 2;
+                if (Number($("#txtCol4TotalReels").val()) > 0) { nextCol = 4; }
+                if (Number($("#txtCol3TotalReels").val()) > 0) { nextCol = 3; }
+                if (Number($("#txtCol2TotalReels").val()) > 0) { nextCol = 2; }
+
+                if (Number(colNum) < Number(nextCol)) {
+
+                    var setE = true;
+                    if (idx <= 1) {
+                        setE = await loadPLCSetColumnEmpty(loaderId, Number(colNum));
+                        await delay(8000);
+                    }
+                    if (setE == false) {
+                        return fResult;
+                    }
+
+                    var getR = true;
+                    if (idx <= 2) {
+                        getR = await loadPLCReadyStatus(loaderId);
+                    }
+                    if (getR == false) {
+                        return fResult;
+                    }
+
+                    var getT = true;
+                    if (idx <= 3) {
+                        getT = await loadPLCTurn(loaderId, Number(nextCol));
+                    }
+                    if (getT == false) {
+                    }
+                    else {
+                        var delayT = 5000 * (nextCol - 1);
+                        await delay(delayT);
+
+                        var chkGripper2 = await loadPLCCheckUnlodingStatus(true);
+                        // console.log('R2.32::' + chkGripper2);
+                        if (chkGripper2 == true) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return fResult;
+        }
+
+        async function loadPLCSetColumnEmpty(loaderId, curCol) {
+
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/SetColumnEmpty/"+ loaderId + "/" + curCol,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('2::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        log('Set Empty Column [' + curCol + '] :: Done ', 'info');
+                    }
+                    else {
+                        log('Set Empty Column [' + curCol + '] :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    log('Set Empty Column [' + curCol + '] :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCReadyStatus(loaderId) {
+
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/GetReadyTurnStatus/"+ loaderId,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('2::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        log('Status Ready to Turn Column :: OK ', 'info');
+                    }
+                    else {
+                        log('Status Ready to Turn Column :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    log('Status Ready to Turn Column :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCTurn(loaderId, nextCol) {
+
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/SetTurnColumn/"+ loaderId + "/" + nextCol,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('2::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        colNum = nextCol;
+                        updateActiveColumn(colNum);
+                        fResult = true;
+                        log('Turn Column :: OK ', 'info');
+                    }
+                    else {
+                        log('Turn Column :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    log('Turn Column :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCEndTask() {
+
+            var loaderId = $("#txtLoaderId").val();
+            var fResult = false;
+
+            for (var iC = Number(colNum); iC <= 4; iC++) {
+                await delay(1000);
+                var setE = await loadPLCSetColumnEmpty(loaderId, Number(iC));
+                console.log('R5.2::' + setE);
+            }
+
+            await $.ajax({
+                url: "/api/PLCHubIn/UnloadEndTask/" + loaderId,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('10::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        endTask = true;
+                        fResult = true;
+                        log('End Loader :: OK ', 'info');
+                        systemStop();
+                    }
+                },
+                error: function (error) {
+                    log('End Loader :: ' + error.val, 'alert');
+                }
+            });
+
+
+
+            return fResult;
+        }
+
+
+        // ----------- Cartesian :: Empty Drawer
+        async function loadPLCGetEmptyTraySlot() {
+
+            var fResult = false;
+            var chkSlot = '-';
+            if (changeTakeSlot == true) {
+                chkSlot = $("#txtRetrieveSlot").val();
+                attemptsRetrieve += 1;
+            }
+
+            // step 2 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/GetEmptyTraySlot/" + chkSlot,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('3::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        log('Get Empty Drawer Slot :: Done ', 'info');
+                        $("#txtRetrieveSlot").val(result.data.slotCode);
+                        if (result.data.isLeft == true) {
+                            sharedDrawerState.cartesianLocation = 'left';
+                            $("#left-input").val(result.data.slotCode);
+                        }
+                        else {
+                            sharedDrawerState.cartesianLocation = 'right';
+                            $("#right-input").val(result.data.slotCode);
+                        }
+                    }
+                    else {
+                        log('Get Empty Drawer Slot :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    log('Get Empty Drawer Slot :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCTakeEmptyTray() {
+
+            var eSlot = $("#txtRetrieveSlot").val();
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/RetrieveTray/" + eSlot,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('3::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success) {
+                        log('Retrieve :: Done ', 'info');
+                    }
+                    else {
+                        log('Retrieve :: ' + result.errMessage, 'alert');
+                    }
+
+                    fResult = result.success;
+                },
+                error: function (error) {
+                    log('Retrieve :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCGetRetrieveTrayStatus() {
+
+            var fResult = -1;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/GetRetrieveTrayStatus/",
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('3::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = 0;
+                        log('Retrieve Status :: OK ', 'info');
+                    }
+                    else {
+                        if (result.errMessage == "1") {
+                            fResult = 1;
+                            log('Retrieve Status :: No Drawer to take. ', 'info');
+                        }
+                        else {
+                            log('Retrieve Status :: ' + result.errMessage, 'alert');
+                        }
+                    }
+
+                    log('Retrieve Slot Code :: ' + result.data.slotCode, 'info');
+                    log('Retrieve QR X :: ' + result.data.qrxPulse, 'info');
+                    log('Retrieve QR Z :: ' + result.data.qryPulse, 'info');
+                    log('Retrieve QR X Differ :: ' + result.data.qrxPulseDiffer, 'info');
+                    log('Retrieve QR Z Differ :: ' + result.data.qryPulseDiffer, 'info');
+
+                },
+                error: function (error) {
+                    log('Retrieve Status :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+
+        // ----------- Cartesian :: Put Away
+        async function loadPLCGetSlot() {
+
+            var actH = $("#txtActHeightC").val();
+            var fResult = false;
+
+            var chkSlot = '-';
+            if (changePutSlot == true) {
+                chkSlot = $("#txtPutSlot").val();
+                attemptsPutAway += 1;
+            }
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/GetBottomSlot/" + actH + "/" + chkSlot,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('4::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        log('Get Put Away Slot :: Done ', 'info');
+                        $("#txtPutSlot").val(result.data.slotCode);
+                        $("#txtPutSlotTake").val(result.data.totalSlot);
+                        if (result.data.isLeft == true) {
+                            sharedDrawerState.cartesianLocation = 'left';
+                            $("#left-input").val(result.data.slotCode);
+                        }
+                        else {
+                            sharedDrawerState.cartesianLocation = 'right';
+                            $("#right-input").val(result.data.slotCode);
+                        }
+                    }
+                    else {
+                        log('Get Put Away Slot :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    log('Get Put Away Slot :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCPutAway() {
+
+            var sCode = $("#txtPutSlot").val();
+            var sTake = $("#txtPutSlotTake").val();
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/PutAway/" + sCode + "/" + sTake,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('4::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        log('Put Away :: Done ', 'info');
+                    }
+                    else {
+                        log('Put Away :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    log('Put Away :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCGetPutAwayStatus() {
+
+            var fResult = false;
+
+            // step 4 : scan item
+            await $.ajax({
+                url: "/api/PLCHubIn/GetPutAwayStatus/",
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+
+                },
+                success: function (result) {
+                    // console.log('4::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        log('Put Away Status :: Done ', 'info');
+                    }
+                    else {
+                        log('Put Away Status :: ' + result.errMessage, 'alert');
+                    }
+
+                    log('Retrieve Slot Code :: ' + result.data.slotCode, 'info');
+                    log('Retrieve QR X :: ' + result.data.qrxPulse, 'info');
+                    log('Retrieve QR Z :: ' + result.data.qryPulse, 'info');
+                    log('Retrieve QR X Differ :: ' + result.data.qrxPulseDiffer, 'info');
+                    log('Retrieve QR Z Differ :: ' + result.data.qryPulseDiffer, 'info');
+                },
+                error: function (error) {
+                    log('Put Away Status :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCTurnHeightMeasurement(status) {
+
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/TurnHeightMeas/" + status,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                },
+                success: function (result) {
+                    // console.log('2::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        log('Turn Height Meas :: DONE ', 'info');
+                    }
+                    else {
+                        log('Turn Height Meas :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    log('Turn Height Meas :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCHeightMeasPutAwayToRack() {
+
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/HeightMeasPutAwayToRack",
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                },
+                success: function (result) {
+                    // console.log('2::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        fResult = true;
+                        log('Height Meas PutAwayToRack :: DONE ', 'info');
+                    }
+                    else {
+                        log('Height Meas PutAwayToRack :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    log('Height Meas PutAwayToRack :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        async function loadPLCGetHeightMeasReelSlot() {
+
+            var fResult = true;
+            var sTake = $("#txtPutSlotTake").val();
+            var actH = $("#txtActHeightC").val();
+            var reelCode = $("#txtReelCodeC").val();
+
+            await $.ajax({
+                url: "/api/PLCHubIn/GetHeightMeasReelSlot/" + reelCode + "/" + sTake,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                },
+                success: function (result) {
+                    // console.log('2::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+                        const arr = str.split(',');
+
+                        if (Number(sTake) < Number(arr[1])) {
+                            fResult = false;
+                        }
+                        if (Number(arr[2]) > 0) {
+                            $("#txtActHeightC").val(Number(arr[2]));
+                        }
+                        log('Height Meas ReelSlot :: Slot ' + arr[1], 'info');
+                    }
+                    else {
+                        if (result.errList.length >= 2 ) {
+                            log('Height Meas ReelSlot :: ' + result.errList[0], 'alert');
+                            log('Height Meas ReelSlot :: ' + result.errList[1], 'alert');
+                        }
+                        else {
+                            if (result.errList.length > 0 ) {
+                                log('Height Meas ReelSlot :: ' + result.errList[0], 'alert');
+                            }
+                        }
+                    }
+                },
+                error: function (error) {
+                    log('Height Meas ReelSlot :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
+
+        function closeTab() {
+            window.close();
+        }
+
+        function exportLogFile() {
+
+
+            $.ajax({
+                url: "/api/PLCHubIn/GetErrorLog/" + qId,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                },
+                success: function (result) {
+                    // console.log('Export Err::' + JSON.stringify(result));
+                    // swal.close();
+                    if (result.success == true) {
+
+                        const wb = XLSX.utils.book_new();
+                        wb.Props = {
+                            Title: "Log File",
+                            Subject: "Rack Job Hub In Task",
+                            Author: "Flex Software Consulting Sdn Bhd",
+                            CreatedDate: new Date()
+                        }
+
+                        // const ws = XLSX.utils.aoa_to_sheet([]); //worksheet data
+                        const ws = XLSX.utils.json_to_sheet(result.data);
+
+                        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+                        XLSX.writeFile(wb, "HubIn Log.xlsx");
+
+                    }
+                },
+                error: function (error) {
+                    console.log('Export Err::' + error.val);
+                }
+            });
+
+        }
+
 
     </script>
 }

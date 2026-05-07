@@ -70,11 +70,11 @@ namespace RackingSystem.Controllers.API
                     return result;
                 }
 
-                // *** testing
+                //// *** testing
                 //result.success = true;
                 //result.data = "00AS01";
                 //return result;
-                // *** testing
+                //// *** testing
 
                 string loaderString = "";
                 string decimalText = "";

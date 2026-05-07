@@ -77,7 +77,8 @@ namespace RackingSystem.Services.SettingServices
                 }
                 if (req.ReelDimension_Id == 0)
                 {
-                    ReelDimension? rExist = _dbContext.ReelDimension.FirstOrDefault(x => x.Thickness == req.Thickness);
+                    // 2026-05-06 can same thickness difference width
+                    ReelDimension? rExist = _dbContext.ReelDimension.FirstOrDefault(x => x.Thickness == req.Thickness && x.Width == req.Width);
                     if (rExist != null)
                     {
                         result.errMessage = "This Thickness has exist.";
@@ -86,7 +87,8 @@ namespace RackingSystem.Services.SettingServices
                 }
                 else
                 {
-                    ReelDimension? rExist = _dbContext.ReelDimension.FirstOrDefault(x => x.Thickness == req.Thickness && x.ReelDimension_Id != req.ReelDimension_Id);
+                    // 2026-05-06 can same thickness difference width
+                    ReelDimension? rExist = _dbContext.ReelDimension.FirstOrDefault(x => x.Thickness == req.Thickness && x.Width == req.Width && x.ReelDimension_Id != req.ReelDimension_Id);
                     if (rExist != null)
                     {
                         result.errMessage = "This Thickness has exist.";

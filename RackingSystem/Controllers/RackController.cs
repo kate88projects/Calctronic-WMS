@@ -378,10 +378,10 @@ namespace RackingSystem.Controllers
             return result;
         }
 
-        public IActionResult RackJobHubInHMI()
+        public IActionResult RackJobHubInHMI(long qId)
         {
             ViewBag.QContinuos = "0";
-            ViewBag.QId = 0; // qId;
+            ViewBag.QId = qId;
             ViewBag.QNo = "";
             ViewBag.xToken = "";
             ViewBag.DeviceId = "";
@@ -397,62 +397,62 @@ namespace RackingSystem.Controllers
                     ViewBag.xToken = User.FindFirst("Token")?.Value;
                     ViewBag.DeviceId = User.FindFirst("DeviceId")?.Value;
 
-                    //var q = _context.RackJobQueue.Where(x => x.RackJobQueue_Id == qId).FirstOrDefault();
-                    //if (q != null)
-                    //{
-                    //    if (q.DocType == EnumQueueDocType.Loader.ToString())
-                    //    {
-                    //        var doc = _context.Loader.Where(x => x.Loader_Id == q.Doc_Id).FirstOrDefault();
-                    //        if (doc != null)
-                    //        {
-                    //            ViewBag.QNo = "HubIn - " + doc.Description;
-                    //        }
-                    //    }
-                    //    else if (q.DocType == EnumQueueDocType.JO.ToString())
-                    //    {
-                    //        var doc = _context.JobOrder.Where(x => x.JobOrder_Id == q.Doc_Id).FirstOrDefault();
-                    //        if (doc != null)
-                    //        {
-                    //            ViewBag.QNo = "HubOut - " + doc.DocNo;
-                    //        }
-                    //    }
-                    //    else
-                    //    {
-                    //        var doc = _context.JobOrderEmergency.Where(x => x.JobOrderEmergency_Id == q.Doc_Id).FirstOrDefault();
-                    //        if (doc != null)
-                    //        {
-                    //            ViewBag.QNo = "HubOut - " + doc.DocNo;
-                    //        }
-                    //    }
-                    //}
+                    var q = _context.RackJobQueue.Where(x => x.RackJobQueue_Id == qId).FirstOrDefault();
+                    if (q != null)
+                    {
+                        if (q.DocType == EnumQueueDocType.Loader.ToString())
+                        {
+                            var doc = _context.Loader.Where(x => x.Loader_Id == q.Doc_Id).FirstOrDefault();
+                            if (doc != null)
+                            {
+                                ViewBag.QNo = "HubIn - " + doc.Description;
+                            }
+                        }
+                        else if (q.DocType == EnumQueueDocType.JO.ToString())
+                        {
+                            var doc = _context.JobOrder.Where(x => x.JobOrder_Id == q.Doc_Id).FirstOrDefault();
+                            if (doc != null)
+                            {
+                                ViewBag.QNo = "HubOut - " + doc.DocNo;
+                            }
+                        }
+                        else
+                        {
+                            var doc = _context.JobOrderEmergency.Where(x => x.JobOrderEmergency_Id == q.Doc_Id).FirstOrDefault();
+                            if (doc != null)
+                            {
+                                ViewBag.QNo = "HubOut - " + doc.DocNo;
+                            }
+                        }
+                    }
 
-                    //var srms = _context.RackJob.FirstOrDefault();
-                    //if (srms != null)
-                    //{
-                    //    bool isCont = false;
+                    var srms = _context.RackJob.FirstOrDefault();
+                    if (srms != null)
+                    {
+                        bool isCont = false;
 
-                    //    if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
-                    //    {
-                    //        //return View("RackJobHubInView");
-                    //    }
-                    //    if (srms.RackJobQueue_Id == qId && srms.LoginIP == ViewBag.DeviceId && srms.Json != "")
-                    //    {
-                    //        RackJobHubInDTO json = JsonConvert.DeserializeObject<RackJobHubInDTO>(srms.Json) ?? new RackJobHubInDTO();
-                    //        if (json.LoaderCode != "")
-                    //        {
-                    //            ViewBag.QContinuos = "1";
-                    //            isCont = true;
-                    //        }
-                    //    }
+                        if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
+                        {
+                            //return View("RackJobHubInView");
+                        }
+                        if (srms.RackJobQueue_Id == qId && srms.LoginIP == ViewBag.DeviceId && srms.Json != "")
+                        {
+                            RackJobHubInDTO json = JsonConvert.DeserializeObject<RackJobHubInDTO>(srms.Json) ?? new RackJobHubInDTO();
+                            if (json.LoaderCode != "")
+                            {
+                                ViewBag.QContinuos = "1";
+                                isCont = true;
+                            }
+                        }
 
-                    //    if (!isCont)
-                    //    {
-                    //        srms.Loader_Id = 0;
-                    //        srms.RackJobQueue_Id = 0;
-                    //        srms.Json = "";
-                    //        _context.SaveChangesAsync();
-                    //    }
-                    //}
+                        if (!isCont)
+                        {
+                            srms.Loader_Id = 0;
+                            srms.RackJobQueue_Id = 0;
+                            srms.Json = "";
+                            _context.SaveChangesAsync();
+                        }
+                    }
                 }
             }
             else

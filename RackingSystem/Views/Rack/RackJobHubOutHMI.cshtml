@@ -269,6 +269,72 @@
         transition: opacity 0.5s ease-out;
     }
 
+    .trolley-selected {
+        border-color: #10b981;
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+        background: rgba(16, 185, 129, 0.08);
+    }
+
+    .selected {
+        border-color: #10b981;
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+        background: rgba(16, 185, 129, 0.08);
+    }
+
+    #start-btn:disabled {
+        background-color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #stop-btn:disabled {
+        background-color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #cont-btn:disabled {
+        background-color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnRetrieveStart:disabled {
+        background-color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnPutawayStart:disabled {
+        background-color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnR1:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnR2:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnR3:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnPA1:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnPA2:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnPA3:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
 </style>
 
 <input type="hidden" id="xToken" value="@ViewBag.xToken" autocomplete="off">
@@ -326,19 +392,22 @@
                     <div class="flex flex-row gap-1.5" id="rackRightSlots"></div>
                 </div>
             </div><!-- PLC Arm Assembly -->
-            <div id="armAssembly" class="arm absolute" style="left: 50%; top: 80px; transform: translateX(-50%);">
+             <div id="armAssembly" class="arm absolute" style="left: 50%; top: 80px; transform: translateX(-50%);">
                 <!-- Vertical rail -->
-                <div class="absolute top-1/2 -translate-y-1/2" style="width:360px;height:4px;background:#334155;border-radius:2px;left:-30px;">
-                    <div style="width:8px;height:8px;background:#475569;border-radius:50%;position:absolute;left:0;top:-2px;"></div>
-                    <div style="width:8px;height:8px;background:#475569;border-radius:50%;position:absolute;right:0;top:-2px;"></div>
-                </div><!-- Arm head -->
-                <div id="armHead" class="absolute arm" style="top:50%;transform:translateY(-50%);left:0;">
-                    <div style="width:14px;height:40px;background:#3b82f6;border-radius:4px;margin:0 auto;"></div><!-- Grippers -->
-                    <div id="gripperLeft" class="gripper" style="width:16px;height:8px;background:#60a5fa;border-radius:3px 0 0 3px;position:absolute;left:-16px;top:16px;"></div>
-                    <div id="gripperRight" class="gripper" style="width:16px;height:8px;background:#60a5fa;border-radius:0 3px 3px 0;position:absolute;right:-16px;top:16px;"></div><!-- Held tray -->
-                    <div id="heldTray" class="tray absolute hidden" style="top:50%;transform:translateY(-50%);left:24px;"></div>
+                <div class="absolute left-1/2 -translate-x-1/2" style="width:4px;height:80px;background:#334155;border-radius:2px;top:-30px;">
+                    <div style="width:8px;height:8px;background:#475569;border-radius:50%;position:absolute;top:0;left:-2px;"></div>
+                    <div style="width:8px;height:8px;background:#475569;border-radius:50%;position:absolute;bottom:0;left:-2px;"></div>
                 </div>
-            </div><!-- Trolley Indicator Light -->
+                <!-- Arm head -->
+                <div id="armHead" class="absolute arm" style="left:50%;transform:translateX(-50%);top:0;">
+                    <div style="width:40px;height:14px;background:#3b82f6;border-radius:4px;margin:0 auto;"></div>
+                    <!-- Grippers -->
+                    <div id="gripperLeft" class="gripper" style="width:8px;height:16px;background:#60a5fa;border-radius:0 0 3px 3px;position:absolute;left:4px;top:14px;"></div>
+                    <div id="gripperRight" class="gripper" style="width:8px;height:16px;background:#60a5fa;border-radius:0 0 3px 3px;position:absolute;right:4px;top:14px;"></div><!-- Held tray -->
+                    <div id="heldTray" class="tray absolute hidden" style="left:50%;transform:translateX(-50%);top:28px;"></div>
+                </div>
+            </div>
+            <!-- Trolley Indicator Light -->
             <div class="absolute right-6 top-10 flex flex-col items-center" style="bottom: 16px;">
                 <div class="text-xs mono" style="color:#475569;">
                     TROLLEY
@@ -467,7 +536,7 @@
                     <div class="flex items-center justify-between mb-3">
                         @* <p class="text-xs font-semibold mono" style="color:#64748b;">GANTRY PROCESS</p> *@
                         <div class="flex gap-2">
-                            <button onclick="startRetrieve()" class="px-3 py-1 rounded text-xs font-semibold" id="btnGantryStart" style="background:#16a34a; color:#fff;">
+                            <button onclick="startRetrieve()" class="px-3 py-1 rounded text-xs font-semibold" id="btnRetrieveStart" style="background:#16a34a; color:#fff;">
                                 <i class="bi-play-fill" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
                                 Start
                             </button>
@@ -480,7 +549,7 @@
                                 <p class="text-sm font-semibold" style="color:#0f172a;">PC → DB</p>
                                 <p class="text-xs" style="color:#64748b;">Get Reel and Slot</p>
                             </div>
-                            <button onclick="loadPLCGetReelSlot()" class="px-3 py-1 rounded text-xs font-semibold" id="btnGantryRetry" style="background:#fff; color:#ef4444;">
+                            <button onclick="loadPLCGetReelSlot()" class="px-3 py-1 rounded text-xs font-semibold" id="btnR1" style="background:#fff; color:#ef4444;">
                                 <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
                             </button>
                         </div>
@@ -490,7 +559,7 @@
                                 <p class="text-sm font-semibold" style="color:#0f172a;">Robot → SRMS</p>
                                 <p class="text-xs" style="color:#64748b;">Retrieve</p>
                             </div>
-                            <button onclick="loadPLCRetrieveTray()" class="px-3 py-1 rounded text-xs font-semibold" id="btnGantryRetry" style="background:#fff; color:#ef4444;">
+                            <button onclick="loadPLCRetrieveTray()" class="px-3 py-1 rounded text-xs font-semibold" id="btnR2" style="background:#fff; color:#ef4444;">
                                 <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
                             </button>
                         </div>
@@ -500,7 +569,7 @@
                                 <p class="text-sm font-semibold" style="color:#0f172a;">Robot → Center</p>
                                 <p class="text-xs" style="color:#64748b;">Retrieve Status</p>
                             </div>
-                            <button onclick="retry_RetrieveStatus()" class="px-3 py-1 rounded text-xs font-semibold" id="btnGantryRetry" style="background:#fff; color:#ef4444;">
+                            <button onclick="retry_RetrieveStatus()" class="px-3 py-1 rounded text-xs font-semibold" id="btnR3" style="background:#fff; color:#ef4444;">
                                 <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
                             </button>
                         </div>
@@ -523,7 +592,7 @@
                     <div class="flex items-center justify-between mb-3">
                         @* <p class="text-xs font-semibold mono" style="color:#64748b;">GANTRY PROCESS</p> *@
                         <div class="flex gap-2">
-                            <button onclick="startPutAway()" class="px-3 py-1 rounded text-xs font-semibold" id="btnGantryStart" style="background:#16a34a; color:#fff;">
+                            <button onclick="startPutAway()" class="px-3 py-1 rounded text-xs font-semibold" id="btnPutawayStart" style="background:#16a34a; color:#fff;">
                                 <i class="bi-play-fill" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
                                 Start
                             </button>
@@ -536,7 +605,7 @@
                                 <p class="text-sm font-semibold" style="color:#0f172a;">PC → DB</p>
                                 <p class="text-xs" style="color:#64748b;">Get Trolley Slot</p>
                             </div>
-                            <button onclick="loadPLCGetTrolleySlot()" class="px-3 py-1 rounded text-xs font-semibold" id="btnGantryRetry" style="background:#fff; color:#ef4444;">
+                            <button onclick="loadPLCGetTrolleySlot()" class="px-3 py-1 rounded text-xs font-semibold" id="btnPA1" style="background:#fff; color:#ef4444;">
                                 <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
                             </button>
                         </div>
@@ -546,7 +615,7 @@
                                 <p class="text-sm font-semibold" style="color:#0f172a;">Robot → Trolley</p>
                                 <p class="text-xs" style="color:#64748b;">PutAway</p>
                             </div>
-                            <button onclick="loadPLCPutAway()" class="px-3 py-1 rounded text-xs font-semibold" id="btnGantryRetry" style="background:#fff; color:#ef4444;">
+                            <button onclick="loadPLCPutAway()" class="px-3 py-1 rounded text-xs font-semibold" id="btnPA2" style="background:#fff; color:#ef4444;">
                                 <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
                             </button>
                         </div>
@@ -556,7 +625,7 @@
                                 <p class="text-sm font-semibold" style="color:#0f172a;">Robot → Center</p>
                                 <p class="text-xs" style="color:#64748b;">PutAway Status</p>
                             </div>
-                            <button onclick="retry_PutAwayStatus()" class="px-3 py-1 rounded text-xs font-semibold" id="btnGantryRetry" style="background:#fff; color:#ef4444;">
+                            <button onclick="retry_PutAwayStatus()" class="px-3 py-1 rounded text-xs font-semibold" id="btnPA3" style="background:#fff; color:#ef4444;">
                                 <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
                             </button>
                         </div>
@@ -676,14 +745,20 @@
 
         let lastItemCount = 0;
         let lastItemId = '0';
+
         const TRAY_COLORS = ['#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899'];
+        let rack = [0,1,2,3,4]; // indices into TRAY_COLORS
+        let trolley = [];
+        let heldTray = null;
+        let running = false;
+        let phase = 'idle'; // idle, picking, moving, placing
+
+        const jsonModal = document.getElementById("jsonModal");
+        const formJSON = document.getElementById("formJSON");
 
         function closeTab() {
             window.close();
         }
-
-        const jsonModal = document.getElementById("jsonModal");
-        const formJSON = document.getElementById("formJSON");
 
         $(document).ready(function () {
             document.getElementById('chkAutoRun').checked = true;
@@ -870,13 +945,24 @@
         }
 
         function updateCartesianUIState() {
-            document.querySelector('#rackLeftSelector').classList.remove('selected');
-            document.querySelector('#rackRightSelector').classList.remove('selected');
+            // document.querySelector('#rackLeftSelector').classList.remove('selected');
+            // document.querySelector('#rackRightSelector').classList.remove('selected');
+
+            // if (sharedDrawerState.cartesianLocation === 'left') {
+            //     document.querySelector('#rackLeftSelector').classList.add('selected');
+            // } else if (sharedDrawerState.cartesianLocation === 'right') {
+            //     document.querySelector('#rackRightSelector').classList.add('selected');
+            // } else {
+            //     $("#left-input").val('');
+            //     $("#right-input").val('');
+            // }
+            document.querySelector('#left-input').classList.remove('selected');
+            document.querySelector('#right-input').classList.remove('selected');
 
             if (sharedDrawerState.cartesianLocation === 'left') {
-                document.querySelector('#rackLeftSelector').classList.add('selected');
+                document.querySelector('#left-input').classList.add('selected');
             } else if (sharedDrawerState.cartesianLocation === 'right') {
-                document.querySelector('#rackRightSelector').classList.add('selected');
+                document.querySelector('#right-input').classList.add('selected');
             } else {
                 $("#left-input").val('');
                 $("#right-input").val('');
@@ -909,6 +995,99 @@
             document.getElementById('pendingCount').innerHTML = totalReels;
             document.getElementById('completedCount').innerHTML = totalCompleted;
             document.getElementById('insufficientCount').innerHTML = totalInsufficient;
+        }
+
+        function setStatus(text, color) {
+          const badge = document.getElementById('statusBadge');
+          const dot = document.getElementById('statusDot');
+          const st = document.getElementById('statusText');
+          st.textContent = text;
+          dot.style.background = color;
+          if (text !== 'IDLE' && text !== 'DONE') badge.classList.add('status-active');
+          else badge.classList.remove('status-active');
+        }
+
+        function moveArm(top) {
+          document.getElementById('armHead').style.top = top + 'px';
+        }
+
+        function setGrip(open) {
+          document.getElementById('gripperLeft').style.transform = open ? 'translateX(-4px)' : '';
+          document.getElementById('gripperRight').style.transform = open ? 'translateX(4px)' : '';
+        }
+
+        function showHeld(colorIdx) {
+          const h = document.getElementById('heldTray');
+          if (colorIdx !== null) {
+            h.style.background = TRAY_COLORS[colorIdx];
+            h.classList.remove('hidden');
+          } else {
+            h.classList.add('hidden');
+          }
+        }
+
+        function moveArmX(side) {
+          const asm = document.getElementById('armAssembly');
+          if (side === 'rack') { asm.style.left = '47%'; }
+          else if (side === 'trolley') { asm.style.left = '53%'; }
+          else { asm.style.left = '50%'; }
+        }
+
+        async function retrieveMove() {
+            // Move to rack
+            setStatus('RETRIEVE', '#f59e0b');
+            // log('Moving arm to rack...');
+            moveArmX('rack');
+            setGrip(true);
+            await delay(900);
+
+            // Lower & grab
+            moveArm(20);
+            await delay(600);
+            setGrip(false);
+            await delay(300);
+            rack.pop();
+            heldTray = 2;
+            showHeld(2);
+            // renderSlots();
+            // log(`Picked tray <span style="color:${TRAY_COLORS[2]}">■</span> from rack`);
+
+            // Lift
+            moveArm(0);
+            await delay(600);
+
+            moveArmX('center');
+
+            // await delay(1000);
+            // putawayMove();
+        }
+
+        async function putawayMove() {
+            // Move to trolley
+            setStatus('PUTAWAY', '#3b82f6');
+            // log('Transferring to trolley...');
+            moveArmX('trolley');
+            await delay(900);
+
+            // Lower & release
+            // setStatus('PLACING', '#8b5cf6');
+            moveArm(20);
+            await delay(600);
+            setGrip(true);
+            await delay(300);
+            trolley.push(3);
+            heldTray = null;
+            showHeld(null);
+            // renderSlots();
+            // log(`Placed tray <span style="color:${TRAY_COLORS[trayIdx]}">■</span> on trolley`);
+
+            // Return center
+            moveArm(0);
+            await delay(400);
+            setGrip(false);
+            moveArmX('center');
+            await delay(600);
+
         }
 
         // ----------- Main Action
@@ -972,6 +1151,12 @@
             sharedDrawerState.systemRunning = true;
             updateSystemStatusUI();
 
+            if (sharedDrawerState.cartesianRobotState == 'Retrieved') {
+                // new UI
+                heldTray = 2;
+                showHeld(2);
+            }
+
             // 4. Continue
              cartesianAutoTimer = setInterval(cartesianAuto, 3000); //3 second workout
 
@@ -982,6 +1167,7 @@
             if (!sharedDrawerState.systemRunning) return;
             sharedDrawerState.systemRunning = false;
             updateSystemStatusUI();
+            disableDivContent(true);
             // log("System Stop command issued. System idling.", 'alert');
 
             updateJson();
@@ -1720,6 +1906,7 @@
 
             var eSlot = $("#txtRetrieveSlot").val();
             var fResult = false;
+            retrieveMove();
 
             // Process UI
             const dot = document.getElementById('rDot2');
@@ -1886,6 +2073,7 @@
             // Process UI
             const dot = document.getElementById('pDot2');
             dot.className = 'step-dot active mt-1';
+            putawayMove();
 
             // step 4 : scan item
             await $.ajax({

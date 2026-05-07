@@ -744,7 +744,7 @@
                         for (const opt of result.data)
                         {
                             const el = document.createElement("option");
-                            el.textContent = opt.thickness;
+                            el.textContent = opt.thickness + " mm X " + opt.width + " inch ";
                             el.value = opt.reelDimension_Id;
                             selLoader.appendChild(el);
                         }
