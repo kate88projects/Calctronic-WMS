@@ -1046,11 +1046,13 @@
             await delay(600);
             setGrip(false);
             await delay(300);
+
+        }
+
+        async function retrieveMoveDone() {
             rack.pop();
             heldTray = 2;
             showHeld(2);
-            // renderSlots();
-            // log(`Picked tray <span style="color:${TRAY_COLORS[2]}">■</span> from rack`);
 
             // Lift
             moveArm(0);
@@ -1062,6 +1064,13 @@
             // putawayMove();
         }
 
+        async function retrieveMoveNext() {
+            moveArm(0);
+            await delay(400);
+            setGrip(false);
+            moveArmX('center');
+        }
+
         async function putawayMove() {
             // Move to trolley
             setStatus('PUTAWAY', '#3b82f6');
@@ -1069,6 +1078,9 @@
             moveArmX('trolley');
             await delay(900);
 
+        }
+
+        async function putawayMoveDone() {
             // Lower & release
             // setStatus('PLACING', '#8b5cf6');
             moveArm(20);
@@ -1977,9 +1989,12 @@
 
                         const dot2 = document.getElementById('rDot3');
                         dot2.className = 'step-dot done mt-1';
+
+                        retrieveMoveDone();
                     }
                     else {
                         log('Retrieve Status :: ' + result.errMessage, 'alert');
+                        retrieveMoveNext();
                     }
 
                     log('Retrieve Slot Code :: ' + result.data.slotCode, 'info');
@@ -2139,6 +2154,7 @@
                         fResult = true;
 
                         log('Put Away Status :: Done ', 'info');
+                        putawayMoveDone();
                     }
                     else {
                         log('Put Away Status :: ' + result.errMessage, 'alert');

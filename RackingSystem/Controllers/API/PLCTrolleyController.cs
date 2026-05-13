@@ -468,8 +468,8 @@ namespace RackingSystem.Controllers.API
 
             //// *** testing
             //result.success = true;
-            //result.errMessage = "Done";
-            ////result.data = 2;
+            //result.errMessage = "";
+            //result.data.data = ""; // value == 3 ? "1" : ""; // value 1 :: tengah buat, 2 :: complete, 3 :: retrieve failure, try another slot
             //return result;
             //// *** testings
 
@@ -870,7 +870,7 @@ namespace RackingSystem.Controllers.API
             //// *** testing
             //result.success = true;
             //result.errMessage = "Done Put Away.";
-            ////result.data = 0;
+            //result.data.data = "0"; // 1 means tengah buat, 2 means complete, 3 failure to put, try another slot
             ////slot.HasEmptyTray = true;
             ////_dbContext.SaveChanges();
             //return result;

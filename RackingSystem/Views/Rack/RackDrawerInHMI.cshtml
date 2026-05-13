@@ -694,8 +694,18 @@
                 $('#start-btn').addClass('hidden');
                 readyContinuos();
             }
-            // retrieveMove();
+            // test();
         });
+
+
+        async function test() {
+          await  putawayMove();
+            await delay(1900);
+          await  putawayMove();
+            await delay(1900);
+           await putawayMoveDone();
+        }
+
 
         async function showJSONModal() {
 
@@ -960,11 +970,13 @@
             await delay(600);
             setGrip(false);
             await delay(300);
+
+        }
+
+        async function retrieveMoveDone() {
             rack.pop();
             heldTray = 2;
             showHeld(2);
-            // renderSlots();
-            // log(`Picked tray <span style="color:${TRAY_COLORS[2]}">■</span> from rack`);
 
             // Lift
             moveArm(0);
@@ -976,6 +988,13 @@
             // putawayMove();
         }
 
+        async function retrieveMoveNext() {
+            moveArm(0);
+            await delay(400);
+            setGrip(false);
+            moveArmX('center');
+        }
+
         async function putawayMove() {
             // Move to trolley
             setStatus('PUTAWAY', '#3b82f6');
@@ -983,6 +1002,9 @@
             moveArmX('trolley');
             await delay(900);
 
+        }
+
+        async function putawayMoveDone() {
             // Lower & release
             // setStatus('PLACING', '#8b5cf6');
             moveArm(20);
@@ -1438,10 +1460,28 @@
             }
 
             var chkStatus = await loadPLCGetPutAwayStatus();
-            if (chkStatus == false) {
+            if (chkStatus == "3") {
+                // need change slot due to have tray
                 sharedDrawerState.cartesianRobotState = 'Retrieved';
                 inPutAwayMove = false;
                 changePutSlot = true;
+                halfPlaceMoveStep = 1;
+
+                if (attemptsPutAway > 3) {
+                    log('Put Away Drawer :: Tried ' + (attemptsPutAway - 1) + ', auto stop now.', 'info');
+                    document.getElementById('chkAutoRun').checked = false;
+                    return false;
+                }
+
+                return;
+            }
+            else if (chkStatus == "2") {
+                // is success
+            }
+            else {
+                sharedDrawerState.cartesianRobotState = 'Retrieved';
+                inPutAwayMove = false;
+                changePutSlot = false;
 
                 if (attemptsPutAway > 3) {
                     log('Put Away Drawer :: Tried ' + (attemptsPutAway - 1) + ', auto stop now.', 'info');
@@ -1516,12 +1556,29 @@
 
         async function retry_PutAwayStatus() {
             var chkStatus = await loadPLCGetPutAwayStatus();
-            if (chkStatus == false) {
+            if (chkStatus == "3") {
+                // need change slot due to have tray
                 sharedDrawerState.cartesianRobotState = 'Retrieved';
                 inPutAwayMove = false;
                 changePutSlot = true;
+                halfPlaceMoveStep = 1;
                 return;
             }
+            else if (chkStatus == "2") {
+                // is success
+            }
+            else {
+                sharedDrawerState.cartesianRobotState = 'Retrieved';
+                inPutAwayMove = false;
+                changePutSlot = false;
+                return;
+            }
+            // if (chkStatus == false) {
+            //     sharedDrawerState.cartesianRobotState = 'Retrieved';
+            //     inPutAwayMove = false;
+            //     changePutSlot = true;
+            //     return;
+            // }
 
             attemptsPutAway = 1;
             halfPlaceMoveStep = 1;
@@ -1544,7 +1601,6 @@
 
             updateJson();
         }
-
 
         // ----------- Database
         async function loadDBCheckRetrieveSlot() {
@@ -1674,11 +1730,24 @@
                         fResult = true;
 
                         $("#txtTrolleyId").val(result.data.trolleyInfo.trolley_Id);
-                        if (isCont) {
-                            colNo = result.data.colNum;
+                        // if (isCont) {
+                        //     colNo = result.data.colNum;
+                        // }
+                        // else {
+                        //     colNo = 1;
+                        // }
+                        colNo = 1;
+                        if (colNo == 1 && Number($('#left-input-tr').val()) >= 51) {
+                            colNo = 2;
                         }
-                        else {
-                            colNo = 1;
+                        if (colNo == 1 && chkCol1.checked == false) {
+                            colNo = 2;
+                        }
+                        if (colNo == 2 && Number($('#center-input-tr').val()) >= 51) {
+                            colNo = 3;
+                        }
+                        if (colNo == 2 && chkCol2.checked == false) {
+                            colNo = 3;
                         }
 
                         log('Trolley :: Done check ' + code, 'info');
@@ -1815,6 +1884,7 @@
 
                         totalPending = totalPending - 1;
                         updateDash();
+                        retrieveMoveDone();
                     }
                     else {
                         if (result.errMessage == "1") {
@@ -1845,6 +1915,7 @@
                         else {
                             log('Retrieve Status :: ' + result.errMessage, 'alert');
                         }
+                        retrieveMoveNext();
                     }
 
                     log('Retrieve Slot Code :: ' + result.data.slotCode, 'info');
@@ -1921,6 +1992,7 @@
         }
 
         async function loadPLCPutAway() {
+            log('Put Away Slot :: ' + $("#txtPutSlot").val(), 'info');
 
             var sCode = $("#txtPutSlot").val();
             var fResult = false;
@@ -1971,6 +2043,7 @@
 
             var sCode = $("#txtPutSlot").val();
             var fResult = false;
+            var data = "";
 
             // Process UI
             const dot = document.getElementById('pDot3');
@@ -2021,9 +2094,12 @@
 
                         totalCompleted = totalCompleted + 1;
                         updateDash();
+                        putawayMoveDone();
+                        data = "2";
                     }
                     else {
                         log('Put Away Status :: ' + result.errMessage, 'alert');
+                        data = result.data.data;
                     }
                 },
                 error: function (error) {
@@ -2031,7 +2107,7 @@
                 }
             });
 
-            return fResult;
+            return data;
         }
 
         function exportLogFile() {
