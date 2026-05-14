@@ -288,13 +288,13 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "Right is locked. Left is locked. ";
-            result.data.Add(1);
-            result.data.Add(1);
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "Right is locked. Left is locked. ";
+            //result.data.Add(1);
+            //result.data.Add(1);
+            //return result;
+            //// *** testing
 
             string decimalText = "";
             string lock1 = "0";
@@ -366,11 +366,11 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.data = 1;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.data = 1;
+            //return result;
+            //// *** testing
 
             // 2. check plc which column is ready
             string plcIp = _loader.IPAddr;
@@ -431,14 +431,14 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "";
-            result.errStackTrace = "";
-            result.data.Add("2");
-            result.data.Add("16");
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "";
+            //result.errStackTrace = "";
+            //result.data.Add("2");
+            //result.data.Add("16");
+            //return result;
+            //// *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -794,12 +794,12 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "";
-            result.data = 0;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "";
+            //result.data = 0;
+            //return result;
+            //// *** testing
 
             // 2. check plc which column is ready
             string plcIp = configRack.ConfigValue;
@@ -1021,11 +1021,11 @@ namespace RackingSystem.Controllers.API
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             string methodName = "StartBarcodeScanner";
 
-            // *** testing
-            result.success = true;
-            result.data = 1;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.data = 1;
+            //return result;
+            //// *** testing
 
             // 2. check plc which column is ready
             string plcIp = ipAddr;
@@ -1124,12 +1124,12 @@ namespace RackingSystem.Controllers.API
             result.data = "";
             string methodName = "GetReelIDByIP";
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "Cannot get Reel ID, please try again.";
-            result.data = "A00000018";
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "Cannot get Reel ID, please try again.";
+            //result.data = "A00000018";
+            //return result;
+            //// *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -1299,11 +1299,11 @@ namespace RackingSystem.Controllers.API
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             string methodName = "SetActualHeight";
 
-            // *** testing
-            result.success = true;
-            result.data = 1;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.data = 1;
+            //return result;
+            //// *** testing
 
             // 2. check plc which column is ready
             string plcIp = ipAddr;
@@ -1396,12 +1396,12 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "0";
-            result.data.data = "";
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "0";
+            //result.data.data = "";
+            //return result;
+            //// *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -1574,12 +1574,12 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "Done Picked.";
-            result.data = 3;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "Done Picked.";
+            //result.data = 3;
+            //return result;
+            //// *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -1653,11 +1653,11 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.data = 1;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.data = 1;
+            //return result;
+            //// *** testing
 
             // 2. check plc which column is ready
             int value = 0;
@@ -1711,12 +1711,12 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "Done Placed.";
-            result.data = 0;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "Done Placed.";
+            //result.data = 0;
+            //return result;
+            //// *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -1936,11 +1936,11 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.data = 1;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.data = 1;
+            //return result;
+            //// *** testing
 
             // 2. check plc which column is ready
             int value = 0;
@@ -2050,12 +2050,12 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "Done Put Away.";
-            result.data.data = "";
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "Done Put Away.";
+            //result.data.data = "";
+            //return result;
+            //// *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -2454,12 +2454,12 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "Done EndTask.";
-            result.data = 0;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "Done EndTask.";
+            //result.data = 0;
+            //return result;
+            //// *** testing
 
             string plcIp = _loader.IPAddr;
             int port = 502;
@@ -2745,10 +2745,10 @@ namespace RackingSystem.Controllers.API
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             string methodName = "GetLoaderMode";
 
-            // *** testing
-            result.success = true;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //return result;
+            //// *** testing
 
             var _loader = _dbContext.Loader.Find(loaderId);
             if (_loader == null)

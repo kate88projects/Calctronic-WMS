@@ -3428,6 +3428,7 @@
 
             var eSlot = $("#txtRetrieveSlot").val();
             var fResult = false;
+            retrieveMove();
 
             await $.ajax({
                 url: "/api/PLCHubIn/RetrieveTray/" + eSlot,
@@ -3484,6 +3485,7 @@
                     if (result.success == true) {
                         fResult = 0;
                         log('Retrieve Status :: OK ', 'info');
+                        retrieveMoveDone();
                     }
                     else {
                         if (result.errMessage == "1") {
@@ -3493,6 +3495,7 @@
                         else {
                             log('Retrieve Status :: ' + result.errMessage, 'alert');
                         }
+                        retrieveMoveNext();
                     }
 
                     log('Retrieve Slot Code :: ' + result.data.slotCode, 'info');
@@ -3573,6 +3576,11 @@
             var sTake = $("#txtPutSlotTake").val();
             var fResult = false;
 
+            // Process UI
+            // const dot = document.getElementById('pDot2');
+            // dot.className = 'step-dot active mt-1';
+            putawayMove();
+
             // step 4 : scan item
             await $.ajax({
                 url: "/api/PLCHubIn/PutAway/" + sCode + "/" + sTake,
@@ -3628,6 +3636,7 @@
                     if (result.success == true) {
                         fResult = true;
                         log('Put Away Status :: Done ', 'info');
+                        putawayMoveDone();
                     }
                     else {
                         log('Put Away Status :: ' + result.errMessage, 'alert');
