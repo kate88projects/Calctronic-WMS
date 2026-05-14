@@ -433,11 +433,11 @@ namespace RackingSystem.Controllers.API
                     return result;
                 }
 
-                //// *** testing
-                //result.success = true;
-                //result.data = 1;
-                //return result;
-                //// *** testing
+                // *** testing
+                result.success = true;
+                result.data = 1;
+                return result;
+                // *** testing
 
                 // 2. check plc which column is ready
                 int plcActualHeight = 0;

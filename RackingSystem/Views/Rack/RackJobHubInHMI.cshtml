@@ -533,6 +533,111 @@
         color: #34d399;
     }
 
+    #start-btn:disabled {
+        background-color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #stop-btn:disabled {
+        background-color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #cont-btn:disabled {
+        background-color: darkgray !important;
+        cursor: not-allowed;
+    }
+    
+    #btnPickStart:disabled {
+        background-color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnPlaceStart:disabled {
+        background-color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnRetrieveStart:disabled {
+        background-color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnPutAwayStart:disabled {
+        background-color: darkgray !important;
+        cursor: not-allowed;
+    }
+    
+    #btnPick1:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnPick2:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnPick3:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnPick4:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnPick5:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnPlace1:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+    
+    #btnPlace2:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnPlace3:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnR1:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnR2:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnR3:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnPA1:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnPA2:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnPA3:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+
 
 </style>
 
@@ -744,7 +849,7 @@
                         <h2 class="text-xs font-semibold mb-2 flex items-center gap-2" style="color:#4b5563;">
                             <i class="bi-rocket-takeoff" style="width:14px;height:14px;"></i> Pick Reel Process
                         </h2>
-                        <div class="mb-6" id="gantry-pick-session">
+                        <div class="mb-6" id="gantry-pick-session" style="border-bottom:1px solid #e2e8f0; padding-bottom: 10px;">
                             <div class="flex items-center justify-between mb-3">
                                 @* <p class="text-xs font-semibold mono" style="color:#64748b;">GANTRY PROCESS</p> *@
                                 <div class="flex gap-2">
@@ -754,14 +859,14 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="flex flex-col gap-2" id="pickStepsContainer" style="border-bottom:1px solid #e2e8f0;">
+                            <div class="flex flex-col gap-2" id="pickStepsContainer">
                                 <div class="step-line relative flex items-start gap-3 py-1">
                                     <div class="step-dot waiting mt-1" id="rDot1"></div>
                                     <div>
                                         <p class="text-sm font-semibold" style="color:#0f172a;">PC → Auto Loader</p>
                                         <p class="text-xs" style="color:#64748b;">Set Auto Loader Unload</p>
                                     </div>
-                                    <button onclick="loadPLCSetLoaderUnload()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnR1">
+                                    <button onclick="loadPLCSetLoaderUnload()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnPick1">
                                         <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
                                     </button>
                                 </div>
@@ -771,7 +876,7 @@
                                         <p class="text-sm font-semibold" style="color:#0f172a;">PC → Gantry</p>
                                         <p class="text-xs" style="color:#64748b;">Scan QR</p>
                                     </div>
-                                    <button onclick="loadPLCStartBarcodeScanner()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnR2">
+                                    <button onclick="loadPLCStartBarcodeScanner()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnPick2">
                                         <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
                                     </button>
                                 </div>
@@ -781,7 +886,7 @@
                                         <p class="text-sm font-semibold" style="color:#0f172a;">PC → DB</p>
                                         <p class="text-xs" style="color:#64748b;">Reed Reel</p>
                                     </div>
-                                    <button onclick="loadPLCScanReelID()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnR3">
+                                    <button onclick="loadPLCScanReelID()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnPick3">
                                         <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
                                     </button>
                                 </div>
@@ -791,7 +896,7 @@
                                         <p class="text-sm font-semibold" style="color:#0f172a;">PC → Auto Loader</p>
                                         <p class="text-xs" style="color:#64748b;">Set Height (Pick)</p>
                                     </div>
-                                    <button onclick="loadPLCSetActualHeight()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnR3">
+                                    <button onclick="loadPLCSetActualHeight()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnPick4">
                                         <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
                                     </button>
                                 </div>
@@ -801,7 +906,7 @@
                                         <p class="text-sm font-semibold" style="color:#0f172a;">PC → Gantry</p>
                                         <p class="text-xs" style="color:#64748b;">* Pick Status *</p>
                                     </div>
-                                    <button onclick="retry_PickStatus()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnR3">
+                                    <button onclick="retry_PickStatus()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnPick5">
                                         <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
                                     </button>
                                 </div>
@@ -827,7 +932,7 @@
                                         <p class="text-sm font-semibold" style="color:#0f172a;">PC → Gantry</p>
                                         <p class="text-xs" style="color:#64748b;">Place</p>
                                     </div>
-                                    <button onclick="loadPLCPlaceReel()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnR1">
+                                    <button onclick="loadPLCPlaceReel()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnPlace1">
                                         <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
                                     </button>
                                 </div>
@@ -837,7 +942,7 @@
                                         <p class="text-sm font-semibold" style="color:#0f172a;">PC → Gantry</p>
                                         <p class="text-xs" style="color:#64748b;">* Place Status *</p>
                                     </div>
-                                    <button onclick="retry_PlaceStatus()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnR2">
+                                    <button onclick="retry_PlaceStatus()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnPlace2">
                                         <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
                                     </button>
                                 </div>
@@ -847,7 +952,7 @@
                                         <p class="text-sm font-semibold" style="color:#0f172a;">PC → Auto Loader</p>
                                         <p class="text-xs" style="color:#64748b;">* All Empty *</p>
                                     </div>
-                                    <button onclick="loadPLCEndTask()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnR3">
+                                    <button onclick="loadPLCEndTask()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnPlace3">
                                         <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
                                     </button>
                                 </div>
@@ -871,7 +976,7 @@
                         <h2 class="text-xs font-semibold mb-2 flex items-center gap-2" style="color:#4b5563;">
                             <i class="bi-rocket-takeoff" style="width:14px;height:14px;"></i> Retrieve Drawer Process
                         </h2>
-                        <div class="mb-6" id="cart-retrieve-session">
+                        <div class="mb-6" id="cart-retrieve-session" style="border-bottom:1px solid #e2e8f0; padding-bottom: 10px;">
                             <div class="flex items-center justify-between mb-3">
                                 @* <p class="text-xs font-semibold mono" style="color:#64748b;">GANTRY PROCESS</p> *@
                                 <div class="flex gap-2">
@@ -888,7 +993,7 @@
                                         <p class="text-sm font-semibold" style="color:#0f172a;">PC → DB Slot</p>
                                         <p class="text-xs" style="color:#64748b;">Get Drawer Slot</p>
                                     </div>
-                                    <button onclick="loadPLCGetEmptyTraySlot()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnPA1">
+                                    <button onclick="loadPLCGetEmptyTraySlot()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnR1">
                                         <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
                                     </button>
                                 </div>
@@ -898,7 +1003,7 @@
                                         <p class="text-sm font-semibold" style="color:#0f172a;">Robot → SRMS</p>
                                         <p class="text-xs" style="color:#64748b;">Retrieve</p>
                                     </div>
-                                    <button onclick="loadPLCTakeEmptyTray()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnPA2">
+                                    <button onclick="loadPLCTakeEmptyTray()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnR2">
                                         <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
                                     </button>
                                 </div>
@@ -908,7 +1013,7 @@
                                         <p class="text-sm font-semibold" style="color:#0f172a;">Robot → Center</p>
                                         <p class="text-xs" style="color:#64748b;">* Retrieve Status *</p>
                                     </div>
-                                    <button onclick="retry_RetrieveStatus()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnPA3">
+                                    <button onclick="retry_RetrieveStatus()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnR3">
                                         <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
                                     </button>
                                 </div>
@@ -1239,8 +1344,6 @@
             });
         }
 
-
-
         async function readyContinuos() {
             var data = await getJson();
             // console.log(data);
@@ -1256,6 +1359,7 @@
                 updateGantryUIState();
                 updateCartesianUIState();
 
+                updateDrawerStatus(sharedDrawerState.drawerStatus, '');
             }
         }
 
@@ -1338,6 +1442,7 @@
             if (!sharedDrawerState.systemRunning) return;
             sharedDrawerState.systemRunning = false;
             updateSystemStatusUI();
+            disableDivContent(true);
             // log("System Stop command issued. System idling.", 'alert');
 
             updateJson();
@@ -1472,16 +1577,18 @@
         }
 
         function updateCartesianUIState() {
-            document.querySelectorAll('.rack-area').forEach(area => {
-                area.classList.remove('active');
-            });
+            // document.querySelectorAll('.rack-area').forEach(area => {
+            //     area.classList.remove('active');
+            // });
 
             if (sharedDrawerState.cartesianLocation === 'left') {
-                document.querySelector('.left-rack').classList.add('active');
+                document.querySelector('#left-input').classList.add('selected');
+                // document.querySelector('.left-rack').classList.add('active');
                 // document.getElementById('left-status').textContent = "ROBOT PRESENT";
                 // document.getElementById('right-status').textContent = "Status: IDLE";
             } else if (sharedDrawerState.cartesianLocation === 'right') {
-                document.querySelector('.right-rack').classList.add('active');
+                document.querySelector('#right-input').classList.add('selected');
+                // document.querySelector('.right-rack').classList.add('active');
                 // document.getElementById('right-status').textContent = "ROBOT PRESENT";
                 // document.getElementById('left-status').textContent = "Status: IDLE";
             } else {
@@ -1491,11 +1598,22 @@
                 // document.getElementById('right-status').textContent = "Status: IDLE";
             }
 
-            document.getElementById('cartesian-state-simple').textContent = sharedDrawerState.cartesianRobotState;
+            // document.getElementById('cartesian-state-simple').textContent = sharedDrawerState.cartesianRobotState;
         }
 
         function disableDivContent(status) {
-            const div2 = document.getElementById('gantry-session');
+            var div2 = document.getElementById('gantry-pick-session');
+            if (div2) {
+                const interactiveElements = div2.querySelectorAll('button'); // input, select, textarea,
+                interactiveElements.forEach(element => {
+                    element.setAttribute('disabled', status);
+                    if (status == false) {
+                        element.removeAttribute('disabled');
+                    }
+                });
+            }
+            
+            div2 = document.getElementById('gantry-place-session');
             if (div2) {
                 const interactiveElements = div2.querySelectorAll('button'); // input, select, textarea,
                 interactiveElements.forEach(element => {
@@ -1506,7 +1624,7 @@
                 });
             }
 
-            const div = document.getElementById('cartesian-session');
+            var div = document.getElementById('cart-retrieve-session');
             if (div) {
                 const interactiveElements = div.querySelectorAll('button'); // input, select, textarea,
                 interactiveElements.forEach(element => {
@@ -1517,35 +1635,157 @@
                 });
             }
 
-            if (status == true) {
-                const links = document.querySelectorAll('a');
-                links.forEach(link => {
-                  // Store the original href in a data attribute
-                  link.dataset.originalHref = link.href;
-                  // Remove the href attribute to prevent navigation
-                  link.removeAttribute('href');
-                  // Optionally, add a class for visual styling and set aria-disabled for accessibility
-                  link.classList.add('disabled-link');
-                  link.setAttribute('aria-disabled', 'true');
+            div = document.getElementById('cart-putaway-session');
+            if (div) {
+                const interactiveElements = div.querySelectorAll('button'); // input, select, textarea,
+                interactiveElements.forEach(element => {
+                    element.setAttribute('disabled', status);
+                    if (status == false) {
+                        element.removeAttribute('disabled');
+                    }
                 });
             }
-            else {
-                const links = document.querySelectorAll('a');
-                links.forEach(link => {
-                  // Restore the original href from the data attribute
-                  if (link.dataset.originalHref) {
-                    link.href = link.dataset.originalHref;
-                    delete link.dataset.originalHref; // Clean up the data attribute
-                  }
-                  // Remove the styling class and aria-disabled attribute
-                  link.classList.remove('disabled-link');
-                  link.removeAttribute('aria-disabled');
-                });
-            }
+
+            // if (status == true) {
+            //     const links = document.querySelectorAll('a');
+            //     links.forEach(link => {
+            //       // Store the original href in a data attribute
+            //       link.dataset.originalHref = link.href;
+            //       // Remove the href attribute to prevent navigation
+            //       link.removeAttribute('href');
+            //       // Optionally, add a class for visual styling and set aria-disabled for accessibility
+            //       link.classList.add('disabled-link');
+            //       link.setAttribute('aria-disabled', 'true');
+            //     });
+            // }
+            // else {
+            //     const links = document.querySelectorAll('a');
+            //     links.forEach(link => {
+            //       // Restore the original href from the data attribute
+            //       if (link.dataset.originalHref) {
+            //         link.href = link.dataset.originalHref;
+            //         delete link.dataset.originalHref; // Clean up the data attribute
+            //       }
+            //       // Remove the styling class and aria-disabled attribute
+            //       link.classList.remove('disabled-link');
+            //       link.removeAttribute('aria-disabled');
+            //     });
+            // }
         }
 
         function delay(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // ----------- New UI movement
+        function updateDash() {
+            document.getElementById('pendingCount').innerHTML = totalPending;
+            document.getElementById('completedCount').innerHTML = totalCompleted;
+        }
+
+        function setStatus(text, color) {
+          const badge = document.getElementById('statusBadge');
+          const dot = document.getElementById('statusDot');
+          const st = document.getElementById('statusText');
+          st.textContent = text;
+          dot.style.background = color;
+          if (text !== 'IDLE' && text !== 'DONE') badge.classList.add('status-active');
+          else badge.classList.remove('status-active');
+        }
+
+        function moveArm(top) {
+          document.getElementById('armHead').style.top = top + 'px';
+        }
+
+        function setGrip(open) {
+          document.getElementById('gripperLeft').style.transform = open ? 'translateX(-4px)' : '';
+          document.getElementById('gripperRight').style.transform = open ? 'translateX(4px)' : '';
+        }
+
+        function showHeld(colorIdx) {
+          const h = document.getElementById('heldTray');
+          if (colorIdx !== null) {
+            h.style.background = TRAY_COLORS[colorIdx];
+            h.classList.remove('hidden');
+          } else {
+            h.classList.add('hidden');
+          }
+        }
+
+        function moveArmX(side) {
+          const asm = document.getElementById('armAssembly');
+          if (side === 'rack') { asm.style.left = '47%'; }
+          else if (side === 'trolley') { asm.style.left = '53%'; }
+          else { asm.style.left = '50%'; }
+        }
+
+        async function retrieveMove() {
+            // Move to rack
+            setStatus('RETRIEVE', '#f59e0b');
+            // log('Moving arm to rack...');
+            moveArmX('rack');
+            setGrip(true);
+            await delay(900);
+
+            // Lower & grab
+            moveArm(20);
+            await delay(600);
+            setGrip(false);
+            await delay(300);
+
+        }
+
+        async function retrieveMoveDone() {
+            rack.pop();
+            heldTray = 2;
+            showHeld(2);
+
+            // Lift
+            moveArm(0);
+            await delay(600);
+
+            moveArmX('center');
+
+            // await delay(1000);
+            // putawayMove();
+        }
+
+        async function retrieveMoveNext() {
+            moveArm(0);
+            await delay(400);
+            setGrip(false);
+            moveArmX('center');
+        }
+
+        async function putawayMove() {
+            // Move to trolley
+            setStatus('PUTAWAY', '#3b82f6');
+            // log('Transferring to trolley...');
+            moveArmX('trolley');
+            await delay(900);
+
+        }
+
+        async function putawayMoveDone() {
+            // Lower & release
+            // setStatus('PLACING', '#8b5cf6');
+            moveArm(20);
+            await delay(600);
+            setGrip(true);
+            await delay(300);
+            trolley.push(3);
+            heldTray = null;
+            showHeld(null);
+            // renderSlots();
+            // log(`Placed tray <span style="color:${TRAY_COLORS[trayIdx]}">■</span> on trolley`);
+
+            // Return center
+            moveArm(0);
+            await delay(400);
+            setGrip(false);
+            moveArmX('center');
+            await delay(600);
+
         }
 
         // ----------- Log
@@ -2428,19 +2668,19 @@
         }
 
         function removeDBUpcoming() {
-            const parentDiv = document.getElementById("system-log-3");
+            // const parentDiv = document.getElementById("system-log-3");
 
-            const firstDivToRemove = parentDiv.querySelector('.reel-card:first-child'); // Replace 'childClassName' with the target class name
+            // const firstDivToRemove = parentDiv.querySelector('.reel-card:first-child'); // Replace 'childClassName' with the target class name
 
-            // 3. Check if the element exists and then remove it
-            if (firstDivToRemove) {
-                firstDivToRemove.classList.add('fade-out');
+            // // 3. Check if the element exists and then remove it
+            // if (firstDivToRemove) {
+            //     firstDivToRemove.classList.add('fade-out');
 
-                // 2. Wait for the animation to finish (500ms in this example) and then remove the element
-                setTimeout(() => {
-                    firstDivToRemove.remove(); // The .remove() method is simple and widely supported
-                }, 500); // The delay must match the CSS transition duration
-            }
+            //     // 2. Wait for the animation to finish (500ms in this example) and then remove the element
+            //     setTimeout(() => {
+            //         firstDivToRemove.remove(); // The .remove() method is simple and widely supported
+            //     }, 500); // The delay must match the CSS transition duration
+            // }
         }
 
 
@@ -3279,8 +3519,10 @@
 
             var chkSlot = '-';
             if (changePutSlot == true) {
-                chkSlot = $("#txtPutSlot").val();
-                attemptsPutAway += 1;
+                if ($("#txtPutSlot").val() != '') {
+                    chkSlot = $("#txtPutSlot").val();
+                    attemptsPutAway += 1;
+                }
             }
 
             // step 4 : scan item

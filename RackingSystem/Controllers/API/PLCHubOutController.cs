@@ -254,13 +254,13 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "Right is locked. Left is locked. ";
-            result.data.Add(2);
-            result.data.Add(2);
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "Right is locked. Left is locked. ";
+            //result.data.Add(2);
+            //result.data.Add(2);
+            //return result;
+            //// *** testing
 
             string decimalText = "";
             string lock1 = "0";
@@ -488,11 +488,11 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.data = 1;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.data = 1;
+            //return result;
+            //// *** testing
 
             // 2. check plc which column is ready
             string plcIp = configRack.ConfigValue;
@@ -605,12 +605,12 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "Done";
-            result.data.data = "1";
-            return result;
-            // *** testings
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "Done";
+            //result.data.data = "1";
+            //return result;
+            //// *** testings
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
@@ -804,11 +804,11 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.data = 1;
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.data = 1;
+            //return result;
+            //// *** testing
 
             // 2. check plc which column is ready
             int value = 0;
@@ -910,12 +910,12 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
-            // *** testing
-            result.success = true;
-            result.errMessage = "Done Put Away.";
-            result.data.data = "3";
-            return result;
-            // *** testing
+            //// *** testing
+            //result.success = true;
+            //result.errMessage = "Done Put Away.";
+            //result.data.data = "3";
+            //return result;
+            //// *** testing
 
             DateTime dtRun = DateTime.Now;
             bool exit = false;
