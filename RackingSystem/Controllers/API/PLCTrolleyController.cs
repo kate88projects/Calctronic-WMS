@@ -630,21 +630,21 @@ namespace RackingSystem.Controllers.API
             //}
 
             //// double check slot_id
-            //string slotCode = GetSlotIDByIP(configRack.ConfigValue);
-            //var slotChk = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
-            //if (slotChk == null)
-            //{
-            //    result.errMessage = "Cannot find Slot Retrieve [" + slotCode + "]. ";
-            //}
-            //else
-            //{
-            //    var pulses = ReadTrolleyPulseByIP(configRack.ConfigValue, trolleyId, slotCode);
-            //    result.data.SlotCode = slotCode;
-            //    result.data.QRXPulse = pulses[0];
-            //    result.data.QRYPulse = pulses[1];
-            //    result.data.QRXPulseDiffer = pulses[2];
-            //    result.data.QRXPulseDiffer = pulses[3];
-            //}
+            string slotCode = GetSlotIDByIP(configRack.ConfigValue);
+            var slotChk = _dbContext.TrolleySlot.Where(x => x.TrolleySlotCode == slotCode).FirstOrDefault();
+            if (slotChk == null)
+            {
+                result.errMessage = "Cannot find Slot Retrieve [" + slotCode + "]. ";
+            }
+            else
+            {
+                var pulses = ReadTrolleyPulseByIP(configRack.ConfigValue, trolleyId, slotCode);
+                result.data.SlotCode = slotCode;
+                result.data.QRXPulse = pulses[0];
+                result.data.QRYPulse = pulses[1];
+                result.data.QRXPulseDiffer = pulses[2];
+                result.data.QRXPulseDiffer = pulses[3];
+            }
 
             //result.success = value == 1;
             result.data.data = value.ToString();
@@ -789,6 +789,7 @@ namespace RackingSystem.Controllers.API
                 registerAddress = 4299;
                 valueToWrite = 0;
                 modbusClient.WriteSingleRegister(registerAddress, highBinary);
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"XPulse {registerAddress}: high- {highBinary}, low-{lowBinary}", slot.SlotCode, false);
 
                 // step 3 : y-pulses
                 //bytes = BitConverter.GetBytes(4930);
@@ -801,6 +802,8 @@ namespace RackingSystem.Controllers.API
                 registerAddress = 4302;
                 valueToWrite = 0;
                 modbusClient.WriteSingleRegister(registerAddress, lowBinary);
+
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"YPulse {registerAddress}: high- {highBinary}, low-{lowBinary}", slot.SlotCode, false);
 
                 // step 4 : 
                 registerAddress = 4310;
@@ -1606,108 +1609,106 @@ namespace RackingSystem.Controllers.API
 
                 PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
 
-                int startAddress = 4223;
+                //int startAddress = 4223;
+                //int numRegisters = 1;
+
+                //while (!exit)
+                //{
+                //    int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                //    for (int i = 0; i < registers.Length; i++)
+                //    {
+                //        value = registers[i];
+                //    }
+
+                //    if (value > 0)
+                //    {
+                //        exit = true;
+                //        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
+                //    }
+                //    if ((DateTime.Now - dtRun).TotalSeconds > 3)
+                //    {
+                //        //result.errMessage = "Timeout. Cannot get Status.";
+                //        exit = true;
+                //        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
+                //    }
+                //}
+
+                //if (value > 0)
+                //{
+                    // first addr
+                int startAddress = 4208;
                 int numRegisters = 1;
-
-                while (!exit)
+                int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                for (int i = 0; i < registers.Length; i++)
                 {
-                    int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
-                    for (int i = 0; i < registers.Length; i++)
+                    PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                    decimalText = getDecimalText(registers[i]);
+                    if (decimalText.Contains("\0"))
                     {
-                        value = registers[i];
+                        decimalText = decimalText.Substring(0, 1);
                     }
-
-                    if (value > 0)
-                    {
-                        exit = true;
-                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
-                    }
-                    if ((DateTime.Now - dtRun).TotalSeconds > 3)
-                    {
-                        //result.errMessage = "Timeout. Cannot get Status.";
-                        exit = true;
-                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
-                    }
+                    qrXText = qrXText + decimalText;
                 }
 
-                if (value > 0)
+                // second addr
+                startAddress = 4209;
+                numRegisters = 1;
+                registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                for (int i = 0; i < registers.Length; i++)
                 {
-                    // first addr
-                    startAddress = 4208;
-                    numRegisters = 1;
-                    int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
-                    for (int i = 0; i < registers.Length; i++)
+                    PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                    decimalText = getDecimalText(registers[i]);
+                    if (decimalText.Contains("\0"))
                     {
-                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
-                        decimalText = getDecimalText(registers[i]);
-                        if (decimalText.Contains("\0"))
-                        {
-                            decimalText = decimalText.Substring(0, 1);
-                        }
-                        qrXText = qrXText + decimalText;
+                        decimalText = decimalText.Substring(0, 1);
                     }
+                    qrXText = qrXText + decimalText;
+                }
 
-                    // second addr
-                    startAddress = 4209;
-                    numRegisters = 1;
-                    registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
-                    for (int i = 0; i < registers.Length; i++)
+                // third addr
+                startAddress = 4210;
+                numRegisters = 1;
+                registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                for (int i = 0; i < registers.Length; i++)
+                {
+                    PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                    decimalText = getDecimalText(registers[i]);
+                    if (decimalText.Contains("\0"))
                     {
-                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
-                        decimalText = getDecimalText(registers[i]);
-                        if (decimalText.Contains("\0"))
-                        {
-                            decimalText = decimalText.Substring(0, 1);
-                        }
-                        qrXText = qrXText + decimalText;
+                        decimalText = decimalText.Substring(0, 1);
                     }
+                    qrYText = qrYText + decimalText;
+                }
 
-                    // third addr
-                    startAddress = 4210;
-                    numRegisters = 1;
-                    registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
-                    for (int i = 0; i < registers.Length; i++)
+                // forth addr
+                startAddress = 4211;
+                numRegisters = 1;
+                registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                for (int i = 0; i < registers.Length; i++)
+                {
+                    PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                    decimalText = getDecimalText(registers[i]);
+                    if (decimalText.Contains("\0"))
                     {
-                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
-                        decimalText = getDecimalText(registers[i]);
-                        if (decimalText.Contains("\0"))
-                        {
-                            decimalText = decimalText.Substring(0, 1);
-                        }
-                        qrYText = qrYText + decimalText;
+                        decimalText = decimalText.Substring(0, 1);
                     }
+                    qrYText = qrYText + decimalText;
+                }
 
-                    // forth addr
-                    startAddress = 4211;
-                    numRegisters = 1;
-                    registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
-                    for (int i = 0; i < registers.Length; i++)
-                    {
-                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
-                        decimalText = getDecimalText(registers[i]);
-                        if (decimalText.Contains("\0"))
-                        {
-                            decimalText = decimalText.Substring(0, 1);
-                        }
-                        qrYText = qrYText + decimalText;
-                    }
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Get X {qrXText} Y {qrYText}", "", false);
 
-                    PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Get X {qrXText} Y {qrYText}", "", false);
+                int qrX = 0;
+                int qrY = 0;
+                int.TryParse(qrXText, out qrX);
+                int.TryParse(qrYText, out qrY);
+                if (qrX > 0 || qrY > 0)
+                {
+                    //slot.QRXPulse = qrX;
+                    //slot.QRYPulse = qrY;
+                    //_dbContext.SaveChanges();
 
-                    int qrX = 0;
-                    int qrY = 0;
-                    int.TryParse(qrXText, out qrX);
-                    int.TryParse(qrYText, out qrY);
-                    if (qrX > 0 || qrY > 0)
-                    {
-                        //slot.QRXPulse = qrX;
-                        //slot.QRYPulse = qrY;
-                        //_dbContext.SaveChanges();
-
-                        result[0] = qrX;
-                        result[1] = qrY;
-                    }
-
+                    result[0] = qrX;
+                    result[1] = qrY;
                 }
 
             }

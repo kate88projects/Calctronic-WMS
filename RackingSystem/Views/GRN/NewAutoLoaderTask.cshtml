@@ -1037,10 +1037,10 @@
                 {
                     $(`#pg-c${i}`).removeClass("unavailable");
                 }
-                if ($(`#icon-c${i}`).hasClass('bi bi-exclamation-square'))
-                {
-                    $(`#icon-c${i}`).removeClass("bi bi-exclamation-square");
-                }
+                // if ($(`#icon-c${i}`).hasClass('bi bi-exclamation-square'))
+                // {
+                //     $(`#icon-c${i}`).removeClass("bi bi-exclamation-square");
+                // }
             }
         }
         /*
@@ -1528,7 +1528,7 @@
                     }
 
                     $(`#c${oldCol}`).removeClass("progress-bar-striped progress-bar-animated bg-warning");
-                    $(`#icon-c${oldCol}`).removeClass("bi bi-fire");
+                    $(`#icon-c${oldCol}`).removeClass("bi-fire");
                     $(`#c${oldCol}`).addClass("bg-success");
 
                     $(`#c${iCol}`).addClass("progress-bar-striped progress-bar-animated bg-warning");
@@ -2078,8 +2078,8 @@
                         $("#txtActHeight").val(result.data[1]);
                         $('#loadCol4').text(iCol);
                         $('#heightStatus4').text(result.data[1]);
+                        $('#txtHActH').text(result.data[1]);
 
-                        $('#txtHActH').val(result.data[1]);
                         const dataAttr = document.getElementById("dataDiv");
                         dataAttr.dataset.decHeight = result.data[2];
 
