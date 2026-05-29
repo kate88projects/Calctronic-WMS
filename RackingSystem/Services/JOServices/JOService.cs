@@ -176,6 +176,16 @@ namespace RackingSystem.Services.JOServices
                     index++;
                 }
 
+                var aggregatedSubItems = job.Details
+                    .GroupBy(x => x.Item_Id)
+                    .Select(g => new
+                    {
+                        Item_Id = g.Key,
+                        Qty = g.Sum(x => x.Qty),
+                        JobOrderDetail_Id = g.First().JobOrderDetail_Id,
+                        JobOrder_Id = g.First().JobOrder_Id,
+                    }).ToList();
+
                 if (job.JobOrder_Id == 0)
                 {
                     var jobOrder = await DocFormatHelper.Instance.get_NextDocumentNo(_dbContext, General.EnumConfiguration.DocFormat_JO, DateTime.Now, true);
@@ -197,7 +207,7 @@ namespace RackingSystem.Services.JOServices
                     _dbContext.JobOrder.Add(_job);
                     await _dbContext.SaveChangesAsync();
 
-                    foreach (var dtl in job.Details)
+                    foreach (var dtl in aggregatedSubItems)
                     {
                         JobOrderDetail _jobDtl = new JobOrderDetail()
                         {
@@ -245,7 +255,7 @@ namespace RackingSystem.Services.JOServices
                     }
 
                     //update the latest detail
-                    foreach (var dtl in job.Details)
+                    foreach (var dtl in aggregatedSubItems)
                     {
                         if (dtl.JobOrderDetail_Id == 0)
                         {
@@ -408,6 +418,16 @@ namespace RackingSystem.Services.JOServices
                     index++;
                 }
 
+                var aggregatedSubItems = jobEmergency.EmergencyDetails
+                    .GroupBy(x => x.Item_Id)
+                    .Select(g => new
+                    {
+                        Item_Id = g.Key,
+                        Qty = g.Sum(x => x.Qty),
+                        JobOrderEmergencyDetail_Id = g.First().JobOrderEmergencyDetail_Id,
+                        JobOrderEmergency_Id = g.First().JobOrderEmergency_Id,
+                    }).ToList();
+
                 if (jobEmergency.JobOrderEmergency_Id == 0)
                 {
                     var jobOrderEmergency = await DocFormatHelper.Instance.get_NextDocumentNo(_dbContext, General.EnumConfiguration.DocFormat_EmergencyJO, DateTime.Now, true);
@@ -429,7 +449,7 @@ namespace RackingSystem.Services.JOServices
                     _dbContext.JobOrderEmergency.Add(_jobE);
                     await _dbContext.SaveChangesAsync();
 
-                    foreach (var dtl in jobEmergency.EmergencyDetails)
+                    foreach (var dtl in aggregatedSubItems)
                     {
                         JobOrderEmergencyDetail _jobEDtl = new JobOrderEmergencyDetail()
                         {
@@ -475,7 +495,7 @@ namespace RackingSystem.Services.JOServices
                     }
 
                     //update the latest detail
-                    foreach (var dtl in jobEmergency.EmergencyDetails)
+                    foreach (var dtl in aggregatedSubItems)
                     {
                         if (dtl.JobOrderEmergencyDetail_Id == 0)
                         {
