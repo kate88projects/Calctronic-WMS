@@ -995,6 +995,7 @@
             $("#txtYPulse").val(row.yPulse);
             $("#txtQrXPulse").val(row.qrxPulse);
             $("#txtQrYPulse").val(row.qryPulse);
+            $("#txtPriority").val(row.priority);
 
             var addPulseFields = [
                 { field: "#txtAddPulse1", value: row.add1Pulse },
@@ -1393,7 +1394,7 @@
                 if (updateType === "slots")
                 {
                     const fieldNames = [
-                        'Trolley Code', 'Trolley Slot Code', 'Column No', 'Row No', 'X Pulse', 'Z Pulse', 'Qr-X Pulse', 'Qr-Z Pulse',
+                        'Trolley Code', 'Trolley Slot Code', 'Column No', 'Row No', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
                         'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6',
                         'Is Active', 'Is Left'
                     ];
@@ -1414,8 +1415,8 @@
                             RowNo: row[colIndex['Row No']],
                             XPulse: row[colIndex['X Pulse']],
                             YPulse: row[colIndex['Z Pulse']],
-                            QRXPulse: row[colIndex['Qr-X Pulse']],
-                            QRYPulse: row[colIndex['Qr-Z Pulse']],
+                            QRXPulse: row[colIndex['QR-X Pulse']],
+                            QRYPulse: row[colIndex['QR-Z Pulse']],
                             Add1Pulse: row[colIndex['Additional Pulse 1']],
                             Add2Pulse: row[colIndex['Additional Pulse 2']],
                             Add3Pulse: row[colIndex['Additional Pulse 3']],
@@ -1429,7 +1430,7 @@
                 }
                 else {
                     const fieldNames = [
-                        'Trolley Slot Code','X Pulse', 'Z Pulse', 'Qr-X Pulse', 'Qr-Z Pulse',
+                        'Trolley Slot Code','X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
                         'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6',
                         'Is Active', 'Is Left'
                     ];
@@ -1445,8 +1446,8 @@
                             TrolleySlotCode: row[colIndex['Trolley Slot Code']],
                             XPulse: row[colIndex['X Pulse']],
                             YPulse: row[colIndex['Z Pulse']],
-                            QRXPulse: row[colIndex['Qr-X Pulse']],
-                            QRYPulse: row[colIndex['Qr-Z Pulse']],
+                            QRXPulse: row[colIndex['QR-X Pulse']],
+                            QRYPulse: row[colIndex['QR-Z Pulse']],
                             Add1Pulse: row[colIndex['Additional Pulse 1']],
                             Add2Pulse: row[colIndex['Additional Pulse 2']],
                             Add3Pulse: row[colIndex['Additional Pulse 3']],

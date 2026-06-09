@@ -778,6 +778,11 @@ namespace RackingSystem.Services.SlotServices
             {
                 foreach (var slot in slotPulses)
                 {
+                    if (slot.SlotCode == null)
+                    {
+                        continue;
+                    }
+
                     bool isError = false;
 
                     //validation

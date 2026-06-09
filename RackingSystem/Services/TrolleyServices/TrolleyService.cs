@@ -392,7 +392,7 @@ namespace RackingSystem.Services.TrolleyServices
                         return result;
                     }
                 }
-                TrolleySlot? slotExist2 = _dbContext.TrolleySlot.FirstOrDefault(x => x.ColNo == trolleySlot.ColNo && x.RowNo == trolleySlot.RowNo && x.TrolleySlot_Id != trolleySlot.TrolleySlot_Id);
+                TrolleySlot? slotExist2 = _dbContext.TrolleySlot.FirstOrDefault(x => x.ColNo == trolleySlot.ColNo && x.RowNo == trolleySlot.RowNo && x.TrolleySlot_Id != trolleySlot.TrolleySlot_Id && x.TrolleySlotCode == trolleySlot.TrolleySlotCode);
                 if (slotExist2 != null)
                 {
                     result.errMessage = "This Column No and Row No have been used.";
@@ -422,6 +422,7 @@ namespace RackingSystem.Services.TrolleyServices
                         Add4Pulse = trolleySlot.Add4Pulse,
                         Add5Pulse = trolleySlot.Add5Pulse,
                         Add6Pulse = trolleySlot.Add6Pulse,
+                        Priority = trolleySlot.Priority,
                     };
                     _dbContext.TrolleySlot.Add(_ts);
                 }
@@ -451,6 +452,8 @@ namespace RackingSystem.Services.TrolleyServices
                     _ts.Add4Pulse = trolleySlot.Add4Pulse;
                     _ts.Add5Pulse = trolleySlot.Add5Pulse;
                     _ts.Add6Pulse = trolleySlot.Add6Pulse;
+                    _ts.Priority = trolleySlot.Priority;
+
                     _dbContext.TrolleySlot.Update(_ts);
                 }
                 await _dbContext.SaveChangesAsync();
