@@ -630,24 +630,31 @@ namespace RackingSystem.Controllers.API
             //}
 
             //// double check slot_id
-            string slotCode = GetSlotIDByIP(configRack.ConfigValue);
-            var slotChk = _dbContext.TrolleySlot.Where(x => x.TrolleySlotCode == slotCode).FirstOrDefault();
-            if (slotChk == null)
+            try
             {
-                result.errMessage = "Cannot find Slot Retrieve [" + slotCode + "]. ";
-            }
-            else
-            {
-                var pulses = ReadTrolleyPulseByIP(configRack.ConfigValue, trolleyId, slotCode);
-                result.data.SlotCode = slotCode;
-                result.data.QRXPulse = pulses[0];
-                result.data.QRYPulse = pulses[1];
-                result.data.QRXPulseDiffer = pulses[2];
-                result.data.QRXPulseDiffer = pulses[3];
-            }
+                string slotCode = GetSlotIDByIP(configRack.ConfigValue);
+                var slotChk = _dbContext.TrolleySlot.Where(x => x.TrolleySlotCode == slotCode).FirstOrDefault();
+                if (slotChk == null)
+                {
+                    result.errMessage = "Cannot find Slot Retrieve [" + slotCode + "]. ";
+                }
+                else
+                {
+                    List<int> pulses = ReadTrolleyPulseByIP(configRack.ConfigValue, trolleyId, slotCode);
+                    result.data.SlotCode = slotCode;
+                    result.data.QRXPulse = pulses[0];
+                    result.data.QRYPulse = pulses[1];
+                    result.data.QRXPulseDiffer = pulses[2];
+                    result.data.QRXPulseDiffer = pulses[3];
+                }
 
-            //result.success = value == 1;
-            result.data.data = value.ToString();
+                //result.success = value == 1;
+                result.data.data = value.ToString();
+            }
+            catch (Exception ex)
+            {
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "GetSlotAndPulse err : " + ex.Message, "", false);
+            }
 
             return result;
         }
@@ -929,22 +936,22 @@ namespace RackingSystem.Controllers.API
                     }
                 }
 
-                //// double check slot_id
-                //string slotCodeRead = GetSlotIDByIP(configRack.ConfigValue);
-                //var slotChk = _dbContext.Slot.Where(x => x.SlotCode == slotCodeRead).FirstOrDefault();
-                //if (slotChk == null)
-                //{
-                //    result.errMessage = "Cannot find Slot Retrieve [" + slotCodeRead + "]. ";
-                //}
-                //else
-                //{
-                //    var pulses = ReadPulseByIP(configRack.ConfigValue, slotCodeRead);
-                //    result.data.SlotCode = slotCode;
-                //    result.data.QRXPulse = pulses[0];
-                //    result.data.QRYPulse = pulses[1];
-                //    result.data.QRXPulseDiffer = pulses[2];
-                //    result.data.QRXPulseDiffer = pulses[3];
-                //}
+                // double check slot_id
+                string slotCodeRead = GetSlotIDByIP(configRack.ConfigValue);
+                var slotChk = _dbContext.Slot.Where(x => x.SlotCode == slotCodeRead).FirstOrDefault();
+                if (slotChk == null)
+                {
+                    result.errMessage = "Cannot find Slot Retrieve [" + slotCodeRead + "]. ";
+                }
+                else
+                {
+                    var pulses = ReadPulseByIP(configRack.ConfigValue, slotCodeRead);
+                    result.data.SlotCode = slotCode;
+                    result.data.QRXPulse = pulses[0];
+                    result.data.QRYPulse = pulses[1];
+                    result.data.QRXPulseDiffer = pulses[2];
+                    result.data.QRXPulseDiffer = pulses[3];
+                }
 
                 result.data.data = value.ToString();
 
@@ -1573,6 +1580,8 @@ namespace RackingSystem.Controllers.API
         internal List<int> ReadTrolleyPulseByIP(string ip, long trolleyId, string slotCode)
         {
             List<int> result = new List<int>();
+            result.Add(0);
+            result.Add(0);
             result.Add(0);
             result.Add(0);
 

@@ -322,6 +322,7 @@ namespace RackingSystem.Services.TrolleyServices
                     if (r != null)
                     {
                         s.ReelCode = r.ReelCode;
+                        s.ItemCode = r.ItemCode;
                     }
                 }
                 result.success = true;

@@ -135,7 +135,7 @@
                                 <a href="javascript:none" class="nav-link">
                                     <i class="nav-icon bi bi-ui-checks-grid"></i>
                                     <p>
-                                        MAINTENANCES
+                                        Maintenance
                                         <i class="nav-arrow bi bi-chevron-right"></i>
                                     </p>
                                 </a>
@@ -222,7 +222,7 @@
                                 <a href="javascript:none" class="nav-link">
                                     <i class="nav-icon bi bi-box-seam-fill"></i>
                                     <p>
-                                        STOCK
+                                        Stock
                                         <i class="nav-arrow bi bi-chevron-right"></i>
                                     </p>
                                 </a>
@@ -280,7 +280,7 @@
                                 <a href="javascript:none" class="nav-link">
                                     <i class="nav-icon bi bi-truck"></i>
                                     <p>
-                                        GRN
+                                        Receive
                                         <i class="nav-arrow bi bi-chevron-right"></i>
                                     </p>
                                 </a>
@@ -362,7 +362,7 @@
                                 <a href="javascript:none" class="nav-link">
                                     <i class="nav-icon bi bi-node-plus"></i>
                                     <p>
-                                        JOB ORDER
+                                        Job Order
                                         <i class="nav-arrow bi bi-chevron-right"></i>
                                     </p>
                                 </a>
@@ -396,7 +396,7 @@
                                 <a href="javascript:none" class="nav-link">
                                     <i class="nav-icon bi bi-calendar2-week"></i>
                                     <p>
-                                        QUEUE SYSTEM
+                                        Queue
                                         <i class="nav-arrow bi bi-chevron-right"></i>
                                     </p>
                                 </a>
@@ -423,7 +423,7 @@
                                 <a href="javascript:none" class="nav-link">
                                     <i class="nav-icon bi bi-hdd-rack"></i>
                                     <p>
-                                        REPORT
+                                        Report
                                         <i class="nav-arrow bi bi-chevron-right"></i>
                                     </p>
                                 </a>
@@ -515,18 +515,18 @@
                                             <p>Transfer Hub In Task</p>
                                         </a>
                                     </li> *@
-                                    <li class="nav-item">
+                                    @* <li class="nav-item">
                                         <a asp-action="ManualHubInTask" asp-controller="Rack" class="nav-link">
                                             <i class="nav-icon bi bi-asterisk"></i>
                                             <p>PLC Task (Manual)</p>
                                         </a>
-                                    </li>
+                                    </li> *@
                                     @if (ViewBag.PermissionList.Contains(108) == true)
                                     {
                                         <li class="nav-item">
-                                            <a asp-action="TrolleyReel" asp-controller="Rack" class="nav-link">
+                                            <a asp-action="TrolleyReelOut" asp-controller="Rack" class="nav-link">
                                                 <i class="nav-icon bi bi-asterisk"></i>
-                                                <p>Trolley Reel</p>
+                                                <p>Trolley Reel Out</p>
                                             </a>
                                         </li>
                                     }
@@ -570,7 +570,7 @@
                                 <a href="javascript:none" class="nav-link">
                                     <i class="nav-icon bi bi-gear"></i>
                                     <p>
-                                        SETTINGS
+                                        Setting
                                         <i class="nav-arrow bi bi-chevron-right"></i>
                                     </p>
                                 </a>
@@ -653,7 +653,7 @@
             <!--end::To the end-->
             <!--begin::Copyright-->
             <strong>
-                Version 1.0.2.0 Copyright &copy; 2025&nbsp;
+                Version 1.0.2.3 Copyright &copy; 2025&nbsp;
                 <!--<a href="https://adminlte.io" class="text-decoration-none">Flex Software Consulting Sdn Bhd</a>-->
             </strong> 
             <!--end::Copyright-->

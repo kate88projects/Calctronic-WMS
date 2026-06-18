@@ -37,6 +37,8 @@ namespace RackingSystem.Models.Trolley
         public Guid Reel_Id { get; set; }
         public string ReelCode { get; set; } = "";
 
+        public string ItemCode { get; set; } = "";
+
         public bool NeedCheck { get; set; } = false;
         public string CheckRemark { get; set; } = "";
         public int Priority { get; set; } = 0;

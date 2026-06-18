@@ -631,6 +631,34 @@ namespace RackingSystem.Controllers
             return View();
         }
 
+        public IActionResult TrolleyReelOut()
+        {
+            ViewBag.xToken = "";
+            ViewBag.PermissionList = new List<int>();
+            //string s = HttpContext.Session.GetString("xSession") ?? "";
+            //if (s != "")
+            //{
+            //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+            //    ViewBag.PermissionList = data.UACIdList;
+            //    ViewBag.xToken = data.Token;
+            //}
+            if (User.Identity?.IsAuthenticated ?? false)
+            {
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
+                {
+                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
+                    ViewBag.PermissionList = uacIdList;
+                    ViewBag.xToken = User.FindFirst("Token")?.Value;
+                }
+            }
+
+            ViewData["ActiveGroup"] = "grpRACKING";
+            ViewData["ActiveTab"] = "TrolleyReelOut";
+            ViewData["Title"] = "Trolley Reel Out";
+            return View();
+        }
+
 
     }
 }

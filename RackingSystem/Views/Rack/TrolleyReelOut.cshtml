@@ -1,0 +1,702 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutEmpty.cshtml";
+}
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Outfit', sans-serif;
+        margin: 0;
+    }
+
+    .slot {
+        width: 100%;
+        height: 16px;
+        border-radius: 2px;
+        transition: all 0.2s;
+        cursor: pointer;
+        position: relative;
+        overflow: visible;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 2px;
+        gap: 2px;
+    }
+
+        .slot.free {
+            /* background: #4ade80;
+                    box-shadow: 0 0 2px #4ade8099;*/
+            /* background: honeydew; */
+            box-shadow: 0 0 2px darkgrey;
+        }
+
+        .slot.occupied {
+            background: #f87171;
+            box-shadow: 0 0 2px #f8717199;
+        }
+
+    .slot-label {
+        font-size: 8px;
+        color: white;
+        font-weight: 700;
+        text-align: left;
+        line-height: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex-grow: 1;
+    }
+
+    .slot-row {
+        font-size: 8px;
+        color: white;
+        font-weight: 600;
+        mono;
+        width: 12px;
+        flex-shrink: 0;
+    }
+
+    .slot-led {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #fbbf24;
+        box-shadow: 0 0 2px #fbbf24;
+        flex-shrink: 0;
+        transition: all 0.15s;
+    }
+
+    .slot.blinking .slot-led {
+        animation: ledBlink 0.5s infinite;
+    }
+    @@keyframes ledBlink {
+        0%, 100%
+
+    {
+        opacity: 1;
+        box-shadow: 0 0 2px #fbbf24;
+    }
+
+    50% {
+        opacity: 0.3;
+        box-shadow: 0 0 0px #fbbf24;
+    }
+
+    }
+
+    .slot:hover {
+        background-brightness: 1.2;
+        z-index: 10;
+        position: relative;
+        box-shadow: 0 0 6px rgba(255,255,255,0.3);
+    }
+
+        .slot:hover .slot-label {
+            opacity: 1;
+        }
+
+    .grid-col {
+        display: grid;
+        grid-template-rows: repeat(50, 16px);
+        gap: 2px;
+    }
+
+    .side-panel {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 12px;
+    }
+
+    .hmi-bg {
+        background: #f8fafc;
+    }
+
+    .header-bar {
+        background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+        border-bottom: 2px solid #3b82f6;
+    }
+
+    .stat-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        padding: 8px 12px;
+    }
+
+    .tooltip {
+        position: fixed;
+        background: #1f2937;
+        border: 1px solid #3b82f6;
+        color: #f3f4f6;
+        padding: 6px 10px;
+        border-radius: 4px;
+        font-size: 11px;
+        pointer-events: none;
+        z-index: 1000;
+        display: none;
+        white-space: nowrap;
+    }
+
+    .noTrolley {
+        background: #fee2e2;
+        border: 1px solid #fecaca;
+    }
+
+    .wTrolley {
+        background: #dbeafe;
+        border: 1px solid #bfdbfe;
+    }
+
+    /* Tooltip text */
+    .tooltiptext {
+        /* visibility: hidden; /* Hidden by default */ 
+        /* width: 130px; */
+        background-color: black;
+        color: #ffffff;
+        text-align: center;
+        padding: 5px;
+        border-radius: 6px;
+        position: absolute;
+        z-index: 1; /* Ensure tooltip is displayed above content */
+    }
+    .text-white{
+        color: white;
+    }
+</style>
+
+<input type="hidden" id="xToken" value="@ViewBag.xToken" autocomplete="off">
+<input type="hidden" id="xTrolleyId" autocomplete="off">
+
+<div id="app" class="h-full w-full overflow-auto" style="background: #f8f9fa;">
+    <!-- Title -->
+    <header class="px-6 py-4 flex items-center justify-between border-b" style="border-color: #e5e7eb;">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: #10b981;">
+                <i class="bi-building-add" style="width:20px;height:20px;color:#fff;"></i>
+            </div>
+            <div>
+                <h1 id="pageTitle" class="text-lg font-bold" style="color:#1f2937;">Trolley</h1>
+                <p id="statusLabel" class="text-xs mono" style="color:#6b7280;">Take Out reels from Trolley</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4 text-xs mono">
+            <button class="stat-card flex items-center gap-2 noTrolley" id="btnTrolley" onclick="insertTrolley()">
+                <span class="text-gray-600">Trolley : </span> <span id="lblTrolley" class="text-gray-900 font-semibold">[Please select]</span>
+            </button>
+            <div class="stat-card flex items-center gap-2">
+                <span class="text-gray-600">TOTAL:</span> <span id="statTotal" class="text-gray-900 font-semibold">300</span>
+            </div>
+            <div class="stat-card flex items-center gap-2">
+                <div class="w-2.5 h-2.5 rounded-sm bg-green-500"></div><span class="text-gray-600">FREE:</span> <span id="statFree" class="text-green-600 font-semibold">0</span>
+            </div>
+            <div class="stat-card flex items-center gap-2">
+                <div class="w-2.5 h-2.5 rounded-sm bg-red-500"></div><span class="text-gray-600">OCCUPIED:</span> <span id="statOccupied" class="text-red-600 font-semibold">0</span>
+            </div>
+            @* <div id="clock" class="stat-card text-blue-600"></div> *@
+        </div>
+    </header>
+    <div class="p-6 flex flex-col gap-1" style="min-height: 90vh;">
+        <!-- Header -->
+        <div class="flex items-center gap-3" style="align-self:center;">
+            <div class="flex-1 max-w-xs">
+                <input id="searchInput" type="text" placeholder="Search for item..." class="w-full px-3 py-2 border border-gray-600 rounded text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-400">
+            </div>
+            <button id="btnSearch" class="px-3 py-1 rounded text-xs font-semibold" style="background:#10b981;color:#fff;" onclick="searchItem()">
+                <i class="bi-search" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
+                Search
+            </button>
+            <button id="cont-btn" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#f59e0b;color:#fff; "
+                    onclick="systemCont()">
+                <i class="bi-trash" style="width:12px;height:12px;"></i> Clear
+            </button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex gap-4 p-4 min-h-0">
+            <!-- Side A -->
+            <div class="flex-1 flex flex-col">
+                <div class="text-center mb-2">
+                    <span class="text-sm font-bold tracking-widest text-blue-600 uppercase">Side A</span>
+                </div>
+                <div class="side-panel flex-1 flex gap-2">
+                    <!-- Row numbers -->
+                    <div id="sideA-rows" class="flex flex-col justify-start text-[8px] mono text-gray-500 gap-[2px]" style="width:24px;"></div>
+                    <div class="flex flex-col items-center flex-1">
+                        <span class="text-[10px] mono text-gray-600 mb-1">COL 1</span>
+                        <div id="sideA-col1" class="grid-col flex-1 w-full"></div>
+                    </div>
+                    <div class="flex flex-col items-center flex-1">
+                        <span class="text-[10px] mono text-gray-600 mb-1">COL 2</span>
+                        <div id="sideA-col2" class="grid-col flex-1 w-full"></div>
+                    </div>
+                    <div class="flex flex-col items-center flex-1">
+                        <span class="text-[10px] mono text-gray-600 mb-1">COL 3</span>
+                        <div id="sideA-col3" class="grid-col flex-1 w-full"></div>
+                    </div>
+                </div>
+            </div><!-- Divider -->
+            <div class="flex flex-col items-center justify-center gap-2">
+                <div class="w-px flex-1 bg-gradient-to-b from-transparent via-gray-600 to-transparent"></div><i data-lucide="arrow-left-right" class="text-gray-600" style="width:16px;height:16px;"></i>
+                <div class="w-px flex-1 bg-gradient-to-b from-transparent via-gray-600 to-transparent"></div>
+            </div><!-- Side B -->
+            <div class="flex-1 flex flex-col">
+                <div class="text-center mb-2">
+                    <span class="text-sm font-bold tracking-widest text-orange-600 uppercase">Side B</span>
+                </div>
+                <div class="side-panel flex-1 flex gap-2">
+                    <!-- Row numbers -->
+                    <div id="sideB-rows" class="flex flex-col justify-start text-[8px] mono text-gray-500 gap-[2px]" style="width:24px;"></div>
+                    <div class="flex flex-col items-center flex-1">
+                        <span class="text-[10px] mono text-gray-600 mb-1">COL 1</span>
+                        <div id="sideB-col1" class="grid-col flex-1 w-full"></div>
+                    </div>
+                    <div class="flex flex-col items-center flex-1">
+                        <span class="text-[10px] mono text-gray-600 mb-1">COL 2</span>
+                        <div id="sideB-col2" class="grid-col flex-1 w-full"></div>
+                    </div>
+                    <div class="flex flex-col items-center flex-1">
+                        <span class="text-[10px] mono text-gray-600 mb-1">COL 3</span>
+                        <div id="sideB-col3" class="grid-col flex-1 w-full"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="tooltiptext" id="tooltip">Some tooltip text</div>
+
+<!-- Modal Dialog -->
+<div id="modal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            @* <div class="modal-header">
+                <h4 class="modal-title">Item Found in Multiple Slots</h4>
+            </div> *@
+            <div id="modalContent" class="max-h-64 overflow-y-auto gap-1" style="padding:15px;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Scan Trolley</h4>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" for="txtTrolley">Trolley</label>
+                    <input type="text" class="form-control" name="Trolley" id="txtTrolley" aria-describedby="Trolley">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="getTrolleyInfo()">Get</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="cancelForm()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    @* <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script> *@
+    @* <link href="~/css/datatables.min.css" rel="stylesheet"> *@
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/datatables.min.js"></script>
+    <script src="~/js/sweetalert2.all.min.js"></script>
+
+    <script type="text/javascript">
+        let token = '';
+
+        const slotData = {};
+        const blinkingSlots = new Map(); // Track blinking slots and their timers
+
+        ['A', 'B'].forEach(side => {
+          slotData[side] = {};
+          for (let col = 1; col <= 3; col++) {
+            slotData[side][col] = [];
+            // for (let row = 0; row < 50; row++) {
+            //   slotData[side][col].push({
+            //     hasReel: false,
+            //     reelNo: '',
+            //     reelCode: '',
+            //     blinking: false,
+            //     slotId: '',
+            //   });
+            // }
+          }
+        });
+
+        $(document).ready(function () {
+            token = $('#xToken').val();
+            // updateClock();
+            // setInterval(updateClock, 1000);
+        });
+
+        // function updateClock() {
+        //   document.getElementById('clock').innerHTML = new Date().toLocaleTimeString();
+        // }
+
+        function insertTrolley() {
+            $("#myModal").modal("show");
+        }
+
+        function cancelForm() {
+            $("#myModal").modal("toggle");
+        }
+    
+        async function getTrolleyInfo() {
+            const tr = document.getElementById('txtTrolley').value.trim();
+            if (tr == "") {
+                alert('Please insert Trolley Code');
+                return;
+            }
+
+            await $.ajax({
+                url: "/api/PLCTrolley/StartTrolleyOut/" + tr,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                // data: JSON.stringify(jsonInput),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    // console.log(result);
+                    swal.close();
+
+                    $('#btnTrolley').removeClass("noTrolley");
+                    $('#btnTrolley').addClass("wTrolley");
+                    $('#lblTrolley').text(tr);
+
+                    if (result.success == true) {
+                        ['A', 'B'].forEach(side => {
+                            // Build slot columns
+                            for (let col = 1; col <= 3; col++) {
+                                const container = document.getElementById(`side${side}-col${col}`);
+                                container.innerHTML = '';
+                                for (let row = 0; row < 50; row++) {
+                                    var getData = result.data.filter(function(x) {
+                                        return x.colNo === col && x.rowNo === (row + 1) && x.isLeft === (side == 'A');
+                                    });
+                                    var data = {};
+                                    if (getData.length >= 1) {
+                                        data = getData[0]
+                                    }
+
+                                    slotData[side][col].push({
+                                        hasReel: data.hasReel,
+                                        reelNo: data.reelNo,
+                                        reelCode: data.reelCode,
+                                        itemCode: data.itemCode,
+                                        blinking: false,
+                                        slotCode: data.trolleySlotCode,
+                                        slotId: data.trolleySlot_Id,
+                                        side: side,
+                                    });
+                                    // console.log(slotData[side][col]);
+
+                                    const slot = document.createElement('div');
+                                    // const data = result.data[side][col][row];
+                                    slot.className = `slot ${data.hasReel ? 'occupied' : 'free'}`;
+                                    slot.dataset.side = side;
+                                    slot.dataset.col = col;
+                                    slot.dataset.row = row + 1;
+
+                                    // Row number
+                                    const rowNum = document.createElement('div');
+                                    rowNum.className = 'slot-row mono';
+                                    rowNum.textContent = String(row + 1).padStart(2, '0');
+                                    slot.appendChild(rowNum);
+
+                                    // Item label
+                                    if (data.hasReel) {
+                                        const label = document.createElement('div');
+                                        label.className = 'slot-label';
+                                        label.textContent = data.reelCode;
+                                        slot.appendChild(label);
+                                    }
+
+                                    // LED indicator
+                                    const led = document.createElement('div');
+                                    led.className = 'slot-led';
+                                    slot.appendChild(led);
+
+                                    // slot.addEventListener('click', () => toggleSlot(side, col, row));
+                                    slot.addEventListener('mouseenter', showTooltip);
+                                    slot.addEventListener('mouseleave', hideTooltip);
+                                    container.appendChild(slot);
+                                }
+                            }
+                        });
+                        updateStats();
+
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                        // alert('Trolley :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                    // alert('Trolley :: ' + error.val, 'alert');
+                }
+            });
+            $("#myModal").modal("toggle");
+        }
+
+        function showTooltip(e) {
+            const t = document.getElementById('tooltip');
+            const s = e.target.dataset;
+            const data = slotData[s.side][s.col][s.row - 1];
+            const status = data.hasReel ? 'OCCUPIED' : 'FREE';
+            const itemInfo = data.reelCode + ` — ${data.itemCode}`;
+            t.innerHTML = `${data.slotId} — <strong>${itemInfo}</strong>`;
+            t.style.display = 'block';
+            t.style.left = e.clientX + 12 + 'px';
+            t.style.top = (e.clientY - 50) + 'px';
+        }
+
+        function hideTooltip() { document.getElementById('tooltip').style.display = 'none'; }
+
+        function updateStats() {
+          let free = 0, occupied = 0;
+          ['A', 'B'].forEach(side => {
+            for (let col = 1; col <= 3; col++) {
+              slotData[side][col].forEach(data => { if (data.hasReel) occupied++; else free++; });
+            }
+          });
+          document.getElementById('statFree').textContent = free;
+          document.getElementById('statOccupied').textContent = occupied;
+        }
+
+        function searchItem() {
+            const code = document.getElementById('searchInput').value.trim();
+            if (code == "") {
+                alert('Please insert Reel Id or Item Code');
+                return;
+            }
+
+          const results = [];
+          ['A', 'B'].forEach(side => {
+            for (let col = 1; col <= 3; col++) {
+              slotData[side][col].forEach((data, row) => {
+                if (data.hasReel && data.reelNo == 0 &&
+                    (data.reelCode.toUpperCase().includes(code.toUpperCase()) || data.itemCode.toUpperCase().includes(code.toUpperCase()))) {
+                  results.push({ side, col, row: row + 1, item: data });
+                }
+              });
+            }
+          });
+
+          if (results.length >= 1) {
+              showModal(results, code);
+          }
+          else {
+            alert('No Result');
+          }
+          // return results;
+        }
+
+        function showModal(results, searchTerm) {
+          const modal = document.getElementById('modal');
+          const content = document.getElementById('modalContent');
+          content.innerHTML = '';
+
+          if (results.length === 0) {
+            content.innerHTML = `<p class="text-gray-600">Item "${searchTerm}" not found in any slot.</p>`;
+          } else if (results.length === 1) {
+            const r = results[0];
+            removeItem(r.side, r.col, r.row - 1);
+            content.innerHTML = `<p class="text-green-600">✓ Item "${r.itemCode}" removed from Side ${r.side}, Col ${r.col}, Row ${String(r.row).padStart(2, '0')}</p>`;
+          } else {
+            content.innerHTML = `<p class="text-gray-700 mb-4">Item "${searchTerm}" found in ${results.length} slots. Select one to remove:</p>`;
+
+            const sideA = results.filter(r => r.side === 'A');
+            const sideB = results.filter(r => r.side === 'B');
+
+            // Create grid container for side-by-side layout
+            const gridContainer = document.createElement('div');
+            gridContainer.className = 'grid grid-cols-2 gap-3';
+
+            if (sideA.length > 0) {
+              const sideAWrapper = document.createElement('div');
+              sideAWrapper.className = 'flex flex-col';
+
+              const sideALabel = document.createElement('p');
+              sideALabel.className = 'text-blue-600 font-semibold text-xs mb-2';
+              sideALabel.textContent = 'SIDE A';
+              sideAWrapper.appendChild(sideALabel);
+
+              sideA.forEach(r => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left px-2 py-2 mb-1.5 bg-gray-200 hover:bg-blue-500 text-gray-900 hover:text-white text-xs rounded transition-colors truncate';
+                btn.title = `Col ${r.col} | Row ${String(r.row).padStart(2, '0')} — ${r.item.itemCode}`;
+                btn.textContent = r.item.slotId; // `C${r.col}R${String(r.row).padStart(2, '0')}`;
+                btn.addEventListener('click', () => {
+                  removeItem(r.side, r.col, r.row - 1);
+                  // modal.classList.add('hidden');
+                  document.getElementById('searchInput').value = '';
+                });
+                sideAWrapper.appendChild(btn);
+              });
+              gridContainer.appendChild(sideAWrapper);
+            }
+
+            if (sideB.length > 0) {
+              const sideBWrapper = document.createElement('div');
+              sideBWrapper.className = 'flex flex-col';
+
+              const sideBLabel = document.createElement('p');
+              sideBLabel.className = 'text-orange-600 font-semibold text-xs mb-2';
+              sideBLabel.textContent = 'SIDE B';
+              sideBWrapper.appendChild(sideBLabel);
+
+              sideB.forEach(r => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left px-2 py-2 mb-1.5 bg-gray-200 hover:bg-orange-500 text-gray-900 hover:text-white text-xs rounded transition-colors truncate';
+                btn.title = `Col ${r.col} | Row ${String(r.row).padStart(2, '0')} — ${r.item.itemCode}`;
+                btn.textContent = r.item.slotId; // `C${r.col}R${String(r.row).padStart(2, '0')}`;
+                btn.addEventListener('click', () => {
+                  removeItem(r.side, r.col, r.row - 1);
+                  // modal.classList.add('hidden');
+                  document.getElementById('searchInput').value = '';
+                });
+                sideBWrapper.appendChild(btn);
+              });
+              gridContainer.appendChild(sideBWrapper);
+            }
+
+            content.appendChild(gridContainer);
+          }
+          // modal.classList.remove('hidden');
+            $("#modal").modal("show");
+        }
+
+        function removeItem(side, col, row) {
+          const data = slotData[side][col][row];
+          data.occupied = false;
+          data.item = null;
+          const container = document.getElementById(`side${side}-col${col}`);
+          const slot = container.children[row];
+          slot.className = 'slot free';
+          slot.innerHTML = '';
+
+          // API
+          turnOffReel(data.slotId);
+
+          // Row number
+          const rowNum = document.createElement('div');
+          rowNum.className = 'slot-row mono';
+          rowNum.textContent = String(row + 1).padStart(2, '0');
+          slot.appendChild(rowNum);
+
+          // LED indicator
+          const led = document.createElement('div');
+          led.className = 'slot-led';
+          slot.appendChild(led);
+
+          // Start blinking
+          startBlinking(side, col, row, slot);
+          updateStats();
+        }
+
+        function startBlinking(side, col, row, slotElement) {
+          const key = `${side}-${col}-${row}`;
+
+          // Clear existing timer if any
+          if (blinkingSlots.has(key)) {
+            clearTimeout(blinkingSlots.get(key));
+          }
+
+          // Add blinking class
+          slotElement.classList.add('blinking');
+
+          // Set timer to stop blinking after 60 seconds
+          const timer = setTimeout(() => {
+            slotElement.classList.remove('blinking');
+            blinkingSlots.delete(key);
+          }, 60000);
+
+          blinkingSlots.set(key, timer);
+        }
+
+        function closeModal() {
+          // document.getElementById('modal').classList.add('hidden');
+            $("#modal").modal("toggle");
+        }
+
+        function turnOffReel(id){
+            // call api to close
+            var arr = [];
+            arr.push(id);
+
+            $.ajax({
+                url: '/api/PLCTrolley/TurnOffTrolleyOut',
+                type: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                data: JSON.stringify(arr),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                        //
+                    }
+                    else {
+                        console.log(result.errMessage);
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+
+            // set ui to off
+            document.querySelectorAll('.cell.on').forEach(c => {
+                c.classList.remove('on');
+                var id = c.getAttribute('data-id');
+                var cell3 = document.getElementById('C3' + id);
+                cell3.innerHTML = "";
+            });
+        }
+
+    </script>
+}
