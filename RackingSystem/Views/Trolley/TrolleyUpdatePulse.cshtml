@@ -313,12 +313,6 @@
         content: "▼ ";
     }
 
-    .field-row {
-        display: grid;
-        grid-template-columns: auto 2fr;
-        align-items: center;
-        gap: 6px;
-    }
 </style>
 
 @section PageHeader {
@@ -332,43 +326,33 @@
     </header>
 }
 
-<div class="container-fluid">
-    <br />
-
+<div class="container-fluid pt-2">
     <input type="hidden" id="xToken" value="@ViewBag.xToken" autocomplete="off">
     <input id="chkCont" type="checkbox" class="" style="display:none;" />
 
-    <div class="row" style="padding:5px;">
-        <div class="col-sm-3">
-            <div class="field-row" style="grid-template-columns: auto 2fr 2fr;">
-                <label for="txtCol" class="form-label mb-0">Column :</label>
+    <div class="card card-panel p-3">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-3 d-flex align-items-center gap-2">
+                <label class="form-label text-secondary text-nowrap mb-0" for="txtCol">Column: </label>
                 <select id="txtSide" class="form-control w-100">
                     <option value="A">A</option>
                     <option value="B">B</option>
                 </select>
-                <input id="txtCol" type="number" class="form-control w-100" placeholder="Col No" />
-            </div> 
-        </div>
-        <div class="col-sm-3">
-            <div class="field-row">
-                <label for="txtRow" class="form-label mb-0">From Row : </label>
-                <input id="txtRow" name="txtRow" type="number" class="form-control w-100" placeholder="Row No" />
+                <input type="number" class="form-control" value="1" id="txtCol" name="txtCol" placeholder="Column No" />
             </div>
-        </div>
-        <div class="col-sm-6">
-            <div class="row" style="padding-left:10px;">
-                <div class="col-3" style="padding:0;">
-                    <button type="button" class="btn btn-primary" style="width:90%;" onclick="loadList()"><i class="bi bi-search"></i> Generate </button>
-                </div>
-                <div class="col-3" style="padding:0;">
-                    <button class="btn btn-success" style="width:90%;" onclick="getQRPulses()" id="start-btn"> Start Scan </button>
-                </div>
-                <div class="col-3" style="padding:0;">
-                    <button class="btn btn-success" style="width:90%;" onclick="getContQRPulses()" id="start-btn"> Start Cont. Scan </button>
-                </div>
-                <div class="col-3" style="padding:0;">
-                    <button class="btn btn-danger" style="width:90%;" onclick="stopGet()" id="stop-btn"> Stop Scan </button>
-                </div>
+
+            <div class="col-md-3 d-flex align-items-center gap-2">
+                <label class="form-label text-secondary text-nowrap mb-0" for="txtRow">From Row: </label>
+                <input type="number" class="form-control" value="1" id="txtRow" name="txtRow" placeholder="Row No" />
+            </div>
+
+            <div class="col-md-6 d-flex gap-2 justify-content-end">
+                <button type="button" class="btn btn-primary flex-grow-1" onclick="loadList()">
+                    <i class="bi bi-search"></i> Generate
+                </button>
+                <button class="btn btn-success flex-grow-1" onclick="getQRPulses()" id="start-btn">Start Scan</button>
+                <button class="btn btn-success flex-grow-1" onclick="getContQRPulses()" id="start-btn">Start Cont. Scan</button>
+                <button class="btn btn-danger flex-grow-1" onclick="stopGet()" id="stop-btn">Stop Scan</button>
             </div>
         </div>
     </div>
@@ -662,7 +646,7 @@
                 }
             }
 
-            await delay(1000);
+            // await delay(1000);
 
             if (r == true) {
                 var r2 = await readPulses(iCol, rowFrom);

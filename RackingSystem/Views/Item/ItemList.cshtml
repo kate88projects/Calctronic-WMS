@@ -1042,7 +1042,7 @@
 
             var book_header = [
                 ['Item Code', 'UOM', 'Description', 'Description 2', 'Item Group Code',
-                'Is Active', 'Is Finish Good', 'Reel Thickness', 'Alarm Over Max Thickness' ]
+                'Is Active', 'Is Finish Good', 'Reel Thickness', 'Reel Width', 'Alarm Over Max Thickness' ]
             ];
 
             var booksheet = XLSX.utils.aoa_to_sheet(book_header);
@@ -1123,7 +1123,7 @@
             let dataTableColumns;
 
             dataTableColumns = ['Item Code', 'UOM', 'Description', 'Description 2', 'Item Group Code',
-                'Is Active', 'Is Finish Good', 'Reel Thickness', 'Alarm Over Max Thickness'];
+                'Is Active', 'Is Finish Good', 'Reel Thickness', 'Reel Width', 'Alarm Over Max Thickness'];
 
             let columnDropdowns = '';
 
@@ -1194,7 +1194,7 @@
 
                 const fieldNames = [
                     'Item Code', 'UOM', 'Description', 'Description 2', 'Item Group Code',
-                    'Is Active', 'Is Finish Good', 'Reel Thickness', 'Alarm Over Max Thickness'
+                    'Is Active', 'Is Finish Good', 'Reel Thickness', 'Reel Width', 'Alarm Over Max Thickness'
                 ];
                 fieldNames.forEach(field => {
                     colIndex[field] = columns.indexOf(normalizeString(userMappings, field));
@@ -1213,6 +1213,7 @@
 
                         ItemGroupCode: row[colIndex['Item Group Code']],
                         Thickness: row[colIndex['Reel Thickness']],
+                        Width: row[colIndex['Reel Width']],
 
                         IsActive: parseBool(row[colIndex['Is Active']]),
                         IsFinishGood: parseBool(row[colIndex['Is Finish Good']]),
@@ -1302,33 +1303,33 @@
         }
 
         async function markErrorsInSheet(bookBuffer, errorRows) {
-                const workbook = new ExcelJS.Workbook();
-                await workbook.xlsx.load(bookBuffer);
-                const worksheet = workbook.getWorksheet(1);
-                const columnsToHighlight = [1, 2, 5, 8];
+            const workbook = new ExcelJS.Workbook();
+            await workbook.xlsx.load(bookBuffer);
+            const worksheet = workbook.getWorksheet(1);
+            const columnsToHighlight = [1, 2, 5, 8, 9];
 
-                // const fieldNames = [
-                //     'Item Code', 'UOM', 'Description', 'Description 2', 'Item Group Code',
-                //     'Is Active', 'Is Finish Good', 'Reel Thickness', 'Alarm Over Max Thickness'
-                // ];
-                // let colorIndex = 0;
-                // const highlightColors = [
-                //     'FFCCCC',
-                //     'FFE5CC',
-                //     'FFFFCC',
-                //   ];
+            // const fieldNames = [
+            //     'Item Code', 'UOM', 'Description', 'Description 2', 'Item Group Code',
+            //     'Is Active', 'Is Finish Good', 'Reel Thickness', 'Alarm Over Max Thickness'
+            // ];
+            // let colorIndex = 0;
+            // const highlightColors = [
+            //     'FFCCCC',
+            //     'FFE5CC',
+            //     'FFFFCC',
+            //   ];
 
-                // Add "Error" header
-                const headerRow = worksheet.getRow(1);
-                const errIdx = 10;
-                headerRow.getCell(errIdx).value = 'Error';
-                headerRow.commit();
+            // Add "Error" header
+            const headerRow = worksheet.getRow(1);
+            const errIdx = 11;
+            headerRow.getCell(errIdx).value = 'Error';
+            headerRow.commit();
 
-                const errorMap = new Map();
-                errorRows.forEach(e => errorMap.set(e.itemCode, e.errorMsg));
-                console.log(errorRows);
+            const errorMap = new Map();
+            errorRows.forEach(e => errorMap.set(e.itemCode, e.errorMsg));
+            // console.log(errorRows);
 
-                worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
+            worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
                 if (rowNumber === 1) return; //skip header row
 
                 const itemCode = row.getCell(1).value;
@@ -1338,48 +1339,48 @@
 
                     // const fillColor = highlightColors[colorIndex % highlightColors.length];
                     // colorIndex++;
-                    console.log("error index" , errIdx);
-                    console.log(columnsToHighlight);
+                    // console.log("error index" , errIdx);
+                    // console.log(columnsToHighlight);
 
                     columnsToHighlight.forEach(colNum => {
-                    const cell = row.getCell(colNum);
-                    console.log("colNumber:", colNum);
-                    cell.fill = {
-                        type: 'pattern',
-                        pattern: 'solid',
-                        fgColor: { argb: 'FFCCCC' }
-                    };
+                        const cell = row.getCell(colNum);
+                        console.log("colNumber:", colNum);
+                        cell.fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: { argb: 'FFCCCC' }
+                        };
                     });
 
                     row.getCell(errIdx).value = errorMsg;
                 }
-                });
+            });
 
-                // Export updated file
-                const updatedBuffer = await workbook.xlsx.writeBuffer();
-                const blob = new Blob([updatedBuffer], {
+            // Export updated file
+            const updatedBuffer = await workbook.xlsx.writeBuffer();
+            const blob = new Blob([updatedBuffer], {
                 type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                });
+            });
 
-                const date = new Date();
-                const year = date.getFullYear();
-                const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-indexed
-                const day = date.getDate().toString().padStart(2, '0');
-                const HH = date.getHours().toString().padStart(2, '0');
-                const mm = date.getMinutes().toString().padStart(2, '0');
-                const ss = date.getSeconds().toString().padStart(2, '0');
-                const formattedDate = `${year}${month}${day}${HH}${mm}`;
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-indexed
+            const day = date.getDate().toString().padStart(2, '0');
+            const HH = date.getHours().toString().padStart(2, '0');
+            const mm = date.getMinutes().toString().padStart(2, '0');
+            const ss = date.getSeconds().toString().padStart(2, '0');
+            const formattedDate = `${year}${month}${day}${HH}${mm}`;
 
-                const link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = "ItemList_Errors_" + formattedDate + ".xlsx";
-                link.click();
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "ItemList_Errors_" + formattedDate + ".xlsx";
+            link.click();
 
-                Swal.fire({
+            Swal.fire({
                 icon: 'warning',
                 title: "Validation Issues Found",
                 text: "Review on returned file and fix errors."
-                });
+            });
         }
 
     </script>

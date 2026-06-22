@@ -1178,11 +1178,11 @@
             };
 
             var book_header = type === "slots" ? [
-                ['Slot Code', 'Column No', 'Row No', 'Is Active', 'Is Left', 'X Pulse', 'Y Pulse', 'QR-X Pulse', 'QR-Y Pulse',
+                ['Slot Code', 'Column No', 'Row No', 'Is Active', 'Is Left', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
                 'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6', 'Priority']
             ]
             : [
-                ['Slot Code', 'X Pulse', 'Y Pulse', 'QR-X Pulse', 'QR-Y Pulse',
+                ['Slot Code', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
                 'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6']
             ];
 
@@ -1274,12 +1274,12 @@
             let dataTableColumns;
 
             if (source == "importSlot") {
-                dataTableColumns = ['Slot Code', 'Column No', 'Row No', 'Is Active', 'Is Left', 'X Pulse', 'Y Pulse', 'QR-X Pulse', 'QR-Y Pulse',
+                dataTableColumns = ['Slot Code', 'Column No', 'Row No', 'Is Active', 'Is Left', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
                                         'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6', 'Priority'];
                 $('#updateType').val("slots");
             }
             else {
-                dataTableColumns = ['Slot Code',  'X Pulse', 'Y Pulse', 'QR-X Pulse', 'QR-Y Pulse',
+                dataTableColumns = ['Slot Code',  'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
                                         'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6'];
                 $('#updateType').val("pluses");
             }
@@ -1292,20 +1292,20 @@
                 return col1Str === col2Str;
             };
 
-            columns.forEach((column, index) => {
-                const matchedCol = dataTableColumns.find(col => isMatch(col, column));
+            dataTableColumns.forEach((column, index) => {
+                const matchedCol = columns.find(col => isMatch(col, column));
 
                 columnDropdowns += `
                     <div class="row justify-content-center align-items-center mb-3">
                         <div class="col-5">
-                            <label class="form-label mb-0">File Column: ${column}</label>
+                            <label class="form-label mb-0">System Column: ${column}</label>
                         </div>
                         <div class="col-5">
                             <select class="form-select column-mapping"
-                                    data-col="${column}"
+                                    data-system="${column}"
                                     id="column${index}">
-                                <option value="">Select Matching Column</option>
-                                ${dataTableColumns.map(col => `
+                                <option value="">Select Excel Column</option>
+                                ${columns.map(col => `
                                     <option value="${col}" ${matchedCol === col ? 'selected' : ''}>${col}</option>
                                 `).join('')}
                             </select>
@@ -1319,13 +1319,12 @@
 
         function captureUserMappings() {
             const mappings = {};
-            document.querySelectorAll('.column-mapping').forEach((selectElement, index) => {
-                const selectedValue = selectElement.value;
-                const columnName = selectElement.getAttribute('data-col');
-                if (selectedValue) {
-                    mappings[columnName] = selectedValue;
-                } else {
-                    console.log(`No selection for column: ${columnName}`);
+            document.querySelectorAll('.column-mapping').forEach(select => {
+                const systemColumn = select.dataset.system;
+                const excelColumn = select.value;
+
+                if (excelColumn) {
+                    mappings[systemColumn] = excelColumn;
                 }
             });
             return mappings;
@@ -1355,12 +1354,13 @@
                 if (updateType === "slots")
                 {
                     const fieldNames = [
-                        'Slot Code', 'Column No', 'Row No', 'X Pulse', 'Y Pulse', 'QR-X Pulse', 'QR-Y Pulse',
+                        'Slot Code', 'Column No', 'Row No', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
                         'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6',
                         'Is Active', 'Is Left', 'Priority'
                     ];
+
                     fieldNames.forEach(field => {
-                        colIndex[field] = columns.indexOf(normalizeString(userMappings, field));
+                        colIndex[field] = columns.indexOf(userMappings[field]);
                     });
 
                     const parseBool = val =>
@@ -1375,9 +1375,9 @@
                             HasEmptyTray: parseBool(row[colIndex['Has Empty Tray']]),
                             HasReel: parseBool(row[colIndex['Has Reel']]),
                             XPulse: row[colIndex['X Pulse']],
-                            YPulse: row[colIndex['Y Pulse']],
+                            YPulse: row[colIndex['Z Pulse']],
                             QRXPulse: row[colIndex['QR-X Pulse']],
-                            QRYPulse: row[colIndex['QR-Y Pulse']],
+                            QRYPulse: row[colIndex['QR-Z Pulse']],
                             Add1Pulse: row[colIndex['Additional Pulse 1']],
                             Add2Pulse: row[colIndex['Additional Pulse 2']],
                             Add3Pulse: row[colIndex['Additional Pulse 3']],
@@ -1392,12 +1392,13 @@
                 }
                 else {
                     const fieldNames = [
-                        'Slot Code','X Pulse', 'Y Pulse', 'QR-X Pulse', 'QR-Y Pulse',
+                        'Slot Code','X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
                         'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6',
                         'Is Active', 'Is Left'
                     ];
+
                     fieldNames.forEach(field => {
-                        colIndex[field] = columns.indexOf(normalizeString(userMappings, field));
+                        colIndex[field] = columns.indexOf(userMappings[field]);
                     });
 
                     // const parseBool = val =>
@@ -1408,9 +1409,9 @@
                             // SlotId: 0,
                             SlotCode: row[colIndex['Slot Code']],
                             XPulse: row[colIndex['X Pulse']],
-                            YPulse: row[colIndex['Y Pulse']],
+                            YPulse: row[colIndex['Z Pulse']],
                             QRXPulse: row[colIndex['QR-X Pulse']],
-                            QRYPulse: row[colIndex['QR-Y Pulse']],
+                            QRYPulse: row[colIndex['QR-Z Pulse']],
                             Add1Pulse: row[colIndex['Additional Pulse 1']],
                             Add2Pulse: row[colIndex['Additional Pulse 2']],
                             Add3Pulse: row[colIndex['Additional Pulse 3']],
@@ -1422,7 +1423,6 @@
                         };
                     });
                 }
-
                 saveExcelSlots(slotsData, content, updateType);
 
             } catch (error) {
@@ -1431,16 +1431,16 @@
             }
         }
 
-        function normalizeString(userMappings, str) {
-            var rValue = str;
+        // function normalizeString(userMappings, str) {
+        //     var rValue = str;
 
-            if (userMappings != null)
-            {
-                rValue = userMappings[str];
-            }
+        //     if (userMappings != null)
+        //     {
+        //         rValue = userMappings[str];
+        //     }
 
-            return rValue;
-        }
+        //     return rValue;
+        // }
 
         function saveExcelSlots(slotsData, bookBuffer, source) {
             const url = source == "slots" ? '/Slot/SaveExcelSlot' : '/Slot/UpdateExcelPulses';
@@ -1507,29 +1507,29 @@
         }
 
         async function markErrorsInSheet(bookBuffer, errorRows, updateType) {
-                const workbook = new ExcelJS.Workbook();
-                await workbook.xlsx.load(bookBuffer);
-                const worksheet = workbook.getWorksheet(1);
-                const columnsToHighlight = updateType === "slots" ? [1, 2, 3, 16] : [1, 12];
+            const workbook = new ExcelJS.Workbook();
+            await workbook.xlsx.load(bookBuffer);
+            const worksheet = workbook.getWorksheet(1);
+            const columnsToHighlight = updateType === "slots" ? [1, 2, 3, 16] : [1, 12];
 
-                // let colorIndex = 0;
-                // const highlightColors = [
-                //     'FFCCCC',
-                //     'FFE5CC',
-                //     'FFFFCC',
-                //   ];
+            // let colorIndex = 0;
+            // const highlightColors = [
+            //     'FFCCCC',
+            //     'FFE5CC',
+            //     'FFFFCC',
+            //   ];
 
-                // Add "Error" header
-                const headerRow = worksheet.getRow(1);
-                const errIdx = updateType === "slots" ? 16 : 12;
-                headerRow.getCell(errIdx).value = 'Error';
-                headerRow.commit();
+            // Add "Error" header
+            const headerRow = worksheet.getRow(1);
+            const errIdx = updateType === "slots" ? 16 : 12;
+            headerRow.getCell(errIdx).value = 'Error';
+            headerRow.commit();
 
-                const errorMap = new Map();
-                errorRows.forEach(e => errorMap.set(e.slotCode, e.errorMsg));
-                console.log(errorRows);
+            const errorMap = new Map();
+            errorRows.forEach(e => errorMap.set(e.slotCode, e.errorMsg));
+            console.log(errorRows);
 
-                worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
+            worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
                 if (rowNumber === 1) return; //skip header row
 
                 const slotCode = row.getCell(1).value;
@@ -1543,35 +1543,34 @@
                     console.log(columnsToHighlight);
 
                     columnsToHighlight.forEach(colNum => {
-                    const cell = row.getCell(colNum);
-                    console.log("colNumber:", colNum);
-                    cell.fill = {
-                        type: 'pattern',
-                        pattern: 'solid',
-                        fgColor: { argb: 'FFCCCC' }
-                    };
+                        const cell = row.getCell(colNum);
+                        console.log("colNumber:", colNum);
+                        cell.fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: { argb: 'FFCCCC' }
+                        };
                     });
-
                     row.getCell(errIdx).value = errorMsg;
                 }
-                });
+            });
 
                 // Export updated file
-                const updatedBuffer = await workbook.xlsx.writeBuffer();
-                const blob = new Blob([updatedBuffer], {
+            const updatedBuffer = await workbook.xlsx.writeBuffer();
+            const blob = new Blob([updatedBuffer], {
                 type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                });
+            });
 
-                const link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = "SlotList_Errors.xlsx";
-                link.click();
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "SlotList_Errors.xlsx";
+            link.click();
 
-                Swal.fire({
-                    icon: 'warning',
-                    title: "Validation Issues Found",
-                    text: "Review on returned file and fix errors."
-                });
+            Swal.fire({
+                icon: 'warning',
+                title: "Validation Issues Found",
+                text: "Review on returned file and fix errors."
+            });
         }
 
     </script>
