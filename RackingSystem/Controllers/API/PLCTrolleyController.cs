@@ -930,7 +930,7 @@ namespace RackingSystem.Controllers.API
                     }
                     if ((DateTime.Now - dtRun).TotalSeconds > 30)
                     {
-                        result.errMessage = "Timeout. Cannot get Reel ID.";
+                        result.errMessage = "Timeout. Cannot get Put Away Status.";
                         exit = true;
                         PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value} TimeOut", "", false);
                     }
@@ -1390,7 +1390,7 @@ namespace RackingSystem.Controllers.API
                         slotID = slotID + decimalText;
                     }
 
-                    PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Get Reel ID {slotID}", "", false);
+                    PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Get Slot ID {slotID}", "", false);
 
                     // *** testing
                     //slotID = "A00000018";

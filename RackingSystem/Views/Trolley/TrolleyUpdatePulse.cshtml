@@ -605,6 +605,7 @@
 
             endTask = true;
             clearInterval(autoTimer);
+            document.getElementById('txtIdle').innerHTML = "Stop";
             return;
         }
 
@@ -618,6 +619,7 @@
             runningTask = false;
             endTask = true;
             clearInterval(autoTimer);
+            document.getElementById('txtIdle').innerHTML = "Stop";
             return;
         }
 

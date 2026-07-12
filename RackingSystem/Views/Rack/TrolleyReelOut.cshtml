@@ -204,7 +204,7 @@
         <!-- Header -->
         <div class="flex items-center gap-3" style="align-self:center;">
             <div class="flex-1 max-w-xs">
-                <input id="searchInput" type="text" placeholder="Search for item..." class="w-full px-3 py-2 border border-gray-600 rounded text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-400">
+                <input id="searchInput" type="text" placeholder="Search for item..." class="w-full px-3 py-2 border border-gray-600 rounded text-sm placeholder-gray-500 focus:outline-none focus:border-blue-400">
             </div>
             <button id="btnSearch" class="px-3 py-1 rounded text-xs font-semibold" style="background:#10b981;color:#fff;" onclick="searchItem()">
                 <i class="bi-search" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
@@ -311,7 +311,7 @@
 
 @section Scripts
 {
-    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="~/js/tailwindcss_3_4_17.js"></script>
     @* <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script> *@
     @* <link href="~/css/datatables.min.css" rel="stylesheet"> *@
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
@@ -323,7 +323,7 @@
     <script type="text/javascript">
         let token = '';
 
-        const slotData = {};
+        slotData = {};
         const blinkingSlots = new Map(); // Track blinking slots and their timers
 
         ['A', 'B'].forEach(side => {
@@ -366,6 +366,15 @@
                 alert('Please insert Trolley Code');
                 return;
             }
+
+            // reset slotData
+            slotData = {};
+            ['A', 'B'].forEach(side => {
+              slotData[side] = {};
+              for (let col = 1; col <= 3; col++) {
+                slotData[side][col] = [];
+              }
+            });
 
             await $.ajax({
                 url: "/api/PLCTrolley/StartTrolleyOut/" + tr,
@@ -539,11 +548,13 @@
 
           if (results.length === 0) {
             content.innerHTML = `<p class="text-gray-600">Item "${searchTerm}" not found in any slot.</p>`;
-          } else if (results.length === 1) {
-            const r = results[0];
-            removeItem(r.side, r.col, r.row - 1);
-            content.innerHTML = `<p class="text-green-600">✓ Item "${r.itemCode}" removed from Side ${r.side}, Col ${r.col}, Row ${String(r.row).padStart(2, '0')}</p>`;
-          } else {
+          } 
+          // else if (results.length === 1) {
+          //   const r = results[0];
+          //   removeItem(r.side, r.col, r.row - 1);
+          //   content.innerHTML = `<p class="text-green-600">✓ Item "${r.itemCode}" removed from Side ${r.side}, Col ${r.col}, Row ${String(r.row).padStart(2, '0')}</p>`;
+          // } 
+          else {
             content.innerHTML = `<p class="text-gray-700 mb-4">Item "${searchTerm}" found in ${results.length} slots. Select one to remove:</p>`;
 
             const sideA = results.filter(r => r.side === 'A');
@@ -566,7 +577,7 @@
                 const btn = document.createElement('button');
                 btn.className = 'w-full text-left px-2 py-2 mb-1.5 bg-gray-200 hover:bg-blue-500 text-gray-900 hover:text-white text-xs rounded transition-colors truncate';
                 btn.title = `Col ${r.col} | Row ${String(r.row).padStart(2, '0')} — ${r.item.itemCode}`;
-                btn.textContent = r.item.slotId; // `C${r.col}R${String(r.row).padStart(2, '0')}`;
+                btn.textContent = 'Row ' + r.row; //r.item.slotId; // `C${r.col}R${String(r.row).padStart(2, '0')}`;
                 btn.addEventListener('click', () => {
                   removeItem(r.side, r.col, r.row - 1);
                   // modal.classList.add('hidden');
@@ -590,7 +601,7 @@
                 const btn = document.createElement('button');
                 btn.className = 'w-full text-left px-2 py-2 mb-1.5 bg-gray-200 hover:bg-orange-500 text-gray-900 hover:text-white text-xs rounded transition-colors truncate';
                 btn.title = `Col ${r.col} | Row ${String(r.row).padStart(2, '0')} — ${r.item.itemCode}`;
-                btn.textContent = r.item.slotId; // `C${r.col}R${String(r.row).padStart(2, '0')}`;
+                btn.textContent = 'Row ' + r.row;  // r.item.slotId; // `C${r.col}R${String(r.row).padStart(2, '0')}`;
                 btn.addEventListener('click', () => {
                   removeItem(r.side, r.col, r.row - 1);
                   // modal.classList.add('hidden');
@@ -616,6 +627,36 @@
           slot.className = 'slot free';
           slot.innerHTML = '';
 
+          // Remove next seq item
+          const data1 = slotData[side][col][row + 1];
+          if (data.reelCode === data1.reelCode) {
+              data1.occupied = false;
+              data1.item = null;
+              const slot1 = container.children[row + 1];
+              slot1.className = 'slot free';
+              slot1.innerHTML = '';
+          }
+
+          // Remove next seq item
+          const data2 = slotData[side][col][row + 2];
+          if (data.reelCode === data2.reelCode) {
+              data2.occupied = false;
+              data2.item = null;
+              const slot2 = container.children[row + 2];
+              slot2.className = 'slot free';
+              slot2.innerHTML = '';
+          }
+
+          // Remove next seq item
+          const data3 = slotData[side][col][row + 3];
+          if (data.reelCode === data3.reelCode) {
+              data3.occupied = false;
+              data3.item = null;
+              const slot3 = container.children[row + 3];
+              slot3.className = 'slot free';
+              slot3.innerHTML = '';
+          }
+
           // API
           turnOffReel(data.slotId);
 
@@ -633,6 +674,7 @@
           // Start blinking
           startBlinking(side, col, row, slot);
           updateStats();
+
         }
 
         function startBlinking(side, col, row, slotElement) {
