@@ -816,6 +816,10 @@
                                 onclick="systemStop()">
                             <i class="bi-stop-fill" style="width:12px;height:12px;"></i> Stop
                         </button>
+                        <button id="end-btn" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#e74c3c;color:#fff;"
+                                onclick="systemEnd()">
+                            <i class="bi-stop-fill" style="width:12px;height:12px;"></i> End Cycle
+                        </button>
                     </div>
                     <div class="grid grid-cols-2 gap-3 mb-6">
                         <div class="rounded-lg p-3 text-center" style="background:#fef3c7;border:1px solid #fde68a;">
@@ -1191,6 +1195,7 @@
         let heldTray = null;
         let running = false;
         let phase = 'idle'; // idle, picking, moving, placing
+        let readyToEnd = false;
 
         const jsonModal = document.getElementById("jsonModal");
         const formJSON = document.getElementById("formJSON");
@@ -1414,6 +1419,8 @@
 
              updateJson();
 
+             readyToEnd = false;
+
             // 4. Continue
              gantryAutoTimer = setInterval(gantryAuto, 3000); //3 second workout
              cartesianAutoTimer = setInterval(cartesianAuto, 3000); //3 second workout
@@ -1430,6 +1437,8 @@
 
             sharedDrawerState.systemRunning = true;
             updateSystemStatusUI();
+            
+        readyToEnd = false;
 
             // 4. Continue
              gantryAutoTimer = setInterval(gantryAuto, 3000); //3 second workout
@@ -1450,6 +1459,12 @@
             clearInterval(gantryAutoTimer);
             clearInterval(cartesianAutoTimer);
 
+        }
+        
+        // System Stop Handler
+        function systemEnd() {
+            if (!sharedDrawerState.systemRunning) return;
+            readyToEnd = true;
         }
 
         // async function systemForceStop() {
@@ -1489,15 +1504,18 @@
             const startBtn = document.getElementById('start-btn');
             const stopBtn = document.getElementById('stop-btn');
             const contBtn = document.getElementById('cont-btn');
+            const endBtn = document.getElementById('end-btn');
 
             if (sharedDrawerState.systemRunning) {
                 startBtn.disabled = true;
                 contBtn.disabled = true;
                 stopBtn.disabled = false;
+                endBtn.disabled = false;
             } else {
                 startBtn.disabled = false;
                 contBtn.disabled = false;
                 stopBtn.disabled = true;
+        endBtn.disabled = true;
             }
         }
 
@@ -1930,7 +1948,7 @@
         // ----------- Action (Auto Mode)
         function gantryAuto() {
             if (endTask == true) { return; }
-            console.log("AutoGantry");
+            // console.log("AutoGantry");
             const chkAutoRun = document.getElementById('chkAutoRun');
             if (chkAutoRun.checked) {
                 // 1. if gantry no pick then just pick
@@ -1942,7 +1960,9 @@
                     if (bal == 0) {
                         return;
                     }
-                    startPick();
+                    if (readyToEnd == false) {
+                        startPick();
+                    }
                 }
 
                 // 2. if gantry picked then just place
@@ -1954,13 +1974,15 @@
 
         function cartesianAuto() {
             if (endTask == true) { return; }
-            console.log("AutoCartesian");
+            // console.log("AutoCartesian");
             const chkAutoRun = document.getElementById('chkAutoRun');
             if (chkAutoRun.checked) {
                 // 1. if no drawer just take (reelId MUST have first cause need get actual height)
                  var actH = $("#txtActHeight").val();
                 if (sharedDrawerState.systemRunning == true && sharedDrawerState.drawerStatus == "None" && actH != "0" && inRetrieveMove == false && inPutAwayMove == false) {
-                    startRetrieve();
+                    if (readyToEnd == false) {
+                        startRetrieve();
+                    }
                 }
 
                 // 2. if have drawer and placed then just put away
@@ -2345,6 +2367,10 @@
             }
 
             updateJson();
+            
+            if (readyToEnd) {
+                log('End Cycle', 'info');
+            }
         }
 
 
@@ -2461,6 +2487,10 @@
             inPutAwayMove = false;
 
             updateJson();
+
+        if (readyToEnd) {
+        log('End Cycle', 'info');
+        }
         }
 
 
@@ -3647,6 +3677,7 @@
                     log('Retrieve QR Z :: ' + result.data.qryPulse, 'info');
                     log('Retrieve QR X Differ :: ' + result.data.qrxPulseDiffer, 'info');
                     log('Retrieve QR Z Differ :: ' + result.data.qryPulseDiffer, 'info');
+
                 },
                 error: function (error) {
                     log('Put Away Status :: ' + error.val, 'alert');
