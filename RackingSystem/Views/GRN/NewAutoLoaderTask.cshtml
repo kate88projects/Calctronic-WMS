@@ -1,7 +1,4 @@
 ﻿
-@{
-}
-
 <style type="text/css">
     body {
         color: #566787;
@@ -172,108 +169,6 @@
         display: none;
     }
 
-    /* @@media (min-width: 1440px) {
-        .progressBar li::after {
-            left: 100px;
-        }
-    } */
-/* 
-    .gauge {
-        position: relative;
-        border-radius: 50%/100% 100% 0 0;
-        background-color: var(--color, #a22);
-        overflow: hidden;
-    }
-
-    .gauge:before {
-        content: "";
-        display: block;
-        padding-top: 50%; 
-        // ratio of 2:1
-    }
-
-    .gauge .chart {
-        overflow: hidden;
-    }
-
-    .gauge .mask {
-        position: absolute;
-        left: 20%;
-        right: 20%;
-        bottom: 0;
-        top: 40%;
-        background-color: #fff;
-        border-radius: 50%/100% 100% 0 0;
-    }
-
-    .gauge .percentage {
-        position: absolute;
-        top: -1px;
-        left: -1px;
-        bottom: 0;
-        right: -1px;
-        background-color: var(--background, #aaa);
-        transform: rotate(var(--rotation));
-        transform-origin: bottom center;
-        transition-duration: 600;
-    }
-
-    .gauge:hover {
-        --rotation: 100deg;
-    }
-
-    .gauge .value {
-        position: absolute;
-        bottom: 0%;
-        left: 0;
-        width: 100%;
-        text-align: center;
-    }
-
-    .gauge .min {
-        position: absolute;
-        bottom: 0;
-        left: 5%;
-    }
-
-    .gauge .max {
-        position: absolute;
-        bottom: 0;
-        right: 5%;
-    }
-
-    .gauge-container {
-      width: 150px;
-      height: 80px;
-      display: block;
-      float: left;
-      padding: 10px;
-      background-color: #222;
-      margin: 7px;
-      border-radius: 3px;
-      position: relative;
-    }
-    .gauge-container > .label {
-      position: absolute;
-      right: 0;
-      top: 0;
-      display: inline-block;
-      background: rgba(0, 0, 0, 0.5);
-      font-family: monospace;
-      font-size: 0.8em;
-      padding: 5px 10px;
-    }
-
-    .wrapper {
-      height: 100px;
-      float: left;
-      margin: 7px;
-      overflow: hidden;
-    }
-    .wrapper > .gauge-container {
-      margin: 0;
-    } */
-
     .gauge-container {
       width: 160px;
       height: 120px;
@@ -301,6 +196,7 @@
         }
       }
     }
+
     .svg-gauge__paths text.label {
       fill: black;
       font-family: monospace;
@@ -312,77 +208,6 @@
     path {
         fill: none;
     }
-     /*
-    .tabbed ul {
-        margin: 0px;
-        padding: 0px;
-        overflow: hidden;
-        float: left;
-        padding-left: 48px;
-        list-style-type: none;
-    }
-
-     .tabbed ul li {
-        display: block;
-        float: right;
-        padding: 10px 24px 8px;
-        background-color: #FFF;
-        margin-right: 46px;
-        z-index: 2;
-        position: relative;
-        cursor: pointer;
-        color: #777;
-        text-transform: uppercase;
-        font: 600 13px/20px robot, 'Open Sans', Helveticam sans-serif;
-        transition: all 250ms ease;
-    }
-
-    .tabbed ul li:before,
-    .tabbed ul li:after {
-        display: block;
-        content: " ";
-        position: absolute;
-        top: 0;
-        height: 100%;
-        width: 44px;
-        background-color: #FFF;
-        transition: all 250ms ease;
-    } 
-
-    .tabbed ul li:before {
-        right: -24px;
-        transform: skew(30deg, 0deg);
-        box-shadow: rgba(0, 0, 0, .1) 3px 2px 5px, inset rgba(255, 255, 255, .09) -1px 0;
-    }
-
-    .tabbed ul li:after {
-        left: -24px;
-        transform: skew(30deg, 0deg);
-        box-shadow: rgba(0, 0, 0, .1) -3px 2px 5px, inset rgba(255, 255, 255, .09) 1px 0;
-    }
-
-    .tabbed ul li.active {
-        z-index: 3;
-    }
-
-    .tabbed ul li.active,
-    .tabbed ul li.active:before,
-    .tabbed ul li.active:after {
-        background-color: #000;
-        color: #fff;
-    }
-
-    .tabbed.round ul li {
-        border-radius: 8px 8px 0 0;
-    }
-
-    .tabbed.round ul li:before {
-        border-radius: 0 8px 0 0;
-    }
-
-    .tabbed.round ul li:after {
-        border-radius: 8px 0 0 0;
-    }  */
 
     .reelDtl {
         background-color: #f2f2f2;
@@ -420,42 +245,6 @@
     .card {
         border-color: #f2f2f2 !important;
     }
-
-    /* header {
-        display: flex;
-        align-items: center;
-        gap: 15px;        
-        flex-wrap: wrap;
-    }
-
-    .pageTitle {
-        margin: 0;
-        text-align: center;
-    }
-
-    header .btn {
-        height: 40px;
-    } 
-
-    .page-header-wrapper {
-        color: #fff !important;
-        background: #4b5366;
-    }
-
-    .bg-body-tertiary {
-        background-color: #f2f2f2 !important;
-    }
-
-    .card {
-        box-shadow: none;
-        border: 1px solid #f2f2f2 !important;
-    }
-
-    .card-body {
-        height: 100%;
-        background-color: #f2f2f2;
-        padding: 10px !important;
-    } */
 
     .unavailable {
         position: relative;
@@ -1548,11 +1337,14 @@
                     }
                     else {
                         if (index == 2) {
-                            $('#btnNext2').removeClass("hidden");
+                            // $('#btnNext2').removeClass("hidden");
                             $('#btnRetry2').addClass("hidden");
-                            //disabled stop & end task button
+                            // //disabled stop & end task button
                             document.getElementById("btnStop").removeAttribute("disabled");
                             document.getElementById("btnEnd").removeAttribute("disabled");
+
+                            //auto proceed to step3
+                            step2();
                         }
                         else {
                             $('#btnRetryTurn').addClass("hidden");
@@ -1664,7 +1456,7 @@
                             }
                             else {
                                 // if success then only show next button
-                                $('#btnNext2').removeClass('hidden');
+                                // $('#btnNext2').removeClass('hidden');
                                 $('#btnRetry2').addClass('hidden');
                                 const oldCol = iCol-1;
                                 $('#c' + (oldCol)).addClass("bg-success");
@@ -1679,6 +1471,9 @@
                                 document.getElementById("btnEnd").removeAttribute("disabled");
                                 // $('#btnStop').removeClass("disabled");
                                 // $('#btnEnd').removeClass("disabled");
+
+                                //auto proceed to step3
+                                step2();
                             }
                         }
                     }
@@ -1699,8 +1494,9 @@
                     $('#btnNext3').addClass('hidden');
                     $('#itemStatus, #reelIdentity, #reelHeight').text('');
                 } else {
-                    $('#btnNext3').removeClass('hidden');
+                    // $('#btnNext3').removeClass('hidden');
                     $('#errItem3').text('');
+                    step3();
                 }
                 return;
             }

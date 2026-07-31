@@ -1905,6 +1905,7 @@ namespace RackingSystem.Controllers.API
                                 {
                                     bottomSlotCol = col.ColNo;
                                     bottomSlotRow = r.data.Row1; // + slotUsage.ReserveSlot - 1;
+                                    break;
                                 }
                             }
                         }
