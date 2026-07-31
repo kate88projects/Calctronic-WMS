@@ -1783,8 +1783,8 @@ namespace RackingSystem.Controllers.API
             return result;
         }
 
-        [HttpGet("GetBottomSlot/{actHeight}/{slotCode}")]
-        public async Task<ServiceResponseModel<SlotDTO>> GetBottomSlot(int actHeight, string slotCode)
+        [HttpGet("GetBottomSlot/{actHeight}/{slotCode}/{dimensionId}")]
+        public async Task<ServiceResponseModel<SlotDTO>> GetBottomSlot(int actHeight, string slotCode, int dimensionId)
         {
             ServiceResponseModel<SlotDTO> result = new ServiceResponseModel<SlotDTO>();
             result.data = new SlotDTO();
@@ -1833,6 +1833,30 @@ namespace RackingSystem.Controllers.API
 
                 int bottomSlotRow = 0;
                 int bottomSlotCol = 0;
+                int colForInches = 0;
+
+                if (dimensionId > 0) //for selected inches
+                {
+                    var reelDimension = _dbContext.ReelDimension.FirstOrDefault(x => x.ReelDimension_Id == dimensionId);
+                    if (reelDimension == null)
+                    {
+                        result.success = false;
+                        result.errMessage = "Reel Inches not found. Cannot assign the Column for the fixed inches.";
+                        return result;
+                    }
+
+                    actHeight = reelDimension.Thickness;
+
+                    var reserveCol = _dbContext.SlotColumnSetting.Where(x => x.ColInches == reelDimension.Width).OrderBy(x => x.SlotColumnSetting_Id).FirstOrDefault();
+                    if (reserveCol == null)
+                    {
+                        result.success = false;
+                        result.errMessage = "No column configured for this reel inches.";
+                        return result;
+                    }
+
+                    colForInches = Convert.ToInt32(reserveCol.ColNo);
+                }
 
                 //calculate slot
                 var slotUsage = _dbContext.SlotCalculation.Where(x => x.MaxThickness >= actHeight).OrderBy(x => x.MaxThickness).FirstOrDefault();
@@ -1843,48 +1867,54 @@ namespace RackingSystem.Controllers.API
                     return result;
                 }
 
-                //// testing 
-                //slotUsage.ReserveSlot = 1;
-                //// testing 
-
-                SlotFreeReqDTO reqSlot = new SlotFreeReqDTO();
-                reqSlot.ColNo = 0;
-                reqSlot.TotalSlot = slotUsage.ReserveSlot;
-                ServiceResponseModel<SlotFreeDTO> rSlot = await _slotService.GetFreeSlot_BySlot_ASC(reqSlot);
-                if (rSlot.data != null)
+                if (dimensionId > 0)
                 {
-                    if (rSlot.data.Row1 > 0)
+                    SlotFreeReqDTO reqSlot = new SlotFreeReqDTO { ColNo = colForInches, TotalSlot = slotUsage.ReserveSlot };
+                    var rSlot = await _slotService.GetFreeSlot_ByColumn_ASC(reqSlot);
+                    if (rSlot.data != null && rSlot.data.Row1 > 0)
                     {
-                        bottomSlotCol = rSlot.data.ColNo;
+                        bottomSlotCol = colForInches;
                         bottomSlotRow = rSlot.data.Row1;
                     }
                 }
-                if (bottomSlotCol == 0 && bottomSlotRow == 0)
+                else
                 {
-                    var colList = _dbContext.SlotColumnSetting.OrderBy(x => x.Reel_IN_Idx).ToList();
-                    foreach (var col in colList)
+                    SlotFreeReqDTO reqSlot = new SlotFreeReqDTO { ColNo = 0, TotalSlot = slotUsage.ReserveSlot };
+                    ServiceResponseModel<SlotFreeDTO> rSlot = await _slotService.GetFreeSlot_BySlot_ASC(reqSlot);
+                    if (rSlot.data != null)
                     {
-                        SlotFreeReqDTO req = new SlotFreeReqDTO();
-                        req.ColNo = col.ColNo;
-                        req.TotalSlot = slotUsage.ReserveSlot;
-
-                        ServiceResponseModel<SlotFreeDTO> r = await _slotService.GetFreeSlot_ByColumn_ASC(req);
-                        if (r.data != null)
+                        if (rSlot.data.Row1 > 0)
                         {
-                            if (r.data.Row1 > 0)
+                            bottomSlotCol = rSlot.data.ColNo;
+                            bottomSlotRow = rSlot.data.Row1;
+                        }
+                    }
+                    if (bottomSlotCol == 0 && bottomSlotRow == 0)
+                    {
+                        var colList = _dbContext.SlotColumnSetting.OrderBy(x => x.Reel_IN_Idx).ToList();
+                        foreach (var col in colList)
+                        {
+                            SlotFreeReqDTO req = new SlotFreeReqDTO();
+                            req.ColNo = col.ColNo;
+                            req.TotalSlot = slotUsage.ReserveSlot;
+
+                            ServiceResponseModel<SlotFreeDTO> r = await _slotService.GetFreeSlot_ByColumn_ASC(req);
+                            if (r.data != null)
                             {
-                                bottomSlotCol = col.ColNo;
-                                bottomSlotRow = r.data.Row1; // + slotUsage.ReserveSlot - 1;
-                                break;
+                                if (r.data.Row1 > 0)
+                                {
+                                    bottomSlotCol = col.ColNo;
+                                    bottomSlotRow = r.data.Row1; // + slotUsage.ReserveSlot - 1;
+                                }
                             }
                         }
                     }
                 }
-
+                    
                 if (bottomSlotCol == 0 && bottomSlotRow == 0)
                 {
                     result.success = false;
-                    result.errMessage = "No empty slot is ready.";
+                    result.errMessage = dimensionId > 0 ? "No empty slot is ready in the reserved column for this reel size." : "No empty slot is ready.";
                     return result;
                 }
                 

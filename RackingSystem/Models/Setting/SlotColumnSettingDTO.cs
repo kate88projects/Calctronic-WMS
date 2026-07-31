@@ -13,5 +13,7 @@
         public int EmptyDrawer_OUT_Idx { get; set; } = 0;
 
         public int Reel_OUT_Idx { get; set; } = 0;
+
+        public int ColInches { get; set; } = 0;
     }
 }

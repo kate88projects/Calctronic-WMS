@@ -22,10 +22,11 @@
                                     <th>Column No</th>
                                     <th>Empty Drawer IN Priority</th>
                                     <th>Empty Drawer OUT Priority</th>
-                                    <th>Reel IN Priority</th>
+                                    <th>Reel IN Priority</th>  
+                                    <th>Column Inches</th>
                                     @* <th>Reel OUT Idx</th> *@
                                     @* <th>Action</th> *@
-                                </tr>
+                                </tr> 
                             </thead>
                         </table>
                     </div>
@@ -50,10 +51,31 @@
 
     <script type="text/javascript">
 
+        let reelWidthList = [];
+
         $(document).ready(function () {
             $('#txtTotalCol').val(0);
-            loadList();
+            loadReelWidthList();
         });
+
+        function loadReelWidthList() {
+            $.ajax({
+                url: '/Setting/GetReelWidthList',
+                type: 'GET',
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    if (result.success == true) {
+                        reelWidthList = result.data;
+                    }
+                    loadList();
+                },
+                error: function (error) {
+                    console.log(error);
+                    loadList();
+                }
+            });
+        }
 
         function loadList() {
             $.ajax({
@@ -103,6 +125,19 @@
                                         const rowIndex = meta.row;
                                         return `<input type="number" class="form-control" id="txtRIn${rowIndex}" value="${row.reel_IN_Idx}">
                                                 <div id="txtRIn${rowIndex}Error" class="error-message"></div>`;
+                                    }
+                                },
+                                {
+                                    data: null,
+                                    render: function (data, type, row, meta) {
+                                        const rowIndex = meta.row;
+                                        let options = '<option value="">-- Select --</option>';
+                                        reelWidthList.forEach(function (w) {
+                                            const selected = (w == row.colInches) ? 'selected' : '';
+                                            options += `<option value="${w}" ${selected}>${w}</option>`;
+                                        });
+                                        return `<select class="form-control" id="txtColInches${rowIndex}">${options}</select>
+                                                <div id="txtColInches${rowIndex}Error" class="error-message"></div>`;
                                     }
                                 },
                                 // {
@@ -174,6 +209,10 @@
                 document.getElementById("txtRIn" + i).classList.remove('is-valid');
                 document.getElementById("txtRIn" + i + 'Error').textContent = '';
 
+                document.getElementById("txtColInches" + i).classList.remove('is-invalid');
+                document.getElementById("txtColInches" + i).classList.remove('is-valid');
+                document.getElementById("txtColInches" + i + 'Error').textContent = '';
+
                 // document.getElementById("txtROut" + i).classList.remove('is-invalid');
                 // document.getElementById("txtROut" + i).classList.remove('is-valid');
                 // document.getElementById("txtROut" + i + 'Error').textContent = '';
@@ -200,6 +239,7 @@
                     showError(txt.id, `Please enter Reel IN Priority.`);
                     isValid = false;
                 }
+                // Column Inches is optional, defaults to 0 when not selected
                 // txt = document.getElementById("txtROut" + i);
                 // if (txt.value == "") {
                 //     showError(txt.id, `Please enter Reel OUT Priority.`);
@@ -226,6 +266,7 @@
                     EmptyDrawer_IN_Idx: $("#txtEDIn" + i).val(),
                     EmptyDrawer_OUT_Idx: $("#txtEDOut" + i).val(),
                     Reel_IN_Idx: $("#txtRIn" + i).val(),
+                    ColInches: $("#txtColInches" + i).val() || 0,
                     // Reel_OUT_Idx: $("#txtROut" + i).val(),
                 }
                 dataList.push(data);

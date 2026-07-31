@@ -197,6 +197,26 @@ namespace RackingSystem.Services.SettingServices
             return result;
         }
 
+        public async Task<ServiceResponseModel<List<int>>> GetReelWidthList()
+        {
+            ServiceResponseModel<List<int>> result = new ServiceResponseModel<List<int>>();
+
+            try
+            {
+                var widthList = await _dbContext.ReelDimension.Select(x => x.Width).Distinct().OrderBy(x => x).ToListAsync();
+                result.success = true;
+                result.data = widthList;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
         public async Task<ServiceResponseModel<List<SlotCalculationListDTO>>> GetSlotCalculationList()
         {
             ServiceResponseModel<List<SlotCalculationListDTO>> result = new ServiceResponseModel<List<SlotCalculationListDTO>>();
@@ -382,6 +402,7 @@ namespace RackingSystem.Services.SettingServices
                     _r.EmptyDrawer_OUT_Idx = item.EmptyDrawer_OUT_Idx;
                     _r.Reel_IN_Idx = item.Reel_IN_Idx;
                     _r.Reel_OUT_Idx = item.Reel_OUT_Idx;
+                    _r.ColInches = item.ColInches;
                     _dbContext.SlotColumnSetting.Update(_r);
                     await _dbContext.SaveChangesAsync();
                 } 

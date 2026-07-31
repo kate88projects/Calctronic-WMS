@@ -689,10 +689,10 @@ namespace RackingSystem.Services.SlotServices
             {
                 var parameters = new[]
                 {
-                    new SqlParameter("@TotalSlot", req.TotalSlot),
+                    new SqlParameter("@TotalSlot", req.TotalSlot)
                 };
 
-                string sql = "EXECUTE dbo.Slot_GET_FREESLOT_ASC @TotalSlot ";
+                string sql = "EXECUTE dbo.Slot_GET_FREESLOT_ASC @TotalSlot";
                 var listDTO = await _dbContext.SP_SlotGetFreeSlotByCol_ASC.FromSqlRaw(sql, parameters).ToListAsync();
 
                 result.success = true;

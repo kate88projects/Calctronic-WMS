@@ -175,26 +175,26 @@
         border-radius: 50%;
         width: 30px;
         height: 30px;
-        // 40px;
+        /* 40px; */
         background-color: var(--accent-color);
         position: absolute;
         top: -10px;
-        // -15px;
+        /* -15px; */
         transition: left 2s ease-in-out, background-color 0.3s;
     }
 
-        .trolley-head[data-position="loader"] {
-            left: 0%;
-        }
+    .trolley-head[data-position="loader"] {
+        left: 0%;
+    }
 
-        .trolley-head[data-position="pickup"] {
-            left: 100%;
-            transform: translateX(-100%);
-        }
+    .trolley-head[data-position="pickup"] {
+        left: 100%;
+        transform: translateX(-100%);
+    }
 
-        .trolley-head[data-has-reel="true"] {
-            background-color: var(--status-ok);
-        }
+    .trolley-head[data-has-reel="true"] {
+        background-color: var(--status-ok);
+    }
 
     /* Loader Viewport acts as a mask/window */
     .loader-viewport {
@@ -210,22 +210,22 @@
         transition: transform 0.8s ease-in-out; /* Smooth sliding animation */
     }
 
-        /* When the loader track has this class, we apply a dimming effect */
-        .loader-track.picking-dim .col {
-            opacity: 0.4;
-            transition: opacity 0.3s ease-in-out;
-        }
+    /* When the loader track has this class, we apply a dimming effect */
+    .loader-track.picking-dim .col {
+        opacity: 0.4;
+        transition: opacity 0.3s ease-in-out;
+    }
 
-            /* The actively selected column should remain fully visible */
-            .loader-track.picking-dim .col.active-pick {
-                opacity: 1.0;
-            }
+    /* The actively selected column should remain fully visible */
+    .loader-track.picking-dim .col.active-pick {
+        opacity: 1.0;
+    }
 
-            /* Ensure the reel counts and labels within dimmed columns are still somewhat readable */
-            .loader-track.picking-dim .col * {
-                /* Optional: Maintain slightly higher visibility for text elements */
-                /* opacity: 1.0; */
-            }
+    /* Ensure the reel counts and labels within dimmed columns are still somewhat readable */
+    .loader-track.picking-dim .col * {
+        /* Optional: Maintain slightly higher visibility for text elements */
+        /* opacity: 1.0; */
+    }
 
     /* Individual columns within the track */
     .col {

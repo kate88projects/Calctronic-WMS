@@ -22,5 +22,8 @@ namespace RackingSystem.Data.Maintenances
         [Required]
         public int Reel_OUT_Idx { get; set; } = 0;
 
+        [Required]
+        public int ColInches { get; set; } = 0;
+
     }
 }

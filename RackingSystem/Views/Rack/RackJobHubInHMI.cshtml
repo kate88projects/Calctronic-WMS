@@ -89,16 +89,16 @@
         transition: all 0.3s ease;
     }
 
-        .rack-slot:hover {
-            border-color: #3b82f6;
-            box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
-        }
+    .rack-slot:hover {
+        border-color: #3b82f6;
+        box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+    }
 
-        .rack-slot.tray-selected {
-            border-color: #10b981;
-            box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
-            background: rgba(16, 185, 129, 0.08);
-        }
+    .rack-slot.tray-selected {
+        border-color: #10b981;
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+        background: rgba(16, 185, 129, 0.08);
+    }
 
     .trolley-slot {
         width: 62px;
@@ -112,16 +112,16 @@
         transition: all 0.3s ease;
     }
 
-        .trolley-slot:hover {
-            border-color: #3b82f6;
-            box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
-        }
+    .trolley-slot:hover {
+        border-color: #3b82f6;
+        box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+    }
 
-        .trolley-slot.empty-selected {
-            border-color: #10b981;
-            box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
-            background: rgba(16, 185, 129, 0.08);
-        }
+    .trolley-slot.empty-selected {
+        border-color: #10b981;
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+        background: rgba(16, 185, 129, 0.08);
+    }
 
     .scene-container {
         position: relative;
@@ -155,41 +155,41 @@
         padding: 8px;
     }
 
-        .rack-selector:hover {
-            border-color: #d1d5db;
-            background: rgba(209, 213, 219, 0.15);
-        }
+    .rack-selector:hover {
+        border-color: #d1d5db;
+        background: rgba(209, 213, 219, 0.15);
+    }
 
-        .rack-selector.selected {
-            border-color: #10b981;
-            background: rgba(16, 185, 129, 0.1);
-            box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
-        }
+    .rack-selector.selected {
+        border-color: #10b981;
+        background: rgba(16, 185, 129, 0.1);
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+    }
 
     .trolley-target {
         position: relative;
     }
 
-        .trolley-target::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border: 2px solid transparent;
-            border-radius: 4px;
-            pointer-events: none;
-            transition: all 0.3s ease;
-        }
+    .trolley-target::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border: 2px solid transparent;
+        border-radius: 4px;
+        pointer-events: none;
+        transition: all 0.3s ease;
+    }
 
-        .trolley-target:hover::after {
-            border-color: #3b82f6;
-            box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
-        }
+    .trolley-target:hover::after {
+        border-color: #3b82f6;
+        box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+    }
 
-        .trolley-target.target-selected::after {
-            border-color: #10b981;
-            box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
-            background: rgba(16, 185, 129, 0.08);
-        }
+    .trolley-target.target-selected::after {
+        border-color: #10b981;
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+        background: rgba(16, 185, 129, 0.08);
+    }
 
 
     .panel {
@@ -255,18 +255,18 @@
         transition: left 2s ease-in-out, background-color 0.3s;
     }
 
-        .gantry-head[data-position="loader"] {
-            left: 0%;
-        }
+    .gantry-head[data-position="loader"] {
+        left: 0%;
+    }
 
-        .gantry-head[data-position="pickup"] {
-            left: 100%;
-            transform: translateX(-100%);
-        }
+    .gantry-head[data-position="pickup"] {
+        left: 100%;
+        transform: translateX(-100%);
+    }
 
-        .gantry-head[data-has-reel="true"] {
-            background-color: var(--status-ok);
-        }
+    .gantry-head[data-has-reel="true"] {
+        background-color: var(--status-ok);
+    }
 
     /* Loader Viewport acts as a mask/window */
     .loader-viewport {
@@ -282,22 +282,22 @@
         transition: transform 0.8s ease-in-out; /* Smooth sliding animation */
     }
 
-        /* When the loader track has this class, we apply a dimming effect */
-        .loader-track.picking-dim .col {
-            opacity: 0.4;
-            transition: opacity 0.3s ease-in-out;
-        }
+    /* When the loader track has this class, we apply a dimming effect */
+    .loader-track.picking-dim .col {
+        opacity: 0.4;
+        transition: opacity 0.3s ease-in-out;
+    }
 
-            /* The actively selected column should remain fully visible */
-            .loader-track.picking-dim .col.active-pick {
-                opacity: 1.0;
-            }
+     /* The actively selected column should remain fully visible */
+    .loader-track.picking-dim .col.active-pick {
+        opacity: 1.0;
+    }
 
-            /* Ensure the reel counts and labels within dimmed columns are still somewhat readable */
-            .loader-track.picking-dim .col * {
-                /* Optional: Maintain slightly higher visibility for text elements */
-                /* opacity: 1.0; */
-            }
+    /* Ensure the reel counts and labels within dimmed columns are still somewhat readable */
+    .loader-track.picking-dim .col * {
+        /* Optional: Maintain slightly higher visibility for text elements */
+        /* opacity: 1.0; */
+    }
 
     /* Individual columns within the track */
     .col {
@@ -355,10 +355,10 @@
         color: var(--text-color);
     }
 
-        .reel-count[data-count="0"] {
-            /* color: var(--status-alarm); */
-            color: grey;
-        }
+    .reel-count[data-count="0"] {
+        /* color: var(--status-alarm); */
+        color: grey;
+    }
 
     /* Define the position classes managed by JavaScript */
     .loader-track.pos-col-1 {
@@ -386,35 +386,35 @@
         margin-bottom: 10px;
     }
 
-        .loader-battery-display .battery-container {
-            width: 80px;
-            height: 15px;
-            background-color: rgba(6, 182, 212, 0.3);
-            border: 1px solid var(--text-color);
-            border-radius: 3px;
-            overflow: hidden;
-        }
+    .loader-battery-display .battery-container {
+        width: 80px;
+        height: 15px;
+        background-color: rgba(6, 182, 212, 0.3);
+        border: 1px solid var(--text-color);
+        border-radius: 3px;
+        overflow: hidden;
+    }
 
-        .loader-battery-display .battery-level {
-            height: 100%;
-            background-color: rgba(6, 182, 212, 0.8);
-            transition: width 0.5s ease-in-out, background-color 0.5s;
-        }
+    .loader-battery-display .battery-level {
+        height: 100%;
+        background-color: rgba(6, 182, 212, 0.8);
+        transition: width 0.5s ease-in-out, background-color 0.5s;
+    }
 
-        .loader-battery-display .battery-text {
-            font-size: 0.9em;
-            font-weight: bold;
-            margin-left: 10px;
-            color: var(--text-color);
-        }
+    .loader-battery-display .battery-text {
+        font-size: 0.9em;
+        font-weight: bold;
+        margin-left: 10px;
+        color: var(--text-color);
+    }
 
-        .loader-battery-display .battery-critical {
-            background-color: var(--status-alarm) !important;
-        }
+    .loader-battery-display .battery-critical {
+        background-color: var(--status-alarm) !important;
+    }
 
-        .loader-battery-display .battery-low {
-            background-color: #f1c40f !important;
-        }
+    .loader-battery-display .battery-low {
+        background-color: #f1c40f !important;
+    }
 
 
     /* Drawer Station */
@@ -493,21 +493,21 @@
         z-index: 2;
     }
 
-        .step-dot.active {
-            border-color: #22c55e;
-            background: #22c55e;
-            box-shadow: 0 0 10px rgba(34,197,94,0.5);
-        }
+    .step-dot.active {
+        border-color: #22c55e;
+        background: #22c55e;
+        box-shadow: 0 0 10px rgba(34,197,94,0.5);
+    }
 
-        .step-dot.done {
-            border-color: #22c55e;
-            background: #22c55e;
-        }
+    .step-dot.done {
+        border-color: #22c55e;
+        background: #22c55e;
+    }
 
-        .step-dot.waiting {
-            border-color: lightgrey; /* #475569; */
-            background: lightgrey; /* #1e293b; */
-        }
+    .step-dot.waiting {
+        border-color: lightgrey; /* #475569; */
+        background: lightgrey; /* #1e293b; */
+    }
 
     .status-badge {
         font-size: 10px;
@@ -797,6 +797,12 @@
                         <div class="flex items-center gap-2">
                             <label for="loader-input" class="text-xs font-semibold" style="color:#4b5563;white-space:nowrap;">Loader : </label>
                             <input type="text" id="loader-input" class="flex-1 px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;color:#374151;background:#fff;">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label for="inch-input" class="text-xs font-semibold" style="color:#4b5563;white-space:nowrap;">Inches : </label>
+                            <select id="inch-select" class="flex-1 px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb; color: #374151; background: #fff; height: 32px;">
+                                <option value="">Loading...</option>
+                            </select>
                         </div>
                         <div class="flex items-center gap-2">
                             <label for="chkAutoRun" class="text-xs font-semibold" style="color:#4b5563;white-space:nowrap;">Auto : </label>
@@ -1173,6 +1179,7 @@
         let endTask = false;
 
         let begining = true;
+        let useInches = false;
 
         let token = '';
         let qId = 0;
@@ -1210,6 +1217,7 @@
             $("#txtLoaderId").val('0');
             updateSystemStatusUI();
             updateGantryUIState();
+            loadReelDList();
             // updateJson();
 
             token = $('#xToken').val();
@@ -1421,6 +1429,8 @@
 
              readyToEnd = false;
 
+             useInches = $('#inch-select').val() > 0 ? true : false;
+
             // 4. Continue
              gantryAutoTimer = setInterval(gantryAuto, 3000); //3 second workout
              cartesianAutoTimer = setInterval(cartesianAuto, 3000); //3 second workout
@@ -1500,6 +1510,55 @@
 
         // Function to update the main header status text and button states
 
+        // Retrieve reel inches
+        function loadReelDList() {
+            $.ajax({
+                url: "/Setting/GetReelDimensionList/",
+                type: "GET",
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading();
+                },
+                success: function (result) {
+                    swal.close()
+                    if (result.success == true) {
+
+                        const selLoader = document.getElementById('inch-select');
+                        selLoader.innerHTML = '<option value="">Select Inches</option>';
+
+                        for (const opt of result.data) {
+                            const el = document.createElement("option");
+                            el.textContent = `${opt.thickness} mm X ${opt.width} inch`;
+                            el.value = opt.reelDimension_Id;
+                            selLoader.appendChild(el);
+                        }
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+        }
+
         function updateSystemStatusUI() {
             const startBtn = document.getElementById('start-btn');
             const stopBtn = document.getElementById('stop-btn');
@@ -1515,7 +1574,7 @@
                 startBtn.disabled = false;
                 contBtn.disabled = false;
                 stopBtn.disabled = true;
-        endBtn.disabled = true;
+                endBtn.disabled = true;
             }
         }
 
@@ -1978,19 +2037,22 @@
             const chkAutoRun = document.getElementById('chkAutoRun');
             if (chkAutoRun.checked) {
                 // 1. if no drawer just take (reelId MUST have first cause need get actual height)
-                 var actH = $("#txtActHeight").val();
-                if (sharedDrawerState.systemRunning == true && sharedDrawerState.drawerStatus == "None" && actH != "0" && inRetrieveMove == false && inPutAwayMove == false) {
+                var actH = $("#txtActHeight").val();
+                var readyForRetrieve = useInches ? true : (actH != "0");
+
+                if (sharedDrawerState.systemRunning == true && sharedDrawerState.drawerStatus == "None" && readyForRetrieve && inRetrieveMove == false && inPutAwayMove == false) {
                     if (readyToEnd == false) {
                         startRetrieve();
                     }
                 }
 
                 // 2. if have drawer and placed then just put away
-                 var actHC = $("#txtActHeightC").val();
-                if (sharedDrawerState.systemRunning == true && sharedDrawerState.drawerStatus == "Placed" && actHC != "0" && inRetrieveMove == false && inPutAwayMove == false) {
+                var actHC = $("#txtActHeightC").val();
+                var readyForPutAway = useInches ? true : (actHC != "0");
+
+                if (sharedDrawerState.systemRunning == true && sharedDrawerState.drawerStatus == "Placed" && readyForPutAway && inRetrieveMove == false && inPutAwayMove == false) {
                     startPutAway();
                 }
-
             }
         }
 
@@ -2183,7 +2245,7 @@
             }
 
             var actH = $("#txtActHeight").val();
-            if (actH == "0") {
+            if (!useInches && actH == "0") {
                 return;
             }
 
@@ -2197,7 +2259,7 @@
                 inRetrieveMove = false;
                 return;
             }
-
+            
             changeTakeSlot = false;
 
             updateCartesianUIState();
@@ -2269,7 +2331,7 @@
             }
 
             var actH = $("#txtActHeightC").val();
-            if (actH == "0") {
+            if (!useInches && actH == "0") {
                 return;
             }
 
@@ -3421,14 +3483,8 @@
                     'Authorization': 'Bearer ' + token
                 },
                 dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
-                beforeSend: function () {
-
-                },
                 success: function (result) {
-                    // console.log('3::' + JSON.stringify(result));
-                    // swal.close();
                     if (result.success == true) {
                         fResult = true;
                         log('Get Empty Drawer Slot :: Done ', 'info');
@@ -3457,6 +3513,7 @@
         async function loadPLCTakeEmptyTray() {
 
             var eSlot = $("#txtRetrieveSlot").val();
+
             var fResult = false;
             retrieveMove();
 
@@ -3558,9 +3615,11 @@
                 }
             }
 
+            var reelDimensionId = $('#inch-select').val() || 0;
+
             // step 4 : scan item
             await $.ajax({
-                url: "/api/PLCHubIn/GetBottomSlot/" + actH + "/" + chkSlot,
+                url: "/api/PLCHubIn/GetBottomSlot/" + actH + "/" + chkSlot + "/" + reelDimensionId + "",
                 type: "GET",
                 headers: {
                     'Authorization': 'Bearer ' + token

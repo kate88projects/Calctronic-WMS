@@ -487,7 +487,7 @@ namespace RackingSystem.Services.ItemServices
                         {
                             igExist = _dbContext.ItemGroup.FirstOrDefault(x => x.ItemGroupCode == itm.ItemGroupCode);
                         }
-                        ReelDimension? rExist = _dbContext.ReelDimension.FirstOrDefault(x => x.Thickness == itm.Thickness);
+                        ReelDimension? rExist = _dbContext.ReelDimension.FirstOrDefault(x => x.Thickness == itm.Thickness && x.Width == itm.Width);
 
                         if (iExist != null)
                         {
@@ -518,7 +518,7 @@ namespace RackingSystem.Services.ItemServices
                         }
                         if (rExist == null)
                         {
-                            result.errMessage = $"Item Code: {itm.ItemCode} Thickness {itm.Thickness} has not found.";
+                            result.errMessage = $"Item Code: {itm.ItemCode} Thickness {itm.Thickness} with Width {itm.Width} has not found.";
                             itm.ErrorMsg = result.errMessage;
                             isError = true;
                         }

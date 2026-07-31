@@ -73,6 +73,13 @@ namespace RackingSystem.Controllers
             return result;
         }
 
+        [HttpGet]
+        public async Task<ServiceResponseModel<List<int>>> GetReelWidthList()
+        {
+            ServiceResponseModel<List<int>> result = await _setService.GetReelWidthList();
+            return result;
+        }
+
         public IActionResult SlotCalculationList()
         {
             ViewBag.PermissionList = new List<int>();
