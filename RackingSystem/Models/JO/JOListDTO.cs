@@ -28,6 +28,8 @@ namespace RackingSystem.Models.JO
 
         public string UpdatedBy { get; set; } = "";
 
+        public bool Backorder { get; set; } = false;
+
         public int totalRecord { get; set; } = 0;
 
         public int page { get; set; } = 1;

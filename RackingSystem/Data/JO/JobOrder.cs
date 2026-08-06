@@ -42,5 +42,7 @@ namespace RackingSystem.Data.JO
         [MaxLength(50)]
         public string UpdatedBy { get; set; } = "";
 
+        public bool Backorder { get; set; } = false;
+
     }
 }

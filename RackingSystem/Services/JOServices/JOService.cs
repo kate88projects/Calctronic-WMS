@@ -176,16 +176,6 @@ namespace RackingSystem.Services.JOServices
                     index++;
                 }
 
-                var aggregatedSubItems = job.Details
-                    .GroupBy(x => x.Item_Id)
-                    .Select(g => new
-                    {
-                        Item_Id = g.Key,
-                        Qty = g.Sum(x => x.Qty),
-                        JobOrderDetail_Id = g.First().JobOrderDetail_Id,
-                        JobOrder_Id = g.First().JobOrder_Id,
-                    }).ToList();
-
                 if (job.JobOrder_Id == 0)
                 {
                     var jobOrder = await DocFormatHelper.Instance.get_NextDocumentNo(_dbContext, General.EnumConfiguration.DocFormat_JO, DateTime.Now, true);
@@ -203,11 +193,12 @@ namespace RackingSystem.Services.JOServices
                         DocDate = DateTime.Now,
                         CreatedBy = job.CreatedBy,
                         CreatedDate = DateTime.Now,
+                        Backorder = job.Backorder,
                     };
                     _dbContext.JobOrder.Add(_job);
                     await _dbContext.SaveChangesAsync();
 
-                    foreach (var dtl in aggregatedSubItems)
+                    foreach (var dtl in job.Details)
                     {
                         JobOrderDetail _jobDtl = new JobOrderDetail()
                         {
@@ -241,6 +232,7 @@ namespace RackingSystem.Services.JOServices
                     //_job.UpdatedBy = job.CreatedBy;
                     _job.CreatedBy = job.CreatedBy;
                     _job.UpdatedDate = DateTime.Now;
+                    _job.Backorder = job.Backorder;
                     _dbContext.JobOrder.Update(_job);
 
                     //remove the previous if not found on the latest detail
@@ -255,7 +247,7 @@ namespace RackingSystem.Services.JOServices
                     }
 
                     //update the latest detail
-                    foreach (var dtl in aggregatedSubItems)
+                    foreach (var dtl in job.Details)
                     {
                         if (dtl.JobOrderDetail_Id == 0)
                         {
@@ -279,7 +271,7 @@ namespace RackingSystem.Services.JOServices
                             _jobDtl.Item_Id = dtl.Item_Id;
                             _jobDtl.Qty = dtl.Qty;
                             _dbContext.JobOrderDetail.Update(_jobDtl);
-                        }   
+                        }
                     }
 
                     if (detailsToRemove.Any())
