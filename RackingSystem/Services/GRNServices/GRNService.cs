@@ -72,7 +72,7 @@ namespace RackingSystem.Services.GRNServices
                 // 3. save Data
                 if (req.GRNDetail_Id == null)
                 {
-                    var rReel = await DocFormatHelper.Instance.get_NextDocumentNo(_dbContext, General.EnumConfiguration.DocFormat_Reel, DateTime.Now, true);
+                    var rReel = await GetNextReelCode();
                     if (rReel.success == false)
                     {
                         result.errMessage = rReel.errMessage;
@@ -326,6 +326,65 @@ namespace RackingSystem.Services.GRNServices
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
             }
+            return result;
+        }
+
+        private async Task<ServiceResponseModel<string>> GetNextReelCode()
+        {
+            ServiceResponseModel<string> result = new ServiceResponseModel<string>();
+
+            try
+            {
+                var config = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.DocFormat_Reel.ToString()).FirstOrDefault();
+                if (config == null)
+                {
+                    result.errMessage = "Reel document format is not configured.";
+                    return result;
+                }
+
+                var docF = _dbContext.DocFormat.Find(long.Parse(config.ConfigValue));
+                if (docF == null)
+                {
+                    result.errMessage = "Reel document format is not configured.";
+                    return result;
+                }
+
+                int counter = docF.NextRoundingNum;
+                string reelCode;
+
+                if (counter <= 9999999)
+                {
+                    reelCode = "!" + counter.ToString("D7");
+                }
+                else
+                {
+                    int overflow = counter - 10000000;
+                    int letterIndex = overflow / 1000000;
+                    int numberPart = overflow % 1000000;
+
+                    if (letterIndex > 25)
+                    {
+                        result.errMessage = "Reel code sequence exhausted.";
+                        return result;
+                    }
+
+                    char letter = (char)('A' + letterIndex);
+                    reelCode = "!" + letter + numberPart.ToString("D6");
+                }
+
+                docF.NextRoundingNum = counter + 1;
+                _dbContext.DocFormat.Update(docF);
+                await _dbContext.SaveChangesAsync();
+
+                result.success = true;
+                result.data = reelCode;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
             return result;
         }
 
