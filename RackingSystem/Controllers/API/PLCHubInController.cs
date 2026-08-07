@@ -217,8 +217,8 @@ namespace RackingSystem.Controllers.API
             return result;
         }
 
-        [HttpGet("StopUnload/{qId}")]
-        public async Task<ServiceResponseModel<bool>> StopUnload(long qId)
+        [HttpGet("StopUnload/{qId}/{mEndTask}")]
+        public async Task<ServiceResponseModel<bool>> StopUnload(long qId, bool mEndTask)
         {
             ServiceResponseModel<bool> result = new ServiceResponseModel<bool>();
             result.data = false;
@@ -229,12 +229,11 @@ namespace RackingSystem.Controllers.API
                 var q = _dbContext.RackJobQueue.Where(x => x.RackJobQueue_Id == qId).FirstOrDefault();
                 if (q != null)
                 {
-                    var colBal = _dbContext.LoaderReel.Where(x => x.Loader_Id == q.Doc_Id).FirstOrDefault();
-                    if (colBal == null)
+                    bool shouldRemove = mEndTask || _dbContext.LoaderReel.Where(x => x.Loader_Id == q.Doc_Id).FirstOrDefault() == null;
+                    if (shouldRemove)
                     {
                         _dbContext.RackJobQueue.Remove(q);
                         _dbContext.SaveChanges();
-
                         var sqlSP = await _dbContext.Database.ExecuteSqlInterpolatedAsync($"EXEC {GeneralStatic.SP_Q_Requeue} ");
                     }
                 }

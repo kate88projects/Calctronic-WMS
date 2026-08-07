@@ -109,16 +109,16 @@
         transition: all 0.3s ease;
     }
 
-        .trolley-slot:hover {
-            border-color: #3b82f6;
-            box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
-        }
+    .trolley-slot:hover {
+        border-color: #3b82f6;
+        box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+    }
 
-        .trolley-slot.empty-selected {
-            border-color: #10b981;
-            box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
-            background: rgba(16, 185, 129, 0.08);
-        }
+    .trolley-slot.empty-selected {
+        border-color: #10b981;
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+        background: rgba(16, 185, 129, 0.08);
+    }
 
     .tray.empty-selected {
         background-color: #10b981;
@@ -157,41 +157,41 @@
         padding: 8px;
     }
 
-        .rack-selector:hover {
-            border-color: #d1d5db;
-            background: rgba(209, 213, 219, 0.15);
-        }
+    .rack-selector:hover {
+        border-color: #d1d5db;
+        background: rgba(209, 213, 219, 0.15);
+    }
 
-        .rack-selector.selected {
-            border-color: #10b981;
-            background: rgba(16, 185, 129, 0.1);
-            box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
-        }
+    .rack-selector.selected {
+        border-color: #10b981;
+        background: rgba(16, 185, 129, 0.1);
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+    }
 
     .trolley-target {
         position: relative;
     }
 
-        .trolley-target::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border: 2px solid transparent;
-            border-radius: 4px;
-            pointer-events: none;
-            transition: all 0.3s ease;
-        }
+    .trolley-target::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border: 2px solid transparent;
+        border-radius: 4px;
+        pointer-events: none;
+        transition: all 0.3s ease;
+    }
 
-        .trolley-target:hover::after {
-            border-color: #3b82f6;
-            box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
-        }
+    .trolley-target:hover::after {
+        border-color: #3b82f6;
+        box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+    }
 
-        .trolley-target.target-selected::after {
-            border-color: #10b981;
-            box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
-            background: rgba(16, 185, 129, 0.08);
-        }
+    .trolley-target.target-selected::after {
+        border-color: #10b981;
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+        background: rgba(16, 185, 129, 0.08);
+    }
 
     .step-line::before {
         content: '';
@@ -219,21 +219,21 @@
         z-index: 2;
     }
 
-        .step-dot.active {
-            border-color: #22c55e;
-            background: #22c55e;
-            box-shadow: 0 0 10px rgba(34,197,94,0.5);
-        }
+    .step-dot.active {
+        border-color: #22c55e;
+        background: #22c55e;
+        box-shadow: 0 0 10px rgba(34,197,94,0.5);
+    }
 
-        .step-dot.done {
-            border-color: #22c55e;
-            background: #22c55e;
-        }
+    .step-dot.done {
+        border-color: #22c55e;
+        background: #22c55e;
+    }
 
-        .step-dot.waiting {
-            border-color: lightgrey; /* #475569; */
-            background: lightgrey; /* #1e293b; */
-        }
+    .step-dot.waiting {
+        border-color: lightgrey; /* #475569; */
+        background: lightgrey; /* #1e293b; */
+    }
 
     .status-badge {
         font-size: 10px;
@@ -292,6 +292,11 @@
     }
 
     #cont-btn:disabled {
+        background-color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #end-btn:disabled {
         background-color: darkgray !important;
         cursor: not-allowed;
     }
@@ -467,6 +472,10 @@
                     <button id="stop-btn" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#e74c3c;color:#fff;"
                             onclick="systemStop()">
                         <i class="bi-stop-fill" style="width:12px;height:12px;"></i> Stop
+                    </button>
+                    <button id="end-btn" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#e74c3c;color:#fff;"
+                            onclick="systemEnd()">
+                        <i class="bi-stop-fill" style="width:12px;height:12px;"></i> End Task
                     </button>
                 </div>
                 <div class="grid grid-cols-3 gap-3 mb-6">
@@ -701,7 +710,7 @@
 
 @section Scripts
 {
-    <script src="~/js/tailwindcss_3_4_17.js"></script>
+    <link href="~/css/tailwind.css" rel="stylesheet" />
     <link href="~/css/jetbrains.css" rel="stylesheet" />
 
     <link href="~/css/datatables.min.css" rel="stylesheet">
@@ -727,6 +736,7 @@
         let inPutAwayMove = false;
 
         let endTask = false;
+        let readyToEnd = false;
 
         let token = '';
         let qId = 0;
@@ -918,6 +928,7 @@
             const startBtn = document.getElementById('start-btn');
             const stopBtn = document.getElementById('stop-btn');
             const contBtn = document.getElementById('cont-btn');
+            const endBtn = document.getElementById('end-btn');
 
             const badge = document.getElementById('statusBadge');
             const dot = document.getElementById('statusDot');
@@ -931,6 +942,7 @@
                 startBtn.disabled = true;
                 contBtn.disabled = true;
                 stopBtn.disabled = false;
+                endBtn.disabled = false;
             } 
             else {
                 st.textContent = 'STOPPED';
@@ -940,6 +952,7 @@
                 startBtn.disabled = false;
                 contBtn.disabled = false;
                 stopBtn.disabled = true;
+                endBtn.disabled = true;
             }
         }
 
@@ -1145,6 +1158,7 @@
             // log("System Start command issued.", 'alert');
 
              updateJson();
+             readyToEnd = false;
 
             // 4. Continue
              cartesianAutoTimer = setInterval(cartesianAuto, 3000); //3 second workout
@@ -1168,23 +1182,105 @@
                 showHeld(2);
             }
 
+            readyToEnd = false;
+
             // 4. Continue
              cartesianAutoTimer = setInterval(cartesianAuto, 3000); //3 second workout
 
         }
 
         // System Stop Handler
-        function systemStop() {
-            if (!sharedDrawerState.systemRunning) return;
+        async function systemStop() {
+            if (!sharedDrawerState.systemRunning || readyToEnd) return;
             sharedDrawerState.systemRunning = false;
             updateSystemStatusUI();
             disableDivContent(true);
+            $('#start-btn').addClass('hidden');
+            $('#cont-btn').removeClass('hidden');
             // log("System Stop command issued. System idling.", 'alert');
 
-            updateJson();
-
             clearInterval(cartesianAutoTimer);
+            updateJson();
+        }
 
+        //System End Handler
+        async function systemEnd() {
+            if (!sharedDrawerState.systemRunning || readyToEnd) return;
+
+            let timerInterval;
+            const swalResult = await swal.fire({
+                title: `End Task?`,
+                text: `You won't be able to revert this.`,
+                icon: "warning",
+                showCancelButton: true,
+                allowOutsideClick: false,
+                confirmButtonText: "Yes",
+                html: `
+                  <div>Confirm end task? Auto-cancel in <span id="countdown">3</span>s.</div>
+                  <div style="margin-top:10px; background:#eee; width:100%; height:8px;">
+                      <div id="bar" style="width:100%; height:8px; background:#f66; transition:width 1s linear;"></div>
+                  </div>
+                `,
+                didOpen: () => {
+                    const content = Swal.getHtmlContainer().querySelector('#countdown');
+                    const bar = Swal.getHtmlContainer().querySelector('#bar');
+                    let timeLeft = 3;
+                    timerInterval = setInterval(() => {
+                        timeLeft--;
+                        bar.style.width = (timeLeft / 3 * 100) + '%';
+
+                        if (content) content.textContent = timeLeft;
+                        if (timeLeft <= 0) {
+                            clearInterval(timerInterval);
+                            Swal.close();
+                        }
+                    }, 1000);
+                },
+                willClose: () => {
+                    clearInterval(timerInterval);
+                }
+            });
+
+            if (swalResult.dismiss && swalResult.dismiss !== Swal.DismissReason.cancel) {
+                readyToEnd = false;
+                return;
+            }
+
+            if (swalResult.isConfirmed) {
+                readyToEnd = true;
+                document.getElementById('stop-btn').disabled = true;
+                document.getElementById('end-btn').disabled = true;
+
+                if (inRetrieveMove || inPutAwayMove) {
+                    log('Waiting for current job to finish before ending task...', 'info');
+                    await waitForCycleToFinish();
+                }
+
+                sharedDrawerState.systemRunning = false;
+                updateSystemStatusUI();
+                disableDivContent(true);
+                updateJson();
+
+                clearInterval(cartesianAutoTimer);
+
+                log(`-- End Task --`, 'info');
+                loadDBEnd();
+                $('#jobDoneModal').modal('show');
+
+            } else {
+                readyToEnd = false;
+            }
+        }
+
+        function waitForCycleToFinish() {
+            return new Promise((resolve) => {
+                const check = setInterval(() => {
+                    if (!inRetrieveMove && !inPutAwayMove && sharedDrawerState.drawerStatus == "None") {
+                        clearInterval(check);
+                        resolve();
+                    }
+                }, 500);
+            });
         }
 
         function delay(ms) {
@@ -1221,7 +1317,7 @@
                 ReelId: $("#txtReelId").val(),
                 ReelCode: $("#txtReelCode").val(),
                 ActualHeight: Number($("#txtActHeight").val()),
-                DtlId: Number($("#txtDtlId").val()),
+                DtlId: Number($("#txtDtlId").val()) || 0,
 
                 CartesianRobotState: sharedDrawerState.cartesianRobotState,
                 CartesianLocation: sharedDrawerState.cartesianLocation,
@@ -1316,7 +1412,9 @@
             if (chkAutoRun.checked) {
                 // 1. if no drawer just take (reelId MUST have first cause need get actual height)
                 if (sharedDrawerState.systemRunning == true && sharedDrawerState.drawerStatus == "None" && inRetrieveMove == false && inPutAwayMove == false) {
-                    startRetrieve();
+                    if (readyToEnd == false) {
+                        startRetrieve();
+                    }
                 }
 
                 // 2. if have drawer and placed then just put away
@@ -1537,7 +1635,6 @@
             inPutAwayMove = false;
 
             updateJson();
-
             // means all is out
             if (totalReels <= 0) {
                 loadDBEnd();
@@ -1612,6 +1709,7 @@
                 $('#cont-btn').addClass('hidden');
                 $('#jobDoneModal').modal('show');
             }
+
         }
 
 
@@ -1679,19 +1777,16 @@
                     'Authorization': 'Bearer ' + token
                 },
                 dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
-
                 },
                 success: function (result) {
                     // console.log('10::' + JSON.stringify(result));
-                    // swal.close();
-                    log('End Loader :: OK ', 'info');
+                    log('End HubOut :: OK ', 'info');
                     return true;
                 },
                 error: function (error) {
-                    log('End Loader :: ' + error.val, 'alert');
+                    log('End HubOut :: ' + error.val, 'alert');
                 }
             });
 
