@@ -547,6 +547,11 @@
         background-color: darkgray !important;
         cursor: not-allowed;
     }
+
+    #end-btn:disabled {
+        background-color: darkgray !important;
+        cursor: not-allowed;
+    }
     
     #btnPickStart:disabled {
         background-color: darkgray !important;
@@ -824,7 +829,7 @@
                         </button>
                         <button id="end-btn" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#e74c3c;color:#fff;"
                                 onclick="systemEnd()">
-                            <i class="bi-stop-fill" style="width:12px;height:12px;"></i> End Cycle
+                            <i class="bi-stop-fill" style="width:12px;height:12px;"></i> End Task
                         </button>
                     </div>
                     <div class="grid grid-cols-2 gap-3 mb-6">
@@ -1135,7 +1140,7 @@
 
 @section Scripts
 {
-    <script src="~/js/tailwindcss_3_4_17.js"></script>
+    <link href="~/css/tailwind.css" rel="stylesheet" />
     <script src="~/js/lucide.min.js"></script>
     <link href="~/css/jetbrains.css" rel="stylesheet" />
 
@@ -1176,8 +1181,6 @@
         let halfRetrieveMoveStep = 1;
         let halfPutAwayMoveStep = 1;
 
-        let endTask = false;
-
         let begining = true;
         let useInches = false;
 
@@ -1203,6 +1206,8 @@
         let running = false;
         let phase = 'idle'; // idle, picking, moving, placing
         let readyToEnd = false;
+        let endTaskPending = false; 
+        let processEnd = false;
 
         const jsonModal = document.getElementById("jsonModal");
         const formJSON = document.getElementById("formJSON");
@@ -1428,6 +1433,7 @@
              updateJson();
 
              readyToEnd = false;
+             endTaskPending = false;
 
              useInches = $('#inch-select').val() > 0 ? true : false;
 
@@ -1447,8 +1453,9 @@
 
             sharedDrawerState.systemRunning = true;
             updateSystemStatusUI();
-            
-        readyToEnd = false;
+
+            readyToEnd = false;
+            endTaskPending = false;
 
             // 4. Continue
              gantryAutoTimer = setInterval(gantryAuto, 3000); //3 second workout
@@ -1457,10 +1464,12 @@
         }
 
         // System Stop Handler
-        function systemStop() {
-            if (!sharedDrawerState.systemRunning) return;
+        async function systemStop() {
+            if (!sharedDrawerState.systemRunning || readyToEnd) return;
             sharedDrawerState.systemRunning = false;
             updateSystemStatusUI();
+            $('#start-btn').addClass('hidden');
+            $('#cont-btn').removeClass('hidden');
             disableDivContent(true);
             // log("System Stop command issued. System idling.", 'alert');
 
@@ -1472,9 +1481,98 @@
         }
         
         // System Stop Handler
-        function systemEnd() {
-            if (!sharedDrawerState.systemRunning) return;
-            readyToEnd = true;
+        async function systemEnd() {
+            if (!sharedDrawerState.systemRunning || readyToEnd) return;
+
+            endTaskPending = true;
+
+            let timerInterval;
+            const swalResult = await swal.fire({
+                title: `End Task?`,
+                text: `You won't be able to revert this.`,
+                icon: "warning",
+                showCancelButton: true,
+                allowOutsideClick: false,
+                confirmButtonText: "Yes",
+                html: `
+                  <div>Confirm end task? Auto-cancel in <span id="countdown">3</span>s.</div>
+                  <div style="margin-top:10px; background:#eee; width:100%; height:8px;">
+                      <div id="bar" style="width:100%; height:8px; background:#f66; transition:width 1s linear;"></div>
+                  </div>
+                `,
+                didOpen: () => {
+                    const content = Swal.getHtmlContainer().querySelector('#countdown');
+                    const bar = Swal.getHtmlContainer().querySelector('#bar');
+                    let timeLeft = 3;
+                    timerInterval = setInterval(() => {
+                        timeLeft--;
+                        bar.style.width = (timeLeft / 3 * 100) + '%';
+
+                        if (content) content.textContent = timeLeft;
+                        if (timeLeft <= 0) {
+                            clearInterval(timerInterval);
+                            Swal.close();
+                        }
+                    }, 1000);
+                },
+                willClose: () => {
+                    clearInterval(timerInterval);
+                }
+            });
+
+            if (swalResult.dismiss && swalResult.dismiss !== Swal.DismissReason.cancel) {
+                readyToEnd = false;
+                endTaskPending = false;
+                return;
+            }
+
+            if (swalResult.isConfirmed) {
+                readyToEnd = true;
+                document.getElementById('stop-btn').disabled = true;
+                document.getElementById('end-btn').disabled = true;
+
+                log('Waiting for current job to finish before ending task...', 'info');
+                await waitForCycleToFinish();
+
+                sharedDrawerState.systemRunning = false;
+                // updateSystemStatusUI();
+                disableDivContent(true);
+                updateJson();
+
+                clearInterval(gantryAutoTimer);
+                clearInterval(cartesianAutoTimer);
+
+                if (!processEnd)
+                {
+                    var rEnd = await loadPLCEndTask();
+                    if (rEnd == true) {
+                        if (readyToEnd) {
+                            await loadDBStopUnload(true);
+                        }
+                        else
+                        {
+                            await loadDBStopUnload();
+                        }
+                    }
+                   
+                    $('#jobDoneModal').modal('show');
+                }
+            } else {
+                readyToEnd = false;
+                endTaskPending = false;
+            }
+
+        }
+
+        function waitForCycleToFinish() {
+            return new Promise((resolve) => {
+                const check = setInterval(() => {
+                    if (!inPickMove && !inPlaceMove && !inRetrieveMove && !inPutAwayMove && sharedDrawerState.drawerStatus == "None" && sharedDrawerState.gantrySequenceState == "Returning") {
+                        clearInterval(check);
+                        resolve();
+                    }
+                }, 500);
+            });
         }
 
         // async function systemForceStop() {
@@ -1984,13 +2082,12 @@
                     $("#txtReelCodeC").val(result.data.reelCodeC);
                     $("#txtActHeightC").val(result.data.actualHeightC);
 
-                    halfPickMove = result.data.HalfPickMove;
+                    halfPickMove = result.data.halfPickMove;
                     halfPickMoveStep = result.data.halfPickMoveStep;
                     halfPlaceMove = result.data.halfPlaceMove;
                     halfPlaceMoveStep = result.data.halfPlaceMoveStep;
 
                     colNum = result.data.colNum;
-
                     fResult = true;
 
                     return fResult;
@@ -2006,7 +2103,6 @@
 
         // ----------- Action (Auto Mode)
         function gantryAuto() {
-            if (endTask == true) { return; }
             // console.log("AutoGantry");
             const chkAutoRun = document.getElementById('chkAutoRun');
             if (chkAutoRun.checked) {
@@ -2019,7 +2115,7 @@
                     if (bal == 0) {
                         return;
                     }
-                    if (readyToEnd == false) {
+                    if (endTaskPending == false) {
                         startPick();
                     }
                 }
@@ -2032,18 +2128,17 @@
         }
 
         function cartesianAuto() {
-            if (endTask == true) { return; }
             // console.log("AutoCartesian");
             const chkAutoRun = document.getElementById('chkAutoRun');
+
             if (chkAutoRun.checked) {
                 // 1. if no drawer just take (reelId MUST have first cause need get actual height)
                 var actH = $("#txtActHeight").val();
                 var readyForRetrieve = useInches ? true : (actH != "0");
 
                 if (sharedDrawerState.systemRunning == true && sharedDrawerState.drawerStatus == "None" && readyForRetrieve && inRetrieveMove == false && inPutAwayMove == false) {
-                    if (readyToEnd == false) {
-                        startRetrieve();
-                    }
+                    //&& (endTaskPending == false || sharedDrawerState.gantrySequenceState == "PickedAndHolding")
+                    startRetrieve();
                 }
 
                 // 2. if have drawer and placed then just put away
@@ -2055,7 +2150,6 @@
                 }
             }
         }
-
 
         // ----------- Action
         // Gantry + Loader Start Pick
@@ -2419,22 +2513,24 @@
             bal = bal + Number($("#txtCol2TotalReels").val());
             bal = bal + Number($("#txtCol3TotalReels").val());
             bal = bal + Number($("#txtCol4TotalReels").val());
-            if (bal == 0 && sharedDrawerState.gantrySequenceState == "Returning" && sharedDrawerState.cartesianRobotState == 'Ready') {
+            if (bal == 0 && sharedDrawerState.gantrySequenceState == "Returning" && sharedDrawerState.cartesianRobotState == 'Ready' || readyToEnd) {
                 log(`Gantry and loader going end task.`, 'info');
+                processEnd = true;
                 var rEnd = await loadPLCEndTask();
                 if (rEnd == true) {
-                    await loadDBStopUnload();
+                    if (readyToEnd) {
+                        await loadDBStopUnload(true);
+                    }
+                    else 
+                    {
+                        await loadDBStopUnload();
+                    }
                 }
                 $('#jobDoneModal').modal('show');
             }
 
             updateJson();
-            
-            if (readyToEnd) {
-                log('End Cycle', 'info');
-            }
         }
-
 
         // ----------- Action :: retry
         async function retry_PickStatus() {
@@ -2549,10 +2645,6 @@
             inPutAwayMove = false;
 
             updateJson();
-
-        if (readyToEnd) {
-        log('End Cycle', 'info');
-        }
         }
 
 
@@ -2683,12 +2775,12 @@
             return fResult;
         }
 
-        async function loadDBStopUnload() {
+        async function loadDBStopUnload(manualEndTask = false) {
 
             var fResult = false;
 
             await $.ajax({
-                url: "/api/PLCHubIn/StopUnload/" + qId,
+                url: "/api/PLCHubIn/StopUnload/" + qId + "/" + manualEndTask,
                 type: "GET",
                 headers: {
                     'Authorization': 'Bearer ' + token
@@ -3439,16 +3531,14 @@
                     'Authorization': 'Bearer ' + token
                 },
                 dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
 
                 },
                 success: function (result) {
                     // console.log('10::' + JSON.stringify(result));
-                    // swal.close();
                     if (result.success == true) {
-                        endTask = true;
+                        readyToEnd = true;
                         fResult = true;
                         log('End Loader :: OK ', 'info');
                         systemStop();
@@ -3872,7 +3962,6 @@
 
         function exportLogFile() {
 
-
             $.ajax({
                 url: "/api/PLCHubIn/GetErrorLog/" + qId,
                 type: "GET",
@@ -3880,13 +3969,11 @@
                     'Authorization': 'Bearer ' + token
                 },
                 dataType: 'JSON',
-                // data: JSON.stringify(jsonInput),
                 contentType: 'application/json; charset=utf-8',
                 beforeSend: function () {
                 },
                 success: function (result) {
-                    // console.log('Export Err::' + JSON.stringify(result));
-                    // swal.close();
+                    // console.log("result log", result);
                     if (result.success == true) {
 
                         const wb = XLSX.utils.book_new();
@@ -3897,19 +3984,15 @@
                             CreatedDate: new Date()
                         }
 
-                        // const ws = XLSX.utils.aoa_to_sheet([]); //worksheet data
                         const ws = XLSX.utils.json_to_sheet(result.data);
-
                         XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
                         XLSX.writeFile(wb, "HubIn Log.xlsx");
-
                     }
                 },
                 error: function (error) {
                     console.log('Export Err::' + error.val);
                 }
             });
-
         }
 
 

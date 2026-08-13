@@ -2186,13 +2186,13 @@
             });
 
 
-            if (swalResult.dismiss === Swal.DismissReason.close) {
-                console.log('Auto cancelled due to timeout.');
-                if (stopDecision) { 
-                    stopDecision(false); 
-                }
-                return;
-            }
+            // if (swalResult.dismiss === Swal.DismissReason.close) {
+            //     console.log('Auto cancelled due to timeout.');
+            //     if (stopDecision) { 
+            //         stopDecision(false); 
+            //     }
+            //     return;
+            // }
 
             if (swalResult.dismiss && swalResult.dismiss !== Swal.DismissReason.cancel) {
                 console.log('Auto cancelled or closed.');

@@ -137,12 +137,12 @@
                                                     <label for="chkPrint" class="custom-control-label">Print QR</label>
                                                 </div>
                                             </div>
-                                            <div class="col-sm-6 col-md-2">
+                                            @* <div class="col-sm-6 col-md-2">
                                                 <div class="custom-control custom-checkbox">
                                                     <input class="custom-control-input" type="checkbox" id="chkPrintItem">
                                                     <label for="chkPrintItem" class="custom-control-label">Print Item</label>
                                                 </div>
-                                            </div>
+                                            </div> *@
                                             @* <div class="col-sm-6 col-md-3">
                                                 <div class="custom-control custom-checkbox">
                                                     <input class="custom-control-input" type="checkbox" id="chkLoadToLoader">
@@ -837,7 +837,6 @@
 
         $('#listTable').on('click', '.edit-btn', function () {
             const row = JSON.parse($(this).attr('data-row'));
-            console.log("edit here", row);
             editItemForm(row);
 
         });
@@ -915,7 +914,6 @@
                     Swal.fire({
                         text: 'Please Wait',
                         width: '300px',
-
                         allowEscapeKey: false,
                         allowOutsideClick: false,
                         showConfirmButton: false,
@@ -949,40 +947,40 @@
                     });
                 }
             });
-
-            // console.log(id);
         }
 
         function refreshListTable(id) {
             if (id != "") {
                 $.ajax({
-                    url: '/GRN/GetLatestGRNDetail', 
+                    url: '/GRN/GetLatestGRNDetail',
                     type: 'POST',
                     data: JSON.stringify(id),
                     dataType: 'JSON',
                     contentType: 'application/json; charset=utf-8',
                     success: function(response) {
-                        console.log("get latest ", response.data);
                         const updatedData = response.data;
                         var table = $('#listTable').DataTable();
 
-                        table.rows().every(function() {
-                            var rowData = this.data();
-                            var detailId = rowData[6];
+                        var editBtn = $('#listTable tbody').find('.edit-btn').filter(function() {
+                            var rowInfo = $(this).data('row');
+                            return rowInfo && rowInfo.grnDetail_Id == id;
+                        }).first();
 
-                            if (detailId == id) {
-                                rowData[1] = updatedData.itemCode;
-                                rowData[2] = updatedData.qty;
-                                rowData[3] = updatedData.reelCode;
-                                rowData[4] = updatedData.createdDateDisplay;
-                                rowData[5] = `<button class="btn btn-warning edit-btn" data-row='${JSON.stringify(updatedData)}'><i class="bi bi-pencil-square"></i> Edit</button>
-                                                <button class="btn btn-primary" id="printQR" onclick="printQR()"><i class="bi bi-printer"></i> Print QR</button>
-                                                <button class="btn btn-primary" id="printItem" onclick="printItem()"><i class="bi bi-printer"></i> Print Item</button>`;
-                                this.data(rowData).invalidate().draw(false);
-                            }
-                        });
+                        if (editBtn.length === 0) {
+                            console.log('Row not found in table for id', id);
+                            return;
+                        }
 
-                        table.draw();
+                        var row = table.row(editBtn.closest('tr'));
+                        var rowData = row.data();
+                        rowData[1] = updatedData.itemCode;
+                        rowData[2] = updatedData.qty;
+                        rowData[3] = updatedData.reelCode;
+                        rowData[4] = updatedData.createdDateDisplay;
+                        rowData[5] = `<button class="btn btn-warning edit-btn" data-row='${JSON.stringify(updatedData)}'><i class="bi bi-pencil-square"></i> Edit</button>
+                                        <button class="btn btn-primary" id="printQR" data-reelcode="${updatedData.reelCode}" onclick="printQR(this)"><i class="bi bi-printer"></i> Print QR</button>
+                                        <button class="btn btn-primary" id="printItem" onclick="printItem()"><i class="bi bi-printer"></i> Print Item</button>`;
+                        row.data(rowData).draw(false);
                     },
                     error: function(error) {
                         swal.fire({

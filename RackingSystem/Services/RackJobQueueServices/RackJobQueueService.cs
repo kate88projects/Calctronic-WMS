@@ -82,7 +82,23 @@ namespace RackingSystem.Services.RackJobQueueServices
                 }
                 else if (req.DocType == EnumQueueDocType.JOE.ToString())
                 {
-
+                    JobOrderEmergency? jobEmergency = _dbContext.JobOrderEmergency.FirstOrDefault(x => x.JobOrderEmergency_Id == req.Doc_Id);
+                    if (jobEmergency == null)
+                    {
+                        result.errMessage = "Cannot find this Emergency Job Order.";
+                        return result;
+                    }
+                    if (jobEmergency.Status != EnumJobOrderStatus.Draft.ToString())
+                    {
+                        result.errMessage = "This Emergency Job Order is in [" + jobEmergency.Status + "] mode.";
+                        return result;
+                    }
+                    JobOrderEmergencyDetail? jobEmergencyDtlList = _dbContext.JobOrderEmergencyDetail.FirstOrDefault(x => x.JobOrderEmergency_Id == req.Doc_Id);
+                    if (jobEmergencyDtlList == null)
+                    {
+                        result.errMessage = "This Emergency Job Order don't have any Product need pick up.";
+                        return result;
+                    }
                 }
                 else if (req.DocType == EnumQueueDocType.Trolley.ToString())
                 {
