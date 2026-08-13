@@ -17,6 +17,6 @@ namespace RackingSystem.Services.JOServices
         public Task<ServiceResponseModel<JOEmergencyReqDTO>> SaveEmergency(JOEmergencyReqDTO jobEmergency);
         public Task<ServiceResponseModel<JOEmergencyReqDTO>> DeleteEmergency(JOEmergencyReqDTO jobEmergency);
 
-
+        public Task<ServiceResponseModel<List<JORawMaterialStockCheckDTO>>> CheckJORawMaterialStock(long jobOrderId, bool includeQueue = true, bool includeEmergency = true);
     }
 }

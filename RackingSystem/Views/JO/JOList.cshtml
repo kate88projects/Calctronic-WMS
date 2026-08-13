@@ -368,6 +368,9 @@
                                     render: function (data, type, row, meta) {
                                         const rawData = JSON.stringify(row).replace(/"/g, "&quot;");
                                         return `<div style="display:flex;">
+                                                    <button class="btn btn-dark d-grid view-btn me-2" data-row='${rawData}' onclick="navigateToSimulate(${row.jobOrder_Id})">
+                                                    <span><i class="bi bi-eye"></i> Simulate</span>
+                                                    </button>
                                                     <button class="btn btn-primary d-grid view-btn me-2" data-row='${rawData}' onclick="navigateToView(${row.jobOrder_Id}, 'view')">
                                                     <span><i class="bi bi-eye"></i> View</span>
                                                     </button>
@@ -420,6 +423,16 @@
 
         function navigateToEdit(id, mode) {
             window.location.href = '@Url.Action("JODetails", "JO", new { id = "_id_", mode = "_mode_" })'.replace('_id_', id).replace('_mode_', mode);
+        }
+        
+        function navigateToSimulate(id) {
+            var baseUrl = '@Url.Action("JOSimulate", "JO")';
+
+            // Append your dynamic query parameters
+            var finalUrl = baseUrl + '?id=' + id;
+
+            // Open the compiled link in a new tab
+            window.open(finalUrl, '_blank');
         }
 
         $('#listTable').on('click', '.delete-btn', function () {

@@ -506,7 +506,7 @@ namespace RackingSystem.Services.ItemServices
                             result.errMessage = $"UOM cannot be empty.";
                             itm.ErrorMsg = result.errMessage;
                             isError = true;
-                        }                        
+                        }
                         if (!string.IsNullOrEmpty(itm.ItemGroupCode))
                         {
                             if (igExist == null)
@@ -611,5 +611,60 @@ namespace RackingSystem.Services.ItemServices
 
             return result;
         }
+
+        public async Task<ServiceResponseModel<List<SlotItemDTO>>> GetSlotByCodeTop5(string itemCode)
+        {
+            ServiceResponseModel<List<SlotItemDTO>> result = new ServiceResponseModel<List<SlotItemDTO>>();
+
+            try
+            {
+                var itemData = await _dbContext.Item.FirstOrDefaultAsync(x => x.ItemCode == itemCode && x.IsActive == true);
+
+                if (itemData == null)
+                {
+                    result.success = true;
+                    result.data = new List<SlotItemDTO>();
+                    return result;
+                }
+
+                // Get top 5 reels for this item, sorted by expiry date (oldest first), and join with slot information
+                var reelList = await _dbContext.Reel
+                    .Where(x => x.Item_Id == itemData.Item_Id && x.IsReady == true)
+                    .OrderBy(x => x.ExpiryDate)
+                    .Take(5)
+                    .ToListAsync();
+
+                var resultList = new List<SlotItemDTO>();
+
+                foreach (var reel in reelList)
+                {
+                    var slot = await _dbContext.Slot.FirstOrDefaultAsync(x => x.Reel_Id == reel.Reel_Id);
+
+                    resultList.Add(new SlotItemDTO
+                    {
+                        Item_Id = itemData.Item_Id,
+                        ItemCode = itemData.ItemCode,
+                        Reel_Id = reel.Reel_Id,
+                        ReelCode = reel.ReelCode,
+                        ExpiryDate = reel.ExpiryDate,
+                        SlotCode = slot?.SlotCode ?? "",
+                        Qty = reel.Qty,
+                        IsReady = reel.IsReady,
+                        Status = reel.Status
+                    });
+                }
+
+                result.success = true;
+                result.data = resultList;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
     }
 }

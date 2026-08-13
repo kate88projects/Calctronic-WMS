@@ -1,0 +1,199 @@
+@{
+	ViewData["Title"] = "Search Slot By Code";
+}
+
+<style>
+	.table-filter input {
+		height: 34px;
+		border-radius: 3px;
+		border-color: #ddd;
+		box-shadow: none;
+	}
+
+	.table-filter .btn {
+		height: 34px;
+	}
+
+	.table-filter label {
+		font-weight: normal;
+		margin-left: 10px;
+	}
+
+	.table-filter input {
+		display: inline-block;
+		margin-left: 5px;
+		width: 300px;
+	}
+
+	.text-muted {
+		color: #6c757d;
+	}
+
+	.result-table {
+		margin-top: 20px;
+	}
+
+	.badge {
+		padding: 5px 10px;
+		border-radius: 3px;
+	}
+
+	.badge-success {
+		background-color: #10c469;
+		color: white;
+	}
+
+	.empty-state {
+		text-align: center;
+		padding: 40px 20px;
+		color: #6c757d;
+	}
+
+	.empty-state i {
+		font-size: 48px;
+		margin-bottom: 20px;
+		opacity: 0.5;
+	}
+</style>
+
+@section PageHeader {
+	<header class="d-flex align-items-center justify-content-between w-100">
+		<h2 class="pageTitle">Search Slot By Code</h2>
+	</header>
+}
+
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-body">
+					<div class="table-filter">
+						<div class="row" style="padding:5px;">
+							<div class="col-sm-8">
+								<label for="txtItemCode">Item Code:</label>
+								<input id="txtItemCode" name="ItemCode" type="text" class="form-control" placeholder="Enter item code" />
+							</div>
+							<div class="col-sm-4">
+								<button type="button" class="btn btn-primary" style="width:100%;" onclick="searchItem()">
+									<i class="bi bi-search"></i> Search
+								</button>
+							</div>
+						</div>
+					</div>
+
+					<hr />
+
+					<!-- Results Table -->
+					<div id="resultContainer">
+
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+	<script>
+		function searchItem() {
+			const itemCode = $('#txtItemCode').val().trim();
+
+			if (!itemCode) {
+				alert('Please enter an item code');
+				return;
+			}
+
+			$.ajax({
+				url: '@Url.Action("SearchSlotByCode", "Item")',
+				type: 'POST',
+				contentType: 'application/json',
+				data: JSON.stringify(itemCode),
+				success: function (response) {
+					displayResults(response.data);
+				},
+				error: function (xhr, status, error) {
+					$('#resultContainer').html(`<div class="alert alert-danger">Error searching for item: ${error}</div>`);
+				}
+			});
+		}
+
+		function displayResults(data) {
+			const container = $('#resultContainer');
+
+			if (!data || data.length === 0) {
+				container.html(`
+					<div class="empty-state">
+						<i class="bi bi-inbox"></i>
+						<h5>No Results Found</h5>
+						<p>No items found for the specified item code.</p>
+					</div>
+				`);
+				return;
+			}
+
+			// <h5>Search Results for: <strong>${escapeHtml(itemCode)}</strong></h5>
+			const itemCode = data[0].itemCode;
+			let html = `
+				<div class="result-table">
+					<table class="table table-striped table-hover">
+						<thead class="table-light">
+							<tr>
+								<th>Item Code</th>
+								<th>Reel Code</th>
+								<th>Slot Code</th>
+								<th>Expiry Date</th>
+								<th>Quantity</th>
+								<th>Status</th>
+							</tr>
+						</thead>
+						<tbody>
+			`;
+
+			data.forEach(function (item, index) {
+				const expiryDate = new Date(item.expiryDate).toLocaleDateString('en-US', {
+					year: 'numeric',
+					month: '2-digit',
+					day: '2-digit'
+				});
+				const formattedDate = new Date(item.expiryDate).toLocaleDateString('en-GB');
+
+				const statusBadge = item.isReady 
+					? '<span class="badge badge-success">Ready</span>'
+					: '<span class="badge" style="background-color: #ffc107; color: #333;">Not Ready</span>';
+
+				html += `
+					<tr>
+						<td>${escapeHtml(item.itemCode)}</td>
+						<td>${escapeHtml(item.reelCode)}</td>
+						<td><strong>${escapeHtml(item.slotCode)}</strong></td>
+						<td>${formattedDate}</td>
+						<td>${item.qty}</td>
+						<td>${statusBadge}</td>
+					</tr>
+				`;
+			});
+
+			html += `
+						</tbody>
+					</table>
+				</div>
+			`;
+
+			container.html(html);
+		}
+
+		function escapeHtml(text) {
+			const div = document.createElement('div');
+			div.textContent = text;
+			return div.innerHTML;
+		}
+
+		// Allow searching by pressing Enter
+		$('#txtItemCode').keypress(function (e) {
+			if (e.which == 13) {
+				searchItem();
+				return false;
+			}
+		});
+	</script>
+}

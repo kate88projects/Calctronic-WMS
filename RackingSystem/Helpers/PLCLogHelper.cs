@@ -112,6 +112,33 @@ namespace RackingSystem.Helpers
 
         }
 
+        public void InsertPLCAddressResponse(AppDbContext _dbContext, int address, string action, int value, string methodName, bool isErr)
+        {
+            PLCAddressResponseLog log = new PLCAddressResponseLog()
+            {
+                Address = address,
+                Action = action,
+                Value = value,
+                MethodName = methodName,
+                CreatedDate = DateTime.Now,
+                IsErr = isErr,
+            };
+            _dbContext.PLCAddressResponseLog.Add(log);
+            _dbContext.SaveChanges();
+
+            // keep only the last 3 responses per address
+            var old = _dbContext.PLCAddressResponseLog
+                .Where(x => x.Address == address)
+                .OrderByDescending(x => x.CreatedDate)
+                .Skip(3)
+                .ToList();
+            if (old.Count > 0)
+            {
+                _dbContext.PLCAddressResponseLog.RemoveRange(old);
+                _dbContext.SaveChanges();
+            }
+        }
+
         public async Task DeleteLog(AppDbContext _dbContext)
         {
             try

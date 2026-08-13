@@ -20,6 +20,7 @@ using EasyModbus;
 using RackingSystem.Models.API;
 using RackingSystem.Data.Maintenances;
 using RackingSystem.Models.Log;
+using RackingSystem.Data.JO;
 
 namespace RackingSystem.Controllers.API
 {
@@ -389,18 +390,20 @@ namespace RackingSystem.Controllers.API
                     }
                 }
 
-                var rack = _dbContext.Slot.Where(x => x.IsActive == true && x.NeedCheck == false && x.HasReel == true && x.ReelNo == "0").FirstOrDefault();
-                if (rack == null)
-                {
-                    result.success = false;
-                    result.errMessage = "No Reel need to take.";
-                    return result;
-                }
-                var reel = _dbContext.Reel.Where(x => x.Reel_Id == rack.Reel_Id).FirstOrDefault();
+                // is testing code need change to FIFO
+                //var reel = _dbContext.Reel.Where(x => x.Reel_Id == rack.Reel_Id).FirstOrDefault();
+                var reel = _dbContext.Reel.Where(x => x.Item_Id == item.Item_Id && x.IsReady == true).OrderBy(x => x.ExpiryDate).FirstOrDefault();
                 if (reel == null)
                 {
                     result.success = false;
-                    result.errMessage = "No Reel need to take.";
+                    result.errMessage = "No Reel for item [" + item.ItemCode + "] need to take.";
+                    return result;
+                }
+                var rack = _dbContext.Slot.Where(x => x.IsActive == true && x.NeedCheck == false && x.HasReel == true && x.Reel_Id == reel.Reel_Id).FirstOrDefault();
+                if (rack == null)
+                {
+                    result.success = false;
+                    result.errMessage = "No Slot for item [" + item.ItemCode + "] need to take.";
                     return result;
                 }
 
@@ -1125,10 +1128,60 @@ namespace RackingSystem.Controllers.API
 
             try
             {
-                // 1. if loader is fully empty then remove q
+                // 1. if job is fully run through then remove q
                 var q = _dbContext.RackJobQueue.Where(x => x.RackJobQueue_Id == qId).FirstOrDefault();
                 if (q != null)
                 {
+                    // Check if JobOrder has backorder before removing queue
+                    if (q.DocType == EnumQueueDocType.JO.ToString())
+                    {
+                        var jobOrder = _dbContext.JobOrder.Where(x => x.JobOrder_Id == q.Doc_Id).FirstOrDefault();
+                        if (jobOrder != null && jobOrder.Backorder == true)
+                        {
+                            // Get JobOrderRaws with Balance Qty > 0
+                            var jobRawsWithBalance = _dbContext.JobOrderRaws.Where(x => x.JobOrder_Id == q.Doc_Id && x.BalQty > 0).ToList();
+
+                            if (jobRawsWithBalance.Count > 0)
+                            {
+                                // Create new Job Emergency
+                                var jobOrderEmergency = await DocFormatHelper.Instance.get_NextDocumentNo(_dbContext, General.EnumConfiguration.DocFormat_EmergencyJO, DateTime.Now, true);
+                                if (jobOrderEmergency.success == true)
+                                {
+                                    var claims = User.Identities.First().Claims.ToList();
+                                    string userId = claims?.FirstOrDefault(x => x.Type.Equals("UserId", StringComparison.OrdinalIgnoreCase))?.Value ?? "System";
+
+                                    JobOrderEmergency newEmergency = new JobOrderEmergency()
+                                    {
+                                        JobOrder_Id = q.Doc_Id,
+                                        DocNo = jobOrderEmergency.data,
+                                        Description = $"Emergency backorder from Job Order {jobOrder.DocNo}",
+                                        Status = EnumJobOrderStatus.Draft.ToString(),
+                                        DocDate = DateTime.Now,
+                                        CreatedBy = userId,
+                                        CreatedDate = DateTime.Now,
+                                    };
+                                    _dbContext.JobOrderEmergency.Add(newEmergency);
+                                    await _dbContext.SaveChangesAsync();
+
+                                    // Add details for each raw with balance
+                                    foreach (var raw in jobRawsWithBalance)
+                                    {
+                                        JobOrderEmergencyDetail emergencyDetail = new JobOrderEmergencyDetail()
+                                        {
+                                            JobOrderEmergency_Id = newEmergency.JobOrderEmergency_Id,
+                                            Item_Id = raw.Item_Id,
+                                            Qty = raw.BalQty,
+                                            BalQty = raw.BalQty,
+                                            CreatedDate = DateTime.Now,
+                                        };
+                                        _dbContext.JobOrderEmergencyDetail.Add(emergencyDetail);
+                                    }
+                                    await _dbContext.SaveChangesAsync();
+                                }
+                            }
+                        }
+                    }
+
                     _dbContext.RackJobQueue.Remove(q);
                     _dbContext.SaveChanges();
 

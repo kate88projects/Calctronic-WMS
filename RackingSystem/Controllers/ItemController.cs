@@ -4,6 +4,7 @@ using RackingSystem.Data;
 using RackingSystem.Models;
 using RackingSystem.Models.Item;
 using RackingSystem.Services.ItemServices;
+using ClosedXML.Excel;
 
 namespace RackingSystem.Controllers
 {
@@ -178,5 +179,41 @@ namespace RackingSystem.Controllers
             ServiceResponseModel<List<ItemListDTO>> result = await _itemService.GetRawItemList();
             return result;
         }
+
+        public IActionResult SearchSlotByCode()
+        {
+            ViewBag.PermissionList = new List<int>();
+            if (User.Identity?.IsAuthenticated ?? false)
+            {
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
+                {
+                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
+                    ViewBag.PermissionList = uacIdList;
+                }
+            }
+
+            ViewData["ActiveGroup"] = "grpRACKING";
+            ViewData["ActiveTab"] = "SearchSlotByCode";
+            ViewData["Title"] = "Search Slot By Code";
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<ServiceResponseModel<List<SlotItemDTO>>> SearchSlotByCode([FromBody] string itemCode)
+        {
+            if (string.IsNullOrWhiteSpace(itemCode))
+            {
+                return new ServiceResponseModel<List<SlotItemDTO>>
+                {
+                    success = false,
+                    errMessage = "Item code is required"
+                };
+            }
+
+            ServiceResponseModel<List<SlotItemDTO>> result = await _itemService.GetSlotByCodeTop5(itemCode.Trim());
+            return result;
+        }
+
     }
 }

@@ -417,7 +417,7 @@
 
                         @if (ViewBag.PermissionList.Contains(100) || ViewBag.PermissionList.Contains(101) || ViewBag.PermissionList.Contains(102) || ViewBag.PermissionList.Contains(103) || 
                         ViewBag.PermissionList.Contains(104) || ViewBag.PermissionList.Contains(105) || ViewBag.PermissionList.Contains(106) || ViewBag.PermissionList.Contains(107) || 
-                        ViewBag.PermissionList.Contains(108) || ViewBag.PermissionList.Contains(109) || ViewBag.PermissionList.Contains(110) || ViewBag.PermissionList.Contains(111))
+                        ViewBag.PermissionList.Contains(108) || ViewBag.PermissionList.Contains(109) || ViewBag.PermissionList.Contains(110) || ViewBag.PermissionList.Contains(111) || ViewBag.PermissionList.Contains(112))
                         {
                             <li class="nav-item" id="grpRACKING">
                                 <a href="javascript:none" class="nav-link">
@@ -531,11 +531,10 @@
                                         </li>
                                     }
                                     <!-- Show log -->
-                                    @if (ViewBag.PermissionList.Contains(109) == true)
+                                    @* @if (ViewBag.PermissionList.Contains(109) == true)
                                     {
                                         <li class="nav-item" style="padding-left:24px;">
                                             <a asp-action="HubInLogView" asp-controller="Log" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
                                                 <p>Hub In Log</p>
                                             </a>
                                         </li>
@@ -544,7 +543,6 @@
                                     {
                                         <li class="nav-item" style="padding-left:24px;">
                                             <a asp-action="HubOutLogView" asp-controller="Log" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
                                                 <p>Hub Out Log</p>
                                             </a>
                                         </li>
@@ -553,8 +551,25 @@
                                     {
                                         <li class="nav-item" style="padding-left:24px;">
                                             <a asp-action="DrawerInView" asp-controller="Log" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
                                                 <p>Put Away Empty Drawer Log</p>
+                                            </a>
+                                        </li>
+                                    } *@
+                                    @if (ViewBag.PermissionList.Contains(112) == true)
+                                    {
+                                        <li class="nav-item" style="padding-left:24px;">
+                                            <a asp-action="SearchSlotByCode" asp-controller="Item" class="nav-link">
+                                                @* <i class="nav-icon bi bi-circle"></i> *@
+                                                <p>Search Slot By Code</p>
+                                            </a>
+                                        </li>
+                                    }
+                                    @if (ViewBag.PermissionList.Contains(113) == true)
+                                    {
+                                        <li class="nav-item" style="padding-left:24px;">
+                                            <a asp-action="StockAgingReport" asp-controller="Reel" class="nav-link">
+                                                @* <i class="nav-icon bi bi-circle"></i> *@
+                                                <p>Stock Aging Report</p>
                                             </a>
                                         </li>
                                     }

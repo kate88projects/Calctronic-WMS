@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using RackingSystem.Data;
-using RackingSystem.Models.Slot;
 using RackingSystem.Models;
 using RackingSystem.Models.Reel;
-using Microsoft.Data.SqlClient;
-using RackingSystem.Models.GRN;
 
 namespace RackingSystem.Services.ReelServices
 {
@@ -123,6 +121,126 @@ namespace RackingSystem.Services.ReelServices
                 result.data = listDTO;
                 return result;
 
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceResponseModel<StockAgingResDTO>> GetExpiredStockAging(StockAgingReqDTO req)
+        {
+            ServiceResponseModel<StockAgingResDTO> result = new ServiceResponseModel<StockAgingResDTO>();
+            result.data = new StockAgingResDTO();
+            result.data.Items = new List<StockAgingDTO>();
+
+            try
+            {
+                var query = from reel in _dbContext.Reel
+                            join item in _dbContext.Item on reel.Item_Id equals item.Item_Id
+                            join itemGroup in _dbContext.ItemGroup on item.ItemGroup_Id equals itemGroup.ItemGroup_Id
+                            join slot in _dbContext.Slot on reel.Slot_Id equals slot.Slot_Id into slotJoin
+                            from slot in slotJoin.DefaultIfEmpty()
+                            select new { reel, item, itemGroup, slot };
+
+                // Apply filters
+                if (!string.IsNullOrWhiteSpace(req.ItemCode))
+                {
+                    query = query.Where(x => x.item.ItemCode.Contains(req.ItemCode));
+                }
+
+                if (!string.IsNullOrWhiteSpace(req.ItemGroup))
+                {
+                    query = query.Where(x => x.itemGroup.ItemGroupCode.Contains(req.ItemGroup));
+                }
+
+                if (req.ToExpiryDate.HasValue)
+                {
+                    query = query.Where(x => x.reel.ExpiryDate <= req.ToExpiryDate.Value.AddDays(1));
+                }
+
+                if (req.FilterExpired != null)
+                {
+                    if (req.FilterExpired == true)
+                    {
+                        query = query.Where(x => x.reel.ExpiryDate < DateTime.Now.Date);
+                    }
+                    else
+                    {
+                        query = query.Where(x => x.reel.ExpiryDate >= DateTime.Now.Date);
+                    }
+                }
+
+                if (req.FilterInSRMS != null)
+                {
+                    if (req.FilterInSRMS == true)
+                    {
+                        query = query.Where(x => x.slot != null);
+                    }
+                    else
+                    {
+                        query = query.Where(x => x.slot == null);
+                    }
+                }
+
+                // Sort by expiry date (oldest first)
+                query = query.OrderBy(x => x.reel.ExpiryDate);
+
+                // Get total count before pagination
+                int totalCount = await query.CountAsync();
+                int totalExpired = await query.Where(x => x.reel.ExpiryDate < DateTime.Now.Date).CountAsync();
+                int totalNonExpired = await query.Where(x => x.reel.ExpiryDate >= DateTime.Now.Date).CountAsync();
+                int totalExpiredInSRMS = await query.Where(x => x.reel.ExpiryDate < DateTime.Now.Date && x.slot != null).CountAsync(); 
+                int totalNonExpiredInSRMS = await query.Where(x => x.reel.ExpiryDate >= DateTime.Now.Date && x.slot != null).CountAsync();
+
+                // Apply pagination
+                var dataList = await query
+                    .Skip((req.page - 1) * req.pageSize)
+                    .Take(req.pageSize)
+                    .ToListAsync();
+
+                var itemList = new List<StockAgingDTO>();
+                foreach (var item in dataList)
+                {
+                    int daysExpired = (int)(DateTime.Now.Date - item.reel.ExpiryDate.Date).TotalDays;
+
+                    itemList.Add(new StockAgingDTO
+                    {
+                        Item_Id = item.item.Item_Id,
+                        ItemCode = item.item.ItemCode,
+                        ItemDescription = item.item.Description,
+                        ItemDesc2 = item.item.Desc2,
+                        ItemGroupName = item.itemGroup.ItemGroupCode,
+                        Reel_Id = item.reel.Reel_Id,
+                        ReelCode = item.reel.ReelCode,
+                        SlotCode = item.slot?.SlotCode ?? "",
+                        ExpiryDate = item.reel.ExpiryDate,
+                        Qty = item.reel.Qty,
+                        IsReady = item.reel.IsReady,
+                        Status = item.reel.Status,
+                        DaysExpired = daysExpired
+                    });
+                }
+
+                int totalPages = (int)Math.Ceiling((double)totalCount / req.pageSize);
+
+                result.data = new StockAgingResDTO
+                {
+                    Items = itemList,
+                    TotalRecords = totalCount,
+                    TotalExpired = totalExpired,
+                    TotalNonExpired = totalNonExpired,
+                    TotalExpiredInSRMS = totalExpiredInSRMS,
+                    TotalNonExpiredInSRMS = totalNonExpiredInSRMS,
+                    Page = req.page,
+                    PageSize = req.pageSize,
+                    TotalPages = totalPages
+                };
+                result.totalRecords = totalCount;
+                result.success = true;
             }
             catch (Exception ex)
             {

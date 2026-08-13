@@ -41,6 +41,8 @@
         RPT_HubInLog_MENU = 109,
         RPT_HubOutLog_MENU = 110,
         RPT_PutAwayEmpDrawer_MENU = 111,
+        RPT_SearchSlot_MENU = 112,
+        RPT_StockAging_MENU = 113,
 
         SETTINGS_UserList_MENU = 121,
         SETTINGS_UserAccessRight_MENU = 122,

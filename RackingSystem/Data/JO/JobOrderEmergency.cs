@@ -8,6 +8,9 @@ namespace RackingSystem.Data.JO
         public long JobOrderEmergency_Id { get; set; }
 
         [Required]
+        public long JobOrder_Id { get; set; } = 0;
+
+        [Required]
         public DateTime DocDate { get; set; } = new DateTime();
 
         [Required]

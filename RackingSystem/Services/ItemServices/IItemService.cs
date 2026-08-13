@@ -22,5 +22,7 @@ namespace RackingSystem.Services.ItemServices
         public Task<ServiceResponseModel<List<ItemListDTO>>> GetActiveItemList();
         public Task<ServiceResponseModel<List<ItemListDTO>>> GetFinishedItemList();
         public Task<ServiceResponseModel<List<ItemListDTO>>> GetRawItemList();
+
+        public Task<ServiceResponseModel<List<SlotItemDTO>>> GetSlotByCodeTop5(string itemCode);
     }
 }

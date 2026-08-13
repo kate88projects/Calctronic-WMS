@@ -1,4 +1,5 @@
 ﻿using RackingSystem.Models;
+using RackingSystem.Models.Item;
 using RackingSystem.Models.Reel;
 
 namespace RackingSystem.Services.ReelServices
@@ -8,5 +9,7 @@ namespace RackingSystem.Services.ReelServices
         public Task<ServiceResponseModel<List<ReelListDTO>>> GetReelList();
         public Task<ServiceResponseModel<ReelAvailableListDTO>> GetAvailableReelTotalCount(ReelAvailableSearchReqDTO req);
         public Task<ServiceResponseModel<List<ReelAvailableListDTO>>> GetAvailableReelList(ReelAvailableSearchReqDTO req);
+
+        public Task<ServiceResponseModel<StockAgingResDTO>> GetExpiredStockAging(StockAgingReqDTO req);
     }
 }

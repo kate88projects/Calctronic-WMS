@@ -570,5 +570,390 @@ namespace RackingSystem.Services.JOServices
             }
             return result;
         }
+
+        public async Task<ServiceResponseModel<List<JORawMaterialStockCheckDTO>>> CheckJORawMaterialStock(long jobOrderId, bool includeQueue = true, bool includeEmergency = true)
+        {
+            ServiceResponseModel<List<JORawMaterialStockCheckDTO>> result = new ServiceResponseModel<List<JORawMaterialStockCheckDTO>>();
+
+            try
+            {
+                // Get all job details for this job order
+                var jobDetails = await _dbContext.JobOrderDetail
+                    .Where(x => x.JobOrder_Id == jobOrderId)
+                    .ToListAsync();
+
+                if (!jobDetails.Any())
+                {
+                    result.success = true;
+                    result.data = new List<JORawMaterialStockCheckDTO>();
+                    return result;
+                }
+
+                var rawMaterialCheckList = new List<JORawMaterialStockCheckDTO>();
+
+                // Build a dictionary to track reserved reels by item
+                var reservedReels = await CalculateReservedReels(includeQueue, includeEmergency, jobOrderId, 0);
+
+                foreach (var detail in jobDetails)
+                {
+                    // Get the finish good item
+                    var finishGoodItem = await _dbContext.Item.FirstOrDefaultAsync(x => x.Item_Id == detail.Item_Id);
+                    if (finishGoodItem == null) continue;
+
+                    // Find the BOM for this finish good item
+                    var bom = await _dbContext.BOM
+                        .FirstOrDefaultAsync(x => x.Item_Id == detail.Item_Id && x.IsActive == true);
+
+                    if (bom == null)
+                    {
+                        // No BOM found for this finish good, consider it unfulfillable
+                        rawMaterialCheckList.Add(new JORawMaterialStockCheckDTO
+                        {
+                            JobOrderDetail_Id = detail.JobOrderDetail_Id,
+                            FinishGoodItemCode = finishGoodItem.ItemCode,
+                            FinishGoodItemDescription = finishGoodItem.Description,
+                            FinishGoodQty = detail.Qty,
+                            IsFulfillable = false,
+                            RawMaterials = new List<RawMaterialStockDTO>(),
+                            Shortages = new List<RawMaterialShortageDTO>()
+                        });
+                        continue;
+                    }
+
+                    // Get all BOM details (raw materials) for this BOM
+                    var bomDetails = await _dbContext.BOMDetail
+                        .Where(x => x.BOM_Id == bom.BOM_Id)
+                        .ToListAsync();
+
+                    var rawMaterials = new List<RawMaterialStockDTO>();
+                    var shortages = new List<RawMaterialShortageDTO>();
+                    bool isFulfillable = true;
+
+                    // Track which reels are used within this BOM (for this job detail)
+                    var usedReelsInThisBOM = new HashSet<Guid>();
+
+                    // For each raw material in the BOM, check stock availability
+                    foreach (var bomDetail in bomDetails)
+                    {
+                        var rawMaterialItem = await _dbContext.Item
+                            .FirstOrDefaultAsync(x => x.Item_Id == bomDetail.Item_Id);
+
+                        if (rawMaterialItem == null) continue;
+
+                        int requiredQty = bomDetail.Qty * detail.Qty; // Required qty * finish good qty
+
+                        // Get all available reels (ready status) for this raw material
+                        var availableReels = await _dbContext.Reel
+                            .Where(x => x.Item_Id == bomDetail.Item_Id &&
+                                       x.NeedCheck == false &&
+                                       x.IsReady == true && 
+                                       x.Status == EnumReelStatus.IsReady.ToString() && 
+                                       x.ExpiryDate.Date >= DateTime.Now.Date) 
+                            .OrderBy(x => x.ExpiryDate)
+                            .ToListAsync();
+
+                        Reel? allocatedReel = null;
+
+                        foreach (var reel in availableReels)
+                        {
+                            // Check if this reel is already reserved for another raw material (from queue/emergency jobs)
+                            if (reservedReels.ContainsKey(reel.Reel_Id))
+                                continue; // Skip this reel, it's reserved by queue/emergency
+
+                            // Check if this reel is already used for another raw material in THIS BOM
+                            if (usedReelsInThisBOM.Contains(reel.Reel_Id))
+                                continue; // Skip this reel, it's already allocated to another raw material
+
+                            // Only allocate if reel qty meets the requirement
+                            if (reel.Qty >= requiredQty)
+                            {
+                                allocatedReel = reel; // Collect reel code
+                                usedReelsInThisBOM.Add(reel.Reel_Id); // Mark as used in this BOM
+                                reservedReels[reel.Reel_Id] = reel.Item_Id; // Reserve this reel globally
+                                break; // Reel fully satisfies requirement
+                            }
+                        }
+
+                        bool hasSufficientStock = allocatedReel == null ? false : (allocatedReel?.Qty >= requiredQty);
+
+                        rawMaterials.Add(new RawMaterialStockDTO
+                        {
+                            RawMaterial_Id = rawMaterialItem.Item_Id,
+                            RawMaterialItemCode = rawMaterialItem.ItemCode,
+                            RawMaterialItemDescription = rawMaterialItem.Description,
+                            RequiredQty = requiredQty,
+                            AvailableQty = allocatedReel?.Qty ?? 0,
+                            HasSufficientStock = hasSufficientStock,
+                            AllocatedReelCodes = allocatedReel?.ReelCode ?? "", // Join reel codes with comma
+                            AllocatedReelCount = 1
+                        });
+
+                        // Track shortages
+                        if (!hasSufficientStock)
+                        {
+                            isFulfillable = false;
+                            shortages.Add(new RawMaterialShortageDTO
+                            {
+                                RawMaterial_Id = rawMaterialItem.Item_Id,
+                                RawMaterialItemCode = rawMaterialItem.ItemCode,
+                                RawMaterialItemDescription = rawMaterialItem.Description,
+                                RequiredQty = requiredQty,
+                                AvailableQty = 0,
+                                ShortageQty = requiredQty
+                            });
+                        }
+                    }
+
+                    rawMaterialCheckList.Add(new JORawMaterialStockCheckDTO
+                    {
+                        JobOrderDetail_Id = detail.JobOrderDetail_Id,
+                        FinishGoodItemCode = finishGoodItem.ItemCode,
+                        FinishGoodItemDescription = finishGoodItem.Description,
+                        FinishGoodQty = detail.Qty,
+                        IsFulfillable = isFulfillable,
+                        RawMaterials = rawMaterials,
+                        Shortages = shortages
+                    });
+                }
+
+                result.success = true;
+                result.data = rawMaterialCheckList;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceResponseModel<List<JORawMaterialStockCheckDTO>>> CheckJOERawMaterialStock(long jobOrderEId, bool includeQueue = true, bool includeEmergency = true)
+        {
+            ServiceResponseModel<List<JORawMaterialStockCheckDTO>> result = new ServiceResponseModel<List<JORawMaterialStockCheckDTO>>();
+
+            try
+            {
+                // Get all job details for this job order
+                var jobDetails = await _dbContext.JobOrderEmergencyDetail
+                    .Where(x => x.JobOrderEmergency_Id == jobOrderEId)
+                    .ToListAsync();
+
+                if (!jobDetails.Any())
+                {
+                    result.success = true;
+                    result.data = new List<JORawMaterialStockCheckDTO>();
+                    return result;
+                }
+
+                var rawMaterialCheckList = new List<JORawMaterialStockCheckDTO>();
+
+                // Build a dictionary to track reserved reels by item
+                var reservedReels = await CalculateReservedReels(includeQueue, includeEmergency, 0, jobOrderEId);
+
+                foreach (var detail in jobDetails)
+                {
+                    var rawMaterials = new List<RawMaterialStockDTO>();
+                    var shortages = new List<RawMaterialShortageDTO>();
+
+                    var rawMaterialItem = await _dbContext.Item
+                        .FirstOrDefaultAsync(x => x.Item_Id == detail.Item_Id);
+
+                    if (rawMaterialItem == null) continue;
+
+                    int requiredQty = detail.Qty; // Required qty 
+
+                    // Get all available reels (ready status) for this raw material
+                    var availableReels = await _dbContext.Reel
+                        .Where(x => x.Item_Id == detail.Item_Id &&
+                                   x.NeedCheck == false &&
+                                   x.IsReady == true &&
+                                   x.Status == EnumReelStatus.IsReady.ToString() &&
+                                   x.ExpiryDate.Date >= DateTime.Now.Date)
+                        .OrderBy(x => x.ExpiryDate)
+                        .ToListAsync();
+
+                    Reel? allocatedReel = null;
+
+                    foreach (var reel in availableReels)
+                    {
+                        // Check if this reel is already reserved for another raw material (from queue/emergency jobs)
+                        if (reservedReels.ContainsKey(reel.Reel_Id))
+                            continue; // Skip this reel, it's reserved by queue/emergency
+
+                        // Only allocate if reel qty meets the requirement
+                        if (reel.Qty >= requiredQty)
+                        {
+                            allocatedReel = reel; // Collect reel code
+                            reservedReels[reel.Reel_Id] = reel.Item_Id; // Reserve this reel globally
+                            break; // Reel fully satisfies requirement
+                        }
+                    }
+
+                    bool hasSufficientStock = allocatedReel == null ? false : (allocatedReel?.Qty >= requiredQty);
+
+                    rawMaterials.Add(new RawMaterialStockDTO
+                    {
+                        RawMaterial_Id = rawMaterialItem.Item_Id,
+                        RawMaterialItemCode = rawMaterialItem.ItemCode,
+                        RawMaterialItemDescription = rawMaterialItem.Description,
+                        RequiredQty = requiredQty,
+                        AvailableQty = allocatedReel?.Qty ?? 0,
+                        HasSufficientStock = hasSufficientStock,
+                        AllocatedReelCodes = allocatedReel?.ReelCode ?? "", // Join reel codes with comma
+                        AllocatedReelCount = 1
+                    });
+
+                    // Track shortages
+                    if (!hasSufficientStock)
+                    {
+                        shortages.Add(new RawMaterialShortageDTO
+                        {
+                            RawMaterial_Id = rawMaterialItem.Item_Id,
+                            RawMaterialItemCode = rawMaterialItem.ItemCode,
+                            RawMaterialItemDescription = rawMaterialItem.Description,
+                            RequiredQty = requiredQty,
+                            AvailableQty = 0,
+                            ShortageQty = requiredQty
+                        });
+                    }
+                }
+
+                result.success = true;
+                result.data = rawMaterialCheckList;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        private async Task<Dictionary<Guid, long>> CalculateReservedReels(bool includeQueue, bool includeEmergency, long skipJobId, long skipJobEId)
+        {
+            var reservedReels = new Dictionary<Guid, long>(); // Reel_Id -> Item_Id (which item type reserved it)
+
+            try
+            {
+                if (includeQueue)
+                {
+                    // Get all pending job orders and allocate their reels
+                    var pendingJobOrderIds = await _dbContext.RackJobQueue
+                        .Where(x => x.DocType == EnumQueueDocType.JO.ToString())
+                        .Select(x => x.Doc_Id)
+                        .ToListAsync();
+
+                    foreach (var jobId in pendingJobOrderIds)
+                    {
+                        if (jobId == skipJobId)
+                            continue;
+
+                        // when add in queue will auto create JobOrderRaws list from BOM
+                        var jobRaws = await _dbContext.JobOrderRaws
+                            .Where(x => x.JobOrder_Id == jobId)
+                            .ToListAsync();
+
+                        // For each job raw, track used reels in its BOM (single-use allocation)
+                        foreach (var raw in jobRaws)
+                        {
+                            // Track reels used within this BOM (same as current job logic)
+                            var usedReelsInThisBOM = new HashSet<Guid>();
+
+                            int requiredQty = raw.BalQty;
+                            var availableReels = await _dbContext.Reel
+                                .Where(x => x.Item_Id == raw.Item_Id &&
+                                           x.NeedCheck == false &&
+                                           x.IsReady == true &&
+                                           x.Status == EnumReelStatus.IsReady.ToString() &&
+                                           x.ExpiryDate.Date >= DateTime.Now.Date)
+                                //!reservedReels.ContainsKey(x.Reel_Id) && // Not reserved by earlier queue/emergency jobs
+                                //!usedReelsInThisBOM.Contains(x.Reel_Id)) // Not used by earlier raw material in this BOM
+                                .OrderBy(x => x.ExpiryDate)
+                                .ToListAsync();
+
+                            int allocatedQty = 0;
+                            foreach (var reel in availableReels)
+                            {
+                                // Double-check not already reserved/used
+                                if (!reservedReels.ContainsKey(reel.Reel_Id) && !usedReelsInThisBOM.Contains(reel.Reel_Id))
+                                {
+                                    // Only allocate if reel qty meets the requirement
+                                    if (reel.Qty >= requiredQty)
+                                    {
+                                        reservedReels[reel.Reel_Id] = raw.Item_Id; // Mark reel as reserved
+                                        usedReelsInThisBOM.Add(reel.Reel_Id); // Mark as used in this BOM
+                                        allocatedQty = reel.Qty;
+                                        break; // Reel fully satisfies requirement
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (includeEmergency)
+                {
+                    // Get all pending emergency job orders and allocate their reels
+                    var pendingEmergencyIds = await _dbContext.RackJobQueue
+                        .Where(x => x.DocType == EnumQueueDocType.JOE.ToString())
+                        .Select(x => x.Doc_Id)
+                        .ToListAsync();
+
+                    foreach (var emergId in pendingEmergencyIds)
+                    {
+                        if (emergId == skipJobEId)
+                            continue;
+
+                        var emergDetails = await _dbContext.JobOrderEmergencyDetail
+                            .Where(x => x.JobOrderEmergency_Id == emergId)
+                            .ToListAsync();
+
+                        // For each emergency detail, track used reels in its BOM (single-use allocation)
+                        foreach (var detail in emergDetails)
+                        {
+                            // Track reels used within this BOM (same as current job logic)
+                            var usedReelsInThisBOM = new HashSet<Guid>();
+
+                            int requiredQty = detail.Qty;
+                            var availableReels = await _dbContext.Reel
+                                .Where(x => x.Item_Id == detail.Item_Id &&
+                                           x.NeedCheck == false &&
+                                           x.IsReady == true &&
+                                           x.Status == EnumReelStatus.IsReady.ToString() &&
+                                           x.ExpiryDate.Date >= DateTime.Now.Date)
+                                //!reservedReels.ContainsKey(x.Reel_Id) && // Not reserved by earlier queue/emergency jobs
+                                //!usedReelsInThisBOM.Contains(x.Reel_Id)) // Not used by earlier raw material in this BOM
+                                .OrderBy(x => x.CreatedDate)
+                                .ToListAsync();
+
+                            int allocatedQty = 0;
+                            foreach (var reel in availableReels)
+                            {
+                                // Double-check not already reserved/used
+                                if (!reservedReels.ContainsKey(reel.Reel_Id) && !usedReelsInThisBOM.Contains(reel.Reel_Id))
+                                {
+                                    // Only allocate if reel qty meets the requirement
+                                    if (reel.Qty >= requiredQty)
+                                    {
+                                        reservedReels[reel.Reel_Id] = detail.Item_Id; // Mark reel as reserved
+                                        usedReelsInThisBOM.Add(reel.Reel_Id); // Mark as used in this BOM
+                                        allocatedQty = reel.Qty;
+                                        break; // Reel fully satisfies requirement
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't throw - return partial reserved dict
+            }
+
+            return reservedReels;
+        }
     }
 }

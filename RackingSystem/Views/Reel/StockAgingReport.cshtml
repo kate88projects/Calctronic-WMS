@@ -1,0 +1,846 @@
+@{
+	ViewData["Title"] = "Stock Aging Report";
+}
+
+<style>
+	.table-filter input, .table-filter select {
+		height: 34px;
+		border-radius: 3px;
+		border-color: #ddd;
+		box-shadow: none;
+	}
+
+	.table-filter .btn {
+		height: 34px;
+	}
+
+	.table-filter label {
+		font-weight: normal;
+		margin-left: 10px;
+		margin-bottom: 0;
+	}
+
+	.table-filter input, .table-filter select {
+		display: inline-block;
+		margin-left: 5px;
+	}
+
+	.table-filter .col-sm-3 input {
+		/* width: 150px; */
+	}
+
+	.table-filter .col-sm-2 input {
+		/* width: 150px; */
+	}
+
+	.text-muted {
+		color: #6c757d;
+	}
+
+	.result-table {
+		margin-top: 20px;
+	}
+
+	.badge {
+		padding: 5px 10px;
+		border-radius: 3px;
+	}
+
+	.badge-danger {
+		background-color: #dc3545;
+		color: white;
+	}
+
+	.badge-warning {
+		background-color: #ffc107;
+		color: #333;
+	}
+
+	.empty-state {
+		text-align: center;
+		padding: 40px 20px;
+		color: #6c757d;
+	}
+
+	.empty-state i {
+		font-size: 48px;
+		margin-bottom: 20px;
+		opacity: 0.5;
+	}
+
+	.days-expired-critical {
+		color: #dc3545;
+		font-weight: bold;
+	}
+
+	.days-expired-warning {
+		color: #ff6b6b;
+	}
+
+	.export-btn {
+		margin-left: 5px;
+	}
+
+	.pagination {
+		float: right;
+		margin: 15px 0 5px;
+	}
+
+	.pagination li a {
+		border: none;
+		font-size: 13px;
+		min-width: 30px;
+		min-height: 30px;
+		color: #999;
+		margin: 0 2px;
+		line-height: 30px;
+		border-radius: 2px !important;
+		text-align: center;
+		padding: 0 6px;
+	}
+
+	.pagination li a:hover {
+		color: #666;
+	}
+
+	.pagination li.active a {
+		background: #03A9F4;
+		color: white;
+	}
+
+	.pagination li.active a:hover {
+		background: #0397d6;
+	}
+
+	.pagination li.disabled i {
+		color: #ccc;
+	}
+
+	.pagination li i {
+		font-size: 16px;
+		padding-top: 6px
+	}
+
+	.pagination-info {
+		float: left;
+		padding: 5px 10px;
+		color: #666;
+	}
+
+	.show-entries {
+		display: inline-block;
+		margin-left: 10px;
+	}
+
+	.show-entries select {
+		width: 60px;
+		height: 34px;
+		padding: 5px;
+	}
+
+	.hint-text {
+		float: left;
+		margin-top: 10px;
+		font-size: 13px;
+	}
+
+	#contentBox {
+		background-color: white;
+	}
+
+	.status-grid {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 16px;
+		margin-bottom: 24px;
+	}
+
+	.status-card {
+		background: #f9fafb;
+		border-radius: 14px;
+		padding: 16px;
+		text-align: center;
+		border: 1px solid #e5e7eb;
+		cursor: pointer;
+		transition: all 0.3s ease;
+	}
+
+		.status-card h3 {
+			font-size: 13px;
+			color: #6b7280;
+			margin-bottom: 6px;
+		}
+
+		.status-card .value {
+			font-size: 22px;
+			font-weight: 600;
+		}
+
+		.status-card:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+		}
+
+		/* Highlighted state for status card when clicked */
+		.status-card.active {
+			background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+			color: white;
+			border-color: #1e40af;
+			box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+		}
+
+		.status-card.active h3 {
+			color: rgba(255, 255, 255, 0.9);
+		}
+
+		.status-card.active .value {
+			color: white;
+		}
+
+		.status-card.active:hover {
+			transform: translateY(-4px);
+			box-shadow: 0 8px 20px rgba(59, 130, 246, 0.5);
+		}
+
+</style>
+
+@section PageHeader {
+	<header class="d-flex align-items-center justify-content-between w-100">
+		<h2 class="pageTitle">Stock Aging Report</h2>
+	</header>
+}
+
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-12">
+			<div class="card">
+				<div class="card-body">
+					<div class="table-filter">
+						<div class="row" style="padding:5px;">
+							<div class="col-sm-3">
+								@* <label for="txtItemCode">Item Code:</label> *@
+								<input id="txtItemCode" name="ItemCode" type="text" class="form-control" placeholder="Item Code" />
+							</div>
+							<div class="col-sm-3" style="">
+								<input id="txtItemDesc" name="ItemDesc" type="text" class="form-control" style="" placeholder="Item Desc / Desc2" />
+							</div>
+							<div class="col-sm-3">
+								@* <label for="txtItemGroup">Item Group:</label> *@
+								<input id="txtItemGroup" name="ItemGroup" type="text" class="form-control" placeholder="Item Group" />
+							</div>
+							<div class="col-sm-2">
+								<label for="toDate">To Expiry Date:</label>
+								<input id="toDate" name="ToExpiryDate" type="date" class="form-control" />
+							</div>
+							<div class="col-sm-1">
+								<button type="button" class="btn btn-primary" style="width:100%;" onclick="loadList(1, 'A')">
+									<i class="bi bi-search"></i> Search
+								</button>
+							</div>
+						</div>
+					</div>
+
+					<hr />
+
+					<!-- Status -->
+					<div class="status-grid">
+						<div class="status-card" onclick="loadList(1, 'NEx')">
+							<h3>Non Expired</h3>
+							<div class="value" id="txtNEx">-</div>
+						</div>
+						<div class="status-card" onclick="loadList(1, 'Ex')">
+							<h3>Expired</h3>
+							<div class="value" id="txtEx">-</div>
+						</div>
+						<div class="status-card" onclick="loadList(1, 'NExSRMS')">
+							<h3>Non Expired In SRMS</h3>
+							<div class="value" id="txtNExSRMS">-</div>
+						</div>
+						<div class="status-card" onclick="loadList(1, 'ExSRMS')">
+							<h3>Expired In SRMS</h3>
+							<div class="value" id="txtExSRMS">-</div>
+						</div>
+					</div>
+
+					<hr />
+
+					<div class="table-filter">
+						<div class="row" style="padding-left:5px;">
+							<div class="col-sm-6">
+								<div class="show-entries">
+									<label>Show</label>
+									<select id="selpageSize" name="pageSize" class="form-control">
+										@* <option value="10">10</option> *@
+										<option value="25">25</option>
+										<option value="50">50</option>
+										<option value="100">100</option>
+										<option value="200">250</option>
+									</select>
+									<span>entries</span>
+								</div>
+							</div>
+							<div class="col-sm-6" style="text-align:end;">
+								<button type="button" class="btn btn-success export-btn" onclick="exportToExcel()">
+									<i class="bi bi-file-earmark-excel"></i> Export to Excel
+								</button>
+							</div>
+						</div>
+					</div>
+
+					<div class="text-nowrap table-container">
+						<table id="listTable" class="dataTable row-border hover order-column" style="width:100%">
+							<thead>
+								<tr>
+									<th>Item Code</th>
+									<th>Description</th>
+									<th>Item Group</th>
+									<th>Reel Code</th>
+									<th>Slot Code</th>
+									<th>Expiry Date</th>
+									<th>Days Expired</th>
+									<th>Qty</th>
+									<th>Status</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+					<div class="dt-container dt-empty-footer">
+						<div class="dt-layout-row">
+							<div class="hint-text">Showing <b id="lblCurCount">0</b> of <b id="lblTotal">0</b> entries</div>
+							@* <ul class="pagination" id="ulPagination">
+                        </ul> *@
+							<div class="dt-layout-cell dt-layout-end">
+								<div class="dt-paging">
+									<nav aria-label="pagination" id="ulPagination">
+									</nav>
+								</div>
+							</div>
+							<input type="hidden" id="txtCurPage">
+							<input type="hidden" id="txtCurFilter">
+							<input type="hidden" id="txtTotalRecord">
+							<input type="hidden" id="txtPageSize">
+							<input type="hidden" id="txtTotalPage">
+						</div>
+					</div>
+
+					<!-- Results Table -->
+					@* <div id="resultContainer"></div> *@
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts
+{
+	<link rel="stylesheet" href="../css/sweetalert2.min.css">
+	<link rel="stylesheet" href="../css/dataTables.dataTables.css">
+	<link rel="stylesheet" href="../css/columnControl.dataTables.css">
+
+	<script src="../lib/jquery/dist/jquery.min.js"></script>
+	<script src="../js/dataTables.js"></script>
+	<script src="../js/dataTables.columnControl.js"></script>
+	<script src="../js/columnControl.dataTables.js"></script>
+
+	<script src="../js/sweetalert2.all.min.js"></script>
+	<script src="../js/xlsx.full.min.js"></script>
+	<script src="../js/exceljs.min.js"></script>
+
+	<script>
+		// let currentPage = 1;
+		// let currentPageSize = 50;
+		// let lastSearchData = null;
+
+		$(document).ready(function() {
+			$('#txtTotalRecord').val(0);
+			$('#txtTotalPage').val(1);
+			$('#txtCurFilter').val('A');
+		});
+
+		function prevPage() {
+			var curPage = $("#txtCurPage").val();
+			if (curPage == 1) {
+				return;
+			}
+			var curFilter = $("#txtCurFilter").val();
+			loadList(curPage - 1, curFilter);
+		}
+
+		function nextPage() {
+			var curPage = Number($("#txtCurPage").val());
+			var ttl = Number($("#txtTotalRecord").val());
+			var pageSize = Number($("#txtPageSize").val());
+			var ttlPage = Number($("#txtTotalPage").val());
+			// var ttlPage = ttl / pageSize;
+			// if ((ttl % pageSize) > 0) {
+			//     ttlPage = ttlPage + 1;
+			// }
+			if ((curPage + 1) > ttlPage) {
+				return;
+			}
+			var curFilter = $("#txtCurFilter").val();
+			loadList(curPage + 1, curFilter);
+		}
+
+		function loadList(page, curFil) {
+			// Remove active class from all status cards
+			$('.status-card').removeClass('active');
+
+			// Add active class to the clicked card
+			if (curFil !== 'A') {
+				$('.status-card').each(function() {
+					const onclick = $(this).attr('onclick');
+					if (onclick.includes("'" + curFil + "'")) {
+						$(this).addClass('active');
+					}
+				});
+			}
+
+			$('#txtCurPage').val(page);
+			$('#txtCurFilter').val(curFil);
+			$('#txtPageSize').val($("#selpageSize").val());
+			var ttlPage = $("#txtTotalPage").val();
+			for (var j = 1; j <= ttlPage; j++) {
+				$('#btnP' + j).removeClass('current');
+			}
+			$('#btnP' + page).addClass('current');
+
+			const itemCode = $('#txtItemCode').val().trim();
+			const itemDesc = $('#txtItemDesc').val().trim();
+			const itemGroup = $('#txtItemGroup').val().trim();
+			const toDate = $('#toDate').val();
+			const ex = curFil == 'A' ? null : (curFil.includes('NEx') ? false : true); // Default to 'A' if no filter is provided
+			const srms = curFil == 'A' ? null : (curFil.includes('SRMS') ? true : false); // Default to 'A' if no filter is provided
+
+			var data = {
+				itemCode: itemCode,
+				itemGroup: itemGroup,
+				toExpiryDate: toDate ? new Date(toDate) : null,
+				filterExpired: ex,
+				filterInSRMS: srms,
+				pageSize: $("#selpageSize").val(),
+				page: page
+			};
+
+			$.ajax({
+				url: "/Reel/GetStockAgingReport/",
+				type: "POST",
+				data: JSON.stringify(data),
+				dataType: 'JSON',
+				contentType: 'application/json; charset=utf-8',
+				beforeSend: function() {
+					Swal.fire({
+						text: 'Please Wait',
+						width: '300px',
+						allowEscapeKey: false,
+						allowOutsideClick: false,
+						showConfirmButton: false,
+					});
+					Swal.showLoading();
+				},
+				success: function(result) {
+					swal.close()
+					if (result.success == true) {
+
+						if (page == 1) {
+							document.getElementById('txtNEx').innerHTML = result.data.totalNonExpired;
+							document.getElementById('txtEx').innerHTML = result.data.totalExpired;
+							document.getElementById('txtNExSRMS').innerHTML = result.data.totalNonExpiredInSRMS;
+							document.getElementById('txtExSRMS').innerHTML = result.data.totalExpiredInSRMS;
+						}
+
+						$('#listTable').DataTable({
+							data: result.data.items,
+							paging: false,
+							searching: false,
+							"info": false,
+							// pageLength: $("#selpageSize").val(),
+							// lengthMenu: [50, 100, 250, 500, 1000],
+							"bDestroy": true,
+							columns: [
+								{ data: 'itemCode' },
+								{ data: 'itemDescription' },
+								{ data: 'itemGroupName' },
+								{ data: 'reelCode' },
+								{ data: 'slotCode' },
+								{
+									data: null,
+									render: function(data, type, row, meta) {
+										// const expiryDate = new Date(row.expiryDate).toLocaleDateString('en-US', {
+										// 	year: 'numeric',
+										// 	month: '2-digit',
+										// 	day: '2-digit'
+										// });
+										const formattedDate = new Date(row.expiryDate).toLocaleDateString('en-GB');
+										return formattedDate;
+									}
+								},
+								{
+									data: null,
+									render: function(data, type, row, meta) {
+										const daysClass = row.daysExpired > 30 ? 'days-expired-critical' : 'days-expired-warning';
+										return '<span class="' + daysClass + '">' + row.daysExpired + ' days</span>';
+									}
+								},
+								{ data: 'qty' },
+								{
+									data: null,
+									render: function(data, type, row, meta) {
+										if (row.isReady == true) {
+											return '<span class="badge badge-warning">Ready</span>';
+										}
+										else {
+											return '<span class="badge badge-danger">Not Ready</span>';
+										}
+									}
+								},
+
+							],
+							ordering: {
+								indicators: false
+							},
+							// columnControl: ['orderStatus']
+						});
+
+						// if is page 1 then need regenerate pagination, else just show current entry
+						var curCnt = 0;
+						var pageSize = parseInt($("#selpageSize").val());
+						var startEntry = ((page - 1) * pageSize) + 1;
+						var ttlRecords = result.data.totalRecords === -1 ? $('#lblTotal').text() : result.data.totalRecords;
+						var endEntry = Math.min(page * pageSize, ttlRecords);
+
+						if (ttlRecords === 0 || startEntry > ttlRecords) {
+							startEntry = 0;
+							endEntry = 0;
+						}
+						$('#lblCurCount').html(`${startEntry} to ${endEntry}`);
+
+						if (page == 1) {
+							$('#lblTotal').html(result.data.totalRecords);
+							$('#ulPagination').html('');
+
+							var pageSize = $("#selpageSize").val();
+							const myDiv = document.getElementById('ulPagination');
+							var ttlPage = result.data.totalRecords / pageSize;
+
+							if ((result.data.totalRecords % pageSize) > 0) {
+								ttlPage = ttlPage + 1;
+							}
+							$('#txtTotalRecord').val(result.data.totalRecords);
+							$('#txtTotalPage').val(ttlPage);
+
+							var lastPage = 1;
+							myDiv.innerHTML += `<button class="dt-paging-button disabled first" onclick="loadList(1, '${curFil}')" role="link" type="button" aria-controls="listTable"><<</button>`;
+							myDiv.innerHTML += `<button class="dt-paging-button disabled" onclick="prevPage()" role="link" type="button" aria-controls="listTable"><</button>`;
+							for (var i = 1; i <= ttlPage; i++) {
+								if (i == 1) {
+									myDiv.innerHTML += `<button class="dt-paging-button current" id="btnP${i}" onclick="loadList(${i}, '${curFil}')" role="link" type="button" aria-controls="listTable" > ${i}</button > `;
+								}
+								else {
+									myDiv.innerHTML += `<button class="dt-paging-button" id="btnP${i}" onclick="loadList(${i}, '${curFil}')" role="link" type="button" aria-controls="listTable">${i}</button>`;
+								}
+								lastPage = i;
+							}
+							myDiv.innerHTML += `<button class="dt-paging-button disabled" onclick="nextPage()" role="link" type="button" aria-controls="listTable">></button>`;
+							myDiv.innerHTML += `<button class="dt-paging-button last disabled" onclick="loadList(${i}, '${curFil}')" role="link" type="button" aria-controls="listTable">>></button>`;
+						}
+
+					}
+					else {
+						swal.fire({
+							icon: 'error',
+							title: "Wait",
+							text: result.errMessage
+						});
+					}
+				},
+				error: function(error) {
+					swal.fire({
+						icon: 'error',
+						title: "Wait",
+						text: error.val
+					});
+				}
+			});
+		}
+
+		function exportToExcel() {
+			const itemCode = $('#txtItemCode').val().trim();
+			const itemGroup = $('#txtItemGroup').val().trim();
+			const fromDate = $('#fromDate').val();
+			const toDate = $('#toDate').val();
+
+			const filterData = {
+				itemCode: itemCode,
+				itemGroup: itemGroup,
+				fromExpiryDate: fromDate ? new Date(fromDate) : null,
+				toExpiryDate: toDate ? new Date(toDate) : null,
+				pageSize: 10000,
+				page: 1
+			};
+
+			// Show loading indicator
+			showLoadingSpinner();
+
+			$.ajax({
+				url: '@Url.Action("ExportStockAgingReport", "Reel")',
+				type: 'POST',
+				contentType: 'application/json',
+				data: JSON.stringify(filterData),
+				xhrFields: {
+					responseType: 'blob'
+				},
+				success: function (blob) {
+					hideLoadingSpinner();
+
+					// Create download link
+					const url = window.URL.createObjectURL(blob);
+					const link = document.createElement('a');
+					link.href = url;
+					link.download = 'StockAgingReport_' + new Date().toISOString().split('T')[0] + '.xlsx';
+
+					// Trigger download
+					document.body.appendChild(link);
+					link.click();
+					document.body.removeChild(link);
+					window.URL.revokeObjectURL(url);
+
+					// Show success message
+					swal.fire({
+						icon: 'success',
+						title: 'Success',
+						text: 'Report exported successfully!'
+					});
+				},
+				error: function (xhr, status, error) {
+					hideLoadingSpinner();
+
+					try {
+						const response = JSON.parse(new TextDecoder().decode(xhr.response));
+						swal.fire({
+							icon: 'error',
+							title: 'Export Failed',
+							text: response.errMessage || 'Failed to export report'
+						});
+					} catch (e) {
+						swal.fire({
+							icon: 'error',
+							title: 'Export Failed',
+							text: 'An error occurred while exporting the report'
+						});
+					}
+				}
+			});
+		}
+
+		function showLoadingSpinner() {
+			$('<div id="loadingOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;">' +
+				'<div class="spinner-border text-light" role="status">' +
+				'<span class="visually-hidden">Loading...</span>' +
+				'</div>' +
+				'</div>').appendTo('body');
+		}
+
+		function hideLoadingSpinner() {
+			$('#loadingOverlay').remove();
+		}
+
+
+		// function searchReport() {
+		// 	const itemCode = $('#txtItemCode').val().trim();
+		// 	const itemDesc = $('#txtItemDesc').val().trim();
+		// 	const itemGroup = $('#txtItemGroup').val().trim();
+		// 	const toDate = $('#toDate').val();
+
+		// 	currentPage = page;
+
+		// 	const filterData = {
+		// 		itemCode: itemCode,
+		// 		itemGroup: itemGroup,
+		// 		toExpiryDate: toDate ? new Date(toDate) : null,
+		// 		pageSize: currentPageSize,
+		// 		page: currentPage
+		// 	};
+
+		// 	$.ajax({
+		// 		url: '@Url.Action("GetStockAgingReport", "Reel")',
+		// 		type: 'POST',
+		// 		contentType: 'application/json',
+		// 		data: JSON.stringify(filterData),
+		// 		success: function (response) {
+		// 			lastSearchData = filterData;
+		// 			displayResults(response.data);
+		// 		},
+		// 		error: function (xhr, status, error) {
+		// 			$('#resultContainer').html(`<div class="alert alert-danger">Error retrieving report: ${error}</div>`);
+		// 		}
+		// 	});
+		// }
+
+		// function displayResults(data, meta) {
+		// 	const container = $('#resultContainer');
+
+		// 	if (!data || !data.items || data.items.length === 0) {
+		// 		container.html(`
+		// 			<div class="empty-state">
+		// 				<i class="bi bi-inbox"></i>
+		// 				<h5>No Expired Items Found</h5>
+		// 				<p>No stock aging items match your filter criteria.</p>
+		// 			</div>
+		// 		`);
+		// 		return;
+		// 	}
+
+		// 	let totalQty = 0;
+		// 	let html = `
+		// 		<div class="result-table">
+		// 			<div class="d-flex justify-content-between align-items-center mb-3">
+		// 				<h5>Stock Aging Report - <strong>${data.items.length}</strong> item(s) on this page</h5>
+		// 				<button type="button" class="btn btn-sm btn-outline-success export-btn" onclick="exportToExcel()">
+		// 					<i class="bi bi-file-earmark-excel"></i> Export
+		// 				</button>
+		// 			</div>
+		// 			<table class="table table-striped table-hover" id="agingTable">
+		// 				<thead class="table-light">
+		// 					<tr>
+		// 						<th>Item Code</th>
+		// 						<th>Description</th>
+		// 						<th>Item Group</th>
+		// 						<th>Reel Code</th>
+		// 						<th>Slot Code</th>
+		// 						<th>Expiry Date</th>
+		// 						<th>Days Expired</th>
+		// 						<th>Qty</th>
+		// 						<th>Status</th>
+		// 					</tr>
+		// 				</thead>
+		// 				<tbody>
+		// 	`;
+
+		// 	data.items.forEach(function (item) {
+		// 		totalQty += item.qty;
+
+		// 		const expiryDate = new Date(item.expiryDate).toLocaleDateString('en-US', {
+		// 			year: 'numeric',
+		// 			month: '2-digit',
+		// 			day: '2-digit'
+		// 		});
+
+		// 		const daysClass = item.daysExpired > 30 ? 'days-expired-critical' : 'days-expired-warning';
+
+		// 		const statusBadge = item.isReady 
+		// 			? '<span class="badge badge-warning">Ready</span>'
+		// 			: '<span class="badge badge-danger">Not Ready</span>';
+
+		// 		html += `
+		// 			<tr>
+		// 				<td><strong>${escapeHtml(item.itemCode)}</strong></td>
+		// 				<td>${escapeHtml(item.itemDescription)}</td>
+		// 				<td>${escapeHtml(item.itemGroupName)}</td>
+		// 				<td>${escapeHtml(item.reelCode)}</td>
+		// 				<td>${escapeHtml(item.slotCode)}</td>
+		// 				<td>${expiryDate}</td>
+		// 				<td><span class="${daysClass}">${item.daysExpired} days</span></td>
+		// 				<td>${item.qty}</td>
+		// 				<td>${statusBadge}</td>
+		// 			</tr>
+		// 		`;
+		// 	});
+
+		// 	html += `
+		// 				</tbody>
+		// 				<tfoot class="table-light">
+		// 					<tr>
+		// 						<th colspan="7" style="text-align:right;">Total Quantity (this page):</th>
+		// 						<th>${totalQty}</th>
+		// 						<th></th>
+		// 					</tr>
+		// 				</tfoot>
+		// 			</table>
+		// 	`;
+
+		// 	// Add pagination
+		// 	if (data && data.totalCount > 0) {
+		// 		html += generatePagination(data.totalPages, data.page, data.totalCount);
+		// 	}
+
+		// 	html += `
+		// 		</div>
+		// 	`;
+
+		// 	container.html(html);
+		// }
+
+		// function generatePagination(totalPages, currentPage, totalCount) {
+		// 	let paginationHtml = `
+		// 		<div class="pagination-info">
+		// 			Showing page ${currentPage} of ${totalPages} (Total: ${totalCount} items)
+		// 		</div>
+		// 		<ul class="pagination">
+		// 	`;
+
+		// 	// Previous button
+		// 	if (currentPage > 1) {
+		// 		paginationHtml += `<li><a href="javascript:searchReport(1)"><i class="bi bi-chevron-double-left"></i></a></li>`;
+		// 		paginationHtml += `<li><a href="javascript:searchReport(${currentPage - 1})"><i class="bi bi-chevron-left"></i></a></li>`;
+		// 	} else {
+		// 		paginationHtml += `<li class="disabled"><a><i class="bi bi-chevron-double-left"></i></a></li>`;
+		// 		paginationHtml += `<li class="disabled"><a><i class="bi bi-chevron-left"></i></a></li>`;
+		// 	}
+
+		// 	// Page numbers
+		// 	let startPage = Math.max(1, currentPage - 2);
+		// 	let endPage = Math.min(totalPages, currentPage + 2);
+
+		// 	if (startPage > 1) {
+		// 		paginationHtml += `<li><a href="javascript:searchReport(1)">1</a></li>`;
+		// 		if (startPage > 2) {
+		// 			paginationHtml += `<li class="disabled"><a>...</a></li>`;
+		// 		}
+		// 	}
+
+		// 	for (let i = startPage; i <= endPage; i++) {
+		// 		if (i === currentPage) {
+		// 			paginationHtml += `<li class="active"><a>${i}</a></li>`;
+		// 		} else {
+		// 			paginationHtml += `<li><a href="javascript:searchReport(${i})">${i}</a></li>`;
+		// 		}
+		// 	}
+
+		// 	if (endPage < totalPages) {
+		// 		if (endPage < totalPages - 1) {
+		// 			paginationHtml += `<li class="disabled"><a>...</a></li>`;
+		// 		}
+		// 		paginationHtml += `<li><a href="javascript:searchReport(${totalPages})">${totalPages}</a></li>`;
+		// 	}
+
+		// 	// Next button
+		// 	if (currentPage < totalPages) {
+		// 		paginationHtml += `<li><a href="javascript:searchReport(${currentPage + 1})"><i class="bi bi-chevron-right"></i></a></li>`;
+		// 		paginationHtml += `<li><a href="javascript:searchReport(${totalPages})"><i class="bi bi-chevron-double-right"></i></a></li>`;
+		// 	} else {
+		// 		paginationHtml += `<li class="disabled"><a><i class="bi bi-chevron-right"></i></a></li>`;
+		// 		paginationHtml += `<li class="disabled"><a><i class="bi bi-chevron-double-right"></i></a></li>`;
+		// 	}
+
+		// 	paginationHtml += `</ul>`;
+		// 	return paginationHtml;
+		// }
+
+		// function escapeHtml(text) {
+		// 	const div = document.createElement('div');
+		// 	div.textContent = text;
+		// 	return div.innerHTML;
+		// }
+
+		// Allow searching by pressing Enter
+		$(document).keypress(function (e) {
+			if (e.which == 13) {
+				var curPage = $("#txtCurPage").val();
+				// loadList(curPage);
+				return false;
+			}
+		});
+
+	</script>
+}

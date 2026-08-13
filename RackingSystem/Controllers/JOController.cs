@@ -80,6 +80,33 @@ namespace RackingSystem.Controllers
             return View(joData);
         }
 
+        public IActionResult JOSimulate(int id)
+        {
+            ViewBag.PermissionList = new List<int>();
+            //string s = HttpContext.Session.GetString("xSession") ?? "";
+            //if (s != "")
+            //{
+            //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
+            //    ViewBag.PermissionList = data.UACIdList;
+            //}
+            if (User.Identity?.IsAuthenticated ?? false)
+            {
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
+                {
+                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
+                    ViewBag.PermissionList = uacIdList;
+                }
+            }
+
+            ViewData["ActiveGroup"] = "grpJO";
+            ViewData["ActiveTab"] = "JOSimulate";
+            ViewData["Title"] = "JO Simulate";
+            ViewBag.id = id;
+
+            return View();
+        }
+
         //[HttpPost]
         //public async Task<ServiceResponseModel<List<JOListDTO>>> GetGRNDetailList([FromBody] JOSearchReqDTO req)
         //{
@@ -242,6 +269,14 @@ namespace RackingSystem.Controllers
             return new JsonResult(result);
         }
 
-        
+        [HttpGet]
+        public async Task<ServiceResponseModel<List<JORawMaterialStockCheckDTO>>> CheckJOStock(long jobOrderId, bool includeQueue = true, bool includeEmergency = true)
+        {
+            ServiceResponseModel<List<JORawMaterialStockCheckDTO>> result = await _joService.CheckJORawMaterialStock(jobOrderId, includeQueue, includeEmergency);
+            return result;
+        }
+
+
     }
 }
+
