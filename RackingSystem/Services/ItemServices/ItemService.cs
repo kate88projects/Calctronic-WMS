@@ -612,7 +612,7 @@ namespace RackingSystem.Services.ItemServices
             return result;
         }
 
-        public async Task<ServiceResponseModel<List<SlotItemDTO>>> GetSlotByCodeTop5(string itemCode)
+        public async Task<ServiceResponseModel<List<SlotItemDTO>>> GetSlotByCodeTop5(string itemCode, DateTime expiryDate)
         {
             ServiceResponseModel<List<SlotItemDTO>> result = new ServiceResponseModel<List<SlotItemDTO>>();
 
@@ -629,7 +629,7 @@ namespace RackingSystem.Services.ItemServices
 
                 // Get top 5 reels for this item, sorted by expiry date (oldest first), and join with slot information
                 var reelList = await _dbContext.Reel
-                    .Where(x => x.Item_Id == itemData.Item_Id && x.IsReady == true)
+                    .Where(x => x.Item_Id == itemData.Item_Id && x.IsReady == true && x.ExpiryDate > expiryDate)
                     .OrderBy(x => x.ExpiryDate)
                     .Take(5)
                     .ToListAsync();

@@ -19,6 +19,8 @@ namespace RackingSystem.Data.JO
         [Required]
         public int BalQty { get; set; } = 0;
 
+        public bool RetrieveFailed { get; set; } = false;
+
         [Required]
         public DateTime CreatedDate { get; set; } = DateTime.Now;
     }

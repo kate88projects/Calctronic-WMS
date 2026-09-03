@@ -1,5 +1,12 @@
 namespace RackingSystem.Models.Item
 {
+    public class SlotSearchReqDTO
+    {
+        public string ItemCode { get; set; } = "";
+
+        public DateTime ExpiryDate { get; set; } = DateTime.Today;
+    }
+
     public class SlotItemDTO
     {
         public long Item_Id { get; set; }

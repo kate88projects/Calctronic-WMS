@@ -69,11 +69,15 @@
 				<div class="card-body">
 					<div class="table-filter">
 						<div class="row" style="padding:5px;">
-							<div class="col-sm-8">
+							<div class="col-sm-5">
 								<label for="txtItemCode">Item Code:</label>
 								<input id="txtItemCode" name="ItemCode" type="text" class="form-control" placeholder="Enter item code" />
 							</div>
 							<div class="col-sm-4">
+								<label for="txtExpiryDate">Expiry Date After:</label>
+								<input id="txtExpiryDate" name="ExpiryDate" type="date" class="form-control" required />
+							</div>
+							<div class="col-sm-3">
 								<button type="button" class="btn btn-primary" style="width:100%;" onclick="searchItem()">
 									<i class="bi bi-search"></i> Search
 								</button>
@@ -95,8 +99,19 @@
 
 @section Scripts {
 	<script>
+		function todayStr() {
+			const d = new Date();
+			const mm = String(d.getMonth() + 1).padStart(2, '0');
+			const dd = String(d.getDate()).padStart(2, '0');
+			return `${d.getFullYear()}-${mm}-${dd}`;
+		}
+
 		function searchItem() {
 			const itemCode = $('#txtItemCode').val().trim();
+			if (!$('#txtExpiryDate').val()) {
+				$('#txtExpiryDate').val(todayStr());
+			}
+			const expiryDate = $('#txtExpiryDate').val();
 
 			if (!itemCode) {
 				alert('Please enter an item code');
@@ -107,7 +122,7 @@
 				url: '@Url.Action("SearchSlotByCode", "Item")',
 				type: 'POST',
 				contentType: 'application/json',
-				data: JSON.stringify(itemCode),
+				data: JSON.stringify({ ItemCode: itemCode, ExpiryDate: expiryDate }),
 				success: function (response) {
 					displayResults(response.data);
 				},
@@ -195,5 +210,8 @@
 				return false;
 			}
 		});
+
+		// Expiry date always starts on today - it must never be left blank
+		$('#txtExpiryDate').val(todayStr());
 	</script>
 }

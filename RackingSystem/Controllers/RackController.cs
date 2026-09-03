@@ -433,7 +433,7 @@ namespace RackingSystem.Controllers
 
                         if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
                         {
-                            //return View("RackJobHubInView");
+                            return RedirectToAction("RackJobHubInHMIView", new { qId = srms.RackJobQueue_Id });
                         }
                         if (srms.RackJobQueue_Id == qId && srms.LoginIP == ViewBag.DeviceId && srms.Json != "")
                         {
@@ -463,6 +463,67 @@ namespace RackingSystem.Controllers
             ViewData["ActiveGroup"] = "grpRACKING";
             ViewData["ActiveTab"] = "RackJob";
             ViewData["Title"] = "Rack Job Hub In";
+            return View();
+        }
+
+        public IActionResult RackJobHubInHMIView(long qId)
+        {
+            ViewBag.QId = qId;
+            ViewBag.QNo = "";
+            ViewBag.xToken = "";
+            ViewBag.DeviceId = "";
+            ViewBag.DocType = "";
+            ViewBag.DocId = 0;
+
+            if (User.Identity?.IsAuthenticated ?? false)
+            {
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
+                {
+                    ViewBag.xToken = User.FindFirst("Token")?.Value;
+                    ViewBag.DeviceId = User.FindFirst("DeviceId")?.Value;
+
+                    var q = _context.RackJobQueue.Where(x => x.RackJobQueue_Id == qId).FirstOrDefault();
+                    if (q != null)
+                    {
+                        ViewBag.DocType = q.DocType;
+                        ViewBag.DocId = q.Doc_Id;
+
+                        if (q.DocType == EnumQueueDocType.Loader.ToString())
+                        {
+                            var doc = _context.Loader.Where(x => x.Loader_Id == q.Doc_Id).FirstOrDefault();
+                            if (doc != null)
+                            {
+                                ViewBag.QNo = doc.Description;
+                            }
+                        }
+                        else if (q.DocType == EnumQueueDocType.JO.ToString())
+                        {
+                            var doc = _context.JobOrder.Where(x => x.JobOrder_Id == q.Doc_Id).FirstOrDefault();
+                            if (doc != null)
+                            {
+                                ViewBag.QNo = doc.DocNo;
+                            }
+                        }
+                        else
+                        {
+                            var doc = _context.JobOrderEmergency.Where(x => x.JobOrderEmergency_Id == q.Doc_Id).FirstOrDefault();
+                            if (doc != null)
+                            {
+                                ViewBag.QNo = doc.DocNo;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            ViewData["ActiveGroup"] = "grpRACKING";
+            ViewData["ActiveTab"] = "RackJob";
+            ViewData["Title"] = "Rack Job Hub In - Viewer";
             return View();
         }
 
@@ -527,9 +588,9 @@ namespace RackingSystem.Controllers
                     {
                         bool isCont = false;
 
-                        if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
+                        if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId && srms.LoginIP != "")
                         {
-                            //return View("RackJobHubOutView");
+                            return RedirectToAction("RackJobHubOutHMIView", new { qId = srms.RackJobQueue_Id });
                         }
                         if (srms.RackJobQueue_Id == qId && srms.LoginIP == ViewBag.DeviceId && srms.Json != "")
                         {
@@ -555,6 +616,67 @@ namespace RackingSystem.Controllers
             ViewData["ActiveGroup"] = "grpRACKING";
             ViewData["ActiveTab"] = "RackJob";
             ViewData["Title"] = "Rack Job Hub Out";
+            return View();
+        }
+
+        public IActionResult RackJobHubOutHMIView(long qId)
+        {
+            ViewBag.QId = qId;
+            ViewBag.QNo = "";
+            ViewBag.xToken = "";
+            ViewBag.DeviceId = "";
+            ViewBag.DocType = "";
+            ViewBag.DocId = 0;
+
+            if (User.Identity?.IsAuthenticated ?? false)
+            {
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
+                {
+                    ViewBag.xToken = User.FindFirst("Token")?.Value;
+                    ViewBag.DeviceId = User.FindFirst("DeviceId")?.Value;
+
+                    var q = _context.RackJobQueue.Where(x => x.RackJobQueue_Id == qId).FirstOrDefault();
+                    if (q != null)
+                    {
+                        ViewBag.DocType = q.DocType;
+                        ViewBag.DocId = q.Doc_Id;
+
+                        if (q.DocType == EnumQueueDocType.Loader.ToString())
+                        {
+                            var doc = _context.Loader.Where(x => x.Loader_Id == q.Doc_Id).FirstOrDefault();
+                            if (doc != null)
+                            {
+                                ViewBag.QNo = doc.Description;
+                            }
+                        }
+                        else if (q.DocType == EnumQueueDocType.JO.ToString())
+                        {
+                            var doc = _context.JobOrder.Where(x => x.JobOrder_Id == q.Doc_Id).FirstOrDefault();
+                            if (doc != null)
+                            {
+                                ViewBag.QNo = doc.DocNo;
+                            }
+                        }
+                        else
+                        {
+                            var doc = _context.JobOrderEmergency.Where(x => x.JobOrderEmergency_Id == q.Doc_Id).FirstOrDefault();
+                            if (doc != null)
+                            {
+                                ViewBag.QNo = doc.DocNo;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            ViewData["ActiveGroup"] = "grpRACKING";
+            ViewData["ActiveTab"] = "RackJob";
+            ViewData["Title"] = "Rack Job Hub Out - Viewer";
             return View();
         }
 

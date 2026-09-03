@@ -114,8 +114,13 @@ namespace RackingSystem.Helpers
 
         public void InsertPLCAddressResponse(AppDbContext _dbContext, int address, string action, int value, string methodName, bool isErr)
         {
+            // Only one job runs at a time - the singleton RackJob row tracks which
+            // RackJobQueue_Id is currently active, so every call site gets it for free.
+            long rackJobQueueId = _dbContext.RackJob.FirstOrDefault()?.RackJobQueue_Id ?? 0;
+
             PLCAddressResponseLog log = new PLCAddressResponseLog()
             {
+                RackJobQueue_Id = rackJobQueueId,
                 Address = address,
                 Action = action,
                 Value = value,

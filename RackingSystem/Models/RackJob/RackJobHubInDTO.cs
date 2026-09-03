@@ -67,5 +67,24 @@ namespace RackingSystem.Models.RackJob
         public int Col2TotalReels { get; set; } = 0;
         public int Col3TotalReels { get; set; } = 0;
         public int Col4TotalReels { get; set; } = 0;
+
+        public string RackLeftSlot { get; set; } = "";
+        public string RackRightSlot { get; set; } = "";
+
+        public string RDot1 { get; set; } = "waiting";
+        public string RDot2 { get; set; } = "waiting";
+        public string RDot3 { get; set; } = "waiting";
+        public string RDot4 { get; set; } = "waiting";
+        public string RDot5 { get; set; } = "waiting";
+        public string RDot6 { get; set; } = "waiting";
+        public string RDot7 { get; set; } = "waiting";
+        public string RDot8 { get; set; } = "waiting";
+
+        public string PDot1 { get; set; } = "waiting";
+        public string PDot2 { get; set; } = "waiting";
+        public string PDot3 { get; set; } = "waiting";
+        public string PDot4 { get; set; } = "waiting";
+        public string PDot5 { get; set; } = "waiting";
+        public string PDot6 { get; set; } = "waiting";
     }
 }

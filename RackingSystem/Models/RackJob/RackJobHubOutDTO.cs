@@ -67,5 +67,21 @@ namespace RackingSystem.Models.RackJob
 
         public int ReelBalance { get; set; } = 0;
 
+        public string ArmPosition { get; set; } = "center";
+        public int ArmHeight { get; set; } = 0;
+        public bool GripperOpen { get; set; } = false;
+        public bool HeldReel { get; set; } = false;
+
+        public string RackLeftSlot { get; set; } = "";
+        public string RackRightSlot { get; set; } = "";
+        public string TrolleySlot { get; set; } = "";
+
+        public string RDot1 { get; set; } = "waiting";
+        public string RDot2 { get; set; } = "waiting";
+        public string RDot3 { get; set; } = "waiting";
+        public string PDot1 { get; set; } = "waiting";
+        public string PDot2 { get; set; } = "waiting";
+        public string PDot3 { get; set; } = "waiting";
+
     }
 }

@@ -130,6 +130,44 @@ namespace RackingSystem.Controllers.API
             return result;
         }
 
+        [HttpGet("GetAddressResponseLog")]
+        public async Task<ServiceResponseModel<List<PLCAddressResponseDTO>>> GetAddressResponseLog()
+        {
+            ServiceResponseModel<List<PLCAddressResponseDTO>> result = new ServiceResponseModel<List<PLCAddressResponseDTO>>();
+            result.data = new List<PLCAddressResponseDTO>();
+
+            try
+            {
+                var rackJobQueueId = _dbContext.RackJob.FirstOrDefault()?.RackJobQueue_Id ?? 0;
+
+                var list = await _dbContext.PLCAddressResponseLog
+                    .Where(x => x.RackJobQueue_Id == rackJobQueueId)
+                    .OrderByDescending(x => x.CreatedDate)
+                    .Take(50)
+                    .ToListAsync();
+                foreach (var l in list)
+                {
+                    result.data.Add(new PLCAddressResponseDTO
+                    {
+                        Address = l.Address,
+                        Action = l.Action,
+                        Value = l.Value,
+                        MethodName = l.MethodName,
+                        CreatedDate = l.CreatedDate,
+                        IsErr = l.IsErr,
+                    });
+                }
+                result.success = true;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
         [HttpGet("GetLoaderInfo_PendingToUnLoad/{req}")]
         public async Task<ServiceResponseModel<LoaderDTO>> GetLoaderInfo_PendingToUnLoad(string req)
         {
@@ -314,6 +352,7 @@ namespace RackingSystem.Controllers.API
                 for (int i = 0; i < registers.Length; i++)
                 {
                     PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                    PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress + i, "Read", registers[i], methodName, false);
                     lock1 = registers[i].ToString();
                 }
 
@@ -381,11 +420,12 @@ namespace RackingSystem.Controllers.API
 
                 PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
 
-                int registerAddress = 4320; 
-                int valueToWrite = 2;  
+                int registerAddress = 4320;
+                int valueToWrite = 2;
 
                 // Write the single holding register
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", valueToWrite, methodName, false);
 
                 result.success = true;
                 result.data = 2;
@@ -465,6 +505,7 @@ namespace RackingSystem.Controllers.API
                     {
                         val1 = registers[i].ToString();
                     }
+                    PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress, "Read", registers[0], methodName, false);
 
                     if (val1 == "2")
                     {
@@ -513,6 +554,7 @@ namespace RackingSystem.Controllers.API
                         {
                             val2 = registers[i].ToString();
                         }
+                        PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress, "Read", registers[0], methodName, false);
 
 
                         if (val2 == "16")
@@ -815,6 +857,7 @@ namespace RackingSystem.Controllers.API
                 //int valueToWrite = 0;
                 int valueToWrite = slot.IsLeft ? 0 : 1;
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", valueToWrite, methodName, false);
 
                 // step 2 : x-pulses
                 //byte[] bytes = BitConverter.GetBytes(57832);
@@ -824,9 +867,11 @@ namespace RackingSystem.Controllers.API
                 registerAddress = 4300;
                 valueToWrite = 0;
                 modbusClient.WriteSingleRegister(registerAddress, lowBinary);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", lowBinary, methodName, false);
                 registerAddress = 4299;
                 valueToWrite = 0;
                 modbusClient.WriteSingleRegister(registerAddress, highBinary);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", highBinary, methodName, false);
 
                 // step 3 : y-pulses
                 //bytes = BitConverter.GetBytes(4930);
@@ -836,31 +881,37 @@ namespace RackingSystem.Controllers.API
                 registerAddress = 4301;
                 valueToWrite = 0;
                 modbusClient.WriteSingleRegister(registerAddress, highBinary);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", highBinary, methodName, false);
                 registerAddress = 4302;
                 valueToWrite = 0;
                 modbusClient.WriteSingleRegister(registerAddress, lowBinary);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", lowBinary, methodName, false);
 
-                // step 4 : 
+                // step 4 :
                 registerAddress = 4310;
                 //valueToWrite = 634;
                 valueToWrite = slot.QRXPulse;
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", valueToWrite, methodName, false);
 
-                // step 5 : 
+                // step 5 :
                 registerAddress = 4311;
                 //valueToWrite = 377;
                 valueToWrite = slot.QRYPulse;
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", valueToWrite, methodName, false);
 
-                // step 6 : 
+                // step 6 :
                 registerAddress = 4312;
                 valueToWrite = 7;
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", valueToWrite, methodName, false);
 
-                // step Last : 
+                // step Last :
                 registerAddress = 4297;
                 valueToWrite = 2;
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", valueToWrite, methodName, false);
 
                 result.success = true;
                 result.data = 1;
@@ -1041,6 +1092,7 @@ namespace RackingSystem.Controllers.API
 
                 // Write the single holding register
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", valueToWrite, methodName, false);
 
                 result.success = true;
                 result.data = 1;
@@ -1157,6 +1209,7 @@ namespace RackingSystem.Controllers.API
                         value = registers[i];
                         decimalText = getDecimalText(registers[i]);
                     }
+                    PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress, "Read", value, methodName, false);
 
                     if (value > 0)
                     {
@@ -1181,6 +1234,7 @@ namespace RackingSystem.Controllers.API
                     for (int i = 0; i < registers.Length; i++)
                     {
                         PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                        PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress + i, "Read", registers[i], methodName, false);
                         decimalText = getDecimalText(registers[i]);
                         if (decimalText.Contains("\0"))
                         {
@@ -1196,6 +1250,7 @@ namespace RackingSystem.Controllers.API
                     for (int i = 0; i < registers.Length; i++)
                     {
                         PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                        PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress + i, "Read", registers[i], methodName, false);
                         decimalText = getDecimalText(registers[i]);
                         if (decimalText.Contains("\0"))
                         {
@@ -1211,6 +1266,7 @@ namespace RackingSystem.Controllers.API
                     for (int i = 0; i < registers.Length; i++)
                     {
                         PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                        PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress + i, "Read", registers[i], methodName, false);
                         decimalText = getDecimalText(registers[i]);
                         if (decimalText.Contains("\0"))
                         {
@@ -1226,6 +1282,7 @@ namespace RackingSystem.Controllers.API
                     for (int i = 0; i < registers.Length; i++)
                     {
                         PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                        PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress + i, "Read", registers[i], methodName, false);
                         decimalText = getDecimalText(registers[i]);
                         if (decimalText.Contains("\0"))
                         {
@@ -1241,6 +1298,7 @@ namespace RackingSystem.Controllers.API
                     for (int i = 0; i < registers.Length; i++)
                     {
                         PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                        PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress + i, "Read", registers[i], methodName, false);
                         decimalText = getDecimalText(registers[i]);
                         if (decimalText.Contains("\0"))
                         {
@@ -1324,12 +1382,14 @@ namespace RackingSystem.Controllers.API
 
                 // Write the single holding register
                 modbusClient1.WriteSingleRegister(registerAddress, highBinary);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", highBinary, methodName, false);
                 PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Set height [" + highBinary + "] to Delta PLC.", "", false);
 
                 registerAddress = 4319;
 
                 // Write the single holding register
                 modbusClient1.WriteSingleRegister(registerAddress, lowBinary);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", lowBinary, methodName, false);
                 PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Set height [" + lowBinary + "] to Delta PLC.", "", false);
 
                 PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Done set height to Delta PLC.", "", false);
@@ -1361,6 +1421,7 @@ namespace RackingSystem.Controllers.API
 
                 // Write the single holding register
                 modbusClient2.WriteSingleRegister(registerAddress, valueToWrite);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", valueToWrite, methodName, false);
 
                 result.success = true;
                 result.data = 2;
@@ -1426,6 +1487,7 @@ namespace RackingSystem.Controllers.API
                     {
                         value = registers[i];
                     }
+                    PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress, "Read", value, methodName, false);
 
                     if (value == 1)
                     {
@@ -1469,6 +1531,7 @@ namespace RackingSystem.Controllers.API
                     for (int i = 0; i < registers.Length; i++)
                     {
                         PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                        PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress + i, "Read", registers[i], methodName, false);
                         valueErr = registers[i];
                     }
 
@@ -1490,6 +1553,7 @@ namespace RackingSystem.Controllers.API
                                 {
                                     value = registers[i];
                                 }
+                                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress, "Read", value, methodName, false);
 
                                 if (value == 1)
                                 {
@@ -1604,6 +1668,7 @@ namespace RackingSystem.Controllers.API
                     {
                         value = registers[i].ToString();
                     }
+                    PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress, "Read", registers[0], methodName, false);
 
                     if (value == "1")
                     {
@@ -1674,6 +1739,7 @@ namespace RackingSystem.Controllers.API
 
                 // Write the single holding register
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", valueToWrite, methodName, false);
 
                 result.success = true;
                 result.data = 1;
@@ -1741,6 +1807,7 @@ namespace RackingSystem.Controllers.API
                     {
                         value = registers[i];
                     }
+                    PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress, "Read", value, methodName, false);
 
                     if (value == 1)
                     {
@@ -1765,6 +1832,7 @@ namespace RackingSystem.Controllers.API
                     int registerAddress = 4309;
                     int valueToWrite = 1;
                     modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+                    PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", valueToWrite, methodName, false);
                 }
             }
             catch (Exception ex)
@@ -1988,6 +2056,7 @@ namespace RackingSystem.Controllers.API
                 //int valueToWrite = 0;
                 int valueToWrite = slot.IsLeft ? 0 : 1;
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", valueToWrite, methodName, false);
 
                 // step 2 : x-pulses
                 //byte[] bytes = BitConverter.GetBytes(57832);
@@ -1997,9 +2066,11 @@ namespace RackingSystem.Controllers.API
                 registerAddress = 4300;
                 valueToWrite = 0;
                 modbusClient.WriteSingleRegister(registerAddress, lowBinary);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", lowBinary, methodName, false);
                 registerAddress = 4299;
                 valueToWrite = 0;
                 modbusClient.WriteSingleRegister(registerAddress, highBinary);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", highBinary, methodName, false);
 
                 // step 3 : y-pulses
                 //bytes = BitConverter.GetBytes(4930);
@@ -2009,26 +2080,31 @@ namespace RackingSystem.Controllers.API
                 registerAddress = 4301;
                 valueToWrite = 0;
                 modbusClient.WriteSingleRegister(registerAddress, highBinary);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", highBinary, methodName, false);
                 registerAddress = 4302;
                 valueToWrite = 0;
                 modbusClient.WriteSingleRegister(registerAddress, lowBinary);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", lowBinary, methodName, false);
 
-                // step 4 : 
+                // step 4 :
                 registerAddress = 4310;
                 //valueToWrite = 634;
                 valueToWrite = slot.QRXPulse;
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", valueToWrite, methodName, false);
 
-                // step 5 : 
+                // step 5 :
                 registerAddress = 4311;
                 //valueToWrite = 377;
                 valueToWrite = slot.QRYPulse;
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", valueToWrite, methodName, false);
 
-                // step 6 : 
+                // step 6 :
                 registerAddress = 4312;
                 valueToWrite = 7;
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", valueToWrite, methodName, false);
 
                 //// step 7 : for turn on sensor
                 //registerAddress = 4320;
@@ -2040,10 +2116,11 @@ namespace RackingSystem.Controllers.API
                 //valueToWrite = 1;
                 //modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
 
-                // step Last : 
+                // step Last :
                 registerAddress = 4297;
                 valueToWrite = 1;
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", valueToWrite, methodName, false);
 
 
                 result.success = true;
@@ -2111,6 +2188,7 @@ namespace RackingSystem.Controllers.API
                     {
                         value = registers[i];
                     }
+                    PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress, "Read", value, methodName, false);
 
                     if (value == 0) // 1 means tengah buat, 0 means complete
                     {
@@ -2503,6 +2581,7 @@ namespace RackingSystem.Controllers.API
                 int registerAddress = 4317;
                 int valueToWrite = 2;
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", valueToWrite, methodName, false);
 
                 result.success = true;
             }
@@ -2556,6 +2635,7 @@ namespace RackingSystem.Controllers.API
                 int registerAddress = 4317;
                 int valueToWrite = 1;
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", valueToWrite, methodName, false);
 
                 result.success = true;
             }
@@ -2613,6 +2693,7 @@ namespace RackingSystem.Controllers.API
 
                 // Write the single holding register
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", valueToWrite, methodName, false);
 
                 result.success = true;
                 result.data = 2;
@@ -2679,6 +2760,7 @@ namespace RackingSystem.Controllers.API
                     {
                         value = registers[i];
                     }
+                    PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress, "Read", value, methodName, false);
 
                     string hex2 = value.ToString("X");
 
@@ -2749,6 +2831,7 @@ namespace RackingSystem.Controllers.API
 
                 // Write the single holding register
                 modbusClient.WriteSingleRegister(registerAddress, nextCol);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", nextCol, methodName, false);
 
                 result.success = true;
                 result.data = 2;
@@ -2803,6 +2886,7 @@ namespace RackingSystem.Controllers.API
 
                 int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                 value = registers[0];
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress, "Read", value, methodName, false);
 
                 result.success = value == 1;
                 result.errMessage = "Current mode is [" + value + "], please turn to Auto.";
@@ -2987,6 +3071,7 @@ namespace RackingSystem.Controllers.API
                         value = registers[i];
                         decimalText = getDecimalText(registers[i]);
                     }
+                    PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress, "Read", value, methodName, false);
 
                     if (value > 0)
                     {
@@ -3010,6 +3095,7 @@ namespace RackingSystem.Controllers.API
                     for (int i = 0; i < registers.Length; i++)
                     {
                         PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                        PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress + i, "Read", registers[i], methodName, false);
                         decimalText = getDecimalText(registers[i]);
                         if (decimalText.Contains("\0"))
                         {
@@ -3025,6 +3111,7 @@ namespace RackingSystem.Controllers.API
                     for (int i = 0; i < registers.Length; i++)
                     {
                         PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                        PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress + i, "Read", registers[i], methodName, false);
                         decimalText = getDecimalText(registers[i]);
                         if (decimalText.Contains("\0"))
                         {
@@ -3040,6 +3127,7 @@ namespace RackingSystem.Controllers.API
                     for (int i = 0; i < registers.Length; i++)
                     {
                         PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                        PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress + i, "Read", registers[i], methodName, false);
                         decimalText = getDecimalText(registers[i]);
                         if (decimalText.Contains("\0"))
                         {
@@ -3055,6 +3143,7 @@ namespace RackingSystem.Controllers.API
                     for (int i = 0; i < registers.Length; i++)
                     {
                         PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                        PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress + i, "Read", registers[i], methodName, false);
                         decimalText = getDecimalText(registers[i]);
                         if (decimalText.Contains("\0"))
                         {
@@ -3070,6 +3159,7 @@ namespace RackingSystem.Controllers.API
                     for (int i = 0; i < registers.Length; i++)
                     {
                         PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                        PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress + i, "Read", registers[i], methodName, false);
                         decimalText = getDecimalText(registers[i]);
                         if (decimalText.Contains("\0"))
                         {
@@ -3085,6 +3175,7 @@ namespace RackingSystem.Controllers.API
                     for (int i = 0; i < registers.Length; i++)
                     {
                         PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                        PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress + i, "Read", registers[i], methodName, false);
                         decimalText = getDecimalText(registers[i]);
                         if (decimalText.Contains("\0"))
                         {
@@ -3164,6 +3255,7 @@ namespace RackingSystem.Controllers.API
                 for (int i = 0; i < registers.Length; i++)
                 {
                     PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                    PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress + i, "Read", registers[i], methodName, false);
                     decimalText = getDecimalText(registers[i]);
                     if (decimalText.Contains("\0"))
                     {
@@ -3179,6 +3271,7 @@ namespace RackingSystem.Controllers.API
                 for (int i = 0; i < registers.Length; i++)
                 {
                     PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                    PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress + i, "Read", registers[i], methodName, false);
                     decimalText = getDecimalText(registers[i]);
                     if (decimalText.Contains("\0"))
                     {
@@ -3194,6 +3287,7 @@ namespace RackingSystem.Controllers.API
                 for (int i = 0; i < registers.Length; i++)
                 {
                     PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                    PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress + i, "Read", registers[i], methodName, false);
                     decimalText = getDecimalText(registers[i]);
                     if (decimalText.Contains("\0"))
                     {
@@ -3209,6 +3303,7 @@ namespace RackingSystem.Controllers.API
                 for (int i = 0; i < registers.Length; i++)
                 {
                     PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                    PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress + i, "Read", registers[i], methodName, false);
                     decimalText = getDecimalText(registers[i]);
                     if (decimalText.Contains("\0"))
                     {
@@ -3290,6 +3385,7 @@ namespace RackingSystem.Controllers.API
 
                 // Write the single holding register
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", valueToWrite, methodName, false);
 
                 result.success = true;
                 result.data = 1;
@@ -3347,6 +3443,7 @@ namespace RackingSystem.Controllers.API
 
                 // Write the single holding register
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
+                PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", valueToWrite, methodName, false);
 
                 result.success = true;
                 result.data = 1;
@@ -3414,6 +3511,7 @@ namespace RackingSystem.Controllers.API
                     {
                         value = registers[i];
                     }
+                    PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress, "Read", value, methodName, false);
 
                     if (value == 2)
                     {
@@ -3460,6 +3558,7 @@ namespace RackingSystem.Controllers.API
                         {
                             valueSlot = registers[i];
                         }
+                        PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress, "Read", valueSlot, methodName, false);
 
                         if (valueSlot > 0)
                         {

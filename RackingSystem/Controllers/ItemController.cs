@@ -200,9 +200,9 @@ namespace RackingSystem.Controllers
         }
 
         [HttpPost]
-        public async Task<ServiceResponseModel<List<SlotItemDTO>>> SearchSlotByCode([FromBody] string itemCode)
+        public async Task<ServiceResponseModel<List<SlotItemDTO>>> SearchSlotByCode([FromBody] SlotSearchReqDTO req)
         {
-            if (string.IsNullOrWhiteSpace(itemCode))
+            if (req == null || string.IsNullOrWhiteSpace(req.ItemCode))
             {
                 return new ServiceResponseModel<List<SlotItemDTO>>
                 {
@@ -211,7 +211,8 @@ namespace RackingSystem.Controllers
                 };
             }
 
-            ServiceResponseModel<List<SlotItemDTO>> result = await _itemService.GetSlotByCodeTop5(itemCode.Trim());
+            var expiryDate = req.ExpiryDate == default ? DateTime.Today : req.ExpiryDate;
+            ServiceResponseModel<List<SlotItemDTO>> result = await _itemService.GetSlotByCodeTop5(req.ItemCode.Trim(), expiryDate);
             return result;
         }
 
