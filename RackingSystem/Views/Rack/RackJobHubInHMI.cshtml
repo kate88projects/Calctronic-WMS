@@ -1442,6 +1442,17 @@
                 log('Loader :: Please scan loader', 'alert');
                 return;
             }
+
+             useInches = $('#inch-select').val() > 0 ? true : false;
+
+            //if useInches, check if there is any column has configured the selected inches
+            if (useInches) {
+               var res = await verifyColumnInches();
+               console.log("response", res);
+
+               if (!res) return;
+            }
+
             var ok = await getLoader(loader, false);
             if (ok == false) {
                 return;
@@ -1481,8 +1492,6 @@
 
              readyToEnd = false;
              endTaskPending = false;
-
-             useInches = $('#inch-select').val() > 0 ? true : false;
 
             // 4. Continue
              gantryAutoTimer = setInterval(gantryAuto, 3000); //3 second workout
@@ -2678,6 +2687,7 @@
             bal = bal + Number($("#txtCol4TotalReels").val());
             if (bal == 0 && sharedDrawerState.gantrySequenceState == "Returning" && sharedDrawerState.cartesianRobotState == 'Ready' || readyToEnd) {
                 log(`Gantry and loader going end task.`, 'info');
+                useInches = false;
                 processEnd = true;
                 var rEnd = await loadPLCEndTask();
                 if (rEnd == true) {
@@ -4158,6 +4168,34 @@
             });
         }
 
+        async function verifyColumnInches() {
+            var reelDimensionId = $('#inch-select').val() || 0;
+            var fResult = false;
+
+            await $.ajax({
+                url: "/api/PLCHubIn/GetColumnInches/" + reelDimensionId + "",
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    if (result.success) {
+                        log('Verify Column Inches :: Column found for the selected reel inches.', 'info');
+                        fResult = true;
+                    }
+                    else {
+                        log('Verify Column Inches :: ' + result.errMessage, 'alert');
+                    }
+                },
+                error: function (error) {
+                    log('Verify Column Inches :: ' + error.val, 'alert');
+                }
+            });
+
+            return fResult;
+        }
 
     </script>
 }

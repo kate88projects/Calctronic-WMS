@@ -190,6 +190,41 @@ namespace RackingSystem.Controllers.API
             }
         }
 
+        [HttpGet("GetColumnInches/{reelDimensionId}")]
+        public async Task<ServiceResponseModel<bool>> GetColumnInches(int reelDimensionId)
+        {
+            ServiceResponseModel<bool> result = new ServiceResponseModel<bool>();
+            result.data = false;
+
+            try
+            {
+                var reelD = _dbContext.ReelDimension.Where(x => x.ReelDimension_Id == reelDimensionId).FirstOrDefault();
+                if (reelD == null)
+                {
+                    result.success = false;
+                    result.errMessage = "Cannot find this reel's dimension.";
+                    return result;
+                }
+                
+                var inchesExist = _dbContext.SlotColumnSetting.Any(x => x.ColInches == reelD.Width);
+                if (!inchesExist)
+                {
+                    result.success = false;
+                    result.errMessage = "No column is configured for this reel's inches. Please configure it in Slot Column Setting before starting the process.";
+                    return result;
+                }
+
+                result.success = true; // means the inches is found for the column
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+            return result;
+        }
+
+
         [HttpGet("StartUnload/{req}/{qId}")]
         public async Task<ServiceResponseModel<RackJobHubInDTO>> StartUnload(string req, long qId)
         {

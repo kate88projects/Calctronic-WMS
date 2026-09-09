@@ -1539,7 +1539,6 @@
                     // is success
                     $('#btnNext4').removeClass("hidden");
                     $('#btnRetry4').addClass("hidden");
-                    $('#errActHeight').text('');
                 }
                 return;
             }
@@ -1869,6 +1868,8 @@
                 },
                 success: function (result) {
                     console.log('4::' + JSON.stringify(result));
+                    $('#errActHeight').text('');
+
                     if (result.success == true) {
                         $('#errCol4').text(''); //remove err msg
                         $("#txtActHeight").val(result.data[1]);
@@ -1880,6 +1881,11 @@
                         dataAttr.dataset.decHeight = result.data[2];
 
                         fResult = 99;
+
+                        if (result.errMessage != null)
+                        {
+                            $('#errActHeight').text(result.errMessage);
+                        }
                     }
                     else {
                         fResult = result.data[0];
@@ -1915,7 +1921,6 @@
                                 $('#heightStatus4').text(result.data[1]);
                                 $('#fullModal').modal("show");
                                 // $('#errCol4').text('All column is full, please take out the reel and change auto loader.');
-
                             }
                         }
                     }

@@ -603,6 +603,19 @@ namespace RackingSystem.Controllers.API
                 float value = BitConverter.ToSingle(floatBytes, 0);
                 float rounded = (float)Math.Round(value, 3);
                 height = ((int)rounded) + 1;
+
+                // if reading error, get the highest max thickness in slot usage setting
+                if (height <= 0)
+                {
+                    var maxThick = _dbContext.SlotCalculation.OrderByDescending(x => x.MaxThickness).FirstOrDefault();
+                    if (maxThick != null)
+                    {
+                        height = maxThick.MaxThickness;
+                        rounded = maxThick.MaxThickness;
+                        result.errMessage = "Reading error. Auto-assigning maximum thickness for this reel.";
+                    }
+                }
+
                 result.success = _loaderCol.BalanceHeight >= height;
                 result.data.Add(_loaderCol.BalanceHeight >= height ? 0 : 2);
                 result.data.Add(height);
