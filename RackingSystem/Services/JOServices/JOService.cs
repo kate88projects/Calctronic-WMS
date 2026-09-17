@@ -571,7 +571,7 @@ namespace RackingSystem.Services.JOServices
             return result;
         }
 
-        public async Task<ServiceResponseModel<List<JORawMaterialStockCheckDTO>>> CheckJORawMaterialStock(long jobOrderId, bool includeQueue = true, bool includeEmergency = true)
+        public async Task<ServiceResponseModel<List<JORawMaterialStockCheckDTO>>> CheckJORawMaterialStock(long jobOrderId, bool includeQueue = true, bool includeEmergency = true, bool includeLoader = true)
         {
             ServiceResponseModel<List<JORawMaterialStockCheckDTO>> result = new ServiceResponseModel<List<JORawMaterialStockCheckDTO>>();
 
@@ -592,7 +592,7 @@ namespace RackingSystem.Services.JOServices
                 var rawMaterialCheckList = new List<JORawMaterialStockCheckDTO>();
 
                 // Build a dictionary to track reserved reels by item
-                var reservedReels = await CalculateReservedReels(includeQueue, includeEmergency, jobOrderId, 0);
+                var (reservedReels, incomingLoaderReels) = await CalculateReservedReels(includeQueue, includeEmergency, includeLoader, jobOrderId, 0);
 
                 foreach (var detail in jobDetails)
                 {
@@ -646,11 +646,16 @@ namespace RackingSystem.Services.JOServices
                         var availableReels = await _dbContext.Reel
                             .Where(x => x.Item_Id == bomDetail.Item_Id &&
                                        x.NeedCheck == false &&
-                                       x.IsReady == true && 
-                                       x.Status == EnumReelStatus.IsReady.ToString() && 
-                                       x.ExpiryDate.Date >= DateTime.Now.Date) 
+                                       x.IsReady == true &&
+                                       x.Status == EnumReelStatus.IsReady.ToString() &&
+                                       x.ExpiryDate.Date >= DateTime.Now.Date)
                             .OrderBy(x => x.ExpiryDate)
                             .ToListAsync();
+
+                        // Reels currently being Hub In'd by a Loader queue entry ahead of this job
+                        // will already be on the rack by the time this job's turn comes.
+                        availableReels.AddRange(incomingLoaderReels.Where(x => x.Item_Id == bomDetail.Item_Id));
+                        availableReels = availableReels.OrderBy(x => x.ExpiryDate).ToList();
 
                         Reel? allocatedReel = null;
 
@@ -728,7 +733,7 @@ namespace RackingSystem.Services.JOServices
             return result;
         }
 
-        public async Task<ServiceResponseModel<List<JORawMaterialStockCheckDTO>>> CheckJOERawMaterialStock(long jobOrderEId, bool includeQueue = true, bool includeEmergency = true)
+        public async Task<ServiceResponseModel<List<JORawMaterialStockCheckDTO>>> CheckJOERawMaterialStock(long jobOrderEId, bool includeQueue = true, bool includeEmergency = true, bool includeLoader = true)
         {
             ServiceResponseModel<List<JORawMaterialStockCheckDTO>> result = new ServiceResponseModel<List<JORawMaterialStockCheckDTO>>();
 
@@ -749,7 +754,7 @@ namespace RackingSystem.Services.JOServices
                 var rawMaterialCheckList = new List<JORawMaterialStockCheckDTO>();
 
                 // Build a dictionary to track reserved reels by item
-                var reservedReels = await CalculateReservedReels(includeQueue, includeEmergency, 0, jobOrderEId);
+                var (reservedReels, incomingLoaderReels) = await CalculateReservedReels(includeQueue, includeEmergency, includeLoader, 0, jobOrderEId);
 
                 foreach (var detail in jobDetails)
                 {
@@ -772,6 +777,11 @@ namespace RackingSystem.Services.JOServices
                                    x.ExpiryDate.Date >= DateTime.Now.Date)
                         .OrderBy(x => x.ExpiryDate)
                         .ToListAsync();
+
+                    // Reels currently being Hub In'd by a Loader queue entry ahead of this job
+                    // will already be on the rack by the time this job's turn comes.
+                    availableReels.AddRange(incomingLoaderReels.Where(x => x.Item_Id == detail.Item_Id));
+                    availableReels = availableReels.OrderBy(x => x.ExpiryDate).ToList();
 
                     Reel? allocatedReel = null;
 
@@ -817,6 +827,19 @@ namespace RackingSystem.Services.JOServices
                             ShortageQty = requiredQty
                         });
                     }
+
+                    // Emergency JO details request a raw material directly (no BOM/finish good),
+                    // so the detail itself is shown as the group row with its single raw material.
+                    rawMaterialCheckList.Add(new JORawMaterialStockCheckDTO
+                    {
+                        JobOrderDetail_Id = detail.JobOrderEmergencyDetail_Id,
+                        FinishGoodItemCode = rawMaterialItem.ItemCode,
+                        FinishGoodItemDescription = rawMaterialItem.Description,
+                        FinishGoodQty = detail.Qty,
+                        IsFulfillable = hasSufficientStock,
+                        RawMaterials = rawMaterials,
+                        Shortages = shortages
+                    });
                 }
 
                 result.success = true;
@@ -831,24 +854,50 @@ namespace RackingSystem.Services.JOServices
             return result;
         }
 
-        private async Task<Dictionary<Guid, long>> CalculateReservedReels(bool includeQueue, bool includeEmergency, long skipJobId, long skipJobEId)
+        private async Task<(Dictionary<Guid, long> ReservedReels, List<Reel> IncomingLoaderReels)> CalculateReservedReels(bool includeQueue, bool includeEmergency, bool includeLoader, long skipJobId, long skipJobEId)
         {
             var reservedReels = new Dictionary<Guid, long>(); // Reel_Id -> Item_Id (which item type reserved it)
+            var incomingLoaderReels = new List<Reel>(); // Reels being Hub In'd by a Loader queue entry ahead of the job being checked
 
             try
             {
+                // Determine the queue sequence (Idx) of the job being simulated, so only
+                // higher-priority (earlier-sequence) queue entries reserve reels ahead of it.
+                // A job not currently in the queue is treated as lowest priority (reserve everything).
+                int currentIdx = int.MaxValue;
+                if (skipJobId != 0)
+                {
+                    var currentQ = await _dbContext.RackJobQueue
+                        .Where(x => x.DocType == EnumQueueDocType.JO.ToString() && x.Doc_Id == skipJobId)
+                        .FirstOrDefaultAsync();
+                    if (currentQ != null) currentIdx = currentQ.Idx;
+                }
+                else if (skipJobEId != 0)
+                {
+                    var currentQ = await _dbContext.RackJobQueue
+                        .Where(x => x.DocType == EnumQueueDocType.JOE.ToString() && x.Doc_Id == skipJobEId)
+                        .FirstOrDefaultAsync();
+                    if (currentQ != null) currentIdx = currentQ.Idx;
+                }
+
                 if (includeQueue)
                 {
                     // Get all pending job orders and allocate their reels
-                    var pendingJobOrderIds = await _dbContext.RackJobQueue
+                    var pendingJobOrders = await _dbContext.RackJobQueue
                         .Where(x => x.DocType == EnumQueueDocType.JO.ToString())
-                        .Select(x => x.Doc_Id)
+                        .Select(x => new { x.Doc_Id, x.Idx })
                         .ToListAsync();
 
-                    foreach (var jobId in pendingJobOrderIds)
+                    foreach (var q in pendingJobOrders)
                     {
-                        if (jobId == skipJobId)
+                        if (q.Doc_Id == skipJobId)
                             continue;
+
+                        // Only reserve for queue entries ahead of (earlier sequence than) the job being checked
+                        if (q.Idx >= currentIdx)
+                            continue;
+
+                        var jobId = q.Doc_Id;
 
                         // when add in queue will auto create JobOrderRaws list from BOM
                         var jobRaws = await _dbContext.JobOrderRaws
@@ -896,15 +945,21 @@ namespace RackingSystem.Services.JOServices
                 if (includeEmergency)
                 {
                     // Get all pending emergency job orders and allocate their reels
-                    var pendingEmergencyIds = await _dbContext.RackJobQueue
+                    var pendingEmergencies = await _dbContext.RackJobQueue
                         .Where(x => x.DocType == EnumQueueDocType.JOE.ToString())
-                        .Select(x => x.Doc_Id)
+                        .Select(x => new { x.Doc_Id, x.Idx })
                         .ToListAsync();
 
-                    foreach (var emergId in pendingEmergencyIds)
+                    foreach (var q in pendingEmergencies)
                     {
-                        if (emergId == skipJobEId)
+                        if (q.Doc_Id == skipJobEId)
                             continue;
+
+                        // Only reserve for queue entries ahead of (earlier sequence than) the job being checked
+                        if (q.Idx >= currentIdx)
+                            continue;
+
+                        var emergId = q.Doc_Id;
 
                         var emergDetails = await _dbContext.JobOrderEmergencyDetail
                             .Where(x => x.JobOrderEmergency_Id == emergId)
@@ -947,13 +1002,46 @@ namespace RackingSystem.Services.JOServices
                         }
                     }
                 }
+
+                if (includeLoader)
+                {
+                    // Get all pending Hub In (Loader) queue entries ahead of the job being checked.
+                    // Their reels are still WaitingLoader/InLoader (not yet IsReady), but will already
+                    // be on the rack by the time this job's turn comes, so count them as available too.
+                    var pendingLoaders = await _dbContext.RackJobQueue
+                        .Where(x => x.DocType == EnumQueueDocType.Loader.ToString())
+                        .Select(x => new { x.Doc_Id, x.Idx })
+                        .ToListAsync();
+
+                    foreach (var q in pendingLoaders)
+                    {
+                        if (q.Idx >= currentIdx)
+                            continue;
+
+                        var pendingReelIds = await _dbContext.LoaderReel
+                            .Where(x => x.Loader_Id == q.Doc_Id)
+                            .Select(x => x.Reel_Id)
+                            .ToListAsync();
+
+                        if (!pendingReelIds.Any())
+                            continue;
+
+                        var pendingReels = await _dbContext.Reel
+                            .Where(x => pendingReelIds.Contains(x.Reel_Id) &&
+                                       x.NeedCheck == false &&
+                                       x.ExpiryDate.Date >= DateTime.Now.Date)
+                            .ToListAsync();
+
+                        incomingLoaderReels.AddRange(pendingReels);
+                    }
+                }
             }
             catch (Exception ex)
             {
                 // Log error but don't throw - return partial reserved dict
             }
 
-            return reservedReels;
+            return (reservedReels, incomingLoaderReels);
         }
     }
 }

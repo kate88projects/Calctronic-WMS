@@ -1,0 +1,749 @@
+@{
+    Layout = "~/Views/Shared/_LayoutEmpty.cshtml";
+}
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Outfit', sans-serif;
+        margin: 0;
+    }
+
+    .tray {
+        width: 56px;
+        height: 18px;
+        border-radius: 3px;
+        border: 1.5px solid rgba(0,0,0,0.15);
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .arm {
+        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .gripper {
+        transition: all 0.3s ease;
+    }
+
+    @@keyframes pulse-glow {
+        0%, 100% { box-shadow: 0 0 8px rgba(16, 185, 129, 0.2); }
+        50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
+    }
+
+    .status-active {
+        animation: pulse-glow 1.5s ease-in-out infinite;
+    }
+
+    @@keyframes slideIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .log-entry {
+        animation: slideIn 0.3s ease;
+    }
+
+    .mono {
+        font-family: 'JetBrains Mono', monospace;
+    }
+
+    .rack-selected {
+        border-color: #10b981;
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+        background: rgba(16, 185, 129, 0.08);
+    }
+
+    .trolley-slot {
+        width: 62px;
+        height: 22px;
+        border: 1.5px dashed rgba(0,0,0,0.1);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .tray.empty-selected {
+        background-color: #10b981;
+    }
+
+    .scene-container {
+        position: relative;
+        width: 100%;
+        height: 280px;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .rack-section, .trolley-column {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5px;
+        align-items: center;
+    }
+
+    .rack-selector {
+        border: 2px solid transparent;
+        border-radius: 6px;
+        padding: 8px;
+    }
+
+    .step-line::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 32px;
+        bottom: -8px;
+        width: 2px;
+        background: lightgrey;
+    }
+
+    .step-line:last-child::before {
+        display: none;
+    }
+
+    .step-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid lightgrey;
+        background: lightgrey;
+        flex-shrink: 0;
+        transition: all 0.3s;
+        position: relative;
+        z-index: 2;
+    }
+
+        .step-dot.active {
+            border-color: #22c55e;
+            background: #22c55e;
+            box-shadow: 0 0 10px rgba(34,197,94,0.5);
+        }
+
+        .step-dot.done {
+            border-color: #22c55e;
+            background: #22c55e;
+        }
+
+        .step-dot.waiting {
+            border-color: lightgrey;
+            background: lightgrey;
+        }
+
+    .status-badge {
+        font-size: 10px;
+        padding: 2px 8px;
+        border-radius: 9999px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .trolley-selected {
+        border-color: #10b981;
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+        background: rgba(16, 185, 129, 0.08);
+    }
+
+    .selected {
+        border-color: #10b981;
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+        background: rgba(16, 185, 129, 0.08);
+    }
+
+    input:disabled, select:disabled {
+        background: #f3f4f6 !important;
+        color: #374151 !important;
+        opacity: 1 !important;
+        cursor: not-allowed;
+    }
+</style>
+
+<input type="hidden" id="xToken" value="@ViewBag.xToken" autocomplete="off">
+<input type="hidden" id="xQId" value="@ViewBag.QId" autocomplete="off">
+<input type="hidden" id="xDeviceId" value="@ViewBag.DeviceId" autocomplete="off">
+
+<div id="app" class="h-full w-full overflow-auto" style="background: #f8f9fa;">
+    <!-- Title -->
+    <header class="px-6 py-4 flex items-center justify-between border-b" style="border-color: #e5e7eb;">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: #475569;">
+                <i class="bi-eye" style="width:20px;height:20px;color:#fff;"></i>
+            </div>
+            <div>
+                <h1 id="pageTitle" class="text-lg font-bold" style="color:#1f2937;">SRMS <span style="color:grey"> [Viewer]</span></h1>
+                <p id="statusLabel" class="text-xs mono" style="color:#6b7280;">Put away empty drawer from Trolley to SRMS</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <button id="addressLogBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;" onclick="showAddressResponseLog()">
+                <i class="bi-cpu" style="width:12px;height:12px;"></i> PLC Address Log
+            </button>
+            <div id="statusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mono" style="background:#f3f4f6;color:#6b7280;">
+                <span id="statusDot" class="w-2 h-2 rounded-full" style="background:#6b7280;"></span> <span id="statusText">IDLE</span>
+            </div>
+        </div>
+    </header>
+    <!-- Body -->
+    <div class="p-6 flex flex-col gap-4" style="min-height: 90vh;">
+        <!-- Scene -->
+        <div class="scene-container" style="background: linear-gradient(180deg, #ffffff 0%, #f3f4f6 100%); border: 1px solid #e5e7eb; height: 160px;">
+            <!-- Grid overlay -->
+            <svg class="absolute inset-0 w-full h-full" style="opacity:0.08;">
+                <defs>
+                    <pattern id="grid" width="30" height="30" patternunits="userSpaceOnUse">
+                        <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#fff" stroke-width="0.5" />
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#grid)" />
+            </svg><!-- Left Racks -->
+            <div class="absolute left-6 top-10 flex" style="bottom: 16px;">
+                <div class="rack-section rack-selector" id="rackLeftSelector">
+                    <div class="text-xs mono mb-1" style="color:#374151;">
+                        TROLLEY LEFT
+                    </div>
+                    <input type="text" id="left-input-tr" class="w-full px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;color:#374151;background:#fff;" autocomplete="off" disabled>
+                </div>
+                <div class="rack-section rack-selector" id="rackCenterSelector">
+                    <div class="text-xs mono mb-1" style="color:#374151;">
+                        TROLLEY CENTER
+                    </div>
+                    <input type="text" id="center-input-tr" class="w-full px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;color:#374151;background:#fff;" autocomplete="off" disabled>
+                </div>
+                <div class="rack-section rack-selector" id="rackRightSelectorTr">
+                    <div class="text-xs mono mb-1" style="color:#374151;">
+                        TROLLEY RIGHT
+                    </div>
+                    <input type="text" id="right-input-tr" class="w-full px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;color:#374151;background:#fff;" autocomplete="off" disabled>
+                </div>
+            </div>
+            <!-- PLC Arm Assembly -->
+            <div id="armAssembly" class="arm absolute" style="left: 50%; top: 80px; transform: translateX(-50%);">
+                <!-- Vertical rail -->
+                <div class="absolute left-1/2 -translate-x-1/2" style="width:4px;height:80px;background:#334155;border-radius:2px;top:-30px;">
+                    <div style="width:8px;height:8px;background:#475569;border-radius:50%;position:absolute;top:0;left:-2px;"></div>
+                    <div style="width:8px;height:8px;background:#475569;border-radius:50%;position:absolute;bottom:0;left:-2px;"></div>
+                </div>
+                <!-- Arm head -->
+                <div id="armHead" class="absolute arm" style="left:50%;transform:translateX(-50%);top:0;">
+                    <div style="width:40px;height:14px;background:#3b82f6;border-radius:4px;margin:0 auto;"></div>
+                    <!-- Grippers -->
+                    <div id="gripperLeft" class="gripper" style="width:8px;height:16px;background:#60a5fa;border-radius:0 0 3px 3px;position:absolute;left:4px;top:14px;"></div>
+                    <div id="gripperRight" class="gripper" style="width:8px;height:16px;background:#60a5fa;border-radius:0 0 3px 3px;position:absolute;right:4px;top:14px;"></div><!-- Held tray -->
+                    <div id="heldTray" class="tray absolute hidden" style="left:50%;transform:translateX(-50%);top:28px;"></div>
+                </div>
+            </div>
+            <!-- Rack Indicator -->
+            <div class="absolute right-6 top-10 flex" style="bottom: 16px;">
+                <div class="rack-section rack-selector" id="rackLeftSlotSelector">
+                    <div class="text-xs mono mb-1" style="color:#374151;">
+                        RACK LEFT
+                    </div>
+                    <input type="text" id="left-input" class="w-full px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;color:#374151;background:#fff;" autocomplete="off" disabled>
+                </div>
+                <div class="rack-section rack-selector" id="rackRightSlotSelector">
+                    <div class="text-xs mono mb-1" style="color:#374151;">
+                        RACK RIGHT
+                    </div>
+                    <input type="text" id="right-input" class="w-full px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;color:#374151;background:#fff;" autocomplete="off" disabled>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 p-4" style="min-height: calc(100% - 73px);">
+            <!-- Left: System Control (3 cols = 50%) -->
+            <div class="col-span-1 flex flex-col gap-4">
+                <!-- System Control -->
+                <div class="rounded-xl p-6 flex flex-col" style="background:#fff;border:1px solid #e5e7eb;">
+                    <h2 class="text-xs font-semibold mb-2 flex items-center gap-2" style="color:#4b5563;">
+                        <i class="bi-controller" style="width:14px;height:14px;"></i> System Control
+                    </h2>
+                    <div class="flex flex-wrap gap-1.5 mb-2">
+                        <div class="flex items-center gap-2">
+                            <label for="job-input" class="text-xs font-semibold" style="color:#4b5563;white-space:nowrap;">Job : </label>
+                            <input type="text" id="job-input" value="@ViewBag.QNo" class="flex-1 px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;color:#374151;background:#fff;" disabled>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label for="trolley-input" class="text-xs font-semibold" style="color:#4b5563;white-space:nowrap;">Trolley : </label>
+                            <input type="text" id="trolley-input" class="flex-1 px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;color:#374151;background:#fff;" disabled>
+                            <select id="side-input" width="50px;" class="flex-1 px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;color:#374151;background:#fff;" disabled>
+                                <option id="A">A</option>
+                                <option id="B">B</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 mb-6">
+                        <div class="rounded-lg p-3 text-center" style="background:#fef3c7;border:1px solid #fde68a;">
+                            <div class="text-xs mono" style="color:#92400e;">
+                                Pending
+                            </div>
+                            <div id="pendingCount" class="text-2xl font-bold mono" style="color:#f59e0b;">
+                                0
+                            </div>
+                        </div>
+                        <div class="rounded-lg p-3 text-center" style="background:#dbeafe;border:1px solid #bfdbfe;">
+                            <div class="text-xs mono" style="color:#1e40af;">
+                                Completed
+                            </div>
+                            <div id="completedCount" class="text-2xl font-bold mono" style="color:#3b82f6;">
+                                0
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="justify-content: space-between; padding: 10px;">
+                    <!-- Retrieve Process Panel -->
+                    <div class="rounded-xl p-6 w-1/2" style="background:#ffffff; border:1px solid #e2e8f0; width: 49%;">
+                        <h2 class="text-xs font-semibold mb-2 flex items-center gap-2" style="color:#4b5563;">
+                            <i class="bi-rocket-takeoff" style="width:14px;height:14px;"></i> Retrieve Process
+                        </h2>
+                        <div class="mb-6" id="cartesian-session">
+                            <div class="flex flex-col gap-2" id="retrieveStepsContainer">
+                                <div class="step-line relative flex items-start gap-3 py-1">
+                                    <div class="step-dot waiting mt-1" id="rDot1"></div>
+                                    <div>
+                                        <p class="text-sm font-semibold" style="color:#0f172a;">PC → DB Trolley</p>
+                                        <p class="text-xs" style="color:#64748b;">Get Trolley Slot</p>
+                                    </div>
+                                </div>
+                                <div class="step-line relative flex items-start gap-3 py-1">
+                                    <div class="step-dot waiting mt-1" id="rDot2"></div>
+                                    <div>
+                                        <p class="text-sm font-semibold" style="color:#0f172a;">Robot → Trolley</p>
+                                        <p class="text-xs" style="color:#64748b;">Retrieve</p>
+                                    </div>
+                                </div>
+                                <div class="step-line relative flex items-start gap-3 py-1">
+                                    <div class="step-dot waiting mt-1" id="rDot3"></div>
+                                    <div>
+                                        <p class="text-sm font-semibold" style="color:#0f172a;">Robot → Center</p>
+                                        <p class="text-xs" style="color:#64748b;">Retrieve Status</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="pt-4 mt-4 border-t" style="border-color:#e2e8f0;">
+                                <div class="flex flex-grid items-start gap-3 py-1">
+                                    <input type="text" id="txtRetrieveSlot" placeholder="Retrieve Slot" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="width: 40%;" disabled>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Putaway Steps -->
+                    <div class="rounded-xl p-6 w-1/2" style="background:#fff;border:1px solid #e5e7eb; width: 49%;">
+                        <h2 class="text-xs font-semibold mb-2 flex items-center gap-2" style="color:#4b5563;">
+                            <i class="bi-rocket-takeoff" style="width:14px;height:14px;"></i> Putaway Process
+                        </h2>
+                        <div class="mb-6" id="trolley-session">
+                            <div class="flex flex-col gap-2" id="putAwayStepsContainer">
+                                <div class="step-line relative flex items-start gap-3 py-1">
+                                    <div class="step-dot waiting mt-1" id="pDot1"></div>
+                                    <div>
+                                        <p class="text-sm font-semibold" style="color:#0f172a;">PC → DB Slot</p>
+                                        <p class="text-xs" style="color:#64748b;">Get Slot</p>
+                                    </div>
+                                </div>
+                                <div class="step-line relative flex items-start gap-3 py-1">
+                                    <div class="step-dot waiting mt-1" id="pDot2"></div>
+                                    <div>
+                                        <p class="text-sm font-semibold" style="color:#0f172a;">Robot → SRMS</p>
+                                        <p class="text-xs" style="color:#64748b;">PutAway</p>
+                                    </div>
+                                </div>
+                                <div class="step-line relative flex items-start gap-3 py-1">
+                                    <div class="step-dot waiting mt-1" id="pDot3"></div>
+                                    <div>
+                                        <p class="text-sm font-semibold" style="color:#0f172a;">Robot → Center</p>
+                                        <p class="text-xs" style="color:#64748b;">PutAway Status</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="pt-4 mt-4 border-t" style="border-color:#e2e8f0;">
+                                <div class="flex flex-grid items-start gap-3 py-1">
+                                    <input type="text" id="txtPutSlot" placeholder="Put Slot" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="width: 50%;" disabled>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Center: Activity Log (3 cols = 50%) -->
+            <div class="col-span-1 flex flex-col gap-4">
+                <!-- Activity Log -->
+                <div class="rounded-xl p-6 flex flex-col" style="background:#fff;border:1px solid #e5e7eb; height: 100%;">
+                    <h2 class="text-xs font-semibold mb-2 flex items-center gap-2" style="color:#4b5563;"><i class="bi-terminal" style="width:14px;height:14px;"></i> Activity Log</h2>
+                    <div id="logList" class="space-y-1 overflow-y-auto" style="max-height: 35rem;">
+                        <div class="log-entry text-xs" style="color:#64748b;">
+                            [Viewer connected]
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PLC Address Response Log Side Panel -->
+<div id="addressLogOverlay" class="hidden" style="position:fixed;inset:0;background:rgba(15,23,42,0.35);z-index:1040;" onclick="hideAddressResponseLog()"></div>
+<div id="addressLogPanel" style="position:fixed;top:0;right:-420px;width:420px;height:100vh;background:#fff;box-shadow:-8px 0 24px rgba(0,0,0,0.12);z-index:1050;transition:right 0.3s ease;display:flex;flex-direction:column;">
+    <div class="px-4 py-3 flex items-center justify-between border-b" style="border-color:#e5e7eb;">
+        <h2 class="text-sm font-bold flex items-center gap-2" style="color:#1f2937;">
+            <i class="bi-cpu" style="width:14px;height:14px;"></i> PLC Address Response Log
+        </h2>
+        <div class="flex items-center gap-2">
+            <button class="px-2 py-1 rounded text-xs font-semibold" style="background:#f3f4f6;color:#374151;" onclick="loadAddressResponseLog()">
+                <i class="bi-arrow-clockwise" style="width:12px;height:12px;"></i> Refresh
+            </button>
+            <button class="btn-close" aria-label="Close" onclick="hideAddressResponseLog()"></button>
+        </div>
+    </div>
+    <div class="px-4 py-2 text-xs mono" style="color:#9ca3af;border-bottom:1px solid #e5e7eb;">
+        Sorted by most recent reading. Rows updated in the last 5s are highlighted.
+    </div>
+    <div id="addressLogList" class="flex-1" style="overflow-y:auto;padding:8px 12px;">
+        <div class="text-xs" style="color:#9ca3af;">Loading...</div>
+    </div>
+</div>
+
+<div class="modal fade" id="jobDoneModal" role="dialog" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-body" style="padding: 50px;">
+                <div class="row">
+                    <div class="col-6">
+                        <img src="~/assets/img/task.gif" style="width:100%;" />
+                    </div>
+                    <div class="col-6">
+                        <p class="" style="font-size:2em;">Job is done. Click the 'Close' button to close this window.</p>
+                        <button class="btn btn-success w-100" style="height: 100px;" onclick="closeTab()">Close</button>
+                        <button class="btn btn-secondary w-100" style="height: 100px;" onclick="exportLogFile()">Export Log</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script src="~/js/lucide.min.js"></script>
+    <link href="~/css/jetbrains.css" rel="stylesheet" />
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <script type="text/javascript">
+
+        // Centralized state, populated purely from the shared RackJob JSON.
+        // This page never issues PLC/DB commands -- it only reads and renders
+        // GetRackJobJson, so a second device can watch what the controlling
+        // device is doing in real time.
+        let sharedDrawerState = {
+            drawerStatus: 'None',
+            cartesianRobotState: 'Ready',
+            cartesianLocation: 'center',
+            systemRunning: false,
+            trolleyLocation: 'none',
+        };
+
+        let token = '';
+        let qId = 0;
+
+        const TRAY_COLORS = ['#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899'];
+
+        function closeTab() {
+            window.close();
+        }
+
+        $(document).ready(function () {
+            token = $('#xToken').val();
+            qId = Number($('#xQId').val());
+
+            getJson();
+            setInterval(getJson, 1000);
+        });
+
+        // ----------- Log
+        function log(msg, typ) {
+            const list = document.getElementById('logList');
+            const d = document.createElement('div');
+            d.className = 'log-entry';
+            const ts = new Date().toLocaleTimeString('en', { hour12: false });
+            if (typ == 'info') {
+                d.innerHTML = `<span style="color:#475569">[${ts}]</span> ${msg}`;
+            }
+            if (typ == 'alert') {
+                d.innerHTML = `<span style="color:#e74c3c">[${ts}]</span> <span style="color:#e74c3c">${msg} </span>`;
+            }
+            list.prepend(d);
+            if (list.children.length > 30) list.lastChild.remove();
+        }
+
+        // ----------- PLC Address Response Log
+        let addressLogInterval = null;
+
+        function showAddressResponseLog() {
+            document.getElementById('addressLogOverlay').classList.remove('hidden');
+            document.getElementById('addressLogPanel').style.right = '0px';
+            loadAddressResponseLog();
+            if (addressLogInterval) { clearInterval(addressLogInterval); }
+            addressLogInterval = setInterval(loadAddressResponseLog, 3000);
+        }
+
+        function hideAddressResponseLog() {
+            document.getElementById('addressLogOverlay').classList.add('hidden');
+            document.getElementById('addressLogPanel').style.right = '-420px';
+            if (addressLogInterval) {
+                clearInterval(addressLogInterval);
+                addressLogInterval = null;
+            }
+        }
+
+        async function loadAddressResponseLog() {
+            await $.ajax({
+                url: '/api/PLCTrolley/GetAddressResponseLog',
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    if (result.success == true) {
+                        renderAddressResponseLog(result.data);
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+
+        function renderAddressResponseLog(list) {
+            const container = document.getElementById('addressLogList');
+            if (!list || list.length === 0) {
+                container.innerHTML = '<div class="text-xs" style="color:#9ca3af;">No address response yet.</div>';
+                return;
+            }
+
+            // sort by last reading datetime, most recent first
+            list.sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate));
+
+            const now = new Date();
+            let html = '';
+            list.forEach(item => {
+                const dt = new Date(item.createdDate);
+                const ageSec = (now - dt) / 1000;
+                const isFresh = ageSec <= 5;
+                const isErr = item.isErr === true;
+
+                let bg = '#fff';
+                let border = '#e5e7eb';
+                if (isErr) { bg = '#fef2f2'; border = '#fecaca'; }
+                else if (isFresh) { bg = '#ecfdf5'; border = '#6ee7b7'; }
+
+                html += `
+                    <div class="log-entry rounded-lg mb-1.5 px-3 py-2" style="background:${bg};border:1px solid ${border};">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold mono" style="color:#1f2937;">Addr ${item.address}</span>
+                            <span class="text-xs font-semibold mono" style="color:${isErr ? '#b91c1c' : '#059669'};">
+                                ${isFresh ? '<i class="bi-broadcast" style="width:10px;height:10px;"></i> ' : ''}${item.action}
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between mt-0.5">
+                            <span class="text-xs mono" style="color:#4b5563;">Value: <b>${item.value}</b></span>
+                            <span class="text-xs mono" style="color:#9ca3af;">${dt.toLocaleTimeString()}</span>
+                        </div>
+                        <div class="text-xs mono" style="color:#9ca3af;">${item.methodName}</div>
+                    </div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function setStatus(text, color) {
+            const badge = document.getElementById('statusBadge');
+            const dot = document.getElementById('statusDot');
+            const st = document.getElementById('statusText');
+            st.textContent = text;
+            dot.style.background = color;
+            if (text !== 'IDLE') badge.classList.add('status-active');
+            else badge.classList.remove('status-active');
+        }
+
+        function updateSystemStatusUI() {
+            if (sharedDrawerState.systemRunning) {
+                setStatus('PROCESSING', '#f59e0b');
+            } else {
+                setStatus('STOPPED', '#6b7280');
+            }
+        }
+
+        function moveArm(top) {
+            document.getElementById('armHead').style.top = top + 'px';
+        }
+
+        function setGrip(open) {
+            document.getElementById('gripperLeft').style.transform = open ? 'translateX(-4px)' : '';
+            document.getElementById('gripperRight').style.transform = open ? 'translateX(4px)' : '';
+        }
+
+        function showHeld(colorIdx) {
+            const h = document.getElementById('heldTray');
+            if (colorIdx !== null) {
+                h.style.background = TRAY_COLORS[colorIdx];
+                h.classList.remove('hidden');
+            } else {
+                h.classList.add('hidden');
+            }
+        }
+
+        function moveArmX(side) {
+            const asm = document.getElementById('armAssembly');
+            if (side === 'rack') { asm.style.left = '47%'; }
+            else if (side === 'trolley') { asm.style.left = '53%'; }
+            else { asm.style.left = '50%'; }
+        }
+
+        function setDotStatus(id, status) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.className = 'step-dot ' + (status || 'waiting') + ' mt-1';
+        }
+
+        // The interactive control page persists PDot1-3 to the shared JSON,
+        // so render those directly; it does not persist RDot1-3, so those
+        // are still approximated from CartesianRobotState.
+        function renderSteps(data) {
+            const state = data.cartesianRobotState;
+
+            if (state === 'Retrieving') {
+                setDotStatus('rDot1', 'done');
+                setDotStatus('rDot2', 'active');
+                setDotStatus('rDot3', 'waiting');
+            } else if (state === 'Retrieved' || state === 'In Put Away') {
+                setDotStatus('rDot1', 'done');
+                setDotStatus('rDot2', 'done');
+                setDotStatus('rDot3', 'done');
+            } else {
+                setDotStatus('rDot1', 'waiting');
+                setDotStatus('rDot2', 'waiting');
+                setDotStatus('rDot3', 'waiting');
+            }
+
+            setDotStatus('pDot1', data.pDot1);
+            setDotStatus('pDot2', data.pDot2);
+            setDotStatus('pDot3', data.pDot3);
+        }
+
+        function updateCartesianUIState() {
+            document.querySelector('#left-input').classList.remove('selected');
+            document.querySelector('#right-input').classList.remove('selected');
+
+            if (sharedDrawerState.cartesianLocation === 'left') {
+                document.querySelector('#left-input').classList.add('selected');
+            } else if (sharedDrawerState.cartesianLocation === 'right') {
+                document.querySelector('#right-input').classList.add('selected');
+            }
+        }
+
+        function updateTrolleyUIState() {
+            document.querySelector('#left-input-tr').classList.remove('trolley-selected');
+            document.querySelector('#center-input-tr').classList.remove('trolley-selected');
+            document.querySelector('#right-input-tr').classList.remove('trolley-selected');
+
+            if (sharedDrawerState.trolleyLocation === 'left') {
+                document.querySelector('#left-input-tr').classList.add('trolley-selected');
+            } else if (sharedDrawerState.trolleyLocation === 'right') {
+                document.querySelector('#right-input-tr').classList.add('trolley-selected');
+            } else if (sharedDrawerState.trolleyLocation === 'center') {
+                document.querySelector('#center-input-tr').classList.add('trolley-selected');
+            }
+        }
+
+        function renderScene(data) {
+            if (data.cartesianLocation === 'left' || data.cartesianLocation === 'right') {
+                moveArmX('rack');
+            } else if (data.trolleyLocation && data.trolleyLocation !== 'none' && data.trolleyLocation !== '') {
+                moveArmX('trolley');
+            } else {
+                moveArmX('center');
+            }
+
+            var isActiveMove = (data.cartesianRobotState === 'Retrieving' || data.cartesianRobotState === 'In Put Away');
+            moveArm(isActiveMove ? 20 : 0);
+
+            var holding = data.drawerStatus === 'Drawer';
+            setGrip(!holding);
+            showHeld(holding ? 2 : null);
+
+            updateCartesianUIState();
+            updateTrolleyUIState();
+            renderSteps(data);
+
+            $('#txtRetrieveSlot').val(data.retrieveSlot);
+            $('#txtPutSlot').val(data.putAwaySlot);
+        }
+
+        function getPendingCount(data) {
+            var total = 0;
+
+            if (data.colNum <= 1 && data.chkCol1 == true) {
+                total = total + (51 - Number(data.currentRowCol1));
+            }
+            if (data.colNum <= 2 && data.chkCol2 == true) {
+                total = total + (51 - Number(data.currentRowCol2));
+            }
+            if (data.colNum <= 3 && data.chkCol3 == true) {
+                total = total + (51 - Number(data.currentRowCol3));
+            }
+
+            return total;
+        }
+
+        async function getJson() {
+            await $.ajax({
+                url: '/api/PLCTrolley/GetRackJobJson',
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    var data = result.data;
+
+                    sharedDrawerState.systemRunning = data.systemStart;
+
+                    $('#trolley-input').val(data.trolleyCode);
+                    $('#side-input').val(data.trolleySide);
+
+                    sharedDrawerState.drawerStatus = data.drawerStatus;
+                    sharedDrawerState.cartesianRobotState = data.cartesianRobotState;
+                    sharedDrawerState.cartesianLocation = data.cartesianLocation;
+                    sharedDrawerState.trolleyLocation = data.trolleyLocation;
+
+                    $('#left-input-tr').val(data.currentRowCol1);
+                    $('#center-input-tr').val(data.currentRowCol2);
+                    $('#right-input-tr').val(data.currentRowCol3);
+
+                    document.getElementById('pendingCount').innerHTML = getPendingCount(data);
+
+                    updateSystemStatusUI();
+                    renderScene(data);
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+
+    </script>
+}

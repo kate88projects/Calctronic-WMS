@@ -62,5 +62,9 @@ namespace RackingSystem.Models.RackJob
         public int CurrentRowCol2 { get; set; } = 1;
         public int CurrentRowCol3 { get; set; } = 1;
 
+        public string PDot1 { get; set; } = "waiting";
+        public string PDot2 { get; set; } = "waiting";
+        public string PDot3 { get; set; } = "waiting";
+
     }
 }

@@ -1,46 +1,8 @@
 @{
-	ViewData["Title"] = "JO Simulate";
+	ViewData["Title"] = "JO Emergency Simulate";
 }
 
 <style>
-	.fulfillment-badge {
-		display: inline-block;
-		padding: 8px 12px;
-		border-radius: 4px;
-		font-weight: bold;
-		font-size: 14px;
-	}
-
-	.fulfillable {
-		background-color: #d4edda;
-		color: #155724;
-		border: 1px solid #c3e6cb;
-	}
-
-	.unfulfillable {
-		background-color: #f8d7da;
-		color: #721c24;
-		border: 1px solid #f5c6cb;
-	}
-
-	.detail-card {
-		border: 1px solid #ddd;
-		border-radius: 4px;
-		margin-bottom: 15px;
-		padding: 15px;
-		background-color: #f9f9f9;
-	}
-
-	.detail-card.warning {
-		border-left: 4px solid #ff6b6b;
-		background-color: #fff9f9;
-	}
-
-	.detail-card.success {
-		border-left: 4px solid #51cf66;
-		background-color: #f9fdf9;
-	}
-
 	.raw-material-table {
 		width: 100%;
 		margin: 10px 0;
@@ -62,44 +24,7 @@
 		background-color: #f5f5f5;
 	}
 
-	.shortage-highlight {
-		background-color: #ffebee !important;
-	}
-
-	.sufficient {
-		color: #4caf50;
-	}
-
-	.insufficient {
-		color: #f44336;
-		font-weight: bold;
-	}
-
-	.shortage-section {
-		background-color: #ffebee;
-		padding: 12px;
-		border-radius: 4px;
-		margin-top: 10px;
-		border-left: 3px solid #d32f2f;
-	}
-
-	.info-row {
-		display: flex;
-		justify-content: space-between;
-		margin: 5px 0;
-		font-size: 14px;
-	}
-
-	.info-label {
-		font-weight: bold;
-		color: #666;
-	}
-
-	.info-value {
-		color: #333;
-	}
-
-	/* Table grouping styles */
+	/* Flat results table styles :: an Emergency JO detail IS a raw material request, no finish-good/BOM level */
 	.results-table {
 		width: 100%;
 		border-collapse: collapse;
@@ -108,7 +33,7 @@
 		background: white;
 	}
 
-	.results-table > thead > tr > th {
+	.results-table thead th {
 		background-color: #f0f0f0;
 		font-weight: 600;
 		padding: 12px;
@@ -116,40 +41,20 @@
 		text-align: left;
 	}
 
-	.group-row {
-		background-color: #e3f2fd;
-		font-weight: 600;
-		cursor: pointer;
-	}
-
-	.group-row td {
-		padding: 12px;
-		border-bottom: 1px solid #ddd;
-	}
-
-	.group-row .toggle-icon {
-		margin-right: 8px;
-		transition: transform 0.3s ease;
-	}
-
-	.group-row.collapsed .toggle-icon {
-		transform: rotate(-90deg);
-	}
-
-	.raw-material-group {
-		background-color: #fafafa;
-	}
-
-	.raw-material-row {
+	.results-table tbody tr {
 		border-bottom: 1px solid #eee;
 	}
 
-	.raw-material-row td {
+	.results-table tbody tr td {
 		padding: 10px 12px;
 		font-size: 14px;
 	}
 
-	.raw-material-row.shortage {
+	.results-table tbody tr:hover {
+		background-color: #f5f5f5;
+	}
+
+	.results-table tbody tr.shortage {
 		background-color: #ffebee;
 	}
 
@@ -171,16 +76,6 @@
 		color: #c62828;
 	}
 
-	.status-badge.fulfill {
-		background-color: #c8e6c9;
-		color: #2e7d32;
-	}
-
-	.status-badge.cannot-fulfill {
-		background-color: #ffcdd2;
-		color: #c62828;
-	}
-
 	.qty-cell {
 		text-align: right;
 		font-family: 'Courier New', monospace;
@@ -189,35 +84,6 @@
 	.loading-spinner {
 		text-align: center;
 		padding: 30px;
-	}
-
-	.summary-section {
-		background-color: #f5f5f5;
-		padding: 20px;
-		border-radius: 4px;
-		margin-bottom: 20px;
-	}
-
-	.summary-item {
-		display: inline-block;
-		margin-right: 30px;
-		margin-bottom: 10px;
-	}
-
-	.summary-value {
-		font-size: 24px;
-		font-weight: bold;
-		color: #333;
-	}
-
-	.summary-label {
-		color: #666;
-		font-size: 12px;
-		text-transform: uppercase;
-	}
-
-	.back-button {
-		margin-bottom: 15px;
 	}
 
 	.empty-state {
@@ -234,7 +100,7 @@
 
 	.status-grid {
 		display: grid;
-		grid-template-columns: repeat(6, 1fr);
+		grid-template-columns: repeat(3, 1fr);
 		gap: 16px;
 		margin-bottom: 24px;
 	}
@@ -311,7 +177,7 @@
 
 @section PageHeader {
 	<header class="d-flex align-items-center justify-content-between w-100">
-		<h2 class="pageTitle">JO Simulate - Raw Material Stock Check</h2>
+		<h2 class="pageTitle">Emergency JO Simulate - Raw Material Stock Check</h2>
 	</header>
 }
 
@@ -320,29 +186,17 @@
 		<div class="col-12">
 			<br />
 
-			<!-- Status -->
+			<!-- Status :: an Emergency JO detail requests a raw material directly (no finish good/BOM), so there is no separate "details" level -->
 			<div class="status-grid">
-				<div class="status-card" id="card_all-details" onclick="showTab2('all-details')">
-					<h3>Total Details</h3>
-					<div class="value" id="txtTtlDtl">-</div>
-				</div>
-				<div class="status-card" id="card_all-raw" onclick="showTab2('all-raw')">
+				<div class="status-card" id="card_all" onclick="showTab2('all')">
 					<h3>Total Raw Materials</h3>
 					<div class="value" id="txtTtlRaw">-</div>
 				</div>
-				<div class="status-card" id="card_details-can" onclick="showTab2('details-can')">
-					<h3>Details Can Fulfill</h3>
-					<div class="value" id="txtTtlCanDtl" style="color: #4caf50;">-</div>
-				</div>
-				<div class="status-card" id="card_details-cannot" onclick="showTab2('details-cannot')">
-					<h3>Details Cannot Fulfill</h3>
-					<div class="value" id="txtTtlCannotDtl" style="color: #ff6b6b;">-</div>
-				</div>
-				<div class="status-card" id="card_raw-can" onclick="showTab2('raw-can')">
+				<div class="status-card" id="card_can-fulfill" onclick="showTab2('can-fulfill')">
 					<h3>Raw Materials Can Fulfill</h3>
 					<div class="value" id="txtTtlCanRaw" style="color: #4caf50;">-</div>
 				</div>
-				<div class="status-card" id="card_raw-cannot" onclick="showTab2('raw-cannot')">
+				<div class="status-card" id="card_cannot-fulfill" onclick="showTab2('cannot-fulfill')">
 					<h3>Raw Materials Cannot Fulfill</h3>
 					<div class="value" id="txtTtlCannotRaw" style="color: #ff6b6b;">-</div>
 				</div>
@@ -358,9 +212,6 @@
 				<button type="button" class="btn btn-outline-secondary" onclick="showAppliedFilters()">
 					<i class="bi bi-funnel"></i> Applied Filters
 				</button>
-				@* <button type="button" class="btn btn-warning" onclick="toggleShortOnly()">
-					<i class="bi bi-funnel"></i> <span id="shortOnlyBtnText">Show Short Only</span>
-				</button> *@
 				<button type="button" class="btn btn-outline-primary" onclick="exportToExcel()">
 					<i class="bi bi-file-earmark-excel"></i> Export to Excel
 				</button>
@@ -377,7 +228,7 @@
 			<ul class="nav nav-tabs" id="mainResultsTab" role="tablist" style="margin-top: 20px;">
 				<li class="nav-item" role="presentation">
 					<button class="nav-link active" id="allDetailsView-tab" data-bs-toggle="tab" data-bs-target="#allDetailsView" type="button" role="tab" aria-controls="allDetailsView" aria-selected="true">
-						<i class="bi bi-list-ul"></i> All Details
+						<i class="bi bi-list-ul"></i> All Raw Materials
 					</button>
 				</li>
 				<li class="nav-item" role="presentation">
@@ -389,29 +240,13 @@
 
 			<!-- Tab Content -->
 			<div class="tab-content" id="mainResultsTabContent">
-				<!-- Tab 1 :: always shows every detail with its raw materials -->
+				<!-- Tab 1 :: always shows every raw material request -->
 				<div class="tab-pane fade show active" id="allDetailsView" role="tabpanel" aria-labelledby="allDetailsView-tab">
-					<div class="mb-2">
-						<button type="button" class="btn btn-warning btn-sm" onclick="expandShortagesOnly('#resultsContainer')">
-							<i class="bi bi-exclamation-triangle"></i> Expand Shortages Only
-						</button>
-						<button type="button" class="btn btn-secondary btn-sm" onclick="collapseAll('#resultsContainer')">
-							<i class="bi bi-arrow-up"></i> Collapse All
-						</button>
-					</div>
 					<div id="resultsContainer"></div>
 				</div>
 
 				<!-- Tab 2 :: refreshed whenever a status card above is clicked -->
 				<div class="tab-pane fade" id="detailsView" role="tabpanel" aria-labelledby="detailsView-tab">
-					<div class="mb-2">
-						<button type="button" class="btn btn-warning btn-sm" onclick="expandAll('#resultsContainer2')">
-							<i class="bi bi-arrow-down"></i> Expand All
-						</button>
-						<button type="button" class="btn btn-secondary btn-sm" onclick="collapseAll('#resultsContainer2')">
-							<i class="bi bi-arrow-up"></i> Collapse All
-						</button>
-					</div>
 					<div id="resultsContainer2"></div>
 				</div>
 			</div>
@@ -500,18 +335,18 @@
 			<script src="~/js/xlsx.full.min.js"></script>
 			<script src="~/js/exceljs.min.js"></script>
 			<script>
-		const jobOrderId = @ViewBag.id;
+		const jobOrderEId = @ViewBag.id;
 
-		function getJobOrderIdFromUrl() {
+		function getJobOrderEIdFromUrl() {
 			const urlParams = new URLSearchParams(window.location.search);
 			return urlParams.get('id');
 		}
 
 		$(document).ready(function () {
-			if (jobOrderId) {
+			if (jobOrderEId) {
 				loadRawMaterialStock();
 			} else {
-				$('#resultsContainer').html('<div class="alert alert-danger">Job Order ID not found</div>');
+				$('#resultsContainer').html('<div class="alert alert-danger">Emergency Job Order ID not found</div>');
 				$('#loading').hide();
 			}
 		});
@@ -579,10 +414,10 @@
 
 		function loadRawMaterialStockWithFilters() {
 			$.ajax({
-				url: '@Url.Action("CheckJOStock", "JO")',
+				url: '@Url.Action("CheckJOEStock", "JO")',
 				type: 'GET',
 				data: {
-					jobOrderId: jobOrderId,
+					jobOrderEId: jobOrderEId,
 					includeQueue: generateOptions.includeQueue,
 					includeEmergency: generateOptions.includeEmergency,
 					includeLoader: generateOptions.includeLoader
@@ -594,8 +429,6 @@
 						$('#resultsContainer').html(`<div class="alert alert-danger">Error: ${response.errMessage}</div>`);
 					}
 					$('#loading').hide();
-					collapseAll('#resultsContainer');
-					collapseAll('#resultsContainer2');
 				},
 				error: function (xhr, status, error) {
 					$('#resultsContainer').html(`<div class="alert alert-danger">Error loading data: ${error}</div>`);
@@ -612,87 +445,58 @@
 		// Data from the last successful load, kept around so tab 2 can be
 		// re-filtered locally whenever a status card is clicked.
 		let lastResultsData = [];
-		let currentTab2Filter = 'all-details';
+		let currentTab2Filter = 'all';
 
 		const TAB2_LABELS = {
-			'all-details': 'Total Details',
-			'all-raw': 'Total Raw Materials',
-			'details-can': 'Details Can Fulfill',
-			'details-cannot': 'Details Cannot Fulfill',
-			'raw-can': 'Raw Materials Can Fulfill',
-			'raw-cannot': 'Raw Materials Cannot Fulfill'
+			'all': 'Total Raw Materials',
+			'can-fulfill': 'Raw Materials Can Fulfill',
+			'cannot-fulfill': 'Raw Materials Cannot Fulfill'
 		};
 
-		// Builds the same nested (detail -> raw materials) table markup used by both tabs.
-		// idPrefix keeps each tab's group-row/toggle ids unique so they don't clash.
-		function buildNestedTableHtml(data, idPrefix) {
+		// Builds a flat table :: one row per raw material request (an Emergency JO
+		// detail IS the raw material request, there's no finish-good/BOM level to nest under).
+		function buildFlatTableHtml(data) {
 			if (!data || data.length === 0) {
 				return `
 					<div class="empty-state">
 						<i class="bi bi-inbox"></i>
-						<h5>No Details Found</h5>
-						<p>No matching job order details.</p>
+						<h5>No Raw Materials Found</h5>
+						<p>No matching emergency job order details.</p>
 					</div>
 				`;
 			}
 
-			let html = '<table class="results-table"><thead><tr><th style="width: 5%;">Status</th><th style="width: 20%;">Finish Good Code</th><th style="width: 20%;">Description</th><th style="width: 10%;" class="qty-cell">Qty Required</th><th style="width: 45%;">Raw Materials</th></tr></thead><tbody>';
+			let html = '<table class="results-table"><thead><tr>';
+			html += '<th style="width: 8%;">Status</th>';
+			html += '<th style="width: 18%;">Item Code</th>';
+			html += '<th style="width: 32%;">Description</th>';
+			html += '<th style="width: 12%;" class="qty-cell">Required Qty</th>';
+			html += '<th style="width: 12%;" class="qty-cell">Available Qty</th>';
+			html += '<th style="width: 18%;">Reel Codes</th>';
+			html += '</tr></thead><tbody>';
 
-			data.forEach(function (detail, index) {
-				const isFulfillable = detail.isFulfillable;
-				const statusBadgeClass = isFulfillable ? 'status-badge fulfill' : 'status-badge cannot-fulfill';
-				const statusText = isFulfillable ? 'OK' : 'SHORT'; // ✓ ✗
-				const groupRowId = idPrefix + index;
+			data.forEach(function (detail) {
+				const material = (detail.rawMaterials && detail.rawMaterials.length > 0) ? detail.rawMaterials[0] : null;
+				const hasSufficientStock = material ? material.hasSufficientStock : detail.isFulfillable;
 
-				// Main row for finish good
+				const statusBadgeClass = hasSufficientStock ? 'status-badge ok' : 'status-badge short';
+				const statusText = hasSufficientStock ? 'OK' : 'SHORT';
+				const rowClass = hasSufficientStock ? '' : 'shortage';
+
+				const reelCodesDisplay = material && material.allocatedReelCodes && material.allocatedReelCodes.trim() !== ''
+					? `<small>${escapeHtml(material.allocatedReelCodes)}</small>`
+					: '<small style="color: #999;">No Reels</small>';
+
 				html += `
-					<tr class="group-row" onclick="toggleDetails('${groupRowId}')">
+					<tr class="${rowClass}">
 						<td><span class="${statusBadgeClass}">${statusText}</span></td>
 						<td><strong>${escapeHtml(detail.finishGoodItemCode)}</strong></td>
 						<td>${escapeHtml(detail.finishGoodItemDescription)}</td>
 						<td class="qty-cell">${detail.finishGoodQty}</td>
-						<td>
-							<span class="toggle-icon">▼</span>
-							<span id="count_${groupRowId}">${detail.rawMaterials ? detail.rawMaterials.length : 0} items</span>
-						</td>
+						<td class="qty-cell">${material ? material.availableQty : 0}</td>
+						<td>${reelCodesDisplay}</td>
 					</tr>
 				`;
-
-				// Raw material rows (grouped)
-				if (detail.rawMaterials && detail.rawMaterials.length > 0) {
-					html += `<tr class="raw-material-group" id="${groupRowId}" style="display: table-row;">`;
-					html += '<td colspan="5" style="padding: 0;">';
-					html += '<table class="raw-material-table" style="width: 100%; margin: 0; border: none;">';
-					html += '<thead style="background-color: #fff3e0;"><tr><th style="width: 18%; border-right: 1px solid #eee;">Item Code</th><th style="width: 27%; border-right: 1px solid #eee;">Description</th><th style="width: 12%; text-align: right; border-right: 1px solid #eee;" class="qty-cell">Required</th><th style="width: 12%; text-align: right; border-right: 1px solid #eee;" class="qty-cell">Available</th><th style="width: 19%; border-right: 1px solid #eee;">Reel Codes</th><th style="width: 12%;">Status</th></tr></thead>';
-					html += '<tbody>';
-
-					detail.rawMaterials.forEach(function (material) {
-						const statusClass = material.hasSufficientStock ? 'status-badge ok' : 'status-badge short';
-						const statusText = material.hasSufficientStock ? 'OK' : 'SHORT';
-						const rowClass = material.hasSufficientStock ? 'raw-material-row' : 'raw-material-row shortage';
-
-						// Display reel codes - show them or "No Reels" if none allocated
-						const reelCodesDisplay = material.allocatedReelCodes && material.allocatedReelCodes.trim() !== ''
-							? `<small>${escapeHtml(material.allocatedReelCodes)}</small>`
-							: '<small style="color: #999;">No Reels</small>';
-
-						html += `
-							<tr class="${rowClass}">
-								<td><strong>${escapeHtml(material.rawMaterialItemCode)}</strong></td>
-								<td>${escapeHtml(material.rawMaterialItemDescription)}</td>
-								<td class="qty-cell" style="text-align: center;">${material.requiredQty}</td>
-								<td class="qty-cell" style="text-align: center;">${material.availableQty}</td>
-								<td style="text-align: center;">${reelCodesDisplay}</td>
-								<td style="text-align: center;"><span class="${statusClass}">${statusText}</span></td>
-							</tr>
-						`;
-					});
-
-					html += '</tbody>';
-					html += '</table>';
-					html += '</td>';
-					html += '</tr>';
-				}
 			});
 
 			html += '</tbody></table>';
@@ -704,20 +508,11 @@
 			if (!data) { return []; }
 
 			switch (filterKey) {
-				case 'details-can':
+				case 'can-fulfill':
 					return data.filter(d => d.isFulfillable);
-				case 'details-cannot':
+				case 'cannot-fulfill':
 					return data.filter(d => !d.isFulfillable);
-				case 'raw-can':
-					return data
-						.map(d => ({ ...d, rawMaterials: (d.rawMaterials || []).filter(rm => rm.hasSufficientStock) }))
-						.filter(d => d.rawMaterials.length > 0);
-				case 'raw-cannot':
-					return data
-						.map(d => ({ ...d, rawMaterials: (d.rawMaterials || []).filter(rm => !rm.hasSufficientStock) }))
-						.filter(d => d.rawMaterials.length > 0);
-				case 'all-raw':
-				case 'all-details':
+				case 'all':
 				default:
 					return data;
 			}
@@ -729,7 +524,7 @@
 			const filtered = filterDataForTab2(lastResultsData, filterKey);
 
 			$('#tab2Label').text(TAB2_LABELS[filterKey] || 'Filtered View');
-			$('#resultsContainer2').html(buildNestedTableHtml(filtered, 'group2_'));
+			$('#resultsContainer2').html(buildFlatTableHtml(filtered));
 
 			$('.status-card').removeClass('active-filter');
 			$(`#card_${filterKey}`).addClass('active-filter');
@@ -746,7 +541,7 @@
 		function displayRawMaterialResults(data) {
 			lastResultsData = data || [];
 
-			$('#resultsContainer').html(buildNestedTableHtml(lastResultsData, 'group_'));
+			$('#resultsContainer').html(buildFlatTableHtml(lastResultsData));
 
 			if (!lastResultsData || lastResultsData.length === 0) {
 				refreshTab2(currentTab2Filter);
@@ -764,118 +559,12 @@
 				else unfulfillableCount++;
 			});
 
-			$('#txtTtlDtl').text(lastResultsData.length);
-			let totalRawMaterials = 0;
-				lastResultsData.forEach(detail => {
-					if (detail.rawMaterials) {
-						totalRawMaterials += detail.rawMaterials.length;
-					}
-				});
-				$('#txtTtlRaw').text(totalRawMaterials);
-				$('#txtTtlCanDtl').text(fulfillableCount);
-				$('#txtTtlCannotDtl').text(unfulfillableCount);
+			$('#txtTtlRaw').text(lastResultsData.length);
+			$('#txtTtlCanRaw').text(fulfillableCount);
+			$('#txtTtlCannotRaw').text(unfulfillableCount);
 
-				// Calculate raw materials can fulfill vs cannot fulfill
-				let totalRawMaterialsCanFulfill = 0;
-				lastResultsData.forEach(detail => {
-					if (detail.rawMaterials) {
-						totalRawMaterialsCanFulfill += detail.rawMaterials.filter(rm => rm.hasSufficientStock).length;
-					}
-				});
-				const totalRawMaterialsCannotFulfill = totalRawMaterials - totalRawMaterialsCanFulfill;
-
-					$('#txtTtlCanRaw').text(totalRawMaterialsCanFulfill);
-					$('#txtTtlCannotRaw').text(totalRawMaterialsCannotFulfill);
-
-					// Keep tab 2 in sync with whatever category is currently active
-					refreshTab2(currentTab2Filter);
-				}
-
-		function toggleDetails(groupRowId) {
-			const row = $(`#${groupRowId}`);
-			const icon = row.prev().find('.toggle-icon');
-
-			if (row.is(':visible')) {
-				row.hide();
-				row.prev().addClass('collapsed');
-			} else {
-				row.show();
-				row.prev().removeClass('collapsed');
-			}
-		}
-
-		function expandShortagesOnly(containerSelector) {
-			// Get all group rows :: scoped to the calling tab's own table
-			const groupRows = $(`${containerSelector} .results-table tbody`).find('tr.group-row');
-
-			groupRows.each(function() {
-				const groupRow = $(this);
-				const groupRowId = groupRow.find('.toggle-icon').parent().parent().attr('onclick').match(/'([^']+)'/)[1];
-				const detailRow = $(`#${groupRowId}`);
-
-				// Check if this detail has shortages
-				const hasShortages = detailRow.find('.raw-material-row.shortage').length > 0;
-
-				if (hasShortages) {
-					// Expand this row
-					detailRow.show();
-					groupRow.removeClass('collapsed');
-				} else {
-					// Collapse this row
-					detailRow.hide();
-					groupRow.addClass('collapsed');
-				}
-			});
-		}
-
-		function collapseAll(containerSelector) {
-			// Collapse all detail rows :: scoped to the calling tab's own table
-			const detailRows = $(`${containerSelector} .results-table tbody`).find('tr.raw-material-group');
-			detailRows.each(function() {
-				$(this).hide();
-				$(this).prev().addClass('collapsed');
-			});
-		}
-
-		function expandAll(containerSelector) {
-			// Expand all detail rows :: scoped to the calling tab's own table
-			const detailRows = $(`${containerSelector} .results-table tbody`).find('tr.raw-material-group');
-			detailRows.each(function() {
-				$(this).show();
-				$(this).prev().removeClass('collapsed');
-			});
-		}
-
-		function toggleShortOnly() {
-			const isShortOnly = document.body.classList.toggle('short-only-mode');
-			const btnText = $('#shortOnlyBtnText');
-			const nestedView = $('#resultsContainer');
-
-			if (isShortOnly) {
-				btnText.text('Show All');
-
-				// Hide rows without shortages in nested view
-				nestedView.find('tr.group-row').each(function() {
-					const groupRow = $(this);
-					const onclickAttr = groupRow.attr('onclick');
-					const groupRowId = onclickAttr ? onclickAttr.match(/'([^']+)'/)[1] : null;
-
-					if (groupRowId) {
-						const detailRow = $(`#${groupRowId}`);
-						const hasShortages = detailRow.find('tr.shortage').length > 0;
-
-						if (!hasShortages) {
-							groupRow.hide();
-							detailRow.hide();
-						}
-					}
-				});
-			} else {
-				btnText.text('Show Short Only');
-
-				// Show all rows in nested view
-				nestedView.find('tr.group-row, tr.raw-material-group').show();
-			}
+			// Keep tab 2 in sync with whatever category is currently active
+			refreshTab2(currentTab2Filter);
 		}
 
 		function escapeHtml(text) {
@@ -898,7 +587,7 @@
 
 			// Add title and summary rows
 			let rowNumber = 1;
-			const titleRow = worksheet.addRow(['JO Raw Material Stock Check Report']);
+			const titleRow = worksheet.addRow(['Emergency JO Raw Material Stock Check Report']);
 			titleRow.font = { bold: true, size: 14 };
 			titleRow.alignment = { horizontal: 'left', vertical: 'center' };
 			worksheet.mergeCells(`A${rowNumber}:F${rowNumber}`);
@@ -915,9 +604,6 @@
 			rowNumber++;
 
 			const summaryData = [
-				['Total Job Details', document.getElementById('txtTtlDtl').textContent],
-				['Details Can Fulfill', document.getElementById('txtTtlCanDtl').textContent],
-				['Details Cannot Fulfill', document.getElementById('txtTtlCannotDtl').textContent],
 				['Total Raw Materials', document.getElementById('txtTtlRaw').textContent],
 				['Raw Materials Can Fulfill', document.getElementById('txtTtlCanRaw').textContent],
 				['Raw Materials Cannot Fulfill', document.getElementById('txtTtlCannotRaw').textContent]
@@ -934,96 +620,53 @@
 			// Add main data table
 			const headerRow = worksheet.addRow([
 				'Status',
-				'Finish Good Code',
-				'Description',
-				'Qty Required',
 				'Item Code',
-				'Raw Material Description',
+				'Description',
 				'Required Qty',
 				'Available Qty',
-				'Reel Codes',
-				'Status'
+				'Reel Codes'
 			]);
 
 			// Style header row
 			headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
 			headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4472C4' } };
 			headerRow.alignment = { horizontal: 'center', vertical: 'center' };
-
-			// Highlight the repeated detail columns (Status, Finish Good Code, Description, Qty Required) in a light color
-			[1, 2, 3, 4].forEach(colIdx => {
-				const cell = headerRow.getCell(colIdx);
-				cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFE699' } };
-				cell.font = { bold: true, color: { argb: 'FF7F6000' } };
-			});
-
 			rowNumber++;
 
-			// Parse and insert data from HTML table
-			let currentDetailStatus = '';
-			let currentFinishGood = '';
-			let currentDescription = '';
-			let currentQty = '';
+			// Parse and insert data from the flat HTML table
+			const rows = resultsTable.querySelectorAll('tbody tr');
+			rows.forEach((row) => {
+				const cells = row.querySelectorAll('td');
+				if (cells.length < 6) { return; }
 
-			const groupRows = resultsTable.querySelectorAll('tr.group-row');
-			groupRows.forEach((groupRow, index) => {
-				const cells = groupRow.querySelectorAll('td');
-				if (cells.length >= 5) {
-					currentDetailStatus = cells[0].textContent.trim();
-					currentFinishGood = cells[1].textContent.trim();
-					currentDescription = cells[2].textContent.trim();
-					currentQty = cells[3].textContent.trim();
+				const excelRow = worksheet.addRow([
+					cells[0].textContent.trim(),
+					cells[1].textContent.trim(),
+					cells[2].textContent.trim(),
+					cells[3].textContent.trim(),
+					cells[4].textContent.trim(),
+					cells[5].textContent.trim()
+				]);
 
-					// Get the raw material group row
-					const rawMaterialGroupRow = groupRow.nextElementSibling;
-					if (rawMaterialGroupRow && rawMaterialGroupRow.classList.contains('raw-material-group')) {
-						const innerTable = rawMaterialGroupRow.querySelector('.raw-material-table');
-						if (innerTable) {
-							const rawMaterialRows = innerTable.querySelectorAll('tbody tr');
-							rawMaterialRows.forEach((rmRow, rmIndex) => {
-								const rmCells = rmRow.querySelectorAll('td');
-								if (rmCells.length >= 6) {
-									const excelRow = worksheet.addRow([
-										currentDetailStatus,
-										currentFinishGood,
-										currentDescription,
-										currentQty,
-										rmCells[0].textContent.trim(),
-										rmCells[1].textContent.trim(),
-										rmCells[2].textContent.trim(),
-										rmCells[3].textContent.trim(),
-										rmCells[4].textContent.trim(),
-										rmCells[5].textContent.trim()
-									]);
-
-									// Color code the status
-									const statusText = rmCells[5].textContent.trim();
-									if (statusText === 'OK') {
-										excelRow.getCell(10).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC6EFCE' } };
-										excelRow.getCell(10).font = { color: { argb: 'FF006100' } };
-									} else if (statusText === 'SHORT') {
-										excelRow.getCell(10).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFCCCB' } };
-										excelRow.getCell(10).font = { color: { argb: 'FF9C0006' } };
-									}
-								}
-							});
-						}
-					}
+				// Color code the status
+				const statusText = cells[0].textContent.trim();
+				if (statusText === 'OK') {
+					excelRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC6EFCE' } };
+					excelRow.getCell(1).font = { color: { argb: 'FF006100' } };
+				} else if (statusText === 'SHORT') {
+					excelRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFCCCB' } };
+					excelRow.getCell(1).font = { color: { argb: 'FF9C0006' } };
 				}
 			});
 
 			// Set column widths
 			worksheet.columns = [
 				{ width: 12 },
-				{ width: 15 },
-				{ width: 20 },
-				{ width: 12 },
-				{ width: 15 },
-				{ width: 25 },
-				{ width: 12 },
-				{ width: 12 },
-				{ width: 15 },
-				{ width: 12 }
+				{ width: 18 },
+				{ width: 32 },
+				{ width: 14 },
+				{ width: 14 },
+				{ width: 20 }
 			];
 
 			// Set all cells alignment
@@ -1034,7 +677,7 @@
 			});
 
 			// Generate and download
-			const fileName = `JO_RawMaterialStock_${new Date().getTime()}.xlsx`;
+			const fileName = `JOE_RawMaterialStock_${new Date().getTime()}.xlsx`;
 			workbook.xlsx.writeBuffer().then(buffer => {
 				const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 				const url = window.URL.createObjectURL(blob);

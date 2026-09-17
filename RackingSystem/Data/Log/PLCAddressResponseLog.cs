@@ -7,6 +7,8 @@ namespace RackingSystem.Data.Log
         [Key]
         public Guid PLCAddressResponseLog_Id { get; set; }
 
+        public long RackJobQueue_Id { get; set; } = 0;
+
         public int Address { get; set; }
 
         [MaxLength(10)]

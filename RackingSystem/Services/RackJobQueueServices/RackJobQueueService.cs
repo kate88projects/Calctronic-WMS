@@ -203,13 +203,13 @@ namespace RackingSystem.Services.RackJobQueueServices
                 }
                 if (req.DocType == EnumQueueDocType.Loader.ToString())
                 {
-
+                    //
                 }
                 else if (req.DocType == EnumQueueDocType.JOE.ToString())
                 {
-
+                    //
                 }
-                else
+                else if (req.DocType == EnumQueueDocType.JO.ToString())
                 {
                     var joRaw = _dbContext.JobOrderRaws.Where(d => d.JobOrder_Id == req.Doc_Id && d.BalQty < d.Qty).FirstOrDefault();
                     if (joRaw != null)
@@ -217,6 +217,10 @@ namespace RackingSystem.Services.RackJobQueueServices
                         result.errMessage = "This Task has loaded cannot remove.";
                         return result;
                     }
+                }
+                else
+                {
+                    //
                 }
 
                 // 2. save Data

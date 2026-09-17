@@ -274,12 +274,12 @@
 
 <!-- Modal Dialog -->
 <div id="modal" class="modal fade" role="dialog">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
             @* <div class="modal-header">
                 <h4 class="modal-title">Item Found in Multiple Slots</h4>
             </div> *@
-            <div id="modalContent" class="max-h-64 overflow-y-auto gap-1" style="padding:15px;">
+            <div id="modalContent" class="overflow-y-auto gap-1" style="padding:15px; max-height:70vh;">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" onclick="closeModal()">Cancel</button>
@@ -309,16 +309,39 @@
     </div>
 </div>
 
+<div class="modal fade" id="scanReelModal" role="dialog" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Scan Reel ID</h4>
+            </div>
+            <div class="modal-body">
+                <p class="text-gray-600" style="font-size:12px;">
+                    LED is lit up on the selected slot. Scan the Reel ID on the physical reel to confirm take out.
+                </p>
+                <div class="mb-3">
+                    <label class="form-label" for="txtScanReelId">Reel ID</label>
+                    <input type="text" class="form-control" id="txtScanReelId" placeholder="Scan Reel ID" autocomplete="off">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="confirmScanReelId()">Confirm</button>
+                <button type="button" class="btn btn-outline-secondary" onclick="cancelScanReelId()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts
-{
-    <script src="~/js/tailwindcss_3_4_17.js"></script>
+{ 
+    <script src="../js/tailwindcss_3_4_17.js"></script>
     @* <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script> *@
     @* <link href="~/css/datatables.min.css" rel="stylesheet"> *@
-    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+    <link rel="stylesheet" href="../css/sweetalert2.min.css">
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/js/datatables.min.js"></script>
-    <script src="~/js/sweetalert2.all.min.js"></script>
+    <script src="../lib/jquery/dist/jquery.min.js"></script>
+    <script src="../js/datatables.min.js"></script>
+    <script src="../js/sweetalert2.all.min.js"></script>
 
     <script type="text/javascript">
         let token = '';
@@ -342,11 +365,45 @@
           }
         });
 
+        let pendingRemoval = null;
+
         $(document).ready(function () {
             token = $('#xToken').val();
             // updateClock();
             // setInterval(updateClock, 1000);
+
+            document.getElementById('searchInput').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    searchItem();
+                }
+            });
+
+            document.getElementById('txtScanReelId').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    confirmScanReelId();
+                }
+            });
+
+            buildRowLabels('A');
+            buildRowLabels('B');
         });
+
+        // Row number gutter next to each side's columns :: descending (50 at top down to 1),
+        // matching the slot grid which is also visually reordered to descending via CSS order.
+        function buildRowLabels(side) {
+            const container = document.getElementById(`side${side}-rows`);
+            container.innerHTML = '';
+            for (let row = 50; row >= 1; row--) {
+                const lbl = document.createElement('div');
+                lbl.style.height = '16px';
+                lbl.style.display = 'flex';
+                lbl.style.alignItems = 'center';
+                lbl.textContent = String(row).padStart(2, '0');
+                container.appendChild(lbl);
+            }
+        }
 
         // function updateClock() {
         //   document.getElementById('clock').innerHTML = new Date().toLocaleTimeString();
@@ -434,6 +491,7 @@
                                     const slot = document.createElement('div');
                                     // const data = result.data[side][col][row];
                                     slot.className = `slot ${data.hasReel ? 'occupied' : 'free'}`;
+                                    slot.style.order = 49 - row; // visually show row 50 at top, descending to row 1
                                     slot.dataset.side = side;
                                     slot.dataset.col = col;
                                     slot.dataset.row = row + 1;
@@ -560,57 +618,75 @@
             const sideA = results.filter(r => r.side === 'A');
             const sideB = results.filter(r => r.side === 'B');
 
-            // Create grid container for side-by-side layout
+            // Build one side's block :: side label + its 3 columns, each column listing its matching rows
+            function buildSideBlock(sideResults, sideLabel, labelColorClass, hoverColorClass) {
+              const wrapper = document.createElement('div');
+              wrapper.className = 'flex flex-col';
+
+              const label = document.createElement('p');
+              label.className = labelColorClass + ' font-semibold text-xs mb-2 text-center';
+              label.textContent = sideLabel;
+              wrapper.appendChild(label);
+
+              const colsGrid = document.createElement('div');
+              colsGrid.className = 'grid grid-cols-3 gap-2';
+
+              for (let col = 1; col <= 3; col++) {
+                const colWrapper = document.createElement('div');
+                colWrapper.className = 'flex flex-col';
+
+                const colLabel = document.createElement('p');
+                colLabel.className = 'text-gray-500 font-semibold mb-1 text-center';
+                colLabel.style.fontSize = '10px';
+                colLabel.textContent = 'COL ' + col;
+                colWrapper.appendChild(colLabel);
+
+                const colResults = sideResults.filter(r => r.col === col).sort((a, b) => b.row - a.row);
+                if (colResults.length === 0) {
+                  const none = document.createElement('p');
+                  none.className = 'text-gray-400 text-center';
+                  none.style.fontSize = '10px';
+                  none.textContent = '-';
+                  colWrapper.appendChild(none);
+                }
+                else {
+                  colResults.forEach(r => {
+                    const btn = document.createElement('button');
+                    btn.className = 'w-full text-left px-3 py-3 mb-3 bg-gray-200 ' + hoverColorClass + ' text-gray-900 hover:text-white text-sm font-medium rounded-lg transition-colors truncate active:scale-95';
+                    btn.style.minHeight = '80px';
+                    btn.style.touchAction = 'manipulation';
+                    btn.title = `Col ${r.col} | Row ${String(r.row).padStart(2, '0')} — ${r.item.itemCode}`;
+                    btn.textContent = 'Row ' + r.row;
+                    btn.addEventListener('click', () => {
+                      selectRowToRemove(r, results, searchTerm);
+                    });
+                    colWrapper.appendChild(btn);
+                  });
+                }
+
+                colsGrid.appendChild(colWrapper);
+              }
+
+              wrapper.appendChild(colsGrid);
+              return wrapper;
+            }
+
+            // Create grid container for side-by-side layout, with a divider between the two sides
             const gridContainer = document.createElement('div');
-            gridContainer.className = 'grid grid-cols-2 gap-3';
+            gridContainer.className = 'flex gap-4';
 
-            if (sideA.length > 0) {
-              const sideAWrapper = document.createElement('div');
-              sideAWrapper.className = 'flex flex-col';
+            const sideABlock = buildSideBlock(sideA, 'SIDE A', 'text-blue-600', 'hover:bg-blue-500');
+            sideABlock.className += ' flex-1';
+            gridContainer.appendChild(sideABlock);
 
-              const sideALabel = document.createElement('p');
-              sideALabel.className = 'text-blue-600 font-semibold text-xs mb-2';
-              sideALabel.textContent = 'SIDE A';
-              sideAWrapper.appendChild(sideALabel);
+            const divider = document.createElement('div');
+            divider.className = 'border-r border-gray-300';
 
-              sideA.forEach(r => {
-                const btn = document.createElement('button');
-                btn.className = 'w-full text-left px-2 py-2 mb-1.5 bg-gray-200 hover:bg-blue-500 text-gray-900 hover:text-white text-xs rounded transition-colors truncate';
-                btn.title = `Col ${r.col} | Row ${String(r.row).padStart(2, '0')} — ${r.item.itemCode}`;
-                btn.textContent = 'Row ' + r.row; //r.item.slotId; // `C${r.col}R${String(r.row).padStart(2, '0')}`;
-                btn.addEventListener('click', () => {
-                  removeItem(r.side, r.col, r.row - 1);
-                  // modal.classList.add('hidden');
-                  document.getElementById('searchInput').value = '';
-                });
-                sideAWrapper.appendChild(btn);
-              });
-              gridContainer.appendChild(sideAWrapper);
-            }
+            gridContainer.appendChild(divider);
 
-            if (sideB.length > 0) {
-              const sideBWrapper = document.createElement('div');
-              sideBWrapper.className = 'flex flex-col';
-
-              const sideBLabel = document.createElement('p');
-              sideBLabel.className = 'text-orange-600 font-semibold text-xs mb-2';
-              sideBLabel.textContent = 'SIDE B';
-              sideBWrapper.appendChild(sideBLabel);
-
-              sideB.forEach(r => {
-                const btn = document.createElement('button');
-                btn.className = 'w-full text-left px-2 py-2 mb-1.5 bg-gray-200 hover:bg-orange-500 text-gray-900 hover:text-white text-xs rounded transition-colors truncate';
-                btn.title = `Col ${r.col} | Row ${String(r.row).padStart(2, '0')} — ${r.item.itemCode}`;
-                btn.textContent = 'Row ' + r.row;  // r.item.slotId; // `C${r.col}R${String(r.row).padStart(2, '0')}`;
-                btn.addEventListener('click', () => {
-                  removeItem(r.side, r.col, r.row - 1);
-                  // modal.classList.add('hidden');
-                  document.getElementById('searchInput').value = '';
-                });
-                sideBWrapper.appendChild(btn);
-              });
-              gridContainer.appendChild(sideBWrapper);
-            }
+            const sideBBlock = buildSideBlock(sideB, 'SIDE B', 'text-orange-600', 'hover:bg-orange-500');
+            sideBBlock.className += ' flex-1';
+            gridContainer.appendChild(sideBBlock);
 
             content.appendChild(gridContainer);
           }
@@ -618,9 +694,83 @@
             $("#modal").modal("show");
         }
 
+        function selectRowToRemove(r, results, searchTerm) {
+            pendingRemoval = { side: r.side, col: r.col, row: r.row - 1, item: r.item, results: results, searchTerm: searchTerm };
+
+            $("#modal").modal("hide");
+
+            // light up the LED for this slot only, so the operator can see which row was picked
+            setTrolleyLED([r.item.slotId], true);
+
+            $('#txtScanReelId').val('');
+            $("#scanReelModal").modal("show");
+            setTimeout(function () { document.getElementById('txtScanReelId').focus(); }, 300);
+        }
+
+        function confirmScanReelId() {
+            if (!pendingRemoval) { return; }
+
+            const scanned = document.getElementById('txtScanReelId').value.trim();
+            if (scanned == '') { return; }
+
+            const expected = (pendingRemoval.item.reelCode || '').trim();
+
+            if (scanned.toUpperCase() == expected.toUpperCase()) {
+                // match :: turn off the LED, update DB, reel confirmed taken out
+                const removal = pendingRemoval;
+                pendingRemoval = null;
+                
+                $("#scanReelModal").modal("hide");
+                removeItem(removal.side, removal.col, removal.row);
+                document.getElementById('searchInput').value = '';
+            }
+            else {
+                // mismatch :: keep the LED lit and the modal open, just clear the input for another scan
+                Swal.fire({
+                    toast: true,
+                    position: 'top',
+                    icon: 'error',
+                    title: 'Reel ID mismatch, please scan again.',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+                document.getElementById('txtScanReelId').value = '';
+                document.getElementById('txtScanReelId').focus();
+            }
+        }
+
+        function cancelScanReelId() {
+            if (pendingRemoval) {
+                setTrolleyLED([pendingRemoval.item.slotId], false);
+                pendingRemoval = null;
+            }
+            $("#scanReelModal").modal("hide");
+        }
+
+        function setTrolleyLED(ids, on) {
+            $.ajax({
+                url: '/api/PLCTrolley/SetTrolleyLED/' + on,
+                type: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                data: JSON.stringify(ids),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    if (result.success != true) {
+                        console.log(result.errMessage);
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+
         function removeItem(side, col, row) {
           const data = slotData[side][col][row];
-          data.occupied = false;
+          data.hasReel = false;
           data.item = null;
           const container = document.getElementById(`side${side}-col${col}`);
           const slot = container.children[row];
@@ -629,8 +779,8 @@
 
           // Remove next seq item
           const data1 = slotData[side][col][row + 1];
-          if (data.reelCode === data1.reelCode) {
-              data1.occupied = false;
+          if (data1 && data.reelCode === data1.reelCode) {
+              data1.hasReel = false;
               data1.item = null;
               const slot1 = container.children[row + 1];
               slot1.className = 'slot free';
@@ -639,8 +789,8 @@
 
           // Remove next seq item
           const data2 = slotData[side][col][row + 2];
-          if (data.reelCode === data2.reelCode) {
-              data2.occupied = false;
+          if (data2 && data.reelCode === data2.reelCode) {
+              data2.hasReel = false;
               data2.item = null;
               const slot2 = container.children[row + 2];
               slot2.className = 'slot free';
@@ -649,8 +799,8 @@
 
           // Remove next seq item
           const data3 = slotData[side][col][row + 3];
-          if (data.reelCode === data3.reelCode) {
-              data3.occupied = false;
+          if (data3 && data.reelCode === data3.reelCode) {
+              data3.hasReel = false;
               data3.item = null;
               const slot3 = container.children[row + 3];
               slot3.className = 'slot free';

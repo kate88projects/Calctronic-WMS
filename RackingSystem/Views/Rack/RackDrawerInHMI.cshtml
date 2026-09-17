@@ -338,6 +338,9 @@
             </div>
         </div>
         <div class="flex items-center gap-3">
+            <button id="addressLogBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;" onclick="showAddressResponseLog()">
+                <i class="bi-cpu" style="width:12px;height:12px;"></i> PLC Address Log
+            </button>
             <div id="statusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mono" style="background:#f3f4f6;color:#6b7280;">
                 <span id="statusDot" class="w-2 h-2 rounded-full" style="background:#6b7280;"></span> <span id="statusText">IDLE</span>
             </div>
@@ -453,6 +456,10 @@
                         <button id="stop-btn" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#e74c3c;color:#fff;"
                                 onclick="systemStop()">
                             <i class="bi-stop-fill" style="width:12px;height:12px;"></i> Stop
+                        </button>
+                        <button id="end-btn" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#e74c3c;color:#fff;"
+                                onclick="systemEnd()">
+                            <i class="bi-stop-fill" style="width:12px;height:12px;"></i> End Task
                         </button>
                     </div>
                     <div class="grid grid-cols-2 gap-3 mb-6">
@@ -601,21 +608,63 @@
     </div>
 </div>
 
+<!-- PLC Address Response Log Side Panel -->
+<div id="addressLogOverlay" class="hidden" style="position:fixed;inset:0;background:rgba(15,23,42,0.35);z-index:1040;" onclick="hideAddressResponseLog()"></div>
+<div id="addressLogPanel" style="position:fixed;top:0;right:-420px;width:420px;height:100vh;background:#fff;box-shadow:-8px 0 24px rgba(0,0,0,0.12);z-index:1050;transition:right 0.3s ease;display:flex;flex-direction:column;">
+    <div class="px-4 py-3 flex items-center justify-between border-b" style="border-color:#e5e7eb;">
+        <h2 class="text-sm font-bold flex items-center gap-2" style="color:#1f2937;">
+            <i class="bi-cpu" style="width:14px;height:14px;"></i> PLC Address Response Log
+        </h2>
+        <div class="flex items-center gap-2">
+            <button class="px-2 py-1 rounded text-xs font-semibold" style="background:#f3f4f6;color:#374151;" onclick="loadAddressResponseLog()">
+                <i class="bi-arrow-clockwise" style="width:12px;height:12px;"></i> Refresh
+            </button>
+            <button class="btn-close" aria-label="Close" onclick="hideAddressResponseLog()"></button>
+        </div>
+    </div>
+    <div class="px-4 py-2 text-xs mono" style="color:#9ca3af;border-bottom:1px solid #e5e7eb;">
+        Sorted by most recent reading. Rows updated in the last 5s are highlighted.
+    </div>
+    <div id="addressLogList" class="flex-1" style="overflow-y:auto;padding:8px 12px;">
+        <div class="text-xs" style="color:#9ca3af;">Loading...</div>
+    </div>
+</div>
+
+<div class="modal fade" id="jobDoneModal" role="dialog" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-body" style="padding: 50px;">
+                <div class="row">
+                    <div class="col-6">
+                        <img src="~/assets/img/task.gif" style="width:100%;" />
+                    </div>
+                    <div class="col-6">
+                        <p class="" style="font-size:2em;">Job is done. Click the 'Close' button to close this window.</p>
+                        <button class="btn btn-success w-100" style="height: 100px;" onclick="closeTab()">Close</button>
+                        <button class="btn btn-secondary w-100" style="height: 100px;" onclick="exportLogFile()">Export Log</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts
 {
     @* <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script> 
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;family=Outfit:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
      *@
 
-    <script src="~/js/lucide.min.js"></script>
-    <link href="~/css/jetbrains.css" rel="stylesheet" />
+    <script src="../js/lucide.min.js"></script>
+    <link href="../css/jetbrains.css" rel="stylesheet" />
 
-    <link href="~/css/datatables.min.css" rel="stylesheet">
+    <link href="../css/datatables.min.css" rel="stylesheet">
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/js/datatables.min.js"></script>
-    <script src="~/js/sweetalert2.all.min.js"></script>
+    <script src="../lib/jquery/dist/jquery.min.js"></script>
+    <script src="../js/datatables.min.js"></script>
+    <script src="../js/sweetalert2.all.min.js"></script>
 
     <script type="text/javascript">
 
@@ -635,6 +684,7 @@
         let inPutAwayMove = false;
 
         let endTask = false;
+        let readyToEnd = false;
 
         let token = '';
         let qId = 0;
@@ -853,16 +903,19 @@
         function updateSystemStatusUI() {
             const startBtn = document.getElementById('start-btn');
             const stopBtn = document.getElementById('stop-btn');
+            const endBtn = document.getElementById('end-btn');
             const contBtn = document.getElementById('cont-btn');
 
             if (sharedDrawerState.systemRunning) {
                 startBtn.disabled = true;
                 contBtn.disabled = true;
                 stopBtn.disabled = false;
+                endBtn.disabled = false;
             } else {
                 startBtn.disabled = false;
                 contBtn.disabled = false;
                 stopBtn.disabled = true;
+                endBtn.disabled = true;
             }
         }
 
@@ -1072,7 +1125,8 @@
             updateSystemStatusUI();
             // log("System Start command issued.", 'alert');
 
-             updateJson();
+            updateJson();
+            readyToEnd = false;
 
             // get pending count
             getPendingCount();
@@ -1094,6 +1148,8 @@
             sharedDrawerState.systemRunning = true;
             updateSystemStatusUI();
 
+            readyToEnd = false;
+
             // get pending count
             getPendingCount();
             updateDash();
@@ -1105,7 +1161,7 @@
 
         // System Stop Handler
         function systemStop() {
-            if (!sharedDrawerState.systemRunning) return;
+            if (!sharedDrawerState.systemRunning || readyToEnd) return;
             sharedDrawerState.systemRunning = false;
             updateSystemStatusUI();
             disableDivContent(true);
@@ -1115,6 +1171,86 @@
 
             clearInterval(cartesianAutoTimer);
 
+        }
+
+        //System End Handler
+        async function systemEnd() {
+            if (!sharedDrawerState.systemRunning || readyToEnd) return;
+
+            let timerInterval;
+            const swalResult = await swal.fire({
+                title: `End Task?`,
+                text: `You won't be able to revert this.`,
+                icon: "warning",
+                showCancelButton: true,
+                allowOutsideClick: false,
+                confirmButtonText: "Yes",
+                html: `
+                          <div>Confirm end task? Auto-cancel in <span id="countdown">3</span>s.</div>
+                          <div style="margin-top:10px; background:#eee; width:100%; height:8px;">
+                              <div id="bar" style="width:100%; height:8px; background:#f66; transition:width 1s linear;"></div>
+                          </div>
+                        `,
+                didOpen: () => {
+                    const content = Swal.getHtmlContainer().querySelector('#countdown');
+                    const bar = Swal.getHtmlContainer().querySelector('#bar');
+                    let timeLeft = 3;
+                    timerInterval = setInterval(() => {
+                        timeLeft--;
+                        bar.style.width = (timeLeft / 3 * 100) + '%';
+
+                        if (content) content.textContent = timeLeft;
+                        if (timeLeft <= 0) {
+                            clearInterval(timerInterval);
+                            Swal.close();
+                        }
+                    }, 1000);
+                },
+                willClose: () => {
+                    clearInterval(timerInterval);
+                }
+            });
+
+            if (swalResult.dismiss && swalResult.dismiss !== Swal.DismissReason.cancel) {
+                readyToEnd = false;
+                return;
+            }
+
+            if (swalResult.isConfirmed) {
+                readyToEnd = true;
+                document.getElementById('stop-btn').disabled = true;
+                document.getElementById('end-btn').disabled = true;
+
+                if (inRetrieveMove || inPutAwayMove) {
+                    log('Waiting for current job to finish before ending task...', 'info');
+                    await waitForCycleToFinish();
+                }
+
+                sharedDrawerState.systemRunning = false;
+                updateSystemStatusUI();
+                disableDivContent(true);
+                updateJson();
+
+                clearInterval(cartesianAutoTimer);
+
+                log(`-- End Task --`, 'info');
+                loadDBEnd();
+                $('#jobDoneModal').modal('show');
+
+            } else {
+                readyToEnd = false;
+            }
+        }
+        
+        function waitForCycleToFinish() {
+            return new Promise((resolve) => {
+                const check = setInterval(() => {
+                    if (!inRetrieveMove && !inPutAwayMove && sharedDrawerState.drawerStatus == "None") {
+                        clearInterval(check);
+                        resolve();
+                    }
+                }, 500);
+            });
         }
 
         function delay(ms) {
@@ -1135,6 +1271,96 @@
           }
           list.prepend(d);
           if (list.children.length > 30) list.lastChild.remove();
+        }
+
+        // ----------- PLC Address Response Log
+        let addressLogInterval = null;
+
+        function showAddressResponseLog() {
+            document.getElementById('addressLogOverlay').classList.remove('hidden');
+            document.getElementById('addressLogPanel').style.right = '0px';
+            loadAddressResponseLog();
+            if (addressLogInterval) { clearInterval(addressLogInterval); }
+            addressLogInterval = setInterval(loadAddressResponseLog, 3000);
+        }
+
+        function hideAddressResponseLog() {
+            document.getElementById('addressLogOverlay').classList.add('hidden');
+            document.getElementById('addressLogPanel').style.right = '-420px';
+            if (addressLogInterval) {
+                clearInterval(addressLogInterval);
+                addressLogInterval = null;
+            }
+        }
+
+        async function loadAddressResponseLog() {
+            await $.ajax({
+                url: '/api/PLCTrolley/GetAddressResponseLog',
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    if (result.success == true) {
+                        renderAddressResponseLog(result.data);
+                    }
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        }
+
+        function renderAddressResponseLog(list) {
+            const container = document.getElementById('addressLogList');
+            if (!list || list.length === 0) {
+                container.innerHTML = '<div class="text-xs" style="color:#9ca3af;">No address response yet.</div>';
+                return;
+            }
+
+            // sort by last reading datetime, most recent first
+            list.sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate));
+
+            const now = new Date();
+            let html = '';
+            list.forEach(item => {
+                const dt = new Date(item.createdDate);
+                const ageSec = (now - dt) / 1000;
+                const isFresh = ageSec <= 5;
+                const isErr = item.isErr === true;
+
+                let bg = '#fff';
+                let border = '#e5e7eb';
+                if (isErr) { bg = '#fef2f2'; border = '#fecaca'; }
+                else if (isFresh) { bg = '#ecfdf5'; border = '#6ee7b7'; }
+
+                html += `
+                    <div class="log-entry rounded-lg mb-1.5 px-3 py-2" style="background:${bg};border:1px solid ${border};">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold mono" style="color:#1f2937;">Addr ${item.address}</span>
+                            <span class="text-xs font-semibold mono" style="color:${isErr ? '#b91c1c' : '#059669'};">
+                                ${isFresh ? '<i class="bi-broadcast" style="width:10px;height:10px;"></i> ' : ''}${item.action}
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between mt-0.5">
+                            <span class="text-xs mono" style="color:#4b5563;">Value: <b>${item.value}</b></span>
+                            <span class="text-xs mono" style="color:#9ca3af;">${dt.toLocaleTimeString()}</span>
+                        </div>
+                        <div class="text-xs mono" style="color:#9ca3af;">${item.methodName}</div>
+                    </div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function getDotStatus(id) {
+            const el = document.getElementById(id);
+            if (!el) return 'waiting';
+            if (el.classList.contains('done')) return 'done';
+            if (el.classList.contains('active')) return 'active';
+            return 'waiting';
         }
 
         // ----------- HMI Action
@@ -1169,6 +1395,10 @@
                 CurrentRowCol1: Number($('#left-input-tr').val()),
                 CurrentRowCol2: Number($('#center-input-tr').val()),
                 CurrentRowCol3: Number($('#right-input-tr').val()),
+
+                PDot1: getDotStatus('pDot1'),
+                PDot2: getDotStatus('pDot2'),
+                PDot3: getDotStatus('pDot3'),
             }
 
             $.ajax({
@@ -1255,7 +1485,9 @@
             if (chkAutoRun.checked) {
                 // 1. if no drawer just take (reelId MUST have first cause need get actual height)
                 if (sharedDrawerState.systemRunning == true && sharedDrawerState.drawerStatus == "None" && inRetrieveMove == false && inPutAwayMove == false) {
-                    startRetrieve();
+                    if (readyToEnd == false) {
+                        startRetrieve();
+                    }
                 }
 
                 // 2. if have drawer and placed then just put away

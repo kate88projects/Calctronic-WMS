@@ -722,9 +722,9 @@ namespace RackingSystem.Controllers
                     {
                         bool isCont = false;
 
-                        if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId)
+                        if (srms.RackJobQueue_Id != 0 && srms.LoginIP != ViewBag.DeviceId && srms.LoginIP != "")
                         {
-                            //return View("RackDrawerInView");
+                            return RedirectToAction("RackDrawerInHMIView", new { qId = srms.RackJobQueue_Id });
                         }
                         if (srms.RackJobQueue_Id == qId && srms.LoginIP == ViewBag.DeviceId)
                         {
@@ -750,6 +750,43 @@ namespace RackingSystem.Controllers
             ViewData["ActiveGroup"] = "grpRACKING";
             ViewData["ActiveTab"] = "RackJob";
             ViewData["Title"] = "Rack Job Drawer In";
+            return View();
+        }
+
+        public IActionResult RackDrawerInHMIView(long qId)
+        {
+            ViewBag.QId = qId;
+            ViewBag.QNo = "";
+            ViewBag.xToken = "";
+            ViewBag.DeviceId = "";
+
+            if (User.Identity?.IsAuthenticated ?? false)
+            {
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
+                {
+                    ViewBag.xToken = User.FindFirst("Token")?.Value;
+                    ViewBag.DeviceId = User.FindFirst("DeviceId")?.Value;
+
+                    var q = _context.RackJobQueue.Where(x => x.RackJobQueue_Id == qId).FirstOrDefault();
+                    if (q != null)
+                    {
+                        var doc = _context.Trolley.Where(x => x.Trolley_Id == q.Doc_Id).FirstOrDefault();
+                        if (doc != null)
+                        {
+                            ViewBag.QNo = doc.TrolleyCode;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            ViewData["ActiveGroup"] = "grpRACKING";
+            ViewData["ActiveTab"] = "RackJob";
+            ViewData["Title"] = "Rack Job Drawer In - Viewer";
             return View();
         }
 

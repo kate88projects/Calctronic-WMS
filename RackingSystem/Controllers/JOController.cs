@@ -107,6 +107,27 @@ namespace RackingSystem.Controllers
             return View();
         }
 
+        public IActionResult JOESimulate(int id)
+        {
+            ViewBag.PermissionList = new List<int>();
+            if (User.Identity?.IsAuthenticated ?? false)
+            {
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+                if (uacClaim != null)
+                {
+                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
+                    ViewBag.PermissionList = uacIdList;
+                }
+            }
+
+            ViewData["ActiveGroup"] = "grpJO";
+            ViewData["ActiveTab"] = "JOESimulate";
+            ViewData["Title"] = "JO Emergency Simulate";
+            ViewBag.id = id;
+
+            return View();
+        }
+
         //[HttpPost]
         //public async Task<ServiceResponseModel<List<JOListDTO>>> GetGRNDetailList([FromBody] JOSearchReqDTO req)
         //{
@@ -270,9 +291,16 @@ namespace RackingSystem.Controllers
         }
 
         [HttpGet]
-        public async Task<ServiceResponseModel<List<JORawMaterialStockCheckDTO>>> CheckJOStock(long jobOrderId, bool includeQueue = true, bool includeEmergency = true)
+        public async Task<ServiceResponseModel<List<JORawMaterialStockCheckDTO>>> CheckJOStock(long jobOrderId, bool includeQueue = true, bool includeEmergency = true, bool includeLoader = true)
         {
-            ServiceResponseModel<List<JORawMaterialStockCheckDTO>> result = await _joService.CheckJORawMaterialStock(jobOrderId, includeQueue, includeEmergency);
+            ServiceResponseModel<List<JORawMaterialStockCheckDTO>> result = await _joService.CheckJORawMaterialStock(jobOrderId, includeQueue, includeEmergency, includeLoader);
+            return result;
+        }
+
+        [HttpGet]
+        public async Task<ServiceResponseModel<List<JORawMaterialStockCheckDTO>>> CheckJOEStock(long jobOrderEId, bool includeQueue = true, bool includeEmergency = true, bool includeLoader = true)
+        {
+            ServiceResponseModel<List<JORawMaterialStockCheckDTO>> result = await _joService.CheckJOERawMaterialStock(jobOrderEId, includeQueue, includeEmergency, includeLoader);
             return result;
         }
 

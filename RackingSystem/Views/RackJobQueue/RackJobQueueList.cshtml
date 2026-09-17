@@ -218,6 +218,12 @@
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
+                                        var btnSimulate = '';
+                                        if (row.docType == "JO" || row.docType == "JOE") {
+                                            btnSimulate = `<button class="btn btn-dark d-grid simulate-btn" style="margin-right:10px;" data-id="${row.doc_Id}" data-code="${row.docType}">
+                                                                <span><i class="bi bi-eye"></i>  Simulate</span>
+                                                            </button>`;
+                                        }
                                         var btnStart ='';
                                         if (row.idx == 1) {
                                             btnStart = `<button class="btn btn-primary d-grid start-btn" style="margin-left:10px;" data-id="${row.rackJobQueue_Id}" data-code="${row.docType}" data-row="${rowData}">
@@ -237,13 +243,13 @@
                                             }
                                         }
                                         
-                                        return `<div style="display:flex;">
-                                                    <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
+                                        return `<div style="display:flex;">` + btnSimulate +
+                                                    `<button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
                                                         <span><i class="bi bi-pencil-square""></i>  Change Q</span>
                                                     </button>
                                                     <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.doc_Id}" data-code="${row.docType}">
                                                         <span><i class="bi bi-trash""></i>  Delete</span>
-                                                    </button>` + btnStart + 
+                                                    </button>` + btnStart +
                                                `</div>`;
                                     }
                                 }
@@ -988,6 +994,13 @@
                 var redirectUrl = '@Url.Action("RackJobHubInHMI", "Rack")';
                 window.open(redirectUrl + '?qId=' + id, '_blank');
             }
+        });
+
+        $('#listTable').on('click', '.simulate-btn', function () {
+            const id = $(this).attr('data-id');
+            const code = $(this).attr('data-code');
+            var redirectUrl = code == "JOE" ? '@Url.Action("JOESimulate", "JO")' : '@Url.Action("JOSimulate", "JO")';
+            window.open(redirectUrl + '?id=' + id, '_blank');
         });
 
     </script>
