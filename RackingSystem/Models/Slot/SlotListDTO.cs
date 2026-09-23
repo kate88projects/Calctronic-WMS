@@ -6,7 +6,7 @@ namespace RackingSystem.Models.Slot
     {
         public long Slot_Id { get; set; }
 
-        public string SlotCode { get; set; }
+        public string SlotCode { get; set; } = "";
 
         public bool IsActive { get; set; } = true;
 

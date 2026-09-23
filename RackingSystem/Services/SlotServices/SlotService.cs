@@ -45,6 +45,7 @@ namespace RackingSystem.Services.SlotServices
             return result;
 
         }
+
         public async Task<ServiceResponseModel<List<SlotListDTO>>> GetSlotList()
         {
             ServiceResponseModel<List<SlotListDTO>> result = new ServiceResponseModel<List<SlotListDTO>>();
@@ -857,6 +858,71 @@ namespace RackingSystem.Services.SlotServices
                 }
 
                 if (errorsLine != null && errorsLine.Count != 0)
+                {
+                    result.success = false;
+                    result.errMessage = "Some rows failed validation.";
+                    result.data = errorsLine;
+                }
+                else
+                {
+                    await _dbContext.SaveChangesAsync();
+                    result.success = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceResponseModel<List<SlotListDTO>>> UpdateExcelPriority(List<SlotListDTO> slots)
+        {
+            ServiceResponseModel<List<SlotListDTO>> result = new ServiceResponseModel<List<SlotListDTO>>();
+            List<SlotListDTO> errorsLine = new List<SlotListDTO>();
+
+            try
+            {
+                foreach (var slot in slots)
+                {
+                    if (slot.SlotCode == null)
+                    {
+                        continue;
+                    }
+
+                    bool isError = false;
+
+                    if (slot.Priority <= 0)
+                    {
+                        result.errMessage = "Please insert Reel In Priority. Negative values are not allowed.";
+                        slot.ErrorMsg = result.errMessage;
+                        isError = true;
+                    }
+
+                    Slot? slotExist = _dbContext.Slot.FirstOrDefault(x => x.SlotCode == slot.SlotCode);
+                    if (slotExist == null)
+                    {
+                        result.errMessage = $"Slot code: {slot.SlotCode} did not exist.";
+                        slot.ErrorMsg = result.errMessage;
+                        isError = true;
+                    }
+
+                    if (!isError)
+                    {
+                        if (errorsLine.Count != 0) continue;
+
+                        slotExist!.Priority = slot.Priority;
+                        _dbContext.Slot.Update(slotExist);
+                    }
+                    else
+                    {
+                        errorsLine.Add(slot);
+                    }
+                }
+
+                if (errorsLine.Count != 0)
                 {
                     result.success = false;
                     result.errMessage = "Some rows failed validation.";

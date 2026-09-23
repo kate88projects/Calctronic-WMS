@@ -205,6 +205,13 @@ namespace RackingSystem.Controllers
             return new JsonResult(result);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> UpdateExcelPriority([FromBody] List<SlotListDTO> slots)
+        {
+            ServiceResponseModel<List<SlotListDTO>> result = await _slotService.UpdateExcelPriority(slots);
+            return new JsonResult(result);
+        }
+
         public IActionResult SlotDrawer()
         {
             ViewBag.PermissionList = new List<int>();
