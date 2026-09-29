@@ -61,7 +61,7 @@ namespace RackingSystem.Controllers.API
         public async Task<ServiceResponseModel<int>> SetScanPulseStart(int colNo, int rowNo)
         {
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
-            string methodName = "SetLoaderUnload";
+            string methodName = "SetScanPulseStart";
 
             var configRack = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking1.ToString()).FirstOrDefault();
             if (configRack == null)
@@ -161,11 +161,11 @@ namespace RackingSystem.Controllers.API
             return result;
         }
 
-        [HttpGet("ReadPulse/{colNo}/{rowNo}")]
-        public async Task<ServiceResponseModel<string>> ReadPulse(int colNo, int rowNo)
+        [HttpGet("ReadPulse/{colNo}/{rowNo}/{isContinue?}")]
+        public async Task<ServiceResponseModel<string>> ReadPulse(int colNo, int rowNo, bool isContinue = false)
         {
             ServiceResponseModel<string> result = new ServiceResponseModel<string>();
-            string methodName = "StartBarcodeScanner";
+            string methodName = "ReadPulse";
 
             var configRack = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking1.ToString()).FirstOrDefault();
             if (configRack == null)
@@ -183,11 +183,24 @@ namespace RackingSystem.Controllers.API
                 return result;
             }
 
+
             //// *** testing
             //result.success = true;
             //result.data = 1;
             //return result;
             //// *** testing
+
+            // not continue from previous slot, wait for machine to travel to the column before read
+            // col 1 / 102 :: no wait, col 2 / 103 :: 2 sec, col 3 / 104 :: 4 sec, ...
+            if (!isContinue)
+            {
+                int waitSec = ((colNo - 1) % 101) * 2;
+                if (waitSec > 0)
+                {
+                    PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Wait {waitSec} sec for Col {colNo}.", "", false);
+                    await Task.Delay(waitSec * 1000);
+                }
+            }
 
             // 2. check plc which column is ready
             string plcIp = configRack.ConfigValue;
@@ -335,7 +348,7 @@ namespace RackingSystem.Controllers.API
         public async Task<ServiceResponseModel<int>> SetScanTrolleyPulseStart(string side, int colNo, int rowNo)
         {
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
-            string methodName = "SetLoaderUnload";
+            string methodName = "SetScanTrolleyPulseStart";
 
             var configRack = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking1.ToString()).FirstOrDefault();
             if (configRack == null)
@@ -370,7 +383,7 @@ namespace RackingSystem.Controllers.API
             {
                 modbusClient.Connect();
 
-                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
 
                 // step 1 : left or right
                 int registerAddress = 4298;
@@ -424,14 +437,14 @@ namespace RackingSystem.Controllers.API
             }
             catch (Exception ex)
             {
-                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Error: " + ex.Message, "", true);
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Error: " + ex.Message, "", true);
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
             }
             finally
             {
                 modbusClient.Disconnect();
-                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "", false);
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Disconnected.", "", false);
             }
 
             return result;
@@ -441,7 +454,7 @@ namespace RackingSystem.Controllers.API
         public async Task<ServiceResponseModel<string>> ReadTrolleyPulse(string side, int colNo, int rowNo)
         {
             ServiceResponseModel<string> result = new ServiceResponseModel<string>();
-            string methodName = "StartBarcodeScanner";
+            string methodName = "ReadTrolleyPulse";
 
             var configRack = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking1.ToString()).FirstOrDefault();
             if (configRack == null)
@@ -482,7 +495,7 @@ namespace RackingSystem.Controllers.API
             {
                 modbusClient.Connect();
 
-                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
 
                 int startAddress = 4223;
                 int numRegisters = 1;
@@ -498,13 +511,13 @@ namespace RackingSystem.Controllers.API
                     if (value > 0)
                     {
                         exit = true;
-                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress}: {value}", "", false);
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress}: {value}", "", false);
                     }
                     if ((DateTime.Now - dtRun).TotalSeconds > 10)
                     {
                         result.errMessage = "Timeout. Cannot get Status.";
                         exit = true;
-                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress}: {value}", "", false);
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress}: {value}", "", false);
                     }
                 }
 
@@ -516,7 +529,7 @@ namespace RackingSystem.Controllers.API
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
                     {
-                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
                         decimalText = getDecimalText(registers[i]);
                         if (decimalText.Contains("\0"))
                         {
@@ -531,7 +544,7 @@ namespace RackingSystem.Controllers.API
                     registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
                     {
-                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
                         decimalText = getDecimalText(registers[i]);
                         if (decimalText.Contains("\0"))
                         {
@@ -546,7 +559,7 @@ namespace RackingSystem.Controllers.API
                     registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
                     {
-                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
                         decimalText = getDecimalText(registers[i]);
                         if (decimalText.Contains("\0"))
                         {
@@ -561,7 +574,7 @@ namespace RackingSystem.Controllers.API
                     registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
                     {
-                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress + i}: {registers[i]}", "", false);
                         decimalText = getDecimalText(registers[i]);
                         if (decimalText.Contains("\0"))
                         {
@@ -570,7 +583,7 @@ namespace RackingSystem.Controllers.API
                         qrYText = qrYText + decimalText;
                     }
 
-                    PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Get X {qrXText} Y {qrYText}", "", false);
+                    PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Get X {qrXText} Y {qrYText}", "", false);
 
                     slot.LastQRXPulse = slot.QRXPulse;
                     slot.LastQRYPulse = slot.QRYPulse;
@@ -595,14 +608,14 @@ namespace RackingSystem.Controllers.API
             }
             catch (Exception ex)
             {
-                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Error: " + ex.Message, "", true);
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Error: " + ex.Message, "", true);
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
             }
             finally
             {
                 modbusClient.Disconnect();
-                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "", false);
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Disconnected.", "", false);
             }
 
             return result;

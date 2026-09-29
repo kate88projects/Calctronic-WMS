@@ -550,6 +550,7 @@ namespace RackingSystem.Controllers.API
 
                     if (value == 2) // value 1 :: tengah buat, 2 :: complete, 3 :: retrieve failure, try another slot
                     {
+                        result.success = true;
                         exit = true;
                         PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
                     }
@@ -995,9 +996,31 @@ namespace RackingSystem.Controllers.API
                         exit = true;
                         PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value} TimeOut", "", false);
                     }
+                    if (!exit)
+                    {
+                        Thread.Sleep(200);
+                    }
                 }
 
-                // double check slot_id
+                result.data.data = value.ToString();
+
+            }
+            catch (Exception ex)
+            {
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Error: " + ex.Message, "", true);
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+                return result;
+            }
+            finally
+            {
+                modbusClient.Disconnect();
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Disconnected.", "", false);
+            }
+
+            // double check slot_id (after disconnect, GetSlotIDByIP / ReadPulseByIP open their own connection)
+            try
+            {
                 string slotCodeRead = GetSlotIDByIP(configRack.ConfigValue);
                 var slotChk = _dbContext.Slot.Where(x => x.SlotCode == slotCodeRead).FirstOrDefault();
                 if (slotChk == null)
@@ -1013,20 +1036,10 @@ namespace RackingSystem.Controllers.API
                     result.data.QRXPulseDiffer = pulses[2];
                     result.data.QRXPulseDiffer = pulses[3];
                 }
-
-                result.data.data = value.ToString();
-
             }
             catch (Exception ex)
             {
-                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Error: " + ex.Message, "", true);
-                result.errMessage = ex.Message;
-                result.errStackTrace = ex.StackTrace ?? "";
-            }
-            finally
-            {
-                modbusClient.Disconnect();
-                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Disconnected.", "", false);
+                PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "GetSlotAndPulse err : " + ex.Message, "", false);
             }
 
             return result;

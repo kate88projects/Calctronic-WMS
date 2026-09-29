@@ -489,6 +489,7 @@
         var endTask = true;
         let token = '';
         let slotLength = 0;
+        let isContinueSlot = false;
 
         function delay(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
@@ -761,7 +762,7 @@
             document.getElementById('txtErr').innerHTML = "-";
 
             await $.ajax({
-                url: "/api/PLCSlot/ReadPulse/" + iCol + "/" + rowFrom,
+                url: "/api/PLCSlot/ReadPulse/" + iCol + "/" + rowFrom + "/" + isContinueSlot,
                 type: "GET",
                 headers: {
                     'Authorization': 'Bearer ' + token
@@ -773,6 +774,7 @@
                 success: function (result) {
                     if (result.success == true) {
                         fResult = true;
+                        isContinueSlot = true;
                         const cell = document.getElementById('R' + rowFrom);
 
                         cell.textContent = result.data;
