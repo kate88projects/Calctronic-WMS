@@ -13809,7 +13809,7 @@
 		host.empty().append(wrapped);
 	
 		if ( activeEl !== undefined ) {
-			host.find( '[data-dt-idx='+activeEl+']' ).trigger('focus');
+			host.find( '[data-dt-idx="'+activeEl+'"]' ).trigger('focus');
 		}
 	
 		// Responsive - check if the buttons are over two lines based on the

@@ -1,324 +1,70 @@
 ﻿
-<style>
-    body {
-        color: #566787;
-        background: #f5f5f5;
-        /* font-family: 'Varela Round', sans-serif; */
-        /* font-size: 13px; */
-    }
-
-    .table-wrapper {
-        background: #fff;
-        padding: 20px 25px;
-        margin: 30px auto;
-        border-radius: 3px;
-        box-shadow: 0 1px 1px rgba(0,0,0,.05);
-    }
-
-    .table-wrapper .btn {
-        float: right;
-        color: #333;
-        background-color: #fff;
-        border-radius: 3px;
-        border: none;
-        outline: none !important;
-        margin-left: 10px;
-    }
-
-    .table-wrapper .btn:hover {
-        color: #333;
-        background: #f2f2f2;
-    }
-
-    .table-wrapper .btn.btn-primary {
-        color: #fff;
-        background: #03A9F4;
-    }
-
-    .table-wrapper .btn.btn-primary:hover {
-        background: #03a3e7;
-    }
-
-    .table-wrapper .btn.btn-success {
-        color: #fff;
-        background: #198754;
-    }
-
-    .table-wrapper .btn.btn-success:hover {
-        background: #198754;
-    }
-
-    .table-wrapper .btn.btn-success:disabled {
-        background-color: #7f8c8d;
-        cursor: not-allowed;
-        opacity: 0.6;
-    }
-
-    .table-wrapper .btn.btn-danger {
-        color: #fff;
-        background: #dc3545;
-    }
-
-    .table-wrapper .btn.btn-danger:hover {
-        background: #dc3545;
-    }
-
-    .table-wrapper .btn.btn-danger:disabled {
-        background-color: #7f8c8d;
-        cursor: not-allowed;
-        opacity: 0.6;
-    }
-
-    .table-title .btn {
-        font-size: 17px;
-        border: none;
-    }
-
-    .table-title .btn i {
-        float: left;
-        font-size: 21px;
-        margin-right: 5px;
-    }
-
-    .table-title .btn span {
-        float: left;
-        margin-top: 2px;
-        height: 21px;
-    }
-
-    .table-title {
-        color: #fff;
-        background: #4b5366;
-        padding: 16px 25px;
-        margin: -20px -25px 10px;
-        border-radius: 3px 3px 0 0;
-    }
-
-    .table-title h2 {
-        margin: 5px 0 0;
-        font-size: 24px;
-    }
-
-    .show-entries select.form-control {
-        width: 60px;
-        margin: 0 5px;
-    }
-
-    .table-filter .filter-group {
-        float: right;
-        margin-left: 15px;
-    }
-
-    .table-filter input, .table-filter select {
-        height: 34px;
-        border-radius: 3px;
-        border-color: #ddd;
-        box-shadow: none;
-    }
-
-    .table-filter {
-        padding: 5px 0 15px;
-        border-bottom: 1px solid #e9e9e9;
-        margin-bottom: 5px;
-    }
-
-    .table-filter .btn {
-        height: 34px;
-    }
-
-    .table-filter label {
-        font-weight: normal;
-        margin-left: 10px;
-    }
-
-    .table-filter select, .table-filter input {
-        display: inline-block;
-        margin-left: 5px;
-    }
-
-    .table-filter input {
-        width: 200px;
-        display: inline-block;
-    }
-
-    .filter-group select.form-control {
-        width: 110px;
-    }
-
-    .filter-icon {
-        float: right;
-        margin-top: 7px;
-    }
-
-    .filter-icon i {
-        font-size: 18px;
-        opacity: 0.7;
-    }
-
-    /* .table > :not(caption) > * > * {
-        padding: 0 !important;
-    } */
-
-    .tblRow {
-        padding: 0 !important;
-    }
-
-    .tblCol1 {
-        width: 30%;
-    }
-
-    .tblCol2 {
-        width: 60%;
-    }
-
-    .tblCol3 {
-        width: 10%;
-        place-content: center;
-    }
-
-    /* --- System Log Area --- */
-    .system-log-container {
-        background-color: var(--card-bg);
-        margin: 0px 20px 20px 20px;
-        padding: 15px;
-        border-radius: 8px;
-        border: 1px solid var(--accent-color);
-    }
-
-    #system-log {
-        background-color: var(--bg-main);
-        color: #7f8c8d;
-        height: 350px;
-        overflow-y: auto;
-        padding: 10px;
-        font-family: monospace;
-        font-size: 0.9em;
-        border-radius: 4px;
-    }
-
-    .log-entry {
-        margin-bottom: 3px;
-        white-space: nowrap;
-    }
-
-    .log-info {
-        color: var(--text-color);
-    }
-
-    .log-alert {
-        color: var(--status-alarm);
-        font-weight: bold;
-    }
-
-    .log-success {
-        color: var(--status-ok);
-    }
-
-    .status-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 16px;
-        margin-bottom: 24px;
-    }
-
-    .status-card {
-        background: #f9fafb;
-        border-radius: 14px;
-        padding: 16px;
-        text-align: center;
-        border: 1px solid #e5e7eb;
-    }
-
-    .status-card h3 {
-        font-size: 13px;
-        color: #6b7280;
-        margin-bottom: 6px;
-    }
-
-    .status-card .value {
-        font-size: 22px;
-        font-weight: 600;
-    }
-
-    .yellow {
-        background: yellow;
-    }
-
-    .circle {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        box-shadow: 0px 0px 1px 1px #0000001a;
-    }
-
-    .pulse {
-        animation: pulse-animation 2s infinite;
-    }
-
-    @@keyframes pulse-animation {
-        0% {
-            box-shadow: 0 0 0 0px rgba(0, 0, 0, 0.2);
-        }
-
-        100% {
-            box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
-        }
-    }
-</style>
+<div class="tw:flex tw:w-full tw:items-center tw:justify-between">
+    <h2 class="tw:text-lg tw:mb-0 tw:ml-2 tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Trolley Detail List</h2>
+    <div class="tw:flex">
+        <button type="button" class="tw:border-0 tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:transition
+            tw:hover:bg-brand-600" onclick="export()">
+            Export
+        </button>
+    </div>
+</div>
 
 
-@section PageHeader {
-    <header class="d-flex align-items-center justify-content-between w-100">
-        <h2 class="pageTitle">Trolley Detail List</h2>
-        <div class="d-flex gap-2">
-            <button type="button" class="btn btn-warning" onclick="export()">
-                Export
-            </button>
-        </div>
-    </header>
-}
-
-<div class="container-fluid">
+<div class="tw:mt-3 tw:space-y-4">
     <input type="hidden" id="xToken" value="@ViewBag.xToken" autocomplete="off">
 
-    <div class="row align-items-center g-2 mt-3">
-        <div class="col-auto">
-            <label for="selTrolley" class="form-label mb-0">Trolley:</label>
-        </div>
-        <div class="col-md-2 col-sm-3">
-            <select class="form-control" id="selTrolley"></select>
-        </div>
-        <div class="col-md-2 col-sm-3">
-            <button type="button" class="btn btn-primary w-100" onclick="loadList()">
+    <div class="tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:p-4 tw:dark:border-gray-800 tw:dark:bg-white/[0.03]">
+        <div class="tw:flex tw:flex-wrap tw:items-center tw:gap-3">
+            <label for="selTrolley" class="tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400">Trolley</label>
+            <div class="tw:relative tw:w-48" x-data="customSelect('selTrolley')" x-init="init()">
+                <select id="selTrolley" class="tw:hidden"></select>
+                <button type="button" @@click="toggle()" @@click.outside="open = false"
+                        class="tw:flex tw:w-full tw:items-center tw:justify-between tw:gap-2 tw:rounded-lg tw:border tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-left tw:text-sm tw:text-gray-800 tw:dark:bg-gray-900 tw:dark:text-white/90"
+                        :class="hasError ? 'tw:border-error-500' : (open ? 'tw:border-brand-300 tw:ring-3 tw:ring-brand-500/10' : 'tw:border-gray-300 tw:dark:border-gray-700')">
+                    <span x-text="selectedLabel || 'Select...'" :class="selectedLabel ? '' : 'tw:text-gray-400 tw:dark:text-white/30'"></span>
+                    <i class="bi bi-chevron-down tw:text-xs tw:text-gray-500 tw:transition-transform tw:dark:text-gray-400" :class="open ? 'tw:rotate-180' : ''"></i>
+                </button>
+                <div x-show="open" x-transition
+                     class="custom-select-scroll tw:absolute tw:z-50 tw:max-h-60 tw:w-full tw:overflow-y-auto tw:rounded-lg tw:border tw:border-gray-200 tw:bg-white tw:py-1 tw:shadow-theme-lg tw:dark:border-gray-700 tw:dark:bg-gray-900"
+                     :class="dropUp ? 'tw:bottom-full tw:mb-1' : 'tw:top-full tw:mt-1'">
+                    <template x-if="options.length === 0">
+                        <div class="tw:px-4 tw:py-2 tw:text-sm tw:text-gray-400 tw:dark:text-white/30">No options</div>
+                    </template>
+                    <template x-for="opt in options" :key="opt.value">
+                        <div @@click="select(opt)"
+                             class="tw:cursor-pointer tw:px-4 tw:py-2 tw:text-sm tw:hover:bg-brand-50 tw:dark:hover:bg-brand-500/15"
+                             :class="opt.value === selectedValue ? 'tw:bg-brand-50 tw:font-medium tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:text-gray-700 tw:dark:text-gray-300'"
+                             x-text="opt.text"></div>
+                    </template>
+                </div>
+            </div>
+            <button type="button" class="tw:flex tw:h-10 tw:w-10 tw:items-center tw:justify-center tw:rounded-lg tw:border-0 tw:bg-brand-500 tw:text-white tw:hover:bg-brand-600" onclick="loadList()">
                 <i class="bi bi-search"></i>
             </button>
         </div>
     </div>
-    <hr />
 
     <!-- Status -->
-    <div class="status-grid">
-        <div class="status-card">
-            <h3>Item Group</h3>
-            <div class="value" id="itemGroupContainer">-</div>
+    <div class="tw:grid tw:grid-cols-4 tw:gap-4">
+        <div class="tw:rounded-2xl tw:border tw:border-gray-200 tw:bg-white tw:p-4 tw:text-center tw:dark:border-gray-800 tw:dark:bg-white/[0.03]">
+            <h3 class="tw:mb-1.5 tw:text-xs tw:text-gray-500 tw:dark:text-gray-400">Item Group</h3>
+            <div class="value tw:text-base tw:font-semibold" id="itemGroupContainer">-</div>
         </div>
-        <div class="status-card">
-            <h3>Need Checking</h3>
-            <div class="value" id="txtCheck">–</div>
+        <div class="tw:rounded-2xl tw:border tw:border-gray-200 tw:bg-white tw:p-4 tw:text-center tw:dark:border-gray-800 tw:dark:bg-white/[0.03]">
+            <h3 class="tw:mb-1.5 tw:text-xs tw:text-gray-500 tw:dark:text-gray-400">Need Checking</h3>
+            <div class="value tw:text-lg tw:font-semibold tw:text-gray-800 tw:dark:text-white/90" id="txtCheck">–</div>
         </div>
-        <div class="status-card">
-            <h3>Side A</h3>
-            <div class="usage-card" data-collapsed="1">
-                @* <h3 class="fs-7 text-dark fw-bold">Column 1</h3> *@
-                <div class="d-flex justify-content-center align-items-center gap-2">
-                    <h3 class="fs-7 text-dark fw-bold mb-0">Column 1</h3>
-                    <div class="ms-3 fs-7 ">
-                        @* <span class="label">Total Reels:</span> *@
+        <div class="tw:rounded-2xl tw:border tw:border-gray-200 tw:bg-white tw:p-4 tw:text-center tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:space-y-2">
+            <h3 class="tw:mb-1.5 tw:text-xs tw:text-gray-500 tw:dark:text-gray-400">Side A</h3>
+            <div class="usage-card tw:dark:bg-white/[0.03] tw:dark:text-white/90" data-collapsed="1">
+                <div class="tw:flex tw:justify-center tw:items-center tw:gap-2">
+                    <h3 class="tw:text-sm tw:font-bold mb-0">Column 1</h3>
+                    <div class="tw:ms-4 tw:text-sm ">
                         <span id="totalReelsA1" class="usage-reel">40 reels</span>
                     </div>
                 </div>
-                <hr class="m-0 pt-1"/>
-                <div class="d-flex justify-content-center gap-2 fs-8 mb-1 mt-1">
+                <hr class="tw:m-0 tw:pt-1"/>
+                <div class="tw:flex tw:justify-center tw:gap-2 tw:text-xs tw:mb-1">
                     <div class="usage-left">
                         <span class="label">Balanced:</span>
                         <span data-type="balanced" id="balancedA1">45 slots</span>
@@ -328,20 +74,20 @@
                         <span data-type="used" id="usedA1">5 slots</span>
                     </div>
                 </div>
-                <div class="fs-8">
+                <div class="tw:text-xs">
                     <span class="label">Total:</span>
                     <span data-type="total" id="totalA1">-</span>
                 </div> 
             </div>
-            <div class="usage-card mt-1" data-collapsed="2">
-                <div class="d-flex justify-content-center align-items-center gap-2">
-                    <h3 class="fs-7 text-dark fw-bold mb-0">Column 2</h3>
-                    <div class="ms-3 fs-7">
+            <div class="usage-card tw:dark:bg-white/[0.03] tw:dark:text-white/90" data-collapsed="2">
+                <div class="tw:flex tw:justify-center tw:items-center tw:gap-2">
+                    <h3 class="tw:text-sm tw:font-bold tw:mb-0">Column 2</h3>
+                    <div class="tw:ms-4 tw:text-sm">
                         <span id="totalReelsA2" class="usage-reel">0 reels</span>
                     </div>
                 </div>
-                <hr class="m-0 pt-1"/>
-                <div class="d-flex justify-content-center gap-2 fs-8 mb-1">
+                <hr class="tw:m-0 tw:pt-1"/>
+                <div class="tw:flex tw:justify-center tw:gap-2 tw:text-xs tw:mb-1">
                     <div class="usage-left">
                         <span class="label">Balanced:</span>
                         <span data-type="balanced" id="balancedA2">45 slots</span>
@@ -351,11 +97,11 @@
                         <span data-type="used" id="usedA2">50 slots</span>
                     </div>
                 </div>
-                <div class="fs-8">
+                <div class="tw:text-xs">
                     <span class="label">Total:</span>
                     <span data-type="total" id="totalA2">-</span>
                 </div>
-                @* <div class="d-flex justify-content-center fs-8 mb-2 gap-2">
+                @* <div class="tw:flex tw:justify-center tw:text-xs mb-2 tw:gap-2">
                     <div>
                         <span class="label">Total:</span>
                         <span data-type="total">50 slots</span>
@@ -366,15 +112,15 @@
                     </div>
                 </div> *@
             </div>
-            <div class="usage-card mt-1" data-collapsed="3">
-                <div class="d-flex justify-content-center align-items-center gap-2">
-                    <h3 class="fs-7 text-dark fw-bold mb-0">Column 3</h3>
-                    <div class="ms-3 fs-7">
+            <div class="usage-card tw:dark:bg-white/[0.03] tw:dark:text-white/90" data-collapsed="3">
+                <div class="tw:flex tw:justify-center tw:items-center tw:gap-2">
+                    <h3 class="tw:text-sm tw:font-bold tw:mb-0">Column 3</h3>
+                    <div class="tw:ms-4 tw:text-sm">
                         <span id="totalReelsA3" class="usage-reel">1 reels</span>
                     </div>
                 </div>
-                <hr class="m-0 pt-1" />
-                <div class="d-flex justify-content-center gap-2 fs-8 mb-1">
+                <hr class="tw:m-0 tw:pt-1" />
+                <div class="tw:flex tw:justify-center tw:gap-2 tw:text-xs tw:mb-1">
                     <div class="usage-left">
                         <span class="label">Balanced:</span>
                         <span data-type="balanced" id="balancedA3">-</span>
@@ -384,24 +130,24 @@
                         <span data-type="used" id="usedA3">-</span>
                     </div>
                 </div>
-                <div class="fs-8">
+                <div class="tw:text-xs">
                     <span class="label">Total:</span>
                     <span data-type="total" id="totalA3">-</span>
                 </div>
             </div>
         </div>
 
-        <div class="status-card">
-            <h3>Side B</h3>
-            <div class="usage-card" data-collapsed="1">
-                <div class="d-flex justify-content-center align-items-center gap-2">
-                    <h3 class="fs-7 text-dark fw-bold mb-0">Column 1</h3>
-                    <div class="ms-3 fs-7">
+        <div class="tw:rounded-2xl tw:border tw:border-gray-200 tw:bg-white tw:p-4 tw:text-center tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:space-y-2">
+            <h3 class="tw:mb-1.5 tw:text-xs tw:text-gray-500 tw:dark:text-gray-400">Side B</h3>
+            <div class="usage-card tw:dark:bg-white/[0.03] tw:dark:text-white/90" data-collapsed="1">
+                <div class="tw:flex tw:justify-center tw:items-center tw:gap-2">
+                    <h3 class="tw:text-sm tw:font-bold tw:mb-0">Column 1</h3>
+                    <div class="tw:ms-4 tw:text-sm">
                         <span id="totalReelsB1" class="usage-reel">5 reels</span>
                     </div>
                 </div>
-                <hr class="m-0 pt-1" />
-                <div class="d-flex justify-content-center gap-2 fs-8 mb-1">
+                <hr class="tw:m-0 tw:pt-1" />
+                <div class="tw:flex tw:justify-center tw:gap-2 tw:text-xs tw:mb-1">
                     <div class="usage-left">
                         <span class="label">Balanced:</span>
                         <span data-type="balanced" id="balancedB1">-</span>
@@ -411,20 +157,20 @@
                         <span data-type="used" id="usedB1">-</span>
                     </div>
                 </div>
-                <div class="fs-8">
+                <div class="tw:text-xs">
                     <span class="label">Total:</span>
                     <span data-type="total" id="totalB1">-</span>
                 </div>
             </div>
-            <div class="usage-card mt-1" data-collapsed="2">
-                <div class="d-flex justify-content-center align-items-center gap-2">
-                    <h3 class="fs-7 text-dark fw-bold mb-0">Column 2</h3>
-                    <div class="ms-3 fs-7">
+            <div class="usage-card tw:dark:bg-white/[0.03] tw:dark:text-white/90" data-collapsed="2">
+                <div class="tw:flex tw:justify-center tw:items-center tw:gap-2">
+                    <h3 class="tw:text-sm tw:font-bold tw:mb-0">Column 2</h3>
+                    <div class="tw:ms-4 tw:text-sm">
                         <span id="totalReelsB2" class="usage-reel">5 reels</span>
                     </div>
                 </div>
-                <hr class="m-0 pt-1" />
-                <div class="d-flex justify-content-center gap-2 fs-8 mb-1">
+                <hr class="tw:m-0 tw:pt-1" />
+                <div class="tw:flex tw:justify-center tw:gap-2 tw:text-xs tw:mb-1">
                     <div class="usage-left">
                         <span class="label">Balanced:</span>
                         <span data-type="balanced" id="balancedB2">-</span>
@@ -434,20 +180,20 @@
                         <span data-type="used" id="usedB2">-</span>
                     </div>
                 </div>
-                <div class="fs-8">
+                <div class="tw:text-xs">
                     <span class="label">Total:</span>
                     <span data-type="total" id="totalB2">-</span>
                 </div>
             </div>
-            <div class="usage-card mt-1" data-collapsed="3">
-                <div class="d-flex justify-content-center align-items-center gap-2">
-                    <h3 class="fs-7 text-dark fw-bold mb-0">Column 3</h3>
-                    <div class="ms-3 fs-7">
+            <div class="usage-card tw:dark:bg-white/[0.03] tw:dark:text-white/90" data-collapsed="3">
+                <div class="tw:flex tw:justify-center tw:items-center tw:gap-2">
+                    <h3 class="tw:text-sm tw:font-bold tw:mb-0">Column 3</h3>
+                    <div class="tw:ms-4 tw:text-sm">
                         <span id="totalReelsB3" class="usage-reel">5 reels</span>
                     </div>
                 </div>
-                <hr class="m-0 pt-1" />
-                <div class="d-flex justify-content-center gap-2 fs-8 mb-1">
+                <hr class="tw:m-0 tw:pt-1" />
+                <div class="tw:flex tw:justify-center tw:gap-2 tw:text-xs tw:mb-1">
                     <div class="usage-left">
                         <span class="label">Balanced:</span>
                         <span data-type="balanced" id="balancedB3">-</span>
@@ -457,7 +203,7 @@
                         <span data-type="used" id="usedB3">-</span>
                     </div>
                 </div>
-                <div class="fs-8">
+                <div class="tw:text-xs">
                     <span class="label">Total:</span>
                     <span data-type="total" id="totalB3">-</span>
                 </div>
@@ -465,42 +211,89 @@
         </div>
     </div>
 
-    <hr />
-    <table id="listTable" class="row-border dataTable hover order-column" style="width:100%">
-        <thead>
-            <tr>
-                <th>Slot</th>
-                <th>Reel Code</th>
-                <th>Item Code</th>
-                <th>Qty</th>
-                <th>Item Group Code</th>
-                @* <th>Check?</th> *@
-                @* <th>Action</th> *@
-            </tr>
-        </thead>
-    </table>
+    <div class="dt-tailadmin tw:overflow-hidden tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:text-gray-700 tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:dark:text-gray-300">
+        <table id="listTable" class="row-border dataTable hover order-column tw:w-full">
+            <thead>
+                <tr class="tw:border-b tw:border-gray-200">
+                    @{
+                        string[] listHeaders = { "Slot", "Reel Code", "Item Code", "Qty", "Item Group Code" };
+                    }
+                    @foreach (var header in listHeaders)
+                    {
+                        <th class="tw:px-5 tw:py-3.5 tw:text-left sm:tw:px-6"><span class="tw:text-sm tw:font-semibold tw:text-gray-700 tw:dark:text-gray-300">@header</span></th>
+                    }
+                </tr>
+            </thead>
+        </table>
+    </div>
 </div>
 
 @section Scripts
 {
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
     <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
-    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="../js/dataTables.js"></script>
-    <script src="../js/dataTables.columnControl.js"></script>
-    <script src="../js/columnControl.dataTables.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
-
-    @* <script src="~/js/gridjs.umd.js"></script> *@
-    @* <script src="~/js/datatables.min.js"></script> *@
-    @* <link rel="stylesheet" href="~/css/gridjs.min.css"> *@
 
     <script type="text/javascript">
         let itemGroupList = {};
         let activeGrp = null;
         let globalData = null;
+
+        function customSelect(selectId) {
+            return {
+                open: false,
+                dropUp: false,
+                options: [],
+                selectedValue: '',
+                selectedLabel: '',
+                hasError: false,
+                init() {
+                    this.syncOptions();
+                    const sel = document.getElementById(selectId);
+                    if (!sel) return;
+                    this.hasError = sel.classList.contains('is-invalid');
+                    new MutationObserver(() => {
+                        this.hasError = sel.classList.contains('is-invalid');
+                    }).observe(sel, { attributes: true, attributeFilter: ['class'] });
+                },
+                toggle() {
+                    this.open = !this.open;
+                    if (this.open) {
+                        this.syncOptions();
+                        const rect = this.$el.getBoundingClientRect();
+                        const spaceBelow = window.innerHeight - rect.bottom;
+                        this.dropUp = spaceBelow < 240 && rect.top > spaceBelow;
+                    }
+                },
+                syncOptions() {
+                    const sel = document.getElementById(selectId);
+                    if (!sel) return;
+                    this.options = Array.from(sel.options).map(o => ({ value: o.value, text: o.textContent.trim() }));
+                    this.selectedValue = sel.value;
+                    const selectedOpt = sel.options[sel.selectedIndex];
+                    this.selectedLabel = selectedOpt ? selectedOpt.textContent.trim() : '';
+                },
+                select(opt) {
+                    const sel = document.getElementById(selectId);
+                    sel.value = opt.value;
+                    this.selectedValue = opt.value;
+                    this.selectedLabel = opt.text;
+                    this.open = false;
+                    sel.dispatchEvent(new Event('change'));
+                }
+            };
+        }
+
+        function refreshCustomSelect(selectId) {
+            const sel = document.getElementById(selectId);
+            const root = sel ? sel.closest('[x-data]') : null;
+            if (root && window.Alpine) {
+                Alpine.$data(root).syncOptions();
+            }
+        }
 
         $(document).ready(function () {
             loadTrolley();
@@ -514,7 +307,7 @@
                 dataType: 'JSON',
                 contentType: 'application/json; charset=utf-8',
                 success: function (result) {
-                    swal.close()
+                    Swal.close()
                     if (result.success == true) {
                         const dropdown = document.getElementById('selTrolley');
                         dropdown.innerHTML = "";
@@ -529,11 +322,12 @@
                             dropdown.appendChild(option);
                         });
 
+                        refreshCustomSelect('selTrolley');
                         loadList();
                     }
                 },
                 error: function (error) {
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -561,10 +355,10 @@
                     Swal.showLoading();
                 },
                 success: function (result) {
-                    swal.close();
+                    Swal.close();
                     if (result.success == true) {
                         globalData = result.data;
-                        console.log(result);
+                        //console.log(result);
                         itemGroupList = {};
 
                         result.data.forEach(item => {
@@ -592,11 +386,8 @@
                             document.getElementById(usedId).textContent = (parseInt(parts[5]) - parseInt(parts[3])) + " slots";
                             document.getElementById(totalId).textContent = parts[3] + " slots";
                         });
-                        // var spText = result.errStackTrace.split(',');
-                        // document.getElementById('txtTtlReelA').innerHTML = 'Total Reel : ' + spText[2];
-                        // document.getElementById('txtTtlEmptyA').innerHTML = 'Empty Slot : ' + spText[3] + " ";
-                        // document.getElementById('txtTtlReelB').innerHTML = 'Total Reel : ' + spText[4];
-                        // document.getElementById('txtTtlEmptyB').innerHTML = 'Empty Slot : ' + spText[5] + " ";
+
+                        const cellClass = 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6 tw:text-theme-sm tw:text-gray-700 tw:dark:text-gray-300';
 
                         $('#listTable').DataTable( {
                             data: result.data,
@@ -605,17 +396,18 @@
                             lengthMenu: [50, 100, 250, 500, 1000],
                             "bDestroy": true,
                             columns: [
-                                { data: 'trolleySlotCode' },
-                                { data: 'reelCode' },
+                                { data: 'trolleySlotCode', className: cellClass },
+                                { data: 'reelCode', className: cellClass },
                                 {
                                     data: null,
+                                    className: cellClass, 
                                     render: function (data, type, row, meta) {
                                         // return '<p>' + row.itemCode + '</p><p>' + row.itemDesc + '</p>';
                                         return '<p style="margin:0;"><span>' + row.itemCode + '</span><br/>' +
                                         '<span style="font-size:13px;color:grey;">' + row.itemDesc + '</span></p>';
                                     }
                                 },
-                                { data: 'qty' },
+                                { data: 'qty', className: cellClass },
                                 // {
                                 //     data: null,
                                 //     render: function (data, type, row, meta) {
@@ -641,16 +433,12 @@
                             language: {
                                 searchPlaceholder: "🔍︎ Search",
                                 search: ""
-                            },
-                            ordering: {
-                                indicators: false
-                            },
-                            columnControl: ['orderStatus']
+                            }
                         });
 
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -658,7 +446,7 @@
                     }
                 },
                 error: function (error) {
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -673,7 +461,7 @@
 
             Object.keys(itemGroupList).forEach((ig, index) => {
                 const btn = document.createElement("button");
-                btn.className = "group-reel-btn text-dark fw-bold";
+                btn.className = "group-reel-btn tw:bg-white tw:dark:bg-white/[0.03] tw:dark:text-white/90";
                 btn.dataset.group = ig;
                 btn.id= `btnGroup${index}`;
 
@@ -681,7 +469,7 @@
 
                 btn.innerHTML = `
                     ${ig}
-                    <span class="fs-7 text-muted" id="txtGroup{index +1}">${qty} reels</span
+                    <span class="tw:text-sm tw:dark:text-white/90" id="txtGroup{index +1}">${qty} reels</span
                 `;
 
                 container.appendChild(btn);
@@ -690,7 +478,7 @@
 
         $(document).on('click', '.group-reel-btn', function() {
             const group = $(this).data('group');
-            console.log("group", group);
+            //console.log("group", group);
 
             const table = $('#listTable').DataTable();
 
@@ -708,7 +496,7 @@
             $(this).addClass('active');
 
             const filteredData = globalData.filter(x => x.itemGroupCode == group);
-            console.log("filteredData", filteredData);
+            //console.log("filteredData", filteredData);
             table.clear();
             table.rows.add(filteredData);
             table.draw();

@@ -764,7 +764,7 @@ url("./fonts/bootstrap-icons.woff?e34853135f9e39acf64315236852cd5a") format("wof
 .bi-funnel-fill::before { content: "\f3e0"; }
 .bi-funnel::before { content: "\f3e1"; }
 .bi-gear-fill::before { content: "\f3e2"; }
-.bi-gear-wide-connected::before { content: "\f3e3"; }
+.bi-gear::before { content: "\f3e3"; }
 .bi-gear-wide::before { content: "\f3e4"; }
 .bi-gear::before { content: "\f3e5"; }
 .bi-gem::before { content: "\f3e6"; }

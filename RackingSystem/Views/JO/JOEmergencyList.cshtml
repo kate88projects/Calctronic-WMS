@@ -6,7 +6,7 @@
 
 </style>
 
-@section PageHeader {
+@* @section PageHeader {
     <header class="d-flex align-items-center justify-content-between w-100">
         <h2 class="pageTitle">Emergency JOB Order List</h2>
         <div class="d-flex">
@@ -15,35 +15,33 @@
             </button>
         </div>
     </header>
-}
+} *@
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card card-outline ">
-                <div class="card-body pt-0">
-                    @* <div id="gridTable" class="table table-responsive text-nowrap mt-3"></div> *@
-                    <div class="text-nowrap table-container mt-1">
-                        <table id="listTable" class="dataTable row-border hover order-column" style="width:100%">
-                            <thead>
-                                <tr>
-                                    @* <th>Job Order Id</th> *@
-                                    <th>Doc No</th>
-                                    <th>Doc Date</th>
-                                    <th>Description</th>
-                                    <th>Status</th>
-                                    <th>Created Date</th>
-                                    @*   <th>Created By</th>
-                                    <th>Updated Date</th>
-                                    <th>Updated By</th> *@
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="tw:flex tw:w-full tw:items-center tw:justify-between">
+    <h2 class="tw:text-lg tw:mb-0 tw:ml-2 tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Emergency JOB Order List</h2>
+    <div class="tw:flex">
+        <button type="button" class="tw:border-0 tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:transition
+            tw:hover:bg-brand-600" onclick="navigateToNew('new')">
+            Add New Emergency JOB
+        </button>
+    </div>
+</div>
+
+<div class="tw:mt-3">
+    <div class="dt-tailadmin tw:overflow-hidden tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:text-gray-700 tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:dark:text-gray-300">
+        <table id="listTable" class="row-border dataTable hover order-column tw:w-full">
+            <thead>
+                <tr class="tw:border-b tw:border-gray-200">
+                    @{
+                        string[] listHeaders = { "Doc No", "Doc Date", "Description", "Status", "Created Date", "Action" };
+                    }
+                    @foreach (var header in listHeaders)
+                    {
+                        <th class="tw:px-5 tw:py-3.5 tw:text-left sm:tw:px-6"><span class="tw:text-sm tw:font-semibold tw:text-gray-700 tw:dark:text-gray-300">@header</span></th>
+                    }
+                </tr>
+            </thead>
+        </table>
     </div>
 </div>
 
@@ -51,16 +49,10 @@
 {
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
     <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
-    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="../js/dataTables.js"></script>
-    <script src="../js/dataTables.columnControl.js"></script>
-    <script src="../js/columnControl.dataTables.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
-
-    @* <script src="~/js/gridjs.umd.js"></script>
-    <link rel="stylesheet" href="~/css/gridjs.min.css"> *@
 
     <script type="text/javascript">
         let gridInstance = null;
@@ -86,106 +78,10 @@
                     Swal.showLoading();
                 },
                 success: function(result) {
-                    swal.close();
-                    console.log("result", result);
-
+                    Swal.close();
                     if (result.success == true) {
-                        /*
-                        if (gridInstance) {
-                            gridInstance.destroy();
-                        }
-                        gridInstance = new gridjs.Grid({
-                            columns: [
-                                { name: 'Emergency Id', id: 'jobOrderEmergency_Id', hidden: true },
-                                { name: 'Doc No', id: 'docNo', width: '170px' },
-                                { 
-                                    name: 'Doc Date', 
-                                    id: 'docDate', 
-                                    formatter: (cell, row) => {
-                                        const dateString = row.cells[2].data.split('.')[0];
-                                        const date = new Date(dateString);
-
-                                        if (isNaN(date)) {
-                                            return 'Invalid Date';
-                                        }
-                                        return date.toLocaleString('en-GB', {
-                                            year: 'numeric',
-                                            month: 'numeric',
-                                            day: 'numeric',
-                                        });
-                                    }
-                                },
-                                { 
-                                    name: 'Description', 
-                                    id: 'description',
-                                    width: '180px',
-                                    formatter: (cell) => {
-                                        const maxLength = 30;
-                                        if (!cell) return '';
-                                        return cell.length > maxLength
-                                            ? gridjs.html(`<span title="${cell}">${cell.substring(0, maxLength)}...</span>`)
-                                            : cell;
-                                    }
-                                },
-                                { name: 'Status', id: 'status', width: '99px' },
-                                {
-                                    name: 'Created Date',
-                                    formatter: (cell, row) => {
-                                        const dateString = row.cells[5].data.split('.')[0];
-                                        const date = new Date(dateString);
-
-                                        if (isNaN(date)) {
-                                            return 'Invalid Date';
-                                        }
-                                        return date.toLocaleString('en-GB', {
-                                            year: 'numeric',
-                                            month: 'numeric',
-                                            day: 'numeric',
-                                            hour: 'numeric',
-                                            minute: 'numeric',
-                                            hour12: true,
-                                        });
-                                    }
-                                },
-                                // { name: 'Created By', id: 'createdBy' },
-                                {
-                                    name: 'Action',
-                                    formatter: (cell, row) => {
-                                        const rawData = JSON.stringify(row);
-                                        return gridjs.html(`
-                                            <div style="display:flex;">
-                                                <button class="btn btn-primary d-grid view-btn me-2" data-row='${rawData}' onclick="navigateToView(${row.cells[0].data}, 'view')">
-                                                    <span><i class="bi bi-eye"></i> View</span>
-                                                </button>
-                                                <button class="btn btn-warning d-grid edit-btn me-2" data-row='${rawData}' onclick="navigateToEdit(${row.cells[0].data}, 'edit')">
-                                                    <span><i class="bi bi-pencil-square"></i> Edit</span>
-                                                </button>
-                                                <button class="btn btn-danger d-grid delete-btn" data-id="${row.cells[0].data}">
-                                                    <span><i class="bi bi-trash"></i> Delete</span>
-                                                </button>
-                                            </div>
-                                        `);
-                                    }
-                                },
-                            ],
-                            data: result.data,
-                            pagination: {
-                                limit: 10
-                            },
-                            search: true,
-                            sort: true,
-                            className: {
-                                table: 'custom-table',
-                            }
-                        }).render(document.getElementById("gridTable"));
-
-                        //remove grid-footer class
-                        const footer = document.querySelector('#gridTable .gridjs-footer');
-                        if (footer) {
-                            footer.id = "gridFooter";
-                        }
-                        document.getElementById("gridFooter").classList.remove("gridjs-footer");
-                        */
+                        const cellClass = 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6 tw:text-theme-sm tw:text-gray-700 tw:dark:text-gray-300';
+                        const designClass = 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6';
 
                         $('#listTable').DataTable({
                            data: result.data,
@@ -194,9 +90,10 @@
                            "info": true,
                            "bDestroy": true,
                            columns: [
-                              { data: 'docNo' },
+                              { data: 'docNo', className: cellClass },
                               {
                                   data: null ,
+                                  className: cellClass, 
                                   render: function (data, type, row, meta) {
                                       const docDate = new Date(row.docDate.split('.')[0]);
                                         if (isNaN(docDate)) return 'Invalid Date';
@@ -215,6 +112,7 @@
                               },
                               {
                                   data: 'description' ,
+                                  className: cellClass, 
                                   render: function (data, type, row, meta) {
                                       const maxLength = 50;
                                       const desc = row.description || "";
@@ -230,10 +128,11 @@
                                       `;
                                   }
                               },
-                              { data: 'status' },
+                              { data: 'status', className: designClass },
                               {
                                   data: 'createdDate',
-                                  render: function (data, type, row) {
+                                  className: cellClass, 
+                                  render: function (data, type, row, meta) {
                                       const date = new Date(data.split('.')[0]);
                                       if (isNaN(date)) return 'Invalid Date';
 
@@ -250,37 +149,37 @@
                               },
                               {
                                   data: null,
+                                  className: designClass, 
                                   render: function (data, type, row, meta) {
                                       const rawData = JSON.stringify(row).replace(/"/g, "&quot;");
-                                      return `<div style="display:flex;">
-                                                 <button class="btn btn-dark d-grid view-btn me-2" data-row='${rawData}' onclick="navigateToSimulate(${row.jobOrderEmergency_Id})">
-                                                      <span><i class="bi bi-eye"></i> Simulate</span>
-                                                  </button>
-                                                 <button class="btn btn-primary d-grid view-btn me-2" data-row='${rawData}' onclick="navigateToView(${row.jobOrderEmergency_Id}, 'view')">
-                                                      <span><i class="bi bi-eye"></i> View</span>
-                                                  </button>
-                                                  <button class="btn btn-warning d-grid edit-btn me-2" data-row='${rawData}' onclick="navigateToEdit(${row.jobOrderEmergency_Id}, 'edit')">
-                                                      <span><i class="bi bi-pencil-square"></i> Edit</span>
-                                                  </button>
-                                                  <button class="btn btn-danger d-grid delete-btn" data-id="${row.jobOrderEmergency_Id}">
-                                                      <span><i class="bi bi-trash"></i> Delete</span>
-                                                  </button>
-                                              </div>`;
+                                      return `<div class="tw:flex tw:items-center tw:gap-2">
+                                          <button class="view-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-brand-50 tw:font-medium tw:text-brand-600
+                                              tw:transition-colors tw:hover:bg-brand-100 tw:dark:bg-brand-500/15 tw:dark:text-brand-400 tw:dark:hover:bg-brand-500/25" data-row='${rawData}' onclick="navigateToView(${row.jobOrderEmergency_Id}, 'view')">
+                                              <i class="bi bi-eye"></i> 
+                                              View
+                                          </button>
+                                          <button class="edit-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-amber-50 tw:font-medium tw:text-amber-600
+                                               tw:transition-colors tw:hover:bg-amber-100 tw:dark:bg-amber-500/15 tw:dark:text-amber-400 tw:dark:hover:bg-amber-500/25" data-row='${rawData}' onclick="navigateToEdit(${row.jobOrderEmergency_Id}, 'edit')">
+                                              <i class="bi bi-pencil-square"></i> 
+                                              Edit
+                                          </button>
+                                          <button class="delete-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-error-50 tw:font-medium tw:text-error-600
+                                               tw:transition-colors tw:hover:bg-error-100 tw:dark:bg-error-500/15 tw:dark:text-error-400 tw:dark:hover:bg-error-500/25" data-id="${row.jobOrderEmergency_Id}">
+                                              <i class="bi bi-trash"></i> 
+                                              Delete
+                                          </button>
+                                      </div>`;
                                   }
                               },
                           ],
                           language: {
                                 searchPlaceholder: "🔍︎ Search",
                                 search: ""
-                            },
-                            ordering: {
-                                indicators: false
-                            },
-                            columnControl: ['orderStatus']
+                          }
                       });
                    }
                    else {
-                       swal.fire({
+                       Swal.fire({
                            icon: 'error',
                            title: "Wait",
                             text: result.errMessage
@@ -288,7 +187,7 @@
                     }
                 },
                 error: function (error) {
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -325,15 +224,13 @@
         });
 
         function deleteEmergency(id) {
-            swal.fire({
+            Swal.fire({
                 title: "Are you sure want to delete?",
-                text: "You will not be able to recover this record!",
-                inputAttributes: {
-                    autocapitalize: 'off'
-                },
+                text: "You won't be able to recover this record!",
+                icon: 'warning', 
                 showCancelButton: true,
-                confirmButtonText: 'ok',
-                cancelButtonText: 'cancel',
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'Cancel',
                 allowOutsideClick: false,
             }).then(function(r) {
                 if (r.isConfirmed == true) {
@@ -358,7 +255,7 @@
                         },
                         success: function (result) {
                             if (result.success == true) {
-                                swal.fire({
+                                Swal.fire({
                                     icon: 'success',
                                     title: "Success Deleted",
                                     text: "",
@@ -368,7 +265,7 @@
                                 });
                             }
                             else {
-                                swal.fire({
+                                Swal.fire({
                                     icon: 'error',
                                     title: "Wait",
                                     text: result.errMessage
@@ -376,8 +273,7 @@
                             }
                         },
                         error: function (error) {
-                            console.log(error);
-                            swal.fire({
+                            Swal.fire({
                                 icon: 'error',
                                 title: "Wait",
                                 text: error.val

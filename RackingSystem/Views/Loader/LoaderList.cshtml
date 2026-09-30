@@ -1,96 +1,79 @@
-﻿<style>
-    .edit-btn, .delete-btn, .empty-btn {
-        height: 33px;
-        padding: 5px 10px;
-        font-size: 14px;
-    }
-</style>
 
-@section PageHeader {
+@* @section PageHeader {
     <header class="d-flex align-items-center justify-content-between w-100">
-        <h2 class="pageTitle">Auto Loader List</h2>
-        <div class="d-flex">
-            <button type="button" class="btn btn-success" onclick="newItemForm()">
-                Add New Auto Loader
-            </button>
-        </div>
     </header>
-}
+} *@
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body pt-0">
-                    <div class="text-nowrap table-container mt-1">
-                        <table id="listTable" class="row-border dataTable hover order-column" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>Auto Loader Code</th>
-                                    <th>Description</th>
-                                    <th>Active State</th>
-                                    <th>Status</th>
-                                    <th>Total Column</th>
-                                    <th>Column Height</th>
-                                    <th>IP Address</th>
-                                    <th>Balance</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="tw:flex tw:w-full tw:items-center tw:justify-between">
+    <h2 class="tw:text-lg tw:mb-0 tw:ml-2 tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Auto Loader List</h2>
+    <div class="tw:flex">
+        <button type="button" class="tw:border-0 tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:transition 
+            tw:hover:bg-brand-600" onclick="newItemForm()">
+            <i class="bi bi-plus-lg"></i>
+            Add New Auto Loader 
+        </button>
     </div>
 </div>
 
-<div class="modal fade" id="myModal" role="dialog">
+<div class="tw:mt-3">
+    <div class="dt-tailadmin tw:overflow-hidden tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:text-gray-700 tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:dark:text-gray-300">
+        <table id="listTable" class="row-border dataTable hover order-column tw:w-full">
+            <thead>
+                <tr class="tw:border-b tw:border-gray-200">
+                    @{
+                        string[] listHeaders = { "Auto Loader Code", "Description", "Active State", "Status", "Total Column", "Column Height", "IP Address", "Balance", "Action" };
+                    }
+                    @foreach (var header in listHeaders)
+                    {
+                        <th class="tw:px-5 tw:py-3.5 tw:text-left sm:tw:px-6"><span class="tw:text-sm tw:font-semibold tw:text-gray-700 tw:dark:text-gray-300">@header</span></th>
+                    }
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" data-bs-backdrop="static" data-bs-focus="false" id="myModal" role="dialog">
     <div class="modal-dialog">
 
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Update Auto Loader</h4>
+        <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+            <div class="tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
+                <h4 class="tw:text-base tw:font-semibold tw:text-gray-800 tw:mb-0 tw:dark:text-white/90">Update Auto Loader</h4>
             </div>
-            @* <form action="/bin/SaveBin" method="post"> *@
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label" for="txtCode">Loader Code (ID)</label>
-                    <input type="text" class="form-control" name="LoaderCode" id="txtCode" aria-describedby="Loader Code" maxlength="50">
-                    <div id="txtCodeError" class="error-message"></div>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtDesc">Description</label>
-                    <input type="text" class="form-control" name="Description" id="txtDesc" aria-describedby="Description" maxlength="255">
-                    <div id="txtDescError" class="error-message"></div>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtTotalCol">Total Column</label>
-                    <input type="number" class="form-control" name="TotalCol" id="txtTotalCol" aria-describedby="TotalCol">
-                    <div id="txtTotalColError" class="error-message"></div>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtColHeight">Column Height (mm)</label>
-                    <input type="number" class="form-control" name="ColHeight" id="txtColHeight" aria-describedby="ColHeight">
-                    <div id="txtColHeightError" class="error-message"></div>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtIPAddr">IP Address</label>
-                    <input type="text" class="form-control" name="IPAddr" id="txtIPAddr" aria-describedby="IP Address" maxlength="50">
-                    <div id="txtIPAddrError" class="error-message"></div>
-                </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkIsActive">
-                    <label class="form-check-label" for="chkIsActive">Is Active</label>
+            <div class="tw:space-y-4 tw:px-6 tw:py-4">
+                @{
+                    var loaderFields = new[]
+                    {
+                        new { Id = "txtCode", Name = "LoaderCode", Label = "Loader Code (ID)", AriaDesc = "Loader Code", Type = "text", MaxLength = (int?)50 },
+                        new { Id = "txtDesc", Name = "Description", Label = "Description", AriaDesc = "Description", Type = "text", MaxLength = (int?)255 },
+                        new { Id = "txtTotalCol", Name = "TotalCol", Label = "Total Column", AriaDesc = "TotalCol", Type = "number", MaxLength = (int?)null },
+                        new { Id = "txtColHeight", Name = "ColHeight", Label = "Column Height (mm)", AriaDesc = "ColHeight", Type = "number", MaxLength = (int?)null },
+                        new { Id = "txtIPAddr", Name = "IPAddr", Label = "IP Address", AriaDesc = "IP Address", Type = "text", MaxLength = (int?)15 },
+                    };
+                }
+                @foreach (var f in loaderFields)
+                {
+                    <div>
+                        <label class="tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400" for="@f.Id">@f.Label</label>
+                        <input type="@f.Type" class="tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-sm tw:text-gray-800 tw:placeholder:text-gray-400 
+                           tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90 
+                           tw:dark:placeholder:text-white/30 tw:dark:focus:border-brand-800" name="@f.Name" id="@f.Id" aria-describedby="@f.AriaDesc" maxlength="@f.MaxLength" oninput="@(f.Id == "txtIPAddr" ? "formatIP(this)" : "removeErrMsg(this.id)")">
+                        <div id="@(f.Id)Error" class="error-message"></div>
+                    </div>
+                }
+                <div class="tw:flex tw:items-center tw:gap-2 tw:mb-0">
+                    <input type="checkbox" class="tw:h-4 tw:w-4 tw:accent-brand-500" id="chkIsActive">
+                    <label class="tw:text-sm tw:text-gray-700 tw:dark:text-gray-400" for="chkIsActive">Is Active</label>
                 </div>
 
                 <input type="hidden" id="txtId">
 
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="saveItem()">Save</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="cancelForm()">Cancel</button>
+            <div class="tw:flex tw:justify-end tw:gap-3 tw:border-t tw:border-gray-100 tw:px-6 tw:py-3 tw:dark:border-gray-800">
+                <button type="button" class="save-btn tw:border-0 tw:rounded-lg tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:shadow-theme-xs 
+                    tw:hover:bg-brand-600" onclick="saveItem()">Save</button>
+                <button type="button" class="cancel-btn tw:bg-transparent tw:rounded-lg tw:border tw:border-gray-300 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-700 tw:hover:bg-gray-100 
+                    tw:dark:border-gray-700 tw:dark:text-gray-400 tw:dark:hover:bg-white/5" onclick="cancelForm()">Cancel</button>
             </div>
             @* </form> *@
         </div>
@@ -101,23 +84,16 @@
 {
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
     <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
-    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="../js/dataTables.js"></script>
-    <script src="../js/dataTables.columnControl.js"></script>
-    <script src="../js/columnControl.dataTables.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
-
-    @* <script src="~/js/gridjs.umd.js"></script> *@
-    @* <script src="~/js/datatables.min.js"></script> *@
-    @* <link rel="stylesheet" href="~/css/gridjs.min.css"> *@
 
     <script type="text/javascript">
         $(document).ready(function () {
             loadList();
         });
-
+        
         function loadList() {
             $.ajax({
                 url: "/Loader/GetLoaderList/",
@@ -135,153 +111,73 @@
                     Swal.showLoading();
                 },
                 success: function (result) {
-                    swal.close();
+                    Swal.close();
                     if (result.success == true) {
+                        const cellClass = 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6 tw:text-theme-sm tw:text-gray-700 tw:dark:text-gray-300';
                         $('#listTable').DataTable( {
                             data: result.data,
                             paging: true,
+                            scrollX: true,
+                            pagingType: 'full_numbers',
                             pageLength: 50,
                             lengthMenu: [50, 100, 250, 500, 1000],
                             columns: [
-                                { data: 'loaderCode' },
-                                { data: 'description' },
+                                { data: 'loaderCode', className: cellClass },
+                                { data: 'description', className: cellClass },
                                 {
                                     data: null,
-                                    render: function (data, type, row, meta) {
-                                        if (row.isActive == true) {
-                                            return '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
-                                        }
-                                        else {
-                                            return '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>'
-                                        }
+                                    className: 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6',
+                                    render: function (row) {
+                                        return row.isActive
+                                            ? '<span class="tw:status-badge tw:bg-success-50 tw:text-success-700 tw:dark:bg-success-500/15 tw:dark:text-success-500">Active</span>'
+                                            : '<span class="tw:status-badge tw:bg-gray-100 tw:text-gray-700 tw:dark:bg-white/5 tw:dark:text-gray-400">Inactive</span>';
                                     }
                                 },
-                                { data: 'status' },
-                                { data: 'totalCol' },
-                                { data: 'colHeight' },
-                                { data: 'ipAddr' },
+                                { data: 'status', className: cellClass },
+                                { data: 'totalCol', className: cellClass },
+                                { data: 'colHeight', className: cellClass },
+                                { data: 'ipAddr', className: cellClass },
                                 {
                                     data: null,
-                                    render: function (data, type, row, meta) {
+                                    className: cellClass,
+                                    render: function (row) {
                                         return `<span>${row.balancePercentage} %</span>`;
                                     }
                                 },
                                 {
                                     data: null,
+                                    className: 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6',
                                     render: function (data, type, row, meta) {
-                                        const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
-                                        return `<div style="display:flex;">
-                                            <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
-                                                <span><i class="bi bi-pencil-square pe-1"></i>Edit</span></button>
-                                            <button class="btn btn-danger deactivate-account delete-btn" style="margin-right:10px; data-id="${row.loader_Id}" data-code="${row.loaderCode}">
-                                                <span><i class="bi bi-trash pe-1"></i>Delete</span>
+                                        const rowData = JSON.stringify(row) .replace(/"/g, "&quot;");
+                                        return `<div class="tw:flex tw:items-center tw:gap-2">
+                                            <button class="edit-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-amber-50 tw:font-medium tw:text-amber-600
+                                                tw:transition-colors tw:hover:bg-amber-100 tw:dark:bg-amber-500/15 tw:dark:text-amber-400 tw:dark:hover:bg-amber-500/25" data-row="${rowData}" title="Edit">
+                                                <i class="bi bi-pencil-square"></i>
+                                                Edit
                                             </button>
-                                            <button class="btn btn-primary empty-btn" data-id="${row.loader_Id}" data-code="${row.loaderCode}">
-                                                <span><i class="bi bi-trash pe-1"></i>Empty</span>
-                                            </button></div>`;
+                                            <button class="delete-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-error-50 tw:font-medium tw:text-error-600 
+                                                tw:transition-colors tw:hover:bg-error-100 tw:dark:bg-error-500/15 tw:dark:text-error-400 tw:dark:hover:bg-error-500/25" data-id="${row.loader_Id}" data-code="${row.loaderCode}" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                                Delete
+                                            </button>
+                                            <button class="empty-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-violet-50 tw:font-medium tw:text-violet-600 tw:transition-colors
+                                                tw:hover:bg-violet-100 tw:dark:bg-violet-500/15 tw:dark:text-violet-400 tw:dark:hover:bg-violet-500/25" data-id="${row.loader_Id}" data-code="${row.loaderCode}" title="Empty">
+                                                <i class="bi bi-eraser"></i>
+                                                Empty
+                                            </button>
+                                        </div>`;
                                     }
                                 }
                             ],
                             language: {
                                 searchPlaceholder: "🔍︎ Search",
                                 search: ""
-                            },
-                            ordering: {
-                                indicators: false
-                            },
-                            columnControl: ['orderStatus']
+                            }
+                            // columnControl: ['orderStatus'] // temporarily disabled for review - default DataTables sorting/header UI
                         });
-                       /*
-                       if (gridInstance) {
-                           gridInstance.destroy();
-                       }
-
-                       gridInstance = new gridjs.Grid({
-                           columns: [
-                               { name: 'Auto Loader Code', id: 'loaderCode', width: '188px' },
-                               { name: 'Description', id: 'description', width: '148px' },
-                               {
-                                   name: 'Active State',
-                                   id: 'isActive',
-                                   width: '140px',
-                                   formatter: (cell, row) => {
-                                        const badgeHtml = row.cells[2].data === true
-                                          ? '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
-                                          : '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>';
-                                        return gridjs.html(`<div style="text-align:center;">${badgeHtml}</div>`);
-                                   }
-                               },
-                               { name: 'Status', id: 'status' },
-                               { 
-                                   name: 'Total Column', 
-                                   id: 'totalCol', 
-                                   width: '148px',
-                                   formatter: (cell) => 
-                                        gridjs.html(`<div style="text-align:center;">${cell}</div>`)
-                               },
-                               { 
-                                   name: 'Column Height', 
-                                   id: 'colHeight', width: '163px', 
-                                   formatter: (cell) => 
-                                        gridjs.html(`<div style="text-align:center;">${cell}</div>`) 
-                               },
-                               { name: 'IP Address', id: 'ipAddr' },
-                               { 
-                                   name: 'Balance',
-                                   id: 'balancePercentage',
-                                   width: '110px',
-                                   formatter: (cell) =>
-                                        gridjs.html(`<div style="text-align:center;">${cell}%</div>`)
-                               },
-                               { name: 'Loader_Id', id: 'loader_Id', hidden: true },
-                               {
-                                   name: 'Action',
-                                   formatter: (cell, row) => {
-                                       const cleanRow = {
-                                           loaderCode: row.cells[0]?.data,
-                                           description: row.cells[1]?.data,
-                                           isActive: row.cells[2]?.data,
-                                           status: row.cells[3]?.data,
-                                           totalCol: row.cells[4]?.data,
-                                           colHeight: row.cells[5]?.data,
-                                           ipAddr: row.cells[6]?.data,
-                                           balance: row.cells[7]?.data,
-                                           loader_Id: row.cells[8]?.data,
-                                       };
-                                       const rawData = btoa(JSON.stringify(cleanRow));
-                                       return gridjs.html(`
-                                           <div style="display: flex;">
-                                               <button class="btn btn-warning d-grid edit-btn me-2" data-row="${rawData}">
-                                                   <span><i class="bi bi-pencil-square"></i> Edit</span>
-                                               </button>
-                                               <button class="btn btn-danger d-grid delete-btn" data-id="${cleanRow.loader_Id}" data-code="${cleanRow.loaderCode}">
-                                                   <span><i class="bi bi-trash"></i> Delete</span>
-                                               </button>
-                                           </div>
-                                       `);
-                                   }
-                               }
-                           ],
-                           data: result.data,
-                           pagination: true,
-                           search: true,
-                           sort: true,
-                           resizable: true,
-                           className: {
-                               table: 'custom-table',
-                           }
-                       }).render(document.getElementById("gridTable"));
-
-                       //remove grid-footer class
-                        const footer = document.querySelector('#gridTable .gridjs-footer');
-                        if (footer) {
-                            footer.id = "gridFooter";
-                        }
-                        document.getElementById("gridFooter").classList.remove("gridjs-footer");
-                        */
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -289,7 +185,7 @@
                     }
                 },
                 error: function (error) {
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -332,6 +228,9 @@
 
         function cancelForm() {
             $("#myModal").modal("toggle");
+            fields = ['txtCode', 'txtDesc', 'txtTotalCol', 'txtColHeight', 'txtIPAddr' ];
+
+            removeErrMsg(fields, true);
         }
 
         // Show error message and highlight invalid fields
@@ -341,17 +240,20 @@
         }
 
         function removeErrMsg(fields, clearValue = false) {
-            fields = ['txtCode', 'txtDesc', 'txtTotalCol', 'txtColHeight', 'txtIPAddr' ];
-            if (!Array.isArray(fields)) {
-                fields = [fields];
-            }
+            // fields = ['txtCode', 'txtDesc', 'txtTotalCol', 'txtColHeight', 'txtIPAddr' ];
+            if (fields != null) 
+            {
+                if (!Array.isArray(fields)) {
+                    fields = [fields];
+                }
 
-            fields.forEach(function(field) {
-                document.getElementById(field).classList.remove('is-invalid');
-                document.getElementById(field).classList.remove('is-valid');
-                document.getElementById(field + 'Error').textContent = '';
-                if (clearValue) document.getElementById(field).value = '';
-            });
+                fields.forEach(function(field) {
+                    document.getElementById(field).classList.remove('is-invalid');
+                    document.getElementById(field).classList.remove('is-valid');
+                    document.getElementById(field + 'Error').textContent = '';
+                    if (clearValue) document.getElementById(field).value = '';
+                });
+            }
         }
 
         function checkInput() {
@@ -375,8 +277,23 @@
             if (txt.value == "") {
                 showError(txt.id, `Please enter IP Address.`);
                 isValid = false;
+            } else if (!isValidIP(txt.value.trim())) {
+                showError(txt.id, `Please enter a valid IP Address (e.g. 192.168.1.10).`);
+                isValid = false;
             }
             return isValid;
+        }
+
+        function formatIP(input) {
+            removeErrMsg(input.id);
+            // Only digits and dots, max 15 chars (255.255.255.255).
+            input.value = input.value.replace(/[^\d.]/g, '').slice(0, 15);
+        }
+
+        // IPv4: four numbers 0-255 separated by dots, no leading zeros (e.g. 192.168.1.10).
+        function isValidIP(value) {
+            const octet = '(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)';
+            return new RegExp(`^${octet}(\\.${octet}){3}$`).test(value);
         }
 
         function saveItem() {
@@ -415,7 +332,7 @@
                 success: function (result) {
                     if (result.success == true) {
                         $("#myModal").modal("toggle");
-                        swal.fire({
+                        Swal.fire({
                             icon: 'success',
                             title: "Success Update",
                             text: "",
@@ -425,7 +342,7 @@
                         });
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -433,7 +350,7 @@
                     }
                 },
                 error: function (error) {
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -449,15 +366,13 @@
         });
 
         function deleteItem(id, code) {
-            swal.fire({
+            Swal.fire({
                 title: "Are you sure want to delete?",
-                text: "You will not be able to recover this record!",
-                inputAttributes: {
-                    autocapitalize: 'off'
-                },
+                text: "You won't be able to recover this record!",
+                icon: 'warning', 
                 showCancelButton: true,
-                confirmButtonText: 'ok',
-                cancelButtonText: 'cancel',
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'Cancel',
                 allowOutsideClick: false
             }).then(function(r) {
                 if (r.isConfirmed == true) {
@@ -485,7 +400,7 @@
                         },
                         success: function (result) {
                             if (result.success == true) {
-                                swal.fire({
+                                Swal.fire({
                                     icon: 'success',
                                     title: "Success Deleted",
                                     text: "",
@@ -495,7 +410,7 @@
                                 });
                             }
                             else {
-                                swal.fire({
+                                Swal.fire({
                                     icon: 'error',
                                     title: "Wait",
                                     text: result.errMessage
@@ -503,7 +418,7 @@
                             }
                         },
                         error: function (error) {
-                            swal.fire({
+                            Swal.fire({
                                 icon: 'error',
                                 title: "Wait",
                                 text: error.val
@@ -524,15 +439,13 @@
         });
 
         function emptyItem(id, code) {
-            swal.fire({
+            Swal.fire({
                 title: "Are you sure want to empty this loader data?",
-                text: "You will not be able to recover this record!",
-                inputAttributes: {
-                    autocapitalize: 'off'
-                },
+                text: "You won't be able to recover this record!",
+				icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'ok',
-                cancelButtonText: 'cancel',
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'Cancel',
                 allowOutsideClick: false
             }).then(function(r) {
                 if (r.isConfirmed == true) {
@@ -560,7 +473,7 @@
                         },
                         success: function (result) {
                             if (result.success == true) {
-                                swal.fire({
+                                Swal.fire({
                                     icon: 'success',
                                     title: "Success Empty",
                                     text: "",
@@ -570,7 +483,7 @@
                                 });
                             }
                             else {
-                                swal.fire({
+                                Swal.fire({
                                     icon: 'error',
                                     title: "Wait",
                                     text: result.errMessage
@@ -578,7 +491,7 @@
                             }
                         },
                         error: function (error) {
-                            swal.fire({
+                            Swal.fire({
                                 icon: 'error',
                                 title: "Wait",
                                 text: error.val

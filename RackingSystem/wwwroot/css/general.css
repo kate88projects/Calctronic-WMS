@@ -1,4 +1,13 @@
-﻿/* header styling */
+﻿
+/* Prevent the browser's scroll-anchoring heuristic from shifting the page's
+   scroll position when a DataTable is destroyed/rebuilt (bDestroy: true) -
+   its brief height collapse-then-regrow otherwise gets "compensated" by an
+   unwanted scroll jump. */
+#content-scroll-area {
+    overflow-anchor: none;
+}
+
+/* header styling */
 /*if header color not same, overwrite this class*/
 .page-header-wrapper {
     display: flex;
@@ -50,7 +59,7 @@ header {
 
 .pageTitle {
     margin: 0;
-    text-align: center;
+/*    text-align: center;*/
     font-size: 25px;
 }
 
@@ -84,11 +93,11 @@ header .btn {
 }
 
 .is-invalid {
-    border-color: red;
+    border-color: red !important;
 }
 
 .is-valid {
-    border-color: green;
+    border-color: green !important;
 }
 
 /* gridjs table styling */
@@ -149,6 +158,7 @@ td.gridjs-td {
 
 .dataTable th, td {
     padding: 8px;
+    font-size: 14px;
     /* border: 0.5px solid #EEEEEE; */
 }
 
@@ -200,19 +210,6 @@ tr:last-child td:last-child {
     border-radius: 15px;
 }
 
-/* .dt-info, .dt-paging, label {
-        font-size: 15px;
-    } */
-
-.dt-paging-button {
-    border-left: 0.5px solid #C9CDCF !important;
-    margin: 0px !important;
-}
-
-.dt-paging-button:first-child {
-    border: none !important;
-}
-
 div.table-container .dt-container .dt-paging .dt-paging-button.current {
     color: blue !important;
     border: 0px;
@@ -223,17 +220,217 @@ div.table-container .dt-container .dt-paging .dt-paging-button.current:hover {
     background-color: none;
 }
 
-.view-btn, .edit-btn, .delete-btn, #printQR, #printItem, .edit-Pass-btn, .start-btn {
+.dt-tailadmin [id$="_wrapper"] {
+    font-family: inherit;
+}
+
+.dt-tailadmin [id$="_wrapper"] .dt-layout-row {
+    align-items: center;
+    padding: 8px 20px 0px;
+}
+
+.dt-tailadmin [id$="_wrapper"] .dt-scroll-body {
+    scrollbar-width: thin;
+    scrollbar-color: #e4e7ec transparent;
+}
+
+/*.dt-tailadmin [id$="_wrapper"] .dt-scroll-body::-webkit-scrollbar {
+    height: 8px;
+}
+
+.dt-tailadmin [id$="_wrapper"] .dt-scroll-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.dt-tailadmin [id$="_wrapper"] .dt-scroll-body::-webkit-scrollbar-thumb {
+    background-color: #e4e7ec;
+    border-radius: 9999px;
+}
+
+.dt-tailadmin [id$="_wrapper"] .dt-scroll-body::-webkit-scrollbar-thumb:hover {
+    background-color: #d0d5dd;
+}*/
+
+.dark .dt-tailadmin [id$="_wrapper"] .dt-scroll-body {
+    scrollbar-color: #344054 transparent;
+}
+
+/* Thin scrollbar for the custom-select dropdown panels (Alpine customSelect) */
+.custom-select-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #e4e7ec transparent;
+}
+
+.dark .custom-select-scroll {
+    scrollbar-color: #344054 transparent;
+}
+
+/*.dark .dt-tailadmin [id$="_wrapper"] .dt-scroll-body::-webkit-scrollbar-thumb {
+    background-color: #344054;
+}
+
+.dark .dt-tailadmin [id$="_wrapper"] .dt-scroll-body::-webkit-scrollbar-thumb:hover {
+    background-color: #475467;
+}*/
+
+.dark .dt-tailadmin table.dataTable thead th,
+.dark .dt-tailadmin [id$="_wrapper"] .dt-scroll-head thead th {
+    background-color: rgba(var(--dt-column-ordering), var(--dt-column-ordering-alpha));
+    border-bottom-color: #1d2939;
+}
+
+.dark .dt-tailadmin table.dataTable tbody tr {
+    border-bottom-color: #1d2939;
+}
+
+.dt-tailadmin table.dataTable tbody tr {
+    border-bottom-color: #1d2939;
+}
+
+.dt-tailadmin [id$="_wrapper"] .dt-length,
+.dt-tailadmin [id$="_wrapper"] .dt-search,
+.dt-tailadmin [id$="_wrapper"] .dt-info {
+    color: #667085;
+    font-size: 13px;
+}
+
+.dt-tailadmin [id$="_wrapper"] .dt-length {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dt-tailadmin [id$="_wrapper"] .dt-input {
+    background-color: transparent;
+    border: 1px solid #d0d5dd;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 13px;
+    color: #344054;
+    outline: none;
+}
+
+.dt-tailadmin [id$="_wrapper"] .dt-input:focus {
+    border-color: #9cb9ff;
+    box-shadow: 0 0 0 3px rgba(70, 95, 255, 0.1);
+}
+
+.dark .dt-tailadmin [id$="_wrapper"] .dt-input {
+    color: #e4e7ec;
+    background-color: transparent;
+}
+
+.dark .dt-tailadmin [id$="_wrapper"] select.dt-input {
+    background-color: #101828;
+}
+
+.dark .dt-tailadmin [id$="_wrapper"] .dt-input::placeholder {
+    color: #667085;
+}
+
+@media (max-width: 767px) {
+    .dt-tailadmin [id$="_wrapper"] .dt-search,
+    .dt-tailadmin [id$="_wrapper"] .dt-search .dt-input {
+        width: 100%;
+        margin: 0;
+    }
+}
+
+.dt-tailadmin [id$="_wrapper"] .dt-paging {
+    margin: 0;
+    border: none;
+    padding-right: 10px;
+}
+
+.dt-tailadmin [id$="_wrapper"] .dt-paging .dt-paging-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    margin-inline-start: 4px;
+    border: 1px solid #e4e7ec;
+    border-radius: 8px;
+    padding: 0 10px;
+    font-size: 13px;
+    color: #344054;
+    cursor: pointer;
+    background: #fff;
+}
+
+.dt-tailadmin [id$="_wrapper"] .dt-paging .dt-paging-button.current,
+.dt-tailadmin [id$="_wrapper"] .dt-paging .dt-paging-button.current:hover {
+    background: rgba(43, 127, 255, 0.08) !important;
+    border: none !important;
+    color: #465fff !important;
+}
+
+.dt-tailadmin [id$="_wrapper"] .dt-paging .dt-paging-button:hover:not(.current):not(.disabled) {
+    background: rgba(43, 127, 255, 0.08) !important;
+    border: none !important;
+    color: #465fff !important;
+}
+
+.dt-tailadmin [id$="_wrapper"] .dt-paging .dt-paging-button.disabled {
+    color: #d0d5dd;
+    cursor: not-allowed;
+}
+
+.dt-tailadmin [id$="_wrapper"] .dt-paging .dt-paging-button:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/*.dt-tailadmin [id$="_wrapper"] .dt-paging .dt-paging-button:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}*/
+
+.dark .dt-tailadmin [id$="_wrapper"] .dt-paging .dt-paging-button {
+    border-color: #1d2939;
+    color: #e4e7ec;
+    background: transparent;
+}
+
+.dark .dt-tailadmin [id$="_wrapper"] .dt-paging .dt-paging-button.current,
+.dark .dt-tailadmin [id$="_wrapper"] .dt-paging .dt-paging-button.current:hover {
+    background: rgba(43, 127, 255, 0.08) !important;
+    border: none !important;
+    color: #465fff !important;
+}
+
+.dark .dt-tailadmin [id$="_wrapper"] .dt-paging .dt-paging-button:hover:not(.current):not(.disabled) {
+    background: rgba(43, 127, 255, 0.08) !important;
+    border: none !important;
+    color: #465fff !important;
+}
+
+.dark .dt-tailadmin [id$="_wrapper"] .dt-paging .dt-paging-button.disabled {
+    color: #475467;
+}
+
+.dark .dt-tailadmin [id$="_wrapper"] .dt-paging .dt-paging-button:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.view-btn, .edit-btn, .delete-btn, #printQR, #printItem, .edit-Pass-btn, .start-btn, .empty-btn {
     height: 33px;
-    padding: 5px 10px;
-    font-size: 14px;
+    padding: 5px 12px;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+}
+
+.save-btn, .cancel-btn {
+    width: 75px;
 }
 
 /* modal styling */
-.modal-body {
+/*.modal-body {
     max-height: calc(100vh - 200px);
     overflow-y: auto
-}
+}*/
 
 /*html, body {
     margin: 0;
@@ -261,6 +458,16 @@ div.table-container .dt-container .dt-paging .dt-paging-button.current:hover {
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
+.dark .usage-card, .dark .col-reel-btn, .dark .group-reel-btn {
+    border-color: transparent;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.col-reel-btn {
+    background: #ffffff;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
 .usage-left {
     color: #16a34a;
 }
@@ -271,28 +478,143 @@ div.table-container .dt-container .dt-paging .dt-paging-button.current:hover {
 
 .col-reel-btn, .group-reel-btn {
     width: 100%;
-    background: white;
     border: 1px solid #e5e7eb;
     border-radius: 10px;
     padding: 8px 12px;
     margin: 6px 0;
-    font-size: 14px;
     cursor: pointer;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: all 0.2s ease;
 }
 
 .col-reel-btn:hover, .group-reel-btn:hover {
     background: #e5e7eb;
 }
 
+.dark .col-reel-btn:hover, .dark .group-reel-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
 .col-reel-btn.active, .group-reel-btn.active {
     background: #e5e7eb;
+}
+
+.dark .col-reel-btn.active, .dark .group-reel-btn.active {
+    background: rgba(70, 95, 255, 0.15);
     color: #fff;
 }
 
 .usage-reel {
     color: #0046FF;
+}
+
+.select2-container {
+    width: 100% !important;
+}
+
+.select2-container--default .select2-selection--single {
+    height: 42px !important;
+    display: flex;
+    align-items: center;
+    border-radius: 8px;
+    border: 1px solid #d0d5dd;
+    background-color: transparent;
+    padding: 0 12px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    padding: 0;
+    line-height: normal;
+    color: #1d2939;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #98a2b3;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 100%;
+    top: 0;
+    right: 8px;
+}
+
+.select2-container--default.select2-container--focus .select2-selection--single,
+.select2-container--default.select2-container--open .select2-selection--single {
+    border-color: #9cb9ff;
+    box-shadow: 0 0 0 3px rgba(70, 95, 255, 0.1);
+}
+
+.select2-container--default.select2-container--disabled .select2-selection--single {
+    background-color: #f9fafb;
+    color: #667085;
+    cursor: not-allowed;
+}
+
+.select2-dropdown {
+    border-radius: 8px;
+    border: 1px solid #e4e7ec;
+    overflow: hidden;
+}
+
+.select2-search--dropdown {
+    padding: 8px;
+}
+
+.select2-search--dropdown .select2-search__field {
+    border-radius: 6px;
+    border: 1px solid #d0d5dd;
+    padding: 6px 10px;
+    outline: none;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #ecf3ff;
+    color: #3641f5;
+}
+
+.select2-container--default .select2-results__option[aria-selected="true"] {
+    background-color: #f2f4f7;
+}
+
+.dark .select2-container--default .select2-selection--single {
+    border-color: #344054;
+    background-color: #101828;
+}
+
+.dark .select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #fff;
+}
+
+.dark .select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #667085;
+}
+
+.dark .select2-container--default.select2-container--disabled .select2-selection--single {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #98a2b3;
+}
+
+.dark .select2-dropdown {
+    background-color: #101828;
+    border-color: #344054;
+}
+
+.dark .select2-search--dropdown .select2-search__field {
+    background-color: #101828;
+    border-color: #344054;
+    color: #fff;
+}
+
+.dark .select2-container--default .select2-results__option {
+    color: #e4e7ec;
+}
+
+.dark .select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: rgba(70, 95, 255, 0.15);
+    color: #7592ff;
+}
+
+.dark .select2-container--default .select2-results__option[aria-selected="true"] {
+    background-color: rgba(255, 255, 255, 0.05);
 }

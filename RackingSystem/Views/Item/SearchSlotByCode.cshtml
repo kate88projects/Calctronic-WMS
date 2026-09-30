@@ -2,99 +2,37 @@
 	ViewData["Title"] = "Search Slot By Code";
 }
 
-<style>
-	.table-filter input {
-		height: 34px;
-		border-radius: 3px;
-		border-color: #ddd;
-		box-shadow: none;
-	}
+<div class="tw:flex tw:w-full tw:items-center tw:justify-between">
+	<h2 class="tw:text-lg tw:mb-0 tw:ml-2 tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Search Slot By Code</h2>
+</div>
 
-	.table-filter .btn {
-		height: 34px;
-	}
-
-	.table-filter label {
-		font-weight: normal;
-		margin-left: 10px;
-	}
-
-	.table-filter input {
-		display: inline-block;
-		margin-left: 5px;
-		width: 300px;
-	}
-
-	.text-muted {
-		color: #6c757d;
-	}
-
-	.result-table {
-		margin-top: 20px;
-	}
-
-	.badge {
-		padding: 5px 10px;
-		border-radius: 3px;
-	}
-
-	.badge-success {
-		background-color: #10c469;
-		color: white;
-	}
-
-	.empty-state {
-		text-align: center;
-		padding: 40px 20px;
-		color: #6c757d;
-	}
-
-	.empty-state i {
-		font-size: 48px;
-		margin-bottom: 20px;
-		opacity: 0.5;
-	}
-</style>
-
-@section PageHeader {
-	<header class="d-flex align-items-center justify-content-between w-100">
-		<h2 class="pageTitle">Search Slot By Code</h2>
-	</header>
-}
-
-<div class="container-fluid">
-	<div class="row">
-		<div class="col-12">
-			<div class="card">
-				<div class="card-body">
-					<div class="table-filter">
-						<div class="row" style="padding:5px;">
-							<div class="col-sm-5">
-								<label for="txtItemCode">Item Code:</label>
-								<input id="txtItemCode" name="ItemCode" type="text" class="form-control" placeholder="Enter item code" />
-							</div>
-							<div class="col-sm-4">
-								<label for="txtExpiryDate">Expiry Date After:</label>
-								<input id="txtExpiryDate" name="ExpiryDate" type="date" class="form-control" required />
-							</div>
-							<div class="col-sm-3">
-								<button type="button" class="btn btn-primary" style="width:100%;" onclick="searchItem()">
-									<i class="bi bi-search"></i> Search
-								</button>
-							</div>
-						</div>
-					</div>
-
-					<hr />
-
-					<!-- Results Table -->
-					<div id="resultContainer">
-
-					</div>
-				</div>
+<div class="tw:mt-3 tw:space-y-4">
+	<div class="tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:p-4 tw:dark:border-gray-800 tw:dark:bg-white/[0.03]">
+		@{
+			string fieldClass = @"tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-sm tw:text-gray-800 tw:placeholder:text-gray-400
+										tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90
+										tw:dark:placeholder:text-white/30 tw:dark:focus:border-brand-800";
+			string labelClass = "tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400";
+		}
+		<div class="tw:grid tw:grid-cols-3 tw:items-end tw:gap-3">
+			<div>
+				<label class="@labelClass" for="txtItemCode">Item Code</label>
+				<input id="txtItemCode" name="ItemCode" type="text" class="@fieldClass" placeholder="Enter item code" />
+			</div>
+			<div>
+				<label class="@labelClass" for="txtExpiryDate">Expiry Date After</label>
+				<input id="txtExpiryDate" name="ExpiryDate" type="date" class="@fieldClass" required />
+			</div>
+			<div>
+				<button type="button" class="tw:inline-flex tw:w-full tw:items-center tw:justify-center tw:gap-2 tw:rounded-lg tw:border-0 tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:hover:bg-brand-600" onclick="searchItem()">
+					<i class="bi bi-search"></i> Search
+				</button>
 			</div>
 		</div>
 	</div>
+
+	<!-- Results Table -->
+	<div id="resultContainer"></div>
 </div>
 
 @section Scripts {
@@ -127,7 +65,7 @@
 					displayResults(response.data);
 				},
 				error: function (xhr, status, error) {
-					$('#resultContainer').html(`<div class="alert alert-danger">Error searching for item: ${error}</div>`);
+					$('#resultContainer').html(`<div class="tw:rounded-lg tw:border tw:border-error-100 tw:bg-error-50 tw:px-4 tw:py-3 tw:text-sm tw:text-error-700 tw:dark:border-error-500/30 tw:dark:bg-error-500/15 tw:dark:text-error-400">Error searching for item: ${error}</div>`);
 				}
 			});
 		}
@@ -137,53 +75,47 @@
 
 			if (!data || data.length === 0) {
 				container.html(`
-					<div class="empty-state">
-						<i class="bi bi-inbox"></i>
-						<h5>No Results Found</h5>
-						<p>No items found for the specified item code.</p>
+					<div class="tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:px-4 tw:py-10 tw:text-center tw:dark:border-gray-800 tw:dark:bg-white/[0.03]">
+						<i class="bi bi-inbox tw:text-5xl tw:text-gray-300 tw:dark:text-gray-600"></i>
+						<h5 class="tw:mt-4 tw:text-base tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">No Results Found</h5>
+						<p class="tw:mt-1 tw:text-sm tw:text-gray-500 tw:dark:text-gray-400">No items found for the specified item code.</p>
 					</div>
 				`);
 				return;
 			}
 
-			// <h5>Search Results for: <strong>${escapeHtml(itemCode)}</strong></h5>
-			const itemCode = data[0].itemCode;
+			const cellClass = 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6 tw:text-theme-sm tw:text-gray-700 tw:dark:text-gray-300';
 			let html = `
-				<div class="result-table">
-					<table class="table table-striped table-hover">
-						<thead class="table-light">
-							<tr>
-								<th>Item Code</th>
-								<th>Reel Code</th>
-								<th>Slot Code</th>
-								<th>Expiry Date</th>
-								<th>Quantity</th>
-								<th>Status</th>
+				<div class="dt-tailadmin tw:overflow-hidden tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:dark:border-gray-800 tw:dark:bg-white/[0.03]">
+					<table class="tw:w-full">
+						<thead>
+							<tr class="tw:border-b tw:border-gray-200 tw:dark:border-gray-800">
+								<th class="tw:px-5 tw:py-3.5 tw:text-left sm:tw:px-6"><span class="tw:text-sm tw:font-semibold tw:text-gray-700 tw:dark:text-gray-300">Item Code</span></th>
+								<th class="tw:px-5 tw:py-3.5 tw:text-left sm:tw:px-6"><span class="tw:text-sm tw:font-semibold tw:text-gray-700 tw:dark:text-gray-300">Reel Code</span></th>
+								<th class="tw:px-5 tw:py-3.5 tw:text-left sm:tw:px-6"><span class="tw:text-sm tw:font-semibold tw:text-gray-700 tw:dark:text-gray-300">Slot Code</span></th>
+								<th class="tw:px-5 tw:py-3.5 tw:text-left sm:tw:px-6"><span class="tw:text-sm tw:font-semibold tw:text-gray-700 tw:dark:text-gray-300">Expiry Date</span></th>
+								<th class="tw:px-5 tw:py-3.5 tw:text-left sm:tw:px-6"><span class="tw:text-sm tw:font-semibold tw:text-gray-700 tw:dark:text-gray-300">Quantity</span></th>
+								<th class="tw:px-5 tw:py-3.5 tw:text-left sm:tw:px-6"><span class="tw:text-sm tw:font-semibold tw:text-gray-700 tw:dark:text-gray-300">Status</span></th>
 							</tr>
 						</thead>
-						<tbody>
+						<tbody class="tw:[&>tr]:border-b tw:[&>tr]:border-gray-100 tw:[&>tr:last-child]:border-0 tw:[&>tr:nth-child(even)]:bg-gray-50 tw:[&>tr:hover]:bg-gray-100 tw:dark:[&>tr]:border-gray-800 tw:dark:[&>tr:nth-child(even)]:bg-white/[0.03] tw:dark:[&>tr:hover]:bg-white/10">
 			`;
 
 			data.forEach(function (item, index) {
-				const expiryDate = new Date(item.expiryDate).toLocaleDateString('en-US', {
-					year: 'numeric',
-					month: '2-digit',
-					day: '2-digit'
-				});
 				const formattedDate = new Date(item.expiryDate).toLocaleDateString('en-GB');
 
-				const statusBadge = item.isReady 
-					? '<span class="badge badge-success">Ready</span>'
-					: '<span class="badge" style="background-color: #ffc107; color: #333;">Not Ready</span>';
+				const statusBadge = item.isReady
+					? '<span class="tw:status-badge tw:bg-success-50 tw:text-success-700 tw:dark:bg-success-500/15 tw:dark:text-success-500">Ready</span>'
+					: '<span class="tw:status-badge tw:bg-warning-50 tw:text-warning-700 tw:dark:bg-warning-500/15 tw:dark:text-warning-500">Not Ready</span>';
 
 				html += `
 					<tr>
-						<td>${escapeHtml(item.itemCode)}</td>
-						<td>${escapeHtml(item.reelCode)}</td>
-						<td><strong>${escapeHtml(item.slotCode)}</strong></td>
-						<td>${formattedDate}</td>
-						<td>${item.qty}</td>
-						<td>${statusBadge}</td>
+						<td class="${cellClass}">${escapeHtml(item.itemCode)}</td>
+						<td class="${cellClass}">${escapeHtml(item.reelCode)}</td>
+						<td class="${cellClass} tw:font-medium tw:text-gray-800 tw:dark:text-white/90">${escapeHtml(item.slotCode)}</td>
+						<td class="${cellClass}">${formattedDate}</td>
+						<td class="${cellClass}">${item.qty}</td>
+						<td class="${cellClass}">${statusBadge}</td>
 					</tr>
 				`;
 			});
@@ -211,7 +143,7 @@
 			}
 		});
 
-		// Expiry date always starts on today - it must never be left blank
+		// Expiry date always starts on today
 		$('#txtExpiryDate').val(todayStr());
 	</script>
 }

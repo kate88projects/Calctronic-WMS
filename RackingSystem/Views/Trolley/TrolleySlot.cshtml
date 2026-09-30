@@ -3,22 +3,6 @@
 }
 
 <style>
-    .text-link {
-        color: blue;
-        cursor: pointer;
-        display: block;
-        text-align: right;
-        margin-bottom: 10px;
-    }
-
-    .hidden {
-        display: none;
-        margin-top: 10px;
-        padding: 10px;
-        background-color: #f9f9f9;
-        border: 1px solid #ccc;
-    }
-        
     #columnMatchingLabel {
         text-align: center;
         width: 100%;
@@ -32,16 +16,9 @@
     .bi-upload {
         padding-left: 10px;
     }
-
-    .edit-btn, .delete-btn {
-        height: 33px;
-        padding: 5px 10px;
-        font-size: 14px;
-    }
-
 </style>
 
-@section PageHeader {
+@* @section PageHeader {
     <header class="d-flex align-items-center justify-content-between w-100">
         <h2 class="pageTitle">Universal Trolley Slot List</h2>
         <div class="d-flex gap-2">
@@ -72,376 +49,334 @@
             </div>
         </div>
     </header>
-}
+} *@
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body pt-0">
-                    @* <div id="gridTable" class="table table-responsive text-nowrap mt-3"></div> *@
-                    <div class="text-nowrap table-container mt-1">
-                        <table id="listTable" class="dataTable row-border hover order-column" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>Universal Trolley</th>
-                                    <th>Universal Trolley Slot Code</th>
-                                    <th>Column No</th>
-                                    <th>Row No</th>
-                               @*      <th>Reel No</th>  *@
-                                    <th>Active State</th>
-                                    <th>Is Left</th>
-                                    <th>X Pulse</th>
-                                    <th>Z Pulse</th>
-                                    <th>QR-X Pulse</th>
-                                    <th>QR-Z Pulse</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div> 
-                </div>
+@{
+    string menuItemClass = "tw:block tw:rounded-lg tw:px-3 tw:py-2 tw:text-sm tw:text-gray-700 tw:no-underline tw:hover:bg-gray-100 tw:dark:text-gray-300 tw:dark:hover:bg-white/5";
+}
+<div class="tw:flex tw:w-full tw:items-center tw:justify-between">
+    <h2 class="tw:text-lg tw:mb-0 tw:ml-2 tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Universal Trolley Slot List</h2>
+    <div class="tw:flex tw:items-center tw:gap-2">
+        <div class="tw:relative" x-data="{ importOpen: false }" @@click.outside="importOpen = false">
+            <button type="button" class="tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:border-0 tw:bg-yellow-400 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:hover:bg-yellow-500" @@click="importOpen = !importOpen">
+                Import
+                <i class="bi bi-chevron-down tw:text-xs"></i>
+            </button>
+            <div x-show="importOpen" x-cloak class="tw:shadow-theme-lg tw:absolute tw:left-0 tw:z-10 tw:mt-2 tw:w-64 tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:p-2 tw:dark:border-gray-800 tw:dark:bg-gray-900">
+                <a href="#" class="@menuItemClass" id="dTemp" onclick="downloadTemp('slots')" @@click="importOpen = false">Download Trolley Slot List Template</a>
+                <a href="#" class="@menuItemClass" id="dTemp" onclick="downloadTemp('pulses')" @@click="importOpen = false">Download Update Trolley Pulses Template</a>
+                <a href="#" class="@menuItemClass" onclick="triggerFileInput('importSlot')" @@click="importOpen = false">Import Trolley Slot from Excel</a>
+            </div>
+        </div>
+        <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" class="tw:hidden" onchange="handleFileUpload(event)">
+        <button type="button" class="tw:rounded-lg tw:border-0 tw:bg-emerald-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:hover:bg-emerald-600" onclick="triggerFileInput('updatePulses')">
+            Update Pulses By Excel
+        </button>
+        <div class="tw:relative" x-data="{ addOpen: false }" @@click.outside="addOpen = false">
+            <button type="button" class="tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:border-0 tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:hover:bg-brand-600" @@click="addOpen = !addOpen">
+                Add
+                <i class="bi bi-chevron-down tw:text-xs"></i>
+            </button>
+            <div x-show="addOpen" x-cloak class="tw:shadow-theme-lg tw:absolute tw:right-0 tw:z-10 tw:mt-2 tw:w-56 tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:p-2 tw:dark:border-gray-800 tw:dark:bg-gray-900">
+                <a href="#" class="@menuItemClass" onclick="newSlotForm()" @@click="addOpen = false">Add Single Trolley Slot</a>
+                <a href="#" class="@menuItemClass" onclick="newSlotColForm()" @@click="addOpen = false">Add Range of Trolley Slots</a>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="columnMatchingModal">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="columnMatchingLabel">Map CSV Columns to Data Table Columns</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<div class="tw:mt-3">
+    <div class="dt-tailadmin tw:overflow-hidden tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:text-gray-700 tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:dark:text-gray-300">
+        <table id="listTable" class="dataTable row-border hover order-column tw:w-full">
+            <thead>
+                <tr class="tw:border-b tw:border-gray-200">
+                    @{
+                        string[] listHeaders = { "Universal Trolley", "Universal Trolley Slot Code", "Column No", "Row No", "Active State", "Is Left", "X Pulse", "Z Pulse", "QR-X Pulse", "QR-Z Pulse", "Action" };
+                    }
+                    @foreach (var header in listHeaders)
+                    {
+                        <th class="tw:px-5 tw:py-3.5 tw:text-left sm:tw:px-6"><span class="tw:text-sm tw:font-semibold tw:text-gray-700 tw:dark:text-gray-300">@header</span></th>
+                    }
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="columnMatchingModal" data-bs-backdrop="static" data-bs-focus="false">
+  <div class="modal-dialog modal-dialog-centered tw:max-w-2xl">
+    <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+      <div class="tw:flex tw:items-center tw:justify-between tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
+        <h5 class="tw:text-base tw:font-medium tw:text-gray-800 tw:dark:text-white/90 tw:mb-0" id="columnMatchingLabel">Map CSV Columns to Data Table Columns</h5>
+        <button type="button" class="tw:flex tw:h-8 tw:w-8 tw:appearance-none tw:items-center tw:justify-center tw:rounded-full tw:border-0 tw:bg-gray-100 tw:text-gray-400 tw:outline-none tw:hover:bg-gray-200 tw:hover:text-gray-600 tw:dark:bg-white/5 tw:dark:text-gray-400 tw:dark:hover:bg-white/[0.07] tw:dark:hover:text-gray-300" data-bs-dismiss="modal" aria-label="Close">
+            <i class="bi bi-x-lg"></i>
+        </button>
       </div>
-      <div class="modal-body" id="csvColumns">
-          <div class="row">
-              <div id="csvColumnContent"></div> 
-              <div id="dataTableColumns"></div> 
-          </div>
+      <div class="tw:space-y-4 tw:px-8 tw:py-3 tw:pt-6 tw:py-3" id="csvColumns">
+          <div id="csvColumnContent"></div>
+          <div id="dataTableColumns"></div>
       </div>
-      <div class="modal-footer matching-btn">
-        <button type="button" class="btn btn-primary" onclick="processAndSubmitData()">Submit<i class="bi bi-upload fs-5"></i></button>
+      <div class="tw:flex tw:justify-center tw:border-t tw:border-gray-100 tw:px-6 tw:py-3 tw:dark:border-gray-800">
+        <button type="button" class="tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:border-0 tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:hover:bg-brand-600" onclick="processAndSubmitData()">Submit<i class="bi bi-upload"></i></button>
       </div>
       <input type="hidden" id="updateType" />
     </div>
   </div>
 </div>
 
+@{
+    string inputClass = "tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-sm tw:text-gray-800 tw:placeholder:text-gray-400 tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90 tw:dark:placeholder:text-white/30 tw:dark:focus:border-brand-800";
+    string labelClass = "tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400";
+}
 <div class="modal fade" data-bs-backdrop="static" data-bs-focus="false" id="myModal" role="dialog">
-    <div class="modal-dialog">
+    <div class="modal-dialog tw:max-w-xl">
 
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Update Slot</h4>
+        <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+            <div class="tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
+                <h4 class="tw:text-base tw:font-semibold tw:text-gray-800 tw:dark:text-white/90 tw:mb-0">Update Slot</h4>
             </div>
-            @* <form action="/Slot/SaveSlot" method="post"> *@
-                <div class="modal-body">
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label class="form-label" for="ddTrolley">Universal Trolley</label>
-                                <select class="form-select" aria-label="Default select example" name="Trolley" id="ddTrolley" oninput="removeErrMsg(this.id)"></select>
-                                <div id="ddTrolleyError" class="error-message"></div>
-                            </div>
-                            <div class="col">
-                                <label class="form-label" for="txtPriority">Priority Level</label>
-                                <input type="number" class="form-control" name="Priority" id="txtPriority" aria-describedby="Priority Level" min="0">
-                                <div id="txtPriorityError" class="error-message"></div>
+            <div class="tw:space-y-4 tw:p-6">
+                <div class="tw:grid tw:grid-cols-2 tw:gap-4">
+                    <div>
+                        <label class="@labelClass" for="ddTrolley">Universal Trolley</label>
+                        <div class="tw:relative" x-data="customSelect('ddTrolley')" x-init="init()">
+                            <select class="tw:hidden" name="Trolley" id="ddTrolley" onchange="removeErrMsg(this.id)"></select>
+                            <button type="button" @@click="toggle()" @@click.outside="open = false"
+                                class="tw:flex tw:w-full tw:items-center tw:justify-between tw:gap-2 tw:rounded-lg tw:border tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-left tw:text-sm tw:text-gray-800 tw:dark:bg-gray-900 tw:dark:text-white/90"
+                                :class="hasError ? 'tw:border-error-500' : (open ? 'tw:border-brand-300 tw:ring-3 tw:ring-brand-500/10' : 'tw:border-gray-300 tw:dark:border-gray-700')">
+                                <span x-text="selectedLabel || 'Select...'" :class="selectedLabel ? '' : 'tw:text-gray-400 tw:dark:text-white/30'"></span>
+                                <i class="bi bi-chevron-down tw:text-xs tw:text-gray-500 tw:transition-transform tw:dark:text-gray-400" :class="open ? 'tw:rotate-180' : ''"></i>
+                            </button>
+                            <div x-show="open" x-transition
+                                class="custom-select-scroll tw:absolute tw:z-50 tw:max-h-60 tw:w-full tw:overflow-y-auto tw:rounded-lg tw:border tw:border-gray-200 tw:bg-white tw:py-1 tw:shadow-theme-lg tw:dark:border-gray-700 tw:dark:bg-gray-900"
+                            :class="dropUp ? 'tw:bottom-full tw:mb-1' : 'tw:top-full tw:mt-1'">
+                                <template x-if="options.length === 0">
+                                    <div class="tw:px-4 tw:py-2 tw:text-sm tw:text-gray-400 tw:dark:text-white/30">No options</div>
+                                </template>
+                                <template x-for="opt in options" :key="opt.value">
+                                    <div @@click="select(opt)"
+                                        class="tw:cursor-pointer tw:px-4 tw:py-2 tw:text-sm tw:hover:bg-brand-50 tw:dark:hover:bg-brand-500/15"
+                                        :class="opt.value === selectedValue ? 'tw:bg-brand-50 tw:font-medium tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:text-gray-700 tw:dark:text-gray-300'"
+                                        x-text="opt.text"></div>
+                                </template>
                             </div>
                         </div>
-                    <div class="mb-3">
-                    <label class="form-label" for="txtCode">Universal Trolley Slot Code</label>
-                        <input type="text" class="form-control" name="SlotCode" id="txtCode" aria-describedby="Slot Code" oninput="removeErrMsg(this.id)">
-                        <div id="txtCodeError" class="error-message"></div>
+                        <div id="ddTrolleyError" class="error-message"></div>
                     </div>
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label class="form-label" for="txtColNo">Column No</label>
-                            <input type="number" class="form-control" name="ColNo" id="txtColNo" aria-describedby="Column No" min="1" pattern="\d*" oninput="removeErrMsg(this.id)">
-                            <div id="txtColNoError" class="error-message"></div>
-                        </div>
-                        <div class="col">
-                            <label class="form-label" for="txtRowNo">Row No</label>
-                            <input type="number" class="form-control" name="RowNo" id="txtRowNo" aria-describedby="Row No" min="1" oninput="removeErrMsg(this.id)">
-                            <div id="txtRowNoError" class="error-message"></div>
-                        </div>
+                    <div>
+                        <label class="@labelClass" for="txtPriority">Priority Level</label>
+                        <input type="number" class="@inputClass" name="Priority" id="txtPriority" aria-describedby="Priority Level" min="0">
+                        <div id="txtPriorityError" class="error-message"></div>
                     </div>
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label class="form-label" for="txtXPulse">X Pulse</label>
-                            <input type="number" class="form-control" name="XPulse" id="txtXPulse" aria-describedby="X Pulse" min="0" oninput="removeErrMsg(this.id)">
-                            <div id="txtXPulseError" class="error-message"></div>
-                        </div>
-                        <div class="col">
-                            <label class="form-label" for="txtYPulse">Z Pulse</label>
-                            <input type="number" class="form-control" name="YPulse" id="txtYPulse" aria-describedby="Z Pulse" min="0" oninput="removeErrMsg(this.id)">
-                            <div id="txtYPulseError" class="error-message"></div>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label class="form-label" for="txtQrXPulse">QR-X Pulse</label>
-                            <input type="number" class="form-control" name="QrXPulse" id="txtQrXPulse" aria-describedby="Qr-X Pulse" min="0" oninput="removeErrMsg(this.id)">
-                            <div id="txtQrXPulseError" class="error-message"></div>
-                        </div>
-                        <div class="col">
-                            <label class="form-label" for="txtQrYPulse">QR-Z Pulse</label>
-                            <input type="number" class="form-control" name="QrYPulse" id="txtQrYPulse" aria-describedby="Qr-Z Pulse" min="0" oninput="removeErrMsg(this.id)">
-                            <div id="txtQrYPulseError" class="error-message"></div>
-                        </div>
-                    </div>
-
-                    <div id="additional" class="hidden">
-                        <div class="row mb-3">
-                            <div class="col">
-                                <label class="form-label" for="txtAddPulse1">Additional Pulse 1</label>
-                                <input type="number" class="form-control" name="AddPulse1" id="txtAddPulse1" aria-describedby="Additional Pulse 1" min="0" oninput="removeErrMsg(this.id)">
-                                <div id="txtAddPulse1Error" class="error-message"></div>
-                            </div>
-                            <div class="col">
-                                <label class="form-label" for="txtAddPulse2">Additional Pulse 2</label>
-                                <input type="number" class="form-control" name="AddPulse2" id="txtAddPulse2" aria-describedby="Additional Pulse 2" min="0" oninput="removeErrMsg(this.id)">
-                                <div id="txtAddPulse2Error" class="error-message"></div>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col">
-                                <label class="form-label" for="txtAddPulse3">Additional Pulse 3</label>
-                                <input type="number" class="form-control" name="AddPulse3" id="txtAddPulse3" aria-describedby="Additional Pulse 3" min="0" onnput="removeErrMsg(this.id)">
-                                <div id="txtAddPulse3Error" class="error-message"></div>
-                            </div>
-                            <div class="col">
-                                <label class="form-label" for="txtAddPulse4">Additional Pulse 4</label>
-                                <input type="number" class="form-control" name="AddPulse4" id="txtAddPulse4" aria-describedby="Additional Pulse 4" min="0" oninput="removeErrMsg(this.id)">
-                                <div id="txtAddPulse4Error" class="error-message"></div>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col">
-                                <label class="form-label" for="txtAddPulse5">Additional Pulse 5</label>
-                                <input type="number" class="form-control" name="AddPulse5" id="txtAddPulse5" aria-describedby="Additional Pulse 5" min="0" oninput="removeErrMsg(this.id)">
-                                <div id="txtAddPulse5Error" class="error-message"></div>
-                            </div>
-                            <div class="col">
-                                <label class="form-label" for="txtAddPulse6">Additional Pulse 6</label>
-                                <input type="number" class="form-control" name="AddPulse6" id="txtAddPulse6" aria-describedby="Additional Pulse 6"" min="0" oninput="removeErrMsg(this.id)">
-                                <div id="txtAddPulse6Error" class="error-message"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <span id="textlink" class="text-link" tabIndex="0" onclick="customPulses('myModal', true)"><i class="fas fa-plus-circle"></i> Additional Pulses</span>
-
-                    <div class="col form-check mb-3">
-                        <input type="checkbox" class="form-check-input" id="chkIsActive">
-                        <label class="form-check-label" for="chkIsActive">Is Active</label>
-                    </div>
-                    <div class="col form-check mb-3">
-                        <input type="checkbox" class="form-check-input" id="chkIsLeft">
-                        <label class="form-check-label" for="chkIsLeft">Is Left</label>
-                    </div>
-                    
-                    <input type="hidden" id="txtId">
-
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="saveSlot()">Save</button> 
-                    <button type="button" class="btn btn-outline-secondary" onclick="cancelForm('myModal')">Cancel</button>
+                <div>
+                    <label class="@labelClass" for="txtCode">Universal Trolley Slot Code</label>
+                    <input type="text" class="@inputClass" name="SlotCode" id="txtCode" aria-describedby="Slot Code" oninput="removeErrMsg(this.id)">
+                    <div id="txtCodeError" class="error-message"></div>
                 </div>
-            @* </form> *@
+                <div class="tw:grid tw:grid-cols-2 tw:gap-4">
+                    <div>
+                        <label class="@labelClass" for="txtColNo">Column No</label>
+                        <input type="number" class="@inputClass" name="ColNo" id="txtColNo" aria-describedby="Column No" min="1" pattern="\d*" oninput="removeErrMsg(this.id)">
+                        <div id="txtColNoError" class="error-message"></div>
+                    </div>
+                    <div>
+                        <label class="@labelClass" for="txtRowNo">Row No</label>
+                        <input type="number" class="@inputClass" name="RowNo" id="txtRowNo" aria-describedby="Row No" min="1" oninput="removeErrMsg(this.id)">
+                        <div id="txtRowNoError" class="error-message"></div>
+                    </div>
+                </div>
+                <div class="tw:grid tw:grid-cols-2 tw:gap-4">
+                    <div>
+                        <label class="@labelClass" for="txtXPulse">X Pulse</label>
+                        <input type="number" class="@inputClass" name="XPulse" id="txtXPulse" aria-describedby="X Pulse" min="0" oninput="removeErrMsg(this.id)">
+                        <div id="txtXPulseError" class="error-message"></div>
+                    </div>
+                    <div>
+                        <label class="@labelClass" for="txtYPulse">Z Pulse</label>
+                        <input type="number" class="@inputClass" name="YPulse" id="txtYPulse" aria-describedby="Z Pulse" min="0" oninput="removeErrMsg(this.id)">
+                        <div id="txtYPulseError" class="error-message"></div>
+                    </div>
+                </div>
+                <div class="tw:grid tw:grid-cols-2 tw:gap-4">
+                    <div>
+                        <label class="@labelClass" for="txtQrXPulse">QR-X Pulse</label>
+                        <input type="number" class="@inputClass" name="QrXPulse" id="txtQrXPulse" aria-describedby="Qr-X Pulse" min="0" oninput="removeErrMsg(this.id)">
+                        <div id="txtQrXPulseError" class="error-message"></div>
+                    </div>
+                    <div>
+                        <label class="@labelClass" for="txtQrYPulse">QR-Z Pulse</label>
+                        <input type="number" class="@inputClass" name="QrYPulse" id="txtQrYPulse" aria-describedby="Qr-Z Pulse" min="0" oninput="removeErrMsg(this.id)">
+                        <div id="txtQrYPulseError" class="error-message"></div>
+                    </div>
+                </div>
+
+                <div id="additional" class="tw:hidden tw:space-y-4">
+                    @foreach (var pair in new[] { new[] { 1, 2 }, new[] { 3, 4 }, new[] { 5, 6 } })
+                    {
+                        <div class="tw:grid tw:grid-cols-2 tw:gap-4">
+                            @foreach (var n in pair)
+                            {
+                                <div>
+                                    <label class="@labelClass" for="txtAddPulse@(n)">Additional Pulse @n</label>
+                                    <input type="number" class="@inputClass" name="AddPulse@(n)" id="txtAddPulse@(n)" aria-describedby="Additional Pulse @n" min="0" oninput="removeErrMsg(this.id)">
+                                    <div id="txtAddPulse@(n)Error" class="error-message"></div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+
+            <span id="textlink" class="tw:mb-2.5 tw:block tw:cursor-pointer tw:text-right tw:text-sm tw:font-medium tw:text-brand-500 tw:hover:text-brand-600 tw:dark:text-brand-400" tabIndex="0" onclick="customPulses('myModal', true)"><i class="fas fa-plus-circle"></i> Additional Pulses</span>
+
+            <div class="tw:flex tw:items-center tw:gap-6 tw:mb-0">
+                <div class="tw:flex tw:items-center tw:gap-2">
+                    <input type="checkbox" class="tw:h-4 tw:w-4 tw:accent-brand-500" id="chkIsActive">
+                    <label class="tw:text-sm tw:text-gray-700 tw:dark:text-gray-400" for="chkIsActive">Is Active</label>
+                </div>
+                <div class="tw:flex tw:items-center tw:gap-2 tw:mb-0">
+                    <input type="checkbox" class="tw:h-4 tw:w-4 tw:accent-brand-500" id="chkIsLeft">
+                    <label class="tw:text-sm tw:text-gray-700 tw:dark:text-gray-400" for="chkIsLeft">Is Left</label>
+                </div>
+            </div>
+
+            <input type="hidden" id="txtId">
+
+            </div>
+            <div class="tw:flex tw:justify-end tw:gap-3 tw:border-t tw:border-gray-100 tw:px-6 tw:py-3 tw:dark:border-gray-800">
+                <button type="button" class="save-btn tw:border-0 tw:rounded-lg tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:shadow-theme-xs tw:hover:bg-brand-600" onclick="saveSlot()">Save</button>
+                <button type="button" class="cancel-btn tw:bg-transparent tw:rounded-lg tw:border tw:border-gray-300 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-700 tw:hover:bg-gray-100 tw:dark:border-gray-700 tw:dark:text-gray-400 tw:dark:hover:bg-white/5" onclick="cancelForm('myModal')">Cancel</button>
+            </div>
         </div>
     </div>
 </div>
 
 <div class="modal fade" data-bs-backdrop="static" data-bs-focus="false" id="colModal" role="dialog">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog tw:max-w-3xl">
 
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Update Slot</h4>
+        <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+            <div class="tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
+                <h4 class="tw:text-base tw:font-semibold tw:text-gray-800 tw:dark:text-white/90 tw:mb-0">Update Slot</h4>
             </div>
-            <div class="modal-body">
-                <div class="row mb-3">
-                    <div class="col">
-                        <label class="form-label" for="ddTrolley1">Universal Trolley</label>
-                        <select class="form-select" aria-label="Default select example" name="Trolley" id="ddTrolley1" oninput="removeErrMsg(this.id)"></select>
+            <div class="tw:space-y-4 tw:p-6">
+                <div class="tw:grid tw:grid-cols-2 tw:gap-4">
+                    <div>
+                        <label class="@labelClass" for="ddTrolley1">Universal Trolley</label>
+                        <div class="tw:relative" x-data="customSelect('ddTrolley1')" x-init="init()">
+                            <select class="tw:hidden" name="Trolley" id="ddTrolley1" onchange="removeErrMsg(this.id)"></select>
+                            <button type="button" @@click="toggle()" @@click.outside="open = false"
+                                class="tw:flex tw:w-full tw:items-center tw:justify-between tw:gap-2 tw:rounded-lg tw:border tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-left tw:text-sm tw:text-gray-800 tw:dark:bg-gray-900 tw:dark:text-white/90"
+                                :class="hasError ? 'tw:border-error-500' : (open ? 'tw:border-brand-300 tw:ring-3 tw:ring-brand-500/10' : 'tw:border-gray-300 tw:dark:border-gray-700')">
+                                <span x-text="selectedLabel || 'Select...'" :class="selectedLabel ? '' : 'tw:text-gray-400 tw:dark:text-white/30'"></span>
+                                <i class="bi bi-chevron-down tw:text-xs tw:text-gray-500 tw:transition-transform tw:dark:text-gray-400" :class="open ? 'tw:rotate-180' : ''"></i>
+                            </button>
+                            <div x-show="open" x-transition
+                                class="custom-select-scroll tw:absolute tw:z-50 tw:max-h-60 tw:w-full tw:overflow-y-auto tw:rounded-lg tw:border tw:border-gray-200 tw:bg-white tw:py-1 tw:shadow-theme-lg tw:dark:border-gray-700 tw:dark:bg-gray-900"
+                            :class="dropUp ? 'tw:bottom-full tw:mb-1' : 'tw:top-full tw:mt-1'">
+                                <template x-if="options.length === 0">
+                                    <div class="tw:px-4 tw:py-2 tw:text-sm tw:text-gray-400 tw:dark:text-white/30">No options</div>
+                                </template>
+                                <template x-for="opt in options" :key="opt.value">
+                                    <div @@click="select(opt)"
+                                        class="tw:cursor-pointer tw:px-4 tw:py-2 tw:text-sm tw:hover:bg-brand-50 tw:dark:hover:bg-brand-500/15"
+                                        :class="opt.value === selectedValue ? 'tw:bg-brand-50 tw:font-medium tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:text-gray-700 tw:dark:text-gray-300'"
+                                        x-text="opt.text"></div>
+                                </template>
+                            </div>
+                        </div>
                         <div id="ddTrolley1Error" class="error-message"></div>
                     </div>
-                    <div class="col">
-                        <label class="form-label" for="txtCodeFormat">Universal Trolley Slot Code Format</label>
-                        <input type="text" class="form-control" name="SlotCodeFormat" id="txtCodeFormat" aria-describedby="Slot Code Format" oninput="removeErrMsg(this.id)">
+                    <div>
+                        <label class="@labelClass" for="txtCodeFormat">Universal Trolley Slot Code Format</label>
+                        <input type="text" class="@inputClass" name="SlotCodeFormat" id="txtCodeFormat" aria-describedby="Slot Code Format" oninput="removeErrMsg(this.id)">
                         <div id="txtCodeFormatError" class="error-message"></div>
                     </div>
                 </div>
-                <div class="row mb-3">
-                    <div class="col">
-                        <label class="form-label" for="txtColFrom">Column No From</label>
-                        <input type="number" class="form-control" name="ColNo" id="txtColFrom" aria-describedby="Slot Code" oninput="removeErrMsg(this.id)">
+                <div class="tw:grid tw:grid-cols-2 sm:tw:grid-cols-4 tw:gap-4">
+                    <div>
+                        <label class="@labelClass" for="txtColFrom">Column No From</label>
+                        <input type="number" class="@inputClass" name="ColNo" id="txtColFrom" aria-describedby="Slot Code" oninput="removeErrMsg(this.id)">
                         <div id="txtColFromError" class="error-message"></div>
                     </div>
-                    <div class="col">
-                        <label class="form-label" for="txtTotalCol">Total Column</label>
-                        <input type="number" class="form-control" name="TotalCol" id="txtTotalCol" aria-describedby="Total Col" oninput="removeErrMsg(this.id)">
+                    <div>
+                        <label class="@labelClass" for="txtTotalCol">Total Column</label>
+                        <input type="number" class="@inputClass" name="TotalCol" id="txtTotalCol" aria-describedby="Total Col" oninput="removeErrMsg(this.id)">
                         <div id="txtTotalColError" class="error-message"></div>
                     </div>
-                    <div class="col">
-                        <label class="form-label" for="txtRowFrom">Row No From</label>
-                        <input type="number" class="form-control" name="RowNo" id="txtRowFrom" aria-describedby="Row No" min="1" oninput="removeErrMsg(this.id)">
+                    <div>
+                        <label class="@labelClass" for="txtRowFrom">Row No From</label>
+                        <input type="number" class="@inputClass" name="RowNo" id="txtRowFrom" aria-describedby="Row No" min="1" oninput="removeErrMsg(this.id)">
                         <div id="txtRowFromError" class="error-message"></div>
-
                     </div>
-                    <div class="col">
-                        <label class="form-label" for="txtTotalRow">Total Row</label>
-                        <input type="number" class="form-control" name="TotalRow" id="txtTotalRow" aria-describedby="Total Row" min="1" oninput="removeErrMsg(this.id)">
+                    <div>
+                        <label class="@labelClass" for="txtTotalRow">Total Row</label>
+                        <input type="number" class="@inputClass" name="TotalRow" id="txtTotalRow" aria-describedby="Total Row" min="1" oninput="removeErrMsg(this.id)">
                         <div id="txtTotalRowError" class="error-message"></div>
                     </div>
                 </div>
-               
-                <div class="row mb-3">
-                    <div class="col">
-                        <label class="form-label" for="txtStartXPulse">X Pulse</label>
-                        <input type="number" class="form-control" name="XPulse" id="txtStartXPulse" aria-describedby="X Pulse" oninput="removeErrMsg(this.id)">
-                        <div id="txtStartXPulseError" class="error-message"></div>
+
+                @{
+                    var colPulsePairs = new[]
+                    {
+                        new { Label = "X Pulse", StartId = "txtStartXPulse", StartName = "XPulse", StartAria = "X Pulse", IncId = "txtXPulseIncrement", IncName = "XPulseIncrement", IncAria = "X Pulse Increment" },
+                        new { Label = "Z Pulse", StartId = "txtStartYPulse", StartName = "YPulse", StartAria = "Z Pulse", IncId = "txtYPulseIncrement", IncName = "YPulseIncrement", IncAria = "Z Pulse Increment" },
+                        new { Label = "QR-X Pulse", StartId = "txtStartQrXPulse", StartName = "QrXPulse", StartAria = "Qr-X Pulse", IncId = "txtQrXPulseIncrement", IncName = "QrXPulseIncrement", IncAria = "Qr-X Pulse Increment" },
+                        new { Label = "QR-Z Pulse", StartId = "txtStartQrYPulse", StartName = "QrYPulse", StartAria = "Qr-Z Pulse", IncId = "txtQrYPulseIncrement", IncName = "QrYPulseIncrement", IncAria = "Qr-Z Pulse Increment" },
+                    };
+                }
+                @foreach (var p in colPulsePairs)
+                {
+                    <div class="tw:grid tw:grid-cols-2 tw:gap-4">
+                        <div>
+                            <label class="@labelClass" for="@p.StartId">@p.Label</label>
+                            <input type="number" class="@inputClass" name="@p.StartName" id="@p.StartId" aria-describedby="@p.StartAria" oninput="removeErrMsg(this.id)">
+                            <div id="@(p.StartId)Error" class="error-message"></div>
+                        </div>
+                        <div>
+                            <label class="@labelClass" for="@p.IncId">@p.Label Increment</label>
+                            <input type="number" class="@inputClass" name="@p.IncName" id="@p.IncId" aria-describedby="@p.IncAria" oninput="removeErrMsg(this.id)">
+                            <div id="@(p.IncId)Error" class="error-message"></div>
+                        </div>
                     </div>
-                    <div class="col">
-                        <label class="form-label" for="txtXPulseIncrement">X Pulse Increment</label>
-                        <input type="number" class="form-control" name="XPulseIncrement" id="txtXPulseIncrement" aria-describedby="X Pulse Increment" oninput="removeErrMsg(this.id)">
-                        <div id="txtXPulseIncrementError" class="error-message"></div>
+                }
+
+                <div id="additional2" class="tw:hidden tw:space-y-4">
+                    @foreach (var n in new[] { 1, 2, 3, 4, 5, 6 })
+                    {
+                        <div class="tw:grid tw:grid-cols-2 tw:gap-4">
+                            <div>
+                                <label class="@labelClass" for="txtStartAddPulse@(n)">Additional Pulse @n</label>
+                                <input type="number" class="@inputClass" name="AddPulse@(n)" id="txtStartAddPulse@(n)" aria-describedby="Additional Pulse @n" min="0" oninput="removeErrMsg(this.id)">
+                                <div id="txtStartAddPulse@(n)Error" class="error-message"></div>
+                            </div>
+                            <div>
+                                <label class="@labelClass" for="txtAddPulse@(n)Inc">Additional Pulse @n Increment</label>
+                                <input type="number" class="@inputClass" name="AddPulse@(n)Inc" id="txtAddPulse@(n)Inc" aria-describedby="Additional Pulse @n Increment" min="0" oninput="removeErrMsg(this.id)">
+                                <div id="txtAddPulse@(n)IncError" class="error-message"></div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <span id="textlink2" class="tw:mb-2.5 tw:block tw:cursor-pointer tw:text-right tw:text-sm tw:font-medium tw:text-brand-500 tw:hover:text-brand-600 tw:dark:text-brand-400" tabindex="0" onclick="customPulses('colModal', true)"><i class="fas fa-plus-circle"></i> Additional Pulses</span>
+                <div class="tw:flex tw:items-center tw:gap-6 tw:mb-0">
+                    <div class="tw:flex tw:items-center tw:gap-2">
+                        <input type="checkbox" class="tw:h-4 tw:w-4 tw:accent-brand-500" id="chkIsActive1">
+                        <label class="tw:text-sm tw:text-gray-700 tw:dark:text-gray-400" for="chkIsActive1">Is Active</label>
+                    </div>
+                    <div class="tw:flex tw:items-center tw:gap-2 tw:mb-0">
+                        <input type="checkbox" class="tw:h-4 tw:w-4 tw:accent-brand-500" id="chkIsLeft1">
+                        <label class="tw:text-sm tw:text-gray-700 tw:dark:text-gray-400" for="chkIsLeft1">Is Left</label>
                     </div>
                 </div>
 
-                <div class="row mb-3">
-                    <div class="col">
-                        <label class="form-label" for="txtStartYPulse">Z Pulse</label>
-                        <input type="number" class="form-control" name="YPulse" id="txtStartYPulse" aria-describedby="Z Pulse" oninput="removeErrMsg(this.id)">
-                        <div id="txtStartYPulseError" class="error-message"></div>
-                    </div>
-                    <div class="col">
-                        <label class="form-label" for="txtYPulseIncrement">Z Pulse Increment</label>
-                        <input type="number" class="form-control" name="YPulseIncrement" id="txtYPulseIncrement" aria-describedby="Z Pulse Increment" oninput="removeErrMsg(this.id)">
-                        <div id="txtYPulseIncrementError" class="error-message"></div>
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col">
-                        <label class="form-label" for="txtStartQrXPulse">QR-X Pulse</label>
-                        <input type="number" class="form-control" name="QrXPulse" id="txtStartQrXPulse" aria-describedby="Qr-X Pulse" oninput="removeErrMsg(this.id)">
-                        <div id="txtStartQrXPulseError" class="error-message"></div>
-                    </div>
-                    <div class="col">
-                        <label class="form-label" for="txtQrXPulseIncrement">QR-X Pulse Increment</label>
-                        <input type="number" class="form-control" name="QrXPulseIncrement" id="txtQrXPulseIncrement" aria-describedby="Qr-X Pulse Increment" oninput="removeErrMsg(this.id)">
-                        <div id="txtQrXPulseIncrementError" class="error-message"></div>
-                    </div>
-                </div>
-                
-                <div class="row mb-3">
-                    <div class="col">
-                        <label class="form-label" for="txtStartQrYPulse">QR-Z Pulse</label>
-                        <input type="number" class="form-control" name="QrYPulse" id="txtStartQrYPulse" aria-describedby="Qr-Z Pulse" oninput="removeErrMsg(this.id)">
-                        <div id="txtStartQrYPulseError" class="error-message"></div>
-                    </div>
-                    <div class="col">
-                        <label class="form-label" for="txtQrYPulseIncrement">QR-Z Pulse Increment</label>
-                        <input type="number" class="form-control" name="QrYPulseIncrement" id="txtQrYPulseIncrement" aria-describedby="Qr-Z Pulse Increment" oninput="removeErrMsg(this.id)">
-                        <div id="txtQrYPulseIncrementError" class="error-message"></div>
-                    </div>
-                </div>
-
-                <div id="additional2" class="hidden">
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label class="form-label" for="txtStartAddPulse1">Additional Pulse 1</label>
-                            <input type="number" class="form-control" name="AddPulse1" id="txtStartAddPulse1" aria-describedby="Additional Pulse 1" min="0" oninput="removeErrMsg(this.id)">
-                            <div id="txtStartAddPulse1Error" class="error-message"></div>
-                        </div>
-                        <div class="col">
-                            <label class="form-label" for="txtAddPulse1Inc">Additional Pulse 1 Increment</label>
-                            <input type="number" class="form-control" name="AddPulse1Inc" id="txtAddPulse1Inc" aria-describedby="Additional Pulse 1 Increment" min="0" oninput="removeErrMsg(this.id)">
-                            <div id="txtAddPulse1IncError" class="error-message"></div>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label class="form-label" for="txtStartAddPulse2">Additional Pulse 2</label>
-                            <input type="number" class="form-control" name="AddPulse2" id="txtStartAddPulse2" aria-describedby="Additional Pulse 2" min="0" oninput="removeErrMsg(this.id)">
-                            <div id="txtStartAddPulse2Error" class="error-message"></div>
-                        </div>
-                        <div class="col">
-                            <label class="form-label" for="txtAddPulse2Inc">Additional Pulse 2 Increment</label>
-                            <input type="number" class="form-control" name="AddPulse2Inc" id="txtAddPulse2Inc" aria-describedby="Additional Pulse 2 Increment" min="0" oninput="removeErrMsg(this.id)">
-                            <div id="txtAddPulse2IncError" class="error-message"></div>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label class="form-label" for="txtStartAddPulse3">Additional Pulse 3</label>
-                            <input type="number" class="form-control" name="AddPulse3" id="txtStartAddPulse3" aria-describedby="Additional Pulse 3" min="0" oninput="removeErrMsg(this.id)">
-                            <div id="txtStartAddPulse3Error" class="error-message"></div>
-                        </div>
-                        <div class="col">
-                            <label class="form-label" for="txtAddPulse3Inc">Additional Pulse 3 Increment</label>
-                            <input type="number" class="form-control" name="AddPulse3Inc" id="txtAddPulse3Inc" aria-describedby="Additional Pulse 3 Increment" min="0" oninput="removeErrMsg(this.id)">
-                            <div id="txtAddPulse3IncError" class="error-message"></div>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label class="form-label" for="txtStartAddPulse4">Additional Pulse 4</label>
-                            <input type="number" class="form-control" name="AddPulse4" id="txtStartAddPulse4" aria-describedby="Additional Pulse 4" min="0" oninput="removeErrMsg(this.id)">
-                            <div id="txtStartAddPulse4Error" class="error-message"></div>
-                        </div>
-                        <div class="col">
-                            <label class="form-label" for="txtAddPulse4Inc">Additional Pulse 4 Increment</label>
-                            <input type="number" class="form-control" name="AddPulse4Inc" id="txtAddPulse4Inc" aria-describedby="Additional Pulse 4 Increment" min="0" oninput="removeErrMsg(this.id)">
-                            <div id="txtAddPulse4IncError" class="error-message"></div>
-                        </div>
-                   </div>
-                   <div class="row mb-3">
-                        <div class="col">
-                            <label class="form-label" for="txtStartAddPulse5">Additional Pulse 5</label>
-                            <input type="number" class="form-control" name="AddPulse5" id="txtStartAddPulse5" aria-describedby="Additional Pulse 5" min="0" oniput="removeErrMsg(this.id)">
-                            <div id="txtStartAddPulse5Error" class="error-message"></div>
-                        </div>
-                        <div class="col">
-                            <label class="form-label" for="txtAddPulse5Inc">Additional Pulse 5 Increment</label>
-                            <input type="number" class="form-control" name="AddPulse5Inc" id="txtAddPulse5Inc" aria-describedby="Additional Pulse 5 Increment" min="0" oninput="removeErrMsg(this.id)">
-                            <div id="txtAddPulse5IncError" class="error-message"></div>
-                        </div>
-                   </div>
-                   <div class="row mb-3">
-                        <div class="col">
-                            <label class="form-label" for="txtStartAddPulse6">Additional Pulse 6</label>
-                            <input type="number" class="form-control" name="AddPulse6" id="txtStartAddPulse6" aria-describedby="Additional Pulse 6" min="0" oninput="removeErrMsg(this.id)">
-                            <div id="txtStartAddPulse6Error" class="error-message"></div>
-                        </div>
-                        <div class="col">
-                            <label class="form-label" for="txtAddPulse6Inc">Additional Pulse 6 Increment</label>
-                            <input type="number" class="form-control" name="AddPulse6Inc" id="txtAddPulse6Inc" aria-describedby="Additional Pulse 6 Increment" min="0" oninput="removeErrMsg(this.id)">
-                           <div id="txtAddPulse6IncError" class="error-message"></div>
-                        </div>
-                   </div>
-                </div>
-
-                <span id="textlink2" class="text-link" tabindex="0" onclick="customPulses('colModal', true)"><i class="fas fa-plus-circle"></i> Additional Pulses</span>
-
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkIsActive1">
-                    <label class="form-check-label" for="chkIsActive1">Is Active</label>
-                </div>
-                <div class="col form-check mb-3">
-                    <input type="checkbox" class="form-check-input" id="chkIsLeft1">
-                    <label class="form-check-label" for="chkIsLeft1">Is Left</label>
-                </div>
-                    
                 <input type="hidden" id="txtId">
                 @* <input type="hidden" id="txtTrolleyId"> *@
 
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="saveRangeOfSlot()">Save</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="cancelForm('colModal')">Cancel</button>
+            <div class="tw:flex tw:justify-end tw:gap-3 tw:border-t tw:border-gray-100 tw:px-6 tw:py-3 tw:dark:border-gray-800">
+                <button type="button" class="save-btn tw:border-0 tw:rounded-lg tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:shadow-theme-xs tw:hover:bg-brand-600" onclick="saveRangeOfSlot()">Save</button>
+                <button type="button" class="cancel-btn tw:bg-transparent tw:rounded-lg tw:border tw:border-gray-300 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-700 tw:hover:bg-gray-100 tw:dark:border-gray-700 tw:dark:text-gray-400 tw:dark:hover:bg-white/5" onclick="cancelForm('colModal')">Cancel</button>
             </div>
         </div>
     </div>
@@ -452,23 +387,69 @@
 {
     <link rel="stylesheet" href="../css/sweetalert2.min.css">
     <link rel="stylesheet" href="../css/dataTables.dataTables.css">
-    <link rel="stylesheet" href="../css/columnControl.dataTables.css">
 
     <script src="../lib/jquery/dist/jquery.min.js"></script>
     <script src="../js/dataTables.js"></script>
-    <script src="../js/dataTables.columnControl.js"></script>
-    <script src="../js/columnControl.dataTables.js"></script>
-
     <script src="../js/sweetalert2.all.min.js"></script>
     <script src="../js/xlsx.full.min.js"></script>
     <script src="../js/exceljs.min.js"></script>
 
-    @* <link rel="stylesheet" href="~/css/gridjs.min.css"> *@
-    @* <script src="~/js/gridjs.umd.js"></script> *@
-
 	<script type="text/javascript">
         var trolleyCodeList = [];
         // let gridInstance = null;
+
+        function customSelect(selectId) {
+            return {
+                open: false,
+                dropUp: false,
+                options: [],
+                selectedValue: '',
+                selectedLabel: '',
+                hasError: false,
+                init() {
+                    this.syncOptions();
+                    const sel = document.getElementById(selectId);
+                    if (!sel) return;
+                    this.hasError = sel.classList.contains('is-invalid');
+                    new MutationObserver(() => {
+                        this.hasError = sel.classList.contains('is-invalid');
+                    }).observe(sel, { attributes: true, attributeFilter: ['class'] });
+                },
+                toggle() {
+                    this.open = !this.open;
+                    if (this.open) {
+                        this.syncOptions();
+                        const rect = this.$el.getBoundingClientRect();
+                        const spaceBelow = window.innerHeight - rect.bottom;
+                        this.dropUp = spaceBelow < 240 && rect.top > spaceBelow;
+                    }
+                },
+                syncOptions() {
+                    const sel = document.getElementById(selectId);
+                    if (!sel) return;
+                    this.options = Array.from(sel.options).map(o => ({ value: o.value, text: o.textContent.trim() }));
+                    this.selectedValue = sel.value;
+                    const selectedOpt = sel.options[sel.selectedIndex];
+                    this.selectedLabel = selectedOpt ? selectedOpt.textContent.trim() : '';
+                },
+                select(opt) {
+                    const sel = document.getElementById(selectId);
+                    sel.value = opt.value;
+                    this.selectedValue = opt.value;
+                    this.selectedLabel = opt.text;
+                    this.open = false;
+                    sel.dispatchEvent(new Event('change'));
+                }
+            };
+        }
+
+        function refreshCustomSelect(selectId) {
+            const sel = document.getElementById(selectId);
+            const root = sel ? sel.closest('[x-data]') : null;
+            if (root && window.Alpine) {
+                Alpine.$data(root).syncOptions();
+            }
+        }
 
         $(document).ready(function () {
             getDropdownTrolley().then(function(resultGet) {
@@ -493,187 +474,88 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
-                    swal.close()
+                    Swal.close()
                     if (result.success == true) {
-                        /*
-                        if (gridInstance) {
-                            gridInstance.destroy();
-                        }
-
-                        gridInstance = new gridjs.Grid({
-                            columns: [
-                                { 
-                                    name: 'Trolley', 
-                                    id: 'trolley_Id', 
-                                    width: '100px',
-                                    formatter: (cell) => {
-                                        const trolley = trolleyCodeList.find(t => t.trolleyId === cell);
-                                        return gridjs.html(`${trolley ? trolley.trolleyCode: '-'}`);
-                                    }
-                                },
-                                { name: 'Trolley Slot Id', id: 'trolleySlot_Id', hidden: true },
-                                { name: 'Trolley Slot Code', id: 'trolleySlotCode', width: '180px' },
-                                { name: 'Col No', id: 'colNo', width: '102px' },
-                                { name: 'Row No', id: 'rowNo', width: '110px' }, 
-                                { 
-                                    name: 'Active State', 
-                                    id: 'isActive', 
-                                    width: '144px',
-                                    formatter: (cell, row) => {
-                                        const badgeHtml = row.cells[5].data === true
-                                          ? '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
-                                          : '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>';
-                                        return gridjs.html(`<div style="text-align:center;">${badgeHtml}</div>`);
-                                    }
-                                },
-                                {
-                                    name: 'Side',
-                                    id :'isLeft',
-                                    width: '90px',
-                                    data: row => row.isLeft,
-                                    formatter: cell => {
-                                        const sideMap = { false: 'Right', true: 'Left' };
-                                        return sideMap[cell] || cell;
-                                    }
-                                },
-                                { name: 'X Pulse', id: 'xPulse', width: '106px' },
-                                { name: 'Z Pulse', id: 'yPulse', width: '106px' },
-                                { name: 'QR-X Pulse', id: 'qrxPulse', width: '134px' },
-                                { name: 'QR-Z Pulse', id: 'qryPulse', width: '134px' },
-                                { name: 'AddPulse1', id: 'add1Pulse', hidden: true },
-                                { name: 'AddPulse2', id: 'add2Pulse', hidden: true },
-                                { name: 'AddPulse3', id: 'add3Pulse', hidden: true },
-                                { name: 'AddPulse4', id: 'add4Pulse', hidden: true },
-                                { name: 'AddPulse5', id: 'add5Pulse', hidden: true },
-                                { name: 'AddPulse6', id: 'add6Pulse', hidden: true },
-                                {
-                                    name: 'Action',
-                                    formatter: (cell, row) => {
-                                        const cleanRow = {
-                                            trolley_Id: row.cells[0]?.data,
-                                            trolleySlot_Id: row.cells[1]?.data,
-                                            trolleySlotCode: row.cells[2]?.data,
-                                            colNo: row.cells[3]?.data,
-                                            rowNo: row.cells[4]?.data,
-                                            isActive: row.cells[5]?.data,
-                                            side: row.cells[6]?.data,
-                                            xPulse: row.cells[7]?.data,
-                                            yPulse: row.cells[8]?.data,
-                                            qrxPulse: row.cells[9]?.data,
-                                            qryPulse: row.cells[10]?.data,
-                                            add1Pulse: row.cells[11]?.data,
-                                            add2Pulse: row.cells[12]?.data,
-                                            add3Pulse: row.cells[13]?.data,
-                                            add4Pulse: row.cells[14]?.data,
-                                            add5Pulse: row.cells[15]?.data,
-                                            add6Pulse: row.cells[16]?.data,
-                                        };
-                                        const rawData = btoa(JSON.stringify(cleanRow));
-                                        return gridjs.html(`
-                                            <div style="display: flex;">
-                                                <button class="btn btn-warning d-grid edit-slot-btn me-2" data-row="${rawData}">
-                                                    <span><i class="bi bi-pencil-square"></i> Edit</span>
-                                                </button>
-                                                <button class="btn btn-danger d-grid delete-slot-btn" data-id="${cleanRow.trolleySlot_Id}" data-code="${cleanRow.trolleySlotCode}">
-                                                    <span><i class="bi bi-trash"></i> Delete</span>
-                                                </button>
-                                            </div>
-                                        `);
-                                    }
-                                }
-                            ],
-                            data: result.data,
-                            pagination: true,
-                            search: true,
-                            sort: true,
-                            resizable: true,
-                            className: {
-                                table: 'custom-table',
-                            }
-                        }).render(document.getElementById("gridTable"));
-
-                        //remove grid-footer class
-                        const footer = document.querySelector('#gridTable .gridjs-footer');
-                        if (footer) {
-                            footer.id = "gridFooter";
-                        }
-                        document.getElementById("gridFooter").classList.remove("gridjs-footer");
-                        */
-                        // console.log("trolley get", trolleyCodeList);
+                        const cellClass = 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6 tw:text-theme-sm tw:text-gray-700 tw:dark:text-gray-300';
+                        const designClass = 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6';
                         $('#listTable').DataTable({
                             data: result.data,
                             paging: true,
+                            scrollX: true,
                             pageLength: 50,
                             lengthMenu: [50, 100, 250, 500, 1000],
                             columns: [
                                 { 
                                     data: 'trolley_Id',
-                                    render: function (data, type, row) {
+                                    className: cellClass,
+                                    render: function (data) {
                                         var trolley = trolleyCodeList.find(function(i) {
                                             return i.trolleyId === data;
                                         });
 
                                         return trolley ? trolley.trolleyCode: '';
-                                    }
+                                    },
                                 },
-                                { data: 'trolleySlotCode' },
-                                { data: 'colNo' },
-                                { data: 'rowNo' },
-                                // { data: 'reelNo'},
+                                { data: 'trolleySlotCode', className: cellClass },
+                                { data: 'colNo', className: cellClass },
+                                { data: 'rowNo', className: cellClass },
                                 {
                                     data: null,
-                                    render: function (data, type, row, meta) {
+                                    className: designClass,
+                                    render: function (row) {
                                         if (row.isActive == true) {
-                                            return '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
+                                            return '<span class="tw:status-badge tw:bg-success-50 tw:text-success-700 tw:dark:bg-success-500/15 tw:dark:text-success-500">Active</span>'
                                         }
                                         else {
-                                            return '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>'
+                                            return '<span class="tw:status-badge tw:bg-gray-100 tw:text-gray-700 tw:dark:bg-white/5 tw:dark:text-gray-400">Inactive</span>'
                                         }
                                     }
                                 },
                                 {
                                     data: null,
-                                    render: function (data, type, row, meta) {
+                                    className: designClass,
+                                    render: function (row) {
                                         if (row.isLeft == true) {
-                                            return '<span><i class="bi bi-check-square" style="color: darkgreen;"></i></span>'
+                                            return '<i class="bi bi-check-square tw:text-success-600"></i>'
                                         }
                                         else {
-                                            return '<span><i class="bi bi-app""></i></span>'
+                                            return '<i class="bi bi-app tw:text-gray-400"></i>'
                                         }
                                     }
                                 },
-                                { data: 'xPulse' },
-                                { data: 'yPulse' },
-                                { data: 'qrxPulse' },
-                                { data: 'qryPulse' },
+                                { data: 'xPulse', className: cellClass },
+                                { data: 'yPulse', className: cellClass },
+                                { data: 'qrxPulse', className: cellClass },
+                                { data: 'qryPulse', className: cellClass },
                                 {
                                     data: null,
-                                    render: function (data, type, row, meta) {
+                                    className: designClass, 
+                                    render: function (row) {
                                         const rawData = JSON.stringify(row).replace(/"/g, "&quot;");
-                                        return `<div style="display:flex;">
-                                                    <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rawData}">
-                                                        <span><i class="bi bi-pencil-square pe-1"></i>Edit</span>
-                                                    </button>
-                                                    <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.trolleySlot_Id}" data-code=${row.trolleySlotCode}">
-                                                        <span><i class="bi bi-trash pe-1"></i>Delete</span>
-                                                    </button>
-                                                </div>`;
+                                        return `<div class="tw:flex tw:items-center tw:gap-2">
+                                            <button class="edit-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-amber-50 tw:font-medium tw:text-amber-600
+                                                tw:transition-colors tw:hover:bg-amber-100 tw:dark:bg-amber-500/15 tw:dark:text-amber-400 tw:dark:hover:bg-amber-500/25" data-row="${rawData}" title="Edit">
+                                                <i class="bi bi-pencil-square"></i>
+                                                Edit
+                                            </button>
+                                            <button class="delete-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-error-50 tw:font-medium tw:text-error-600
+                                                tw:transition-colors tw:hover:bg-error-100 tw:dark:bg-error-500/15 tw:dark:text-error-400 tw:dark:hover:bg-error-500/25" data-id="${row.trolleySlot_Id}" data-code="${row.trolleySlotCode}" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                                Delete
+                                            </button>
+                                        </div>`;
                                     }
                                 }
                             ],
                             language: {
                                 searchPlaceholder: "🔍︎ Search",
                                 search: ""
-                            },
-                            ordering: {
-                                indicators: false
-                            },
-                            columnControl: ['orderStatus']
+                            }
                         });
                         
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -681,7 +563,7 @@
                     }
                 },
                 error: function (error) {
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -742,10 +624,12 @@
                                     option.textContent = t.trolleyCode;
                                     dropdown.appendChild(option);
                                 });
+
+                                refreshCustomSelect(id);
                             });
                             resolve(true);
                         } else {
-                            swal.fire({
+                            Swal.fire({
                                 icon: 'error',
                                 title: "Wait",
                                 text: result.errMessage
@@ -754,7 +638,7 @@
                         }
                     },
                     error: function (error) {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: error.val
@@ -770,12 +654,14 @@
 
             var fields;
             if (modalId == "colModal") {
-                fields = ['ddTrolley1', 'txtCodeFormat', 'txtColFrom', 'txtTotalCol', 'txtRowFrom', 'txtTotalRow', 'txtStartXPulse', 'txtXPulseIncrement', 'txtStartYPulse', 'txtYPulseIncrement', 'txtStartQrXPulse', 'txtQrXPulseIncrement', 'txtStartQrYPulse', 'txtQrYPulseIncrement'];
-            } 
+                fields = ['ddTrolley1', 'txtCodeFormat', 'txtColFrom', 'txtTotalCol', 'txtRowFrom', 'txtTotalRow', 'txtStartXPulse', 'txtXPulseIncrement', 'txtStartYPulse', 'txtYPulseIncrement', 'txtStartQrXPulse', 'txtQrXPulseIncrement', 'txtStartQrYPulse', 'txtQrYPulseIncrement',
+                    'txtStartAddPulse1', 'txtAddPulse1Inc', 'txtStartAddPulse2', 'txtAddPulse2Inc', 'txtStartAddPulse3', 'txtAddPulse3Inc', 'txtStartAddPulse4', 'txtAddPulse4Inc', 'txtStartAddPulse5', 'txtAddPulse5Inc', 'txtStartAddPulse6', 'txtAddPulse6Inc'];
+            }
             else {
                 fields = ['ddTrolley', 'txtPriority', 'txtCode', 'txtColNo', 'txtRowNo', 'txtXPulse', 'txtYPulse', 'txtQrXPulse', 'txtQrYPulse', 'txtAddPulse1', 'txtAddPulse2', 'txtAddPulse3', 'txtAddPulse4', 'txtAddPulse5', 'txtAddPulse6'];
             }
             removeErrMsg(fields, true);
+            refreshCustomSelect(modalId == "colModal" ? 'ddTrolley1' : 'ddTrolley');
             customPulses(modalId);
         }
 
@@ -824,10 +710,16 @@
                 }
 
                 fields.forEach(function(field) {
-                    document.getElementById(field).classList.remove('is-invalid');
-                    document.getElementById(field).classList.remove('is-valid');
-                    document.getElementById(field + 'Error').textContent = '';
-                    if (clearValue) document.getElementById(field).value = '';
+                    const el = document.getElementById(field);
+                    if (!el) return;
+
+                    el.classList.remove('is-invalid');
+                    el.classList.remove('is-valid');
+
+                    const errEl = document.getElementById(field + 'Error');
+                    if (errEl) errEl.textContent = '';
+
+                    if (clearValue) el.value = '';
                 });
             }
         }
@@ -892,7 +784,7 @@
                     success: function (result) {
                         if (result.success == true) {
                             $("#myModal").modal("toggle");
-                            swal.fire({
+                            Swal.fire({
                                 icon: 'success',
                                 title: "Success Update",
                                 text: "",
@@ -902,7 +794,7 @@
                             });
                         }
                         else {
-                            swal.fire({
+                            Swal.fire({
                                 icon: 'error',
                                 title: "Wait",
                                 text: result.errMessage
@@ -910,8 +802,7 @@
                         }
                     },
                     error: function (error) {
-                        console.log(error);
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: error.val
@@ -932,12 +823,12 @@
                 text = document.getElementById("textlink2");
             }
 
-            const isHidden = container.classList.contains("hidden");
+            const isHidden = container.classList.contains("tw:hidden");
 
             if (isHidden) {
                 if (isChange)
                 {
-                    container.classList.remove("hidden");
+                    container.classList.remove("tw:hidden");
                     text.innerHTML = '<i class="fas fa-minus-circle"></i> Additional Pulses';
                 }
                 
@@ -956,7 +847,7 @@
 
             } else {
                 
-                container.classList.add("hidden");
+                container.classList.add("tw:hidden");
                 text.innerHTML = '<i class="fas fa-plus-circle"></i> Additional Pulses';
                 
                 
@@ -987,6 +878,7 @@
             var hasValue = false;
 
             $('#ddTrolley').val(row.trolley_Id);
+            refreshCustomSelect('ddTrolley');
             $('#txtId').val(row.trolleySlot_Id);
             $('#txtCode').val(row.trolleySlotCode);
             $('#txtColNo').val(row.colNo);
@@ -1025,15 +917,13 @@
         });
 
         function deleteSlot(id, slotCode) {
-            swal.fire({
+            Swal.fire({
                 title: "Are you sure want to delete?",
-                text: "You will not be able to recover this record!",
-                inputAttributes: {
-                    autocapitalize: 'off'
-                },
+                text: "You won't be able to recover this record!",
+                icon: 'warning', 
                 showCancelButton: true,
-                confirmButtonText: 'ok',
-                cancelButtonText: 'cancel',
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'Cancel',
                 allowOutsideClick: false
               }).then(function(r) {
                 if (r.isConfirmed == true) {
@@ -1064,7 +954,7 @@
                         },
                         success: function (result) {
                             if (result.success == true) {
-                                swal.fire({
+                                Swal.fire({
                                     icon: 'success',
                                     title: "Success Deleted",
                                     text: "",
@@ -1074,7 +964,7 @@
                                 });
                             }
                             else {
-                                swal.fire({
+                                Swal.fire({
                                     icon: 'error',
                                     title: "Wait",
                                     text: result.errMessage
@@ -1082,8 +972,7 @@
                             }
                         },
                         error: function (error) {
-                            console.log(error);
-                            swal.fire({
+                            Swal.fire({
                                 icon: 'error',
                                 title: "Wait",
                                 text: error.val
@@ -1181,7 +1070,7 @@
                     success: function (result) {
                         if (result.success == true) {
                             $("#myModal").modal("toggle");
-                            swal.fire({
+                            Swal.fire({
                                 icon: 'success',
                                 title: "Success Update",
                                 text: "",
@@ -1191,7 +1080,7 @@
                             });
                         }
                         else {
-                            swal.fire({
+                            Swal.fire({
                                 icon: 'error',
                                 title: "Wait",
                                 text: result.errMessage
@@ -1199,8 +1088,7 @@
                         }
                     },
                     error: function (error) {
-                        console.log(error);
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: error.val
@@ -1333,26 +1221,42 @@
                 const matchedCol = dataTableColumns.find(col => isMatch(col, column));
 
                 columnDropdowns += `
-                <div class="container">
-                    <div class="row justify-content-center align-items-center mb-3">
-                        <div class="col-5">
-                            <label class="form-label mb-0">File Column: ${column}</label>
-                        </div>
-                        <div class="col-5">
-                            <select class="form-select column-mapping" 
-                                    data-col="${column}" 
-                                    id="column${index}">
-                                <option value="">Select Matching Column</option>
-                                ${dataTableColumns.map(col => `
-                                    <option value="${col}" ${matchedCol === col ? 'selected' : ''}>${col}</option>
-                                `).join('')}
-                            </select>
+                <div class="tw:mb-3 tw:grid tw:grid-cols-2 tw:items-center">
+                    <label class="tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400">File Column: ${column}</label>
+                    <div class="tw:relative" x-data="customSelect('column${index}')" x-init="init()">
+                        <select class="column-mapping tw:hidden" data-col="${column}" id="column${index}">
+                            <option value="">Select Matching Column</option>
+                            ${dataTableColumns.map(col => `
+                                <option value="${col}" ${matchedCol === col ? 'selected' : ''}>${col}</option>
+                            `).join('')}
+                        </select>
+                        <button type="button" @@click="toggle()" @@click.outside="open = false"
+                            class="tw:flex tw:w-full tw:items-center tw:justify-between tw:gap-2 tw:rounded-lg tw:border tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-left tw:text-sm tw:text-gray-800 tw:dark:bg-gray-900 tw:dark:text-white/90"
+                            :class="hasError ? 'tw:border-error-500' : (open ? 'tw:border-brand-300 tw:ring-3 tw:ring-brand-500/10' : 'tw:border-gray-300 tw:dark:border-gray-700')">
+                            <span x-text="selectedLabel || 'Select...'" :class="selectedLabel ? '' : 'tw:text-gray-400 tw:dark:text-white/30'"></span>
+                            <i class="bi bi-chevron-down tw:text-xs tw:text-gray-500 tw:transition-transform tw:dark:text-gray-400" :class="open ? 'tw:rotate-180' : ''"></i>
+                        </button>
+                        <div x-show="open" x-transition
+                            class="custom-select-scroll tw:absolute tw:z-50 tw:max-h-60 tw:w-full tw:overflow-y-auto tw:rounded-lg tw:border tw:border-gray-200 tw:bg-white tw:py-1 tw:shadow-theme-lg tw:dark:border-gray-700 tw:dark:bg-gray-900"
+                            :class="dropUp ? 'tw:bottom-full tw:mb-1' : 'tw:top-full tw:mt-1'">
+                            <template x-if="options.length === 0">
+                                <div class="tw:px-4 tw:py-2 tw:text-sm tw:text-gray-400 tw:dark:text-white/30">No options</div>
+                            </template>
+                            <template x-for="opt in options" :key="opt.value">
+                                <div @@click="select(opt)"
+                                    class="tw:cursor-pointer tw:px-4 tw:py-2 tw:text-sm tw:hover:bg-brand-50 tw:dark:hover:bg-brand-500/15"
+                                    :class="opt.value === selectedValue ? 'tw:bg-brand-50 tw:font-medium tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:text-gray-700 tw:dark:text-gray-300'"
+                                    x-text="opt.text"></div>
+                            </template>
                         </div>
                     </div>
                 </div>`;
             });
 
             document.getElementById('csvColumnContent').innerHTML = columnDropdowns;
+            if (window.Alpine) {
+                Alpine.initTree(document.getElementById('csvColumnContent'));
+            }
             $('#columnMatchingModal').modal("show");
         }
 
@@ -1460,7 +1364,6 @@
                     });
                 }
 
-                console.log(slotsData);
                 saveExcelSlots(slotsData, content, updateType); 
 
             } catch (error) {
@@ -1494,7 +1397,6 @@
                         Swal.fire({
                             text: 'Please Wait',
                             width: '300px',
-
                             allowEscapeKey: false,
                             allowOutsideClick: false,
                             showConfirmButton: false,
@@ -1503,7 +1405,7 @@
                     },
                     success: function(response) {
                         if (response.success == true) {
-                            swal.fire({
+                            Swal.fire({
                                 icon: 'success',
                                 title: "Success Update",
                                 text: "",
@@ -1514,7 +1416,7 @@
                         } else {
                            if (response.data && response.data.length > 0) {
                                markErrorsInSheet(bookBuffer, response.data, source);
-                               swal.fire({
+                               Swal.fire({
                                   icon: 'warning',
                                   title: "Validation Issues Found",
                                   text: "Review on returned file and fix errors."
@@ -1522,7 +1424,7 @@
                                $('#columnMatchingModal').modal("toggle");
 
                            } else {
-                               swal.fire({
+                               Swal.fire({
                                   icon: 'error',
                                   title: "Wait",
                                   text: response.errMessage
@@ -1531,8 +1433,7 @@
                         }
                     },
                     error: function(xhr, status, error) {
-                        console.log(error);
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: error.val
@@ -1564,12 +1465,11 @@
               worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
                 if (rowNumber === 1) return; 
                 const errorRow = errorRows[rowNumber - 2];
-                console.log(errorRow);
 
                   // const fillColor = highlightColors[colorIndex % highlightColors.length];
                   // colorIndex++;
-                  console.log("error index" , errIdx);
-                  console.log(columnsToHighlight);
+                  //console.log("error index" , errIdx);
+                  //console.log(columnsToHighlight);
 
                   if (errorRow && errorRow.errorMsg != "")
                   {

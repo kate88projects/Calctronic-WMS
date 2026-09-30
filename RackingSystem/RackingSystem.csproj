@@ -13,10 +13,12 @@
   <ItemGroup>
     <Content Remove="Views\Rack\NewHubInTask.cshtml" />
     <Content Remove="Views\Rack\NewTransferHubInTask.cshtml" />
+    <Content Remove="Views\Rack\TransferHubOutTask.cshtml" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="15.0.1" />
+    <PackageReference Include="Bogus" Version="35.6.5" />
     <PackageReference Include="EasyModbusTCP.NETCore" Version="1.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.18" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.18" />

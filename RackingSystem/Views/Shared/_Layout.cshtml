@@ -1,15 +1,15 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>@ViewData["Title"] - WMS</title>
 
     <!-- Theme Color -->
     <meta name="color-scheme" content="light" />
-    <meta name="theme-color" content="#007bff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#007bff" />  @* media="(prefers-color-scheme: light)" *@
+    <meta name="theme-color" content="#1a1a1a" />  @* media="(prefers-color-scheme: dark)" *@
 
     <!-- Fonts -->
     @* <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round"> *@
@@ -29,299 +29,290 @@
     <!--begin::Required Plugin(AdminLTE)-->
     @* <link rel="stylesheet" href="../../css/adminlte.css" /> *@
     <link rel="stylesheet" href="~/css/adminlte.css" asp-append-version="true" />
-    <!--end::Required Plugin(AdminLTE)-->
+
     <link rel="stylesheet" href="~/css/general.css" />
+
+    <!-- TailAdmin styling preview: isolated Tailwind v4 build, scoped to this file + LoaderList.cshtml only -->
+    <link rel="stylesheet" href="~/css/tailwind-admin.css" asp-append-version="true" />
 
     <style type="text/css">
         html * {
         /* font-size: 1em !important; */
         /* color: #000 !important; */
-        font-family: Varela Round !important;
+            font-family: Varela Round !important;
+        }
+
+        /* Belt-and-suspenders: guarantee no bullet markers in the TailAdmin
+           sidebar nav regardless of stylesheet cache/load order. */
+        #app-sidebar ul,
+        #app-sidebar li {
+            list-style: none !important;
         }
 
         @@media (max-width: 1000px) {
             .card-body {
                 height: auto !important;
             }
-
-            .app-wrapper {
-                display: flex;
-                flex-direction: column;
-                height: 100vh;
-            }
-
-            .app-main {
-                flex-grow: 1;
-                padding: 20px;
-                overflow: auto;
-            }
         }
-
-        .page-header-wrapper {
-            background-color: #343A40;
-            height: 3.5rem;
-        }
-
     </style>
 </head>
 
-<body class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
+@{
+    var grpMMOpen = ViewData["ActiveGroup"]?.ToString() == "grpMM";
+    var grpSTOCKOpen = ViewData["ActiveGroup"]?.ToString() == "grpSTOCK";
+    var grpBOMOpen = ViewData["ActiveGroup"]?.ToString() == "grpBOM";
+    var grpGRNOpen = ViewData["ActiveGroup"]?.ToString() == "grpGRN";
+    var grpJOOpen = ViewData["ActiveGroup"]?.ToString() == "grpJO";
+    var grpQOpen = ViewData["ActiveGroup"]?.ToString() == "grpQ";
+    var grpRACKINGOpen = ViewData["ActiveGroup"]?.ToString() == "grpRACKING";
+    var grpSETTINGSOpen = ViewData["ActiveGroup"]?.ToString() == "grpSETTINGS";
+}
 
-    <!--begin::App Wrapper-->
-    <div class="app-wrapper">
-        <!--begin::Header-->
-        @* <nav class="app-header navbar navbar-expand bg-body">
-            <!--begin::Container-->
-            <div class="container-fluid">
-                <!--begin::Start Navbar Links-->
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button">
-                            <i class="bi bi-list"></i>
-                        </a>
-                    </li>
-                    <li class="nav-item d-none d-md-block"><a href="#" class="nav-link">Home</a></li>
-                </ul>
-                <!--end::Start Navbar Links-->
+<body class="tw:bg-gray-50 tw:dark:bg-gray-900"
+      x-data="{ sidebarToggle: false, darkMode: false, menuToggle: false }"
+      x-init="darkMode = JSON.parse(localStorage.getItem('darkMode') || 'false'); document.documentElement.classList.toggle('dark', darkMode)">
 
-            </div>
-            <!--end::Container-->
-        </nav> *@
-        <div class="page-header-wrapper">
-            <div id="sideBtn" class="navBtn click flex-start">
-                <i class="bi bi-list"></i>
-            </div>
+    <!--begin::App Wrapper (TailAdmin shell)-->
+    <div class="tw:flex tw:h-screen tw:overflow-hidden">
 
-            <div class="page-header-slot">
-                @RenderSection("PageHeader", required: false)
-            </div>
-        </div>
-
-        <!--end::Header-->
         <!--begin::Sidebar-->
-        <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
-            <!--begin::Sidebar Brand-->
-            <div class="sidebar-brand">
-                <!--begin::Brand Link-->
-                <a asp-action="Index" asp-controller="Home" class="brand-link">
-                    <!--begin::Brand Text-->
-                    <span class="brand-text fw-light">WMS</span>
-                    <!--end::Brand Text-->
+        <aside id="app-sidebar" :class="sidebarToggle ? 'tw:translate-x-0 tw:xl:w-20' : 'tw:-translate-x-full'"
+               class="tw:sidebar tw:fixed tw:top-0 tw:left-0 tw:z-9999 tw:flex tw:h-screen tw:w-65 tw:flex-col tw:overflow-y-auto tw:border-r tw:border-gray-200 tw:bg-white tw:px-4 tw:xl:static tw:xl:translate-x-0 tw:dark:border-gray-800 tw:dark:bg-gray-900"
+               @@click.outside="if (window.innerWidth < 1280) sidebarToggle = false">
+
+            <div :class="sidebarToggle ? 'tw:justify-center' : 'tw:justify-between'"
+                 class="tw:flex tw:items-center tw:gap-2 tw:pt-6 tw:pb-5">
+                <a asp-action="Index" asp-controller="Home"
+                   class="tw:flex tw:items-center tw:gap-2 tw:text-lg tw:font-semibold tw:text-gray-800 tw:no-underline tw:hover:text-gray-800 tw:dark:text-white"
+                   :class="sidebarToggle ? 'tw:xl:hidden' : ''">
+                    <i class="bi bi-hdd-rack tw:text-xl tw:text-brand-500"></i>
+                    <span>WMS</span>
                 </a>
-                <!--end::Brand Link-->
+                <i class="bi bi-hdd-rack tw:hidden tw:text-xl tw:text-brand-500" :class="sidebarToggle ? 'tw:xl:block' : ''"></i>
             </div>
-            <!--end::Sidebar Brand-->
-            <!--begin::Sidebar Wrapper-->
-            <div class="sidebar-wrapper">
-                <nav class="mt-2">
-                    <!--begin::Sidebar Menu-->
-                    <ul class="nav sidebar-menu flex-column"
-                    data-lte-toggle="treeview"
-                    role="navigation"
-                    aria-label="Main navigation"
-                    data-accordion="false"
-                    id="navigation">
-                        <li class="nav-item">
-                            <a asp-action="Dashboard1" asp-controller="Dashboard" class="nav-link">
-                                <i class="nav-icon bi bi-pie-chart"></i>
-                                <p>Dashboard</p>
+
+            <div class="tw:no-scrollbar tw:flex tw:flex-1 tw:flex-col tw:overflow-y-auto tw:ease-linear tw:pb-6">
+                <nav x-data="{ selected: '@ViewData["ActiveGroup"]' }">
+                    <ul class="tw:flex tw:flex-col tw:gap-1 tw:list-none tw:m-0 tw:p-0">
+
+                        <li>
+                            <a asp-action="Dashboard1" asp-controller="Dashboard"
+                               class="tw:menu-item tw:group @(ViewData["ActiveTab"]?.ToString() == "Dashboard1" ? "tw:menu-item-active" : "tw:menu-item-inactive")">
+                                <i class="bi bi-pie-chart @(ViewData["ActiveTab"]?.ToString() == "Dashboard1" ? "tw:menu-item-icon-active" : "tw:menu-item-icon-inactive")"></i>
+                                <span class="tw:menu-item-text" :class="sidebarToggle ? 'tw:xl:hidden' : ''">Dashboard</span>
                             </a>
                         </li>
 
                         @if (ViewBag.PermissionList.Contains(1) || ViewBag.PermissionList.Contains(2) || ViewBag.PermissionList.Contains(3) || ViewBag.PermissionList.Contains(4) ||
                         ViewBag.PermissionList.Contains(5) || ViewBag.PermissionList.Contains(6) || ViewBag.PermissionList.Contains(7) || ViewBag.PermissionList.Contains(8))
                         {
-                            <li class="nav-item" id="grpMM">
-                                <a href="javascript:none" class="nav-link">
-                                    <i class="nav-icon bi bi-ui-checks-grid"></i>
-                                    <p>
-                                        Maintenance
-                                        <i class="nav-arrow bi bi-chevron-right"></i>
-                                    </p>
+                            <li>
+                                <a href="javascript:void(0)" @@click.prevent="selected = (selected === 'grpMM' ? '' : 'grpMM')"
+                                   class="tw:menu-item tw:group @(grpMMOpen ? "tw:menu-item-active" : "tw:menu-item-inactive")">
+                                    <i class="bi bi-ui-checks-grid @(grpMMOpen ? "tw:menu-item-icon-active" : "tw:menu-item-icon-inactive")"></i>
+                                    <span class="tw:menu-item-text" :class="sidebarToggle ? 'tw:xl:hidden' : ''">Maintenance</span>
+                                    <i class="bi bi-chevron-right tw:menu-item-arrow @(grpMMOpen ? "tw:menu-item-arrow-active" : "tw:menu-item-arrow-inactive")"
+                                       :class="sidebarToggle ? 'tw:xl:hidden' : ''"></i>
                                 </a>
-                                <ul class="nav nav-treeview">
-                                    @if (ViewBag.PermissionList.Contains(1) == true)
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="LoaderList" asp-controller="Loader" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>Auto Loader List</p>
-                                            </a>
-                                        </li>
-                                    }
-                                    @if (ViewBag.PermissionList.Contains(7) == true)
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="LoaderColumnList" asp-controller="Loader" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>Loader Column List</p>
-                                            </a>
-                                        </li>
-                                    }
-                                    @if (ViewBag.PermissionList.Contains(2) == true)
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="TrolleyList" asp-controller="Trolley" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>Trolley List</p>
-                                            </a>
-                                        </li>
-                                    }
-                                    @if (ViewBag.PermissionList.Contains(3) == true)
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="TrolleySlot" asp-controller="Trolley" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>Trolley Slot List</p>
-                                            </a>
-                                        </li>
-                                    }
-                                    @if (ViewBag.PermissionList.Contains(4) == true)
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="SlotList" asp-controller="Slot" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>Slot Module List</p>
-                                            </a>
-                                        </li>
-                                    }
-                                    @if (ViewBag.PermissionList.Contains(5) == true)
-                                    {
-                                        <li class="nav-item">
-                                            <a asp-action="SlotUpdatePulse" asp-controller="Slot" class="nav-link">
-                                                <i class="nav-icon bi bi-asterisk"></i>
-                                                <p>SRMS Update QR Pulses</p>
-                                            </a>
-                                        </li>
-                                    }
-                                    @if (ViewBag.PermissionList.Contains(8) == true)
-                                    {
-                                        <li class="nav-item">
-                                            <a asp-action="TrolleyUpdatePulse" asp-controller="Trolley" class="nav-link">
-                                                <i class="nav-icon bi bi-asterisk"></i>
-                                                <p>Trolley Update QR Pulses</p>
-                                            </a>
-                                        </li>
-                                    }
-                                    @*  @if (ViewBag.PermissionList.Contains(6) == true)
-                                    {
-                                        <li class="nav-item">
-                                            <a asp-action="SlotList" asp-controller="Slot" class="nav-link">
-                                                <i class="nav-icon bi bi-circle"></i>
-                                                <p>Slot Check Drawer</p>
-                                            </a>
-                                        </li>
-                                    } *@
-                                </ul>
+                                <div class="tw:overflow-hidden tw:transform tw:translate" :class="(selected === 'grpMM') ? 'tw:block' : 'tw:hidden'">
+                                    <ul :class="sidebarToggle ? 'tw:xl:hidden' : 'tw:flex'" class="tw:menu-dropdown tw:mt-2 tw:flex-col tw:gap-1 tw:pl-9 tw:list-none tw:m-0">
+                                        @if (ViewBag.PermissionList.Contains(1) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="LoaderList" asp-controller="Loader"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "LoaderList" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    Auto Loader List
+                                                </a>
+                                            </li>
+                                        }
+                                        @if (ViewBag.PermissionList.Contains(7) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="LoaderColumnList" asp-controller="Loader"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "LoaderColumnList" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    Loader Column List
+                                                </a>
+                                            </li>
+                                        }
+                                        @if (ViewBag.PermissionList.Contains(2) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="TrolleyList" asp-controller="Trolley"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "TrolleyList" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    Universal Trolley List
+                                                </a>
+                                            </li>
+                                        }
+                                        @if (ViewBag.PermissionList.Contains(3) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="TrolleySlot" asp-controller="Trolley"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "TrolleySlot" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    Trolley Slot List
+                                                </a>
+                                            </li>
+                                        }
+                                        @if (ViewBag.PermissionList.Contains(4) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="SlotList" asp-controller="Slot"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "SlotList" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    Slot Module List
+                                                </a>
+                                            </li>
+                                        }
+                                        @if (ViewBag.PermissionList.Contains(4) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="SlotScanControl" asp-controller="Slot"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "SlotScanControl" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    Slot Scan Control
+                                                </a>
+                                            </li>
+                                        }
+                                        @if (ViewBag.PermissionList.Contains(5) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="SlotUpdatePulse" asp-controller="Slot"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "SlotUpdatePulse" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    SRMS Update QR Pulses
+                                                </a>
+                                            </li>
+                                        }
+                                        @if (ViewBag.PermissionList.Contains(8) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="TrolleyUpdatePulse" asp-controller="Trolley"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "TrolleyUpdatePulse" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    Trolley Update QR Pulses
+                                                </a>
+                                            </li>
+                                        }
+                                        @*  @if (ViewBag.PermissionList.Contains(6) == true)
+                                        {
+                                            <li class="nav-item">
+                                                <a asp-action="SlotList" asp-controller="Slot" class="nav-link">
+                                                    <i class="nav-icon bi bi-circle"></i>
+                                                    <p>Slot Check Drawer</p>
+                                                </a>
+                                            </li>
+                                        } *@
+                                    </ul>
+                                </div>
                             </li>
                         }
 
                         @if (ViewBag.PermissionList.Contains(20) || ViewBag.PermissionList.Contains(21))
                         {
-                            <li class="nav-item" id="grpSTOCK">
-                                <a href="javascript:none" class="nav-link">
-                                    <i class="nav-icon bi bi-box-seam-fill"></i>
-                                    <p>
-                                        Stock
-                                        <i class="nav-arrow bi bi-chevron-right"></i>
-                                    </p>
+                            <li>
+                                <a href="javascript:void(0)" @@click.prevent="selected = (selected === 'grpSTOCK' ? '' : 'grpSTOCK')"
+                                   class="tw:menu-item tw:group @(grpSTOCKOpen ? "tw:menu-item-active" : "tw:menu-item-inactive")">
+                                    <i class="bi bi-box-seam-fill @(grpSTOCKOpen ? "tw:menu-item-icon-active" : "tw:menu-item-icon-inactive")"></i>
+                                    <span class="tw:menu-item-text" :class="sidebarToggle ? 'tw:xl:hidden' : ''">Stock</span>
+                                    <i class="bi bi-chevron-right tw:menu-item-arrow @(grpSTOCKOpen ? "tw:menu-item-arrow-active" : "tw:menu-item-arrow-inactive")"
+                                       :class="sidebarToggle ? 'tw:xl:hidden' : ''"></i>
                                 </a>
-                                <ul class="nav nav-treeview">
-                                    @if (ViewBag.PermissionList.Contains(20) == true)
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="ItemGroupList" asp-controller="Item" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>Item Group List</p>
-                                            </a>
-                                        </li>
-                                    }
-                                    @if (ViewBag.PermissionList.Contains(21) == true)
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="ItemList" asp-controller="Item" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>Item List</p>
-                                            </a>
-                                        </li>
-                                    }
-                                </ul>
+                                <div class="tw:overflow-hidden tw:transform tw:translate" :class="(selected === 'grpSTOCK') ? 'tw:block' : 'tw:hidden'">
+                                    <ul :class="sidebarToggle ? 'tw:xl:hidden' : 'tw:flex'" class="tw:menu-dropdown tw:mt-2 tw:flex-col tw:gap-1 tw:pl-9 tw:list-none tw:m-0">
+                                        @if (ViewBag.PermissionList.Contains(20) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="ItemGroupList" asp-controller="Item"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "ItemGroupList" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    Item Group List
+                                                </a>
+                                            </li>
+                                        }
+                                        @if (ViewBag.PermissionList.Contains(21) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="ItemList" asp-controller="Item"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "ItemList" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    Item List
+                                                </a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
                             </li>
                         }
 
                         @if (ViewBag.PermissionList.Contains(40))
                         {
-                            <li class="nav-item" id="grpBOM">
-                                <a href="javascript:none" class="nav-link">
-                                    <i class="nav-icon bi bi-diagram-3"></i>
-                                    <p>
-                                        BOM
-                                        <i class="nav-arrow bi bi-chevron-right"></i>
-                                    </p>
+                            <li>
+                                <a href="javascript:void(0)" @@click.prevent="selected = (selected === 'grpBOM' ? '' : 'grpBOM')"
+                                   class="tw:menu-item tw:group @(grpBOMOpen ? "tw:menu-item-active" : "tw:menu-item-inactive")">
+                                    <i class="bi bi-diagram-3 @(grpBOMOpen ? "tw:menu-item-icon-active" : "tw:menu-item-icon-inactive")"></i>
+                                    <span class="tw:menu-item-text" :class="sidebarToggle ? 'tw:xl:hidden' : ''">BOM</span>
+                                    <i class="bi bi-chevron-right tw:menu-item-arrow @(grpBOMOpen ? "tw:menu-item-arrow-active" : "tw:menu-item-arrow-inactive")"
+                                       :class="sidebarToggle ? 'tw:xl:hidden' : ''"></i>
                                 </a>
-                                <ul class="nav nav-treeview">
-                                    @if (ViewBag.PermissionList.Contains(40))
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="BOMList" asp-controller="BOM" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>BOM List</p>
-                                            </a>
-                                        </li>
-                                    }
-                                </ul>
-                            </li> 
+                                <div class="tw:overflow-hidden tw:transform tw:translate" :class="(selected === 'grpBOM') ? 'tw:block' : 'tw:hidden'">
+                                    <ul :class="sidebarToggle ? 'tw:xl:hidden' : 'tw:flex'" class="tw:menu-dropdown tw:mt-2 tw:flex-col tw:gap-1 tw:pl-9 tw:list-none tw:m-0">
+                                        @if (ViewBag.PermissionList.Contains(40))
+                                        {
+                                            <li>
+                                                <a asp-action="BOMList" asp-controller="BOM"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "BOMList" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    BOM List
+                                                </a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            </li>
                         }
-
 
                         @if (ViewBag.PermissionList.Contains(60) || ViewBag.PermissionList.Contains(61) || ViewBag.PermissionList.Contains(62) || ViewBag.PermissionList.Contains(63))
                         {
-                            <li class="nav-item" id="grpGRN">
-                                <a href="javascript:none" class="nav-link">
-                                    <i class="nav-icon bi bi-truck"></i>
-                                    <p>
-                                        Receive
-                                        <i class="nav-arrow bi bi-chevron-right"></i>
-                                    </p>
+                            <li>
+                                <a href="javascript:void(0)" @@click.prevent="selected = (selected === 'grpGRN' ? '' : 'grpGRN')"
+                                   class="tw:menu-item tw:group @(grpGRNOpen ? "tw:menu-item-active" : "tw:menu-item-inactive")">
+                                    <i class="bi bi-truck @(grpGRNOpen ? "tw:menu-item-icon-active" : "tw:menu-item-icon-inactive")"></i>
+                                    <span class="tw:menu-item-text" :class="sidebarToggle ? 'tw:xl:hidden' : ''">Receive</span>
+                                    <i class="bi bi-chevron-right tw:menu-item-arrow @(grpGRNOpen ? "tw:menu-item-arrow-active" : "tw:menu-item-arrow-inactive")"
+                                       :class="sidebarToggle ? 'tw:xl:hidden' : ''"></i>
                                 </a>
-                                <ul class="nav nav-treeview">
-                                    @if (ViewBag.PermissionList.Contains(60) == true)
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="NewGRN" asp-controller="GRN" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>New Receive</p>
-                                            </a>
-                                        </li>
-                                    }
-                                    @if (ViewBag.PermissionList.Contains(61) == true)
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="GRNDetailList" asp-controller="GRN" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>GRN List</p>
-                                            </a>
-                                        </li>
-                                    }
-                                    @*  @if (ViewBag.PermissionList.Contains(62) == true)
-                                    {
-                                        <li class="nav-item">
-                                            <a asp-action="GRNDetailList" asp-controller="GRN" class="nav-link">
-                                                <i class="nav-icon bi bi-circle"></i>
-                                                <p>Reprint Reel Sticker</p>
-                                            </a>
-                                        </li>
-                                    } *@
-                                    @if (ViewBag.PermissionList.Contains(63) == true)
-                                    {
-                                        <li class="nav-item">
-                                            <a asp-action="NewAutoLoaderTask" asp-controller="GRN" class="nav-link">
-                                                <i class="nav-icon bi bi-asterisk"></i>
-                                                <p>New Auto Loader Task</p>
-                                            </a>
-                                        </li>
-                                    }
-                                </ul>
+                                <div class="tw:overflow-hidden tw:transform tw:translate" :class="(selected === 'grpGRN') ? 'tw:block' : 'tw:hidden'">
+                                    <ul :class="sidebarToggle ? 'tw:xl:hidden' : 'tw:flex'" class="tw:menu-dropdown tw:mt-2 tw:flex-col tw:gap-1 tw:pl-9 tw:list-none tw:m-0">
+                                        @if (ViewBag.PermissionList.Contains(60) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="NewGRN" asp-controller="GRN"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "NewGRN" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    New Receive
+                                                </a>
+                                            </li>
+                                        }
+                                        @if (ViewBag.PermissionList.Contains(61) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="GRNDetailList" asp-controller="GRN"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "GRNDetailList" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    GRN List
+                                                </a>
+                                            </li>
+                                        }
+                                        @if (ViewBag.PermissionList.Contains(63) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="NewAutoLoaderTask" asp-controller="GRN"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "NewAutoLoaderTask" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    New Auto Loader Task
+                                                </a>
+                                            </li>
+                                        }
+                                        @if (ViewBag.PermissionList.Contains(63) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="LoadInTaskManual" asp-controller="GRN"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "LoadInTaskManual" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    Load In Task (Manual)
+                                                </a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
                             </li>
                         }
 
@@ -355,412 +346,433 @@
                             </ul>
                         </li> *@
 
-
                         @if (ViewBag.PermissionList.Contains(80) || ViewBag.PermissionList.Contains(81))
                         {
-                            <li class="nav-item" id="grpJO">
-                                <a href="javascript:none" class="nav-link">
-                                    <i class="nav-icon bi bi-node-plus"></i>
-                                    <p>
-                                        Job Order
-                                        <i class="nav-arrow bi bi-chevron-right"></i>
-                                    </p>
+                            <li>
+                                <a href="javascript:void(0)" @@click.prevent="selected = (selected === 'grpJO' ? '' : 'grpJO')"
+                                   class="tw:menu-item tw:group @(grpJOOpen ? "tw:menu-item-active" : "tw:menu-item-inactive")">
+                                    <i class="bi bi-node-plus @(grpJOOpen ? "tw:menu-item-icon-active" : "tw:menu-item-icon-inactive")"></i>
+                                    <span class="tw:menu-item-text" :class="sidebarToggle ? 'tw:xl:hidden' : ''">Job Order</span>
+                                    <i class="bi bi-chevron-right tw:menu-item-arrow @(grpJOOpen ? "tw:menu-item-arrow-active" : "tw:menu-item-arrow-inactive")"
+                                       :class="sidebarToggle ? 'tw:xl:hidden' : ''"></i>
                                 </a>
-                                <ul class="nav nav-treeview">
-                                    @if (ViewBag.PermissionList.Contains(80))
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="JOList" asp-controller="JO" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>JO List</p>
-                                            </a>
-                                        </li>
-                                    }
-                                    @if (ViewBag.PermissionList.Contains(81))
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="JOEmergencyList" asp-controller="JO" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>Emergency JO List</p>
-                                            </a>
-                                        </li>
-                                    }
-                                </ul>
+                                <div class="tw:overflow-hidden tw:transform tw:translate" :class="(selected === 'grpJO') ? 'tw:block' : 'tw:hidden'">
+                                    <ul :class="sidebarToggle ? 'tw:xl:hidden' : 'tw:flex'" class="tw:menu-dropdown tw:mt-2 tw:flex-col tw:gap-1 tw:pl-9 tw:list-none tw:m-0">
+                                        @if (ViewBag.PermissionList.Contains(80))
+                                        {
+                                            <li>
+                                                <a asp-action="JOList" asp-controller="JO"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "JOList" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    JO List
+                                                </a>
+                                            </li>
+                                        }
+                                        @if (ViewBag.PermissionList.Contains(81))
+                                        {
+                                            <li>
+                                                <a asp-action="JOEmergencyList" asp-controller="JO"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "JOEmergencyList" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    Emergency JO List
+                                                </a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
                             </li>
                         }
-
 
                         @if (ViewBag.PermissionList.Contains(90))
                         {
-                            <li class="nav-item" id="grpQ">
-                                <a href="javascript:none" class="nav-link">
-                                    <i class="nav-icon bi bi-calendar2-week"></i>
-                                    <p>
-                                        Queue
-                                        <i class="nav-arrow bi bi-chevron-right"></i>
-                                    </p>
+                            <li>
+                                <a href="javascript:void(0)" @@click.prevent="selected = (selected === 'grpQ' ? '' : 'grpQ')"
+                                   class="tw:menu-item tw:group @(grpQOpen ? "tw:menu-item-active" : "tw:menu-item-inactive")">
+                                    <i class="bi bi-calendar2-week @(grpQOpen ? "tw:menu-item-icon-active" : "tw:menu-item-icon-inactive")"></i>
+                                    <span class="tw:menu-item-text" :class="sidebarToggle ? 'tw:xl:hidden' : ''">Queue</span>
+                                    <i class="bi bi-chevron-right tw:menu-item-arrow @(grpQOpen ? "tw:menu-item-arrow-active" : "tw:menu-item-arrow-inactive")"
+                                       :class="sidebarToggle ? 'tw:xl:hidden' : ''"></i>
                                 </a>
-                                <ul class="nav nav-treeview">
-                                    @if (ViewBag.PermissionList.Contains(90))
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="RackJobQueueList" asp-controller="RackJobQueue" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>Queue List</p>
-                                            </a>
-                                        </li>
-                                    }
-                                </ul>
+                                <div class="tw:overflow-hidden tw:transform tw:translate" :class="(selected === 'grpQ') ? 'tw:block' : 'tw:hidden'">
+                                    <ul :class="sidebarToggle ? 'tw:xl:hidden' : 'tw:flex'" class="tw:menu-dropdown tw:mt-2 tw:flex-col tw:gap-1 tw:pl-9 tw:list-none tw:m-0">
+                                        @if (ViewBag.PermissionList.Contains(90))
+                                        {
+                                            <li>
+                                                <a asp-action="RackJobQueueList" asp-controller="RackJobQueue"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "RackJobQueueList" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    Queue List
+                                                </a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
                             </li>
                         }
 
-
-                        @if (ViewBag.PermissionList.Contains(100) || ViewBag.PermissionList.Contains(101) || ViewBag.PermissionList.Contains(102) || ViewBag.PermissionList.Contains(103) || 
-                        ViewBag.PermissionList.Contains(104) || ViewBag.PermissionList.Contains(105) || ViewBag.PermissionList.Contains(106) || ViewBag.PermissionList.Contains(107) || 
+                        @if (ViewBag.PermissionList.Contains(100) || ViewBag.PermissionList.Contains(101) || ViewBag.PermissionList.Contains(102) || ViewBag.PermissionList.Contains(103) ||
+                        ViewBag.PermissionList.Contains(104) || ViewBag.PermissionList.Contains(105) || ViewBag.PermissionList.Contains(106) || ViewBag.PermissionList.Contains(107) ||
                         ViewBag.PermissionList.Contains(108) || ViewBag.PermissionList.Contains(109) || ViewBag.PermissionList.Contains(110) || ViewBag.PermissionList.Contains(111) || ViewBag.PermissionList.Contains(112))
                         {
-                            <li class="nav-item" id="grpRACKING">
-                                <a href="javascript:none" class="nav-link">
-                                    <i class="nav-icon bi bi-hdd-rack"></i>
-                                    <p>
-                                        Report
-                                        <i class="nav-arrow bi bi-chevron-right"></i>
-                                    </p>
+                            <li>
+                                <a href="javascript:void(0)" @@click.prevent="selected = (selected === 'grpRACKING' ? '' : 'grpRACKING')"
+                                   class="tw:menu-item tw:group @(grpRACKINGOpen ? "tw:menu-item-active" : "tw:menu-item-inactive")">
+                                    <i class="bi bi-hdd-rack @(grpRACKINGOpen ? "tw:menu-item-icon-active" : "tw:menu-item-icon-inactive")"></i>
+                                    <span class="tw:menu-item-text" :class="sidebarToggle ? 'tw:xl:hidden' : ''">Report</span>
+                                    <i class="bi bi-chevron-right tw:menu-item-arrow @(grpRACKINGOpen ? "tw:menu-item-arrow-active" : "tw:menu-item-arrow-inactive")"
+                                       :class="sidebarToggle ? 'tw:xl:hidden' : ''"></i>
                                 </a>
-                                <ul class="nav nav-treeview">
-                                    @if (ViewBag.PermissionList.Contains(100) == true)
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="AvailableReelList" asp-controller="Reel" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>Available Reel List</p>
-                                            </a>
-                                        </li>
-                                    }
-                                    @if (ViewBag.PermissionList.Contains(104) == true)
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="LoaderDetailList" asp-controller="Loader" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>Loader Detail List</p>
-                                            </a>
-                                        </li>
-                                    }
-                                    @* @if (ViewBag.PermissionList.Contains(100) == true)
-                                    {
-                                        <li class="nav-item">
-                                            <a asp-action="SlotDetailList" asp-controller="Slot" class="nav-link">
-                                                <i class="nav-icon bi bi-circle"></i>
-                                                <p>SRMS Detail List</p>
-                                            </a>
-                                        </li>
-                                    } *@
-                                    @if (ViewBag.PermissionList.Contains(105) == true)
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="TrolleyDetailList" asp-controller="Trolley" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>Trolley Detail List</p>
-                                            </a>
-                                        </li>
-                                    }
-                                    @* @if (ViewBag.PermissionList.Contains(101) == true)
-                                    {
-                                        <li class="nav-item">
-                                            <a asp-action="SlotStatus" asp-controller="Slot" class="nav-link">
-                                                <i class="nav-icon bi bi-circle"></i>
-                                                <p>SRMS Status</p>
-                                            </a>
-                                        </li>
-                                    } *@
-                                    @if (ViewBag.PermissionList.Contains(106) == true)
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="SlotColumnStatus" asp-controller="Slot" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>SRMS Column Status</p>
-                                            </a>
-                                        </li>
-                                    }
-                                    @if (ViewBag.PermissionList.Contains(107) == true)
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="TrolleyColumnStatus" asp-controller="Trolley" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>Trolley Column Status</p>
-                                            </a>
-                                        </li>
-                                    }
-                                    @* @if (ViewBag.PermissionList.Contains(102) == true)
-                                    {
-                                        <li class="nav-item">
-                                            <a asp-action="SlotDrawer" asp-controller="Slot" class="nav-link">
-                                                <i class="nav-icon bi bi-circle"></i>
-                                                <p>Empty Slot Drawer</p>
-                                            </a>
-                                        </li>
-                                    } 
-                                    @if (ViewBag.PermissionList.Contains(103) == true)
-                                    {
-                                        <li class="nav-item">
-                                            <a asp-action="SlotSimulation" asp-controller="Slot" class="nav-link">
-                                                <i class="nav-icon bi bi-circle"></i>
-                                                <p>Simulation</p>
-                                            </a>
-                                        </li>
-                                    } *@
-                                    @* <li class="nav-item">
-                                        <a asp-action="RackJob" asp-controller="Rack" class="nav-link">
-                                            <i class="nav-icon bi bi-asterisk"></i>
-                                            <p>Transfer Hub In Task</p>
-                                        </a>
-                                    </li> *@
-                                    @* <li class="nav-item">
-                                        <a asp-action="ManualHubInTask" asp-controller="Rack" class="nav-link">
-                                            <i class="nav-icon bi bi-asterisk"></i>
-                                            <p>PLC Task (Manual)</p>
-                                        </a>
-                                    </li> *@
-                                    @if (ViewBag.PermissionList.Contains(108) == true)
-                                    {
-                                        <li class="nav-item">
-                                            <a asp-action="TrolleyReelOut" asp-controller="Rack" class="nav-link">
+                                <div class="tw:overflow-hidden tw:transform tw:translate" :class="(selected === 'grpRACKING') ? 'tw:block' : 'tw:hidden'">
+                                    <ul :class="sidebarToggle ? 'tw:xl:hidden' : 'tw:flex'" class="tw:menu-dropdown tw:mt-2 tw:flex-col tw:gap-1 tw:pl-9 tw:list-none tw:m-0">
+                                        @if (ViewBag.PermissionList.Contains(100) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="AvailableReelList" asp-controller="Reel"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "AvailableReelList" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    Available Reel List
+                                                </a>
+                                            </li>
+                                        }
+                                        @if (ViewBag.PermissionList.Contains(104) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="LoaderDetailList" asp-controller="Loader"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "LoaderDetailList" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    Loader Detail List
+                                                </a>
+                                            </li>
+                                        }
+                                        @* @if (ViewBag.PermissionList.Contains(100) == true)
+                                        {
+                                            <li class="nav-item">
+                                                <a asp-action="SlotDetailList" asp-controller="Slot" class="nav-link">
+                                                    <i class="nav-icon bi bi-circle"></i>
+                                                    <p>SRMS Detail List</p>
+                                                </a>
+                                            </li>
+                                        } *@
+                                        @if (ViewBag.PermissionList.Contains(105) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="TrolleyDetailList" asp-controller="Trolley"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "TrolleyDetailList" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    Trolley Detail List
+                                                </a>
+                                            </li>
+                                        }
+                                        @* @if (ViewBag.PermissionList.Contains(101) == true)
+                                        {
+                                            <li class="nav-item">
+                                                <a asp-action="SlotStatus" asp-controller="Slot" class="nav-link">
+                                                    <i class="nav-icon bi bi-circle"></i>
+                                                    <p>SRMS Status</p>
+                                                </a>
+                                            </li>
+                                        } *@
+                                        @if (ViewBag.PermissionList.Contains(106) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="SlotColumnStatus" asp-controller="Slot"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "SlotColumnStatus" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    SRMS Column Status
+                                                </a>
+                                            </li>
+                                        }
+                                        @if (ViewBag.PermissionList.Contains(107) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="TrolleyColumnStatus" asp-controller="Trolley"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "TrolleyColumnStatus" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    Trolley Column Status
+                                                </a>
+                                            </li>
+                                        }
+                                        @* @if (ViewBag.PermissionList.Contains(102) == true)
+                                        {
+                                            <li class="nav-item">
+                                                <a asp-action="SlotDrawer" asp-controller="Slot" class="nav-link">
+                                                    <i class="nav-icon bi bi-circle"></i>
+                                                    <p>Empty Slot Drawer</p>
+                                                </a>
+                                            </li>
+                                        } 
+                                        @if (ViewBag.PermissionList.Contains(103) == true)
+                                        {
+                                            <li class="nav-item">
+                                                <a asp-action="SlotSimulation" asp-controller="Slot" class="nav-link">
+                                                    <i class="nav-icon bi bi-circle"></i>
+                                                    <p>Simulation</p>
+                                                </a>
+                                            </li>
+                                        } *@
+                                            @* <li class="nav-item">
+                                            <a asp-action="RackJob" asp-controller="Rack" class="nav-link">
                                                 <i class="nav-icon bi bi-asterisk"></i>
-                                                <p>Trolley Reel Out</p>
+                                                <p>Transfer Hub In Task</p>
                                             </a>
-                                        </li>
-                                    }
-                                    <!-- Show log -->
-                                    @* @if (ViewBag.PermissionList.Contains(109) == true)
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="HubInLogView" asp-controller="Log" class="nav-link">
-                                                <p>Hub In Log</p>
+                                        </li> *@
+                                            @* <li class="nav-item">
+                                            <a asp-action="ManualHubInTask" asp-controller="Rack" class="nav-link">
+                                                <i class="nav-icon bi bi-asterisk"></i>
+                                                <p>PLC Task (Manual)</p>
                                             </a>
-                                        </li>
-                                    }
-                                    @if (ViewBag.PermissionList.Contains(110) == true)
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="HubOutLogView" asp-controller="Log" class="nav-link">
-                                                <p>Hub Out Log</p>
-                                            </a>
-                                        </li>
-                                    }
-                                    @if (ViewBag.PermissionList.Contains(111) == true)
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="DrawerInView" asp-controller="Log" class="nav-link">
-                                                <p>Put Away Empty Drawer Log</p>
-                                            </a>
-                                        </li>
-                                    } *@
-                                    @if (ViewBag.PermissionList.Contains(112) == true)
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="SearchSlotByCode" asp-controller="Item" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>Search Slot By Code</p>
-                                            </a>
-                                        </li>
-                                    }
-                                    @if (ViewBag.PermissionList.Contains(113) == true)
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="StockAgingReport" asp-controller="Reel" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>Stock Aging Report</p>
-                                            </a>
-                                        </li>
-                                    }
-                                </ul>
+                                        </li> *@
+                                        @if (ViewBag.PermissionList.Contains(108) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="TrolleyReelOut" asp-controller="Rack"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "TrolleyReelOut" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    Trolley Reel Out
+                                                </a>
+                                            </li>
+                                        }
+                                        <!-- Show log -->
+                                        @* @if (ViewBag.PermissionList.Contains(109) == true)
+                                        {
+                                            <li class="nav-item" style="padding-left:24px;">
+                                                <a asp-action="HubInLogView" asp-controller="Log" class="nav-link">
+                                                    <p>Hub In Log</p>
+                                                </a>
+                                            </li>
+                                        }
+                                        @if (ViewBag.PermissionList.Contains(110) == true)
+                                        {
+                                            <li class="nav-item" style="padding-left:24px;">
+                                                <a asp-action="HubOutLogView" asp-controller="Log" class="nav-link">
+                                                    <p>Hub Out Log</p>
+                                                </a>
+                                            </li>
+                                        }
+                                        @if (ViewBag.PermissionList.Contains(111) == true)
+                                        {
+                                            <li class="nav-item" style="padding-left:24px;">
+                                                <a asp-action="DrawerInView" asp-controller="Log" class="nav-link">
+                                                    <p>Put Away Empty Drawer Log</p>
+                                                </a>
+                                            </li>
+                                        } *@
+
+                                        @if (ViewBag.PermissionList.Contains(112) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="SearchSlotByCode" asp-controller="Item"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "SearchSlotByCode" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    Search Slot By Code
+                                                </a>
+                                            </li>
+                                        }
+                                        @if (ViewBag.PermissionList.Contains(113) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="StockAgingReport" asp-controller="Reel"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "StockAgingReport" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    Stock Aging Report
+                                                </a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
                             </li>
                         }
 
-
-                        @if (ViewBag.PermissionList.Contains(121) || ViewBag.PermissionList.Contains(122) || ViewBag.PermissionList.Contains(123) || 
+                        @if (ViewBag.PermissionList.Contains(121) || ViewBag.PermissionList.Contains(122) || ViewBag.PermissionList.Contains(123) ||
                         ViewBag.PermissionList.Contains(124) || ViewBag.PermissionList.Contains(125) || ViewBag.PermissionList.Contains(126))
                         {
-                            <li class="nav-item" id="grpSETTINGS">
-                                <a href="javascript:none" class="nav-link">
-                                    <i class="nav-icon bi bi-gear"></i>
-                                    <p>
-                                        Setting
-                                        <i class="nav-arrow bi bi-chevron-right"></i>
-                                    </p>
+                            <li>
+                                <a href="javascript:void(0)" @@click.prevent="selected = (selected === 'grpSETTINGS' ? '' : 'grpSETTINGS')"
+                                   class="tw:menu-item tw:group @(grpSETTINGSOpen ? "tw:menu-item-active" : "tw:menu-item-inactive")">
+                                    <i class="bi bi-gear @(grpSETTINGSOpen ? "tw:menu-item-icon-active" : "tw:menu-item-icon-inactive")"></i>
+                                    <span class="tw:menu-item-text" :class="sidebarToggle ? 'tw:xl:hidden' : ''">Setting</span>
+                                    <i class="bi bi-chevron-right tw:menu-item-arrow @(grpSETTINGSOpen ? "tw:menu-item-arrow-active" : "tw:menu-item-arrow-inactive")"
+                                       :class="sidebarToggle ? 'tw:xl:hidden' : ''"></i>
                                 </a>
-                                <ul class="nav nav-treeview">
-                                    @if (ViewBag.PermissionList.Contains(121) == true)
-                                    {
-                                        <li class="nav-item " style="padding-left:24px;">
-                                            <a asp-action="UserList" asp-controller="Account" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>User List</p>
-                                            </a>
-                                        </li>
-                                    }
-                                    @if (ViewBag.PermissionList.Contains(122) == true)
-                                    {
-                                        <li class="nav-item" style="padding-left:24px;">
-                                            <a asp-action="UserAccessRightList" asp-controller="Account" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>User Access Right</p>
-                                            </a>
-                                        </li>
-                                    }
-                                    @if (ViewBag.PermissionList.Contains(123) == true)
-                                    {
-                                        <li class="nav-item " style="padding-left:24px;">
-                                            <a asp-action="ReelDimensionList" asp-controller="Setting" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>Reel Height</p>
-                                            </a>
-                                        </li>
-                                    }
-                                    @if (ViewBag.PermissionList.Contains(124) == true)
-                                    {
-                                        <li class="nav-item " style="padding-left:24px;">
-                                            <a asp-action="SlotCalculationList" asp-controller="Setting" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>Slot Usage</p>
-                                            </a>
-                                        </li>
-                                    }
-                                    @if (ViewBag.PermissionList.Contains(125) == true)
-                                    {
-                                        <li class="nav-item " style="padding-left:24px;">
-                                            <a asp-action="SlotColumnSetting" asp-controller="Setting" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>Slot Column</p>
-                                            </a>
-                                        </li>
-                                    }
-                                    @if (ViewBag.PermissionList.Contains(126) == true)
-                                    {
-                                        <li class="nav-item " style="padding-left:24px;">
-                                            <a asp-action="GlobalSetting" asp-controller="Setting" class="nav-link">
-                                                @* <i class="nav-icon bi bi-circle"></i> *@
-                                                <p>Global Setting</p>
-                                            </a>
-                                        </li>
-                                    }
-                                </ul>
+                                <div class="tw:overflow-hidden tw:transform tw:translate" :class="(selected === 'grpSETTINGS') ? 'tw:block' : 'tw:hidden'">
+                                    <ul :class="sidebarToggle ? 'tw:xl:hidden' : 'tw:flex'" class="tw:menu-dropdown tw:mt-2 tw:flex-col tw:gap-1 tw:pl-9 tw:list-none tw:m-0">
+                                        @if (ViewBag.PermissionList.Contains(121) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="UserList" asp-controller="Account"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "UserList" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    User List
+                                                </a>
+                                            </li>
+                                        }
+                                        @if (ViewBag.PermissionList.Contains(122) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="UserAccessRightList" asp-controller="Account"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "UserAccessRightList" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    User Access Right
+                                                </a>
+                                            </li>
+                                        }
+                                        @if (ViewBag.PermissionList.Contains(123) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="ReelDimensionList" asp-controller="Setting"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "ReelDimensionList" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    Reel Height
+                                                </a>
+                                            </li>
+                                        }
+                                        @if (ViewBag.PermissionList.Contains(124) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="SlotCalculationList" asp-controller="Setting"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "SlotCalculationList" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    Slot Usage
+                                                </a>
+                                            </li>
+                                        }
+                                        @if (ViewBag.PermissionList.Contains(125) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="SlotColumnSetting" asp-controller="Setting"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "SlotColumnSetting" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    Slot Column
+                                                </a>
+                                            </li>
+                                        }
+                                        @if (ViewBag.PermissionList.Contains(126) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="GlobalSetting" asp-controller="Setting"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "GlobalSetting" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    Global Setting
+                                                </a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
                             </li>
                         }
 
-
                     </ul>
-                    <!--end::Sidebar Menu-->
                 </nav>
             </div>
-            <!--end::Sidebar Wrapper-->
         </aside>
         <!--end::Sidebar-->
-        <!--begin::App Main-->
-        <main class="app-main">
-            @RenderBody()
-        </main>
-        <!--end::App Main-->
-        <!--begin::Footer-->
-        <footer class="app-footer">
-            <!--begin::To the end-->
-            @* <div class="float-end d-none d-sm-inline">Anything you want</div> *@
-            <!--end::To the end-->
-            <!--begin::Copyright-->
-            <strong>
-                Version 1.0.2.10 Copyright &copy; 2025&nbsp;
-                <!--<a href="https://adminlte.io" class="text-decoration-none">Flex Software Consulting Sdn Bhd</a>-->
-            </strong> 
-            <!--end::Copyright-->
-        </footer>
-        <!--end::Footer-->
+        <!--begin::Content column-->
+        <div id="content-scroll-area" class="tw:relative tw:flex tw:flex-1 tw:flex-col tw:overflow-y-auto tw:overflow-x-hidden">
+
+            <!--begin::Header (persistent - identical on every page, matches
+                 tailadmin/src/partials/header.html's real structure/behavior) -->
+            <header class="tw:sticky tw:top-0 tw:z-40 tw:flex tw:w-full tw:border-gray-200 tw:bg-white tw:xl:border-b tw:dark:border-gray-800 tw:dark:bg-gray-900">
+                <div class="tw:flex tw:grow tw:flex-col tw:items-center tw:justify-between tw:xl:flex-row tw:xl:px-6">
+                    <div class="tw:flex tw:w-full tw:items-center tw:justify-between tw:gap-2 tw:border-b tw:border-gray-200 tw:px-3 tw:py-3 sm:tw:gap-4 lg:tw:py-4 tw:xl:justify-normal tw:xl:border-b-0 tw:xl:px-0 tw:dark:border-gray-800">
+                        <!-- Hamburger Toggle BTN (sidebar) -->
+                        <button type="button"
+                                class="tw:z-[99999] tw:flex tw:h-10 tw:w-10 tw:flex-shrink-0 tw:appearance-none tw:items-center tw:justify-center tw:rounded-lg tw:border-0 tw:border-gray-200 tw:bg-transparent tw:text-gray-500 tw:outline-none tw:xl:h-9 tw:xl:w-9 tw:xl:border tw:dark:border-gray-800 tw:dark:text-gray-400"
+                                @@click.stop="sidebarToggle = !sidebarToggle">
+                            <svg class="tw:hidden tw:fill-current tw:xl:block" width="16" height="12" viewBox="0 0 16 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M0.583252 1C0.583252 0.585788 0.919038 0.25 1.33325 0.25H14.6666C15.0808 0.25 15.4166 0.585786 15.4166 1C15.4166 1.41421 15.0808 1.75 14.6666 1.75L1.33325 1.75C0.919038 1.75 0.583252 1.41422 0.583252 1ZM0.583252 11C0.583252 10.5858 0.919038 10.25 1.33325 10.25L14.6666 10.25C15.0808 10.25 15.4166 10.5858 15.4166 11C15.4166 11.4142 15.0808 11.75 14.6666 11.75L1.33325 11.75C0.919038 11.75 0.583252 11.4142 0.583252 11ZM1.33325 5.25C0.919038 5.25 0.583252 5.58579 0.583252 6C0.583252 6.41421 0.919038 6.75 1.33325 6.75L7.99992 6.75C8.41413 6.75 8.74992 6.41421 8.74992 6C8.74992 5.58579 8.41413 5.25 7.99992 5.25L1.33325 5.25Z" fill="" />
+                            </svg>
+
+                            <svg :class="sidebarToggle ? 'tw:hidden' : 'tw:block tw:xl:hidden'" class="tw:fill-current tw:xl:hidden" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M3.25 6C3.25 5.58579 3.58579 5.25 4 5.25L20 5.25C20.4142 5.25 20.75 5.58579 20.75 6C20.75 6.41421 20.4142 6.75 20 6.75L4 6.75C3.58579 6.75 3.25 6.41422 3.25 6ZM3.25 18C3.25 17.5858 3.58579 17.25 4 17.25L20 17.25C20.4142 17.25 20.75 17.5858 20.75 18C20.75 18.4142 20.4142 18.75 20 18.75L4 18.75C3.58579 18.75 3.25 18.4142 3.25 18ZM4 11.25C3.58579 11.25 3.25 11.5858 3.25 12C3.25 12.4142 3.58579 12.75 4 12.75L12 12.75C12.4142 12.75 12.75 12.4142 12.75 12C12.75 11.5858 12.4142 11.25 12 11.25L4 11.25Z" fill="" />
+                            </svg>
+
+                            <!-- cross icon -->
+                            <svg :class="sidebarToggle ? 'tw:block tw:xl:hidden' : 'tw:hidden'" class="tw:fill-current" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M6.21967 7.28131C5.92678 6.98841 5.92678 6.51354 6.21967 6.22065C6.51256 5.92775 6.98744 5.92775 7.28033 6.22065L11.999 10.9393L16.7176 6.22078C17.0105 5.92789 17.4854 5.92788 17.7782 6.22078C18.0711 6.51367 18.0711 6.98855 17.7782 7.28144L13.0597 12L17.7782 16.7186C18.0711 17.0115 18.0711 17.4863 17.7782 17.7792C17.4854 18.0721 17.0105 18.0721 16.7176 17.7792L11.999 13.0607L7.28033 17.7794C6.98744 18.0722 6.51256 18.0722 6.21967 17.7794C5.92678 17.4865 5.92678 17.0116 6.21967 16.7187L10.9384 12L6.21967 7.28131Z" fill="" />
+                            </svg>
+                        </button>
+
+                        <!-- Mobile-only brand (hidden at xl, since the sidebar's own
+                             brand is visible there instead) -->
+                        <a asp-action="Index" asp-controller="Home"
+                           class="tw:flex tw:items-center tw:gap-2 tw:text-lg tw:font-semibold tw:text-gray-800 tw:no-underline tw:xl:hidden tw:dark:text-white">
+                            <i class="bi bi-hdd-rack tw:text-xl tw:text-brand-500"></i>
+                            <span>WMS</span>
+                        </a>
+
+                        <!-- Application menu toggle: collapses the right-hand cluster
+                             (search/dark-mode/user) below xl, matching the real template -->
+                        <button type="button"
+                                class="tw:z-[99999] tw:flex tw:h-10 tw:w-10 tw:flex-shrink-0 tw:appearance-none tw:items-center tw:justify-center tw:rounded-lg tw:border-0 tw:bg-transparent tw:text-gray-700 tw:outline-none tw:hover:bg-gray-100 tw:xl:hidden tw:dark:text-gray-400 tw:dark:hover:bg-gray-800"
+                                :class="menuToggle ? 'tw:bg-gray-100 tw:dark:bg-gray-800' : ''"
+                                @@click.stop="menuToggle = !menuToggle">
+                            <i class="bi bi-three-dots-vertical tw:text-xl"></i>
+                        </button>
+                    </div>
+
+                    <!-- Right cluster: dark mode + user profile - collapsible below xl -->
+                    <div :class="menuToggle ? 'tw:flex' : 'tw:hidden'"
+                         class="tw:w-full tw:items-center tw:justify-between tw:gap-4 tw:px-5 tw:py-4 tw:xl:flex tw:xl:w-auto tw:xl:justify-end tw:xl:px-0 tw:xl:py-0">
+                        <div class="tw:flex tw:items-center tw:gap-3">
+                            <!-- Dark Mode Toggler -->
+                            <button type="button"
+                                    class="tw:relative tw:flex tw:h-9 tw:w-9 tw:flex-shrink-0 tw:items-center tw:justify-center tw:rounded-full tw:border tw:border-gray-200 tw:bg-white tw:text-gray-500 tw:transition-colors tw:hover:bg-gray-100 tw:hover:text-gray-700 tw:dark:border-gray-800 tw:dark:bg-gray-900 tw:dark:text-gray-400 tw:dark:hover:bg-gray-800 tw:dark:hover:text-white"
+                                    @@click.prevent="darkMode = !darkMode; document.documentElement.classList.toggle('dark', darkMode); localStorage.setItem('darkMode', JSON.stringify(darkMode))">
+                                <i class="bi" :class="darkMode ? 'bi-sun' : 'bi-moon-stars'"></i>
+                            </button>
+
+                            <!-- User profile -->
+                            <div class="tw:relative" x-data="{ dropdownOpen: false }" @@click.outside="dropdownOpen = false">
+                                <button type="button"
+                                        class="tw:flex tw:appearance-none tw:items-center tw:border-0 tw:bg-transparent tw:text-gray-700 tw:outline-none tw:dark:text-gray-400"
+                                        @@click.prevent="dropdownOpen = !dropdownOpen">
+                                    <span class="tw:me-3 tw:flex tw:h-9 tw:w-9 tw:items-center tw:justify-center tw:rounded-full tw:bg-brand-50 tw:text-brand-500 tw:dark:bg-brand-500/15">
+                                        <i class="bi bi-person-fill"></i>
+                                    </span>
+                                    <span class="tw:text-theme-sm tw:me-1 tw:font-medium">@(User.Identity?.Name ?? "User")</span>
+                                    <i class="bi bi-chevron-down tw:text-xs tw:transition-transform" :class="dropdownOpen ? 'tw:rotate-180' : ''"></i>
+                                </button>
+
+                                <div x-show="dropdownOpen" x-cloak
+                                     class="tw:shadow-theme-lg tw:absolute tw:right-0 tw:mt-3 tw:flex tw:w-56 tw:flex-col tw:rounded-2xl tw:border tw:border-gray-200 tw:bg-white tw:p-3 tw:dark:border-gray-800 tw:dark:bg-gray-900">
+                                    <span class="tw:text-theme-sm tw:block tw:px-2 tw:py-1 tw:font-medium tw:text-gray-700 tw:dark:text-gray-300">@(User.Identity?.Name ?? "User")</span>
+                                    <form method="post" asp-action="Logout" asp-controller="Account" class="tw:mt-2 tw:border-t tw:border-gray-100 tw:pt-2 tw:dark:border-gray-800">
+                                        <button type="submit"
+                                                class="tw:group tw:text-theme-sm tw:flex tw:w-full tw:appearance-none tw:items-center tw:gap-2 tw:rounded-lg tw:border-0 tw:bg-transparent tw:px-2 tw:py-2 tw:text-left tw:font-medium tw:text-gray-700 tw:outline-none tw:hover:bg-gray-100 tw:dark:text-gray-400 tw:dark:hover:bg-white/5">
+                                            <i class="bi bi-box-arrow-right"></i>
+                                            Sign out
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <!--end::Header-->
+
+            <!--begin::Page toolbar (per-view title/actions, varies per page) -->
+            @* <div class="page-header-slot tw:border-b tw:border-gray-200 tw:bg-white tw:px-4 tw:py-4 md:tw:px-6 tw:dark:border-gray-800 tw:dark:bg-gray-900">
+                @RenderSection("PageHeader", required: false)
+            </div> *@
+            <!--end::Page toolbar-->
+
+            <!--begin::App Main-->
+            <main class="tw:flex-1">
+                <div class="tw:mx-auto tw:max-w-(--breakpoint-2xl) tw:px-4 tw:pb-4 tw:pt-2 tw:md:px-6 tw:md:pb-6 tw:md:pt-3">
+                    @RenderBody()
+                </div>
+            </main>
+            <!--end::App Main-->
+
+            <!--begin::Footer-->
+            <footer class="tw:border-t tw:border-gray-200 tw:bg-white tw:px-4 tw:py-3 tw:text-xs tw:text-gray-500 tw:dark:border-gray-800 tw:dark:bg-gray-900 tw:dark:text-gray-400">
+                <strong>
+                    Version 1.0.2.4 Copyright &copy; 2025&nbsp;
+                </strong>
+            </footer>
+            <!--end::Footer-->
+        </div>
+        <!--end::Content column-->
     </div>
     <!--end::App Wrapper-->
 
-    
-    <!--end::Third Party Plugin(OverlayScrollbars)--><!--begin::Required Plugin(popperjs for Bootstrap 5)-->
+    <!--begin::Required Plugin(popperjs for Bootstrap 5)-->
     <script src="~/lib/popper/popper.js"></script>
-    <script type="module" src="~/js/adminlte.min.js"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @* <script type="module" src="~/js/adminlte.min.js"></script> *@
+
+    <script src="~/js/adminlte.js"></script>
+
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- TailAdmin styling preview: powers the sidebar/dark-mode interactivity above -->
+    <script src="~/lib/alpinejs/alpine.min.js" defer></script>
+
     @await RenderSectionAsync("Scripts", required: false)
-
-    <script type="text/javascript">
-        $(document).ready(function() {
-            // var isAuthenticated = @(User?.Identity?.IsAuthenticated == true ? "true" : "false");
-            // console.log("isauth", isAuthenticated);
-
-            // if (isAuthenticated === "false") {
-            //     console.log("proceed here?");
-            //     window.location.href = '@Url.Action("Login", "Account")';
-            // }
-            // else if (isAuthenticated == false)
-            // {
-            //     console.log(" here?");
-            //     window.location.href = '@Url.Action("Login", "Account")';
-            // }
-
-            //temp remove
-            // $.ajax({
-            //     url: '/Account/getSession',
-            //     type: 'GET',
-            //     xhrFields: {
-            //         withCredentials: true
-            //     },
-            //     success: function(data) {
-            //         // console.log(data);
-            //         if (data == "") {
-            //             window.location.href = '@Url.Action("Login", "Account")';
-            //         }
-            //     },
-            //     error: function(xhr, status, error) {
-            //         console.error('Error fetching data:', error);
-            //     }
-            // });
-
-
-            // for (var j = 1; j <= ttlPage; j++) {
-            //     $('#btnP' + j).removeClass('active');
-            // }
-            // $('#btnP' + page).addClass('active');
-            
-            var myActiveTab = '@ViewData["ActiveTab"]';
-            var myActiveGroup = '@ViewData["ActiveGroup"]';
-            // console.log(myActiveGroup);
-            $('#' + myActiveGroup).addClass('menu-open');
-
-            const allLinks = document.querySelectorAll('a.nav-link'); // Selects all <a> elements on the page
-
-            allLinks.forEach(link => {
-              const hrefValue = link.href; // Access the href attribute of each link
-                    // console.log(hrefValue);
-              if (hrefValue.includes(myActiveTab)) {
-                  $(link).addClass('active');
-              }
-              else {
-                  $(link).removeClass('active');
-              }
-            });
-
-
-        });
-
-        const body = document.querySelector('body');
-        const sideBtn = document.getElementById('sideBtn');
-        sideBtn.addEventListener('click', () => {
-            if (body.classList.contains('sidebar-open')) {
-                body.classList.remove('sidebar-open');
-                sideBtn.classList.remove('click');
-                body.classList.add('sidebar-closed');
-                body.classList.add('sidebar-collapse');
-            } else {
-                body.classList.remove('sidebar-closed');
-                body.classList.remove('sidebar-collapse');
-                body.classList.add('sidebar-open');
-                sideBtn.classList.add('click');
-            }
-        });
-    </script>
 </body>
 </html>

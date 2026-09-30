@@ -1,129 +1,101 @@
 ﻿<style>
-
-    .grid-container {
-        display: grid;
-        grid-template-columns: 1fr 2fr;
-        gap: 5px; 
-        align-items: center;
-    }
-
-    .grid-item {
-        display: flex;
-        align-items: center;
-    }
-
-    .input-wrapper {
-        display: flex;
-        align-items: center;
-        margin-right: 5px; 
-    }
-
-    .input-wrapper input {
-        width: 60px;
-        margin-right: 2px;
-    }
-
-    .input-wrapper .input-label {
-        font-size: 14px;
-        white-space: nowrap;
-    }
-
     .error-message {
         font-size: 12px;
         color: red;
         margin-top: 3px;
     }
-
-
 </style>
 
-@section PageHeader {
-    <header class="d-flex align-items-center justify-content-between w-100">
-        <h2 class="pageTitle">Item Group List</h2>
-        <div class="d-flex">
-            <button type="button" class="btn btn-success" onclick="newItemForm()">
-                Add New Item Group
-            </button>
-        </div>
-    </header>
-}
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body pt-0">
-                    @* <div id="gridTable" class="table table-responsive text-nowrap mt-3"></div> *@
-                    <div class="text-nowrap table-container mt-1">
-                        <table id="listTable" class="dataTable row-border hover order-column" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>Item Group Code</th>
-                                    <th>Description</th>
-                                    <th>Is Active</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="tw:flex tw:w-full tw:items-center tw:justify-between">
+    <h2 class="tw:text-lg tw:mb-0 tw:ml-2 tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Item Group List</h2>
+    <div class="tw:flex">
+        <button type="button" class="tw:border-0 tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:transition
+            tw:hover:bg-brand-600" onclick="newItemForm()">
+            Add New Item Group
+        </button>
     </div>
 </div>
 
-<div class="modal fade" id="myModal" role="dialog">
+<div class="tw:mt-3">
+    <div class="dt-tailadmin tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:text-gray-700 tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:dark:text-gray-300">
+        <table id="listTable" class="row-border dataTable hover order-column tw:w-full">
+            <thead>
+                <tr class="tw:border-b tw:border-gray-200">
+                    @{
+                        string[] listHeaders = { "Item Group Code", "Description", "Is Active", "Action" };
+                    }
+                    @foreach (var header in listHeaders)
+                    {
+                        <th class="tw:px-5 tw:py-3.5 tw:text-left sm:tw:px-6"><span class="tw:text-sm tw:font-semibold tw:text-gray-700 tw:dark:text-gray-300">@header</span></th>
+                    }
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="myModal" role="dialog" data-bs-focus="false">
     <div class="modal-dialog">
 
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Update Item Group</h4>
+        <div class="modal-content tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+            <div class="tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
+                <h4 class="tw:text-base tw:font-semibold tw:text-gray-800 tw:mb-0 tw:dark:text-white/90">Update Item Group</h4>
             </div>
-            @* <form action="/bin/SaveBin" method="post"> *@
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label" for="txtCode">Item Group Code</label>
-                    <input type="text" class="form-control" name="ItemCode" id="txtCode" aria-describedby="Item Code" maxlength="50">
+            <div class="tw:space-y-4 tw:px-6 tw:py-4">
+                <div>
+                    <label class="tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400" for="txtCode">Item Group Code</label>
+                    <input type="text" class="tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-sm tw:text-gray-800 tw:placeholder:text-gray-400
+                           tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90
+                           tw:dark:placeholder:text-white/30 tw:dark:focus:border-brand-800" name="ItemCode" id="txtCode" aria-describedby="Item Code" maxlength="50" oninput="removeErrMsg(this.id)">
                     <div id="txtCodeError" class="error-message"></div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtDesc">Description</label>
-                    <input type="text" class="form-control" name="Description" id="txtDesc" aria-describedby="Description" maxlength="255">
+                <div>
+                    <label class="tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400" for="txtDesc">Description</label>
+                    <input type="text" class="tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-sm tw:text-gray-800 tw:placeholder:text-gray-400
+                           tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90
+                           tw:dark:placeholder:text-white/30 tw:dark:focus:border-brand-800" name="Description" id="txtDesc" aria-describedby="Item Code" maxlength="50">
                     <div id="txtDescError" class="error-message"></div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Expired Date Range</label>
-                    <div class="grid-container">
-                        <div class="grid-item">
-                            <div class="input-wrapper">
-                                <input type="number" class="form-control" name="Years" id="txtYears" aria-describedby="Years" style="width: 80px;" >
-                                <span class="ms-1">Years</span>
+                <div>
+                    <label class="tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400">Expired Date Range</label>
+                    <div class="tw:grid tw:grid-cols-2 tw:gap-3">
+                        <div>
+                            <div class="tw:flex tw:items-center tw:gap-2">
+                                <input type="number" class="tw:w-20 tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-3 tw:py-2 tw:text-sm tw:text-gray-800 tw:placeholder:text-gray-400
+                                    tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90"
+                                    name="Years" id="txtYears" aria-describedby="Years">
+                                <span class="tw:text-sm tw:text-gray-700 tw:dark:text-gray-400">Years</span>
                             </div>
                             <div id="txtYearsError" class="error-message"></div>
                         </div>
-                        <div class="grid-item">
-                            <div class="input-wrapper">
-                                <input type="number" class="form-control" name="Months" id="txtMonths" aria-describedby="Months" style="width: 80px;">
-                                <span class="ms-1">Months</span>
+                        <div>
+                            <div class="tw:flex tw:items-center tw:gap-2">
+                                <input type="number" class="tw:w-20 tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-3 tw:py-2 tw:text-sm tw:text-gray-800 tw:placeholder:text-gray-400
+                                    tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90"
+                                    name="Months" id="txtMonths" aria-describedby="Months">
+                                <span class="tw:text-sm tw:text-gray-700 tw:dark:text-gray-400">Months</span>
                             </div>
                             <div id="txtMonthsError" class="error-message"></div>
                         </div>
                     </div>
                 </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkIsActive">
-                    <label class="form-check-label" for="chkIsActive">Is Active</label>
+                <div class="tw:flex tw:items-center tw:gap-2 tw:mb-0">
+                    <input type="checkbox" class="tw:h-4 tw:w-4 tw:accent-brand-500" id="chkIsActive">
+                    <label class="tw:text-sm tw:text-gray-700 tw:dark:text-gray-400" for="chkIsActive">Is Active</label>
                 </div>
-
                 <input type="hidden" id="txtId">
-
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="saveItem()">Save</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="cancelForm()">Cancel</button>
+            <div class="tw:flex tw:justify-end tw:gap-3 tw:border-t tw:border-gray-100 tw:px-6 tw:py-3 tw:dark:border-gray-800">
+                <button type="button" class="save-btn tw:border-0 tw:rounded-lg tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:shadow-theme-xs
+                    tw:hover:bg-brand-600" onclick="saveItem()">
+                    Save
+                </button>
+                <button type="button" class="cancel-btn tw:bg-transparent tw:rounded-lg tw:border tw:border-gray-300 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-700 tw:hover:bg-gray-100
+                    tw:dark:border-gray-700 tw:dark:text-gray-400 tw:dark:hover:bg-white/5" onclick="cancelForm()">
+                    Cancel
+                </button>
             </div>
-            @* </form> *@
         </div>
     </div>
 </div>
@@ -132,21 +104,12 @@
 {
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
     <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
-    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="../js/dataTables.js"></script>
-    <script src="../js/dataTables.columnControl.js"></script>
-    <script src="../js/columnControl.dataTables.js"></script>
-
     <script src="~/js/sweetalert2.all.min.js"></script>
 
-    @* <script src="~/js/gridjs.umd.js"></script> 
-    <link rel="stylesheet" href="~/css/gridjs.min.css">*@
-
     <script type="text/javascript">
-        // let gridInstance = null;
-
         $(document).ready(function () {
             loadList();
         });
@@ -168,118 +131,55 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
-                    swal.close()
+                    Swal.close()
                     if (result.success == true) {
-                        
+                        const cellClass = 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6 tw:text-theme-sm tw:text-gray-700 tw:dark:text-gray-300';
+
                         $('#listTable').DataTable( {
                             data: result.data,
                             paging: true,
                             pageLength: 50,
-                            lengthMenu: [50, 100, 250, 500, 1000],
+                            lengthMenu: [20, 50, 100, 250],
                             columns: [
-                                { data: 'itemGroupCode' },
-                                { data: 'description' },
+                                { data: 'itemGroupCode', className: cellClass },
+                                { data: 'description', className: cellClass },
                                 {
                                     data: null,
+                                    className: 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6',
                                     render: function (data, type, row, meta) {
-                                        if (row.isActive == true) {
-                                            return '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
-                                        }
-                                        else {
-                                            return '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>'
-                                        }
+                                        return row.isActive
+                                            ? '<span class="tw:status-badge tw:bg-success-50 tw:text-success-700 tw:dark:bg-success-500/15 tw:dark:text-success-500">Active</span>'
+                                            : '<span class="tw:status-badge tw:bg-gray-100 tw:text-gray-700 tw:dark:bg-white/5 tw:dark:text-gray-400">Inactive</span>';
                                     }
                                 },
                                 {
                                     data: null,
+                                    className: 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6',
                                     render: function (data, type, row, meta) {
                                         const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
-                                        return `<div style="display:flex;">
-                                            <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
-                                                <span><i class="bi bi-pencil-square""></i>  Edit</span>
+                                        return `<div style="tw:flex tw:items-center tw:gap-2">
+                                            <button class="edit-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-amber-50 tw:font-medium tw:text-amber-600
+                                                tw:transition-colors tw:hover:bg-amber-100 tw:dark:bg-amber-500/15 tw:dark:text-amber-400 tw:dark:hover:bg-amber-500/25" data-row="${rowData}">
+                                                <i class="bi bi-pencil-square""></i>  
+                                                Edit
                                             </button>
-                                            <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.itemGroup_Id}" data-code="${row.itemGroupCode}">
-                                                <span><i class="bi bi-trash""></i>  Delete</span>
-                                            </button></div>`;
+                                            <button class="delete-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-error-50 tw:font-medium tw:text-error-600
+                                                tw:transition-colors tw:hover:bg-error-100 tw:dark:bg-error-500/15 tw:dark:text-error-400 tw:dark:hover:bg-error-500/25" data-id="${row.itemGroup_Id}" data-code="${row.itemGroupCode}">
+                                                <i class="bi bi-trash""></i>  
+                                                Delete
+                                            </button>
+                                        </div>`;
                                     }
                                 }
                             ],
                             language: {
                                 searchPlaceholder: "🔍︎ Search",
                                 search: ""
-                            },
-                            ordering: {
-                                indicators: false
-                            },
-                            columnControl: ['orderStatus'],
-                            columnDropdowns: [
-                                { width: '50px' },
-                            ]
+                            }
                         });
-                        /*
-                       if (gridInstance) {
-                           gridInstance.destroy();
-                       }
-
-                       gridInstance = new gridjs.Grid({
-                           columns: [
-                               { name: 'Item Group Id', id: 'itemGroup_Id', hidden: true},
-                               { name: 'Item Group Code', id: 'itemGroupCode', width: '188px' },
-                               { name: 'Description', id: 'description' },
-                               { 
-                                   name: 'Active State',
-                                   id: 'isActive',
-                                   width: '140px',
-                                   formatter: (cell, row) => {
-                                        const badgeHtml = row.cells[3].data === true
-                                          ? '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
-                                          : '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>';
-                                        return gridjs.html(`<div style="text-align:center;">${badgeHtml}</div>`);
-                                   }
-                               },
-                               {
-                                   name: 'Action',
-                                   formatter: (cell, row) => {
-                                       const cleanRow = {
-                                           itemGroup_Id: row.cells[0]?.data,
-                                           itemGroupCode: row.cells[1]?.data,
-                                           description: row.cells[2]?.data,
-                                           isActive: row.cells[3]?.data,
-                                       };
-                                       const rawData = btoa(JSON.stringify(cleanRow));
-                                       return gridjs.html(`
-                                            <div style="display: flex;">
-                                               <button class="btn btn-warning d-grid edit-btn me-2" data-row="${rawData}">
-                                                   <span><i class="bi bi-pencil-square"></i> Edit</span>
-                                               </button>
-                                               <button class="btn btn-danger d-grid delete-btn" data-id="${cleanRow.itemGroup_Id}" data-code="${cleanRow.itemGroupCode}">
-                                                   <span><i class="bi bi-trash"></i> Delete</span>
-                                               </button>
-                                           </div>
-                                       `);
-                                   }
-                               }
-                           ],
-                           data: result.data,
-                           pagination: true,
-                           search: true,
-                           sort: true,
-                           resizable: true,
-                           className: {
-                               table: 'custom-table',
-                           }
-                       }).render(document.getElementById("gridTable"));
-
-                       //remove grid-footer class
-                        const footer = document.querySelector('#gridTable .gridjs-footer');
-                        if (footer) {
-                            footer.id = "gridFooter";
-                        }
-                        document.getElementById("gridFooter").classList.remove("gridjs-footer");
-                        */
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -287,7 +187,7 @@
                     }
                 },
                 error: function (error) {
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -328,6 +228,10 @@
 
         function cancelForm() {
             $("#myModal").modal("toggle");
+
+            fields = ['txtCode', 'txtDesc' ];
+            removeErrMsg(fields, true);
+
         }
 
         // Show error message and highlight invalid fields
@@ -337,17 +241,18 @@
         }
 
         function removeErrMsg(fields, clearValue = false) {
-            fields = ['txtCode', 'txtDesc' ];
-            if (!Array.isArray(fields)) {
-                fields = [fields];
-            }
+            if (fields != null) {
+                if (!Array.isArray(fields)) {
+                    fields = [fields];
+                }
 
-            fields.forEach(function(field) {
-                document.getElementById(field).classList.remove('is-invalid');
-                document.getElementById(field).classList.remove('is-valid');
-                document.getElementById(field + 'Error').textContent = '';
-                if (clearValue) document.getElementById(field).value = '';
-            });
+                fields.forEach(function(field) {
+                    document.getElementById(field).classList.remove('is-invalid');
+                    document.getElementById(field).classList.remove('is-valid');
+                    document.getElementById(field + 'Error').textContent = '';
+                    if (clearValue) document.getElementById(field).value = '';
+                });
+            }
         }
 
         function checkInput() {
@@ -395,7 +300,7 @@
                 success: function (result) {
                     if (result.success == true) {
                         $("#myModal").modal("toggle");
-                        swal.fire({
+                        Swal.fire({
                             icon: 'success',
                             title: "Success Update",
                             text: "",
@@ -405,7 +310,7 @@
                         });
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -413,8 +318,7 @@
                     }
                 },
                 error: function (error) {
-                    console.log(error);
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -430,15 +334,13 @@
         });
 
         function deleteItem(id, code) {
-            swal.fire({
+            Swal.fire({
                 title: "Are you sure want to delete?",
-                text: "You will not be able to recover this record!",
-                inputAttributes: {
-                    autocapitalize: 'off'
-                },
+                text: "You won't be able to recover this record!",
+                icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'ok',
-                cancelButtonText: 'cancel',
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'Cancel',
                 allowOutsideClick: false
               }).then(function(r) {
                 if (r.isConfirmed == true) {
@@ -466,7 +368,7 @@
                         },
                         success: function (result) {
                             if (result.success == true) {
-                                swal.fire({
+                                Swal.fire({
                                     icon: 'success',
                                     title: "Success Deleted",
                                     text: "",
@@ -476,7 +378,7 @@
                                 });
                             }
                             else {
-                                swal.fire({
+                                Swal.fire({
                                     icon: 'error',
                                     title: "Wait",
                                     text: result.errMessage
@@ -484,7 +386,7 @@
                             }
                         },
                         error: function (error) {
-                            swal.fire({
+                            Swal.fire({
                                 icon: 'error',
                                 title: "Wait",
                                 text: error.val

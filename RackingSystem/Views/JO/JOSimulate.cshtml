@@ -1,505 +1,170 @@
 @{
-	ViewData["Title"] = "JO Simulate";
+    ViewData["Title"] = "JO Simulate";
+    string labelClass = "tw:mb-2 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-300";
+    string smallBtn = "tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:border-0 tw:px-3 tw:py-1.5 tw:text-sm tw:font-medium tw:transition-colors";
 }
 
-<style>
-	.fulfillment-badge {
-		display: inline-block;
-		padding: 8px 12px;
-		border-radius: 4px;
-		font-weight: bold;
-		font-size: 14px;
-	}
-
-	.fulfillable {
-		background-color: #d4edda;
-		color: #155724;
-		border: 1px solid #c3e6cb;
-	}
-
-	.unfulfillable {
-		background-color: #f8d7da;
-		color: #721c24;
-		border: 1px solid #f5c6cb;
-	}
-
-	.detail-card {
-		border: 1px solid #ddd;
-		border-radius: 4px;
-		margin-bottom: 15px;
-		padding: 15px;
-		background-color: #f9f9f9;
-	}
-
-	.detail-card.warning {
-		border-left: 4px solid #ff6b6b;
-		background-color: #fff9f9;
-	}
-
-	.detail-card.success {
-		border-left: 4px solid #51cf66;
-		background-color: #f9fdf9;
-	}
-
-	.raw-material-table {
-		width: 100%;
-		margin: 10px 0;
-	}
-
-	.raw-material-table thead {
-		background-color: #f0f0f0;
-		font-weight: 600;
-	}
-
-	.raw-material-table th,
-	.raw-material-table td {
-		padding: 8px;
-		border-bottom: 1px solid #ddd;
-		text-align: left;
-	}
-
-	.raw-material-table tbody tr:hover {
-		background-color: #f5f5f5;
-	}
-
-	.shortage-highlight {
-		background-color: #ffebee !important;
-	}
-
-	.sufficient {
-		color: #4caf50;
-	}
-
-	.insufficient {
-		color: #f44336;
-		font-weight: bold;
-	}
-
-	.shortage-section {
-		background-color: #ffebee;
-		padding: 12px;
-		border-radius: 4px;
-		margin-top: 10px;
-		border-left: 3px solid #d32f2f;
-	}
-
-	.info-row {
-		display: flex;
-		justify-content: space-between;
-		margin: 5px 0;
-		font-size: 14px;
-	}
-
-	.info-label {
-		font-weight: bold;
-		color: #666;
-	}
-
-	.info-value {
-		color: #333;
-	}
-
-	/* Table grouping styles */
-	.results-table {
-		width: 100%;
-		border-collapse: collapse;
-		margin-top: 20px;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-		background: white;
-	}
-
-	.results-table > thead > tr > th {
-		background-color: #f0f0f0;
-		font-weight: 600;
-		padding: 12px;
-		border-bottom: 2px solid #ddd;
-		text-align: left;
-	}
-
-	.group-row {
-		background-color: #e3f2fd;
-		font-weight: 600;
-		cursor: pointer;
-	}
-
-	.group-row td {
-		padding: 12px;
-		border-bottom: 1px solid #ddd;
-	}
-
-	.group-row .toggle-icon {
-		margin-right: 8px;
-		transition: transform 0.3s ease;
-	}
-
-	.group-row.collapsed .toggle-icon {
-		transform: rotate(-90deg);
-	}
-
-	.raw-material-group {
-		background-color: #fafafa;
-	}
-
-	.raw-material-row {
-		border-bottom: 1px solid #eee;
-	}
-
-	.raw-material-row td {
-		padding: 10px 12px;
-		font-size: 14px;
-	}
-
-	.raw-material-row.shortage {
-		background-color: #ffebee;
-	}
-
-	.status-badge {
-		display: inline-block;
-		padding: 4px 8px;
-		border-radius: 4px;
-		font-weight: 600;
-		font-size: 12px;
-	}
-
-	.status-badge.ok {
-		background-color: #c8e6c9;
-		color: #2e7d32;
-	}
-
-	.status-badge.short {
-		background-color: #ffcdd2;
-		color: #c62828;
-	}
-
-	.status-badge.fulfill {
-		background-color: #c8e6c9;
-		color: #2e7d32;
-	}
-
-	.status-badge.cannot-fulfill {
-		background-color: #ffcdd2;
-		color: #c62828;
-	}
-
-	.qty-cell {
-		text-align: right;
-		font-family: 'Courier New', monospace;
-	}
-
-	.loading-spinner {
-		text-align: center;
-		padding: 30px;
-	}
-
-	.summary-section {
-		background-color: #f5f5f5;
-		padding: 20px;
-		border-radius: 4px;
-		margin-bottom: 20px;
-	}
-
-	.summary-item {
-		display: inline-block;
-		margin-right: 30px;
-		margin-bottom: 10px;
-	}
-
-	.summary-value {
-		font-size: 24px;
-		font-weight: bold;
-		color: #333;
-	}
-
-	.summary-label {
-		color: #666;
-		font-size: 12px;
-		text-transform: uppercase;
-	}
-
-	.back-button {
-		margin-bottom: 15px;
-	}
-
-	.empty-state {
-		text-align: center;
-		padding: 40px 20px;
-		color: #6c757d;
-	}
-
-	.empty-state i {
-		font-size: 48px;
-		margin-bottom: 20px;
-		opacity: 0.5;
-		}
-
-	.status-grid {
-		display: grid;
-		grid-template-columns: repeat(6, 1fr);
-		gap: 16px;
-		margin-bottom: 24px;
-	}
-
-	.status-card {
-		background: #f9fafb;
-		border-radius: 14px;
-		padding: 16px;
-		text-align: center;
-		border: 1px solid #e5e7eb;
-		cursor: pointer;
-		transition: transform 0.15s ease, box-shadow 0.15s ease;
-	}
-
-		.status-card h3 {
-			font-size: 13px;
-			color: #6b7280;
-			margin-bottom: 6px;
-		}
-
-		.status-card .value {
-			font-size: 22px;
-			font-weight: 600;
-		}
-
-		.status-card:hover {
-			transform: translateY(-2px);
-			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-		}
-
-		.status-card.active-filter {
-			border-color: #007bff;
-			box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-		}
-
-		/* Tab styles */
-		.nav-tabs {
-			border-bottom: 2px solid #dee2e6;
-			background-color: #f8f9fa;
-			border-radius: 4px 4px 0 0;
-			padding: 5px;
-		}
-
-		.nav-tabs .nav-link {
-			color: #6c757d;
-			border: none;
-			background-color: transparent;
-			border-radius: 4px 4px 0 0;
-			margin-right: 2px;
-			transition: all 0.3s ease;
-		}
-
-		.nav-tabs .nav-link:hover {
-			color: #495057;
-			background-color: #e9ecef;
-		}
-
-		.nav-tabs .nav-link.active {
-			color: #fff;
-			background-color: #007bff;
-			border: none;
-			font-weight: 600;
-		}
-
-		.tab-content {
-			padding: 20px;
-			background-color: #fff;
-			border: 1px solid #dee2e6;
-			border-top: none;
-			border-radius: 0 0 4px 4px;
-		}
-
-</style>
-
-@section PageHeader {
-	<header class="d-flex align-items-center justify-content-between w-100">
-		<h2 class="pageTitle">JO Simulate - Raw Material Stock Check</h2>
-	</header>
-}
-
-<div class="container-fluid">
-	<div class="row">
-		<div class="col-12">
-			<br />
-
-			<!-- Status -->
-			<div class="status-grid">
-				<div class="status-card" id="card_all-details" onclick="showTab2('all-details')">
-					<h3>Total Details</h3>
-					<div class="value" id="txtTtlDtl">-</div>
-				</div>
-				<div class="status-card" id="card_all-raw" onclick="showTab2('all-raw')">
-					<h3>Total Raw Materials</h3>
-					<div class="value" id="txtTtlRaw">-</div>
-				</div>
-				<div class="status-card" id="card_details-can" onclick="showTab2('details-can')">
-					<h3>Details Can Fulfill</h3>
-					<div class="value" id="txtTtlCanDtl" style="color: #4caf50;">-</div>
-				</div>
-				<div class="status-card" id="card_details-cannot" onclick="showTab2('details-cannot')">
-					<h3>Details Cannot Fulfill</h3>
-					<div class="value" id="txtTtlCannotDtl" style="color: #ff6b6b;">-</div>
-				</div>
-				<div class="status-card" id="card_raw-can" onclick="showTab2('raw-can')">
-					<h3>Raw Materials Can Fulfill</h3>
-					<div class="value" id="txtTtlCanRaw" style="color: #4caf50;">-</div>
-				</div>
-				<div class="status-card" id="card_raw-cannot" onclick="showTab2('raw-cannot')">
-					<h3>Raw Materials Cannot Fulfill</h3>
-					<div class="value" id="txtTtlCannotRaw" style="color: #ff6b6b;">-</div>
-				</div>
-			</div>
-
-			<hr />
-
-			<!-- Action Buttons -->
-			<div id="actionButtons" style="display: none; margin-bottom: 15px;">
-				<button type="button" class="btn btn-success" onclick="openGenerateModal()">
-					<i class="bi bi-play-circle"></i> Generate Report
-				</button>
-				<button type="button" class="btn btn-outline-secondary" onclick="showAppliedFilters()">
-					<i class="bi bi-funnel"></i> Applied Filters
-				</button>
-				@* <button type="button" class="btn btn-warning" onclick="toggleShortOnly()">
-					<i class="bi bi-funnel"></i> <span id="shortOnlyBtnText">Show Short Only</span>
-				</button> *@
-				<button type="button" class="btn btn-outline-primary" onclick="exportToExcel()">
-					<i class="bi bi-file-earmark-excel"></i> Export to Excel
-				</button>
-			</div>
-
-			<div id="loading" class="loading-spinner">
-				<div class="spinner-border" role="status">
-					<span class="visually-hidden">Loading...</span>
-				</div>
-				<p>Checking raw material stock availability...</p>
-			</div>
-
-			<!-- Results Tabs -->
-			<ul class="nav nav-tabs" id="mainResultsTab" role="tablist" style="margin-top: 20px;">
-				<li class="nav-item" role="presentation">
-					<button class="nav-link active" id="allDetailsView-tab" data-bs-toggle="tab" data-bs-target="#allDetailsView" type="button" role="tab" aria-controls="allDetailsView" aria-selected="true">
-						<i class="bi bi-list-ul"></i> All Details
-					</button>
-				</li>
-				<li class="nav-item" role="presentation">
-					<button class="nav-link" id="detailsView-tab" data-bs-toggle="tab" data-bs-target="#detailsView" type="button" role="tab" aria-controls="detailsView" aria-selected="false">
-						<i class="bi bi-funnel"></i> <span id="tab2Label">Filtered View</span>
-					</button>
-				</li>
-			</ul>
-
-			<!-- Tab Content -->
-			<div class="tab-content" id="mainResultsTabContent">
-				<!-- Tab 1 :: always shows every detail with its raw materials -->
-				<div class="tab-pane fade show active" id="allDetailsView" role="tabpanel" aria-labelledby="allDetailsView-tab">
-					<div class="mb-2">
-						<button type="button" class="btn btn-warning btn-sm" onclick="expandShortagesOnly('#resultsContainer')">
-							<i class="bi bi-exclamation-triangle"></i> Expand Shortages Only
-						</button>
-						<button type="button" class="btn btn-secondary btn-sm" onclick="collapseAll('#resultsContainer')">
-							<i class="bi bi-arrow-up"></i> Collapse All
-						</button>
-					</div>
-					<div id="resultsContainer"></div>
-				</div>
-
-				<!-- Tab 2 :: refreshed whenever a status card above is clicked -->
-				<div class="tab-pane fade" id="detailsView" role="tabpanel" aria-labelledby="detailsView-tab">
-					<div class="mb-2">
-						<button type="button" class="btn btn-warning btn-sm" onclick="expandAll('#resultsContainer2')">
-							<i class="bi bi-arrow-down"></i> Expand All
-						</button>
-						<button type="button" class="btn btn-secondary btn-sm" onclick="collapseAll('#resultsContainer2')">
-							<i class="bi bi-arrow-up"></i> Collapse All
-						</button>
-					</div>
-					<div id="resultsContainer2"></div>
-				</div>
-			</div>
-
-			<!-- Generate Report Modal -->
-			<div class="modal fade" id="generateModal" tabindex="-1" aria-labelledby="generateModalLabel" aria-hidden="true">
-				<div class="modal-dialog">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="modal-title" id="generateModalLabel">Generate Stock Report</h5>
-							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-						</div>
-						<div class="modal-body">
-							<form id="generateForm">
-								<!-- Include Job Orders in Queue -->
-								<div class="mb-3">
-									<label class="form-label">Include Job Orders in Queue:</label>
-									<div class="form-check">
-										<input class="form-check-input" type="radio" name="includeQueue" id="queueYes" value="true" checked>
-										<label class="form-check-label" for="queueYes">Yes</label>
-									</div>
-									<div class="form-check">
-										<input class="form-check-input" type="radio" name="includeQueue" id="queueNo" value="false">
-										<label class="form-check-label" for="queueNo">No</label>
-									</div>
-								</div>
-
-								<!-- Include Emergency in Queue -->
-								<div class="mb-3">
-									<label class="form-label">Include Emergency Jobs in Queue:</label>
-									<div class="form-check">
-										<input class="form-check-input" type="radio" name="includeEmergency" id="emergencyYes" value="true" checked>
-										<label class="form-check-label" for="emergencyYes">Yes</label>
-									</div>
-									<div class="form-check">
-										<input class="form-check-input" type="radio" name="includeEmergency" id="emergencyNo" value="false">
-										<label class="form-check-label" for="emergencyNo">No</label>
-									</div>
-								</div>
-
-								<!-- Include AutoLoader Incoming Reel -->
-								<div class="mb-3">
-									<label class="form-label">Include AutoLoader Incoming Reel:</label>
-									<div class="form-check">
-										<input class="form-check-input" type="radio" name="includeLoader" id="loaderYes" value="true" checked>
-										<label class="form-check-label" for="loaderYes">Yes</label>
-									</div>
-									<div class="form-check">
-										<input class="form-check-input" type="radio" name="includeLoader" id="loaderNo" value="false">
-										<label class="form-check-label" for="loaderNo">No</label>
-									</div>
-								</div>
-							</form>
-						</div>
-						<div class="modal-footer">
-							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-							<button type="button" class="btn btn-primary" onclick="confirmGenerateReport()">Generate</button>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<!-- Applied Filters Modal :: shows the filter options used for the currently displayed report -->
-			<div class="modal fade" id="appliedFiltersModal" tabindex="-1" aria-labelledby="appliedFiltersModalLabel" aria-hidden="true">
-				<div class="modal-dialog">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="modal-title" id="appliedFiltersModalLabel">Applied Filters</h5>
-							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-						</div>
-						<div class="modal-body">
-							<ul class="list-unstyled mb-0" id="appliedFiltersList"></ul>
-						</div>
-						<div class="modal-footer">
-							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-						</div>
-					</div>
-				</div>
-			</div>
-
-		</div>
-		</div>
-		</div>
-
-		@section Scripts {
-			<script src="~/js/xlsx.full.min.js"></script>
-			<script src="~/js/exceljs.min.js"></script>
-			<script>
+<div class="tw:space-y-4">
+    <h2 class="tw:mb-0 tw:ml-2 tw:text-lg tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">JO Simulate - Raw Material Stock Check</h2>
+
+    <!-- Status -->
+    <div class="tw:grid tw:grid-cols-6 tw:gap-4 tw:mt-3">
+        @{
+            const string plain = "tw:text-gray-800 tw:dark:text-white/90";
+            var statusCards = new[]
+            {
+                new { Key = "all-details", Label = "Total Details", ValueId = "txtTtlDtl", Color = plain },
+                new { Key = "all-raw", Label = "Total Raw Materials", ValueId = "txtTtlRaw", Color = plain },
+                new { Key = "details-can", Label = "Details Can Fulfill", ValueId = "txtTtlCanDtl", Color = "tw:text-success-500" },
+                new { Key = "details-cannot", Label = "Details Cannot Fulfill", ValueId = "txtTtlCannotDtl", Color = "tw:text-error-500" },
+                new { Key = "raw-can", Label = "Raw Materials Can Fulfill", ValueId = "txtTtlCanRaw", Color = "tw:text-success-500" },
+                new { Key = "raw-cannot", Label = "Raw Materials Cannot Fulfill", ValueId = "txtTtlCannotRaw", Color = "tw:text-error-500" },
+            };
+        }
+        @foreach (var card in statusCards)
+        {
+            <div class="status-card tw:cursor-pointer tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:p-4 tw:text-center tw:transition tw:hover:-translate-y-0.5 tw:hover:shadow-theme-md tw:dark:border-gray-800 tw:dark:bg-white/[0.03]"
+                 id="card_@(card.Key)" onclick="showTab2('@card.Key')">
+                <h3 class="tw:mb-1.5 tw:text-theme-xs tw:text-gray-500 tw:dark:text-gray-400">@card.Label</h3>
+                <div class="tw:text-xl tw:font-semibold @card.Color" id="@card.ValueId">-</div>
+            </div>
+        }
+    </div>
+
+    <!-- Action Buttons -->
+    <div id="actionButtons" class="tw:flex tw:flex-wrap tw:items-center tw:gap-2" style="display: none;">
+        <button type="button" class="tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:border-0 tw:bg-success-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:transition-colors tw:hover:bg-success-600" onclick="openGenerateModal()">
+            <i class="bi bi-play-circle"></i> Generate Report
+        </button>
+        <button type="button" class="tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-700 tw:transition-colors tw:hover:bg-gray-100 tw:dark:border-gray-700 tw:dark:text-gray-400 tw:dark:hover:bg-white/5" onclick="showAppliedFilters()">
+            <i class="bi bi-funnel"></i> Applied Filters
+        </button>
+        @* <button type="button" class="btn btn-warning" onclick="toggleShortOnly()">
+            <i class="bi bi-funnel"></i> <span id="shortOnlyBtnText">Show Short Only</span>
+        </button> *@
+        <button type="button" class="tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:border-0 tw:bg-indigo-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:transition-colors tw:hover:bg-indigo-600" onclick="exportToExcel()">
+            <i class="bi bi-file-earmark-excel"></i> Export to Excel
+        </button>
+    </div>
+
+    <div id="loading" class="tw:flex tw:flex-col tw:items-center tw:gap-3 tw:py-8 tw:text-sm tw:text-gray-500 tw:dark:text-gray-400">
+        <div class="tw:h-8 tw:w-8 tw:animate-spin tw:rounded-full tw:border-2 tw:border-gray-200 tw:border-t-brand-500" role="status">
+            <span class="tw:sr-only">Loading...</span>
+        </div>
+        <p class="tw:mb-0">Checking raw material stock availability...</p>
+    </div>
+
+    <!-- Results Tabs -->
+    <div id="resultsTabs" x-data="{ tab: 'all' }" class="tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:dark:border-gray-800 tw:dark:bg-white/[0.03]">
+        <div class="tw:flex tw:gap-1 tw:border-b tw:border-gray-200 tw:p-2 tw:dark:border-gray-800" role="tablist">
+            <button type="button" id="allDetailsView-tab" role="tab" aria-controls="allDetailsView" :aria-selected="tab === 'all'" @@click="tab = 'all'"
+                class="tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:border-0 tw:px-4 tw:py-2 tw:text-sm tw:font-medium tw:transition-colors"
+                :class="tab === 'all' ? 'tw:bg-brand-50 tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:bg-transparent tw:text-gray-500 tw:hover:bg-gray-100 tw:dark:text-gray-400 tw:dark:hover:bg-white/5'">
+                <i class="bi bi-list-ul"></i> All Details
+            </button>
+            <button type="button" id="detailsView-tab" role="tab" aria-controls="detailsView" :aria-selected="tab === 'filtered'" @@click="tab = 'filtered'"
+                class="tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:border-0 tw:px-4 tw:py-2 tw:text-sm tw:font-medium tw:transition-colors"
+                :class="tab === 'filtered' ? 'tw:bg-brand-50 tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:bg-transparent tw:text-gray-500 tw:hover:bg-gray-100 tw:dark:text-gray-400 tw:dark:hover:bg-white/5'">
+                <i class="bi bi-funnel"></i> <span id="tab2Label">Filtered View</span>
+            </button>
+        </div>
+
+        <div class="tw:p-4">
+            <!-- Tab 1 :: always shows every detail with its raw materials -->
+            <div x-show="tab === 'all'" id="allDetailsView" role="tabpanel" aria-labelledby="allDetailsView-tab">
+                <div class="tw:mb-3 tw:flex tw:gap-2">
+                    <button type="button" class="@smallBtn tw:bg-amber-50 tw:text-amber-600 tw:hover:bg-amber-100 tw:dark:bg-amber-500/15 tw:dark:text-amber-400 tw:dark:hover:bg-amber-500/25" onclick="expandShortagesOnly('#resultsContainer')">
+                        <i class="bi bi-exclamation-triangle"></i> Expand Shortages Only
+                    </button>
+                    <button type="button" class="@smallBtn tw:bg-gray-100 tw:text-gray-700 tw:hover:bg-gray-200 tw:dark:bg-white/5 tw:dark:text-gray-300 tw:dark:hover:bg-white/10" onclick="collapseAll('#resultsContainer')">
+                        <i class="bi bi-arrow-up"></i> Collapse All
+                    </button>
+                </div>
+                <div id="resultsContainer"></div>
+            </div>
+
+            <!-- Tab 2 :: refreshed whenever a status card above is clicked -->
+            <div x-show="tab === 'filtered'" style="display: none;" id="detailsView" role="tabpanel" aria-labelledby="detailsView-tab">
+                <div class="tw:mb-3 tw:flex tw:gap-2">
+                    <button type="button" class="@smallBtn tw:bg-amber-50 tw:text-amber-600 tw:hover:bg-amber-100 tw:dark:bg-amber-500/15 tw:dark:text-amber-400 tw:dark:hover:bg-amber-500/25" onclick="expandAll('#resultsContainer2')">
+                        <i class="bi bi-arrow-down"></i> Expand All
+                    </button>
+                    <button type="button" class="@smallBtn tw:bg-gray-100 tw:text-gray-700 tw:hover:bg-gray-200 tw:dark:bg-white/5 tw:dark:text-gray-300 tw:dark:hover:bg-white/10" onclick="collapseAll('#resultsContainer2')">
+                        <i class="bi bi-arrow-up"></i> Collapse All
+                    </button>
+                </div>
+                <div id="resultsContainer2"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Generate Report Modal -->
+<div class="modal fade" id="generateModal" tabindex="-1" aria-labelledby="generateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+            <div class="tw:flex tw:items-center tw:justify-between tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
+                <h4 class="tw:mb-0 tw:text-base tw:font-semibold tw:text-gray-800 tw:dark:text-white/90" id="generateModalLabel">Generate Stock Report</h4>
+                <button type="button" class="tw:border-0 tw:bg-transparent tw:text-gray-400 tw:hover:text-gray-600 tw:dark:hover:text-gray-200" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <form id="generateForm" class="tw:space-y-4 tw:px-6 tw:py-4">
+                @{
+                    var radioGroups = new[]
+                    {
+                        new { Id = "queue", Name = "includeQueue", Label = "Include Job Orders in Queue:" },
+                        new { Id = "emergency", Name = "includeEmergency", Label = "Include Emergency Jobs in Queue:" },
+                        new { Id = "loader", Name = "includeLoader", Label = "Include AutoLoader Incoming Reel:" },
+                    };
+                }
+                @foreach (var g in radioGroups)
+                {
+                    <div>
+                        <span class="@labelClass">@g.Label</span>
+                        <div class="tw:space-y-2">
+                            <label class="tw:flex tw:cursor-pointer tw:items-center tw:gap-2 tw:text-sm tw:text-gray-700 tw:dark:text-gray-300" for="@(g.Id)Yes">
+                                <input class="tw:h-4 tw:w-4 tw:accent-brand-500" type="radio" name="@g.Name" id="@(g.Id)Yes" value="true" checked> Yes
+                            </label>
+                            <label class="tw:flex tw:cursor-pointer tw:items-center tw:gap-2 tw:text-sm tw:text-gray-700 tw:dark:text-gray-300" for="@(g.Id)No">
+                                <input class="tw:h-4 tw:w-4 tw:accent-brand-500" type="radio" name="@g.Name" id="@(g.Id)No" value="false"> No
+                            </label>
+                        </div>
+                    </div>
+                }
+            </form>
+            <div class="tw:flex tw:justify-end tw:gap-3 tw:border-t tw:border-gray-100 tw:px-6 tw:py-3 tw:dark:border-gray-800">
+                <button type="button" class="save-btn tw:border-0 tw:rounded-lg tw:bg-brand-500 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:shadow-theme-xs tw:hover:bg-brand-600" onclick="confirmGenerateReport()">Generate</button>
+                <button type="button" class="cancel-btn tw:bg-transparent tw:rounded-lg tw:border tw:border-gray-300 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-700 tw:hover:bg-gray-100
+                    tw:dark:border-gray-700 tw:dark:text-gray-400 tw:dark:hover:bg-white/5" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Applied Filters Modal :: shows the filter options used for the currently displayed report -->
+<div class="modal fade" id="appliedFiltersModal" tabindex="-1" aria-labelledby="appliedFiltersModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+            <div class="tw:flex tw:items-center tw:justify-between tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
+                <h4 class="tw:mb-0 tw:text-base tw:font-semibold tw:text-gray-800 tw:dark:text-white/90" id="appliedFiltersModalLabel">Applied Filters</h4>
+                <button type="button" class="tw:border-0 tw:bg-white tw:text-gray-400 tw:hover:text-gray-600 tw:dark:bg-gray-900 tw:dark:hover:text-gray-200" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="tw:px-6 tw:py-4">
+                <ul class="tw:m-0 tw:list-none tw:space-y-3 tw:p-0" id="appliedFiltersList"></ul>
+            </div>
+            <div class="tw:flex tw:justify-end tw:gap-3 tw:border-t tw:border-gray-100 tw:px-6 tw:py-3 tw:dark:border-gray-800">
+                <button type="button" class="cancel-btn tw:bg-transparent tw:rounded-lg tw:border tw:border-gray-300 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-700 tw:hover:bg-gray-100
+                    tw:dark:border-gray-700 tw:dark:text-gray-400 tw:dark:hover:bg-white/5" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts 
+{
+	<script src="~/js/xlsx.full.min.js"></script>
+	<script src="~/js/exceljs.min.js"></script>
+
+	<script>
 		const jobOrderId = @ViewBag.id;
 
 		function getJobOrderIdFromUrl() {
@@ -511,7 +176,7 @@
 			if (jobOrderId) {
 				loadRawMaterialStock();
 			} else {
-				$('#resultsContainer').html('<div class="alert alert-danger">Job Order ID not found</div>');
+				$('#resultsContainer').html(errorAlertHtml('Job Order ID not found'));
 				$('#loading').hide();
 			}
 		});
@@ -563,15 +228,15 @@
 
 			let html = '';
 			rows.forEach(row => {
-				const badgeClass = row.value ? 'status-badge ok' : 'status-badge short';
-				const badgeText = row.value ? 'Yes' : 'No';
-				html += `<li class="d-flex justify-content-between align-items-center mb-2">
-							<span>${row.label}</span>
-							<span class="${badgeClass}">${badgeText}</span>
-						</li>`;
-			});
+					const badgeClass = row.value ? BADGE_OK : BADGE_SHORT;
+					const badgeText = row.value ? 'Yes' : 'No';
+					html += `<li class="tw:flex tw:items-center tw:justify-between tw:text-sm tw:text-gray-700 tw:dark:text-gray-300">
+								<span>${row.label}</span>
+								<span class="${badgeClass}">${badgeText}</span>
+							</li>`;
+				});
 
-			document.getElementById('appliedFiltersList').innerHTML = html;
+				document.getElementById('appliedFiltersList').innerHTML = html;
 
 			const modal = new bootstrap.Modal(document.getElementById('appliedFiltersModal'));
 			modal.show();
@@ -591,14 +256,14 @@
 					if (response.success) {
 						displayRawMaterialResults(response.data);
 					} else {
-						$('#resultsContainer').html(`<div class="alert alert-danger">Error: ${response.errMessage}</div>`);
+						$('#resultsContainer').html(errorAlertHtml(`Error: ${response.errMessage}`));
 					}
 					$('#loading').hide();
 					collapseAll('#resultsContainer');
 					collapseAll('#resultsContainer2');
 				},
 				error: function (xhr, status, error) {
-					$('#resultsContainer').html(`<div class="alert alert-danger">Error loading data: ${error}</div>`);
+					$('#resultsContainer').html(errorAlertHtml(`Error loading data: ${error}`));
 					$('#loading').hide();
 				}
 			});
@@ -623,36 +288,66 @@
 			'raw-cannot': 'Raw Materials Cannot Fulfill'
 		};
 
+		// Tailwind class strings shared by the generated markup.
+		const BADGE_OK = 'tw:status-badge tw:bg-success-50 tw:text-success-700 tw:dark:bg-success-500/15 tw:dark:text-success-500';
+		const BADGE_SHORT = 'tw:status-badge tw:bg-error-50 tw:text-error-700 tw:dark:bg-error-500/15 tw:dark:text-error-500';
+		const CARD_IDLE = 'tw:border-gray-200 tw:dark:border-gray-800';
+		const CARD_ACTIVE = 'tw:border-brand-500 tw:ring-3 tw:ring-brand-500/20';
+
+		function errorAlertHtml(message) {
+			return `<div class="tw:rounded-lg tw:border tw:border-error-100 tw:bg-error-50 tw:px-4 tw:py-3 tw:text-sm tw:text-error-700 tw:dark:border-error-500/30 tw:dark:bg-error-500/15 tw:dark:text-error-500">${escapeHtml(message)}</div>`;
+		}
+
+		// Highlights the status card whose filter is showing in tab 2.
+		function setActiveCard(filterKey) {
+			$('.status-card').removeClass(CARD_ACTIVE).addClass(CARD_IDLE);
+			$(`#card_${filterKey}`).removeClass(CARD_IDLE).addClass(CARD_ACTIVE);
+		}
+
 		// Builds the same nested (detail -> raw materials) table markup used by both tabs.
 		// idPrefix keeps each tab's group-row/toggle ids unique so they don't clash.
+		// (group-row, raw-material-group, raw-material-row, shortage and toggle-icon are hooks
+		// used by the expand/collapse/export code below, so keep them on the elements.)
 		function buildNestedTableHtml(data, idPrefix) {
 			if (!data || data.length === 0) {
 				return `
-					<div class="empty-state">
-						<i class="bi bi-inbox"></i>
-						<h5>No Details Found</h5>
-						<p>No matching job order details.</p>
+					<div class="tw:py-10 tw:text-center tw:text-gray-500 tw:dark:text-gray-400">
+						<i class="bi bi-inbox tw:mb-3 tw:block tw:text-5xl tw:opacity-50"></i>
+						<h5 class="tw:mb-1 tw:text-base tw:font-semibold tw:text-gray-700 tw:dark:text-gray-300">No Details Found</h5>
+						<p class="tw:mb-0 tw:text-sm">No matching job order details.</p>
 					</div>
 				`;
 			}
 
-			let html = '<table class="results-table"><thead><tr><th style="width: 5%;">Status</th><th style="width: 20%;">Finish Good Code</th><th style="width: 20%;">Description</th><th style="width: 10%;" class="qty-cell">Qty Required</th><th style="width: 45%;">Raw Materials</th></tr></thead><tbody>';
+			const th = 'tw:px-4 tw:py-3 tw:text-left tw:text-sm tw:font-semibold tw:text-gray-700 tw:dark:text-gray-300';
+			const thRight = th.replace('tw:text-left', 'tw:text-right');
+			const innerTh = 'tw:px-3 tw:py-2 tw:text-xs tw:font-semibold tw:uppercase tw:tracking-wide tw:text-gray-600 tw:dark:text-gray-400';
+
+			let html = '<div class="tw:overflow-x-auto tw:rounded-lg tw:border tw:border-gray-200 tw:dark:border-gray-800">';
+			html += '<table class="results-table tw:w-full tw:border-collapse tw:text-sm">';
+			html += `<thead><tr class="tw:border-b tw:border-gray-200 tw:bg-gray-50 tw:dark:border-gray-800 tw:dark:bg-white/[0.03]">
+				<th class="${th} tw:w-[5%]">Status</th>
+				<th class="${th} tw:w-[20%]">Finish Good Code</th>
+				<th class="${th} tw:w-[20%]">Description</th>
+				<th class="${thRight} tw:w-[10%] qty-cell">Qty Required</th>
+				<th class="${th} tw:w-[45%]">Raw Materials</th>
+			</tr></thead><tbody>`;
 
 			data.forEach(function (detail, index) {
 				const isFulfillable = detail.isFulfillable;
-				const statusBadgeClass = isFulfillable ? 'status-badge fulfill' : 'status-badge cannot-fulfill';
+				const statusBadgeClass = isFulfillable ? BADGE_OK : BADGE_SHORT;
 				const statusText = isFulfillable ? 'OK' : 'SHORT'; // ✓ ✗
 				const groupRowId = idPrefix + index;
 
 				// Main row for finish good
 				html += `
-					<tr class="group-row" onclick="toggleDetails('${groupRowId}')">
-						<td><span class="${statusBadgeClass}">${statusText}</span></td>
-						<td><strong>${escapeHtml(detail.finishGoodItemCode)}</strong></td>
-						<td>${escapeHtml(detail.finishGoodItemDescription)}</td>
-						<td class="qty-cell">${detail.finishGoodQty}</td>
-						<td>
-							<span class="toggle-icon">▼</span>
+					<tr class="group-row tw:group tw:cursor-pointer tw:border-b tw:border-gray-100 tw:bg-gray-50 tw:font-semibold tw:hover:bg-gray-100 tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:dark:hover:bg-white/5" onclick="toggleDetails('${groupRowId}')">
+						<td class="tw:px-4 tw:py-3"><span class="${statusBadgeClass}">${statusText}</span></td>
+						<td class="tw:px-4 tw:py-3 tw:text-gray-800 tw:dark:text-white/90"><strong>${escapeHtml(detail.finishGoodItemCode)}</strong></td>
+						<td class="tw:px-4 tw:py-3 tw:text-gray-700 tw:dark:text-gray-300">${escapeHtml(detail.finishGoodItemDescription)}</td>
+						<td class="qty-cell tw:px-4 tw:py-3 tw:text-right tw:font-mono tw:text-gray-700 tw:dark:text-gray-300">${detail.finishGoodQty}</td>
+						<td class="tw:px-4 tw:py-3 tw:text-gray-700 tw:dark:text-gray-300">
+							<span class="toggle-icon tw:mr-2 tw:inline-block tw:transition-transform tw:duration-300 tw:group-[.collapsed]:-rotate-90">▼</span>
 							<span id="count_${groupRowId}">${detail.rawMaterials ? detail.rawMaterials.length : 0} items</span>
 						</td>
 					</tr>
@@ -661,29 +356,38 @@
 				// Raw material rows (grouped)
 				if (detail.rawMaterials && detail.rawMaterials.length > 0) {
 					html += `<tr class="raw-material-group" id="${groupRowId}" style="display: table-row;">`;
-					html += '<td colspan="5" style="padding: 0;">';
-					html += '<table class="raw-material-table" style="width: 100%; margin: 0; border: none;">';
-					html += '<thead style="background-color: #fff3e0;"><tr><th style="width: 18%; border-right: 1px solid #eee;">Item Code</th><th style="width: 27%; border-right: 1px solid #eee;">Description</th><th style="width: 12%; text-align: right; border-right: 1px solid #eee;" class="qty-cell">Required</th><th style="width: 12%; text-align: right; border-right: 1px solid #eee;" class="qty-cell">Available</th><th style="width: 19%; border-right: 1px solid #eee;">Reel Codes</th><th style="width: 12%;">Status</th></tr></thead>';
+					html += '<td colspan="5" class="tw:p-0">';
+					html += '<table class="raw-material-table tw:w-full tw:border-collapse">';
+					html += `<thead class="tw:bg-amber-50 tw:dark:bg-amber-500/10"><tr>
+						<th class="${innerTh} tw:w-[18%]">Item Code</th>
+						<th class="${innerTh} tw:w-[27%]">Description</th>
+						<th class="${innerTh} tw:w-[12%] tw:text-center qty-cell">Required</th>
+						<th class="${innerTh} tw:w-[12%] tw:text-center qty-cell">Available</th>
+						<th class="${innerTh} tw:w-[19%] tw:text-center">Reel Codes</th>
+						<th class="${innerTh} tw:w-[12%] tw:text-center">Status</th>
+					</tr></thead>`;
 					html += '<tbody>';
 
 					detail.rawMaterials.forEach(function (material) {
-						const statusClass = material.hasSufficientStock ? 'status-badge ok' : 'status-badge short';
+						const statusClass = material.hasSufficientStock ? BADGE_OK : BADGE_SHORT;
 						const statusText = material.hasSufficientStock ? 'OK' : 'SHORT';
-						const rowClass = material.hasSufficientStock ? 'raw-material-row' : 'raw-material-row shortage';
+						const rowClass = material.hasSufficientStock
+							? 'raw-material-row tw:border-b tw:border-gray-100 tw:dark:border-gray-800'
+							: 'raw-material-row shortage tw:border-b tw:border-gray-100 tw:bg-error-50 tw:dark:border-gray-800 tw:dark:bg-error-500/10';
 
 						// Display reel codes - show them or "No Reels" if none allocated
 						const reelCodesDisplay = material.allocatedReelCodes && material.allocatedReelCodes.trim() !== ''
 							? `<small>${escapeHtml(material.allocatedReelCodes)}</small>`
-							: '<small style="color: #999;">No Reels</small>';
+							: '<small class="tw:text-gray-400 tw:dark:text-white/30">No Reels</small>';
 
 						html += `
 							<tr class="${rowClass}">
-								<td><strong>${escapeHtml(material.rawMaterialItemCode)}</strong></td>
-								<td>${escapeHtml(material.rawMaterialItemDescription)}</td>
-								<td class="qty-cell" style="text-align: center;">${material.requiredQty}</td>
-								<td class="qty-cell" style="text-align: center;">${material.availableQty}</td>
-								<td style="text-align: center;">${reelCodesDisplay}</td>
-								<td style="text-align: center;"><span class="${statusClass}">${statusText}</span></td>
+								<td class="tw:px-3 tw:py-2.5 tw:text-gray-800 tw:dark:text-white/90"><strong>${escapeHtml(material.rawMaterialItemCode)}</strong></td>
+								<td class="tw:px-3 tw:py-2.5 tw:text-gray-700 tw:dark:text-gray-300">${escapeHtml(material.rawMaterialItemDescription)}</td>
+								<td class="qty-cell tw:px-3 tw:py-2.5 tw:text-center tw:font-mono tw:text-gray-700 tw:dark:text-gray-300">${material.requiredQty}</td>
+								<td class="qty-cell tw:px-3 tw:py-2.5 tw:text-center tw:font-mono tw:text-gray-700 tw:dark:text-gray-300">${material.availableQty}</td>
+								<td class="tw:px-3 tw:py-2.5 tw:text-center tw:text-gray-700 tw:dark:text-gray-300">${reelCodesDisplay}</td>
+								<td class="tw:px-3 tw:py-2.5 tw:text-center"><span class="${statusClass}">${statusText}</span></td>
 							</tr>
 						`;
 					});
@@ -695,7 +399,7 @@
 				}
 			});
 
-			html += '</tbody></table>';
+			html += '</tbody></table></div>';
 			return html;
 		}
 
@@ -731,16 +435,14 @@
 			$('#tab2Label').text(TAB2_LABELS[filterKey] || 'Filtered View');
 			$('#resultsContainer2').html(buildNestedTableHtml(filtered, 'group2_'));
 
-			$('.status-card').removeClass('active-filter');
-			$(`#card_${filterKey}`).addClass('active-filter');
+			setActiveCard(filterKey);
 		}
 
 		// Called when a status card is clicked :: refresh tab 2 and switch to it.
 		function showTab2(filterKey) {
 			refreshTab2(filterKey);
 
-			const tabTrigger = document.getElementById('detailsView-tab');
-			bootstrap.Tab.getOrCreateInstance(tabTrigger).show();
+			Alpine.$data(document.getElementById('resultsTabs')).tab = 'filtered';
 		}
 
 		function displayRawMaterialResults(data) {
@@ -1046,9 +748,9 @@
 				document.body.removeChild(a);
 				window.URL.revokeObjectURL(url);
 			}).catch(err => {
-						console.error('Error exporting to Excel:', err);
-							alert('Error generating Excel file');
-						});
-					}
-				</script>
+				console.error('Error exporting to Excel:', err);
+					alert('Error generating Excel file');
+				});
+			}
+	</script>
 }

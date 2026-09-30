@@ -1,182 +1,92 @@
-﻿
-<style>
-    .row {
-        clear: right;
-    }
-
-    .table-filter {
-        border-radius: 3px;
-        border-color: #ddd;
-        box-shadow: none;
-    }
-
-    .show-entries select.form-control {
-        width: 60px;
-        margin: 0 5px;
-    }
-
-    .table-filter .row {
-        display: flex;
-        align-items: center;
-    }
-
-    .table-filter .col-sm-12 {
-        display: flex;
-        justify-content: flex-start; 
-    }
-
-    .show-entries {
-        display: flex;
-        align-items: center; 
-        gap: 5px;  
-    }
-
-    #selpageSize:focus {
-        border-color: #007bff;
-        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-    }
-
-    #selpageSize:hover {
-        border-color: #007bff;
-    }
-
-    .pagination {
-        float: right;
-        margin: 0 0 5px;
-    }
-
-    .pagination li a {
-        border: none;
-        font-size: 13px;
-        min-width: 30px;
-        min-height: 30px;
-        color: #999;
-        margin : 0 2px;
-        line-height: 30px;
-        border-radius: 2px !important;
-        text-align: center;
-        padding: 0 6px;
-    }
-
-    .pagination li a:hover {
-        color: #666;
-    }
-
-    .pagination li.active a {
-        background: #03A9F4;
-    }
-
-    .pagination li.active a:hover {
-        background: #0397d6;
-    }
-
-    .pagination li.disabled i {
-        font-size: 16px;
-        padding-top: 6px;
-    }
-
-    .pagination li i {
-        font-size: 16px;
-        padding-top: 6px
-    }
-
-    .view-btn {
-        font-size: 14px;
+﻿<style>
+    .dt-layout-row:not(.dt-layout-table) {
+        display: none !important;
     }
 </style>
 
-@section PageHeader {
-    <header class="d-flex align-items-center justify-content-between w-100">
-        <h2 class="pageTitle">BOM List</h2>
-        <div class="d-flex gap-2">
-            <button type="button" class="btn btn-warning" onclick="downloadTemp()">
-                Download Import Template
+<div x-data="{ filtersOpen: true }">
+    <div class="tw:flex tw:w-full tw:items-center tw:justify-between">
+        <h2 class="tw:text-lg tw:mb-0 tw:ml-2 tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">BOM List</h2>
+        <div class="tw:flex tw:items-center tw:gap-2">
+            <button type="button" class="tw:rounded-lg tw:border-0 tw:px-3.5 tw:py-2.5 tw:transition-colors"
+                :class="filtersOpen ? 'tw:bg-brand-50 tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:bg-gray-100 tw:text-gray-500 tw:hover:bg-gray-200 tw:dark:bg-white/5 tw:dark:text-gray-400 tw:dark:hover:bg-white/10'"
+                @@click="filtersOpen = !filtersOpen" title="Toggle Filters">
+                <i class="bi bi-funnel"></i>
             </button>
-            <button type="button" class="btn btn-primary" onclick="triggerFileInput()">
+            <button type="button" class="tw:gap-1.5 tw:rounded-lg tw:border-0 tw:bg-yellow-400 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:hover:bg-yellow-500" onclick="downloadTemp()">
+                Download BOM Template
+            </button>
+            <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" class="tw:hidden" onchange="handleFileUpload(event)">
+            <button type="button" class="tw:rounded-lg tw:border-0 tw:bg-emerald-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium
+                tw:text-white tw:hover:bg-emerald-600" onclick="triggerFileInput()">
                 Import BOM By Excel
             </button>
-            <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleFileUpload(event)">
-            <button type="button" class="btn btn-success" onclick="navigateToNew('new')">
+            <button type="button" class="tw:border-0 tw:gap-2 tw:rounded-lg tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium
+                tw:text-white tw:transition tw:hover:bg-brand-600" onclick="navigateToNew('new')">
                 Add New BOM
             </button>
-
         </div>
-    </header>
-}
+    </div>
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row" style="padding:5px;">
-                        <div class="col-sm-3" style="">
-                            <input id="txtItemCode" name="ItemCode" type="text" class="form-control" placeholder="Item" />
-                        </div>
-                        <div class="col-sm-3">
-                            <input id="txtCreatedBySearch" name="CreatedBy" type="text" class="form-control" placeholder="Created By" />
-                        </div>
-                        <div class="col-sm-1 d-flex"> @* col-sm-6 d-flex justify-content-end *@
-                            <button type="button" class="btn btn-primary" style="width: 100%; " onclick="loadList(1)"><i class="bi bi-search"></i> </button>
-                        </div>
-                    </div>
-                    <hr />
-                    <div class="table-filter">
-                        <div class="row" style="padding-left:5px;">
-                            <div class="col-sm-12">
-                                <div class="show-entries">
-                                    <label>Show</label>
-                                    <select id="selpageSize" name="pageSize" class="form-control">
-                                        <option value="10">10</option>
-                                        <option value="25">25</option>
-                                        <option value="50">50</option>
-                                        <option value="100">100</option>
-                                        <option value="200">250</option>
-                                    </select>
-                                    <span>entries</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    @* <div id="gridTable" class="table table-responsive text-nowrap mt-3"></div> *@
-                    <div class="text-nowrap table-container">
-                        <table id="listTable" class="dataTable row-border hover order-column" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>BOM Id</th>
-                                    <th>Item</th>
-                                    <th>Description</th>
-                                    <th>Is Active</th>
-                                    <th>CreatedDate</th>
-                                    <th>CreatedBy</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
-
-                    <div class="dt-container dt-empty-footer">
-                        <div class="dt-layout-row">
-                            <div class="hint-text">Showing <b id="lblCurCount">0</b> of <b id="lblTotal">0</b> entries</div>
-                            @* <ul class="pagination" id="ulPagination">
-                        </ul> *@
-                            <div class="dt-layout-cell dt-layout-end">
-                                <div class="dt-paging">
-                                    <nav aria-label="pagination" id="ulPagination">
-                                    </nav>
-                                </div>
-                            </div>
-                            <input type="hidden" id="txtCurPage">
-                            <input type="hidden" id="txtTotalRecord">
-                            <input type="hidden" id="txtPageSize">
-                            <input type="hidden" id="txtTotalPage">
-                        </div>
-                    </div>
-
+    <div class="tw:mt-3 tw:space-y-4">
+        <div x-show="filtersOpen" x-transition class="tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:p-4 tw:dark:border-gray-800 tw:dark:bg-white/[0.03]">
+            @{
+                string fieldClass = @"tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-sm tw:text-gray-800 tw:placeholder:text-gray-400
+                    tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90
+                    tw:dark:placeholder:text-white/30 tw:dark:focus:border-brand-800";
+                string labelClass = "tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400";
+            }
+            <div class="tw:grid tw:grid-cols-3 tw:items-end tw:gap-3">
+                <div>
+                    <label class="@labelClass" for="txtItemCode">Item Code</label>
+                    <input id="txtItemCode" name="ItemCode" type="text" class="@fieldClass" placeholder="Item Code" />
+                </div>
+                <div>
+                    <label class="@labelClass" for="txtCreatedBySearch">Created By</label>
+                    <input id="txtCreatedBySearch" name="CreatedBy" type="text" class="@fieldClass" placeholder="Created By" />
+                </div>
+                <div>
+                    <button type="button" class="tw:inline-flex tw:w-full tw:items-center tw:justify-center tw:rounded-lg tw:border-0 tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:hover:bg-brand-600" onclick="loadList(1)">
+                        <i class="bi bi-search"></i>
+                    </button>
                 </div>
             </div>
         </div>
+
+        <div class="dt-tailadmin tw:overflow-hidden tw:rounded-lg tw:border tw:border-gray-200 tw:bg-white tw:text-gray-700 tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:dark:text-gray-300">
+            <div class="tw:flex tw:items-center tw:gap-2 tw:px-5 tw:pt-4 tw:text-[13px] tw:text-gray-500 sm:tw:px-6 tw:dark:text-gray-400">
+                <select id="selpageSize" name="pageSize" class="tw:rounded-lg tw:border tw:border-gray-300 tw:bg-white tw:px-4 tw:py-2 tw:text-[13px] tw:font-medium tw:text-gray-800 tw:shadow-theme-xs tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90">
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="200">250</option>
+                </select>
+                <span>entries per page</span>
+            </div>
+
+            <table id="listTable" class="row-border dataTable hover order-column tw:w-full">
+                <thead>
+                    <tr class="tw:border-b tw:border-gray-200">
+                        @{
+                            string[] listHeaders = { "BOM Id", "Item", "Description", "Is Active", "Created Date", "Action" };
+                        }
+                        @foreach (var header in listHeaders)
+                        {
+                            <th class="tw:px-5 tw:py-3.5 tw:text-left sm:tw:px-6"><span class="tw:text-sm tw:font-semibold tw:text-gray-700 tw:dark:text-gray-300">@header</span></th>
+                        }
+                    </tr>
+                </thead>
+            </table>
+
+            <div class="tw:flex tw:flex-wrap tw:text-[13px] tw:items-center tw:justify-between tw:gap-3 tw:px-5 tw:py-4 sm:tw:px-6">
+                <div class="tw:text-gray-500 tw:dark:text-gray-400">Showing <span id="lblCurCount">0</span> of <span id="lblTotal">0</span> entries</div>
+                <nav aria-label="pagination" id="ulPagination" class="tw:flex tw:items-center tw:gap-1"></nav>
+            </div>
+        </div>
+        <input type="hidden" id="txtCurPage">
+        <input type="hidden" id="txtTotalRecord">
+        <input type="hidden" id="txtPageSize">
+        <input type="hidden" id="txtTotalPage">
     </div>
 </div>
 
@@ -184,12 +94,9 @@
 {
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
     <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
-    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="../js/dataTables.js"></script>
-    <script src="../js/dataTables.columnControl.js"></script>
-    <script src="../js/columnControl.dataTables.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
     <script src="../js/xlsx.full.min.js"></script>
     <script src="../js/exceljs.min.js"></script>
@@ -225,7 +132,7 @@
 
             if ((curPage + 1) > ttlPage) {
                 return;
-            } 
+            }
             loadList(curPage + 1);
         }
 
@@ -233,16 +140,11 @@
 
             $('#txtCurPage').val(page);
             $('#txtPageSize').val($('#selpageSize').val());
-            var ttlPage = $('#txtTotalPage').val();
-            for (var j =1; j <= ttlPage; j++) {
-                $('#btnP' + j).removeClass("current");
-            }
-            $('#btnP' + page).addClass('current');
 
             var data = {
                 ItemCode: $('#txtItemCode').val(),
                 CreatedBy: $('#txtCreatedBySearch').val(),
-                page: page, 
+                page: page,
                 pageSize: $('#selpageSize').val(),
             };
 
@@ -264,8 +166,10 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
-                    swal.close()
+                    Swal.close()
                     if (result.success == true) {
+                        const cellClass = 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6 tw:text-theme-sm tw:text-gray-700 tw:dark:text-gray-300';
+
                         $('#listTable').DataTable({
                             data: result.data,
                             paging: false,
@@ -273,8 +177,9 @@
                             "info": false,
                             "bDestroy": true,
                             columns: [
-                                { data: 'boM_Id' },
-                                { data: 'item_Id' ,
+                                { data: 'boM_Id', className: cellClass },
+                                {   data: 'item_Id', 
+                                    className: cellClass, 
                                     render: function(data, type, row) {
                                         var item = itemList.find(function(i) {
                                             return i.itemId === data;
@@ -283,7 +188,8 @@
                                     }
                                 },
                                 { 
-                                    data: 'description' ,
+                                    data: 'description',
+                                    className: cellClass, 
                                     render: function (data, type, row, meta) {
                                         const maxLength = 50;
                                         const desc = row.description || "";
@@ -301,17 +207,16 @@
                                 },
                                 {
                                     data: null,
+                                    className: 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6',
                                     render: function (data, type, row, meta) {
-                                        if (row.isActive == true) {
-                                            return '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
-                                        }
-                                        else {
-                                            return '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>'
-                                        }
+                                        return row.isActive
+                                            ? '<span class="tw:status-badge tw:bg-success-50 tw:text-success-700 tw:dark:bg-success-500/15 tw:dark:text-success-500">Active</span>'
+                                            : '<span class="tw:status-badge tw:bg-gray-100 tw:text-gray-700 tw:dark:bg-white/5 tw:dark:text-gray-400">Inactive</span>';
                                     }
                                 },
                                 { 
                                     data: 'createdDate',
+                                    className: cellClass, 
                                     render: function (data, type, row) {
                                         const date = new Date(data.split('.')[0]);
                                         if (isNaN(date)) return 'Invalid Date';
@@ -327,22 +232,30 @@
                                         });
                                     }
                                 },
-                                { data: 'createdBy' },
+                                // { data: 'createdBy', className: cellClass },
                                 {
                                     data: null,
+                                    className: 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6',
+                                    className: cellClass, 
                                     render: function (data, type, row, meta) {
                                         const rawData = JSON.stringify(row).replace(/"/g, "&quot;");
-                                        return `<div style="display:flex;">
-                                                    <button class="btn btn-primary d-grid view-btn me-2" data-row='${rawData}' onclick="navigateToView(${row.boM_Id}, 'view')">
-                                                    <span><i class="bi bi-eye"></i> View</span>
-                                                    </button>
-                                                    <button class="btn btn-warning d-grid edit-btn me-2" data-row='${rawData}' onclick="navigateToEdit(${row.boM_Id}, 'edit')">
-                                                        <span><i class="bi bi-pencil-square"></i> Edit</span>
-                                                    </button>
-                                                    <button class="btn btn-danger d-grid delete-btn" data-id="${row.boM_Id}">
-                                                        <span><i class="bi bi-trash"></i> Delete</span>
-                                                    </button>
-                                                </div>`;
+                                        return `<div class="tw:flex tw:items-center tw:gap-2">
+                                            <button class="view-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-brand-50 tw:font-medium tw:text-brand-600
+                                                tw:transition-colors tw:hover:bg-brand-100 tw:dark:bg-brand-500/15 tw:dark:text-brand-400 tw:dark:hover:bg-brand-500/25" data-row='${rawData}' onclick="navigateToView(${row.boM_Id}, 'view')">
+                                                <i class="bi bi-eye"></i> 
+                                                View
+                                            </button>
+                                            <button class="edit-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-amber-50 tw:font-medium tw:text-amber-600
+                                                tw:transition-colors tw:hover:bg-amber-100 tw:dark:bg-amber-500/15 tw:dark:text-amber-400 tw:dark:hover:bg-amber-500/25" data-row='${rawData}' onclick="navigateToEdit(${row.boM_Id}, 'edit')">
+                                                <i class="bi bi-pencil-square"></i> 
+                                                Edit
+                                            </button>
+                                            <button class="delete-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-error-50 tw:font-medium tw:text-error-600
+                                                tw:transition-colors tw:hover:bg-error-100 tw:dark:bg-error-500/15 tw:dark:text-error-400 tw:dark:hover:bg-error-500/25" data-id="${row.boM_Id}">
+                                                <i class="bi bi-trash"></i> 
+                                                Delete
+                                            </button>
+                                        </div>`;
                                     }
                                 }
                             ],
@@ -362,35 +275,44 @@
 
                         if (page == 1) {
                             $('#lblTotal').html(result.totalRecords);
-                            $('#ulPagination').html('');
 
-                            var pageSize = $('#selpageSize').val();
-                            const myDiv = document.getElementById('ulPagination');
-                            var ttlPage = result.totalRecords / pageSize;
-                            if ((result.totalRecords % pageSize) > 0) {
+                            var pageSizeVal = $('#selpageSize').val();
+                            var ttlPage = parseInt(result.totalRecords / pageSizeVal);
+                            if ((result.totalRecords % pageSizeVal) > 0) {
                                 ttlPage = ttlPage + 1;
                             }
                             $('#txtTotalRecord').val(result.totalRecords);
                             $('#txtTotalPage').val(ttlPage);
-
-                            var lastPage = 1;
-                            myDiv.innerHTML += '<button class="dt-paging-button disabled first" onclick="loadList(1)" role="link" type="button" aria-controls="listTable"><<</button>';
-                            myDiv.innerHTML += '<button class="dt-paging-button disabled" onclick="prevPage()" role="link" type="button" aria-controls="listTable"><</button>';
-                            for (var i = 1; i <= ttlPage; i++) {
-                                if (i == 1) {
-                                       myDiv.innerHTML += '<button class="dt-paging-button current" id="btnP'+ i +'" onclick="loadList('+ i +')" role="link" type="button" aria-controls="listTable">'+ i +'</button>';
-                                }
-                                else {
-                                       myDiv.innerHTML += '<button class="dt-paging-button" id="btnP'+ i +'" onclick="loadList('+ i +')" role="link" type="button" aria-controls="listTable">'+ i +'</button>';
-                                }
-                                lastPage = i;
-                            }
-                            myDiv.innerHTML += '<button class="dt-paging-button disabled" onclick="nextPage()" role="link" type="button" aria-controls="listTable">></button>';
-                            myDiv.innerHTML += '<button class="dt-paging-button last disabled" onclick="loadList(' + lastPage + ')" role="link" type="button" aria-controls="listTable">>></button>';
                         }
+
+                        var ttlPage = Number($('#txtTotalPage').val());
+                        const myDiv = document.getElementById('ulPagination');
+                        myDiv.innerHTML = "";
+                        var pageItems = buildPaginationItems(ttlPage, page, 5);
+
+                        const pageBtnBase = 'tw:inline-flex tw:h-8 tw:min-w-8 tw:items-center tw:justify-center tw:rounded-lg tw:border tw:border-gray-200 tw:px-2.5 tw:text-sm tw:dark:border-gray-800';
+                        const pageBtnCurrent = pageBtnBase + ' tw:border-0 tw:bg-[rgba(43,127,255,0.08)] tw:font-medium tw:text-brand-500';
+                        const pageBtnDisabled = pageBtnBase + ' tw:border-0 tw:cursor-not-allowed tw:text-gray-300 tw:dark:text-gray-600 tw:bg-transparent' ;
+                        const pageBtnNormal = pageBtnBase + ' tw:text-gray-700 tw:dark:text-gray-300 tw:hover:border-0 tw:hover:bg-[rgba(43,127,255,0.08)] tw:hover:text-brand-500 tw:bg-transparent';
+
+                        myDiv.innerHTML += '<button ' + (page <= 1 ? 'disabled' : '') + ' class="' + (page <= 1 ? pageBtnDisabled : pageBtnNormal) + '" onclick="loadList(1)" role="link" type="button" aria-controls="listTable">«</button>';
+                        myDiv.innerHTML += '<button ' + (page <= 1 ? 'disabled' : '') + ' class="' + (page <= 1 ? pageBtnDisabled : pageBtnNormal) + '" onclick="prevPage()" role="link" type="button" aria-controls="listTable">‹</button>';
+
+                        pageItems.forEach(function(item) {
+                            if (item === '...') {
+                                myDiv.innerHTML += '<span class="tw:px-1 tw:text-gray-400">...</span>';
+                            }
+                            else {
+                                var isC = (page == item) ? pageBtnCurrent : pageBtnNormal;
+                                myDiv.innerHTML += '<button class="' + isC + '" id="btnP' + item + '" onclick="loadList(' + item + ')" role="link" type="button" aria-controls="listTable">' + item + '</button>';
+                            }
+                        });
+
+                        myDiv.innerHTML += '<button ' + (page >= ttlPage ? 'disabled' : '') + ' class="' + (page >= ttlPage ? pageBtnDisabled : pageBtnNormal) + '" onclick="nextPage()" role="link" type="button" aria-controls="listTable">›</button>';
+                        myDiv.innerHTML += '<button ' + (page >= ttlPage ? 'disabled' : '') + ' class="' + (page >= ttlPage ? pageBtnDisabled : pageBtnNormal) + '" onclick="loadList(' + ttlPage + ')" role="link" type="button" aria-controls="listTable">»</button>';
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -398,7 +320,7 @@
                     }
                 },
                 error: function (error) {
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -407,13 +329,44 @@
             });
         }
 
+        function buildPaginationItems(totalPages, currentPage, windowSize = 5) {
+            const items = [];
+
+            if (totalPages <= windowSize) {
+                for (let i = 1; i <= totalPages; i++) {
+                    items.push(i);
+                }
+                return items;
+            }
+
+            if (currentPage <= windowSize - 1) {
+                for (let i = 1; i <= windowSize; i++) {
+                    items.push(i);
+                }
+                items.push('...');
+                items.push(totalPages);
+            }
+            else if (currentPage >= totalPages - windowSize + 2) {
+                items.push(1);
+                items.push('...');
+                for (let i = totalPages - windowSize + 1; i <= totalPages; i++) {
+                    items.push(i);
+                }
+            }
+            else {
+                items.push(1);
+                items.push('...');
+                items.push(currentPage - 1, currentPage, currentPage + 1);
+                items.push('...');
+                items.push(totalPages);
+            }
+
+            return items;
+        }
+
         function navigateToNew(mode) {
             window.location.href = '@Url.Action("BOMDetails", "BOM", new { id = "_id_", mode = "_mode_" })'.replace('_id_', 0).replace('_mode_', mode);
 
-            // getRawItemList();
-            // getFinishedItemList();
-            // clearForm();
-            // $('#newModal').modal("show");
         }
 
         function getFinishedItemList() {
@@ -434,7 +387,7 @@
                             });
                             resolve(true);
                         } else {
-                            swal.fire({
+                            Swal.fire({
                                 icon: 'error',
                                 title: 'Wait',
                                 text: result.errMessage
@@ -443,7 +396,7 @@
                         }
                     },
                     error: function (error) {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: 'Wait',
                             text: error.val
@@ -468,16 +421,13 @@
         });
 
         function deleteBom(id) {
-            console.log(id);
-            swal.fire({
+            Swal.fire({
                 title: "Are you sure want to delete?",
-                text: "You will not be able to recover this record!",
-                inputAttributes: {
-                    autocapitalize: 'off'
-                },
+                text: "You won't be able to recover this record!",
+                icon: "warning",
                 showCancelButton: true,
-                confirmButtonText: 'ok',
-                cancelButtonText: 'cancel',
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'Cancel',
                 allowOutsideClick: false
             }).then(function(r) {
                 if (r.isConfirmed == true) {
@@ -503,7 +453,7 @@
                         },
                         success: function (result) {
                             if (result.success == true) {
-                                swal.fire({
+                                Swal.fire({
                                     icon: 'success',
                                     title: "Success Deleted",
                                     text: "",
@@ -513,7 +463,7 @@
                                 });
                             }
                             else {
-                                swal.fire({
+                                Swal.fire({
                                     icon: 'error',
                                     title: "Wait",
                                     text: result.errMessage
@@ -521,8 +471,8 @@
                             }
                         },
                         error: function (error) {
-                            console.log(error);
-                            swal.fire({
+                            // console.log(error);
+                            Swal.fire({
                                 icon: 'error',
                                 title: "Wait",
                                 text: error.val
@@ -668,7 +618,7 @@
                     SubItems: subItems
                 };
 
-                console.log("Parsed BOM:", excelData);
+                // console.log("Parsed BOM:", excelData);
                 return excelData;
             }).catch(function(err) {
                 console.error("Error processing the file:", err);
@@ -694,10 +644,10 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
-                    console.log(result);
+                    // console.log(result);
 
                     if (result.success == true) {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'success',
                             title: "Success Update",
                             text: "",
@@ -709,14 +659,14 @@
                     else {
                         if (result.data && result.data.subItems.length > 0) {
                             generateErrorExcelFile(originalFileContent, result.data);
-                            swal.fire({
+                            Swal.fire({
                                 icon: 'warning',
                                 title: "Validation Issues Found",
                                 text: "Review on returned file and fix errors."
                             });
 
                         } else {
-                            swal.fire({
+                            Swal.fire({
                                 icon: 'error',
                                 title: "Wait",
                                 text: result.errMessage
@@ -725,8 +675,8 @@
                     }
                 },
                 error: function (error) {
-                    console.log(error);
-                    swal.fire({
+                    // console.log(error);
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val

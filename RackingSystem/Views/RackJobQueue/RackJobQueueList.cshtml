@@ -1,8 +1,11 @@
 ﻿
-@section PageHeader {
+@* @section PageHeader {
     <header class="d-flex align-items-center justify-content-between w-100">
         <h2 class="pageTitle">Queue Management</h2>
         <div class="d-flex gap-2">
+            <button type="button" class="btn btn-secondary" onclick="resetQueue()" @(ViewBag.PermissionList.Contains(91) ? "" : "hidden")>
+                Reset Queue
+            </button>
             <button type="button" class="btn btn-success" onclick="newTrolleyForm()">
                 Empty Drawer Return
             </button>
@@ -17,50 +20,92 @@
             </button>
         </div>
     </header>
-}
+} *@
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <div class="text-nowrap table-container mt-1">
-                        <table id="listTable" class="dataTable row-border hover order-column" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>Idx</th>
-                                    <th>Doc Type</th>
-                                    <th>Doc No</th>
-                                    <th>Total Lines</th>
-                                    <th>Remark</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="tw:flex tw:w-full tw:items-center tw:justify-between tw:gap-4">
+    <h2 class="tw:mb-0 tw:ml-2 tw:shrink-0 tw:text-lg tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Queue Management</h2>
+    <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-end tw:gap-2">
+        <button type="button" class="tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:border-0 tw:bg-zinc-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:transition tw:hover:bg-zinc-600"
+                onclick="resetQueue()" @(ViewBag.PermissionList.Contains(91) ? "" : "hidden")>
+            Reset Queue
+        </button>
+        <button type="button" class="tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:border-0 tw:bg-success-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:transition tw:hover:bg-success-600"
+                onclick="newTrolleyForm()">
+            Empty Drawer Return
+        </button>
+        <button type="button" class="tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:border-0 tw:bg-success-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:transition tw:hover:bg-success-600"
+                onclick="newLoaderForm()">
+            Reel Put-Away
+        </button>
+        <button type="button" class="tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:border-0 tw:bg-success-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:transition tw:hover:bg-success-600"
+                onclick="newJOForm()">
+            Add Job Order
+        </button>
+        <button type="button" class="tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:border-0 tw:bg-red-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:transition tw:hover:bg-red-600"
+                onclick="newEmergencyForm()">
+            Add Emergency
+        </button>
+    </div>
+</div>
+
+<div class="tw:mt-3">
+    <div class="dt-tailadmin tw:overflow-hidden tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:text-gray-700 tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:dark:text-gray-300">
+        <table id="listTable" class="dataTable row-border hover order-column tw:w-full">
+            <thead>
+                <tr class="tw:border-b tw:border-gray-200">
+                    @{
+                        string[] listHeaders = { "Idx", "Doc Type", "Doc No", "Total Lines", "Remark", "Action" };
+                    }
+                    @foreach (var header in listHeaders)
+                    {
+                        <th class="tw:px-5 tw:py-3.5 tw:text-left sm:tw:px-6"><span class="tw:text-sm tw:font-semibold tw:text-gray-700 tw:dark:text-gray-300">@header</span></th>
+                    }
+                </tr>
+            </thead>
+        </table>
     </div>
 </div>
 
 <div class="modal fade" id="loaderModal" role="dialog">
     <div class="modal-dialog">
 
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Add Loader</h4>
+        <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+            <div class="tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
+                <h4 class="tw:text-base tw:font-semibold tw:text-gray-800 tw:mb-0 tw:dark:text-white/90">Add Loader</h4>
             </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label" for="selLoader">Loader</label>
-                    <select class="form-control" id="selLoader"> </select>
+            <div class="tw:space-y-4 tw:px-6 tw:py-4">
+                <div>
+                    <label class="tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400" for="selLoader">Loader</label>
+                    <div class="tw:relative" x-data="customSelect('selLoader')" x-init="init()">
+                        <select id="selLoader" class="tw:hidden" onchange="removeLoaderErrMsg(this.id)"></select>
+                        <button type="button" @@click="toggle()" @@click.outside="open = false"
+                            class="tw:flex tw:w-full tw:items-center tw:justify-between tw:gap-2 tw:rounded-lg tw:border tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-left tw:text-sm tw:text-gray-800 tw:dark:bg-gray-900 tw:dark:text-white/90"
+                            :class="hasError ? 'tw:border-error-500' : (open ? 'tw:border-brand-300 tw:ring-3 tw:ring-brand-500/10' : 'tw:border-gray-300 tw:dark:border-gray-700')">
+                            <span x-text="selectedLabel || 'Select...'" :class="selectedLabel ? '' : 'tw:text-gray-400 tw:dark:text-white/30'"></span>
+                            <i class="bi bi-chevron-down tw:text-xs tw:text-gray-500 tw:transition-transform tw:dark:text-gray-400" :class="open ? 'tw:rotate-180' : ''"></i>
+                        </button>
+                        <div x-show="open" x-transition
+                            class="custom-select-scroll tw:absolute tw:z-50 tw:max-h-60 tw:w-full tw:overflow-y-auto tw:rounded-lg tw:border tw:border-gray-200 tw:bg-white tw:py-1 tw:shadow-theme-lg tw:dark:border-gray-700 tw:dark:bg-gray-900"
+                            :class="dropUp ? 'tw:bottom-full tw:mb-1' : 'tw:top-full tw:mt-1'">
+                            <template x-if="options.length === 0">
+                                <div class="tw:px-4 tw:py-2 tw:text-sm tw:text-gray-400 tw:dark:text-white/30">No options</div>
+                            </template>
+                            <template x-for="opt in options" :key="opt.value">
+                                <div @@click="select(opt)"
+                                    class="tw:cursor-pointer tw:px-4 tw:py-2 tw:text-sm tw:hover:bg-brand-50 tw:dark:hover:bg-brand-500/15"
+                                    :class="opt.value === selectedValue ? 'tw:bg-brand-50 tw:font-medium tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:text-gray-700 tw:dark:text-gray-300'"
+                                    x-text="opt.text"></div>
+                            </template>
+                        </div>
+                    </div>
                     <div id="selLoaderError" class="error-message"></div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="saveLoader()">Save</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="cancelLoaderForm()">Cancel</button>
+            <div class="tw:flex tw:justify-end tw:gap-3 tw:border-t tw:border-gray-100 tw:px-6 tw:py-3 tw:dark:border-gray-800">
+                <button type="button" class="save-btn tw:border-0 tw:rounded-lg tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:shadow-theme-xs 
+                    tw:hover:bg-brand-600" onclick="saveLoader()">Save</button>
+                <button type="button" class="cancel-btn tw:bg-transparent tw:rounded-lg tw:border tw:border-gray-300 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-700 tw:hover:bg-gray-100
+                    tw:dark:border-gray-700 tw:dark:text-gray-400 tw:dark:hover:bg-white/5" onclick="cancelLoaderForm()">Cancel</button>
             </div>
         </div>
     </div>
@@ -69,20 +114,43 @@
 <div class="modal fade" id="joModal" role="dialog">
     <div class="modal-dialog">
 
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Add Job Order</h4>
+        <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+            <div class="tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
+                <h4 class="tw:text-base tw:font-semibold tw:text-gray-800 tw:mb-0 tw:dark:text-white/90">Add Job Order</h4>
             </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label" for="selJO">Job Order</label>
-                    <select class="form-control" id="selJO"> </select>
+            <div class="tw:space-y-4 tw:px-6 tw:py-4">
+                <div>
+                    <label class="tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400" for="selJO">Job Order</label>
+                    <div class="tw:relative" x-data="customSelect('selJO')" x-init="init()">
+                        <select id="selJO" class="tw:hidden" onchange="removeJOErrMsg(this.id)"></select>
+                        <button type="button" @@click="toggle()" @@click.outside="open = false"
+                            class="tw:flex tw:w-full tw:items-center tw:justify-between tw:gap-2 tw:rounded-lg tw:border tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-left tw:text-sm tw:text-gray-800 tw:dark:bg-gray-900 tw:dark:text-white/90"
+                            :class="hasError ? 'tw:border-error-500' : (open ? 'tw:border-brand-300 tw:ring-3 tw:ring-brand-500/10' : 'tw:border-gray-300 tw:dark:border-gray-700')">
+                            <span x-text="selectedLabel || 'Select...'" :class="selectedLabel ? '' : 'tw:text-gray-400 tw:dark:text-white/30'"></span>
+                            <i class="bi bi-chevron-down tw:text-xs tw:text-gray-500 tw:transition-transform tw:dark:text-gray-400" :class="open ? 'tw:rotate-180' : ''"></i>
+                        </button>
+                        <div x-show="open" x-transition
+                            class="custom-select-scroll tw:absolute tw:z-50 tw:max-h-60 tw:w-full tw:overflow-y-auto tw:rounded-lg tw:border tw:border-gray-200 tw:bg-white tw:py-1 tw:shadow-theme-lg tw:dark:border-gray-700 tw:dark:bg-gray-900"
+                            :class="dropUp ? 'tw:bottom-full tw:mb-1' : 'tw:top-full tw:mt-1'">
+                            <template x-if="options.length === 0">
+                                <div class="tw:px-4 tw:py-2 tw:text-sm tw:text-gray-400 tw:dark:text-white/30">No options</div>
+                            </template>
+                            <template x-for="opt in options" :key="opt.value">
+                                <div @@click="select(opt)"
+                                    class="tw:cursor-pointer tw:px-4 tw:py-2 tw:text-sm tw:hover:bg-brand-50 tw:dark:hover:bg-brand-500/15"
+                                    :class="opt.value === selectedValue ? 'tw:bg-brand-50 tw:font-medium tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:text-gray-700 tw:dark:text-gray-300'"
+                                    x-text="opt.text"></div>
+                            </template>
+                        </div>
+                    </div>
                     <div id="selJOError" class="error-message"></div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="saveJO()">Save</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="cancelJOForm()">Cancel</button>
+            <div class="tw:flex tw:justify-end tw:gap-3 tw:border-t tw:border-gray-100 tw:px-6 tw:py-3 tw:dark:border-gray-800">
+                <button type="button" class="save-btn tw:border-0 tw:rounded-lg tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:shadow-theme-xs 
+                    tw:hover:bg-brand-600" onclick="saveJO()">Save</button>
+                <button type="button" class="cancel-btn tw:bg-transparent tw:rounded-lg tw:border tw:border-gray-300 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-700 tw:hover:bg-gray-100
+                    tw:dark:border-gray-700 tw:dark:text-gray-400 tw:dark:hover:bg-white/5" onclick="cancelJOForm()">Cancel</button>
             </div>
         </div>
     </div>
@@ -91,20 +159,43 @@
 <div class="modal fade" id="emModal" role="dialog">
     <div class="modal-dialog">
 
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Add Emergency Order</h4>
+        <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+            <div class="tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
+                <h4 class="tw:text-base tw:font-semibold tw:text-gray-800 tw:mb-0 tw:dark:text-white/90">Add Emergency Order</h4>
             </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label" for="selEmergency">Emergency Order</label>
-                    <select class="form-control" id="selEmergency"> </select>
+            <div class="tw:space-y-4 tw:px-6 tw:py-4">
+                <div>
+                    <label class="tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400" for="selEmergency">Emergency Order</label>
+                    <div class="tw:relative" x-data="customSelect('selEmergency')" x-init="init()">
+                        <select id="selEmergency" class="tw:hidden" onchange="removeEmergencyErrMsg(this.id)"></select>
+                        <button type="button" @@click="toggle()" @@click.outside="open = false"
+                            class="tw:flex tw:w-full tw:items-center tw:justify-between tw:gap-2 tw:rounded-lg tw:border tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-left tw:text-sm tw:text-gray-800 tw:dark:bg-gray-900 tw:dark:text-white/90"
+                            :class="hasError ? 'tw:border-error-500' : (open ? 'tw:border-brand-300 tw:ring-3 tw:ring-brand-500/10' : 'tw:border-gray-300 tw:dark:border-gray-700')">
+                            <span x-text="selectedLabel || 'Select...'" :class="selectedLabel ? '' : 'tw:text-gray-400 tw:dark:text-white/30'"></span>
+                            <i class="bi bi-chevron-down tw:text-xs tw:text-gray-500 tw:transition-transform tw:dark:text-gray-400" :class="open ? 'tw:rotate-180' : ''"></i>
+                        </button>
+                        <div x-show="open" x-transition
+                            class="custom-select-scroll tw:absolute tw:z-50 tw:max-h-60 tw:w-full tw:overflow-y-auto tw:rounded-lg tw:border tw:border-gray-200 tw:bg-white tw:py-1 tw:shadow-theme-lg tw:dark:border-gray-700 tw:dark:bg-gray-900"
+                            :class="dropUp ? 'tw:bottom-full tw:mb-1' : 'tw:top-full tw:mt-1'">
+                            <template x-if="options.length === 0">
+                                <div class="tw:px-4 tw:py-2 tw:text-sm tw:text-gray-400 tw:dark:text-white/30">No options</div>
+                            </template>
+                            <template x-for="opt in options" :key="opt.value">
+                                <div @@click="select(opt)"
+                                    class="tw:cursor-pointer tw:px-4 tw:py-2 tw:text-sm tw:hover:bg-brand-50 tw:dark:hover:bg-brand-500/15"
+                                    :class="opt.value === selectedValue ? 'tw:bg-brand-50 tw:font-medium tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:text-gray-700 tw:dark:text-gray-300'"
+                                    x-text="opt.text"></div>
+                            </template>
+                        </div>
+                    </div>
                     <div id="selEmergencyError" class="error-message"></div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="saveEmergency()">Save</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="cancelEmergencyForm()">Cancel</button>
+            <div class="tw:flex tw:justify-end tw:gap-3 tw:border-t tw:border-gray-100 tw:px-6 tw:py-3 tw:dark:border-gray-800">
+                <button type="button" class="save-btn tw:border-0 tw:rounded-lg tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:shadow-theme-xs 
+                    tw:hover:bg-brand-600" onclick="saveEmergency()">Save</button>
+                <button type="button" class="cancel-btn tw:bg-transparent tw:rounded-lg tw:border tw:border-gray-300 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-700 tw:hover:bg-gray-100
+                    tw:dark:border-gray-700 tw:dark:text-gray-400 tw:dark:hover:bg-white/5" onclick="cancelEmergencyForm()">Cancel</button>
             </div>
         </div>
     </div>
@@ -113,22 +204,45 @@
 <div class="modal fade" id="trolleyModal" role="dialog">
     <div class="modal-dialog">
 
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Add Trolley</h4>
+        <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+            <div class="tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
+                <h4 class="tw:text-base tw:font-semibold tw:text-gray-800 tw:mb-0 tw:dark:text-white/90">Add Trolley</h4>
             </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label" for="selTrolley">Trolley</label>
-                    <select class="form-control" id="selTrolley">
-                        <option id="1"> Trolley1A </option>
+            <div class="tw:space-y-4 tw:px-6 tw:py-4">
+                <div>
+                    <label class="tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400" for="selTrolley">Trolley</label>
+                    <div class="tw:relative" x-data="customSelect('selTrolley')" x-init="init()">
+                        <select id="selTrolley" class="tw:hidden" onchange="removeTrolleyErrMsg(this.id)">
+                            <option id="1"> Trolley1A </option>
                         </select>
+                        <button type="button" @@click="toggle()" @@click.outside="open = false"
+                            class="tw:flex tw:w-full tw:items-center tw:justify-between tw:gap-2 tw:rounded-lg tw:border tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-left tw:text-sm tw:text-gray-800 tw:dark:bg-gray-900 tw:dark:text-white/90"
+                            :class="hasError ? 'tw:border-error-500' : (open ? 'tw:border-brand-300 tw:ring-3 tw:ring-brand-500/10' : 'tw:border-gray-300 tw:dark:border-gray-700')">
+                            <span x-text="selectedLabel || 'Select...'" :class="selectedLabel ? '' : 'tw:text-gray-400 tw:dark:text-white/30'"></span>
+                            <i class="bi bi-chevron-down tw:text-xs tw:text-gray-500 tw:transition-transform tw:dark:text-gray-400" :class="open ? 'tw:rotate-180' : ''"></i>
+                        </button>
+                        <div x-show="open" x-transition
+                            class="custom-select-scroll tw:absolute tw:z-50 tw:max-h-60 tw:w-full tw:overflow-y-auto tw:rounded-lg tw:border tw:border-gray-200 tw:bg-white tw:py-1 tw:shadow-theme-lg tw:dark:border-gray-700 tw:dark:bg-gray-900"
+                            :class="dropUp ? 'tw:bottom-full tw:mb-1' : 'tw:top-full tw:mt-1'">
+                            <template x-if="options.length === 0">
+                                <div class="tw:px-4 tw:py-2 tw:text-sm tw:text-gray-400 tw:dark:text-white/30">No options</div>
+                            </template>
+                            <template x-for="opt in options" :key="opt.value">
+                                <div @@click="select(opt)"
+                                    class="tw:cursor-pointer tw:px-4 tw:py-2 tw:text-sm tw:hover:bg-brand-50 tw:dark:hover:bg-brand-500/15"
+                                    :class="opt.value === selectedValue ? 'tw:bg-brand-50 tw:font-medium tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:text-gray-700 tw:dark:text-gray-300'"
+                                    x-text="opt.text"></div>
+                            </template>
+                        </div>
+                    </div>
                     <div id="selTrolleyError" class="error-message"></div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="saveTrolley()">Save</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="cancelTrolleyForm()">Cancel</button>
+            <div class="tw:flex tw:justify-end tw:gap-3 tw:border-t tw:border-gray-100 tw:px-6 tw:py-3 tw:dark:border-gray-800">
+                <button type="button" class="save-btn tw:border-0 tw:rounded-lg tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:shadow-theme-xs 
+                    tw:hover:bg-brand-600" onclick="saveTrolley()">Save</button>
+                <button type="button" class="cancel-btn tw:bg-transparent tw:rounded-lg tw:border tw:border-gray-300 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-700 tw:hover:bg-gray-100
+                    tw:dark:border-gray-700 tw:dark:text-gray-400 tw:dark:hover:bg-white/5" onclick="cancelTrolleyForm()">Cancel</button>
             </div>
         </div>
     </div>
@@ -137,26 +251,52 @@
 <div class="modal fade" id="qModal" role="dialog">
     <div class="modal-dialog">
 
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Add Loader</h4>
+        <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+            <div class="tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
+                <h4 class="tw:text-base tw:font-semibold tw:text-gray-800 tw:mb-0 tw:dark:text-white/90">Change Queue Number</h4>
             </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label" for="txtDocNo">Loader / Doc No</label>
-                    <input type="text" class="form-control" name="Doc No" id="txtDocNo" aria-describedby="Doc No" disabled>
+            <div class="tw:space-y-4 tw:px-6 tw:py-4">
+                <div>
+                    <label class="tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400" for="txtDocNo">Loader / Doc No</label>
+                    <input type="text" class="tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-zinc-100 tw:px-4 tw:py-2.5 tw:text-sm tw:text-gray-500 tw:placeholder:text-gray-400
+                        tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-gray-400" name="Doc No" id="txtDocNo" aria-describedby="Doc No" disabled>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtQ">Queue No</label>
-                    <input type="number" class="form-control" name="Q No" id="txtQ" aria-describedby="Q No">
+                <div>
+                    <label class="tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400" for="txtQ">Queue No</label>
+                    <input type="number" class="tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-sm tw:text-gray-800 tw:placeholder:text-gray-400
+                        tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90
+                        tw:dark:placeholder:text-white/30 tw:dark:focus:border-brand-800" name="Q No" id="txtQ" aria-describedby="Q No" min="1">
                     <div id="txtQError" class="error-message"></div>
                 </div>
                 <input type="hidden" id="txtDocId">
                 <input type="hidden" id="txtDocType">
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="saveQ()">Save</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="cancelQForm()">Cancel</button>
+            <div class="tw:flex tw:justify-end tw:gap-3 tw:border-t tw:border-gray-100 tw:px-6 tw:py-3 tw:dark:border-gray-800">
+                <button type="button" class="save-btn tw:border-0 tw:rounded-lg tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:shadow-theme-xs 
+                    tw:hover:bg-brand-600" onclick="saveQ()">Save</button>
+                <button type="button" class="cancel-btn tw:bg-transparent tw:rounded-lg tw:border tw:border-gray-300 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-700 tw:hover:bg-gray-100
+                    tw:dark:border-gray-700 tw:dark:text-gray-400 tw:dark:hover:bg-white/5" onclick="cancelQForm()">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="resetQueueModal" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog">
+    <div class="modal-dialog modal-dialog-centered tw:max-w-sm">
+        <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+            <div class="tw:p-6 tw:text-center">
+                <div class="tw:mx-auto tw:mb-4 tw:flex tw:h-14 tw:w-14 tw:items-center tw:justify-center tw:rounded-full tw:bg-warning-50 tw:text-warning-500 tw:dark:bg-warning-500/15">
+                    <i class="bi bi-exclamation-triangle tw:text-2xl"></i>
+                </div>
+                <h4 class="tw:mb-2 tw:text-base tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Are you sure want to reset the queue?</h4>
+                <p class="tw:text-sm tw:text-gray-500 tw:dark:text-gray-400">You will not be able to recover this record!</p>
+            </div>
+            <div class="tw:flex tw:justify-center tw:gap-3 tw:border-t tw:border-gray-100 tw:px-6 tw:py-3 tw:dark:border-gray-800">
+                <button type="button" class="save-btn tw:border-0 tw:rounded-lg tw:bg-error-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:shadow-theme-xs tw:hover:bg-error-600" onclick="confirmResetQueue()">Yes</button>
+                <button type="button" class="cancel-btn tw:bg-transparent tw:rounded-lg tw:border tw:border-gray-300 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-700 tw:hover:bg-gray-100
+                    tw:dark:border-gray-700 tw:dark:text-gray-400 tw:dark:hover:bg-white/5" onclick="cancelResetQueueForm()">
+                    No
+                </button>
             </div>
         </div>
     </div>
@@ -164,20 +304,67 @@
 
 @section Scripts
 {
-    @* <link href="~/css/datatables.min.css" rel="stylesheet">
-    <script src="~/js/datatables.min.js"></script> *@
-
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
     <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
-    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="../js/dataTables.js"></script>
-    <script src="../js/dataTables.columnControl.js"></script>
-    <script src="../js/columnControl.dataTables.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
 
     <script type="text/javascript">
+
+        function customSelect(selectId) {
+            return {
+                open: false,
+                dropUp: false,
+                options: [],
+                selectedValue: '',
+                selectedLabel: '',
+                hasError: false,
+                init() {
+                    this.syncOptions();
+                    const sel = document.getElementById(selectId);
+                    if (!sel) return;
+                    this.hasError = sel.classList.contains('is-invalid');
+                    new MutationObserver(() => {
+                        this.hasError = sel.classList.contains('is-invalid');
+                    }).observe(sel, { attributes: true, attributeFilter: ['class'] });
+                },
+                toggle() {
+                    this.open = !this.open;
+                    if (this.open) {
+                        this.syncOptions();
+                        const rect = this.$el.getBoundingClientRect();
+                        const spaceBelow = window.innerHeight - rect.bottom;
+                        this.dropUp = spaceBelow < 240 && rect.top > spaceBelow;
+                    }
+                },
+                syncOptions() {
+                    const sel = document.getElementById(selectId);
+                    if (!sel) return;
+                    this.options = Array.from(sel.options).map(o => ({ value: o.value, text: o.textContent.trim() }));
+                    this.selectedValue = sel.value;
+                    const selectedOpt = sel.options[sel.selectedIndex];
+                    this.selectedLabel = selectedOpt ? selectedOpt.textContent.trim() : '';
+                },
+                select(opt) {
+                    const sel = document.getElementById(selectId);
+                    sel.value = opt.value;
+                    this.selectedValue = opt.value;
+                    this.selectedLabel = opt.text;
+                    this.open = false;
+                    sel.dispatchEvent(new Event('change'));
+                }
+            };
+        }
+
+        function refreshCustomSelect(selectId) {
+            const sel = document.getElementById(selectId);
+            const root = sel ? sel.closest('[x-data]') : null;
+            if (root && window.Alpine) {
+                Alpine.$data(root).syncOptions();
+            }
+        }
 
         $(document).ready(function () {
             loadList();
@@ -200,23 +387,26 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
-                    console.log(result);
-                    swal.close()
+                    //console.log(result);
+                    Swal.close()
                     if (result.success == true) {
+                        const cellClass = 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6 tw:text-theme-sm tw:text-gray-700 tw:dark:text-gray-300';
+
                         $('#listTable').DataTable( {
                             data: result.data,
                             paging: true,
                             pageLength: 50,
                             lengthMenu: [50, 100, 250, 500, 1000],
                             columns: [
-                                { data: 'idx' },
-                                { data: 'docType' },
-                                { data: 'docNo' },
-                                { data: 'totalLines' },
-                                { data: 'remark' },
+                                { data: 'idx', className: cellClass },
+                                { data: 'docType', className: cellClass },
+                                { data: 'docNo', className: cellClass },
+                                { data: 'totalLines', className: cellClass },
+                                { data: 'remark', className: cellClass },
                                 {
                                     data: null,
-                                    render: function (data, type, row, meta) {
+                                    className: 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6',
+                                    render: function (row) {
                                         const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
                                         var btnSimulate = '';
                                         if (row.docType == "JO" || row.docType == "JOE") {
@@ -226,31 +416,41 @@
                                         }
                                         var btnStart ='';
                                         if (row.idx == 1) {
-                                            btnStart = `<button class="btn btn-primary d-grid start-btn" style="margin-left:10px;" data-id="${row.rackJobQueue_Id}" data-code="${row.docType}" data-row="${rowData}">
-                                                            <span><i class="bi bi-setting-square""></i>  Start</span>
-                                                        </button>`;
+                                            btnStart = `<button class="start-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-brand-50 tw:font-medium tw:text-brand-600
+                                                tw:transition-colors tw:hover:bg-brand-100 tw:dark:bg-brand-500/15 tw:dark:text-brand-400 tw:dark:hover:bg-brand-500/25" data-id="${row.rackJobQueue_Id}" data-code="${row.docType}" data-row="${rowData}">
+                                                <i class="bi bi-gear"></i>  
+                                                Start
+                                            </button>`;
                                         }
                                         else {
                                             if (row.docType == "JOE") {
-                                                btnStart = `<button class="btn btn-primary d-grid start-btn" style="margin-left:10px;" data-id="${row.rackJobQueue_Id}" data-code="${row.docType}" data-row="${rowData}">
-                                                            <span><i class="bi bi-setting-square""></i>  Start</span>
-                                                        </button>`;
+                                                btnStart = `<button class="start-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-brand-50 tw:font-medium tw:text-brand-600
+                                                    tw:transition-colors tw:hover:bg-brand-100 tw:dark:bg-brand-500/15 tw:dark:text-brand-400 tw:dark:hover:bg-brand-500/25" data-id="${row.rackJobQueue_Id}" data-code="${row.docType}" data-row="${rowData}">
+                                                    <i class="bi bi-gear"></i>  
+                                                    Start
+                                                </button>`;
                                             }
                                             if (row.docType == "Trolley") {
-                                                btnStart = `<button class="btn btn-primary d-grid start-btn" style="margin-left:10px;" data-id="${row.rackJobQueue_Id}" data-code="${row.docType}" data-row="${rowData}">
-                                                            <span><i class="bi bi-setting-square""></i>  Start</span>
-                                                        </button>`;
+                                                btnStart = `<button class="start-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-brand-50 tw:font-medium tw:text-brand-600
+                                                    tw:transition-colors tw:hover:bg-brand-100 tw:dark:bg-brand-500/15 tw:dark:text-brand-400 tw:dark:hover:bg-brand-500/25" data-id="${row.rackJobQueue_Id}" data-code="${row.docType}" data-row="${rowData}">
+                                                    <i class="bi bi-gear"></i>  
+                                                    Start
+                                                </button>`;
                                             }
                                         }
-                                        
-                                        return `<div style="display:flex;">` + btnSimulate +
-                                                    `<button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
-                                                        <span><i class="bi bi-pencil-square""></i>  Change Q</span>
-                                                    </button>
-                                                    <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.doc_Id}" data-code="${row.docType}">
-                                                        <span><i class="bi bi-trash""></i>  Delete</span>
-                                                    </button>` + btnStart +
-                                               `</div>`;
+
+                                        return `<div class="tw:flex tw:items-center tw:gap-2">
+                                            <button class="edit-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-amber-50 tw:font-medium tw:text-amber-600
+                                                tw:transition-colors tw:hover:bg-amber-100 tw:dark:bg-amber-500/15 tw:dark:text-amber-400 tw:dark:hover:bg-amber-500/25" data-row="${rowData}">
+                                                <i class="bi bi-pencil-square"></i>  
+                                                Change Q
+                                            </button>
+                                            <button class="delete-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-error-50 tw:font-medium tw:text-error-600
+                                                tw:transition-colors tw:hover:bg-error-100 tw:dark:bg-error-500/15 tw:dark:text-error-400 tw:dark:hover:bg-error-500/25" data-id="${row.doc_Id}" data-code="${row.docType}">
+                                                <i class="bi bi-trash"></i>  
+                                                Delete
+                                            </button>` + btnStart + 
+                                        `</div>`;
                                     }
                                 }
                             ],
@@ -258,14 +458,10 @@
                                 searchPlaceholder: "🔍︎ Search",
                                 search: ""
                             },
-                            ordering: {
-                                indicators: false
-                            },
-                            columnControl: ['orderStatus']
                         });
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -273,7 +469,7 @@
                     }
                 },
                 error: function (error) {
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -300,7 +496,7 @@
                     Swal.showLoading();
                 },
                 success: function (result) {
-                    swal.close();
+                    Swal.close();
                     if (result.success == true) {
 
                         // Get the select element
@@ -313,9 +509,10 @@
                             el.value = opt.loader_Id;
                             selLoader.appendChild(el);
                         }
+                        refreshCustomSelect('selLoader');
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -323,7 +520,7 @@
                     }
                 },
                 error: function (error) {
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -349,7 +546,7 @@
                     Swal.showLoading();
                 },
                 success: function (result) {
-                    swal.close();
+                    Swal.close();
                     if (result.success == true) {
 
                         // Get the select element
@@ -362,9 +559,10 @@
                             el.value = opt.jobOrder_Id;
                             selJO.appendChild(el);
                         }
+                        refreshCustomSelect('selJO');
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -372,7 +570,7 @@
                     }
                 },
                 error: function (error) {
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -398,7 +596,7 @@
                     Swal.showLoading();
                 },
                 success: function(result) {
-                    swal.close();
+                    Swal.close();
                     if (result.success == true) {
                         const selEmergency = document.getElementById('selEmergency');
                         selEmergency.options.length = 0;
@@ -409,9 +607,10 @@
                             el.value = opt.jobOrderEmergency_Id;
                             selEmergency.appendChild(el);
                         }
+                        refreshCustomSelect('selEmergency');
                    }
                    else {
-                       swal.fire({
+                       Swal.fire({
                            icon: 'error',
                            title: "Wait",
                             text: result.errMessage
@@ -419,7 +618,7 @@
                     }
                 },
                 error: function (error) {
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -432,6 +631,7 @@
             loadLoaderList();
             removeLoaderErrMsg([]);
             $("#selLoader").val("");
+            refreshCustomSelect('selLoader');
             $("#loaderModal").modal("show");
         }
 
@@ -439,6 +639,7 @@
             loadJOList();
             removeJOErrMsg([]);
             $("#selJO").val("");
+            refreshCustomSelect('selJO');
             $("#joModal").modal("show");
         }
 
@@ -446,6 +647,7 @@
             loadEmergencyList();
             removeEmergencyErrMsg([]);
             $("#selEmergency").val("");
+            refreshCustomSelect('selEmergency');
             $("#emModal").modal("show");
         }
 
@@ -453,6 +655,7 @@
             // loadTrolleyList();
             removeTrolleyErrMsg([]);
             $("#selTrolley").val("");
+            refreshCustomSelect('selTrolley');
             $("#trolleyModal").modal("show");
         }
 
@@ -513,7 +716,7 @@
             let isValid = true;
             var txt = document.getElementById("selLoader");
             if (txt.value == "") {
-                showError(txt.id, `Please enter Auto Loader.`);
+                showLoaderError(txt.id, `Please enter Auto Loader.`);
                 isValid = false;
             }
             return isValid;
@@ -572,7 +775,7 @@
             let isValid = true;
             var txt = document.getElementById("selEmergency");
             if (txt.value == "") {
-                showError(txt.id, `Please select Emergency.`);
+                showEmergencyError(txt.id, `Please select Emergency.`);
                 isValid = false;
             }
             return isValid;
@@ -638,7 +841,7 @@
                 success: function (result) {
                     if (result.success == true) {
                         $("#loaderModal").modal("toggle");
-                        swal.fire({
+                        Swal.fire({
                             icon: 'success',
                             title: "Success Update",
                             text: "",
@@ -648,7 +851,7 @@
                         });
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -656,8 +859,8 @@
                     }
                 },
                 error: function (error) {
-                    console.log(error);
-                    swal.fire({
+                    //console.log(error);
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -696,7 +899,7 @@
                 success: function (result) {
                     if (result.success == true) {
                         $("#joModal").modal("toggle");
-                        swal.fire({
+                        Swal.fire({
                             icon: 'success',
                             title: "Success Update",
                             text: "",
@@ -706,7 +909,7 @@
                         });
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -714,8 +917,8 @@
                     }
                 },
                 error: function (error) {
-                    console.log(error);
-                    swal.fire({
+                    //console.log(error);
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -754,7 +957,7 @@
                 success: function (result) {
                     if (result.success == true) {
                         $("#emModal").modal("toggle");
-                        swal.fire({
+                        Swal.fire({
                             icon: 'success',
                             title: "Success Update",
                             text: "",
@@ -764,7 +967,7 @@
                         });
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -772,8 +975,8 @@
                     }
                 },
                 error: function (error) {
-                    console.log(error);
-                    swal.fire({
+                    //console.log(error);
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -813,7 +1016,7 @@
                 success: function (result) {
                     if (result.success == true) {
                         $("#trolleyModal").modal("toggle");
-                        swal.fire({
+                        Swal.fire({
                             icon: 'success',
                             title: "Success Update",
                             text: "",
@@ -823,7 +1026,7 @@
                         });
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -831,8 +1034,8 @@
                     }
                 },
                 error: function (error) {
-                    console.log(error);
-                    swal.fire({
+                    //console.log(error);
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -849,15 +1052,13 @@
 
         function deleteQueue(id, code) {
 
-            swal.fire({
+            Swal.fire({
                 title: "Are you sure want to delete?",
-                text: "You will not be able to recover this record!",
-                inputAttributes: {
-                    autocapitalize: 'off'
-                },
+                text: "You won't be able to recover this record!",
+                icon: 'warning', 
                 showCancelButton: true,
-                confirmButtonText: 'ok',
-                cancelButtonText: 'cancel',
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'Cancel',
                 allowOutsideClick: false
               }).then(function(r) {
                 if (r.isConfirmed == true) {
@@ -885,7 +1086,7 @@
                         },
                         success: function (result) {
                             if (result.success == true) {
-                                swal.fire({
+                                Swal.fire({
                                     icon: 'success',
                                     title: "Success Deleted",
                                     text: "",
@@ -895,7 +1096,7 @@
                                 });
                             }
                             else {
-                                swal.fire({
+                                Swal.fire({
                                     icon: 'error',
                                     title: "Wait",
                                     text: result.errMessage
@@ -903,8 +1104,8 @@
                             }
                         },
                         error: function (error) {
-                            console.log(error);
-                            swal.fire({
+                            //console.log(error);
+                            Swal.fire({
                                 icon: 'error',
                                 title: "Wait",
                                 text: error.val
@@ -950,7 +1151,7 @@
                 success: function (result) {
                     if (result.success == true) {
                         // $("#joModal").modal("toggle");
-                        swal.fire({
+                        Swal.fire({
                             icon: 'success',
                             title: "Success Update",
                             text: "",
@@ -960,7 +1161,7 @@
                         });
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -968,8 +1169,8 @@
                     }
                 },
                 error: function (error) {
-                    console.log(error);
-                    swal.fire({
+                    //console.log(error);
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -996,12 +1197,17 @@
             }
         });
 
-        $('#listTable').on('click', '.simulate-btn', function () {
-            const id = $(this).attr('data-id');
-            const code = $(this).attr('data-code');
-            var redirectUrl = code == "JOE" ? '@Url.Action("JOESimulate", "JO")' : '@Url.Action("JOSimulate", "JO")';
-            window.open(redirectUrl + '?id=' + id, '_blank');
-        });
+        function resetQueue() {
+            $("#resetQueueModal").modal("show");
+        }
+
+        function cancelResetQueueForm() {
+            $("#resetQueueModal").modal("hide");
+        }
+
+        function confirmResetQueue() {
+            $("#resetQueueModal").modal("hide");
+        }
 
     </script>
 }

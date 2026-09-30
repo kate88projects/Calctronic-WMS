@@ -1,0 +1,152 @@
+@import "tailwindcss/theme.css" prefix(tw);
+@import "tailwindcss/utilities.css" prefix(tw);
+
+@custom-variant dark (&:is(.dark *));
+
+@source "../Views/**/*.cshtml";
+
+/*
+  Isolated Tailwind v4 build (the project's confirmed TailAdmin direction,
+  now scanning every Razor view under Views/**), compiled by the separate
+  toolchain in tailwind-admin-v4/ (its own package.json + node_modules,
+  kept apart from the project's main Tailwind v3 CLI setup so the existing
+  HMI views can't be affected). Views not yet converted to TailAdmin still
+  render their original Bootstrap/AdminLTE markup untouched - broadening
+  @source here just means their classes are picked up automatically as
+  each one gets converted, without editing this file again each time.
+
+  - This file imports only the `theme` and `utilities` layers (no
+    `preflight`), which is what keeps Tailwind's base CSS reset out of
+    this stylesheet. _Layout.cshtml is shared by every view in the app,
+    and that reset would otherwise break the Bootstrap/AdminLTE styling
+    on every page we are not touching.
+  - Every generated utility (and every custom @utility below) is
+    prefixed "tw:" so it can never collide with an existing Bootstrap/
+    AdminLTE class name elsewhere in the app (e.g. Bootstrap's own
+    `.gap-3`/`.p-3`/`.border`/`.shadow`).
+  - The @theme tokens and @utility classes below are copied from the
+    real TailAdmin template's src/css/style.css (the file the user
+    downloaded), trimmed to only what the sidebar/header/table actually
+    use here.
+*/
+
+@theme {
+  --breakpoint-2xsm: 375px;
+  --breakpoint-xsm: 425px;
+  --breakpoint-3xl: 2000px;
+
+  --text-theme-sm: 14px;
+  --text-theme-sm--line-height: 20px;
+  --text-theme-xs: 12px;
+  --text-theme-xs--line-height: 18px;
+
+  --color-brand-25: #f2f7ff;
+  --color-brand-50: #ecf3ff;
+  --color-brand-100: #dde9ff;
+  --color-brand-200: #c2d6ff;
+  --color-brand-300: #9cb9ff;
+  --color-brand-400: #7592ff;
+  --color-brand-500: #465fff;
+  --color-brand-600: #3641f5;
+  --color-brand-700: #2a31d8;
+  --color-brand-800: #252dae;
+  --color-brand-900: #262e89;
+  --color-brand-950: #161950;
+
+  --color-gray-25: #fcfcfd;
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f2f4f7;
+  --color-gray-200: #e4e7ec;
+  --color-gray-300: #d0d5dd;
+  --color-gray-400: #98a2b3;
+  --color-gray-500: #667085;
+  --color-gray-600: #475467;
+  --color-gray-700: #344054;
+  --color-gray-800: #1d2939;
+  --color-gray-900: #101828;
+  --color-gray-950: #0c111d;
+  --color-gray-dark: #1a2231;
+
+  --color-success-25: #f6fef9;
+  --color-success-50: #ecfdf3;
+  --color-success-100: #d1fadf;
+  --color-success-500: #12b76a;
+  --color-success-600: #039855;
+  --color-success-700: #027a48;
+
+  --color-error-25: #fffbfa;
+  --color-error-50: #fef3f2;
+  --color-error-100: #fee4e2;
+  --color-error-500: #f04438;
+  --color-error-600: #d92d20;
+  --color-error-700: #b42318;
+
+  --color-warning-50: #fffaeb;
+  --color-warning-100: #fef0c7;
+  --color-warning-500: #f79009;
+  --color-warning-600: #dc6803;
+  --color-warning-700: #b54708;
+
+  --shadow-theme-xs: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
+  --shadow-theme-sm:
+    0px 1px 3px 0px rgba(16, 24, 40, 0.1), 0px 1px 2px 0px rgba(16, 24, 40, 0.06);
+  --shadow-theme-md:
+    0px 4px 8px -2px rgba(16, 24, 40, 0.1), 0px 2px 4px -2px rgba(16, 24, 40, 0.06);
+  --shadow-theme-lg:
+    0px 12px 16px -4px rgba(16, 24, 40, 0.08), 0px 4px 6px -2px rgba(16, 24, 40, 0.03);
+}
+
+@utility menu-item {
+  @apply tw:relative tw:flex tw:items-center tw:gap-2.5 tw:rounded-lg tw:px-2.5 tw:py-1.5 tw:text-sm tw:font-medium tw:no-underline;
+}
+@utility menu-item-active {
+  @apply tw:bg-brand-50 tw:text-brand-500 tw:dark:bg-brand-500/[0.12] tw:dark:text-brand-400;
+}
+@utility menu-item-inactive {
+  @apply tw:text-gray-700 tw:hover:bg-gray-100 tw:hover:text-gray-700 tw:dark:text-gray-300 tw:dark:hover:bg-white/5 tw:dark:hover:text-gray-300;
+}
+@utility menu-item-icon-active {
+  @apply tw:text-brand-500 tw:dark:text-brand-400;
+}
+@utility menu-item-icon-inactive {
+  @apply tw:text-gray-500 tw:group-hover:text-gray-700 tw:dark:text-gray-400 tw:dark:group-hover:text-gray-300;
+}
+@utility menu-item-arrow {
+  @apply tw:absolute tw:top-1/2 tw:right-2.5 tw:-translate-y-1/2;
+}
+@utility menu-item-arrow-active {
+  @apply tw:stroke-brand-500 tw:dark:stroke-brand-400 tw:rotate-180;
+}
+@utility menu-item-arrow-inactive {
+  @apply tw:stroke-gray-500 tw:group-hover:stroke-gray-700 tw:dark:stroke-gray-400 tw:dark:group-hover:stroke-gray-300;
+}
+@utility menu-dropdown-item {
+  @apply tw:text-theme-sm tw:relative tw:flex tw:items-center tw:gap-2.5 tw:rounded-lg tw:px-2.5 tw:py-2 tw:font-medium tw:no-underline;
+}
+@utility menu-dropdown-item-active {
+  @apply tw:bg-brand-50 tw:text-brand-500 tw:dark:bg-brand-500/[0.12] tw:dark:text-brand-400;
+}
+@utility menu-dropdown-item-inactive {
+  @apply tw:text-gray-700 tw:hover:bg-gray-100 tw:dark:text-gray-300 tw:dark:hover:bg-white/5;
+}
+@utility no-scrollbar {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+@utility custom-scrollbar {
+  &::-webkit-scrollbar {
+    @apply tw:size-1.5;
+  }
+  &::-webkit-scrollbar-track {
+    @apply tw:rounded-full;
+  }
+  &::-webkit-scrollbar-thumb {
+    @apply tw:rounded-full tw:bg-gray-200;
+  }
+}
+@utility status-badge {
+  @apply tw:inline-flex tw:items-center tw:rounded-full tw:px-2.5 tw:py-0.5 tw:text-theme-xs tw:font-medium;
+}

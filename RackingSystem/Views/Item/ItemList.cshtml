@@ -1,249 +1,202 @@
-﻿
-<style>
-    .show-entries select.form-control {
-        width: 60px;
-        margin: 0 5px;
-    }
-
-    .table-filter .filter-group {
-        float: right;
-        margin-left: 15px;
-    }
-
-    .table-filter input, .table-filter select {
-        height: 34px;
-        border-radius: 3px;
-        border-color: #ddd;
-        box-shadow: none;
-    }
-
-    .table-filter {
-        /* padding: 5px 0 15px;
-        border-bottom: 1px solid #e9e9e9;
-        margin-bottom: 5px; */
-    }
-
-    .table-filter .btn {
-        height: 34px;
-    }
-
-    .table-filter label {
-        font-weight: normal;
-        margin-left: 10px;
-    }
-
-    .table-filter select, .table-filter input {
-        display: inline-block;
-        margin-left: 5px;
-    }
-
-    .table-filter input {
-        width: 200px;
-        display: inline-block;
-    }
-
-    .filter-group select.form-control {
-        width: 110px;
-    }
-
-    .filter-icon {
-        float: right;
-        margin-top: 7px;
-    }
-
-    .filter-icon i {
-        font-size: 18px;
-        opacity: 0.7;
-    }
-
-    .pagination {
-        float: right;
-        margin: 0 0 5px;
-    }
-
-    .pagination li a {
-        border: none;
-        font-size: 13px;
-        min-width: 30px;
-        min-height: 30px;
-        color: #999;
-        margin: 0 2px;
-        line-height: 30px;
-        border-radius: 2px !important;
+﻿<style>
+    #columnMatchingLabel {
         text-align: center;
-        padding: 0 6px;
+        width: 100%;
+        font-weight: bold;
     }
 
-    .pagination li a:hover {
-        color: #666;
+    .matching-btn {
+        justify-content: center;
     }
 
-    .pagination li.active a {
-        background: #03A9F4;
+    .bi-upload {
+        padding-left: 10px;
     }
 
-    .pagination li.active a:hover {
-        background: #0397d6;
+    .dt-layout-row:not(.dt-layout-table) {
+        display: none !important;
     }
-
-    .pagination li.disabled i {
-        color: #ccc;
-    }
-
-    .pagination li i {
-        font-size: 16px;
-        padding-top: 6px
-    }
-
 </style>
 
-@section PageHeader {
-    <header class="d-flex align-items-center justify-content-between w-100">
-        <h2 class="pageTitle">Item List</h2>
-        <div class="d-flex gap-2">
-            <div class="btn-group">
-                <button type="button" class="btn btn-warning">Import</button>
-                <button type="button" class="btn btn-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="true">
-                    <span class="visually-hidden">Toggle Dropdown</span>
+@{
+    string menuItemClass = "tw:block tw:rounded-lg tw:px-3 tw:py-2 tw:text-sm tw:text-gray-700 tw:no-underline tw:hover:bg-gray-100 tw:dark:text-gray-300 tw:dark:hover:bg-white/5";
+}
+
+<div x-data="{ filtersOpen: true }">
+    <div class="tw:flex tw:w-full tw:items-center tw:justify-between">
+        <h2 class="tw:text-lg tw:mb-0 tw:ml-2 tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Item List</h2>
+        <div class="tw:flex tw:items-center tw:gap-2">
+            <button type="button" class="tw:rounded-lg tw:border-0 tw:px-3.5 tw:py-2.5 tw:transition-colors"
+                    :class="filtersOpen ? 'tw:bg-brand-50 tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:bg-gray-100 tw:text-gray-500 tw:hover:bg-gray-200 tw:dark:bg-white/5 tw:dark:text-gray-400 tw:dark:hover:bg-white/10'"
+                    @@click="filtersOpen = !filtersOpen" title="Toggle Filters">
+                <i class="bi bi-funnel"></i>
+            </button>
+            <div class="tw:relative" x-data="{ importOpen: false }" @@click.outside="importOpen = false">
+                <button type="button" class="tw:rounded-lg tw:border-0 tw:bg-yellow-400 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:hover:bg-yellow-500" @@click="importOpen = !importOpen">
+                    Import
+                    <i class="bi bi-chevron-down tw:text-xs"></i>
                 </button>
-                <ul class="dropdown-menu" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(114.5px, 40px, 0px);">
-                    <li><a class="dropdown-item" onclick="downloadTemp()">Download Template</a></li>
-                    <li><a class="dropdown-item" onclick="triggerFileInput()">Import Item from Excel</a></li>
-                </ul>
-                <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleFileUpload(event)">
+                <div x-show="importOpen" x-cloak class="tw:shadow-theme-lg tw:absolute tw:left-0 tw:z-10 tw:mt-2 tw:w-64 tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:p-2 tw:dark:border-gray-800 tw:dark:bg-gray-900">
+                    <a href="#" class="@menuItemClass" id="dTemp" onclick="downloadTemp()" @@click="importOpen = false">Download Template</a>
+                    <a href="#" class="@menuItemClass" onclick="triggerFileInput()" @@click="importOpen = false">Import Item by Excel</a>
+                </div>
             </div>
-            <button type="button" class="btn btn-success" onclick="newItemForm()">
+            <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" class="tw:hidden" onchange="handleFileUpload(event)">
+            <button type="button" class="tw:rounded-lg tw:border-0 tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:hover:bg-brand-600" onclick="newItemForm()">
                 Add New Item
             </button>
         </div>
-    </header>
-}
+    </div>
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row" style="padding:5px;">
-                        <div class="col-sm-3" style="">
-                            <input id="txtItemCode" name="ItemCode" type="text" class="form-control" style="" placeholder="Item" />
-                        </div>
-                        <div class="col-sm-3" style="">
-                            <input id="txtItemDesc" name="ItemDesc" type="text" class="form-control" style="" placeholder="Item Desc / Desc2" />
-                        </div>
-                        <div class="col-sm-3" style="">
-                            <input id="txtItemGroup" name="ItemGroup" type="text" class="form-control" style="" placeholder="Item Group" />
-                        </div>
-                        <div class="col-sm-2" style="">
-                            <input id="txtThickness" name="Thickness" type="text" class="form-control" style="" placeholder="Thickness" />
-                        </div>
-                        <div class="col-sm-1" style="">
-                            <button type="button" class="btn btn-primary" style="width:100%;" onclick="loadList(1)"><i class="bi bi-search"></i> </button>
-                        </div>
-                    </div>
-                    <hr />
-                    <div class="table-filter">
-                        <div class="row" style="padding-left:5px;">
-                            <div class="col-sm-12">
-                                <div class="show-entries">
-                                    <label>Show</label>
-                                    <select id="selpageSize" name="pageSize" class="form-control">
-                                        <option value="10">10</option>
-                                        <option value="25">25</option>
-                                        <option value="50">50</option>
-                                        <option value="100">100</option>
-                                        <option value="200">250</option>
-                                    </select>
-                                    <span>entries</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @* <div id="gridTable" class="table table-responsive text-nowrap mt-3"></div> *@
-
-                    <div class="text-nowrap table-container">
-                        <table id="listTable" class="dataTable row-border hover order-column" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>Item Code</th>
-                                    <th>UOM</th>
-                                    <th>Description</th>
-                                    <th>Item Group</th>
-                                    <th>Is Active</th>
-                                    <th>FinishGood?</th>
-                                    <th>Dimension</th>
-                                    @* <th>Width (inch)</th> *@
-                                    <th>Max Thickness (mm)</th>
-                                    <th>Alarm?</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
-                    <div class="dt-container dt-empty-footer">
-                        <div class="dt-layout-row">
-                            <div class="hint-text">Showing <b id="lblCurCount">0</b> of <b id="lblTotal">0</b> entries</div>
-                            @* <ul class="pagination" id="ulPagination">
-                        </ul> *@
-                            <div class="dt-layout-cell dt-layout-end">
-                                <div class="dt-paging">
-                                    <nav aria-label="pagination" id="ulPagination">
-                                    </nav>
-                                </div>
-                            </div>
-                            <input type="hidden" id="txtCurPage">
-                            <input type="hidden" id="txtTotalRecord">
-                            <input type="hidden" id="txtPageSize">
-                            <input type="hidden" id="txtTotalPage">
-                        </div>
-                    </div>
-
+    <div class="tw:mt-3 tw:space-y-4">
+        <div x-show="filtersOpen" x-transition class="tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:p-4 tw:dark:border-gray-800 tw:dark:bg-white/[0.03]">
+            @{
+                string fieldClass = @"tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-sm tw:text-gray-800 tw:placeholder:text-gray-400
+                                        tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90
+                                        tw:dark:placeholder:text-white/30 tw:dark:focus:border-brand-800";
+                string labelClass = "tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400";
+            }
+            <div class="tw:grid tw:grid-cols-3 tw:items-end tw:gap-3">
+                <div>
+                    <label class="@labelClass" for="txtItemCode">Item Code</label>
+                    <input id="txtItemCode" name="ItemCode" type="text" class="@fieldClass" placeholder="Item Code" />
+                </div>
+                <div>
+                    <label class="@labelClass" for="txtItemDesc">Created By</label>
+                    <input id="txtItemDesc" name="ItemDesc" type="text" class="@fieldClass" placeholder="Item Desc / Desc2" />
+                </div>
+                <div>
+                    <label class="@labelClass" for="txtItemGroup">Item Group</label>
+                    <input id="txtItemGroup" name="ItemGroup" type="text" class="@fieldClass" placeholder="Item Group" />
+                </div>
+                <div>
+                    <label class="@labelClass" for="txtThickness">Item Code</label>
+                    <input id="txtThickness" name="Thickness" type="text" class="@fieldClass" placeholder="Thickness" />
+                </div>
+                <div>
+                    <button type="button" class="tw:inline-flex tw:w-full tw:items-center tw:justify-center tw:rounded-lg tw:border-0 tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:hover:bg-brand-600" onclick="loadList(1)">
+                        <i class="bi bi-search"></i>
+                    </button>
                 </div>
             </div>
         </div>
+        <div class="dt-tailadmin tw:rounded-lg tw:border tw:border-gray-200 tw:bg-white tw:text-gray-700 tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:dark:text-gray-300">
+            <div class="tw:flex tw:items-center tw:gap-2 tw:px-5 tw:pt-4 tw:text-[13px] tw:text-gray-500 sm:tw:px-6 tw:dark:text-gray-400">
+                <select id="selpageSize" name="pageSize" class="tw:rounded-lg tw:border tw:border-gray-300 tw:bg-white tw:px-4 tw:py-2 tw:text-[13px] tw:font-medium tw:text-gray-800 tw:shadow-theme-xs tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="200">250</option>
+                </select>
+                <span>entries per page</span>
+            </div>
+
+            <table id="listTable" class="row-border dataTable hover order-column tw:w-full">
+                <thead>
+                    <tr class="tw:border-b tw:border-gray-200">
+                        @{
+                            string[] listHeaders = { "Item Code", "UOM", "Description", "Item Group", "Is Active", "FinishGood?", "Dimension", "Max Thickness (mm)", "Alarm?", "Action" };
+                        }
+                        @foreach (var header in listHeaders)
+                        {
+                            <th class="tw:px-5 tw:py-3.5 tw:text-left sm:tw:px-6"><span class="tw:text-sm tw:font-semibold tw:text-gray-700 tw:dark:text-gray-300">@header</span></th>
+                        }
+                    </tr>
+                </thead>
+            </table>
+
+            <div class="tw:flex tw:flex-wrap tw:text-[13px] tw:items-center tw:justify-between tw:gap-3 tw:px-5 tw:py-4 sm:tw:px-6">
+                <div class="tw:text-gray-500 tw:dark:text-gray-400">Showing <span id="lblCurCount">0</span> of <span id="lblTotal">0</span> entries</div>
+                <nav aria-label="pagination" id="ulPagination" class="tw:flex tw:items-center tw:gap-1"></nav>
+            </div>
+        </div>
+        <input type="hidden" id="txtCurPage">
+        <input type="hidden" id="txtTotalRecord">
+        <input type="hidden" id="txtPageSize">
+        <input type="hidden" id="txtTotalPage">
+
     </div>
 </div>
 
-<div class="modal fade" id="myModal" role="dialog">
+<div class="modal fade" data-bs-backdrop="static" data-bs-focus="false" id="myModal" role="dialog">
     <div class="modal-dialog">
 
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Update Item</h4>
+        <div class="modal-content tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+            <div class="tw:rounded-t-2xl tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
+                <h4 class="tw:text-base tw:font-semibold tw:text-gray-800 tw:mb-0 tw:dark:text-white/90">Update Item</h4>
             </div>
-            @* <form action="/bin/SaveBin" method="post"> *@
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label" for="txtCode">Item Code</label>
-                    <input type="text" class="form-control" name="ItemCode" id="txtCode" aria-describedby="Item Code" maxlength="50">
+            <div class="tw:space-y-4 tw:px-6 tw:py-4">
+                <div>
+                    <label class="@labelClass" for="txtCode">Item Code</label>
+                    <input type="text" class="@fieldClass" name="ItemCode" id="txtCode" aria-describedby="Item Code" maxlength="50" oninput="removeErrMsg(this.id)">
                     <div id="txtCodeError" class="error-message"></div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtUOM">UOM</label>
-                    <input type="text" class="form-control" name="UOM" id="txtUOM" aria-describedby="UOM" maxlength="50">
+                <div>
+                    <label class="@labelClass" for="txtUOM">UOM</label>
+                    <input type="text" class="@fieldClass" name="UOM" id="txtUOM" aria-describedby="UOM" maxlength="50" oninput="removeErrMsg(this.id)">
                     <div id="txtUOMError" class="error-message"></div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtDesc">Description</label>
-                    <input type="text" class="form-control" name="Description" id="txtDesc" aria-describedby="Description" maxlength="255">
+                <div>
+                    <label class="@labelClass" for="txtDesc">Description</label>
+                    <input type="text" class="@fieldClass" name="Description" id="txtDesc" aria-describedby="Description" maxlength="255" oninput="removeErrMsg(this.id)">
                     <div id="txtDescError" class="error-message"></div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtDesc2">Desc2</label>
-                    <input type="text" class="form-control" name="Desc2" id="txtDesc2" aria-describedby="Desc2" maxlength="255">
+                <div>
+                    <label class="@labelClass" for="txtDesc2">Desc2</label>
+                    <input type="text" class="@fieldClass" name="Desc2" id="txtDesc2" aria-describedby="Desc2" maxlength="255">
                     <div id="txtDesc2Error" class="error-message"></div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="selItemGroup">Item Group</label>
-                    <select class="form-control" id="selItemGroup">
-                    </select>
+                <div>
+                    <label class="@labelClass" for="selItemGroup">Item Group</label>
+                    <div class="tw:relative" x-data="customSelect('selItemGroup')" x-init="init()">
+                        <select class="tw:hidden" id="selItemGroup" onchange="removeErrMsg(this.id)"></select>
+                        <button type="button" @@click="toggle()" @@click.outside="open = false"
+                            class="tw:flex tw:w-full tw:items-center tw:justify-between tw:gap-2 tw:rounded-lg tw:border tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-left tw:text-sm tw:text-gray-800 tw:dark:bg-gray-900 tw:dark:text-white/90"
+                            :class="hasError ? 'tw:border-error-500' : (open ? 'tw:border-brand-300 tw:ring-3 tw:ring-brand-500/10' : 'tw:border-gray-300 tw:dark:border-gray-700')">
+                            <span x-text="selectedLabel || 'Select...'" :class="selectedLabel ? '' : 'tw:text-gray-400 tw:dark:text-white/30'"></span>
+                            <i class="bi bi-chevron-down tw:text-xs tw:text-gray-500 tw:transition-transform tw:dark:text-gray-400" :class="open ? 'tw:rotate-180' : ''"></i>
+                        </button>
+                        <div x-show="open" x-transition
+                            class="custom-select-scroll tw:absolute tw:z-50 tw:max-h-60 tw:w-full tw:overflow-y-auto tw:rounded-lg tw:border tw:border-gray-200 tw:bg-white tw:py-1 tw:shadow-theme-lg tw:dark:border-gray-700 tw:dark:bg-gray-900"
+                            :class="dropUp ? 'tw:bottom-full tw:mb-1' : 'tw:top-full tw:mt-1'">
+                            <template x-if="options.length === 0">
+                                <div class="tw:px-4 tw:py-2 tw:text-sm tw:text-gray-400 tw:dark:text-white/30">No options</div>
+                            </template>
+                            <template x-for="opt in options" :key="opt.value">
+                                <div @@click="select(opt)"
+                                    class="tw:cursor-pointer tw:px-4 tw:py-2 tw:text-sm tw:hover:bg-brand-50 tw:dark:hover:bg-brand-500/15"
+                                    :class="opt.value === selectedValue ? 'tw:bg-brand-50 tw:font-medium tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:text-gray-700 tw:dark:text-gray-300'"
+                                    x-text="opt.text"></div>
+                            </template>
+                        </div>
+                    </div>
                     <div id="selItemGroupError" class="error-message"></div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="selReelDimension">Reel Thickness (mm)</label>
-                    <select class="form-control" id="selReelDimension">
-                    </select>
+                <div>
+                    <label class="@labelClass" for="selReelDimension">Reel Thickness (mm)</label>
+                    <div class="tw:relative" x-data="customSelect('selReelDimension')" x-init="init()">
+                        <select class="tw:hidden" id="selReelDimension" onchange="removeErrMsg(this.id)"></select>
+                        <button type="button" @@click="toggle()" @@click.outside="open = false"
+                            class="tw:flex tw:w-full tw:items-center tw:justify-between tw:gap-2 tw:rounded-lg tw:border tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-left tw:text-sm tw:text-gray-800 tw:dark:bg-gray-900 tw:dark:text-white/90"
+                            :class="hasError ? 'tw:border-error-500' : (open ? 'tw:border-brand-300 tw:ring-3 tw:ring-brand-500/10' : 'tw:border-gray-300 tw:dark:border-gray-700')">
+                            <span x-text="selectedLabel || 'Select...'" :class="selectedLabel ? '' : 'tw:text-gray-400 tw:dark:text-white/30'"></span>
+                            <i class="bi bi-chevron-down tw:text-xs tw:text-gray-500 tw:transition-transform tw:dark:text-gray-400" :class="open ? 'tw:rotate-180' : ''"></i>
+                        </button>
+                        <div x-show="open" x-transition
+                            class="custom-select-scroll tw:absolute tw:z-50 tw:max-h-60 tw:w-full tw:overflow-y-auto tw:rounded-lg tw:border tw:border-gray-200 tw:bg-white tw:py-1 tw:shadow-theme-lg tw:dark:border-gray-700 tw:dark:bg-gray-900"
+                            :class="dropUp ? 'tw:bottom-full tw:mb-1' : 'tw:top-full tw:mt-1'">
+                            <template x-if="options.length === 0">
+                                <div class="tw:px-4 tw:py-2 tw:text-sm tw:text-gray-400 tw:dark:text-white/30">No options</div>
+                            </template>
+                            <template x-for="opt in options" :key="opt.value">
+                                <div @@click="select(opt)"
+                                    class="tw:cursor-pointer tw:px-4 tw:py-2 tw:text-sm tw:hover:bg-brand-50 tw:dark:hover:bg-brand-500/15"
+                                    :class="opt.value === selectedValue ? 'tw:bg-brand-50 tw:font-medium tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:text-gray-700 tw:dark:text-gray-300'"
+                                    x-text="opt.text"></div>
+                            </template>
+                        </div>
+                    </div>
                     <div id="selReelDimensionError" class="error-message"></div>
                 </div>
                @*  <div class="mb-3">
@@ -258,44 +211,47 @@
                     <label class="form-label" for="txtMaxThickness">Max Thickness (mm)</label>
                     <input type="number" class="form-control" name="MaxThickness" id="txtMaxThickness" aria-describedby="Max Thickness" disabled>
                 </div> *@
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkIsActive">
-                    <label class="form-check-label" for="chkIsActive">Is Active</label>
-                </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkIsFinishGood">
-                    <label class="form-check-label" for="chkIsFinishGood">Is Finish Good</label>
-                </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkAlarmOverMaxThickness">
-                    <label class="form-check-label" for="chkAlarmOverMaxThickness">Alarm Over Max Thickness</label>
+                <div class="tw:flex tw:flex-wrap tw:items-center tw:gap-6">
+                    <div class="tw:flex tw:items-center tw:gap-2">
+                        <input type="checkbox" class="tw:h-4 tw:w-4 tw:accent-brand-500" id="chkIsActive">
+                        <label class="tw:text-sm tw:text-gray-700 tw:dark:text-gray-400" for="chkIsActive">Is Active</label>
+                    </div>
+                    <div class="tw:flex tw:items-center tw:gap-2">
+                        <input type="checkbox" class="tw:h-4 tw:w-4 tw:accent-brand-500" id="chkIsFinishGood">
+                        <label class="tw:text-sm tw:text-gray-700 tw:dark:text-gray-400" for="chkIsFinishGood">Is Finish Good</label>
+                    </div>
+                    <div class="tw:flex tw:items-center tw:gap-2">
+                        <input type="checkbox" class="tw:h-4 tw:w-4 tw:accent-brand-500" id="chkAlarmOverMaxThickness">
+                        <label class="tw:text-sm tw:text-gray-700 tw:dark:text-gray-400" for="chkAlarmOverMaxThickness">Alarm Over Max Thickness</label>
+                    </div>
                 </div>
 
                 <input type="hidden" id="txtId">
 
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="saveItem()">Save</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="cancelForm()">Cancel</button>
+            <div class="tw:flex tw:justify-end tw:gap-3 tw:border-t tw:border-gray-100 tw:px-6 tw:py-3 tw:dark:border-gray-800">
+                <button type="button" class="tw:rounded-lg tw:border-0 tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:shadow-theme-xs tw:hover:bg-brand-600" onclick="saveItem()">Save</button>
+                <button type="button" class="tw:bg-transparent tw:rounded-lg tw:border tw:border-gray-300 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-700 tw:hover:bg-gray-100 tw:dark:border-gray-700 tw:dark:text-gray-400 tw:dark:hover:bg-white/5" onclick="cancelForm()">Cancel</button>
             </div>
             @* </form> *@
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="columnMatchingModal">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="columnMatchingLabel">Map CSV Columns to Data Table Columns</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<div class="modal fade" id="columnMatchingModal" data-bs-backdrop="static" data-bs-focus="false">
+    <div class="modal-dialog modal-dialog-centered tw:max-w-2xl">
+        <div class="modal-content tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+            <div class="tw:flex tw:items-center tw:justify-between tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
+                <h5 class="tw:text-base tw:font-semibold tw:text-gray-800 tw:dark:text-white/90 tw:mb-0" id="columnMatchingLabel">Map CSV Columns to Data Table Columns</h5>
+                <button type="button" class="tw:flex tw:h-8 tw:w-8 tw:appearance-none tw:items-center tw:justify-center tw:rounded-full tw:border-0 tw:bg-gray-100 tw:text-gray-400 tw:outline-none tw:hover:bg-gray-200 tw:hover:text-gray-600 tw:dark:bg-white/5 tw:dark:text-gray-400 tw:dark:hover:bg-white/[0.07] tw:dark:hover:text-gray-300" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="bi bi-x-lg"></i>
+                </button>
             </div>
-            <div class="modal-body" id="csvColumns">
-                <div id="csvColumns"></div>
+            <div class="tw:space-y-4 tw:px-8 tw:py-3 tw:pt-6 tw:py-3" id="csvColumns">
+                <div id="csvColumnContent"></div>
                 <div id="dataTableColumns"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="processAndSubmitData()">Submit</button>
+            </div><div class="tw:flex tw:justify-center tw:border-t tw:border-gray-100 tw:px-6 tw:py-5 tw:dark:border-gray-800">
+                <button type="button" class="tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:border-0 tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:hover:bg-brand-600" onclick="processAndSubmitData()">Submit<i class="bi bi-upload"></i></button>
             </div>
         </div>
     </div>
@@ -305,25 +261,70 @@
 {
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
     <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
-    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="../js/dataTables.js"></script>
-    <script src="../js/dataTables.columnControl.js"></script>
-    <script src="../js/columnControl.dataTables.js"></script>
 
     <script src="~/js/sweetalert2.all.min.js"></script>
     <script src="~/js/xlsx.full.min.js"></script>
     <script src="~/js/exceljs.min.js"></script>
 
-    @* <link href="~/css/datatables.min.css" rel="stylesheet">
-    <script src="~/js/gridjs.umd.js"></script> 
-    <script src="~/js/datatables.min.js"></script> 
-    <link rel="stylesheet" href="~/css/gridjs.min.css"> *@
-
     <script type="text/javascript">
         let uploadedFileContent = null;
         let uploadedFileExtension = null;
+
+        function customSelect(selectId) {
+            return {
+                open: false,
+                dropUp: false,
+                options: [],
+                selectedValue: '',
+                selectedLabel: '',
+                hasError: false,
+                init() {
+                    this.syncOptions();
+                    const sel = document.getElementById(selectId);
+                    if (!sel) return;
+                    this.hasError = sel.classList.contains('is-invalid');
+                    new MutationObserver(() => {
+                        this.hasError = sel.classList.contains('is-invalid');
+                    }).observe(sel, { attributes: true, attributeFilter: ['class'] });
+                },
+                toggle() {
+                    this.open = !this.open;
+                    if (this.open) {
+                        this.syncOptions();
+                        const rect = this.$el.getBoundingClientRect();
+                        const spaceBelow = window.innerHeight - rect.bottom;
+                        this.dropUp = spaceBelow < 240 && rect.top > spaceBelow;
+                    }
+                },
+                syncOptions() {
+                    const sel = document.getElementById(selectId);
+                    if (!sel) return;
+                    this.options = Array.from(sel.options).map(o => ({ value: o.value, text: o.textContent.trim() }));
+                    this.selectedValue = sel.value;
+                    const selectedOpt = sel.options[sel.selectedIndex];
+                    this.selectedLabel = selectedOpt ? selectedOpt.textContent.trim() : '';
+                },
+                select(opt) {
+                    const sel = document.getElementById(selectId);
+                    sel.value = opt.value;
+                    this.selectedValue = opt.value;
+                    this.selectedLabel = opt.text;
+                    this.open = false;
+                    sel.dispatchEvent(new Event('change'));
+                }
+            };
+        }
+
+        function refreshCustomSelect(selectId) {
+            const sel = document.getElementById(selectId);
+            const root = sel ? sel.closest('[x-data]') : null;
+            if (root && window.Alpine) {
+                Alpine.$data(root).syncOptions();
+            }
+        }
 
         $(document).ready(function() {
             $('#txtTotalRecord').val(0);
@@ -359,11 +360,6 @@
         function loadList(page) {
             $('#txtCurPage').val(page);
             $('#txtPageSize').val($("#selpageSize").val());
-            var ttlPage = $("#txtTotalPage").val();
-            for (var j = 1; j <= ttlPage; j++) {
-                $('#btnP' + j).removeClass('current');
-            }
-            $('#btnP' + page).addClass('current');
 
             var data = {
                 ItemCode: $("#txtItemCode").val(),
@@ -391,21 +387,26 @@
                     Swal.showLoading();
                 },
                 success: function (result) {
-                    swal.close()
+                    Swal.close()
                     if (result.success == true) {
+                        const cellClass = 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6 tw:text-theme-sm tw:text-gray-700 tw:dark:text-gray-300';
+                        const designClass = 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6';
+
                         $('#listTable').DataTable({
                             data: result.data,
                             paging: false,
+                            scrollX: true,
                             searching: false,
                             "info": false,
                             // pageLength: $("#selpageSize").val(),
                             // lengthMenu: [50, 100, 250, 500, 1000],
                             "bDestroy": true,
                             columns: [
-                                { data: 'itemCode' },
-                                { data: 'uom' },
+                                { data: 'itemCode', className: cellClass },
+                                { data: 'uom', className: cellClass },
                                 {
                                     data: null,
+                                    className: cellClass, 
                                     render: function (data, type, row, meta) {
                                         const maxLength = 50;
                                         const desc = row.description || "";
@@ -421,181 +422,63 @@
                                         `;
                                     }
                                 },
-                                { data: 'itemGroupCode' },
+                                { data: 'itemGroupCode', className: cellClass },
                                 {
                                     data: null,
+                                    className: designClass,
                                     render: function (data, type, row, meta) {
-                                        if (row.isActive == true) {
-                                            return '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
-                                        }
-                                        else {
-                                            return '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>'
-                                        }
+                                        return row.isActive
+                                            ? '<span class="tw:status-badge tw:bg-success-50 tw:text-success-700 tw:dark:bg-success-500/15 tw:dark:text-success-500">Active</span>'
+                                            : '<span class="tw:status-badge tw:bg-gray-100 tw:text-gray-700 tw:dark:bg-white/5 tw:dark:text-gray-400">Inactive</span>';
                                     }
                                 },
                                 {
                                     data: null,
+                                    className: designClass,
                                     render: function (data, type, row, meta) {
-                                        if (row.isFinishGood == true) {
-                                            return '<span><i class="bi bi-check-square" style="color: darkgreen;"></i></span>'
-                                        }
-                                        else {
-                                            return '<span><i class="bi bi-app""></i></span>'
-                                        }
+                                        return row.isFinishGood
+                                            ? '<span><i class="bi bi-check-square tw:text-success-700"></i></span>'
+                                            : '<span><i class="bi bi-app""></i></span>';
                                     }
                                 },
                                 {
                                     data: null,
+                                    className: cellClass, 
                                     render: function (data, type, row, meta) {
-                                            return '<p style="margin:0;"><span>' + row.thickness + ' mm X ' + row.width + ' inch</span></p>'
+                                            return '<p style="tw:m-0"><span>' + row.thickness + ' mm X ' + row.width + ' inch</span></p>'
                                     }
                                 },
-                                { data: 'maxThickness' },
+                                { data: 'maxThickness', className: cellClass },
                                 {
                                     data: null,
+                                    className: designClass,
                                     render: function (data, type, row, meta) {
-                                        if (row.alarmOverMaxThickness == true) {
-                                            return '<span><i class="bi bi-check-square"></i></span>'
-                                        }
-                                        else {
-                                            return '<span><i class="bi bi-app""></i></span>'
-                                        }
+                                        return row.alarmOverMaxThickness
+                                        ? '<span><i class="bi bi-check-square tw:text-success-700"></i></span>'
+                                        : '<span><i class="bi bi-app""></i></span>';
                                     }
                                 },
                                 {
                                     data: null,
+                                    className: designClass,
                                     render: function (data, type, row, meta) {
                                         const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
-                                        return `<div style="display:flex;">
-                                                <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
-                                                    <span><i class="bi bi-pencil-square""></i>  Edit</span>
-                                                </button>
-                                                <button class="btn btn-danger deactivate-account delete-btn" data-id="${row.item_Id}" data-code="${row.itemCode}">
-                                                    <span><i class="bi bi-trash""></i>  Delete</span>
-                                                </button></div>`;
+                                        return `<div class="tw:flex tw:items-center tw:gap-2">
+                                            <button class="edit-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-amber-50 tw:font-medium tw:text-amber-600
+                                                tw:transition-colors tw:hover:bg-amber-100 tw:dark:bg-amber-500/15 tw:dark:text-amber-400 tw:dark:hover:bg-amber-500/25" data-row="${rowData}">
+                                                <i class="bi bi-pencil-square""></i>  
+                                                Edit
+                                            </button>
+                                            <button class="delete-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-error-50 tw:font-medium tw:text-error-600
+                                                tw:transition-colors tw:hover:bg-error-100 tw:dark:bg-error-500/15 tw:dark:text-error-400 tw:dark:hover:bg-error-500/25" data-id="${row.item_Id}" data-code="${row.itemCode}">
+                                                <i class="bi bi-trash""></i>  
+                                                Delete
+                                            </button>
+                                        </div>`;
                                     }
                                 }
                             ],
-                            ordering: {
-                                indicators: false
-                            },
-                            columnControl: ['orderStatus']
                         });
-                        
-                        /*
-                        if (gridInstance) {
-                            gridInstance.destroy();
-                        }
-
-                        gridInstance = new gridjs.Grid({
-                            columns: [
-                                { name: 'Item Id', id: 'item_Id', hidden: true },
-                                { name: 'Item Code', id: 'itemCode', width: '120px' },
-                                { name: 'Item Group Id', id: 'itemGroup_Id', hidden: true },
-                                { name: 'UOM', id: 'uom' },
-                                { 
-                                    name: 'Description', 
-                                    id: 'description',
-                                    formatter: (cell) => {
-                                        const maxLength = 50;
-                                        if (!cell) return '';
-                                        return cell.length > maxLength
-                                            ? gridjs.html(`<span title="${cell}">${cell.substring(0, maxLength)}...</span>`)
-                                            : cell;
-                                    }
-                                },
-                                { name: 'Item Group', id: 'itemGroupCode', width: '140px' },
-                                { 
-                                    name: 'Active State', 
-                                    id: 'isActive',
-                                    width: '140px',
-                                    formatter: (cell, row) => {
-                                       const badgeHtml = row.cells[7].data === true
-                                          ? '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
-                                          : '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>';
-                                        return gridjs.html(`<div style="text-align:center;">${badgeHtml}</div>`);
-                                   }
-                                },
-                                {   name: 'Finish Goods?', 
-                                    id: 'isFinishGood',
-                                    width: '160px',
-                                    formatter: (cell) => {
-                                        return gridjs.html(`
-                                            <div style="text-align:center;">
-                                                ${cell === true
-                                                    ? '<i class="bi bi-check-square text-success"></i>'
-                                                    : '<i class="bi bi-app"></i>'
-                                                }
-                                            </div>
-                                        `);
-                                    }
-                                },
-                                { name: 'Thickness', id: 'thickness', hidden: true },
-                                { name: 'Width', id: 'width', hidden: true },
-                                { name: 'Reel Dimension Id', id: 'reelDimension_Id', hidden: true },
-                                { 
-                                    name: 'Dimension', 
-                                    formatter: (cell, row) => {
-                                        return gridjs.html(`<span>${row.cells[9].data} mm X ${row.cells[10].data} inch</span>`);
-                                    }
-                                },
-                                { name: 'Max Thickness(mm)', id: 'maxThickness', width: '190px' },
-                                { 
-                                    name: 'Alarm?', 
-                                    id: 'alarmOverMaxThickness', 
-                                    width: '100px',
-                                    formatter: (cell) => {
-                                        return gridjs.html(`
-                                            <div style="text-align:center;">
-                                                ${cell === true
-                                                    ? '<i class="bi bi-check-square text-success"></i>'
-                                                    : '<i class="bi bi-app"></i>'
-                                                }
-                                            </div>
-                                        `);
-                                    }
-                                },
-                                { 
-                                    name: 'Action',
-                                    formatter: (cell, row) => {
-                                        const cleanRow = {
-                                            item_Id: row.cells[0]?.data,
-                                            itemCode: row.cells[1]?.data,
-                                            itemGroup_Id: row.cells[2]?.data,
-                                            uom: row.cells[3]?.data,
-                                            description: row.cells[4]?.data,
-                                            itemGroup: row.cells[5]?.data,
-                                            isFinishGood: row.cells[6]?.data,
-                                            thickness: row.cells[7]?.data,
-                                            width: row.cells[8]?.data,
-                                            reelDimension_Id: row.cells[9]?.data,
-                                            maxThickness: row.cells[10]?.data,
-                                            alarmOverMaxThickness: row.cells[11]?.data,
-                                        };
-                                        const rawData = btoa(JSON.stringify(cleanRow));
-                                        return gridjs.html(`
-                                           <div style="display: flex;">
-                                               <button class="btn btn-warning d-grid edit-btn me-2" data-row="${rawData}">
-                                                   <span><i class="bi bi-pencil-square"></i> Edit</span>
-                                               </button>
-                                               <button class="btn btn-danger d-grid delete-btn" data-id="${cleanRow.item_Id}" data-code="${cleanRow.itemCode}">
-                                                   <span><i class="bi bi-trash"></i> Delete</span>
-                                               </button>
-                                           </div>
-                                        `);
-                                    }
-                                }
-                            ],
-                            data: result.data,
-                            pagination: false,
-                            search: false,
-                            sort: false,
-                            resizable: true,
-                            className: {
-                                table: 'custom-table',
-                            }
-                        }).render(document.getElementById("gridTable"));
-                        */
 
                         // if is page 1 then need regenerate pagination, else just show current entry
                         var curCnt = 0;
@@ -612,48 +495,45 @@
 
                         if (page == 1) {
                             $('#lblTotal').html(result.totalRecords);
-                            $('#ulPagination').html('');
 
-                            var pageSize = $("#selpageSize").val();
-                            const myDiv = document.getElementById('ulPagination');
-                            var ttlPage = result.totalRecords / pageSize;
-
-                            if ((result.totalRecords % pageSize) > 0) {
+                            var pageSizeVal = $("#selpageSize").val();
+                            var ttlPage = parseInt(result.totalRecords / pageSizeVal);
+                            if ((result.totalRecords % pageSizeVal) > 0) {
                                 ttlPage = ttlPage + 1;
                             }
                             $('#txtTotalRecord').val(result.totalRecords);
                             $('#txtTotalPage').val(ttlPage);
-
-                            // myDiv.innerHTML += '<li class="page-item disabled"><a href="javascript:prevPage()">Previous</a></li>';
-                            // for (var i = 1; i <= ttlPage; i++) {
-                            //     if (i == 1) {
-                            //            myDiv.innerHTML += '<li class="page-item active" id="btnP'+ i +'"><a href="javascript:loadList('+ i +')" class="page-link">'+ i +'</a></li>';
-                            //     }
-                            //     else {
-                            //            myDiv.innerHTML += '<li class="page-item" id="btnP'+ i +'"><a href="javascript:loadList('+ i +')" class="page-link">'+ i +'</a></li>';
-                            //     }
-                            // }
-                            // myDiv.innerHTML += '<li class="page-item disabled"><a href="javascript:nextPage()">Next</a></li>';
-
-                            var lastPage = 1;
-                            myDiv.innerHTML += '<button class="dt-paging-button disabled first" onclick="loadList(1)" role="link" type="button" aria-controls="listTable"><<</button>';
-                            myDiv.innerHTML += '<button class="dt-paging-button disabled" onclick="prevPage()" role="link" type="button" aria-controls="listTable"><</button>';
-                            for (var i = 1; i <= ttlPage; i++) {
-                                if (i == 1) {
-                                       myDiv.innerHTML += '<button class="dt-paging-button current" id="btnP'+ i +'" onclick="loadList('+ i +')" role="link" type="button" aria-controls="listTable">'+ i +'</button>';
-                                }
-                                else {
-                                       myDiv.innerHTML += '<button class="dt-paging-button" id="btnP'+ i +'" onclick="loadList('+ i +')" role="link" type="button" aria-controls="listTable">'+ i +'</button>';
-                                }
-                                lastPage = i;
-                            }
-                            myDiv.innerHTML += '<button class="dt-paging-button disabled" onclick="nextPage()" role="link" type="button" aria-controls="listTable">></button>';
-                            myDiv.innerHTML += '<button class="dt-paging-button last disabled" onclick="loadList(' + lastPage + ')" role="link" type="button" aria-controls="listTable">>></button>';
                         }
+
+                        var ttlPage = Number($('#txtTotalPage').val());
+                        const myDiv = document.getElementById('ulPagination');
+                        myDiv.innerHTML = "";
+                        var pageItems = buildPaginationItems(ttlPage, page, 5);
+
+                        const pageBtnBase = 'tw:inline-flex tw:h-8 tw:min-w-8 tw:items-center tw:justify-center tw:rounded-lg tw:border tw:border-gray-200 tw:px-2.5 tw:text-sm tw:dark:border-gray-800';
+                        const pageBtnCurrent = pageBtnBase + ' tw:border-0 tw:bg-[rgba(43,127,255,0.08)] tw:font-medium tw:text-brand-500';
+                        const pageBtnDisabled = pageBtnBase + ' tw:border-0 tw:cursor-not-allowed tw:text-gray-300 tw:dark:text-gray-600 tw:bg-transparent';
+                        const pageBtnNormal = pageBtnBase + ' tw:text-gray-700 tw:dark:text-gray-300 tw:hover:border-0 tw:hover:bg-[rgba(43,127,255,0.08)] tw:hover:text-brand-500 tw:bg-transparent';
+
+                        myDiv.innerHTML += '<button ' + (page <= 1 ? 'disabled' : '') + ' class="' + (page <= 1 ? pageBtnDisabled : pageBtnNormal) + '" onclick="loadList(1)" role="link" type="button" aria-controls="listTable">«</button>';
+                        myDiv.innerHTML += '<button ' + (page <= 1 ? 'disabled' : '') + ' class="' + (page <= 1 ? pageBtnDisabled : pageBtnNormal) + '" onclick="prevPage()" role="link" type="button" aria-controls="listTable">‹</button>';
+
+                        pageItems.forEach(function(item) {
+                            if (item === '...') {
+                                myDiv.innerHTML += '<span class="tw:px-1 tw:text-gray-400">...</span>';
+                            }
+                            else {
+                                var isC = (page == item) ? pageBtnCurrent : pageBtnNormal;
+                                myDiv.innerHTML += '<button class="' + isC + '" id="btnP' + item + '" onclick="loadList(' + item + ')" role="link" type="button" aria-controls="listTable">' + item + '</button>';
+                            }
+                        });
+
+                        myDiv.innerHTML += '<button ' + (page >= ttlPage ? 'disabled' : '') + ' class="' + (page >= ttlPage ? pageBtnDisabled : pageBtnNormal) + '" onclick="nextPage()" role="link" type="button" aria-controls="listTable">›</button>';
+                        myDiv.innerHTML += '<button ' + (page >= ttlPage ? 'disabled' : '') + ' class="' + (page >= ttlPage ? pageBtnDisabled : pageBtnNormal) + '" onclick="loadList(' + ttlPage + ')" role="link" type="button" aria-controls="listTable">»</button>';
 
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -661,13 +541,48 @@
                     }
                 },
                 error: function (error) {
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
                     });
                 }
             });
+        }
+
+        function buildPaginationItems(totalPages, currentPage, windowSize = 5) {
+            const items = [];
+
+            if (totalPages <= windowSize) {
+                for (let i = 1; i <= totalPages; i++) {
+                    items.push(i);
+                }
+                return items;
+            }
+
+            if (currentPage <= windowSize - 1) {
+                for (let i = 1; i <= windowSize; i++) {
+                    items.push(i);
+                }
+                items.push('...');
+                items.push(totalPages);
+            }
+            else if (currentPage >= totalPages - windowSize + 2) {
+                items.push(1);
+                items.push('...');
+                for (let i = totalPages - windowSize + 1; i <= totalPages; i++) {
+                    items.push(i);
+                }
+            }
+            else {
+                items.push(1);
+                items.push('...');
+                items.push(currentPage - 1, currentPage, currentPage + 1);
+                items.push('...');
+                items.push(totalPages);
+            }
+
+            return items;
         }
 
         function loadItemGroupList() {
@@ -687,7 +602,7 @@
                     Swal.showLoading();
                 },
                 success: function (result) {
-                    swal.close()
+                    Swal.close()
                     if (result.success == true) {
 
                         // Get the select element
@@ -699,9 +614,10 @@
                             el.value = opt.itemGroup_Id;
                             selLoader.appendChild(el);
                         }
+                        refreshCustomSelect('selItemGroup');
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -709,7 +625,7 @@
                     }
                 },
                 error: function (error) {
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -735,8 +651,7 @@
                     Swal.showLoading();
                 },
                 success: function (result) {
-                    // console.log(result);
-                    swal.close()
+                    Swal.close()
                     if (result.success == true) {
 
                         // Get the select element
@@ -748,9 +663,10 @@
                             el.value = opt.reelDimension_Id;
                             selLoader.appendChild(el);
                         }
+                        refreshCustomSelect('selReelDimension');
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -758,7 +674,7 @@
                     }
                 },
                 error: function (error) {
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -776,6 +692,8 @@
             $("#txtDesc2").val("");
             $("#selItemGroup").val("0");
             $("#selReelDimension").val("0");
+            refreshCustomSelect('selItemGroup');
+            refreshCustomSelect('selReelDimension');
             // $("#txtThickness").val("");
             // $("#txtWidth").val("");
             // $("#txtMaxThickness").val("");
@@ -791,7 +709,6 @@
         });
 
         function editItemForm(row) {
-            // console.log(row.isActive);
             removeErrMsg([]);
             $("#txtId").val(row.item_Id);
             $("#txtCode").val(row.itemCode);
@@ -800,6 +717,8 @@
             $("#txtDesc2").val(row.desc2);
             $("#selItemGroup").val(row.itemGroup_Id);
             $("#selReelDimension").val(row.reelDimension_Id);
+            refreshCustomSelect('selItemGroup');
+            refreshCustomSelect('selReelDimension');
             // $("#txtThickness").val(h);
             // $("#txtWidth").val(w);
             // $("#txtMaxThickness").val(maxh);
@@ -826,6 +745,9 @@
 
         function cancelForm() {
             $("#myModal").modal("toggle");
+
+            fields = ['txtCode', 'txtUOM', 'txtDesc', 'txtDesc2', 'selItemGroup', 'selReelDimension' ];
+            removeErrMsg(fields, true);
         }
 
         // Show error message and highlight invalid fields
@@ -835,17 +757,18 @@
         }
 
         function removeErrMsg(fields, clearValue = false) {
-            fields = ['txtCode', 'txtUOM', 'txtDesc', 'txtDesc2', 'selItemGroup', 'selReelDimension' ];
-            if (!Array.isArray(fields)) {
-                fields = [fields];
-            }
+            if (fields != null) {
+                if (!Array.isArray(fields)) {
+                    fields = [fields];
+                }
 
-            fields.forEach(function(field) {
-                document.getElementById(field).classList.remove('is-invalid');
-                document.getElementById(field).classList.remove('is-valid');
-                document.getElementById(field + 'Error').textContent = '';
-                if (clearValue) document.getElementById(field).value = '';
-            });
+                fields.forEach(function(field) {
+                    document.getElementById(field).classList.remove('is-invalid');
+                    document.getElementById(field).classList.remove('is-valid');
+                    document.getElementById(field + 'Error').textContent = '';
+                    if (clearValue) document.getElementById(field).value = '';
+                });
+            }
         }
 
         function checkInput() {
@@ -923,7 +846,7 @@
                 success: function (result) {
                     if (result.success == true) {
                         $("#myModal").modal("toggle");
-                        swal.fire({
+                        Swal.fire({
                             icon: 'success',
                             title: "Success Update",
                             text: "",
@@ -933,7 +856,7 @@
                         });
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -941,8 +864,7 @@
                     }
                 },
                 error: function (error) {
-                    console.log(error);
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -958,16 +880,13 @@
         });
 
         function deleteItem(id, ItemCode) {
-
-            swal.fire({
+            Swal.fire({
                 title: "Are you sure want to delete?",
-                text: "You will not be able to recover this record!",
-                inputAttributes: {
-                    autocapitalize: 'off'
-                },
+                text: "You won't be able to recover this record!",
+                icon: 'warning', 
                 showCancelButton: true,
-                confirmButtonText: 'ok',
-                cancelButtonText: 'cancel',
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'Cancel',
                 allowOutsideClick: false
               }).then(function(r) {
                 if (r.isConfirmed == true) {
@@ -996,7 +915,7 @@
                         success: function (result) {
                             if (result.success == true) {
                                 // $("#myModal").modal("toggle");
-                                swal.fire({
+                                Swal.fire({
                                     icon: 'success',
                                     title: "Success Deleted",
                                     text: "",
@@ -1006,7 +925,7 @@
                                 });
                             }
                             else {
-                                swal.fire({
+                                Swal.fire({
                                     icon: 'error',
                                     title: "Wait",
                                     text: result.errMessage
@@ -1014,8 +933,7 @@
                             }
                         },
                         error: function (error) {
-                            console.log(error);
-                            swal.fire({
+                            Swal.fire({
                                 icon: 'error',
                                 title: "Wait",
                                 text: error.val
@@ -1109,8 +1027,8 @@
                 uploadedFileContent = content;
                 uploadedFileExtension = fileExtension;
 
-                console.log(uploadedFileContent);
-                console.log(uploadedFileExtension);
+                // console.log(uploadedFileContent);
+                // console.log(uploadedFileExtension);
 
                 showColumnMapping(columns);
             } catch (error) {
@@ -1137,24 +1055,42 @@
                 const matchedCol = dataTableColumns.find(col => isMatch(col, column));
 
                 columnDropdowns += `
-                    <div class="row align-items-center mb-3">
-                        <div class="col-4">
-                            <label class="form-label mb-0">File Column: <strong>${column}</strong></label>
+                <div class="tw:mb-3 tw:grid tw:grid-cols-2 tw:items-center">
+                    <label class="tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400">File Column: ${column}</label>
+                    <div class="tw:relative" x-data="customSelect('column${index}')" x-init="init()">
+                        <select class="column-mapping tw:hidden" data-col="${column}" id="column${index}">
+                            <option value="">Select Matching Column</option>
+                            ${dataTableColumns.map(col => `
+                                <option value="${col}" ${matchedCol === col ? 'selected' : ''}>${col}</option>
+                            `).join('')}
+                        </select>
+                        <button type="button" @@click="toggle()" @@click.outside="open = false"
+                            class="tw:flex tw:w-full tw:items-center tw:justify-between tw:gap-2 tw:rounded-lg tw:border tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-left tw:text-sm tw:text-gray-800 tw:dark:bg-gray-900 tw:dark:text-white/90"
+                            :class="hasError ? 'tw:border-error-500' : (open ? 'tw:border-brand-300 tw:ring-3 tw:ring-brand-500/10' : 'tw:border-gray-300 tw:dark:border-gray-700')">
+                            <span x-text="selectedLabel || 'Select...'" :class="selectedLabel ? '' : 'tw:text-gray-400 tw:dark:text-white/30'"></span>
+                            <i class="bi bi-chevron-down tw:text-xs tw:text-gray-500 tw:transition-transform tw:dark:text-gray-400" :class="open ? 'tw:rotate-180' : ''"></i>
+                        </button>
+                        <div x-show="open" x-transition
+                            class="custom-select-scroll tw:absolute tw:z-50 tw:max-h-60 tw:w-full tw:overflow-y-auto tw:rounded-lg tw:border tw:border-gray-200 tw:bg-white tw:py-1 tw:shadow-theme-lg tw:dark:border-gray-700 tw:dark:bg-gray-900"
+                            :class="dropUp ? 'tw:bottom-full tw:mb-1' : 'tw:top-full tw:mt-1'">
+                            <template x-if="options.length === 0">
+                                <div class="tw:px-4 tw:py-2 tw:text-sm tw:text-gray-400 tw:dark:text-white/30">No options</div>
+                            </template>
+                            <template x-for="opt in options" :key="opt.value">
+                                <div @@click="select(opt)"
+                                    class="tw:cursor-pointer tw:px-4 tw:py-2 tw:text-sm tw:hover:bg-brand-50 tw:dark:hover:bg-brand-500/15"
+                                    :class="opt.value === selectedValue ? 'tw:bg-brand-50 tw:font-medium tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:text-gray-700 tw:dark:text-gray-300'"
+                                    x-text="opt.text"></div>
+                            </template>
                         </div>
-                        <div class="col-6">
-                            <select class="form-select column-mapping"
-                                    data-col="${column}"
-                                    id="column${index}">
-                                <option value="">Select Matching Column</option>
-                                ${dataTableColumns.map(col => `
-                                    <option value="${col}" ${matchedCol === col ? 'selected' : ''}>${col}</option>
-                                `).join('')}
-                            </select>
-                        </div>
-                    </div>`;
+                    </div>
+                </div>`;
             });
 
-            document.getElementById('csvColumns').innerHTML = columnDropdowns;
+            document.getElementById('csvColumnContent').innerHTML = columnDropdowns;
+            if (window.Alpine) {
+                Alpine.initTree(document.getElementById('csvColumnContent'));
+            }
             $('#columnMatchingModal').modal("show");
         }
 
@@ -1263,7 +1199,7 @@
                     },
                     success: function(response) {
                         if (response.success == true) {
-                            swal.fire({
+                            Swal.fire({
                                 icon: 'success',
                                 title: "Success Update",
                                 text: "",
@@ -1274,7 +1210,7 @@
                         } else {
                             if (response.data && response.data.length > 0) {
                                 markErrorsInSheet(bookBuffer, response.data);
-                                swal.fire({
+                                Swal.fire({
                                     icon: 'warning',
                                     title: "Validation Issues Found",
                                     text: "Review on returned file and fix errors."
@@ -1282,7 +1218,7 @@
                                 $('#columnMatchingModal').modal("toggle");
 
                             } else {
-                                swal.fire({
+                                Swal.fire({
                                     icon: 'error',
                                     title: "Wait",
                                     text: response.errMessage
@@ -1291,8 +1227,7 @@
                         }
                     },
                     error: function(xhr, status, error) {
-                        console.log(error);
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: error.val
@@ -1344,7 +1279,7 @@
 
                     columnsToHighlight.forEach(colNum => {
                         const cell = row.getCell(colNum);
-                        console.log("colNumber:", colNum);
+                        // console.log("colNumber:", colNum);
                         cell.fill = {
                             type: 'pattern',
                             pattern: 'solid',

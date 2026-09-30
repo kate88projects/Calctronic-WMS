@@ -1,66 +1,64 @@
-﻿
-@section PageHeader {
-    <header class="d-flex align-items-center justify-content-between w-100">
-        <h2 class="pageTitle">Slot Calculation Setting</h2>
-        <div class="d-flex">
-            <button type="button" class="btn btn-success" onclick="newItemForm()">
-                Add New Slot Calculation
-            </button>
-        </div>
-    </header>
-}
+﻿<div class="tw:flex tw:w-full tw:items-center tw:justify-between">
+    <h2 class="tw:text-lg tw:mb-0 tw:ml-2 tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Slot Calculation Setting</h2>
+    <div class="tw:flex">
+        <button type="button" class="tw:border-0 tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:transition
+            tw:hover:bg-brand-600" onclick="newItemForm()">
+            Add New Slot Calculation
+        </button>
+    </div>
+</div>
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body pt-0">
-                    <div class="text-nowrap table-container mt-1">
-                        <table id="listTable" class="row-border dataTable hover order-column" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>Max Thickness (mm)</th>
-                                    <th>Reserve Slot</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="tw:mt-3">
+    <div class="dt-tailadmin tw:overflow-hidden tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:text-gray-700 tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:dark:text-gray-300">
+        <table id="listTable" class="row-border dataTable hover order-column tw:w-full">
+            <thead>
+                <tr class="tw:border-b tw:border-gray-200">
+                    @{
+                        string[] listHeaders = { "Max Thickness (mm)", "Reserve Slot", "Action" };
+                    }
+                    @foreach (var header in listHeaders)
+                    {
+                        <th class="tw:px-5 tw:py-3.5 tw:text-left sm:tw:px-6"><span class="tw:text-sm tw:font-semibold tw:text-gray-700 tw:dark:text-gray-300">@header</span></th>
+                    }
+                </tr>
+            </thead>
+        </table>
     </div>
 </div>
 
 <div class="modal fade" id="myModal" role="dialog">
     <div class="modal-dialog">
 
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Update Slot Calculation</h4>
+        <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+            <div class="tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
+                <h4 class="tw:text-base tw:font-semibold tw:text-gray-800 tw:mb-0 tw:dark:text-white/90">Update Slot Calculation</h4>
             </div>
-            @* <form action="/bin/SaveBin" method="post"> *@
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label" for="txtMaxThickness">Max Thickness (mm)</label>
-                    <input type="number" class="form-control" name="MaxThickness" id="txtMaxThickness" aria-describedby="Max Thickness">
+            <div class="tw:space-y-4 tw:px-6 tw:py-4">
+                <div>
+                    <label class="tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400" for="txtMaxThickness">Max Thickness (mm)</label>
+                    <input type="number" class="tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-sm tw:text-gray-800 tw:placeholder:text-gray-400
+                        tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90
+                        tw:dark:placeholder:text-white/30 tw:dark:focus:border-brand-800" name="MaxThickness" id="txtMaxThickness" aria-describedby="Max Thickness" oninput="removeErrMsg(this.id)">
                     <div id="txtMaxThicknessError" class="error-message"></div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtReserveSlot">Reserve Slot</label>
-                    <input type="number" class="form-control" name="ReserveSlot" id="txtReserveSlot" aria-describedby="ReserveSlot">
+                <div class="tw:mb-0">
+                    <label class="tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400" for="txtReserveSlot">Reserve Slot</label>
+                    <input type="number" class="tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-sm tw:text-gray-800 tw:placeholder:text-gray-400
+                        tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90
+                        tw:dark:placeholder:text-white/30 tw:dark:focus:border-brand-800" name="ReserveSlot" id="txtReserveSlot" aria-describedby="ReserveSlot" oninput="removeErrMsg(this.id)">
                     <div id="txtReserveSlotError" class="error-message"></div>
                 </div>
 
                 <input type="hidden" id="txtId">
 
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="saveItem()">Save</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="cancelForm()">Cancel</button>
+            <div class="tw:flex tw:justify-end tw:gap-3 tw:border-t tw:border-gray-100 tw:px-6 tw:py-3 tw:dark:border-gray-800">
+                <button type="button" class="save-btn tw:border-0 tw:rounded-lg tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:shadow-theme-xs tw:hover:bg-brand-600" onclick="saveItem()">Save</button>
+                <button type="button" class="cancel-btn tw:bg-transparent tw:rounded-lg tw:border tw:border-gray-300 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-700 tw:hover:bg-gray-100
+                    tw:dark:border-gray-700 tw:dark:text-gray-400 tw:dark:hover:bg-white/5" onclick="cancelForm()">
+                    Cancel
+                </button>
             </div>
-            @* </form> *@
         </div>
     </div>
 </div>
@@ -69,12 +67,9 @@
 {
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
     <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
-    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="../js/dataTables.js"></script>
-    <script src="../js/dataTables.columnControl.js"></script>
-    <script src="../js/columnControl.dataTables.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
 
     <script type="text/javascript">
@@ -100,48 +95,44 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
-                    swal.close()
+                    Swal.close()
                     if (result.success == true) {
+                        const cellClass = 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6 tw:text-theme-sm tw:text-gray-700 tw:dark:text-gray-300';
+
                         $('#listTable').DataTable( {
                             data: result.data,
                             paging: true,
                             pageLength: 50,
                             columns: [
-                                { data: 'maxThickness', width: '300px' },
-                                { data: 'reserveSlot', width: '300px' },
+                                { data: 'maxThickness', width: '300px', className: cellClass },
+                                { data: 'reserveSlot', width: '300px', className: cellClass },
                                 {
                                     data: null,
+                                    className: 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6',
                                     render: function (data, type, row, meta) {
-                                        return `<div style="display: flex;">
-                                                    <button class="btn btn-warning d-grid" style="margin-right: 10px;"
-                                                    onclick="editItemForm('${row.slotCalculation_Id}', '${row.maxThickness}', '${row.reserveSlot}')">
-                                                        <span><i class="bi bi-pencil-square""></i>  Edit</span>
-                                                    </button>
-                                                    <button class="btn btn-danger deactivate-account" onclick="deleteItem('${row.slotCalculation_Id}', '${row.maxThickness}')">
-                                                        <span><i class="bi bi-trash""></i>  Delete</span>
-                                                    </button>
-                                                </div>`;
-                                    //     return '<div style="display:flex;"><button class="btn btn-success d-grid" style="margin-right:10px;"' +
-                                    //     'onclick="editItemForm(\'' + row.slotCalculation_Id + '\', ' +
-                                    //     '\'' + row.maxThickness + '\', \'' + row.reserveSlot + '\' )">' +
-                                    //     '<span><i class="bi bi-pencil-square""></i>  Edit</span></button>' +
-
-                                    //     '<button class="btn btn-danger deactivate-account" onclick="deleteItem(\'' + row.slotCalculation_Id + '\', \'' + row.maxThickness + '\')"><span><i class="bi bi-trash""></i>  Delete</span></button></div>';
+                                        return `<div class="tw:flex tw:items-center tw:gap-2">
+                                            <button class="edit-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-amber-50 tw:font-medium tw:text-amber-600 tw:transition-colors tw:hover:bg-amber-100
+                                                tw:dark:bg-amber-500/15 tw:dark:text-amber-400 tw:dark:hover:bg-amber-500/25" onclick="editItemForm('${row.slotCalculation_Id}', '${row.maxThickness}', '${row.reserveSlot}')">
+                                                <i class="bi bi-pencil-square"></i> 
+                                                Edit
+                                            </button>
+                                            <button class="delete-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-error-50 tw:font-medium tw:text-error-600 tw:transition-colors tw:hover:bg-error-100 
+                                                tw:dark:bg-error-500/15 tw:dark:text-error-400 tw:dark:hover:bg-error-500/25" onclick="deleteItem('${row.slotCalculation_Id}', '${row.maxThickness}')">
+                                                <i class="bi bi-trash"></i>  
+                                                Delete
+                                            </button>
+                                        </div>`;
                                     }
                                 }
                             ],
                             language: {
                                 searchPlaceholder: "🔍︎ Search",
                                 search: ""
-                            },
-                            ordering: {
-                                indicators: false
-                            },
-                            columnControl: ['orderStatus']
+                            }
                         });
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -149,7 +140,7 @@
                     }
                 },
                 error: function (error) {
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -176,6 +167,8 @@
 
         function cancelForm() {
             $("#myModal").modal("toggle");
+            fields = ['txtMaxThickness', 'txtReserveSlot' ];
+            removeErrMsg(fields, true);
         }
 
         // Show error message and highlight invalid fields
@@ -185,17 +178,18 @@
         }
 
         function removeErrMsg(fields, clearValue = false) {
-            fields = ['txtMaxThickness', 'txtReserveSlot' ];
-            if (!Array.isArray(fields)) {
-                fields = [fields];
-            }
+            if (fields != null) {
+                if (!Array.isArray(fields)) {
+                    fields = [fields];
+                }
 
-            fields.forEach(function(field) {
-                document.getElementById(field).classList.remove('is-invalid');
-                document.getElementById(field).classList.remove('is-valid');
-                document.getElementById(field + 'Error').textContent = '';
-                if (clearValue) document.getElementById(field).value = '';
-            });
+                fields.forEach(function(field) {
+                    document.getElementById(field).classList.remove('is-invalid');
+                    document.getElementById(field).classList.remove('is-valid');
+                    document.getElementById(field + 'Error').textContent = '';
+                    if (clearValue) document.getElementById(field).value = '';
+                });
+            }
         }
 
         function checkInput() {
@@ -244,7 +238,7 @@
                 success: function (result) {
                     if (result.success == true) {
                         $("#myModal").modal("toggle");
-                        swal.fire({
+                        Swal.fire({
                             icon: 'success',
                             title: "Success Update",
                             text: "",
@@ -254,7 +248,7 @@
                         });
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -262,8 +256,7 @@
                     }
                 },
                 error: function (error) {
-                    console.log(error);
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -275,15 +268,13 @@
 
         function deleteItem(id, maxh) {
 
-            swal.fire({
+            Swal.fire({
                 title: "Are you sure want to delete?",
-                text: "You will not be able to recover this record!",
-                inputAttributes: {
-                    autocapitalize: 'off'
-                },
+                text: "You won't be able to recover this record!",
+                icon: 'warning', 
                 showCancelButton: true,
-                confirmButtonText: 'ok',
-                cancelButtonText: 'cancel',
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'Cancel',
                 allowOutsideClick: false
             }).then(function(r) {
                 if (r.isConfirmed == true) {
@@ -310,7 +301,7 @@
                         },
                         success: function (result) {
                             if (result.success == true) {
-                                swal.fire({
+                                Swal.fire({
                                     icon: 'success',
                                     title: "Success Deleted",
                                     text: "",
@@ -320,7 +311,7 @@
                                 });
                             }
                             else {
-                                swal.fire({
+                                Swal.fire({
                                     icon: 'error',
                                     title: "Wait",
                                     text: result.errMessage
@@ -328,8 +319,7 @@
                             }
                         },
                         error: function (error) {
-                            console.log(error);
-                            swal.fire({
+                            Swal.fire({
                                 icon: 'error',
                                 title: "Wait",
                                 text: error.val

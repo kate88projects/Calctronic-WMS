@@ -1,192 +1,6 @@
 ﻿
 <style >
-    body {
-        color: #566787;
-        background: #f5f5f5;
-        /* font-family: 'Varela Round', sans-serif; */
-        /* font-size: 13px; */
-    }
-
-    .table-wrapper {
-        background: #fff;
-        padding: 20px 25px;
-        margin: 10px auto;
-        border-radius: 3px;
-        box-shadow: 0 1px 1px rgba(0,0,0,.05);
-    }
-
-    .table-wrapper .btn {
-        float: right;
-        color: #333;
-        background-color: #fff;
-        border-radius: 3px;
-        border: none;
-        outline: none !important;
-        margin-left: 10px;
-    }
-
-    .table-wrapper .btn:hover {
-        color: #333;
-        background: #f2f2f2;
-    }
-
-    .table-wrapper .btn.btn-primary {
-        color: #fff;
-        background: #03A9F4;
-    }
-
-    .table-wrapper .btn.btn-primary:hover {
-        background: #03a3e7;
-    }
-
-    .table-wrapper .btn.btn-success {
-        color: #fff;
-        background: #198754;
-    }
-
-    .table-wrapper .btn.btn-success:hover {
-        background: #198754;
-    }
-
-    .table-wrapper .btn.btn-success:disabled {
-        background-color: #7f8c8d;
-        cursor: not-allowed;
-        opacity: 0.6;
-    }
-
-    .table-wrapper .btn.btn-danger {
-        color: #fff;
-        background: #dc3545;
-    }
-
-    .table-wrapper .btn.btn-danger:hover {
-        background: #dc3545;
-    }
-
-    .table-wrapper .btn.btn-danger:disabled {
-        background-color: #7f8c8d;
-        cursor: not-allowed;
-        opacity: 0.6;
-    }
-
-    .table-title .btn {
-        font-size: 17px;
-        border: none;
-    }
-
-    .table-title .btn i {
-        float: left;
-        font-size: 21px;
-        margin-right: 5px;
-    }
-
-    .table-title .btn span {
-        float: left;
-        margin-top: 2px;
-        height: 21px;
-    }
-
-    .table-title {
-        color: #fff;
-        background: #4b5366;
-        padding: 16px 25px;
-        margin: -20px -25px 10px;
-        border-radius: 3px 3px 0 0;
-    }
-
-    .table-title h2 {
-        margin: 5px 0 0;
-        font-size: 24px;
-    }
-
-    .show-entries select.form-control {
-        width: 60px;
-        margin: 0 5px;
-    }
-
-    .table-filter .filter-group {
-        float: right;
-        margin-left: 15px;
-    }
-
-    .table-filter input, .table-filter select {
-        height: 34px;
-        border-radius: 3px;
-        border-color: #ddd;
-        box-shadow: none;
-    }
-
-    .table-filter {
-        padding: 5px 0 15px;
-        border-bottom: 1px solid #e9e9e9;
-        margin-bottom: 5px;
-    }
-
-    .table-filter .btn {
-        height: 34px;
-    }
-
-    .table-filter label {
-        font-weight: normal;
-        margin-left: 10px;
-    }
-
-    .table-filter select, .table-filter input {
-        display: inline-block;
-        margin-left: 5px;
-    }
-
-    .table-filter input {
-        width: 200px;
-        display: inline-block;
-    }
-
-    .filter-group select.form-control {
-        width: 110px;
-    }
-
-    .filter-icon {
-        float: right;
-        margin-top: 7px;
-    }
-
-    .filter-icon i {
-        font-size: 18px;
-        opacity: 0.7;
-    }
-
-    /* .table > :not(caption) > * > * {
-        padding: 0 !important;
-    } */
-
-    .tblRow {
-        padding: 0 !important;
-    }
-
-    .tblCol1 {
-        width: 30%;
-    }
-
-    .tblCol2 {
-        width: 60%;
-    }
-
-    .tblCol3 {
-        width: 10%;
-        place-content:center;
-    }
-
-    /* --- System Log Area --- */
-    .system-log-container {
-        background-color: var(--card-bg);
-        margin: 0px 20px 20px 20px;
-        padding: 15px;
-        border-radius: 8px;
-        border: 1px solid var(--accent-color);
-    }
-
     #system-log {
-        background-color: var(--bg-main);
         color: #7f8c8d;
         height: 350px;
         overflow-y: auto;
@@ -207,37 +21,10 @@
 
     .log-alert {
         color: var(--status-alarm);
-        font-weight: bold;
     }
 
     .log-success {
         color: var(--status-ok);
-    }
-
-    .status-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 16px;
-        margin-bottom: 24px;
-    }
-
-    .status-card {
-        background: #f9fafb;
-        border-radius: 14px;
-        padding: 16px;
-        text-align: center;
-        border: 1px solid #e5e7eb;
-    }
-
-    .status-card h3 {
-        font-size: 13px;
-        color: #6b7280;
-        margin-bottom: 6px;
-    }
-
-    .status-card .value {
-        font-size: 22px;
-        font-weight: 600;
     }
 
     .yellow {
@@ -256,34 +43,13 @@
     }
 
     @@keyframes pulse-animation {
-        0%
+        0% {
+            box-shadow: 0 0 0 0px rgba(0, 0, 0, 0.2);
+        }
 
-    {
-        box-shadow: 0 0 0 0px rgba(0, 0, 0, 0.2);
-    }
-
-    100% {
-        box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
-    }
-
-    }
-
-    .pulse-row {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        font-size: 16px;
-        margin-top: 4px;
-    }
-
-    .pulse-label {
-        font-weight: 600;
-        min-width: 40px;
-    }
-
-    .pulse-value {
-        font-weight: 700;
+        100% {
+            box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+        }
     }
 
     .diff-up {
@@ -311,109 +77,96 @@
 
 </style>
 
+<div class="tw:flex tw:w-full tw:items-center tw:justify-between">
+    <h2 class="tw:text-lg tw:mb-0 tw:ml-2 tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Update Slot QR Pulse</h2>
+    <div class="tw:flex tw:gap-2">
+        <button type="button" class="tw:border-0 tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:bg-indigo-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:transition
+                tw:hover:bg-indigo-600" onclick="exportLogFile()">
+            Export Pulses
+        </button>
+    </div>
+</div>
 
-@section PageHeader {
-    <header class="d-flex align-items-center justify-content-between w-100">
-        <h2 class="pageTitle">Update Slot QR Pulse</h2>
-        <div class="d-flex gap-2">
-            <button type="button" class="btn btn-warning" onclick="exportLogFile()">
-                Export Pulses
-            </button>
-        </div>
-    </header>
-}
-
-<div class="container-fluid pt-2">
+<div class="tw:mt-3">
     <input type="hidden" id="xToken" value="@ViewBag.xToken" autocomplete="off">
     <input id="chkCont" type="checkbox" class="" style="display:none;" />
 
-    <div class="card card-panel p-3">
-        <div class="row g-3 align-items-center">
-            <div class="col-md-3 d-flex align-items-center gap-2">
-                <label class="form-label text-secondary text-nowrap mb-0" for="txtCol">Column: </label>
-                <input type="number" class="form-control" value="1" id="txtCol" name="txtCol" placeholder="Column No" />
+    @{
+        string inputClass = "tw:w-28 tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-3 tw:py-2 tw:text-sm tw:text-gray-800 tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90";
+        string labelClass = "tw:whitespace-nowrap tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400";
+        string btnBase = "tw:inline-flex tw:items-center tw:justify-center tw:gap-1.5 tw:rounded-lg tw:border-0 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:disabled:cursor-not-allowed tw:disabled:opacity-50";
+    }
+    <div class="tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:p-4 tw:dark:border-gray-800 tw:dark:bg-white/[0.03]">
+        <div class="tw:flex tw:flex-wrap tw:items-center tw:gap-4">
+            <div class="tw:flex tw:items-center tw:gap-2">
+                <label class="@labelClass" for="txtCol">Column:</label>
+                <input type="number" class="@inputClass" value="1" id="txtCol" name="txtCol" placeholder="Column No" />
             </div>
 
-            <div class="col-md-3 d-flex align-items-center gap-2">
-                <label class="form-label text-secondary text-nowrap mb-0" for="txtRow">From Row: </label>
-                <input type="number" class="form-control" value="1" id="txtRow" name="txtRow" placeholder="Row No" />
+            <div class="tw:flex tw:items-center tw:gap-2">
+                <label class="@labelClass" for="txtRow">From Row:</label>
+                <input type="number" class="@inputClass" value="1" id="txtRow" name="txtRow" placeholder="Row No" />
             </div>
 
-            <div class="col-md-6 d-flex gap-2 justify-content-end">
-                <button type="button" class="btn btn-primary flex-grow-1" onclick="loadList()">
+            <div class="tw:ml-auto tw:flex tw:flex-wrap tw:gap-2">
+                <button type="button" class="@btnBase tw:bg-brand-500 tw:hover:bg-brand-600" onclick="loadList()">
                     <i class="bi bi-search"></i> Generate
                 </button>
-                <button class="btn btn-success flex-grow-1" onclick="getQRPulses()" id="start-btn">Start Scan</button>
-                <button class="btn btn-success flex-grow-1" onclick="getContQRPulses()" id="start-btn">Start Cont. Scan</button>
-                <button class="btn btn-danger flex-grow-1" onclick="stopGet()" id="stop-btn">Stop Scan</button>
+                <button type="button" class="@btnBase tw:bg-emerald-500 tw:hover:bg-emerald-600" onclick="getQRPulses()" id="start-btn">Start Scan</button>
+                <button type="button" class="@btnBase tw:bg-emerald-500 tw:hover:bg-emerald-600" onclick="getContQRPulses()" id="start-btn">Start Cont. Scan</button>
+                <button type="button" class="@btnBase tw:bg-error-500 tw:hover:bg-error-600" onclick="stopGet()" id="stop-btn">Stop Scan</button>
             </div>
         </div>
     </div>
-
-    <hr />
 
     <!-- Status -->
-    <div class="status-grid">
-        <div class="status-card">
-            <h3>Status</h3>
-            <div class="value" id="txtIdle">Stop</div>
+    <div class="tw:my-4 tw:grid tw:grid-cols-4 tw:gap-4">
+            <div class="tw:rounded-2xl tw:border tw:border-gray-200 tw:bg-gray-50 tw:p-4 tw:text-center tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:bg-white">
+            <h3 class="tw:mb-1.5 tw:text-[13px] tw:text-gray-500 tw:dark:text-gray-400">Status</h3>
+            <div class="tw:text-xl tw:font-semibold tw:text-gray-800 tw:dark:text-white/90" id="txtIdle">Stop</div>
         </div>
-        <div class="status-card">
-            <h3>Current Row</h3>
-            <div class="value" id="txtCurRow">–</div>
+            <div class="tw:rounded-2xl tw:border tw:border-gray-200 tw:bg-gray-50 tw:p-4 tw:text-center tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:bg-white">
+            <h3 class="tw:mb-1.5 tw:text-[13px] tw:text-gray-500 tw:dark:text-gray-400">Current Row</h3>
+            <div class="tw:text-xl tw:font-semibold tw:text-gray-800 tw:dark:text-white/90" id="txtCurRow">–</div>
         </div>
-        <div class="status-card">
-            <h3>Pulses Read</h3>
-            <div class="pulse-row">
-                <span class="pulse-label">QR-X:</span>
-                <span class="pulse-value" id="pulseXValue">0</span>
-                <span class="pulse-diff ms-2" id="pulseXDiff"></span>
+            <div class="tw:rounded-2xl tw:border tw:border-gray-200 tw:bg-gray-50 tw:p-4 tw:text-center tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:bg-white">
+            <h3 class="tw:mb-1.5 tw:text-[13px] tw:text-gray-500 tw:dark:text-gray-400">Pulses Read</h3>
+                <div class="tw:flex tw:items-center tw:justify-center tw:gap-1.5 tw:text-base">
+                <span class="tw:font-semibold tw:text-gray-600 tw:dark:text-gray-400">QR-X:</span>
+                <span class="tw:font-bold tw:text-gray-800 tw:dark:text-white/90" id="pulseXValue">0</span>
+                <span class="pulse-diff tw:ml-1" id="pulseXDiff"></span>
             </div>
-
-            <div class="pulse-row">
-                <span class="pulse-label">QR-Z:</span>
-                <span class="pulse-value" id="pulseZValue">0</span>
-                <span class="pulse-diff ms-2" id="pulseZDiff"></span>
+                <div class="tw:mt-1 tw:flex tw:items-center tw:justify-center tw:gap-1.5 tw:text-base">
+                <span class="tw:font-semibold tw:text-gray-600 tw:dark:text-gray-400">QR-Z:</span>
+                <span class="tw:font-bold tw:text-gray-800 tw:dark:text-white/90" id="pulseZValue">0</span>
+                <span class="pulse-diff tw:ml-1" id="pulseZDiff"></span>
             </div>
         </div>
-        <div class="status-card">
-            <h3>Errors</h3>
-            <div class="value" id="txtErr" style="color: darkred;">-</div>
+            <div class="tw:rounded-2xl tw:border tw:border-gray-200 tw:bg-gray-50 tw:p-4 tw:text-center tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:bg-white">
+            <h3 class="tw:mb-1.5 tw:text-[13px] tw:text-gray-500 tw:dark:text-gray-400">Errors</h3>
+            <div class="tw:text-xl tw:font-semibold tw:text-error-600 tw:dark:text-error-500" id="txtErr">-</div>
         </div>
     </div>
-    <hr />
 
-
-    <div class="row">
-        <div class="col-2">
-            <table class="table table-striped table-hover" id="list1Table">
-                <tbody id="list1TableBody"></tbody>
+    <div class="tw:grid tw:grid-cols-[1fr_1fr_1fr_2fr] tw:gap-3">
+        <div class="tw:overflow-hidden tw:rounded-lg tw:border tw:border-gray-200 tw:bg-white tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:p-3">
+            <table class="tw:w-full tw:text-xs" id="list1Table">
+                <tbody id="list1TableBody" class="tw:[&>tr]:border-b tw:[&>tr]:border-gray-100 tw:[&>tr:last-child]:border-0 tw:[&>tr:nth-child(even)]:bg-gray-50 tw:[&>tr:hover]:bg-gray-100 tw:dark:[&>tr]:border-gray-800 tw:dark:[&>tr:nth-child(even)]:bg-white/[0.03] tw:dark:[&>tr:hover]:bg-white/10"></tbody>
             </table>
         </div>
-        <div class="col-2">
-            <table class="table table-striped table-hover" id="list2Table">
-                <tbody id="list2TableBody"></tbody>
+        <div class="tw:overflow-hidden tw:rounded-lg tw:border tw:border-gray-200 tw:bg-white tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:p-3">
+            <table class="tw:w-full tw:text-xs" id="list2Table">
+                <tbody id="list2TableBody" class="tw:[&>tr]:border-b tw:[&>tr]:border-gray-100 tw:[&>tr:last-child]:border-0 tw:[&>tr:nth-child(even)]:bg-gray-50 tw:[&>tr:hover]:bg-gray-100 tw:dark:[&>tr]:border-gray-800 tw:dark:[&>tr:nth-child(even)]:bg-white/[0.03] tw:dark:[&>tr:hover]:bg-white/10"></tbody>
             </table>
         </div>
-        <div class="col-2">
-            <table class="table table-striped table-hover" id="list3Table">
-                <tbody id="list3TableBody"></tbody>
+        <div class="tw:overflow-hidden tw:rounded-lg tw:border tw:border-gray-200 tw:bg-white tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:p-3">
+            <table class="tw:w-full tw:text-xs" id="list3Table">
+                <tbody id="list3TableBody" class="tw:[&>tr]:border-b tw:[&>tr]:border-gray-100 tw:[&>tr:last-child]:border-0 tw:[&>tr:nth-child(even)]:bg-gray-50 tw:[&>tr:hover]:bg-gray-100 tw:dark:[&>tr]:border-gray-800 tw:dark:[&>tr:nth-child(even)]:bg-white/[0.03] tw:dark:[&>tr:hover]:bg-white/10"></tbody>
             </table>
         </div>
-        <div class="col-2">
-            <table class="table table-striped table-hover" id="list4Table">
-                <tbody id="list4TableBody"></tbody>
-            </table>
-        </div>
-        <div class="col-2">
-            <table class="table table-striped table-hover" id="list5Table">
-                <tbody id="list5TableBody"></tbody>
-            </table>
-        </div>
-        <div class="col-2">
-            <div id="system-log" style="border: 1px solid lightgrey;">
-                <!-- Log entries will be appended here by JavaScript -->
-            </div>
+        <div class="tw:overflow-hidden tw:rounded-lg tw:border tw:border-gray-200 tw:bg-white tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:p-3">
+            <h3 class="tw:mb-2 tw:text-sm tw:font-semibold tw:text-gray-700 tw:dark:text-gray-300">Activity Log</h3>
+            <div id="system-log"></div>
         </div>
     </div>
 
@@ -421,51 +174,51 @@
 
 <div class="modal fade" id="myModal" role="dialog">
     <div class="modal-dialog">
-
-        <!-- Modal content-->
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Update Slot</h4>
+        <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+            <div class="tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
+                <h4 class="tw:text-base tw:font-semibold tw:text-gray-800 tw:mb-0 tw:dark:text-white/90">Update Slot</h4>
             </div>
-            @* <form action="/bin/SaveBin" method="post"> *@
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label" for="txtRowNo">Row No</label>
-                    <input type="text" class="form-control" name="RowNo" id="txtRowNo" aria-describedby="Row No" disabled>
+            <div class="tw:space-y-4 tw:px-6 tw:py-4">
+                <div>
+                    <label class="@labelClass" for="txtRowNo">Row No</label>
+                    <input type="text" class="@inputClass tw:w-full tw:disabled:opacity-50" name="RowNo" id="txtRowNo" aria-describedby="Row No" disabled>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtPriority">Priority</label>
-                    <input type="number" class="form-control" name="RowNo" id="txtPriority" aria-describedby="Priority">
+                <div>
+                    <label class="@labelClass" for="txtPriority">Priority</label>
+                    <input type="number" class="@inputClass tw:w-full" name="RowNo" id="txtPriority" aria-describedby="Priority">
                 </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkIsActive">
-                    <label class="form-check-label" for="chkIsActive">Is Active</label>
+                <div class="tw:flex tw:items-center tw:gap-6">
+                    <div class="tw:flex tw:items-center tw:gap-2">
+                        <input type="checkbox" class="tw:h-4 tw:w-4 tw:accent-brand-500" id="chkIsActive">
+                        <label class="tw:text-sm tw:text-gray-700 tw:dark:text-gray-400" for="chkIsActive">Is Active</label>
+                    </div>
+                    <div class="tw:flex tw:items-center tw:gap-2">
+                        <input type="checkbox" class="tw:h-4 tw:w-4 tw:accent-brand-500" id="chkForEmptyTray">
+                        <label class="tw:text-sm tw:text-gray-700 tw:dark:text-gray-400" for="chkForEmptyTray">For Empty Tray</label>
+                    </div>
                 </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkForEmptyTray">
-                    <label class="form-check-label" for="chkForEmptyTray">For Empty Tray</label>
+                <div class="tw:flex tw:items-center tw:gap-6">
+                    <div class="tw:flex tw:items-center tw:gap-2">
+                        <input type="checkbox" class="tw:h-4 tw:w-4 tw:accent-brand-500" id="chkHasEmptyTray">
+                        <label class="tw:text-sm tw:text-gray-700 tw:dark:text-gray-400" for="chkHasEmptyTray">Has Empty Tray</label>
+                    </div>
+                    <div class="tw:flex tw:items-center tw:gap-2">
+                        <input type="checkbox" class="tw:h-4 tw:w-4 tw:accent-brand-500" id="chkHasReel">
+                        <label class="tw:text-sm tw:text-gray-700 tw:dark:text-gray-400" for="chkHasReel">Has Reel</label>
+                    </div>
                 </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkHasEmptyTray">
-                    <label class="form-check-label" for="chkHasEmptyTray">Has Empty Tray</label>
-                </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkHasReel">
-                    <label class="form-check-label" for="chkHasReel">Has Reel</label>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtReelNo">Reel No</label>
-                    <input type="number" class="form-control" name="ReelNo" id="txtReelNo" aria-describedby="ReelNo">
+                <div>
+                    <label class="@labelClass" for="txtReelNo">Reel No</label>
+                    <input type="number" class="@inputClass tw:w-full" name="ReelNo" id="txtReelNo" aria-describedby="ReelNo">
                 </div>
 
                 <input type="hidden" id="txtId">
 
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="updateSlotStatus()">Update</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="cancelForm()">Cancel</button>
+            <div class="tw:flex tw:justify-end tw:gap-3 tw:border-t tw:border-gray-100 tw:px-6 tw:py-3 tw:dark:border-gray-800">
+                <button type="button" class="tw:rounded-lg tw:border-0 tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:shadow-theme-xs tw:hover:bg-brand-600" onclick="updateSlotStatus()">Update</button>
+                <button type="button" class="tw:bg-transparent tw:rounded-lg tw:border tw:border-gray-300 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-700 tw:hover:bg-gray-100 tw:dark:border-gray-700 tw:dark:text-gray-400 tw:dark:hover:bg-white/5" onclick="cancelForm()">Cancel</button>
             </div>
-            @* </form> *@
         </div>
     </div>
 </div>
@@ -526,45 +279,44 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
-                    // console.log("result", result);
-                    swal.close();
+                    Swal.close();
                     if (result.success == true) {
 
                         var idx = 1;
-                        for (let iC = 1; iC <= 5; iC++) {
+                        for (let iC = 1; iC <= 3; iC++) {
                             const tbl = document.getElementById('list' + iC + 'Table');
                             const tableBody = document.getElementById('list' + iC + 'TableBody');
                             tableBody.innerHTML = '';
 
-                            for (let i = 0; i < 25; i++) { // Example: Add 5 rows
+                            for (let i = 0; i < 50; i++) { // Example: Add 5 rows
                                 // if (idx >= 111) { continue; }
                                 slotLength = result.data.length;
                                 if (idx-1 < slotLength) {
                                     const rawData = JSON.stringify(result.data[idx - 1]);
                                     const newRow = tbl.insertRow(); // or document.createElement('tr');
                                     const cell1 = newRow.insertCell(); // or document.createElement('td');
-                                    cell1.innerHTML = `<a style="font-size:10px;"
-                                    href='javascript:none;' id='btnUpdate' data-row='${rawData}' > ` + result.data[idx - 1].rowNo + '</a>';
-                                    $(cell1).addClass("tblRow tblCol1");
+                                    cell1.innerHTML = `<a class="tw:text-[10px] tw:text-gray-500 tw:dark:text-gray-400"
+                                    href='javascript:void(0);' id='btnUpdate' data-row='${rawData}' > ` + result.data[idx - 1].rowNo + '</a>';
+                                    $(cell1).addClass("tw:w-[30%] tw:px-2 tw:py-1.5");
                                     const cell2 = newRow.insertCell();
                                     // cell2.id = "R" + (111 - idx);
                                     cell2.id = "R" + (slotLength - idx+1);
                                     cell2.dataset.slotId = result.data[idx - 1].slot_Id;
                                     cell2.innerHTML = '' + result.data[idx - 1].qrxPulse + ' , ' + result.data[idx - 1].qryPulse + '';
-                                    $(cell2).addClass("tblRow tblCol2");
+                                    $(cell2).addClass("tw:w-[60%] tw:px-2 tw:py-1.5 tw:text-gray-700 tw:dark:text-gray-300");
                                     const cell3 = newRow.insertCell(); // or document.createElement('td');
                                     if (result.data[idx - 1].needCheck) {
                                         cell3.innerHTML = '<div class="circle pulse yellow"></div>';
                                     }
                                     else {
                                         if (result.data[idx - 1].isActive) {
-                                            cell3.innerHTML = '<span style="font-size:10px;color:lightgreen;"><i class="bi-circle-fill"></i></span>';
+                                            cell3.innerHTML = '<span class="tw:text-[10px] tw:text-success-500"><i class="bi-circle-fill"></i></span>';
                                         }
                                         else {
-                                            cell3.innerHTML = '<span style="font-size:10px;color:red;"><i class="bi-exclamation-circle-fill"></i></span>';
+                                            cell3.innerHTML = '<span class="tw:text-[10px] tw:text-error-500"><i class="bi-exclamation-circle-fill"></i></span>';
                                         }
                                     }
-                                    $(cell3).addClass("tblRow tblCol3");
+                                    $(cell3).addClass("tw:w-[10%] tw:px-2 tw:py-1.5 tw:text-center");
 
                                     idx = idx + 1;
                                 }
@@ -572,7 +324,7 @@
                         }
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -580,7 +332,7 @@
                     }
                 },
                 error: function (error) {
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -821,16 +573,16 @@
 
                         const pulseXDiff = document.getElementById("pulseXDiff");
                         pulseXDiff.textContent = xDiff.text;
-                        pulseXDiff.className = `pulse-diff ms-2 ${xDiff.className}`;
+                        pulseXDiff.className = `pulse-diff tw:ml-1 ${xDiff.className}`;
 
                         const pulseZDiff = document.getElementById("pulseZDiff");
                         pulseZDiff.textContent = zDiff.text;
-                        pulseZDiff.className = `pulse-diff ms-2 ${zDiff.className}`;
+                        pulseZDiff.className = `pulse-diff tw:ml-1 ${zDiff.className}`;
                     }
                 },
                 error: function (error) {
-                    console.log(error);
-                    swal.fire({
+                    //console.log(error);
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -873,16 +625,6 @@
         });
 
         $('#list3Table').on('click', '#btnUpdate', function () {
-            const data = JSON.parse($(this).attr('data-row').replace(/&quot;/g, '"'));
-            updateForm(data);
-        });
-
-        $('#list4Table').on('click', '#btnUpdate', function () {
-            const data = JSON.parse($(this).attr('data-row').replace(/&quot;/g, '"'));
-            updateForm(data);
-        });
-
-        $('#list5Table').on('click', '#btnUpdate', function () {
             const data = JSON.parse($(this).attr('data-row').replace(/&quot;/g, '"'));
             updateForm(data);
         });
@@ -954,7 +696,7 @@
                 success: function (result) {
                     if (result.success == true) {
                         $("#myModal").modal("toggle");
-                        swal.fire({
+                        Swal.fire({
                             icon: 'success',
                             title: "Success Update",
                             text: "",
@@ -964,7 +706,7 @@
                         });
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -972,8 +714,8 @@
                     }
                 },
                 error: function (error) {
-                    console.log(error);
-                    swal.fire({
+                    //console.log(error);
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -1002,7 +744,7 @@
                 },
                 success: function (result) {
                     // console.log('Export Err::' + JSON.stringify(result));
-                    // swal.close();
+                    // Swal.close();
                     if (result.success == true) {
 
                         const wb = XLSX.utils.book_new();
@@ -1031,7 +773,7 @@
                     }
                 },
                 error: function (error) {
-                    console.log('Export Err::' + error.val);
+                    //console.log('Export Err::' + error.val);
                 }
             });
 

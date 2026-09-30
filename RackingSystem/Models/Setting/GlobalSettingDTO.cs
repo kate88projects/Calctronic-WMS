@@ -9,5 +9,7 @@ namespace RackingSystem.Models.Setting
         public string ConfigTitle { get; set; } = "";
 
         public string ConfigValue { get; set; } = "";
+
+        public string ValueType { get; set; } = "";
     }
 }

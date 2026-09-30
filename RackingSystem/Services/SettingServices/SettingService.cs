@@ -436,6 +436,7 @@ namespace RackingSystem.Services.SettingServices
                             Configuration_Id = s.Configuration_Id,
                             ConfigTitle = "PLC SRMS - IP Address",
                             ConfigValue = s.ConfigValue,
+                            ValueType = GetValueType(s.ConfigTitle),
                         });
                     }
                     if (s.ConfigTitle == EnumConfiguration.PLC_IPAddr_Gantry1.ToString())
@@ -445,6 +446,7 @@ namespace RackingSystem.Services.SettingServices
                             Configuration_Id = s.Configuration_Id,
                             ConfigTitle = "PLC Gantry - IP Address",
                             ConfigValue = s.ConfigValue,
+                            ValueType = GetValueType(s.ConfigTitle),
                         });
                     }
                     if (s.ConfigTitle == EnumConfiguration.Loader_ColMinReserve.ToString())
@@ -454,6 +456,7 @@ namespace RackingSystem.Services.SettingServices
                             Configuration_Id = s.Configuration_Id,
                             ConfigTitle = "Auto Loader - Column Min Balance Height",
                             ConfigValue = s.ConfigValue,
+                            ValueType = GetValueType(s.ConfigTitle),
                         });
                     }
                 }
@@ -490,7 +493,27 @@ namespace RackingSystem.Services.SettingServices
                     result.errMessage = "Cannot find this setting, please refresh the list.";
                     return result;
                 }
-                _r.ConfigValue = req.ConfigValue;
+
+                // Validate against the stored title
+                string value = (req.ConfigValue ?? "").Trim();
+                if (value == "")
+                {
+                    result.errMessage = "Please enter Value.";
+                    return result;
+                }
+                string valueType = GetValueType(_r.ConfigTitle);
+                if (valueType == "ip" && !IsValidIPv4(value))
+                {
+                    result.errMessage = "Please enter a valid IP Address (e.g. 192.168.1.10).";
+                    return result;
+                }
+                if (valueType == "int" && (!short.TryParse(value, out short num) || num <= 0))
+                {
+                    result.errMessage = "Please enter a whole number between 1 and 32767.";
+                    return result;
+                }
+
+                _r.ConfigValue = value;
                 _dbContext.Configuration.Update(_r);
                 await _dbContext.SaveChangesAsync();
 
@@ -503,6 +526,20 @@ namespace RackingSystem.Services.SettingServices
             }
 
             return result;
+        }
+
+        private static string GetValueType(string configTitle)
+        {
+            if (configTitle.Contains("_IPAddr_")) return "ip";
+            if (configTitle == EnumConfiguration.Loader_ColMinReserve.ToString()) return "int"; // read with Convert.ToInt16
+            return "";
+        }
+
+        // IPv4: four numbers 0-255 separated by dots
+        private static bool IsValidIPv4(string value)
+        {
+            return System.Text.RegularExpressions.Regex.IsMatch(value,
+                @"^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$");
         }
 
     }

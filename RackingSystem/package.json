@@ -1,5 +1,14 @@
 {
+  "scripts": {
+    "build:css": "tailwindcss -i ./tailwind-src/input.css -o ./wwwroot/css/tailwind.css --minify",
+    "watch:css": "tailwindcss -i ./tailwind-src/input.css -o ./wwwroot/css/tailwind.css --watch",
+    "build:css:admin": "cd tailwind-admin-v4 && npx tailwindcss -i ./admin-input.css -o ../wwwroot/css/tailwind-admin.css --minify",
+    "watch:css:admin": "cd tailwind-admin-v4 && npx tailwindcss -i ./admin-input.css -o ../wwwroot/css/tailwind-admin.css --watch"
+  },
   "dependencies": {
     "bootstrap-icons": "^1.13.1"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
   }
 }

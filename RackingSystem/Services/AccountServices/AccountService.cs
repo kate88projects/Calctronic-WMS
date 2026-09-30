@@ -20,7 +20,7 @@ namespace RackingSystem.Services.AccountServices
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _config;
 
-        public AccountService(AppDbContext dbContext, UserManager<User> userManager, IConfiguration config, IHttpContextAccessor httpContextAccessor)
+        public AccountService(AppDbContext dbContext, UserManager<User> userManager, IConfiguration config)
         {
             _dbContext = dbContext;
             _userManager = userManager;

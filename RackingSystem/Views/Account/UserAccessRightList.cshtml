@@ -1,361 +1,146 @@
-﻿
-<style>
-    tr:hover td {
-        background-color: #F8F6F0;
-    }
 
-    .pnlHide {
-        display: none;
-    }
+@{
+    (string Id, string Value, string Label)[] maintenanceItems = {
+        ("txtLoaderList", "1", "Loader List"),
+        ("txtLoaderColList", "7", "Loader Column List"),
+        ("txtSlotList", "4", "Slot List"),
+        ("txtSlotPulses", "8", "Slot Pulses"),
+        ("txtTrolleyList", "2", "Trolley List"),
+        ("txtTrolleySlotList", "3", "Trolley Slot List"),
+        ("txtTrolleyPulses", "8", "Trolley Pulses"),
+    };
 
-    .checkboxes ul, .checkboxes li {
-        margin: 0;
-        padding: 0;
-        list-style: none;
-    }
-</style>
+    (string Id, string Value, string Label)[] stockItems = {
+        ("txtItemGroupList", "20", "Item Group List"),
+        ("txtItemList", "21", "Item List"),
+    };
 
-@section PageHeader {
-    <header class="d-flex align-items-center justify-content-between w-100">
-        <h2 class="pageTitle">User Access Right List <b></b></h2>
-    </header>
+    (string Id, string Value, string Label)[] grnItems = {
+        ("txtNewReceive", "60", "New Receive"),
+        ("txtGRNDtlList", "61", "GRN Dtl List"),
+        ("txtTaskGRN", "63", "New Loader Task"),
+    };
+
+    (string Id, string Value, string Label)[] joItems = {
+        ("txtJOList", "80", "JO List"),
+        ("txtJOEList", "81", "JO Emergency List"),
+    };
+
+    (string Id, string Value, string Label)[] qItems = {
+        ("txtQList", "90", "Queue List"),
+        ("txtQResetQueue", "91", "Reset Queue"),
+    };
+
+    (string Id, string Value, string Label)[] rackingItems = {
+        ("txtAvailableReelList", "100", "Available Reel List"),
+        ("txtLoaderDtl", "104", "Loader Dtl List"),
+        ("txtTrolleyDtl", "105", "Trolley Dtl List"),
+        ("txtSRMSCol", "106", "SRMS Col Status"),
+        ("txtTrolleyCol", "107", "Trolley Col Status"),
+        ("txtHubInLog", "109", "Hub In Log"),
+        ("txtHubOutLog", "110", "Hub Out Log"),
+        ("txtPAEmptyDrawerLog", "111", "PA Empty Drawer"),
+    };
+
+    (string Id, string Value, string Label)[] settingItems = {
+        ("txtUserList", "121", "User List"),
+        ("txtUserAccessRight", "122", "User Access Right"),
+        ("txtReelHeight", "123", "Reel Height"),
+        ("txtSlotCalculation", "124", "Slot Usage"),
+        ("txtSlotColumn", "125", "Slot Column"),
+        ("txtGlobalSet", "126", "Global Setting"),
+    };
+
+    var permissionGroups = new (string GroupDivId, string ParentId, string ParentName, string ParentLabel, string ChildClass, (string Id, string Value, string Label)[] Items)[]
+    {
+        ("maintenanceGroup", "txtMaintenance", "maintenance", "Maintenance", "chkMaintenance", maintenanceItems),
+        ("stockGroup", "txtStock", "stock", "Stock", "chkStock", stockItems),
+        ("grnGroup", "txtGRN", "grn", "GRN", "chkGRN", grnItems),
+        ("joGroup", "txtJO", "jo", "Job Order", "chkJO", joItems),
+        ("qGroup", "txtQ", "jo", "Queue System", "chkQ", qItems),
+        ("rackingGroup", "txtRacking", "racking", "Report", "chkRacking", rackingItems),
+        ("settingGroup", "txtSetting", "setting", "Setting", "chkSetting", settingItems),
+    };
 }
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body pt-0">
-                    @* <div id="gridTable" class="table table-responsive text-nowrap mt-3"></div> *@
-                    <div class="text-nowrap table-container mt-1">
-                        <table id="listTable" class="row-border dataTable hover order-column" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>Username</th>
-                                    <th>Fullname</th>
-                                    <th>Is Active</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="tw:flex tw:w-full tw:items-center tw:justify-between">
+    <h2 class="tw:text-lg tw:mb-0 tw:ml-2 tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">User Access Right List</h2>
+</div>
+
+<div class="tw:mt-3">
+    <div class="dt-tailadmin tw:overflow-hidden tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:text-gray-700 tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:dark:text-gray-300">
+        <table id="listTable" class="row-border dataTable hover order-column tw:w-full">
+            <thead>
+                <tr class="tw:border-b tw:border-gray-200">
+                    @{
+                        string[] listHeaders = { "Username", "Fullname", "Is Active", "Action" };
+                    }
+                    @foreach (var header in listHeaders)
+                    {
+                        <th class="tw:px-5 tw:py-3.5 tw:text-left sm:tw:px-6"><span class="tw:text-sm tw:font-semibold tw:text-gray-700 tw:dark:text-gray-300">@header</span></th>
+                    }
+                </tr>
+            </thead>
+        </table>
     </div>
 </div>
 
-<div class="modal fade" id="myModal" role="dialog">
-    <div class="modal-dialog modal-lg">
-
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Update User Access Right</h4>
+<div class="modal fade" id="myModal" role="dialog" data-bs-focus="false">
+    <div class="modal-dialog tw:max-w-3xl">
+        <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+            <div class="tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
+                <h4 class="tw:text-base tw:font-semibold tw:mb-0 tw:text-gray-800 tw:dark:text-white/90">Update User Access Right</h4>
             </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label" for="txtFullname">Fullname</label>
-                    <input type="text" class="form-control" name="Fullname" id="txtFullname" aria-describedby="Fullname" disabled>
+            <div class="tw:max-h-[70vh] tw:space-y-5 tw:overflow-y-auto tw:px-6 tw:py-4">
+                <div>
+                    <label class="tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400" for="txtFullname">Fullname</label>
+                    <input type="text" class="tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-zinc-100 tw:px-4 tw:py-2.5 tw:text-sm tw:text-gray-500 tw:placeholder:text-gray-400
+                        tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-gray-400" name="Fullname" id="txtFullname" aria-describedby="Fullname" disabled>
                 </div>
 
-                <div class="row">
-                    <label class="col-sm-3 col-form-label">Permissions </label>
-                    @*Maintenance*@
-                    <div id="maintenanceGroup">
-                        <input type="checkbox" name="maintenance" id="txtMaintenance" />
-                        <label for="txtMaintenance"> Maintenance</label>
-
-                        <div class="row">
-                            <label class="col-sm-3 col-form-label" style="padding:0;"> </label>
-                            <div class="col-sm-3" style="padding:0;">
-                                <ul class="checkboxes">
-                                    <li>
-                                        <input class="chkMaintenance" type="checkbox" id="txtLoaderList" value="1" />
-                                        <label for="txtLoaderList" style="">Loader List </label>
-                                    </li>
-                                    <li>
-                                        <input class="chkMaintenance" type="checkbox" id="txtLoaderColList" value="7" />
-                                        <label for="txtLoaderColList" style="">Loader Column List </label>
-                                    </li>
-                                </ul>
+                <div>
+                    <div class="tw:mb-3 tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400">Permissions</div>
+                    <div class="tw:space-y-4">
+                        @foreach (var group in permissionGroups)
+                        {
+                            <div id="@group.GroupDivId" class="tw:rounded-lg tw:border tw:border-gray-200 tw:p-4 tw:dark:border-gray-700">
+                                <div class="tw:mb-3 tw:flex tw:items-center tw:gap-2 tw:border-b tw:border-gray-100 tw:pb-3 tw:dark:border-gray-800">
+                                    <input type="checkbox" class="tw:h-4 tw:w-4 tw:accent-brand-500" name="@group.ParentName" id="@group.ParentId">
+                                    <label class="tw:text-sm tw:font-semibold tw:text-gray-800 tw:dark:text-white/90" for="@group.ParentId">@group.ParentLabel</label>
+                                </div>
+                                <div class="tw:grid tw:grid-cols-2 tw:gap-x-4 tw:gap-y-2.5 sm:tw:grid-cols-3">
+                                    @foreach (var item in group.Items)
+                                    {
+                                        <div class="tw:flex tw:items-center tw:gap-2">
+                                            <input class="@group.ChildClass tw:h-4 tw:w-4 tw:accent-brand-500" type="checkbox" id="@item.Id" value="@item.Value">
+                                            <label class="tw:text-sm tw:text-gray-700 tw:dark:text-gray-400" for="@item.Id">@item.Label</label>
+                                        </div>
+                                    }
+                                </div>
                             </div>
-                            <div class="col-sm-3" style="padding:0;">
-                                <ul class="checkboxes">
-                                    <li>
-                                        <input class="chkMaintenance" type="checkbox" id="txtSlotList" value="4" />
-                                        <label for="txtSlotList" style="">Slot List </label>
-                                    </li>
-                                    <li>
-                                        <input class="chkMaintenance" type="checkbox" id="txtSlotPulses" value="8" />
-                                        <label for="txtSlotPulses" style="">Slot Pulses </label>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="col-sm-3" style="padding:0;">
-                                <ul class="checkboxes">
-                                    <li>
-                                        <input class="chkMaintenance" type="checkbox" id="txtTrolleyList" value="2" />
-                                        <label for="txtTrolleyList" style="">Trolley List </label>
-                                    </li>
-                                    <li>
-                                        <input class="chkMaintenance" type="checkbox" id="txtTrolleySlotList" value="3" />
-                                        <label for="txtTrolleySlotList">Trolley Slot List </label>
-                                    </li>
-                                    <li>
-                                        <input class="chkMaintenance" type="checkbox" id="txtTrolleyPulses" value="8" />
-                                        <label for="txtTrolleyPulses" style="">Trolley Pulses </label>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
+                        }
                     </div>
-
-                    @*STOCK*@
-                    <div id="stockGroup">
-                        <input type="checkbox" name="stock" id="txtStock" />
-                        <label for="txtStock">Stock </label>
-
-                        <div class="row">
-                            <label class="col-sm-3 col-form-label" style="padding:0;"> </label>
-                            <div class="col-sm-3" style="padding:0;">
-                                <ul class="checkboxes">
-                                    <li>
-                                        <input class="chkStock" type="checkbox" id="txtItemGroupList" value="20" />
-                                        <label for="txtItemGroupList" style="">Item Group List </label>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="col-sm-3" style="padding:0;">
-                                <ul class="checkboxes">
-                                    <li>
-                                        <input class="chkStock" type="checkbox" id="txtItemList" value="21" />
-                                        <label for="txtItemList" style="">Item List </label>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    @*GRN*@
-                    <div id="grnGroup">
-                        <input type="checkbox" name="grn" id="txtGRN" />
-                        <label for="txtGRN">GRN </label>
-
-                        <div class="row">
-                            <label class="col-sm-3 col-form-label" style="padding:0;"> </label>
-                            <div class="col-sm-3" style="padding:0;">
-                                <ul class="checkboxes">
-                                    <li>
-                                        <input class="chkGRN" type="checkbox" id="txtNewReceive" value="60" />
-                                        <label for="txtNewReceive" style="">NewReceive </label>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="col-sm-3" style="padding:0;">
-                                <ul class="checkboxes">
-                                    <li>
-                                        <input class="chkGRN" type="checkbox" id="txtGRNDtlList" value="61" />
-                                        <label for="txtGRNDtlList" style="">GRN Dtl List </label>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="col-sm-3" style="padding:0;">
-                                <ul class="checkboxes">
-                                    @* <li>
-                                        <input class="chkGRN" type="checkbox" id="txtReprintList" value="62" />
-                                        <label for="txtReprintList">Reprint List </label>
-                                    </li> *@
-                                    <li>
-                                        <input class="chkGRN" type="checkbox" id="txtTaskGRN" value="63" />
-                                        <label for="txtTaskGRN">New Loader Task </label>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    @*JO*@
-                    <div id="joGroup">
-                        <input type="checkbox" name="jo" id="txtJO" />
-                        <label for="txtJO">Job Order </label>
-
-                        <div class="row">
-                            <label class="col-sm-3 col-form-label" style="padding:0;"> </label>
-                            <div class="col-sm-3" style="padding:0;">
-                                <ul class="checkboxes">
-                                    <li>
-                                        <input class="chkJO" type="checkbox" id="txtJOList" value="80" />
-                                        <label for="txtJOList" style="">JO List </label>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="col-sm-3" style="padding:0;">
-                                <ul class="checkboxes">
-                                    <li>
-                                        <input class="chkJO" type="checkbox" id="txtJOEList" value="81" />
-                                        <label for="txtJOEList" style="">JO Emergency List </label>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    @*Q*@
-                    <div id="qGroup">
-                        <input type="checkbox" name="jo" id="txtQ" />
-                        <label for="txtQ">Queue System </label>
-
-                        <div class="row">
-                            <label class="col-sm-3 col-form-label" style="padding:0;"> </label>
-                            <div class="col-sm-3" style="padding:0;">
-                                <ul class="checkboxes">
-                                    <li>
-                                        <input class="chkQ" type="checkbox" id="txtQList" value="90" />
-                                        <label for="txtQList" style="">Queue List </label>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    @*Racking*@
-                    <div id="rackingGroup">
-                        <input type="checkbox" name="racking" id="txtRacking" />
-                        <label for="txtRacking">Report </label>
-
-                        <div class="row">
-                            <label class="col-sm-3 col-form-label" style="padding:0;"> </label>
-                            <div class="col-sm-3" style="padding:0;">
-                                <ul class="checkboxes">
-                                    <li>
-                                        <input class="chkRacking" type="checkbox" id="txtAvailableReelList" value="100" />
-                                        <label for="txtAvailableReelList" style="">Available Reel List </label>
-                                    </li>
-                                    <li>
-                                        <input class="chkRacking" type="checkbox" id="txtLoaderDtl" value="104" />
-                                        <label for="txtLoaderDtl" style="">Loader Dtl List </label>
-                                    </li>
-                                    <li>
-                                        <input class="chkRacking" type="checkbox" id="txtTrolleyDtl" value="105" />
-                                        <label for="txtTrolleyDtl" style="">Trolley Dtl List </label>
-                                    </li>
-                                    @* <li>
-                                        <input class="chkRacking" type="checkbox" id="txtRackingStatus" value="101" />
-                                        <label for="txtRackingStatus" style="">Racking Status </label>
-                                    </li> *@
-                                </ul>
-                            </div>
-                            <div class="col-sm-3" style="padding:0;">
-                                <ul class="checkboxes">
-                                    <li>
-                                        <input class="chkRacking" type="checkbox" id="txtSRMSCol" value="106" />
-                                        <label for="txtSRMSCol" style="">SRMS Col Status </label>
-                                    </li>
-                                    <li>
-                                        <input class="chkRacking" type="checkbox" id="txtTrolleyCol" value="107" />
-                                        <label for="txtTrolleyCol" style="">Trolley Col Status </label>
-                                    </li>
-                                    @* <li>
-                                        <input class="chkRacking" type="checkbox" id="txtSetEmptyDrawer" value="102" />
-                                        <label for="txtSetEmptyDrawer" style="">Set Empty Drawer </label>
-                                    </li> *@
-                                </ul>
-                            </div>
-                            <div class="col-sm-3" style="padding:0;">
-                                <ul class="checkboxes">
-                                    <li>
-                                        <input class="chkRacking" type="checkbox" id="txtHubInLog" value="109" />
-                                        <label for="txtHubInLog" style="">Hub In Log </label>
-                                    </li>
-                                    <li>
-                                        <input class="chkRacking" type="checkbox" id="txtHubOutLog" value="110" />
-                                        <label for="txtHubOutLog" style="">Hub Out Log </label>
-                                    </li>
-                                    <li>
-                                        <input class="chkRacking" type="checkbox" id="txtPAEmptyDrawerLog" value="111" />
-                                        <label for="txtPAEmptyDrawerLog" style="">PA Empty Drawer </label>
-                                    </li>
-                                    @* <li>
-                                        <input class="chkRacking" type="checkbox" id="txtSimulation" value="103" />
-                                        <label for="txtSimulation">Simulation </label>
-                                    </li> *@
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    @*Setting*@
-                    <div id="settingGroup">
-                        <input type="checkbox" name="setting" id="txtSetting" />
-                        <label for="txtSetting">Setting </label>
-
-                        <div class="row">
-                            <label class="col-sm-3 col-form-label" style="padding:0;"> </label>
-                            <div class="col-sm-3" style="padding:0;">
-                                <ul class="checkboxes">
-                                    <li>
-                                        <input class="chkSetting" type="checkbox" id="txtUserList" value="121" />
-                                        <label for="txtUserList" style="">UserList </label>
-                                    </li>
-                                    <li>
-                                        <input class="chkSetting" type="checkbox" id="txtUserAccessRight" value="122" />
-                                        <label for="txtUserAccessRight" style="">User Access Right </label>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="col-sm-3" style="padding:0;">
-                                <ul class="checkboxes">
-                                    <li>
-                                        <input class="chkSetting" type="checkbox" id="txtSlotCalculation" value="124" />
-                                        <label for="txtSlotCalculation" style="">Slot Usage </label>
-                                    </li>
-                                    <li>
-                                        <input class="chkSetting" type="checkbox" id="txtSlotColumn" value="125" />
-                                        <label for="txtSlotColumn" style="">Slot Column </label>
-                                    </li>
-                                </ul>
-                            </div>
-                            <div class="col-sm-3" style="padding:0;">
-                                <ul class="checkboxes">
-                                    <li>
-                                        <input class="chkSetting" type="checkbox" id="txtReelHeight" value="123" />
-                                        <label for="txtReelHeight" style="">Reel Height </label>
-                                    </li>
-                                    <li>
-                                        <input class="chkSetting" type="checkbox" id="txtGlobalSet" value="126" />
-                                        <label for="txtGlobalSet" style="">Global Setting</label>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
+
                 <input type="hidden" id="txtId">
-
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="savePermission()">Save</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="cancelForm()">Cancel</button>
+            <div class="tw:flex tw:justify-end tw:gap-3 tw:border-t tw:border-gray-100 tw:px-6 tw:py-3 tw:dark:border-gray-800">
+                <button type="button" class="save-btn tw:border-0 tw:rounded-lg tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:shadow-theme-xs
+                    tw:hover:bg-brand-600" onclick="savePermission()">Save</button>
+                <button type="button" class="cancel-btn tw:bg-transparent tw:rounded-lg tw:border tw:border-gray-300 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-700 tw:hover:bg-gray-100
+                    tw:dark:border-gray-700 tw:dark:text-gray-400 tw:dark:hover:bg-white/5" onclick="cancelForm()">Cancel</button>
             </div>
         </div>
-    </div>
     </div>
 </div>
 
 @section Scripts
 {
-    @*<link href="~/css/datatables.min.css" rel="stylesheet"> 
-    <script src="~/js/datatables.min.js"></script> *@
-
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
     <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
-    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="../js/dataTables.js"></script>
-    <script src="../js/dataTables.columnControl.js"></script>
-    <script src="../js/columnControl.dataTables.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
 
     <script type="text/javascript">
@@ -383,107 +168,50 @@
                     Swal.showLoading();
                 },
                 success: function (result) {
-                    swal.close()
+                    Swal.close()
                     if (result.success == true) {
+                        const cellClass = 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6 tw:text-theme-sm tw:text-gray-700 tw:dark:text-gray-300';
+
                         $('#listTable').DataTable( {
                             data: result.data,
                             paging: true,
                             pageLength: 50,
                             lengthMenu: [50, 100, 250, 500, 1000],
                             columns: [
-                                { data: 'username' },
-                                { data: 'fullname' },
+                                { data: 'username', className: cellClass },
+                                { data: 'fullname', className: cellClass },
                                 {
                                     data: null,
+                                    className: 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6',
                                     render: function (data, type, row, meta) {
-                                        if (row.isActive == true) {
-                                            return '<span class="badge rounded-pill bg-success" style="font-size:13px;">Active</span>'
-                                        }
-                                        else {
-                                            return '<span class="badge rounded-pill bg-secondary" style="font-size:13px;">Inactive</span>'
-                                        }
+                                        return row.isActive
+                                            ? '<span class="tw:status-badge tw:bg-success-50 tw:text-success-700 tw:dark:bg-success-500/15 tw:dark:text-success-500">Active</span>'
+                                            : '<span class="tw:status-badge tw:bg-gray-100 tw:text-gray-700 tw:dark:bg-white/5 tw:dark:text-gray-400">Inactive</span>';
                                     }
                                 },
                                 {
                                     data: null,
+                                    className: 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6',
                                     render: function (data, type, row, meta) {
                                         const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
-                                        return `<div style="display:flex;">
-                                                   <button class="btn btn-warning d-grid edit-btn" style="margin-right:10px;" data-row="${rowData}">
-                                                        <span><i class="bi bi-pencil-square""></i>  Edit</span>
-                                                    </button>`;
+                                        return `<div class="tw:flex tw:items-center tw:gap-2">
+                                            <button class="edit-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-amber-50 tw:font-medium tw:text-amber-600 tw:transition-colors
+                                                tw:hover:bg-amber-100 tw:dark:bg-amber-500/15 tw:dark:text-amber-400 tw:dark:hover:bg-amber-500/25" data-row="${rowData}" title="Edit">
+                                                <i class="bi bi-pencil-square"></i>
+                                                Edit
+                                            </button>
+                                        </div>`;
                                     }
                                 }
                             ],
                             language: {
                                 searchPlaceholder: "🔍︎ Search",
                                 search: ""
-                            },
-                            ordering: {
-                                indicators: false
-                            },
-                            columnControl: ['orderStatus']
-                        });
-                        
-                       /*
-                       if (gridInstance) {
-                            gridInstance.destroy();
-                        }
-
-                         gridInstance = new gridjs.Grid({
-                            columns: [
-                                { name: 'Username', id: 'username' },
-                                { name: 'Fullname', id: 'fullname' },
-                                {
-                                    name: 'Active State',
-                                    id: 'isActive',
-                                    formatter: (cell, row) => {
-                                        return row.cells[2].data === true
-                                          ? gridjs.html('<span class="badge rounded-pill bg-success">Active</span>')
-                                          : gridjs.html('<span class="badge rounded-pill bg-secondary">InActive</span>');
-                                    }
-                                },
-                                { name: 'Id', id: 'id', hidden: true },
-                                {
-                                    name: 'Action',
-                                    formatter: (cell, row) => {
-                                        const cleanRow = {
-                                            username: row.cells[0]?.data,
-                                            fullname: row.cells[1]?.data,
-                                            isActive: row.cells[2]?.data,
-                                            id: row.cells[3]?.data,
-                                        };
-                                        const rawData = btoa(JSON.stringify(cleanRow));
-                                        return gridjs.html(`
-                                            <div style="display:flex;">
-                                                <button class="btn btn-success d-grid edit-btn" style="margin-right:10px;" data-row="${rawData}">
-                                                    <span><i class="bi bi-pencil-square""></i>  Edit</span>
-                                                </button>
-                                            </div>
-                                        `)
-                                    }
-                                },
-                            ],
-                            data: result.data,
-                            pagination: true,
-                            search: true,
-                            sort: true,
-                            resizable: true,
-                            className: {
-                                table: 'custom-table',
                             }
-                         }).render(document.getElementById("gridTable"));
-
-                         //remove grid-footer class
-                        const footer = document.querySelector('#gridTable .gridjs-footer');
-                        if (footer) {
-                            footer.id = "gridFooter";
-                        }
-                        document.getElementById("gridFooter").classList.remove("gridjs-footer");
-                        */
+                        });
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -491,7 +219,7 @@
                     }
                 },
                 error: function (error) {
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -575,7 +303,7 @@
             }
             if ($(".chkGRN:checked").length == $(".chkGRN").length) {
                 $("#txtGRN").prop('checked', true);
-        }
+            }
 
             // JO
             if (!$(this).is(":checked")) {
@@ -583,7 +311,7 @@
             }
             if ($(".chkJO:checked").length == $(".chkJO").length) {
                 $("#txtJO").prop('checked', true);
-        }
+            }
 
             // Q
             if (!$(this).is(":checked")) {
@@ -591,7 +319,7 @@
             }
             if ($(".chkQ:checked").length == $(".chkQ").length) {
                 $("#txtQ").prop('checked', true);
-        }
+            }
 
             // Racking
             if (!$(this).is(":checked")) {
@@ -609,7 +337,7 @@
                 $("#txtSetting").prop('checked', true);
             }
 
-                }
+        }
 
         function savePermission() {
             var permissions = [];
@@ -650,7 +378,7 @@
                 success: function (result) {
                     if (result.success == true) {
                         $("#myModal").modal("toggle");
-                        swal.fire({
+                        Swal.fire({
                             icon: 'success',
                             title: "Success Update",
                             text: "",
@@ -660,7 +388,7 @@
                         });
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -668,8 +396,8 @@
                     }
                 },
                 error: function (error) {
-                    console.log(error);
-                    swal.fire({
+                    // console.log(error);
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val

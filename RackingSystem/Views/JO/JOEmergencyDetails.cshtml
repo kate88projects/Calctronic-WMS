@@ -95,7 +95,7 @@
     }
 </style>
 
-@section PageHeader {
+@* @section PageHeader {
     <header class="d-flex align-items-center justify-content-between w-100">
         <h2 class="pageTitle">Emergency JO Details</h2>
         <div class="d-flex">
@@ -104,165 +104,242 @@
             </button>
         </div>
     </header>
-}
+} *@
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                @* <div class="card-header table-title">
-                    <div class="card-title">
-                        <h2>Emergency JO Details <b></b></h2>
-                    </div>
-                    <div class="card-tools">
-                        <button type="button" class="btn btn-warning" onclick="enabledEdit()" @(mode == "view" ? "" : "hidden")>
-                            <i class="bi bi-pencil-square"></i> Edit
-                        </button>
-                    </div>
-                </div> *@
-                <div class="card-body">
-                    <form id="joEForm" method="post" data-joe-id="@Model.JobOrderEmergency_Id">
-                        <div class="joEContainer">
-                            <div class="row">
-                                <div class="col">
-                                    <div class="row">
-                                        <div class="d-flex">
-                                            <i class="bi bi-exclamation-diamond title-icon"></i>
-                                            <span class="title titleColor ms-2">Emergency Job Order</span>
-                                        </div>
-                                    </div>
-                                    <div class="itemContainer">
-                                        <div class="row g-4">
-                                            <div class="col-5">
-                                                <label for="txtDocNo">Document No</label>
-                                                <input type="text" class="form-control" id="txtDocNo" value="@Model.DocNo" disabled>
-                                                <div id="txtDocNoError" class="error-message"></div>
-                                            </div>
-                                            <div class="col-5">
-                                                <label for="txtdesc">Description</label>
-                                                <input type="text" class="form-control" id="txtdesc" placeholder="Please enter description" value="@Model.Description" @(mode == "view" ? "disabled" : "")>
-                                                <div id="txtdescError" class="error-message"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <hr>
+<div class="tw:space-y-4">
+    <div class="tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:px-6 tw:py-4 tw:dark:border-gray-800 tw:dark:bg-white/[0.03]">
+        <div class="tw:flex tw:items-center tw:justify-between tw:gap-4">
+            <div>
+                <h2 class="tw:text-lg tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Emergency JO Details</h2>
+                <p class="tw:mb-0 tw:text-sm tw:text-gray-500 tw:dark:text-gray-400">Job order details &middot; created @Model.CreatedDate.ToString("yyyy-MM-dd")</p>
+            </div>
+            <div class="tw:flex tw:gap-3">
+                <button type="button" id="backButton" class="tw:inline-flex tw:shrink-0 tw:items-center tw:gap-2 tw:rounded-lg tw:border tw:border-gray-300 tw:bg-white tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-700 tw:transition-colors
+                    tw:hover:bg-gray-50 tw:dark:border-gray-700 tw:dark:bg-white/5 tw:dark:text-gray-300 tw:dark:hover:bg-white/10" onclick="returnToEmergency()" @(mode == "view" ? "" : "hidden")>
+                    <i class="bi bi-arrow-left"></i>
+                    Back
+                </button>
+                <button type="button" id="editButton" class="tw:inline-flex tw:shrink-0 tw:items-center tw:gap-2 tw:rounded-lg tw:border tw:border-yellow-300 tw:bg-yellow-50 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-yellow-700 tw:transition-colors
+                    tw:hover:bg-yellow-100 tw:dark:border-yellow-800 tw:dark:bg-yellow-500/15 tw:dark:text-yellow-400 tw:dark:hover:bg-yellow-500/25" onclick="enabledEdit()" @(mode == "view" ? "" : "hidden")>
+                    <i class="bi bi-pencil"></i>
+                    Edit
+                </button>
+            </div>
 
-                        <div class="subContainer">
-                            <div class="row">
-                                <div class="d-flex">
-                                    <i class="bi bi-list-stars title-icon"></i>
-                                    <span class="title subtitleColor ms-2">Sub Item</span>
-                                </div>
-                            </div>
-                            <div class="itemContainer" id="itemContainer">
-                                <div class="row g-4">
-                                    <div class="col-5">
-                                        <label for="subItem1">Product</label>
-                                    </div>
-                                    <div class="col-4">
-                                        <label for="txtQty1">Quantity</label>
-                                    </div>
-                                </div>
-                                <div class="row itemBlock" id="itemBlock" data-index="1">
-                                    <div class="item">
-                                        <div class="row g-4 mb-2">
-                                            <div class="col-5">
-                                                <select class="joe-select js-example-basic-single form-control" id="subItem1" style="width:100%" @(mode == "view" ? "disabled" : "")></select>
-                                                <div id="subItem1Error" class="error-message"></div>
-                                            </div>
-                                            <div class="col-4">
-                                                <input type="number" class="form-control" id="txtQty1" placeholder="Please enter quantity" @(mode == "view" ? "disabled" : "") required>
-                                                <div id="txtQty1Error" class="error-message"></div>
-                                            </div>
-                                            <div class="title-container">
-                                                <button class="btn btn-outline-danger" type="button" onclick="removeItem(this)" @(mode == "view" ? "hidden" : "")>
-                                                    <i class="fa fa-trash" tabindex="0"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <input type="hidden" id="txtJobEDtlId1">
-                                    </div>
-                                </div>
-                            </div>
+        </div>
+    </div>
 
-                            <button id="addSub" type="button" class="add-sub mt-2 btn btn-outline-success" tabindex="0" onclick="addSubItem()" @(mode == "view" ? "hidden" : "")>
-                                <i class="fas fa-plus-circle"></i> Sub Item
-                            </button>
-                        </div>
-                        <hr>
+    <form id="joForm" method="post" data-jo-id="@Model.JobOrderEmergency_Id" class="tw:space-y-4">
 
-                        <div class="sumContainer">
-                            <div class="row">
-                                <div class="d-flex">
-                                    <i class="bi bi-clipboard-data title-icon"></i>
-                                    <span class="title titleColor ms-2">Summary</span>
-                                </div>
-                            </div>
-                            <div class="itemContainer">
-                                <div class="row data-row">
-                                    <div class="label">Total Sub Items</div>
-                                    <div class="value" id="ttlSub">1</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-end">
-                            <button class="btn btn-primary me-2" id="saveButton" @(mode == "view" ? "hidden" : "")>Save</button>
-                            <button type="button" class="btn btn-outline-secondary" onclick="returnToEmergency()" @(mode == "view" ? "hidden" : "")>Cancel</button>
-                            <button type="button" class="btn btn-secondary" id="backButton" onclick="returnToEmergency()" @(mode == "view" ? "" : "hidden")><i class="bi bi-arrow-left"></i> Back</button>
-                        </div>
-                    </form>
+        <div class="tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:px-6 tw:py-4 tw:dark:border-gray-800 tw:dark:bg-white/[0.03]">
+            <div class="tw:mb-4 tw:flex tw:items-center tw:gap-2">
+                <i class="bi bi-file-earmark tw:text-lg tw:text-black tw:dark:text-white/90"></i>
+                <span class="tw:text-base tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Overview</span>
+            </div>
+            <div class="tw:grid tw:grid-cols-2 tw:gap-4">
+                <div>
+                    <label class="tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-500 tw:dark:text-gray-400" for="txtDocNo">Document No</label>
+                    <input type="text" class="tw:w-full tw:rounded-lg tw:border tw:border-transparent tw:bg-gray-100 tw:px-3 tw:py-2.5 tw:text-sm tw:text-gray-700 tw:dark:bg-white/5 tw:dark:text-gray-300" id="txtDocNo" value="@Model.DocNo" disabled>
+                    <div id="txtDocNoError" class="error-message"></div>
+                </div>
+                <div>
+                    <label class="tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:tracking-wide tw:text-gray-500 tw:dark:text-gray-400" for="txtdesc">Description</label>
+                    <input type="text" class="tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-sm tw:text-gray-800 tw:placeholder:text-gray-400 tw:placeholder:italic
+                        tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:disabled:bg-gray-50 tw:disabled:text-gray-500
+                        tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90 tw:dark:placeholder:text-white/30 tw:dark:focus:border-brand-800 tw:dark:disabled:bg-white/5 tw:dark:disabled:text-gray-400"
+                           id="txtdesc" placeholder="No description provided" value="@Model.Description" @(mode == "view" ? "disabled" : "")>
+                    <div id="txtdescError" class="error-message"></div>
                 </div>
             </div>
         </div>
-    </div>
+
+        <div class="tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:px-6 tw:py-4 tw:dark:border-gray-800 tw:dark:bg-white/[0.03]">
+            <div class="tw:flex tw:items-center tw:justify-between">
+                <div class="tw:flex tw:items-center tw:gap-2">
+                    <i class="bi bi-list-ul tw:text-lg tw:text-black tw:dark:text-white/90"></i>
+                    <span class="tw:text-base tw:font-semibold tw:text-black-800 tw:dark:text-white/90">Sub Items</span>
+                </div>
+                <span id="ttlItemsBadge" class="tw:status-badge tw:bg-gray-100 tw:text-gray-700 tw:dark:bg-white/5 tw:dark:text-gray-400">1 item</span>
+            </div>
+
+            <div class="tw:flex tw:items-center tw:gap-3 tw:py-2 tw:px-4 tw:border-b tw:border-gray-100 tw:dark:border-gray-800">
+                <span class="tw:w-1/20 tw:text-sm tw:font-medium tw:tracking-wide tw:text-gray-400">#</span>
+                <span class="tw:w-15/20 tw:text-sm tw:font-medium tw:tracking-wide tw:text-gray-400">Product</span>
+                <span class="tw:w-3/20 tw:text-sm tw:font-medium tw:tracking-wide tw:text-gray-400">Quantity</span>
+                <span class="tw:w-1/20"></span>
+            </div>
+
+            <div id="itemContainer">
+                <div class="item tw:flex tw:gap-3 tw:border-b tw:border-gray-100 tw:px-4 tw:py-2 tw:dark:border-gray-800" data-index="1">
+                    <div class="item-index tw:w-1/20 tw:flex tw:items-center tw:shrink-0 tw:text-sm tw:text-gray-400">1</div>
+                    <div class="tw:w-15/20">
+                        <div class="item-view tw:flex tw:items-center tw:gap-3" @(mode == "view" ? "" : "hidden")>
+                            <div class="tw:flex tw:h-9 tw:w-9 tw:shrink-0 tw:items-center tw:justify-center tw:rounded-lg tw:bg-gray-100 tw:text-gray-500 tw:dark:bg-white/5 tw:dark:text-gray-400">
+                                <i class="bi bi-box-seam"></i>
+                            </div>
+                            <span class="item-view-label tw:text-sm tw:font-medium tw:text-gray-800 tw:dark:text-white/90">-</span>
+                        </div>
+                        <div class="item-select-wrap tw:relative" x-data="customSelect('subItem1')" @@click.outside="open = false" @(mode == "view" ? "hidden" : "")>
+                            <select class="jo-select tw:hidden" id="subItem1" onchange="removeErrMsg(this.id)"></select>
+                            <button type="button" @@click="toggle()"
+                                class="tw:box-border tw:flex tw:h-[40px] tw:w-full tw:items-center tw:justify-between tw:gap-2 tw:rounded-lg tw:border tw:bg-transparent tw:px-4 tw:text-left tw:text-sm tw:text-gray-800 tw:dark:bg-gray-900 tw:dark:text-white/90"
+                                :class="hasError ? 'tw:border-error-500' : (open ? 'tw:border-brand-300 tw:ring-3 tw:ring-brand-500/10' : 'tw:border-gray-300 tw:dark:border-gray-700')">
+                                <span class="tw:truncate" x-text="selectedLabel || 'Select an option'" :class="selectedLabel ? '' : 'tw:text-gray-400 tw:dark:text-white/30'"></span>
+                                <i class="bi bi-chevron-down tw:shrink-0 tw:text-xs tw:text-gray-500 tw:transition-transform tw:dark:text-gray-400" :class="open ? 'tw:rotate-180' : ''"></i>
+                            </button>
+                            <div x-show="open" x-transition style="display: none;"
+                                class="tw:absolute tw:z-50 tw:w-full tw:overflow-hidden tw:rounded-lg tw:border tw:border-gray-200 tw:bg-white tw:shadow-theme-lg tw:dark:border-gray-700 tw:dark:bg-gray-900"
+                                :class="dropUp ? 'tw:bottom-full tw:mb-1' : 'tw:top-full tw:mt-1'">
+                                <div class="tw:border-b tw:border-gray-100 tw:p-2 tw:dark:border-gray-800">
+                                    <input type="text" x-ref="search" x-model="search" class="tw:w-full tw:rounded-md tw:border tw:border-gray-300 tw:px-3 tw:py-1.5 tw:text-sm tw:text-gray-800 tw:outline-none
+                                        tw:focus:border-brand-300 tw:dark:border-gray-700 tw:dark:bg-gray-800 tw:dark:text-white/90" placeholder="Search product...">
+                                </div>
+                                <div class="custom-select-scroll tw:max-h-52 tw:overflow-y-auto tw:py-1">
+                                    <template x-if="filteredOptions.length === 0">
+                                        <div class="tw:px-4 tw:py-2 tw:text-sm tw:text-gray-400 tw:dark:text-white/30">No matches</div>
+                                    </template>
+                                    <template x-for="opt in filteredOptions" :key="opt.value">
+                                        <div @@click="select(opt)"
+                                            class="tw:cursor-pointer tw:px-4 tw:py-2 tw:text-sm tw:hover:bg-brand-50 tw:dark:hover:bg-brand-500/15"
+                                            :class="opt.value === selectedValue ? 'tw:bg-brand-50 tw:font-medium tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:text-gray-700 tw:dark:text-gray-300'"
+                                            x-text="opt.text"></div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="subItem1Error" class="error-message"></div>
+                    </div>
+
+                    <div class="tw:w-3/20">
+                        <input type="number" class="tw:box-border tw:h-[40px] tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-3 tw:text-center tw:text-sm tw:font-medium tw:text-gray-800
+                            tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:disabled:border-transparent tw:disabled:bg-gray-100
+                            tw:disabled:font-medium tw:disabled:text-gray-700 tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90 tw:dark:disabled:bg-white/5 tw:dark:disabled:text-gray-300"
+                               id="txtQty1" placeholder="0" @(mode == "view" ? "disabled" : "") required oninput="removeErrMsg(this.id)">
+                        <div id="txtQty1Error" class="error-message"></div>
+                    </div>
+
+                    <div class="tw:w-1/20">
+                        <button class="remove-item-btn tw:box-border tw:inline-flex tw:h-[40px] tw:w-[40px] tw:items-center tw:justify-center tw:rounded-lg tw:border tw:border-gray-200 tw:bg-white tw:text-gray-400 tw:transition-colors
+                            tw:hover:border-error-200 tw:hover:bg-error-50 tw:hover:text-error-600 tw:dark:border-gray-700 tw:dark:bg-white/[0.03]"
+                                type="button" onclick="removeItem(this)" title="Remove" @(mode == "view" ? "hidden" : "")>
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                    <input type="hidden" id="txtJobEDtlId1">
+                </div>
+            </div>
+
+            <button id="addSub" type="button" class="tw:mt-2 tw:flex tw:w-full tw:items-center tw:justify-center tw:gap-2 tw:rounded-lg tw:border tw:border-dashed tw:border-gray-300 tw:bg-gray-50 tw:px-4 tw:py-3 tw:text-sm tw:font-medium tw:text-gray-600 tw:transition-colors
+                tw:hover:border-brand-300 tw:hover:bg-brand-50 tw:hover:text-brand-600 tw:dark:border-gray-700 tw:dark:bg-white/[0.02] tw:dark:text-gray-400 tw:dark:hover:border-brand-800 tw:dark:hover:bg-brand-500/10 tw:dark:hover:text-brand-400"
+                    tabindex="0" onclick="addSubItem()" @(mode == "view" ? "hidden" : "")>
+                <i class="bi bi-plus-circle"></i>
+                Add Item
+            </button>
+
+            <div class="tw:mt-4 tw:flex tw:justify-end tw:gap-3 tw:text-sm tw:dark:border-gray-800">
+                <span class="tw:font-medium tw:text-brand-600 tw:dark:text-brand-400">Total Quantity</span>
+                <span id="ttlQty" class="tw:rounded-lg tw:min-w-12 tw:bg-gray-100 tw:justify-center tw:status-badge tw:bg-gray-800 tw:text-white tw:dark:bg-white/10">0</span>
+            </div>
+        </div>
+
+        <div class="tw:flex tw:justify-end tw:gap-3 tw:rounded-xl">
+            <button class="save-btn tw:border-0 tw:rounded-lg tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:shadow-theme-xs tw:hover:bg-brand-600" id="saveButton" @(mode == "view" ? "hidden" : "")>Save</button> 
+            <button type="button" class="cancel-btn tw:bg-transparent tw:rounded-lg tw:border tw:border-gray-300 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-700 tw:hover:bg-gray-100 tw:dark:border-gray-700 tw:dark:text-gray-400 tw:dark:hover:bg-white/5" onclick="returnToEmergency()" @(mode == "view" ? "hidden" : "")>Cancel</button>
+        </div>
+    </form>
 </div>
 
 @section Scripts {
 
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
-    <link rel="stylesheet" href="~/css/gridjs.min.css">    
-    <link rel="stylesheet" href="~/css/select2.min.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/js/sweetalert2.all.min.js"></script>  
-    <script src="~/js/gridjs.umd.js"></script>
-    <script src="~/js/select2.min.js"></script>
+    <script src="~/js/sweetalert2.all.min.js"></script>
 
     <script type="text/javascript">
         let itemIndex = 1;
         let mode = "@mode";
-        
-        $(document).ready(function() {
-            $('.joe-select').select2({
-                placeholder: 'Select an option',
-                width: 'resolve',
-            });
 
+        const itemPickerHtml = document.querySelector('#itemContainer .item-select-wrap').innerHTML;
+        let itemList = [];
+
+        $(document).ready(function() {
             loadItems().then(() => {
                 loadDetails();
             }).catch((error) => {
-                swal.fire({
+                Swal.fire({
                     icon: 'error',
                     title: 'Error',
                     text: error
                 });
             });
 
-            $('.joe-select').on('select2:open', function() {
-                setTimeout(() => {
-                    let searchField = document.querySelector('.select2-container--open .select2-search__field');
-                    if (searchField) {
-                        searchField.focus();
-                    }
-                }, 100);
-            });
+            $('#itemContainer').on('input', 'input[type="number"]', updateTotals);
         });
 
-        $('#joEForm').on('keydown', function(event) {
+        function customSelect(selectId) {
+            return {
+                open: false,
+                dropUp: false,
+                options: [],
+                selectedValue: '',
+                selectedLabel: '',
+                hasError: false,
+                search: '',
+                get filteredOptions() {
+                    const term = this.search.trim().toLowerCase();
+                    return this.options.filter(o => o.text.toLowerCase().includes(term));
+                },
+                init() {
+                    this.syncOptions();
+                    const sel = document.getElementById(selectId);
+                    if (!sel) return;
+                    this.hasError = sel.classList.contains('is-invalid');
+                    new MutationObserver(() => {
+                        this.hasError = sel.classList.contains('is-invalid');
+                    }).observe(sel, { attributes: true, attributeFilter: ['class'] });
+                },
+                toggle() {
+                    this.open = !this.open;
+                    if (this.open) {
+                        this.search = '';
+                        this.syncOptions();
+                        const rect = this.$el.getBoundingClientRect();
+                        const spaceBelow = window.innerHeight - rect.bottom;
+                        this.dropUp = spaceBelow < 280 && rect.top > spaceBelow;
+                        this.$nextTick(() => this.$refs.search?.focus());
+                    }
+                },
+                syncOptions() {
+                    const sel = document.getElementById(selectId);
+                    if (!sel) return;
+                    this.options = Array.from(sel.options)
+                        .filter(o => o.value !== '')
+                        .map(o => ({ value: o.value, text: o.textContent.trim() }));
+                    this.selectedValue = sel.value;
+                    const selectedOpt = sel.options[sel.selectedIndex];
+                    this.selectedLabel = selectedOpt && selectedOpt.value !== '' ? selectedOpt.textContent.trim() : '';
+                },
+                select(opt) {
+                    const sel = document.getElementById(selectId);
+                    sel.value = opt.value;
+                    this.selectedValue = opt.value;
+                    this.selectedLabel = opt.text;
+                    this.open = false;
+                    sel.dispatchEvent(new Event('change'));
+                }
+            };
+        }
+
+        function refreshCustomSelect(selectId) {
+            const sel = document.getElementById(selectId);
+            const root = sel ? sel.closest('[x-data]') : null;
+            if (root && window.Alpine) {
+                Alpine.$data(root).syncOptions();
+            }
+        }
+
+        $('#joForm').on('keydown', function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
             }
@@ -281,6 +358,7 @@
                     contentType: 'application/json; charset=utf-8',
                     success: function (result) {
                         if (result.success == true) {
+                            itemList = result.data;
                             const dropdown = document.getElementById('subItem1');
                             if (dropdown)
                             {
@@ -292,33 +370,39 @@
                                 defaultOption.selected = true;
                                 dropdown.appendChild(defaultOption);
 
-                                result.data.forEach(function (i) {
+                                itemList.forEach(function (i) {
                                     const option = document.createElement("option");
                                     option.value = i.item_Id;
                                     option.textContent = i.itemCode;
                                     dropdown.appendChild(option);
                                 });
-
-                                $(dropdown).select2({
-                                    placeholder: 'Select an option',
-                                    width: 'resolve',
-                                }).trigger('change');
                             }
+                            refreshCustomSelect('subItem1');
                             resolve();
                         } else {
                             reject(result.errMessage);
                         }
                     },
-                    error: function (error) {
-                        reject(result.errMessage);
+                    error: function () {
+                        reject("Failed to load items.");
                     }
                 });
             });
         }
 
+        function getItemCodeById(id) {
+            const found = itemList.find(i => i.item_Id == id);
+            return found ? found.itemCode : '-';
+        }
+
+        function setItemViewLabel(itemEl, itemId) {
+            const label = itemEl.querySelector('.item-view-label');
+            if (label) label.textContent = getItemCodeById(itemId);
+        }
+
         function loadDetails() {
-            var joEForm = document.querySelector('#joEForm');
-            var joEId = joEForm.getAttribute('data-joe-id');
+            var joForm = document.querySelector('#joForm');
+            var joEId = joForm.getAttribute('data-jo-id');
 
             $.ajax({
                 url: '/JO/GetJOEmergencyDetail',
@@ -327,7 +411,7 @@
                 dataType: 'JSON',
                 contentType: 'application/json; charset=utf-8',
                 success: function (result) {
-                    if (result.success = true) {
+                    if (result.success == true) {
                         joEDtls = result.data.map(function (i) {
                             return {
                                 jobOrderEmergency_Id: i.jobOrderEmergency_Id,
@@ -338,21 +422,22 @@
                         });
 
                         const container = document.getElementById("itemContainer");
-                        const items = container.querySelectorAll(".itemBlock");
+                        const items = container.querySelectorAll(".item");
                         const itemCount = items.length;
 
                         joEDtls.forEach((dtl, index) => {
                             if (index === 0) {
-                                const firstItem = container.querySelector(".itemBlock");
+                                const firstItem = container.querySelector(".item");
                                 const select = firstItem.querySelector("select");
                                 const qtyInput = firstItem.querySelector('input[type="number"]');
                                 const detailId = firstItem.querySelector('input[type="hidden"]');
 
                                 select.value = dtl.itemId;
                                 qtyInput.value = dtl.qty;
-                                detailId.value = dtl.joDetailId;
+                                detailId.value = dtl.jobOrderEmergencyDetail_Id;
+                                setItemViewLabel(firstItem, dtl.itemId);
+                                refreshCustomSelect(select.id);
 
-                                $(select).val(dtl.itemId).trigger('change');
                             } else if (itemCount < joEDtls.length) {
                                 createNewInputField(dtl, index+1, true);
                             }
@@ -360,11 +445,11 @@
                         });
                         itemIndex = joEDtls.length == 0 ? itemIndex : joEDtls.length;
 
-                        const total = document.querySelectorAll('.itemBlock').length;
-                        document.getElementById('ttlSub').textContent = total;
+                        renumberItems();
+                        updateTotals();
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -372,7 +457,7 @@
                     }
                 },
                 error: function (error) {
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -384,19 +469,23 @@
         function addSubItem() {
            itemIndex++;
            createNewInputField(null, itemIndex, false);
-           const total = document.querySelectorAll('.itemBlock').length;
-           document.getElementById('ttlSub').textContent = total;
+           renumberItems();
+           updateTotals();
         };
 
         function createNewInputField(dtl, index, isEditing = false) {
             const container = document.getElementById("itemContainer");
-            const firstItem = container.querySelector(".itemBlock");
-            //destroy select2 before clone to avoid the original select2 be affected
-            $(firstItem.querySelector("select")).select2('destroy');
+            const firstItem = container.querySelector(".item");
 
             const dataIdx = firstItem.getAttribute("data-index");
             const newItem = firstItem.cloneNode(true);
             newItem.setAttribute("data-index", index);
+
+            // Replace the cloned (already Alpine-initialised) picker with a clean one for this row.
+            const pickerWrap = newItem.querySelector('.item-select-wrap');
+            pickerWrap.innerHTML = itemPickerHtml;
+            pickerWrap.setAttribute('x-data', `customSelect('subItem${index}')`);
+            pickerWrap.querySelector('select').innerHTML = firstItem.querySelector('select').innerHTML;
 
             const select = newItem.querySelector("select");
             const qtyInput = newItem.querySelector('input[type="number"]');
@@ -405,13 +494,14 @@
             const newItemIndex = index;
             select.id = `subItem${newItemIndex}`;
             qtyInput.id = `txtQty${newItemIndex}`;
-            detailId.id = `txtBomDtlId${newItemIndex}`;
+            detailId.id = `txtJobEDtlId${newItemIndex}`;
 
-            //remove all label
-            newItem.querySelectorAll('label').forEach(label => label.remove());
             select.value = isEditing == true ? dtl.itemId : "";
             qtyInput.value = isEditing == true ? dtl.qty : "";
-            detailId.value = isEditing == true ? dtl.bomDetailId : "";
+            detailId.value = isEditing == true ? dtl.jobOrderEmergencyDetail_Id : "";
+            if (isEditing == true) {
+                setItemViewLabel(newItem, dtl.itemId);
+            }
 
             const errBlock1 = newItem.querySelector(`#subItem${dataIdx}Error`);
             errBlock1.id = `subItem${newItemIndex}Error`;
@@ -419,46 +509,48 @@
             errBlock2.id = `txtQty${newItemIndex}Error`;
 
             container.appendChild(newItem);
-            //reinitialize select2
-            container.querySelectorAll(".itemBlock").forEach(item => {
-                $(item.querySelector("select")).select2({
-                    placeholder: 'Select an option',
-                    width: 'resolve',
-                }).trigger('change');
-
-                $(item.querySelector("select")).on('select2:open', function() {
-                    setTimeout(() => {
-                        let searchField = document.querySelector('.select2-container--open .select2-search__field');
-                        if (searchField) {
-                            searchField.focus();
-                        }
-                    }, 100);
-                });
-            });
             removeErrMsg([`subItem${newItemIndex}`, `txtQty${newItemIndex}`]);
 
         };
 
         function removeItem(icon) {
-            const item = icon.closest('.itemBlock');
+            const item = icon.closest('.item');
             const container = document.getElementById("itemContainer");
-            const items = container.querySelectorAll(".itemBlock");
+            const items = container.querySelectorAll(".item");
             const itemCount = items.length;
 
             if (itemCount > 1)
             {
                 item.remove();
             } else {
-                swal.fire({
+                Swal.fire({
                     icon: 'info',
                     title: "Cannot Remove",
                     text: "At least one sub-item must remain."
                 });
             }
 
-            const total = document.querySelectorAll('.itemBlock').length;
-            document.getElementById('ttlSub').textContent = total;
+            renumberItems();
+            updateTotals();
         };
+
+        function renumberItems() {
+            document.querySelectorAll('#itemContainer .item .item-index').forEach((el, idx) => {
+                el.textContent = idx + 1;
+            });
+        }
+
+        function updateTotals() {
+            const items = document.querySelectorAll('#itemContainer .item');
+            let totalQty = 0;
+            items.forEach(item => {
+                const v = parseFloat(item.querySelector('input[type="number"]').value);
+                if (!isNaN(v)) totalQty += v;
+            });
+
+            document.getElementById('ttlItemsBadge').textContent = items.length + (items.length === 1 ? ' item' : ' items');
+            document.getElementById('ttlQty').textContent = totalQty;
+        }
 
         function returnToEmergency() {
             window.history.back();
@@ -470,7 +562,7 @@
         });
 
         function saveEmergencyJobOrder() {
-            const items = document.querySelectorAll('.item');
+            const items = document.querySelectorAll('#itemContainer .item');
             const formData = [];
             let isValid = true;
 
@@ -504,8 +596,6 @@
                     EmergencyDetails: formData,
                 };
 
-                console.log("jobData", jobData);
-
                 $.ajax({
                     url: '/JO/SaveEmergency',
                     type: 'POST',
@@ -524,7 +614,7 @@
                     },
                     success: function (result) {
                         if (result.success == true) {
-                            swal.fire({
+                            Swal.fire({
                                 icon: 'success',
                                 title: "Success Save",
                                 text: "",
@@ -534,7 +624,7 @@
                             });
                         }
                         else {
-                            swal.fire({
+                            Swal.fire({
                                 icon: 'error',
                                 title: "Wait",
                                 text: result.errMessage,
@@ -542,7 +632,7 @@
                         }
                     },
                     error: function (error) {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: error.val,
@@ -575,7 +665,7 @@
         function enabledEdit() {
             mode = 'edit';
 
-            const form = document.getElementById('joEForm');
+            const form = document.getElementById('joForm');
             const elements = form.querySelectorAll('input, select, button');
 
             elements.forEach(el => {
@@ -588,11 +678,14 @@
             document.getElementById('saveButton')?.removeAttribute('hidden');
             document.getElementById('addSub')?.removeAttribute('hidden');
 
-            document.querySelectorAll('.btn-outline-danger').forEach(btn => {
+            document.querySelectorAll('.remove-item-btn').forEach(btn => {
                 btn.removeAttribute('hidden');
             });
 
-            document.querySelector('.btn-warning')?.setAttribute('hidden', 'true');
+            document.querySelectorAll('.item-view').forEach(el => { el.hidden = true; });
+            document.querySelectorAll('.item-select-wrap').forEach(el => { el.hidden = false; });
+
+            document.getElementById('editButton')?.setAttribute('hidden', 'true');
             document.getElementById('backButton')?.setAttribute('hidden', 'true');
         }
     </script>

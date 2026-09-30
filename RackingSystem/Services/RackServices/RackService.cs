@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RackingSystem.Data;
 using RackingSystem.Data.RackJob;
@@ -28,6 +27,12 @@ namespace RackingSystem.Services.RackServices
                 var rackJob = await _dbContext.RackJob.Where(r => r.RackJobQueue_Id != 0).OrderByDescending(r => r.StartDate).FirstOrDefaultAsync();
                 var rackJobDTO = _mapper.Map<RackJobDTO>(rackJob);
 
+                var rackJobLog = await _dbContext.RackJobLog.Where(r => r.RackJobQueue_Id == rackJobDTO.RackJobQueue_Id).FirstOrDefaultAsync();
+                if (rackJobLog != null)
+                {
+                    rackJobDTO.LastUpdatedTime = rackJobLog.EndDate;
+                }
+                
                 result.success = true;
                 result.data = rackJobDTO;
                 return result;

@@ -1,57 +1,90 @@
 ﻿
-@section PageHeader {
-    <header class="d-flex align-items-center justify-content-between w-100">
-        <h2 class="pageTitle">Slot Column Setting</h2>
-        <div class="d-flex">
-            <button type="button" class="btn btn-success" onclick="updateSetting()">
-                Update Setting
-            </button>
-        </div>
-    </header>
-}
-
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body pt-0">
-                    <div class="text-nowrap table-container mt-1">
-                        <table id="listTable" class="row-border dataTable hover order-column" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>Column No</th>
-                                    <th>Empty Drawer IN Priority</th>
-                                    <th>Empty Drawer OUT Priority</th>
-                                    <th>Reel IN Priority</th>  
-                                    <th>Column Inches</th>
-                                    @* <th>Reel OUT Idx</th> *@
-                                    @* <th>Action</th> *@
-                                </tr> 
-                            </thead>
-                        </table>
-                    </div>
-                </div>
-                <input type="hidden" id="txtTotalCol">
-            </div>
-        </div>
+<div class="tw:flex tw:w-full tw:items-center tw:justify-between">
+    <h2 class="tw:text-lg tw:mb-0 tw:ml-2 tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Slot Column Setting</h2>
+    <div class="tw:flex">
+        <button type="button" class="tw:border-0 tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:transition
+            tw:hover:bg-brand-600" onclick="updateSetting()">
+            Update Setting
+        </button>
     </div>
+</div>
+
+<div class="tw:mt-3">
+    <div class="dt-tailadmin tw:overflow-hidden tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:text-gray-700 tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:dark:text-gray-300">
+        <table id="listTable" class="row-border dataTable hover order-column tw:w-full">
+            <thead>
+                <tr class="tw:border-b tw:border-gray-200">
+                    @{
+                        string[] listHeaders = { "Column No", "Empty Drawer IN Priority", "Empty Drawer OUT Priority", "Reel IN Priority", "Column Inches" };
+                    }
+                    @foreach (var header in listHeaders)
+                    {
+                        <th class="tw:px-5 tw:py-3.5 tw:text-left sm:tw:px-6"><span class="tw:text-sm tw:font-semibold tw:text-gray-700 tw:dark:text-gray-300">@header</span></th>
+                    }
+                </tr> 
+            </thead>
+        </table>
+    </div>
+    <input type="hidden" id="txtTotalCol">
 </div>
 
 @section Scripts
 {
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
     <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
-    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
-
+    
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="../js/dataTables.js"></script>
-    <script src="../js/dataTables.columnControl.js"></script>
-    <script src="../js/columnControl.dataTables.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
 
     <script type="text/javascript">
 
         let reelWidthList = [];
+
+        function customSelect(selectId) {
+            return {
+                open: false,
+                dropUp: false,
+                options: [],
+                selectedValue: '',
+                selectedLabel: '',
+                hasError: false,
+                init() {
+                    this.syncOptions();
+                    const sel = document.getElementById(selectId);
+                    if (!sel) return;
+                    this.hasError = sel.classList.contains('is-invalid');
+                    new MutationObserver(() => {
+                        this.hasError = sel.classList.contains('is-invalid');
+                    }).observe(sel, { attributes: true, attributeFilter: ['class'] });
+                },
+                toggle() {
+                    this.open = !this.open;
+                    if (this.open) {
+                        this.syncOptions();
+                        const rect = this.$el.getBoundingClientRect();
+                        const spaceBelow = window.innerHeight - rect.bottom;
+                        this.dropUp = spaceBelow < 240 && rect.top > spaceBelow;
+                    }
+                },
+                syncOptions() {
+                    const sel = document.getElementById(selectId);
+                    if (!sel) return;
+                    this.options = Array.from(sel.options).map(o => ({ value: o.value, text: o.textContent.trim() }));
+                    this.selectedValue = sel.value;
+                    const selectedOpt = sel.options[sel.selectedIndex];
+                    this.selectedLabel = selectedOpt ? selectedOpt.textContent.trim() : '';
+                },
+                select(opt) {
+                    const sel = document.getElementById(selectId);
+                    sel.value = opt.value;
+                    this.selectedValue = opt.value;
+                    this.selectedLabel = opt.text;
+                    this.open = false;
+                    sel.dispatchEvent(new Event('change'));
+                }
+            };
+        }
 
         $(document).ready(function () {
             $('#txtTotalCol').val(0);
@@ -71,7 +104,6 @@
                     loadList();
                 },
                 error: function (error) {
-                    console.log(error);
                     loadList();
                 }
             });
@@ -94,50 +126,84 @@
                     Swal.showLoading()
                 },
                 success: function (result) {
-                    swal.close()
+                    Swal.close()
                     if (result.success == true) {
+                        const cellClass = 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6 tw:text-theme-sm tw:text-gray-700 tw:dark:text-gray-300';
+
                         $('#listTable').DataTable( {
                             data: result.data,
                             paging: true,
                             pageLength: 50,
                             columns: [
-                                { data: 'colNo' },
+                                { data: 'colNo', className: cellClass },
                                 {
                                     data: null,
+                                    className: cellClass,
                                     render: function (data, type, row, meta) {
                                         const rowIndex = meta.row;
                                         return `<input type="hidden" id="txtId${rowIndex}" value="${row.slotColumnSetting_Id}">
-                                            <input type="number" class="form-control" id="txtEDIn${rowIndex}" value="${row.emptyDrawer_IN_Idx}">
-                                            <div id="txtEDIn${rowIndex}Error" class="error-message"></div>`;
+                                        <input type="number" class="tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-4 tw:py-2 tw:text-sm tw:text-gray-800 tw:placeholder:text-gray-400
+                                            tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90
+                                            tw:dark:placeholder:text-white/30 tw:dark:focus:border-brand-800" id="txtEDIn${rowIndex}" value="${row.emptyDrawer_IN_Idx}" oninput="this.classList.remove('is-invalid','is-valid'); document.getElementById(this.id+'Error').textContent='';">
+                                        <div id="txtEDIn${rowIndex}Error" class="error-message"></div>`;
                                     }
                                 },
                                 {
                                     data: null,
+                                    className: cellClass,
                                     render: function (data, type, row, meta) {
                                         const rowIndex = meta.row;
-                                        return `<input type="number" class="form-control" id="txtEDOut${rowIndex}" value="${row.emptyDrawer_OUT_Idx}">
-                                            <div id="txtEDOut${rowIndex}Error" class="error-message"></div>`;
+                                        return `<input type="number" class="tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-4 tw:py-2 tw:text-sm tw:text-gray-800 tw:placeholder:text-gray-400
+                                            tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90
+                                            tw:dark:placeholder:text-white/30 tw:dark:focus:border-brand-800" id="txtEDOut${rowIndex}" value="${row.emptyDrawer_OUT_Idx}" oninput="this.classList.remove('is-invalid','is-valid'); document.getElementById(this.id+'Error').textContent='';">
+                                        <div id="txtEDOut${rowIndex}Error" class="error-message"></div>`;
                                     }
                                 },
                                 {
                                     data: null,
+                                    className: cellClass,
                                     render: function (data, type, row, meta) {
                                         const rowIndex = meta.row;
-                                        return `<input type="number" class="form-control" id="txtRIn${rowIndex}" value="${row.reel_IN_Idx}">
-                                                <div id="txtRIn${rowIndex}Error" class="error-message"></div>`;
+                                        return `<input type="number" class="tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-4 tw:py-2 tw:text-sm tw:text-gray-800 tw:placeholder:text-gray-400
+                                            tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90
+                                            tw:dark:placeholder:text-white/30 tw:dark:focus:border-brand-800" id="txtRIn${rowIndex}" value="${row.reel_IN_Idx}" oninput="this.classList.remove('is-invalid','is-valid'); document.getElementById(this.id+'Error').textContent='';">
+                                        <div id="txtRIn${rowIndex}Error" class="error-message"></div>`;
                                     }
                                 },
                                 {
                                     data: null,
+                                    className: cellClass,
                                     render: function (data, type, row, meta) {
                                         const rowIndex = meta.row;
+                                        const selId = `txtColInches${rowIndex}`;
                                         let options = '<option value="">-- Select --</option>';
                                         reelWidthList.forEach(function (w) {
                                             const selected = (w == row.colInches) ? 'selected' : '';
                                             options += `<option value="${w}" ${selected}>${w}</option>`;
                                         });
-                                        return `<select class="form-control" id="txtColInches${rowIndex}">${options}</select>
-                                                <div id="txtColInches${rowIndex}Error" class="error-message"></div>`;
+                                        return `<select id="${selId}" class="tw:hidden">${options}</select>
+                                        <div class="tw:relative" x-data="customSelect('${selId}')" x-init="init()">
+                                            <button type="button" @@click="toggle()" @@click.outside="open = false"
+                                                class="tw:flex tw:w-full tw:items-center tw:justify-between tw:gap-2 tw:rounded-lg tw:border tw:bg-transparent tw:px-4 tw:py-2 tw:text-left tw:text-sm tw:text-gray-800 tw:dark:bg-gray-900 tw:dark:text-white/90"
+                                                :class="hasError ? 'tw:border-error-500' : (open ? 'tw:border-brand-300 tw:ring-3 tw:ring-brand-500/10' : 'tw:border-gray-300 tw:dark:border-gray-700')">
+                                                <span x-text="selectedLabel || '-- Select --'" :class="selectedLabel ? '' : 'tw:text-gray-400 tw:dark:text-white/30'"></span>
+                                                <i class="bi bi-chevron-down tw:text-xs tw:text-gray-500 tw:transition-transform tw:dark:text-gray-400" :class="open ? 'tw:rotate-180' : ''"></i>
+                                            </button>
+                                            <div x-show="open" x-transition
+                                                class="custom-select-scroll tw:absolute tw:z-50 tw:max-h-60 tw:w-full tw:overflow-y-auto tw:rounded-lg tw:border tw:border-gray-200 tw:bg-white tw:py-1 tw:shadow-theme-lg tw:dark:border-gray-700 tw:dark:bg-gray-900"
+                                                :class="dropUp ? 'tw:bottom-full tw:mb-1' : 'tw:top-full tw:mt-1'">
+                                                <template x-if="options.length === 0">
+                                                    <div class="tw:px-4 tw:py-2 tw:text-sm tw:text-gray-400 tw:dark:text-white/30">No options</div>
+                                                </template>
+                                                <template x-for="opt in options" :key="opt.value">
+                                                    <div @@click="select(opt)"
+                                                        class="tw:cursor-pointer tw:px-4 tw:py-2 tw:text-sm tw:hover:bg-brand-50 tw:dark:hover:bg-brand-500/15"
+                                                        :class="opt.value === selectedValue ? 'tw:bg-brand-50 tw:font-medium tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:text-gray-700 tw:dark:text-gray-300'"
+                                                        x-text="opt.text"></div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                        <div id="${selId}Error" class="error-message"></div>`;
                                     }
                                 },
                                 // {
@@ -162,17 +228,13 @@
                             language: {
                                 searchPlaceholder: "🔍︎ Search",
                                 search: ""
-                            },
-                            ordering: {
-                                indicators: false
-                            },
-                            columnControl: ['orderStatus']
+                            }
                         });
 
                         $('#txtTotalCol').val(result.totalRecords);
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -180,7 +242,7 @@
                     }
                 },
                 error: function (error) {
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -291,7 +353,7 @@
                 success: function (result) {
                     if (result.success == true) {
                         $("#myModal").modal("toggle");
-                        swal.fire({
+                        Swal.fire({
                             icon: 'success',
                             title: "Success Update",
                             text: "",
@@ -301,7 +363,7 @@
                         });
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -309,8 +371,7 @@
                     }
                 },
                 error: function (error) {
-                    console.log(error);
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
