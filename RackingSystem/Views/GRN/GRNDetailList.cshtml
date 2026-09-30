@@ -1,215 +1,140 @@
-﻿
-<style type="text/css">
-    .show-entries select.form-control {
-        width: 60px;
-        margin: 0 5px;
-    }
-
-    .table-filter .filter-group {
-        float: right;
-        margin-left: 15px;
-    }
-
-    .table-filter input, .table-filter select {
-        height: 34px;
-        border-radius: 3px;
-        border-color: #ddd;
-        box-shadow: none;
-    }
-
-    .table-filter .btn {
-        height: 34px;
-    }
-
-    .table-filter label {
-        font-weight: normal;
-        margin-left: 10px;
-    }
-
-    .table-filter select, .table-filter input {
-        display: inline-block;
-        margin-left: 5px;
-    }
-
-    .table-filter input {
-        width: 200px;
-        display: inline-block;
-    }
-
-    .filter-group select.form-control {
-        width: 110px;
-    }
-
-    .filter-icon {
-        float: right;
-        margin-top: 7px;
-    }
-
-    .filter-icon i {
-        font-size: 18px;
-        opacity: 0.7;
-    }
-
-    .text-success {
-        color: #10c469;
-    }
-
-    .text-info {
-        color: #62c9e8;
-    }
-
-    .text-warning {
-        color: #FFC107;
-    }
-
-    .text-danger {
-        color: #ff5b5b;
-    }
-
-    .hint-text {
-        float: left;
-        margin-top: 10px;
-        font-size: 13px;
-    }
-
-    #contentBox {
-        background-color: white;
+﻿<style>
+    #listTable_wrapper .dt-layout-row:not(.dt-layout-table) {
+        display: none !important;
     }
 </style>
 
-@section PageHeader {
-    <header class="d-flex align-items-center justify-content-between w-100">
-        <h2 class="pageTitle">GRN List <b></b></h2>
-    </header>
-}
+<div x-data="{ filtersOpen: true }">
+    <div class="tw:flex tw:w-full tw:items-center tw:justify-between">
+        <h2 class="tw:text-lg tw:mb-0 tw:ml-2 tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">GRN List</h2>
+        <div class="tw:flex tw:items-center tw:gap-2">
+            <button type="button" class="tw:inline-flex tw:items-center tw:justify-center tw:rounded-lg tw:border-0 tw:px-3.5 tw:py-2"
+                    :class="filtersOpen ? 'tw:bg-brand-50 tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:bg-gray-100 tw:text-gray-500 tw:hover:bg-gray-200 tw:dark:bg-white/5 tw:dark:text-gray-400 tw:dark:hover:bg-white/10'"
+                    @@click="filtersOpen = !filtersOpen" title="Toggle Filters">
+                <i class="bi bi-funnel"></i>
+            </button>
+        </div>
+    </div>
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <div id="contentBox" class="row mt-2" style="padding:5px;">
-                        <div class="col-sm-2" style="">
-                            <input id="txtGRN" name="GRNBatchNo" type="text" class="form-control" style="" placeholder="GRN No" />
-                        </div>
-                        <div class="col-sm-2" style="">
-                            <input id="txtItemCode" name="ItemCode" type="text" class="form-control" style="" placeholder="Item" />
-                        </div>
-                        <div class="col-sm-2" style="">
-                            <input id="txtReelCode" name="ReelCode" type="text" class="form-control" style="" placeholder="Reel Code" />
-                        </div>
-                        <div class="col-sm-5" style="">
-                            <div class="row">
-                                <div class="col-4" style="padding:0;">
-                                    <select id="selDateType" name="DateType" class="form-control">
-                                        <option value="C">Created Date</option>
-                                        <option value="U">Updated Date</option>
-                                    </select>
-                                </div>
-                                <div class="col-4" style="padding:0;">
-                                    <input id="dtpDateFrom" name="DateFrom" type="date" class="form-control" placeholder="Date From" />
-                                </div>
-                                <div class="col-4" style="padding:0;">
-                                    <input id="dtpDateTo" name="DateTo" type="date" class="form-control" placeholder="Date To" />
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-1" style="">
-                            <button type="button" class="btn btn-primary" style="width:100%;" onclick="loadList(1)"><i class="bi bi-search"></i> </button>
-                        </div>
-                    </div>
-                    <hr />
-                    <div class="table-filter">
-                        <div class="row" style="padding-left:5px;">
-                            <div class="col-sm-12">
-                                <div class="show-entries">
-                                    <label>Show</label>
-                                    <select id="selpageSize" name="pageSize" class="form-control">
-                                        <option value="10">10</option>
-                                        <option value="25">25</option>
-                                        <option value="50">50</option>
-                                        <option value="100">100</option>
-                                        <option value="200">250</option>
-                                    </select>
-                                    <span>entries</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-nowrap table-container mt-2">
-                        <table id="listTable" class="row-border dataTable hover order-column" style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>GRN No</th>
-                                    <th>Item</th>
-                                    <th>Qty</th>
-                                    <th>Reel Code</th>
-                                    @* <th>Reel Status</th> *@
-                                    <th>Created Date</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
-
-                    <div class="dt-container dt-empty-footer">
-                        <div class="dt-layout-row">
-                            <div class="hint-text">Showing <b id="lblCurCount">0</b> of <b id="lblTotal">0</b> entries</div>
-                            @* <ul class="pagination" id="ulPagination">
-                        </ul> *@
-                            <div class="dt-layout-cell dt-layout-end">
-                                <div class="dt-paging">
-                                    <nav aria-label="pagination" id="ulPagination">
-                                    </nav>
-                                </div>
-                            </div>
-                            <input type="hidden" id="txtCurPage">
-                            <input type="hidden" id="txtTotalRecord">
-                            <input type="hidden" id="txtPageSize">
-                            <input type="hidden" id="txtTotalPage">
-                        </div>
-                    </div>
+    <div class="tw:mt-3 tw:space-y-4">
+        <div x-show="filtersOpen" x-transition class="tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:p-4 tw:dark:border-gray-800 tw:dark:bg-white/[0.03]">
+            @{
+                string fieldClass = @"tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-sm tw:text-gray-800 tw:placeholder:text-gray-400
+                        tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90
+                        tw:dark:placeholder:text-white/30 tw:dark:focus:border-brand-800";
+                string labelClass = "tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400";
+            }
+            <div class="tw:grid tw:grid-cols-3 tw:items-end tw:gap-3">
+                <div>
+                    <label class="@labelClass" for="txtGRN">GRN No</label>
+                    <input id="txtGRN" name="GRNBatchNo" type="text" class="@fieldClass" placeholder="GRN No" />
+                </div>
+                <div>
+                    <label class="@labelClass" for="txtItemCode">Item</label>
+                    <input id="txtItemCode" name="ItemCode" type="text" class="@fieldClass" placeholder="Item Code" />
+                </div>
+                <div>
+                    <label class="@labelClass" for="txtReelCode">Item</label>
+                    <input id="txtReelCode" name="ReelCode" type="text" class="@fieldClass" placeholder="Reel Code" />
+                </div>
+                <div>
+                    <label class="@labelClass" for="selDateType">Date Type</label>
+                    <select id="selDateType" name="DateType" class="@fieldClass">
+                        <option value="C">Created Date</option>
+                        <option value="U">Updated Date</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="@labelClass" for="dtpDateFrom">Date From</label>
+                    <input id="dtpDateFrom" name="DateFrom" type="date" class="@fieldClass" placeholder="Date From" />
+                </div>
+                <div>
+                    <label class="@labelClass" for="dtpDateTo">Date To</label>
+                    <input id="dtpDateTo" name="DateTo" type="date" class="@fieldClass" placeholder="Date To" />
+                </div>
+                <div>
+                    <button type="button" class="tw:inline-flex tw:w-full tw:items-center tw:justify-center tw:rounded-lg tw:border-0 tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:hover:bg-brand-600" onclick="loadList(1)">
+                        <i class="bi bi-search"></i>
+                    </button>
                 </div>
             </div>
         </div>
+
+        <div class="dt-tailadmin tw:overflow-hidden tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:text-gray-700 tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:dark:text-gray-300">
+            <div class="tw:flex tw:items-center tw:gap-2 tw:px-5 tw:pt-4 tw:text-sm tw:text-gray-700 tw:dark:text-gray-400">
+                @* <label for="selpageSize">Show</label> *@
+                <select id="selpageSize" name="pageSize" class="tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-2.5 tw:py-1.5 tw:text-[13px] tw:text-gray-800 tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="200">250</option>
+                </select>
+                <span>entries per page</span>
+            </div>
+
+            <table id="listTable" class="row-border dataTable hover order-column tw:w-full">
+                <thead>
+                    <tr class="tw:border-b tw:border-gray-200">
+                        @{
+                            string[] listHeaders = { "GRN No", "Item", "Qty", "Reel Code", "Created Date", "Action" };
+                        }
+                        @foreach (var header in listHeaders)
+                        {
+                            <th class="tw:px-5 tw:py-3.5 tw:text-left sm:tw:px-6"><span class="tw:text-sm tw:font-semibold tw:text-gray-700 tw:dark:text-gray-300">@header</span></th>
+                        }
+                    </tr>
+                </thead>
+            </table>
+            <div class="tw:flex tw:flex-wrap tw:text-sm tw:items-center tw:justify-between tw:gap-3 tw:px-5 tw:py-4 sm:tw:px-6">
+                <div class="tw:text-gray-500 tw:dark:text-gray-400">Showing <span id="lblCurCount">0</span> of <span id="lblTotal">0</span> entries</div>
+                <nav aria-label="pagination" id="ulPagination" class="tw:flex tw:items-center tw:gap-1"></nav>
+            </div>
+        </div>
+
+        <input type="hidden" id="txtCurPage">
+        <input type="hidden" id="txtTotalRecord">
+        <input type="hidden" id="txtPageSize">
+        <input type="hidden" id="txtTotalPage">
+
     </div>
 </div>
 
 <div class="modal fade" data-bs-backdrop="static" id="myEditModal" role="dialog">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Update GRN</h4>
+        <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+            <div class="tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
+                <h4 class="tw:mb-0 tw:text-base tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Update GRN</h4>
             </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label>Supplier Name</label>
-                    <input id="txtSupplierName2" type="text" class="form-control" style="" placeholder="" onclick="" maxlength="255" oninput="removeErrMsg(this.id)" />
+            <div class="tw:space-y-4 tw:px-6 tw:py-4">
+                <div>
+                    <label class="@labelClass" for="txtSupplierName2">Supplier Name</label>
+                    <input id="txtSupplierName2" type="text" class="@fieldClass" maxlength="255" oninput="removeErrMsg(this.id)" />
                     <div id="txtSupplierName2Error" class="error-message"></div>
                 </div>
-                <div class="mb-3">
-                    <label>Supplier Ref No</label>
-                    <input id="txtSupplierRefNo2" type="text" class="form-control" style="" placeholder="" maxlength="50" oninput="removeErrMsg(this.id)" />
+                <div>
+                    <label class="@labelClass" for="txtSupplierRefNo2">Supplier Ref No</label>
+                    <input id="txtSupplierRefNo2" type="text" class="@fieldClass" maxlength="50" oninput="removeErrMsg(this.id)" />
                     <div id="txtSupplierRefNo2Error" class="error-message"></div>
                 </div>
-                <div class="mb-3">
-                    <label>Item</label>
-                    <input id="txtItem2" type="button" class="form-control" style="" placeholder="" onclick="showItemForm('Edit')" />
+                <div>
+                    <label class="@labelClass" for="txtItem2">Item</label>
+                    <input id="txtItem2" type="button" class="@fieldClass tw:cursor-pointer tw:text-left" onclick="showItemForm('Edit')" />
                     <div id="txtItem2Error" class="error-message"></div>
                 </div>
-                <div class="mb-3">
-                    <label>Qty</label>
-                    <input id="txtQty2" type="number" class="form-control" style="" placeholder="" oninput="removeErrMsg(this.id)" />
+                <div>
+                    <label class="@labelClass" for="txtQty2">Qty</label>
+                    <input id="txtQty2" type="number" class="@fieldClass" oninput="removeErrMsg(this.id)" />
                     <div id="txtQty2Error" class="error-message"></div>
                 </div>
-                <div class="mb-3">
-                    <label>Expiry Date</label>
-                    <input id="dtpExDate2" name="DateFrom" type="date" class="form-control" placeholder="Expiry Date" oninput="removeErrMsg(this.id)" />
+                <div>
+                    <label class="@labelClass" for="dtpExDate2">Expiry Date</label>
+                    <input id="dtpExDate2" name="DateFrom" type="date" class="@fieldClass" placeholder="Expiry Date" oninput="removeErrMsg(this.id)" />
                     <div id="dtpExDate2Error" class="error-message"></div>
                 </div>
-                <div class="mb-3">
-                    <label>Remark</label>
-                    <input id="txtRemark2" type="text" class="form-control" style="" placeholder="" maxlength="255" />
+                <div>
+                    <label class="@labelClass" for="txtRemark2">Remark</label>
+                    <input id="txtRemark2" type="text" class="@fieldClass" maxlength="255" />
                     <div id="txtRemark2Error" class="error-message"></div>
                 </div>
 
@@ -220,34 +145,38 @@
                 <input type="hidden" id="txtReelCode2">
 
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="updateReceive()">Save</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="cancelEditForm()">Cancel</button>
+            <div class="tw:flex tw:justify-end tw:gap-3 tw:border-t tw:border-gray-100 tw:px-6 tw:py-3 tw:dark:border-gray-800">
+                <button type="button" class="save-btn tw:rounded-lg tw:border-0 tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:shadow-theme-xs tw:hover:bg-brand-600" onclick="updateReceive()">Save</button>
+                <button type="button" class="cancel-btn tw:bg-transparent tw:rounded-lg tw:border tw:border-gray-300 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-700 tw:hover:bg-gray-100 tw:dark:border-gray-700 tw:dark:text-gray-400 tw:dark:hover:bg-white/5" onclick="cancelEditForm()">Cancel</button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="itemModal" role="dialog" style="background-color: rgba(0, 0, 0, 0.2);">
+<div class="modal fade" id="itemModal" role="dialog" data-bs-focus="false">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h4 class="modal-title">Select Item</h4>
+        <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+            <div class="tw:border-b tw:border-gray-100 tw:bg-brand-500 tw:px-6 tw:py-4">
+                <h4 class="tw:mb-0 tw:text-base tw:font-semibold tw:text-white">Select Item</h4>
             </div>
-            <div class="modal-body">
-                <table id="itemTable" class="row-border dataTable hover order-column mb-2 mt-2" style="width:100%">
+
+            <div class="dt-tailadmin tw:overflow-hidden tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:text-gray-700 tw:dark:border-gray-800 tw:dark:bg-white/[0.03] tw:dark:text-gray-300">
+                <table id="itemTable" class="row-border dataTable hover order-column tw:w-full">
                     <thead>
-                        <tr>
-                            <th>Item Code</th>
-                            <th>UOM</th>
-                            <th>Description</th>
-                            <th>Action</th>
+                        <tr class="tw:border-b tw:border-gray-200">
+                            @{
+                                string[] ItemHeaders = { "Item Code", "UOM", "Description", "Action" };
+                            }
+                            @foreach (var header in ItemHeaders)
+                            {
+                                <th class="tw:px-5 tw:py-3.5 tw:text-left sm:tw:px-6"><span class="tw:text-sm tw:font-semibold tw:text-gray-700 tw:dark:text-gray-300">@header</span></th>
+                            }
                         </tr>
                     </thead>
-                    <tbody></tbody>
                 </table>
                 <input type="hidden" id="txtItemStatus">
             </div>
+
         </div>
     </div>
 </div>
@@ -257,12 +186,9 @@
 {
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
     <link rel="stylesheet" href="~/css/dataTables.dataTables.css">
-    <link rel="stylesheet" href="~/css/columnControl.dataTables.css">
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="../js/dataTables.js"></script>
-    <script src="../js/dataTables.columnControl.js"></script>
-    <script src="../js/columnControl.dataTables.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
 
     <script type="text/javascript">
@@ -318,7 +244,6 @@
                     Swal.fire({
                         text: 'Please Wait',
                         width: '300px',
-
                         allowEscapeKey: false,
                         allowOutsideClick: false,
                         showConfirmButton: false,
@@ -326,32 +251,38 @@
                     Swal.showLoading();
                 },
                 success: function (result) {
-                    swal.close();
+                    Swal.close();
+                    const cellClass = 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6 tw:text-theme-sm tw:text-gray-700 tw:dark:text-gray-300';
+
                     if (result.success == true) {
+
                         $('#itemTable').DataTable( {
-                            dom: 'frtip',
                             ordering: false,
                             data: result.data,
                             paging: true,
-                            pageLength: 25,
-                            lengthMenu: [25, 50, 100, 250, 500],
+                            pagingType: 'full_numbers',
+                            pageLength: 50,
+                            lengthMenu: [50, 100, 250, 500, 1000],
                             columns: [
-                                { data: 'itemCode' },
-                                { data: 'uom' },
+                                { data: 'itemCode', className: cellClass },
+                                { data: 'uom', className: cellClass },
                                 {
                                     data: null,
+                                    className: cellClass,
                                     render: function (data, type, row, meta) {
-                                        return '<p><span>' + row.description + '</span><br/>' +
-                                        '<span style="font-size:13px;color:grey;">' + row.desc2 + '</span></p>';
+                                        const desc = row.description || '';
+                                        const descShort = desc.length > 30 ? desc.substring(0, 30) + '...' : desc;
+                                        return '<p class="tw:m-0" title="' + desc.replace(/"/g, '&quot;') + '"><span>' + descShort + '</span><br/>' +
+                                        '<span class="tw:text-[13px] tw:text-gray-500 tw:dark:text-gray-400">' + row.desc2 + '</span></p>';
                                     }
                                 },
                                 {
                                     data: null,
                                     render: function (data, type, row, meta) {
                                         const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
-                                        return `<div style="display:flex;">
-                                                    <button class="btn btn-success d-grid addItem-btn" data-row="${rowData}">
-                                                        <span><i class="bi bi-plus""></i> Add</span>
+                                        return `<div class="tw:flex">
+                                                    <button class="addItem-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:border-0 tw:bg-brand-500 tw:px-3 tw:py-1.5 tw:text-sm tw:font-medium tw:text-white tw:hover:bg-brand-600" data-row="${rowData}">
+                                                        <i class="bi bi-plus-lg"></i> Add
                                                     </button>
                                                 </div>`;
                                     }
@@ -361,21 +292,17 @@
                                 searchPlaceholder: "🔍︎ Search",
                                 search: ""
                             },
-                            ordering: {
-                                indicators: false
-                            },
-                            columnControl: ['orderStatus'],
                             columnDefs: [
                                 { width: '15%', targets: 0 },
                                 { width: '10%', targets: 1 },
-                                { width: '60%', targets: 2 },
+                                { width: '15%', targets: 2 },
                                 { width: '15%', targets: 3 }
                             ]
                         });
 
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -383,7 +310,7 @@
                     }
                 },
                 error: function (error) {
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -395,11 +322,6 @@
         function loadList(page) {
             $('#txtCurPage').val(page);
             $('#txtPageSize').val($("#selpageSize").val());
-            var ttlPage = $("#txtTotalPage").val();
-            for (var j = 1; j <= ttlPage; j++) {
-                $('#btnP' + j).removeClass('current');
-            }
-            $('#btnP' + page).addClass('current');
 
             var data = {
                 GRNBatchNo: $("#txtGRN").val(),
@@ -430,7 +352,9 @@
                 },
                 success: function (result) {
                     // console.log(result);
-                    swal.close()
+                    Swal.close()
+                    const cellClass = 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6 tw:text-theme-sm tw:text-gray-700 tw:dark:text-gray-300';
+
                     if (result.success == true) {
                         $('#listTable').DataTable( {
                             data: result.data,
@@ -441,17 +365,18 @@
                             // lengthMenu: [50, 100, 250, 500, 1000],
                             "bDestroy": true,
                             columns: [
-                                { data: 'grnBatchNo' },
+                                { data: 'grnBatchNo', className: cellClass },
                                 {
                                     data: null,
+                                    className: cellClass, 
                                     render: function (data, type, row, meta) {
                                         // return '<p>' + row.itemCode + '</p><p>' + row.itemDesc + '</p>';
                                         return '<p style="margin:0;"><span>' + row.itemCode + '</span><br/>' +
                                         '<span style="font-size:13px;color:grey;">' + row.itemDesc + '</span></p>';
                                     }
                                 },
-                                { data: 'qty' },
-                                { data: 'reelCode' },
+                                { data: 'qty', className: cellClass },
+                                { data: 'reelCode', className: cellClass },
                                 // {
                                 //     data: null,
                                 //     render: function (data, type, row, meta) {
@@ -461,6 +386,7 @@
                                 // },
                                 {
                                     data: null,
+                                    className: cellClass, 
                                     render: function (data, type, row, meta) {
                                         // if (row.createdDateDisplay == row.updatedDateDisplay) {
                                         //     return `<p style="margin:0;">${row.createdDateDisplay}</p>`;
@@ -469,17 +395,27 @@
                                         //     return '<p style="margin:0;"><span>' + row.updatedDateDisplay + '</span><br/>' +
                                         //     '<span style="font-size:13px;color:grey;">' + row.createdDateDisplay + '</span></p>';
                                         // }
-                                        return '<p>' + row.createdDateDisplay + '</p> ';
+                                        return row.createdDateDisplay ;
                                     }
                                 },
                                 {
                                     data: null,
+                                    className: 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6',
                                     render: function (data, type, row, meta) {
                                         // console.log(row);
                                         const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
-                                        return `<button class="btn btn-warning edit-btn" data-row="${rowData}" id="editBtn" data-bs-toggle="tooltip" title="Edit">
-                                                <i class="bi bi-pencil-square"></i> Edit</button>
-                                                <button class="btn btn-danger deactivate-account delete-btn" data-row="${rowData}" data-id="${row.grnDetail_Id}" data-code="${row.reelCode}"> Delete</button>`;
+                                        return ` <div class="tw:flex tw:items-center tw:gap-2">
+                                            <button class="edit-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-amber-50 tw:font-medium tw:text-amber-600
+                                                tw:transition-colors tw:hover:bg-amber-100 tw:dark:bg-amber-500/15 tw:dark:text-amber-400 tw:dark:hover:bg-amber-500/25" data-row="${rowData}">
+                                                <i class="bi bi-pencil-square"></i>
+                                                Edit
+                                            </button>
+                                            <button class="delete-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-error-50 tw:font-medium tw:text-error-600
+                                                tw:transition-colors tw:hover:bg-error-100 tw:dark:bg-error-500/15 tw:dark:text-error-400 tw:dark:hover:bg-error-500/25" data-row="${rowData}" data-id="${row.grnDetail_Id}" data-code="${row.reelCode}">
+                                                <i class="bi bi-trash"></i>
+                                                Delete
+                                            </button>
+                                        </div>`;
                                     }
                                 }
                             ],
@@ -509,40 +445,35 @@
 
                         }
 
-                        var isC = "";
                         var ttlPage = Number($("#txtTotalPage").val());
                         const myDiv = document.getElementById('ulPagination');
                         myDiv.innerHTML = "";
-                        var pages = getVisiblePages(Number($('#lblTotal').html()), page, 8);
+                        var pageItems = buildPaginationItems(ttlPage, page, 5);
 
-                        myDiv.innerHTML += '<button class="dt-paging-button disabled first" onclick="loadList(1)" role="link" type="button" aria-controls="listTable">«</button>';
-                        myDiv.innerHTML += '<button class="dt-paging-button disabled" onclick="prevPage()" role="link" type="button" aria-controls="listTable">‹</button>';
-                        // for (var i = 1; i <= ttlPage; i++) {
-                        //     if (i == 1) {
-                        //            myDiv.innerHTML += '<button class="dt-paging-button current" id="btnP'+ i +'" onclick="loadList('+ i +')" role="link" type="button" aria-controls="listTable">'+ i +'</button>';
-                        //     }
-                        //     else {
-                        //            myDiv.innerHTML += '<button class="dt-paging-button" id="btnP'+ i +'" onclick="loadList('+ i +')" role="link" type="button" aria-controls="listTable">'+ i +'</button>';
-                        //     }
-                        //     lastPage = i;
-                        // }
-                        pages.forEach(function(val, idx) {
-                            if (page == val) {
-                                isC = "current";
+                        const pageBtnBase = 'tw:inline-flex tw:h-8 tw:min-w-8 tw:items-center tw:justify-center tw:rounded-lg tw:border tw:border-gray-200 tw:px-2.5 tw:text-sm tw:dark:border-gray-800';
+                        const pageBtnCurrent = pageBtnBase + ' tw:border-0 tw:bg-[rgba(43,127,255,0.08)] tw:font-medium tw:text-brand-500';
+                        const pageBtnDisabled = pageBtnBase + ' tw:border-0 tw:cursor-not-allowed tw:text-gray-300 tw:dark:text-gray-600 tw:bg-transparent';
+                        const pageBtnNormal = pageBtnBase + ' tw:text-gray-700 tw:dark:text-gray-300 tw:hover:border-0 tw:hover:bg-[rgba(43,127,255,0.08)] tw:hover:text-brand-500 tw:bg-transparent';
+
+                        myDiv.innerHTML += '<button ' + (page <= 1 ? 'disabled' : '') + ' class="' + (page <= 1 ? pageBtnDisabled : pageBtnNormal) + '" onclick="loadList(1)" role="link" type="button" aria-controls="listTable">«</button>';
+                        myDiv.innerHTML += '<button ' + (page <= 1 ? 'disabled' : '') + ' class="' + (page <= 1 ? pageBtnDisabled : pageBtnNormal) + '" onclick="prevPage()" role="link" type="button" aria-controls="listTable">‹</button>';
+
+                        pageItems.forEach(function(item) {
+                            if (item === '...') {
+                                myDiv.innerHTML += '<span class="tw:px-1 tw:text-gray-400">...</span>';
                             }
                             else {
-                                isC = "";
-                            }
-                            if (val <= ttlPage) {
-                                myDiv.innerHTML += '<button class="dt-paging-button ' + isC + '" id="btnP'+ val +'" onclick="loadList('+ val +')" role="link" type="button" aria-controls="listTable">'+ val +'</button>';
+                                var isC = (page == item) ? pageBtnCurrent : pageBtnNormal;
+                                myDiv.innerHTML += '<button class="' + isC + '" id="btnP' + item + '" onclick="loadList(' + item + ')" role="link" type="button" aria-controls="listTable">' + item + '</button>';
                             }
                         });
-                        myDiv.innerHTML += '<button class="dt-paging-button disabled" onclick="nextPage()" role="link" type="button" aria-controls="listTable">›</button>';
-                        myDiv.innerHTML += '<button class="dt-paging-button last disabled" onclick="loadList(' + ttlPage + ')" role="link" type="button" aria-controls="listTable">»</button>';
+
+                        myDiv.innerHTML += '<button ' + (page >= ttlPage ? 'disabled' : '') + ' class="' + (page >= ttlPage ? pageBtnDisabled : pageBtnNormal) + '" onclick="nextPage()" role="link" type="button" aria-controls="listTable">›</button>';
+                        myDiv.innerHTML += '<button ' + (page >= ttlPage ? 'disabled' : '') + ' class="' + (page >= ttlPage ? pageBtnDisabled : pageBtnNormal) + '" onclick="loadList(' + ttlPage + ')" role="link" type="button" aria-controls="listTable">»</button>';
 
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -550,13 +481,54 @@
                     }
                 },
                 error: function (error) {
-                    swal.fire({
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
                     });
                 }
             });
+        }
+
+        function buildPaginationItems(totalPages, currentPage, windowSize = 5) {
+            const items = [];
+
+            if (totalPages <= windowSize) {
+                for (let i = 1; i <= totalPages; i++) {
+                    items.push(i);
+                }
+                return items;
+            }
+
+            if (currentPage <= windowSize - 1) {
+                for (let i = 1; i <= windowSize; i++) {
+                    items.push(i);
+                }
+                items.push('...');
+                items.push(totalPages);
+            }
+            else if (currentPage >= totalPages - windowSize + 2) {
+                items.push(1);
+                items.push('...');
+                for (let i = totalPages - windowSize + 1; i <= totalPages; i++) {
+                    items.push(i);
+                }
+            }
+            else {
+                items.push(1);
+                items.push('...');
+                items.push(currentPage - 1, currentPage, currentPage + 1);
+                items.push('...');
+                items.push(totalPages);
+            }
+
+            return items;
+        }
+
+        // Show error message and highlight the invalid field
+        function showError(fieldId, message) {
+            document.getElementById(fieldId).classList.add('is-invalid');
+            document.getElementById(fieldId + 'Error').textContent = message;
         }
 
         function removeErrMsg(fields, clearValue = false) {
@@ -586,7 +558,7 @@
             $("#txtItem2").val(row.itemCode);
             $("#txtItemId2").val(row.item_Id);
 
-            // removeErrMsg('txtItem');
+            removeErrMsg('txtItem2');
             $("#itemModal").modal("toggle");
 
             // //get expired date range
@@ -611,7 +583,7 @@
             //         }
             //     },
             //     error: function (error) {
-            //         swal.fire({
+            //         Swal.fire({
             //             icon: 'error',
             //             title: "Wait",
             //             text: error.val
@@ -622,7 +594,6 @@
 
         $('#listTable').on('click', '.edit-btn', function () {
             const row = JSON.parse($(this).attr('data-row'));
-            console.log("edit here", row);
             editItemForm(row);
 
         });
@@ -707,7 +678,7 @@
                 },
                 success: function (result) {
                     if (result.success == true) {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'success',
                             title: "Succes Save",
                             text: "",
@@ -716,7 +687,7 @@
                         // refreshListTable(data.GRNDetail_Id);
                     }
                     else {
-                        swal.fire({
+                        Swal.fire({
                             icon: 'error',
                             title: "Wait",
                             text: result.errMessage
@@ -724,8 +695,8 @@
                     }
                 },
                 error: function (error) {
-                    console.log(error);
-                    swal.fire({
+                    // console.log(error);
+                    Swal.fire({
                         icon: 'error',
                         title: "Wait",
                         text: error.val
@@ -743,15 +714,13 @@
         });
 
         function deleteItem(id, reelCode) {
-            swal.fire({
+            Swal.fire({
                 title: "Are you sure want to delete?",
-                text: "You will not be able to recover this record!",
-                inputAttributes: {
-                    autocapitalize: 'off'
-                },
+                text: "You won't be able to recover this record!",
+                icon: 'warning', 
                 showCancelButton: true,
-                confirmButtonText: 'ok',
-                cancelButtonText: 'cancel',
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'Cancel',
                 allowOutsideClick: false
             }).then(function(r) {
                 if (r.isConfirmed == true) {
@@ -779,7 +748,7 @@
                         },
                         success: function (result) {
                             if (result.success == true) {
-                                swal.fire({
+                                Swal.fire({
                                     icon: 'success',
                                     title: "Success Deleted",
                                     text: "",
@@ -789,7 +758,7 @@
                                 });
                             }
                             else {
-                                swal.fire({
+                                Swal.fire({
                                     icon: 'error',
                                     title: "Wait",
                                     text: result.errMessage
@@ -797,7 +766,7 @@
                             }
                         },
                         error: function (error) {
-                            swal.fire({
+                            Swal.fire({
                                 icon: 'error',
                                 title: "Wait",
                                 text: error.val
@@ -811,27 +780,5 @@
             });
         }
 
-        function getVisiblePages(totalPages, currentPage, range = 5) {
-            if (totalPages <= range) {
-                // If total pages are less than or equal to the range, show all of them
-                return Array.from({ length: totalPages }, (_, i) => i + 1);
-            }
-
-            let startPage = Math.max(1, currentPage - Math.floor(range / 2));
-            let endPage = Math.min(totalPages, startPage + range - 1);
-
-            // Adjust startPage if endPage hits totalPages boundary
-            if (endPage === totalPages) {
-                startPage = Math.max(1, endPage - range + 1);
-            }
-
-            // Create an array of page numbers within the calculated range
-            const pages = [];
-            for (let i = startPage; i <= endPage; i++) {
-                pages.push(i);
-            }
-
-            return pages;
-        }
     </script>
 }

@@ -75,7 +75,7 @@ namespace RackingSystem.Services.ItemServices
                     result.errMessage = "Please insert Item Group Code.";
                     return result;
                 }
-                if (string.IsNullOrEmpty(itemReq.ItemGroupCode))
+                if (string.IsNullOrWhiteSpace(itemReq.ItemGroupCode))
                 {
                     result.errMessage = "Please insert Item Group Code.";
                     return result;
@@ -291,7 +291,7 @@ namespace RackingSystem.Services.ItemServices
                     result.errMessage = "Please insert Item Code.";
                     return result;
                 }
-                if (string.IsNullOrEmpty(itemReq.ItemCode))
+                if (string.IsNullOrWhiteSpace(itemReq.ItemCode))
                 {
                     result.errMessage = "Please insert Item Code.";
                     return result;

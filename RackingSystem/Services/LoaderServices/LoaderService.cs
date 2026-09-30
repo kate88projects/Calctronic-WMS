@@ -92,7 +92,7 @@ namespace RackingSystem.Services.LoaderServices
                     result.errMessage = "Please insert Loader Code.";
                     return result;
                 }
-                if (string.IsNullOrEmpty(req.LoaderCode))
+                if (string.IsNullOrWhiteSpace(req.LoaderCode))
                 {
                     result.errMessage = "Please insert Loader Code.";
                     return result;

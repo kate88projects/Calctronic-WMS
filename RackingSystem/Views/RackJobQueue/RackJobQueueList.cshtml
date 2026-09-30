@@ -213,7 +213,6 @@
                     <label class="tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400" for="selTrolley">Trolley</label>
                     <div class="tw:relative" x-data="customSelect('selTrolley')" x-init="init()">
                         <select id="selTrolley" class="tw:hidden" onchange="removeTrolleyErrMsg(this.id)">
-                            <option id="1"> Trolley1A </option>
                         </select>
                         <button type="button" @@click="toggle()" @@click.outside="open = false"
                             class="tw:flex tw:w-full tw:items-center tw:justify-between tw:gap-2 tw:rounded-lg tw:border tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-left tw:text-sm tw:text-gray-800 tw:dark:bg-gray-900 tw:dark:text-white/90"
@@ -627,6 +626,54 @@
             });
         }
 
+        function loadTrolleyList() {
+            $.ajax({
+                url: "/Trolley/GetTrolleyList/",
+                type: "GET",
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading();
+                },
+                success: function (result) {
+                    Swal.close();
+                    if (result.success == true) {
+                        const selTrolley = document.getElementById('selTrolley');
+                        selTrolley.options.length = 0;
+                        for (const opt of result.data)
+                        {
+                            const el = document.createElement("option");
+                            el.textContent = opt.trolleyCode;
+                            el.value = opt.trolley_Id;
+                            selTrolley.appendChild(el);
+                        }
+                        refreshCustomSelect('selTrolley');
+                    }
+                    else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+        }
+
         function newLoaderForm() {
             loadLoaderList();
             removeLoaderErrMsg([]);
@@ -652,7 +699,7 @@
         }
 
         function newTrolleyForm() {
-            // loadTrolleyList();
+            loadTrolleyList();
             removeTrolleyErrMsg([]);
             $("#selTrolley").val("");
             refreshCustomSelect('selTrolley');

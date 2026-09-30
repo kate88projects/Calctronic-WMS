@@ -30,10 +30,8 @@
     <link rel="preload" href="~/css/tailwind.css" as="style" />
     <link href="~/css/tailwind.css" rel="stylesheet" />
 
-    <!--begin::Required Plugin(AdminLTE)-->
-    @* <link rel="stylesheet" href="../../css/adminlte.css" /> *@
-    <link rel="stylesheet" href="~/css/adminlte.css" asp-append-version="true" />
-    <!--end::Required Plugin(AdminLTE)-->
+    <!-- Bootstrap CSS (modals, buttons, forms, grid + the base reset) -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
 
 
     <style type="text/css">
@@ -51,7 +49,6 @@
 
     <!--end::Third Party Plugin(OverlayScrollbars)--><!--begin::Required Plugin(popperjs for Bootstrap 5)-->
     <script src="~/lib/popper/popper.js"></script>
-    <script type="module" src="~/js/adminlte.min.js"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

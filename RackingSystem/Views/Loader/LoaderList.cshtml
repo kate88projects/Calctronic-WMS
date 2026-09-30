@@ -259,7 +259,7 @@
         function checkInput() {
             let isValid = true;
             var txt = document.getElementById("txtCode");
-            if (txt.value == "") {
+            if (txt.value.trim() == "") {
                 showError(txt.id, `Please enter Auto Loader Code.`);
                 isValid = false;
             }

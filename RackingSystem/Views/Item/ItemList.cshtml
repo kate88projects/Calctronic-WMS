@@ -774,17 +774,17 @@
         function checkInput() {
             let isValid = true;
             var txt = document.getElementById("txtCode");
-            if (txt.value == "") {
+            if (txt.value.trim() == "") {
                 showError(txt.id, `Please enter Item Code.`);
                 isValid = false;
             }
             txt = document.getElementById("txtUOM");
-            if (txt.value == "") {
+            if (txt.value.trim() == "") {
                 showError(txt.id, `Please enter UOM.`);
                 isValid = false;
             }
             txt = document.getElementById("txtDesc");
-            if (txt.value == "") {
+            if (txt.value.trim() == "") {
                 showError(txt.id, `Please enter Description.`);
                 isValid = false;
             }
