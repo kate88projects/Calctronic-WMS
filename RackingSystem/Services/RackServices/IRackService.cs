@@ -9,5 +9,6 @@ namespace RackingSystem.Services.RackServices
     {
         public Task<ServiceResponseModel<RackJobDTO>> GetRackJob();
         public Task<ServiceResponseModel<RackJobLog>> GetEndRackJob(long jobQId);
+        public Task<ServiceResponseModel<RackTaskSummaryDTO>> GetTaskSummary();
     }
 }

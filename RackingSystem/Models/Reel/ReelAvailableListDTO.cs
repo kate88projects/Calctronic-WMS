@@ -53,11 +53,10 @@ namespace RackingSystem.Models.Reel
         public int TrolleyColNo { get; set; } = 0;
 
         public int TrolleyRowNo { get; set; } = 0;
-
-        public int TotalWaiting { get; set; } = 0;
-        public int TotalInLoader { get; set; } = 0;
-        public int TotalSRMS { get; set; } = 0;
-        public int TotalInTrolley { get; set; } = 0;
+        public int? TotalWaiting { get; set; }
+        public int? TotalInLoader { get; set; }
+        public int? TotalSRMS { get; set; }
+        public int? TotalInTrolley { get; set; }
 
         public int totalRecord { get; set; } = 0;
 

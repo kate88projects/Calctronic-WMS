@@ -24,5 +24,7 @@ namespace RackingSystem.Services.TrolleyServices
         public Task<ServiceResponseModel<List<TrolleyReelDtlDTO>>> GetTrolleyReelDtlList(long id);
 
         public Task<ServiceResponseModel<TrolleySlotDTO>> UpdateTrolleySlotStatus(SlotStatusReqDTO slotReq);
+
+        public Task<ServiceResponseModel<List<TrolleyColumnDTO>>> GetTrolleyColumnUsage(long trolleyId);
     }
 }

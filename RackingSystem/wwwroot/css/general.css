@@ -100,6 +100,21 @@ header .btn {
     border-color: green !important;
 }
 
+/* Alpine: elements marked x-cloak stay hidden until Alpine starts, so menus do not flash open on page load. */
+[x-cloak] {
+    display: none !important;
+}
+
+hr,
+hr:not([size]) {
+    height: auto;
+    background-color: transparent;
+    border-width: 0;
+    border-top-width: 1px;
+    border-style: solid;
+    opacity: 0.25;
+}
+
 /* gridjs table styling */
 /*
 .custom-table thead th {

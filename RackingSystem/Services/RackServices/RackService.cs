@@ -25,9 +25,16 @@ namespace RackingSystem.Services.RackServices
             try
             {
                 var rackJob = await _dbContext.RackJob.Where(r => r.RackJobQueue_Id != 0).OrderByDescending(r => r.StartDate).FirstOrDefaultAsync();
-                var rackJobDTO = _mapper.Map<RackJobDTO>(rackJob);
+                if (rackJob == null)
+                {
+                    //No job is running right now. dashboard shows its "no task is working" state.
+                    result.success = true;
+                    return result;
+                }
 
-                var rackJobLog = await _dbContext.RackJobLog.Where(r => r.RackJobQueue_Id == rackJobDTO.RackJobQueue_Id).FirstOrDefaultAsync();
+                var rackJobDTO = _mapper.Map<RackJobDTO>(rackJob);
+                var queueId = rackJob.RackJobQueue_Id;
+                var rackJobLog = await _dbContext.RackJobLog.Where(r => r.RackJobQueue_Id == queueId).FirstOrDefaultAsync();
                 if (rackJobLog != null)
                 {
                     rackJobDTO.LastUpdatedTime = rackJobLog.EndDate;
@@ -35,6 +42,34 @@ namespace RackingSystem.Services.RackServices
                 
                 result.success = true;
                 result.data = rackJobDTO;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceResponseModel<RackTaskSummaryDTO>> GetTaskSummary()
+        {
+            ServiceResponseModel<RackTaskSummaryDTO> result = new ServiceResponseModel<RackTaskSummaryDTO>();
+
+            try
+            {
+                var todayStart = DateTime.Today;
+
+                var runningCount = await _dbContext.RackJob.CountAsync(r => r.RackJobQueue_Id != 0);
+                var completedTodayCount = await _dbContext.RackJobLog.CountAsync(l => l.EndDate >= todayStart);
+
+                result.success = true;
+                result.data = new RackTaskSummaryDTO
+                {
+                    RunningCount = runningCount,
+                    CompletedTodayCount = completedTodayCount,
+                };
                 return result;
             }
             catch (Exception ex)

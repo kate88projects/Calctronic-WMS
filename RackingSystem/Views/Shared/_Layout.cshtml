@@ -11,6 +11,12 @@
     <meta name="theme-color" content="#007bff" />  @* media="(prefers-color-scheme: light)" *@
     <meta name="theme-color" content="#1a1a1a" />  @* media="(prefers-color-scheme: dark)" *@
 
+    <!-- Apply the saved dark-mode choice before the first paint. It used to happen only when Alpine started (loaded last,
+         after jQuery/DataTables/etc.), so every page change flashed white for a moment before turning dark. -->
+    <script>
+        try { document.documentElement.classList.toggle('dark', JSON.parse(localStorage.getItem('darkMode') || 'false')); } catch (e) { }
+    </script>
+
     <!-- Fonts -->
     @* <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round"> *@
     <link href="~/css/roboto.css" rel="stylesheet" />
@@ -29,7 +35,7 @@
     <!-- Bootstrap CSS (modals, buttons, forms, grid + the base reset the Tailwind pages rely on) -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
 
-    <link rel="stylesheet" href="~/css/general.css" />
+    <link rel="stylesheet" href="~/css/general.css" asp-append-version="true" />
 
     <!-- TailAdmin styling preview: isolated Tailwind v4 build, scoped to this file + LoaderList.cshtml only -->
     <link rel="stylesheet" href="~/css/tailwind-admin.css" asp-append-version="true" />
@@ -81,7 +87,7 @@
 
             <div :class="sidebarToggle ? 'tw:justify-center' : 'tw:justify-between'"
                  class="tw:flex tw:items-center tw:gap-2 tw:pt-6 tw:pb-5">
-                <a asp-action="Index" asp-controller="Home"
+                <a asp-action="Dashboard" asp-controller="Dashboard"
                    class="tw:flex tw:items-center tw:gap-2 tw:text-lg tw:font-semibold tw:text-gray-800 tw:no-underline tw:hover:text-gray-800 tw:dark:text-white"
                    :class="sidebarToggle ? 'tw:xl:hidden' : ''">
                     <i class="bi bi-hdd-rack tw:text-xl tw:text-brand-500"></i>
@@ -95,9 +101,9 @@
                     <ul class="tw:flex tw:flex-col tw:gap-1 tw:list-none tw:m-0 tw:p-0">
 
                         <li>
-                            <a asp-action="Dashboard1" asp-controller="Dashboard"
-                               class="tw:menu-item tw:group @(ViewData["ActiveTab"]?.ToString() == "Dashboard1" ? "tw:menu-item-active" : "tw:menu-item-inactive")">
-                                <i class="bi bi-pie-chart @(ViewData["ActiveTab"]?.ToString() == "Dashboard1" ? "tw:menu-item-icon-active" : "tw:menu-item-icon-inactive")"></i>
+                            <a asp-action="Dashboard" asp-controller="Dashboard"
+                               class="tw:menu-item tw:group @(ViewData["ActiveTab"]?.ToString() == "Dashboard" ? "tw:menu-item-active" : "tw:menu-item-inactive")">
+                                <i class="bi bi-pie-chart @(ViewData["ActiveTab"]?.ToString() == "Dashboard" ? "tw:menu-item-icon-active" : "tw:menu-item-icon-inactive")"></i>
                                 <span class="tw:menu-item-text" :class="sidebarToggle ? 'tw:xl:hidden' : ''">Dashboard</span>
                             </a>
                         </li>
@@ -113,7 +119,7 @@
                                     <i class="bi bi-chevron-right tw:menu-item-arrow @(grpMMOpen ? "tw:menu-item-arrow-active" : "tw:menu-item-arrow-inactive")"
                                        :class="sidebarToggle ? 'tw:xl:hidden' : ''"></i>
                                 </a>
-                                <div class="tw:overflow-hidden tw:transform tw:translate" :class="(selected === 'grpMM') ? 'tw:block' : 'tw:hidden'">
+                                <div class="tw:overflow-hidden tw:transform tw:translate" x-show="selected === 'grpMM'" style="@(grpMMOpen ? null : "display: none;")">
                                     <ul :class="sidebarToggle ? 'tw:xl:hidden' : 'tw:flex'" class="tw:menu-dropdown tw:mt-2 tw:flex-col tw:gap-1 tw:pl-9 tw:list-none tw:m-0">
                                         @if (ViewBag.PermissionList.Contains(1) == true)
                                         {
@@ -160,7 +166,7 @@
                                                 </a>
                                             </li>
                                         }
-                                        @if (ViewBag.PermissionList.Contains(4) == true)
+                                        @* @if (ViewBag.PermissionList.Contains(4) == true)
                                         {
                                             <li>
                                                 <a asp-action="SlotScanControl" asp-controller="Slot"
@@ -168,7 +174,7 @@
                                                     Slot Scan Control
                                                 </a>
                                             </li>
-                                        }
+                                        } *@
                                         @if (ViewBag.PermissionList.Contains(5) == true)
                                         {
                                             <li>
@@ -211,7 +217,7 @@
                                     <i class="bi bi-chevron-right tw:menu-item-arrow @(grpSTOCKOpen ? "tw:menu-item-arrow-active" : "tw:menu-item-arrow-inactive")"
                                        :class="sidebarToggle ? 'tw:xl:hidden' : ''"></i>
                                 </a>
-                                <div class="tw:overflow-hidden tw:transform tw:translate" :class="(selected === 'grpSTOCK') ? 'tw:block' : 'tw:hidden'">
+                                <div class="tw:overflow-hidden tw:transform tw:translate" x-show="selected === 'grpSTOCK'" style="@(grpSTOCKOpen ? null : "display: none;")">
                                     <ul :class="sidebarToggle ? 'tw:xl:hidden' : 'tw:flex'" class="tw:menu-dropdown tw:mt-2 tw:flex-col tw:gap-1 tw:pl-9 tw:list-none tw:m-0">
                                         @if (ViewBag.PermissionList.Contains(20) == true)
                                         {
@@ -246,7 +252,7 @@
                                     <i class="bi bi-chevron-right tw:menu-item-arrow @(grpBOMOpen ? "tw:menu-item-arrow-active" : "tw:menu-item-arrow-inactive")"
                                        :class="sidebarToggle ? 'tw:xl:hidden' : ''"></i>
                                 </a>
-                                <div class="tw:overflow-hidden tw:transform tw:translate" :class="(selected === 'grpBOM') ? 'tw:block' : 'tw:hidden'">
+                                <div class="tw:overflow-hidden tw:transform tw:translate" x-show="selected === 'grpBOM'" style="@(grpBOMOpen ? null : "display: none;")">
                                     <ul :class="sidebarToggle ? 'tw:xl:hidden' : 'tw:flex'" class="tw:menu-dropdown tw:mt-2 tw:flex-col tw:gap-1 tw:pl-9 tw:list-none tw:m-0">
                                         @if (ViewBag.PermissionList.Contains(40))
                                         {
@@ -272,7 +278,7 @@
                                     <i class="bi bi-chevron-right tw:menu-item-arrow @(grpGRNOpen ? "tw:menu-item-arrow-active" : "tw:menu-item-arrow-inactive")"
                                        :class="sidebarToggle ? 'tw:xl:hidden' : ''"></i>
                                 </a>
-                                <div class="tw:overflow-hidden tw:transform tw:translate" :class="(selected === 'grpGRN') ? 'tw:block' : 'tw:hidden'">
+                                <div class="tw:overflow-hidden tw:transform tw:translate" x-show="selected === 'grpGRN'" style="@(grpGRNOpen ? null : "display: none;")">
                                     <ul :class="sidebarToggle ? 'tw:xl:hidden' : 'tw:flex'" class="tw:menu-dropdown tw:mt-2 tw:flex-col tw:gap-1 tw:pl-9 tw:list-none tw:m-0">
                                         @if (ViewBag.PermissionList.Contains(60) == true)
                                         {
@@ -301,7 +307,7 @@
                                                 </a>
                                             </li>
                                         }
-                                        @if (ViewBag.PermissionList.Contains(63) == true)
+                                        @* @if (ViewBag.PermissionList.Contains(63) == true)
                                         {
                                             <li>
                                                 <a asp-action="LoadInTaskManual" asp-controller="GRN"
@@ -309,7 +315,7 @@
                                                     Load In Task (Manual)
                                                 </a>
                                             </li>
-                                        }
+                                        } *@
                                     </ul>
                                 </div>
                             </li>
@@ -355,7 +361,7 @@
                                     <i class="bi bi-chevron-right tw:menu-item-arrow @(grpJOOpen ? "tw:menu-item-arrow-active" : "tw:menu-item-arrow-inactive")"
                                        :class="sidebarToggle ? 'tw:xl:hidden' : ''"></i>
                                 </a>
-                                <div class="tw:overflow-hidden tw:transform tw:translate" :class="(selected === 'grpJO') ? 'tw:block' : 'tw:hidden'">
+                                <div class="tw:overflow-hidden tw:transform tw:translate" x-show="selected === 'grpJO'" style="@(grpJOOpen ? null : "display: none;")">
                                     <ul :class="sidebarToggle ? 'tw:xl:hidden' : 'tw:flex'" class="tw:menu-dropdown tw:mt-2 tw:flex-col tw:gap-1 tw:pl-9 tw:list-none tw:m-0">
                                         @if (ViewBag.PermissionList.Contains(80))
                                         {
@@ -390,7 +396,7 @@
                                     <i class="bi bi-chevron-right tw:menu-item-arrow @(grpQOpen ? "tw:menu-item-arrow-active" : "tw:menu-item-arrow-inactive")"
                                        :class="sidebarToggle ? 'tw:xl:hidden' : ''"></i>
                                 </a>
-                                <div class="tw:overflow-hidden tw:transform tw:translate" :class="(selected === 'grpQ') ? 'tw:block' : 'tw:hidden'">
+                                <div class="tw:overflow-hidden tw:transform tw:translate" x-show="selected === 'grpQ'" style="@(grpQOpen ? null : "display: none;")">
                                     <ul :class="sidebarToggle ? 'tw:xl:hidden' : 'tw:flex'" class="tw:menu-dropdown tw:mt-2 tw:flex-col tw:gap-1 tw:pl-9 tw:list-none tw:m-0">
                                         @if (ViewBag.PermissionList.Contains(90))
                                         {
@@ -418,7 +424,7 @@
                                     <i class="bi bi-chevron-right tw:menu-item-arrow @(grpRACKINGOpen ? "tw:menu-item-arrow-active" : "tw:menu-item-arrow-inactive")"
                                        :class="sidebarToggle ? 'tw:xl:hidden' : ''"></i>
                                 </a>
-                                <div class="tw:overflow-hidden tw:transform tw:translate" :class="(selected === 'grpRACKING') ? 'tw:block' : 'tw:hidden'">
+                                <div class="tw:overflow-hidden tw:transform tw:translate" x-show="selected === 'grpRACKING'" style="@(grpRACKINGOpen ? null : "display: none;")">
                                     <ul :class="sidebarToggle ? 'tw:xl:hidden' : 'tw:flex'" class="tw:menu-dropdown tw:mt-2 tw:flex-col tw:gap-1 tw:pl-9 tw:list-none tw:m-0">
                                         @if (ViewBag.PermissionList.Contains(100) == true)
                                         {
@@ -582,7 +588,7 @@
                                     <i class="bi bi-chevron-right tw:menu-item-arrow @(grpSETTINGSOpen ? "tw:menu-item-arrow-active" : "tw:menu-item-arrow-inactive")"
                                        :class="sidebarToggle ? 'tw:xl:hidden' : ''"></i>
                                 </a>
-                                <div class="tw:overflow-hidden tw:transform tw:translate" :class="(selected === 'grpSETTINGS') ? 'tw:block' : 'tw:hidden'">
+                                <div class="tw:overflow-hidden tw:transform tw:translate" x-show="selected === 'grpSETTINGS'" style="@(grpSETTINGSOpen ? null : "display: none;")">
                                     <ul :class="sidebarToggle ? 'tw:xl:hidden' : 'tw:flex'" class="tw:menu-dropdown tw:mt-2 tw:flex-col tw:gap-1 tw:pl-9 tw:list-none tw:m-0">
                                         @if (ViewBag.PermissionList.Contains(121) == true)
                                         {
@@ -676,7 +682,7 @@
 
                         <!-- Mobile-only brand (hidden at xl, since the sidebar's own
                              brand is visible there instead) -->
-                        <a asp-action="Index" asp-controller="Home"
+                        <a asp-action="Dashboard" asp-controller="Dashboard"
                            class="tw:flex tw:items-center tw:gap-2 tw:text-lg tw:font-semibold tw:text-gray-800 tw:no-underline tw:xl:hidden tw:dark:text-white">
                             <i class="bi bi-hdd-rack tw:text-xl tw:text-brand-500"></i>
                             <span>WMS</span>

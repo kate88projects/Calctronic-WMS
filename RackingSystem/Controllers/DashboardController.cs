@@ -6,15 +6,9 @@ namespace RackingSystem.Controllers
     [Authorize(AuthenticationSchemes = "MyAuthCookie")]
     public class DashboardController : Controller
     {
-        public IActionResult Dashboard1()
+        public IActionResult Dashboard()
         {
             ViewBag.PermissionList = new List<int>();
-            //string s = HttpContext.Session.GetString("xSession") ?? "";
-            //if (s != "")
-            //{
-            //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
-            //    ViewBag.PermissionList = data.UACIdList;
-            //}
             if (User.Identity?.IsAuthenticated ?? false)
             {
                 var uacClaim = User.FindFirst("UACIdList")?.Value;
@@ -25,8 +19,8 @@ namespace RackingSystem.Controllers
                 }
             }
 
-            ViewData["ActiveGroup"] = "";
-            ViewData["ActiveTab"] = "Dashboard1";
+            ViewData["ActiveGroup"] = "Dashboard";
+            ViewData["ActiveTab"] = "Dashboard";
             ViewData["Title"] = "Dashboard";
             return View();
         }

@@ -573,7 +573,7 @@ namespace RackingSystem.Controllers.API
                 //result.data.Add(0);
                 //result.errMessage = "Loader Column [" + colNo + "] is full.";
                 //result.data.Add(2);
-                //result.data.Add(15);
+                //result.data.Add(12);
                 //return result;
                 // *** testing
 

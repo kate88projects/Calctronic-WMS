@@ -372,6 +372,13 @@ namespace RackingSystem.Controllers
         }
 
         [HttpGet]
+        public async Task<ServiceResponseModel<RackTaskSummaryDTO>> GetTaskSummary()
+        {
+            ServiceResponseModel<RackTaskSummaryDTO> result = await _rackService.GetTaskSummary();
+            return result;
+        }
+
+        [HttpGet]
         public async Task<ServiceResponseModel<RackJobLog>> GetEndRackJob(long jobQId)
         {
             ServiceResponseModel<RackJobLog> result = await _rackService.GetEndRackJob(jobQId);

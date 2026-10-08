@@ -975,11 +975,9 @@ namespace RackingSystem.Services.SlotServices
             ServiceResponseModel<List<SlotUsageDTO>> result = new ServiceResponseModel<List<SlotUsageDTO>>();
             var activeAmt = 0;
             var inactiveAmt = 0;
-            var forEmptyQty = 0;
             var hasTrayQty = 0;
             var hasReelQty = 0;
             var needCheckQty = 0;
-            var inactiveCheckQty = 0;
 
             try
             {
@@ -988,80 +986,70 @@ namespace RackingSystem.Services.SlotServices
 
                 foreach(var slot in slotListDTO)
                 {
-                    if (slot.IsActive == true)
+                    if (slot.IsActive == false)
                     {
-                        activeAmt++;
-                        if (slot.HasEmptyTray)
-                        {
-                            hasTrayQty++;
-                        }
-                        else if (slot.ForEmptyTray)
-                        {
-                            forEmptyQty++;
-                        }
-                        else if (slot.HasReel)
-                        {
-                            hasReelQty++;
-                        }
-                        //else //need check slot
-                        //{
-                        //    needCheckQty++;
-                        //}
+                        inactiveAmt++;
                     }
                     else
                     {
-                        if (slot.NeedCheck)
-                        {
-                            inactiveCheckQty++;
-                        }
-                        else
-                        {
-                            inactiveAmt++;
-                        }
+                        activeAmt++;
+                    }
+                    if (slot.NeedCheck)
+                    {
+                        needCheckQty++;
+                    }
+                    if (slot.HasEmptyTray)
+                    {
+                        hasTrayQty++;
+                    }
+                    if (slot.HasReel)
+                    {
+                        hasReelQty++;
                     }
                 }
 
-
-                double calculatePercent(int value, int activeQty) =>
-                    activeQty == 0 ? 0: Math.Round((double)value / activeQty * 100, 2);
+                int availableQty = activeAmt - hasTrayQty - hasReelQty;
+                var ttlSlot = slotList.Count;
+                double calculatePercent(int value, int ttlQty) =>
+                    ttlQty == 0 ? 0: Math.Round((double)value / ttlQty * 100, 2);
 
                 result.data = new List<SlotUsageDTO>
                 {
                     new SlotUsageDTO
                     {
-                        title = "Occupied: Empty Drawer",
-                        available = true,
+                        title = "Occupied with Empty Drawer",
+                        //available = true,
                         slotQty = hasTrayQty,
-                        percentage = calculatePercent(hasTrayQty, activeAmt),
+                        percentage = calculatePercent(hasTrayQty, ttlSlot),
                     },
                     new SlotUsageDTO
                     {
                         title = "Available",
-                        available = true,
-                        slotQty = forEmptyQty,
-                        percentage = calculatePercent(forEmptyQty, activeAmt),
+                        //available = true,
+                        slotQty = availableQty,
+                        percentage = calculatePercent(availableQty, ttlSlot),
                     },
                     new SlotUsageDTO
                     {
-                        title = "Occupied: Reel",
-                        available = true,
+                        title = "Occupied with Reel",
+                        //available = true,
                         slotQty = hasReelQty,
-                        percentage = calculatePercent(hasReelQty, activeAmt),
+                        percentage = calculatePercent(hasReelQty, ttlSlot),
                     },
                     new SlotUsageDTO
                     {
                         title = "Inactive Slot",
-                        available = false,
+                        //available = false,
                         slotQty = inactiveAmt,
-                        percentage = 0,
+                        percentage = calculatePercent(inactiveAmt, ttlSlot),
                     },
                     new SlotUsageDTO
                     {
                         title = "Error Slot",
-                        available = false,
+                        //available = false,
                         slotQty = needCheckQty,
                         percentage = 0,
-                    }
+                    },
                 };
                 result.success = true;
             }

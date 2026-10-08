@@ -1,15 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using RackingSystem.Data;
 using RackingSystem.Models;
 using RackingSystem.Models.Slot;
 using RackingSystem.Models.Trolley;
-using RackingSystem.Models.User;
 using RackingSystem.Services.TrolleyServices;
-using System.Collections.Generic;
-using System.Security.Policy;
 
 namespace RackingSystem.Controllers
 {
@@ -430,6 +426,12 @@ namespace RackingSystem.Controllers
             return result;
         }
 
+        [HttpPost]
+        public async Task<ServiceResponseModel<List<TrolleyColumnDTO>>> GetTrolleyColumnUsage([FromBody] long trolleyId)
+        {
+           ServiceResponseModel<List<TrolleyColumnDTO>> result = await _trolleyService.GetTrolleyColumnUsage(trolleyId);
+            return result;
+        }
     }
 }
 

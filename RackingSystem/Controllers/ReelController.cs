@@ -70,10 +70,10 @@ namespace RackingSystem.Controllers
                 if (rTotal.success)
                 {
                     ttl = rTotal.data.totalRecord;
-                    ttlW = rTotal.data.TotalWaiting;
-                    ttlL = rTotal.data.TotalInLoader;
-                    ttlSRMS = rTotal.data.TotalSRMS;
-                    ttlT = rTotal.data.TotalInTrolley;
+                    ttlW = rTotal.data.TotalWaiting ?? 0;
+                    ttlL = rTotal.data.TotalInLoader ?? 0;
+                    ttlSRMS = rTotal.data.TotalSRMS ?? 0;
+                    ttlT = rTotal.data.TotalInTrolley ?? 0;
                 }
                 else
                 {

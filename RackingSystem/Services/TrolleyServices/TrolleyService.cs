@@ -722,6 +722,11 @@ namespace RackingSystem.Services.TrolleyServices
             {
                 foreach (var ts in tsPulses)
                 {
+                    if (ts.TrolleySlotCode == null)
+                    {
+                        continue;
+                    }
+
                     bool isError = false;
 
                     //validation
@@ -968,6 +973,42 @@ namespace RackingSystem.Services.TrolleyServices
                 result.errStackTrace = ex.StackTrace ?? "";
             }
 
+            return result;
+        }
+
+        public async Task<ServiceResponseModel<List<TrolleyColumnDTO>>> GetTrolleyColumnUsage(long trolleyId)
+        {
+            ServiceResponseModel<List<TrolleyColumnDTO>> result = new ServiceResponseModel<List<TrolleyColumnDTO>>();
+
+            try
+            {
+                var trolleySlotList = await _dbContext.TrolleySlot.Where(x => x.Trolley_Id == trolleyId).OrderBy(x => x.TrolleySlotCode).ToListAsync();
+                var trolleySlotListDTO = _mapper.Map<List<TrolleySlotDTO>>(trolleySlotList).ToList();
+
+                var resultList = trolleySlotListDTO
+                    .GroupBy(x => new { x.ColNo, x.IsLeft })
+                    .Select(g => new TrolleyColumnDTO
+                    {
+                        colNo = g.Key.ColNo,
+                        isLeft = g.Key.IsLeft,
+                        totalCount = g.Count(),
+                        reelQty = g.Count(x => x.HasReel == true),
+                        percentage = g.Count() == 0 ? 0 : (double)g.Count(x => x.HasReel == true) / g.Count(),
+                        side = g.Key.IsLeft == true ? "A" : "B",
+                    })
+                    .OrderBy(x => x.isLeft)  // optional
+                    .ThenBy(x => x.colNo)
+                    .ToList();
+
+                result.success = true;
+                result.data = resultList;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
             return result;
         }
 

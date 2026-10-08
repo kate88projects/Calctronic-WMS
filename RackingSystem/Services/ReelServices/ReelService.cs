@@ -62,15 +62,13 @@ namespace RackingSystem.Services.ReelServices
                 var listDTO = await _dbContext.SP_ReelGetAvailSearchList.FromSqlRaw(sql, parameters).ToListAsync();
 
                 ReelAvailableListDTO data = new ReelAvailableListDTO();
-                if (listDTO != null)
-                {
-                    data.totalRecord = listDTO.First().totalRecord;
-                    data.TotalWaiting = listDTO.First().TotalWaiting;
-                    data.TotalInLoader = listDTO.First().TotalInLoader;
-                    data.TotalSRMS = listDTO.First().TotalSRMS;
-                    data.TotalInTrolley = listDTO.First().TotalInTrolley;
-                }
+                var first = listDTO?.FirstOrDefault();
 
+                data.totalRecord = first?.totalRecord ?? 0;
+                data.TotalWaiting = first?.TotalWaiting ?? 0;
+                data.TotalInLoader = first?.TotalInLoader ?? 0;
+                data.TotalSRMS = first?.TotalSRMS ?? 0;
+                data.TotalInTrolley = first?.TotalInTrolley ?? 0;
 
                 result.success = true;
                 result.data = data;

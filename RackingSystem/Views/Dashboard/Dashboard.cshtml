@@ -1,5 +1,965 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    string card = "tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:p-4 tw:dark:border-gray-800 tw:dark:bg-white/[0.03]";
+    string sectionTitle = "tw:text-base tw:font-semibold tw:text-gray-800 tw:dark:text-white/90";
+    string smallTitle = "tw:text-sm tw:font-medium tw:text-gray-500 tw:dark:text-gray-400";
+    string inputClass = @"tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-sm tw:text-gray-800 tw:placeholder:text-gray-400
+        tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90
+        tw:dark:placeholder:text-white/30 tw:dark:focus:border-brand-800";
+
+    var legend = new[]
+    {
+        new { Key = "reel", Label = "Occupied with Reel" },
+        new { Key = "drawer", Label = "Occupied with Empty Drawer" },
+        new { Key = "available", Label = "Available" },
+        new { Key = "inactive", Label = "Inactive Slot" },
+    };
+    var taskCards = new[]
+    {
+        new { Img = "task-pending.png", Title = "Pending Tasks", Id = "pendingCount", Value = "-" },
+        new { Img = "task-running.png", Title = "Running Tasks", Id = "runningCount", Value = "-" },
+        new { Img = "task-complete.png", Title = "Completed Today", Id = "completedCount", Value = "-" },
+    };
+    var upcoming = new[]
+    {
+        new { Idx = 1, Name = "-" },
+        new { Idx = 2, Name = "-" },
+    };
+    var filterOptions = new[]
+    {
+        new { Value = "Occupied with Reel", Color = "#424874", TextColor = "#fff" },
+        new { Value = "Occupied with Empty Drawer", Color = "#A6B1E1", TextColor = "" },
+        new { Value = "Available", Color = "#DCD6F7", TextColor = "" },
+        new { Value = "Inactive Slot", Color = "#F04438", TextColor = "#fff" },
+    };
+}
+
+<div class="tw:space-y-4">
+    <div class="tw:flex tw:items-center tw:justify-between">
+        <h2 class="tw:mb-0 tw:ml-2 tw:text-lg tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Dashboard</h2>
+        <div class="tw:flex tw:items-center tw:gap-2 tw:text-xs tw:text-gray-500 tw:dark:text-gray-400">
+            <span id="refreshStatus" title="Tasks refresh every 15 seconds, slots every 60 seconds">Loading...</span>
+            <button type="button" class="tw:inline-flex tw:h-8 tw:w-8 tw:items-center tw:justify-center tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:text-gray-600 tw:transition-colors tw:hover:bg-gray-100 tw:dark:border-gray-700 tw:dark:text-gray-300 tw:dark:hover:bg-white/5" title="Refresh now" onclick="refreshAll(true)">
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Slot capacity + attention -->
+    <div class="tw:grid tw:grid-cols-1 tw:gap-4 tw:lg:grid-cols-2">
+        <div class="@card">
+            <span class="@sectionTitle">Slot Capacity Overview</span>
+            <div class="tw:mt-3 tw:flex tw:flex-wrap tw:items-center tw:gap-4">
+                <div class="tw:flex tw:min-h-[220px] tw:min-w-[220px] tw:shrink-0 tw:items-center tw:justify-center">
+                    <svg id="donutChart" width="200" height="200"></svg>
+                </div>
+                <div class="tw:flex tw:min-w-[220px] tw:flex-1 tw:flex-col tw:gap-3">
+                    @foreach (var l in legend)
+                    {
+                        <div class="tw:grid tw:grid-cols-[20px_1fr] tw:items-center tw:gap-x-3 tw:gap-y-1">
+                            <span class="tw:row-span-2 tw:h-5 tw:w-5 tw:self-center tw:rounded-full" id="dot-@(l.Key)"></span>
+                            <div class="tw:flex tw:items-center tw:justify-between tw:gap-2">
+                                <span class="tw:text-[15px] tw:text-gray-700 tw:dark:text-gray-300">@l.Label</span>
+                                <span class="tw:whitespace-nowrap tw:text-xs tw:text-gray-500 tw:dark:text-gray-400" id="percent-@(l.Key)"></span>
+                            </div>
+                            <div class="tw:h-1.5 tw:w-full tw:overflow-hidden tw:rounded-full tw:bg-gray-100 tw:dark:bg-white/10">
+                                <div class="tw:h-full tw:rounded-full" id="bar-@(l.Key)"></div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="@card">
+            <span class="@sectionTitle">Attention Listing <span id="attentionQty" class="tw:font-normal tw:text-gray-500 tw:dark:text-gray-400">(0)</span></span>
+            <div id="attentionList"></div>
+        </div>
+    </div>
+
+    <!-- Task overview -->
+    <div class="tw:grid tw:grid-cols-1 tw:gap-4 tw:lg:grid-cols-2">
+        <div class="@card tw:relative">
+            <span class="@sectionTitle" id="usageTitle">Auto Loader Column Usage</span>
+            <div id="colHeader" class="tw:mt-3 tw:grid tw:grid-cols-[60px_90px_1fr_50px] tw:items-center tw:gap-3 tw:border-b tw:border-gray-200 tw:pb-2 tw:pl-2 tw:text-sm tw:font-medium tw:text-gray-500 tw:dark:border-gray-800 tw:dark:text-gray-400">
+                <div class="tw:hidden" id="sideCol">Side</div>
+                <div>Column</div>
+                <div>Reel Qty</div>
+                <div>Usage</div>
+            </div>
+            <div id="usageContainer"></div>
+            <div id="usageOverlay" class="tw:absolute tw:inset-0 tw:hidden tw:items-center tw:justify-center tw:rounded-xl tw:bg-white/70 tw:text-sm tw:font-semibold tw:text-gray-500 tw:dark:bg-gray-900/70 tw:dark:text-gray-400">
+                <span>No Active Task</span>
+            </div>
+        </div>
+
+        <div class="tw:space-y-4">
+            <div class="tw:grid tw:grid-cols-3 tw:gap-4">
+                @foreach (var c in taskCards)
+                {
+                    <div class="@card tw:text-center">
+                        <img src="~/assets/img/@c.Img" class="tw:mx-auto tw:h-11 tw:w-11 tw:object-contain" alt="" />
+                        <div class="@smallTitle tw:mt-2">@c.Title</div>
+                        <div class="tw:text-xl tw:font-semibold tw:text-gray-800 tw:dark:text-white/90" id="@(string.IsNullOrEmpty(c.Id) ? null : c.Id)">@c.Value</div>
+                    </div>
+                }
+            </div>
+
+            <div class="tw:grid tw:grid-cols-1 tw:gap-4 tw:sm:grid-cols-2">
+                <div class="@card">
+                    <div class="tw:flex tw:items-center tw:gap-4">
+                        <div class="tw:min-w-0 tw:flex-1">
+                            <span class="@smallTitle">Current Progress</span>
+                            <p class="tw:mb-0 tw:mt-1 tw:text-[15px] tw:text-gray-800 tw:dark:text-white/90" id="currentTitle">-</p>
+                            <div class="tw:mt-2 tw:text-[10px] tw:text-gray-500 tw:dark:text-gray-400">Last updated <span id="lastUpdated"></span></div>
+                        </div>
+                        <div class="tw:flex tw:w-28 tw:shrink-0 tw:items-center tw:justify-center tw:border-l tw:border-gray-200 tw:pl-4 tw:dark:border-gray-800">
+                            <svg viewBox="0 0 40 40" class="tw:block tw:h-auto tw:w-full">
+                                <path class="tw:stroke-gray-200 tw:dark:stroke-gray-700" fill="none" stroke-width="3.8"
+                                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path class="tw:stroke-success-500" id="circle" fill="none" stroke-width="2.8" stroke-linecap="round"
+                                      stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <text x="18" y="20.35" class="percentage tw:fill-gray-600 tw:dark:fill-gray-300" text-anchor="middle" font-size="0.5em" id="percentageText">0%</text>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="@card">
+                    <div class="tw:flex tw:items-center">
+                        <span class="@smallTitle">Upcoming Tasks</span>
+                        <button type="button" class="tw:ml-auto tw:border-0 tw:bg-transparent tw:text-sm tw:text-gray-500 tw:hover:font-semibold tw:hover:text-gray-800 tw:dark:text-gray-400 tw:dark:hover:text-white/90">View More</button>
+                    </div>
+                    @foreach (var t in upcoming)
+                    {
+                        <div class="tw:mt-3 tw:flex tw:items-center tw:gap-3">
+                            <div class="tw:flex tw:h-10 tw:w-10 tw:shrink-0 tw:items-center tw:justify-center tw:rounded-md tw:border-2 tw:border-amber-400">
+                                <i class="bi bi-box-seam tw:text-amber-500"></i>
+                            </div>
+                            <div class="tw:min-w-0">
+                                <div class="tw:text-sm tw:text-gray-800 tw:dark:text-white/90" id="upcomingName@(t.Idx)">@t.Name</div>
+                                <div class="tw:text-xs tw:text-gray-500 tw:dark:text-gray-400" id="docNo@(t.Idx)">-</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slots overview -->
+    <div class="@card">
+        <span class="@sectionTitle">Slots Overview</span>
+        <div class="tw:mt-3 tw:flex tw:flex-wrap tw:items-center tw:gap-3">
+            <div class="tw:inline-flex tw:rounded-lg tw:bg-gray-100 tw:p-1 tw:dark:bg-white/5" role="group">
+                <label class="tw:cursor-pointer" for="leftS">
+                    <input type="radio" class="tw:peer tw:sr-only" name="filter" id="leftS" checked />
+                    <span class="tw:block tw:rounded-md tw:px-3 tw:py-1 tw:text-sm tw:font-medium tw:text-gray-500 tw:peer-checked:bg-white tw:peer-checked:text-gray-800 tw:peer-checked:shadow-theme-xs tw:dark:text-gray-400 tw:dark:peer-checked:bg-gray-800 tw:dark:peer-checked:text-white/90">Left Racking</span>
+                </label>
+                <label class="tw:cursor-pointer" for="rightS">
+                    <input type="radio" class="tw:peer tw:sr-only" name="filter" id="rightS" />
+                    <span class="tw:block tw:rounded-md tw:px-3 tw:py-1 tw:text-sm tw:font-medium tw:text-gray-500 tw:peer-checked:bg-white tw:peer-checked:text-gray-800 tw:peer-checked:shadow-theme-xs tw:dark:text-gray-400 tw:dark:peer-checked:bg-gray-800 tw:dark:peer-checked:text-white/90">Right Racking</span>
+                </label>
+            </div>
+
+            <div class="tw:relative" x-data="{ open: false }" @@click.outside="open = false">
+                <button type="button" id="filterBtn" @@click="open = !open"
+                        class="tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-3 tw:py-1.5 tw:text-xs tw:font-medium tw:text-gray-700 tw:transition-colors tw:hover:bg-gray-100 tw:dark:border-gray-700 tw:dark:text-gray-300 tw:dark:hover:bg-white/5">
+                    <i class="bi bi-funnel"></i> FILTER
+                </button>
+
+                <div id="filterMenu" x-show="open" x-transition style="display: none;"
+                     class="tw:absolute tw:left-0 tw:z-20 tw:mt-2 tw:w-64 tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:p-3 tw:text-sm tw:text-gray-700 tw:shadow-theme-lg tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-gray-300">
+                    <label class="tw:flex tw:cursor-pointer tw:items-center tw:gap-2">
+                        <input type="checkbox" id="selectAll" class="tw:h-4 tw:w-4 tw:accent-brand-500" />
+                        <span>Select All</span>
+                    </label>
+                    <hr class="tw:my-2 tw:border-gray-200 tw:dark:border-gray-700">
+
+                    <div class="tw:space-y-2">
+                        @foreach (var o in filterOptions)
+                        {
+                            <label class="tw:flex tw:cursor-pointer tw:items-center tw:gap-2">
+                                <input type="checkbox" class="tw:h-4 tw:w-4 tw:accent-brand-500" value="@o.Value" data-color="@o.Color" data-textcolor="@o.TextColor">
+                                <span class="label-text">@o.Value</span>
+                                <span class="count tw:ml-auto tw:text-xs tw:text-gray-500"></span>
+                            </label>
+                        }
+                    </div>
+
+                    <hr class="tw:my-2 tw:border-gray-200 tw:dark:border-gray-700">
+                    <div class="tw:mb-3 tw:flex tw:items-center tw:gap-2">
+                        <span class="tw:inline-block tw:h-3 tw:w-3 tw:rounded-full tw:bg-warning-500"></span>
+                        <span class="label-text">Warning</span>
+                    </div>
+
+                    <button type="button" class="tw:w-full tw:rounded-lg tw:border-0 tw:bg-success-500 tw:px-3 tw:py-2 tw:text-sm tw:font-medium tw:text-white tw:transition-colors tw:hover:bg-success-600" @@click="open = false" onclick="applyFilter()">Apply</button>
+                </div>
+            </div>
+
+            <div id="selectedFilters" class="tw:flex tw:flex-wrap tw:gap-2"></div>
+        </div>
+
+        <div id="slotContainer" class="tw:mt-4 tw:grid tw:grid-cols-[repeat(auto-fit,minmax(200px,1fr))] tw:gap-2.5"></div>
+    </div>
+</div>
+
+<div class="modal fade" id="updateSlotModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+            <div class="tw:flex tw:items-center tw:justify-between tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
+                <h4 class="tw:mb-0 tw:text-base tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Update Slot Status</h4>
+                <button type="button" class="tw:border-0 tw:bg-transparent tw:text-gray-400 tw:hover:text-gray-600 tw:dark:hover:text-gray-200" data-bs-dismiss="modal" aria-label="Close"><i class="bi bi-x-lg"></i></button>
+            </div>
+
+            <div class="tw:space-y-4 tw:px-6 tw:py-4">
+                <p class="tw:mb-0 tw:text-sm">
+                    <i class="bi bi-exclamation-lg tw:text-error-500"></i>
+                    This update may impact slot availability.
+                    Please review the slot and provide remarks to proceed with the update.<i class="bi bi-exclamation-lg tw:text-error-500"></i>
+                </p>
+                <div>
+                    <label class="tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400" for="txtCheckRemark">Post-check Remarks</label>
+                    <input type="text" class="@inputClass" id="txtCheckRemark" placeholder="Please enter check Remark">
+                    <div id="txtCheckRemarkError" class="error-message"></div>
+                </div>
+            </div>
+
+            <div class="tw:flex tw:justify-end tw:gap-3 tw:border-t tw:border-gray-100 tw:px-6 tw:py-3 tw:dark:border-gray-800">
+                <button type="button" class="save-btn tw:rounded-lg tw:border-0 tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:shadow-theme-xs tw:hover:bg-brand-600" onclick="saveUpdateSlot()">Save</button>
+                <button type="button" class="cancel-btn tw:bg-transparent tw:rounded-lg tw:border tw:border-gray-300 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-700 tw:hover:bg-gray-100 tw:dark:border-gray-700 tw:dark:text-gray-400 tw:dark:hover:bg-white/5" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+
+    <script src="~/js/d3.v7.min.js"></script>
+    <script src="~/js/sweetalert2.all.min.js"></script>
+    <script type="text/javascript">
+
+        let totalSlots = 100;
+        let groupedSlots = {};
+        let currentTaskQueueId = null;
+        let currentDocType = null;
+        let currentEqId = null;
+
+        const taskTypeMap = {
+            Loader: 'Unloading Process',
+            JO: 'Job Order',
+            JOE: 'Emergency Job Order',
+            Trolley: 'Put-Away Empty Drawer',
+        }
+
+        const TASK_REFRESH_SECONDS = 15;   // current job, queue, usage, today's counts
+        const SLOT_REFRESH_EVERY = 4;      // capacity, attention list and slot grid on every 4th refresh (= 60 seconds)
+        let refreshTick = 0;
+        let isRefreshing = false;
+        let refreshHadError = false;
+
+        $(document).ready(function () {
+            Promise.allSettled([loadSlotUsage(), loadSlots(), loadCurrentTask(), loadTaskSummary()])
+                .then(() => setRefreshStatus(false));
+
+            setInterval(refreshAll, TASK_REFRESH_SECONDS * 1000);
+            // catch up straight away when the user comes back to this tab
+            document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshAll(true); });
+        });
+
+        // Silent refresh: no popups. A failure only changes the status text and the next tick tries again.
+        function refreshAll(includeSlots) {
+            if (document.hidden || isRefreshing) return;
+            isRefreshing = true;
+            refreshHadError = false;
+            refreshTick++;
+
+            const calls = [loadCurrentTask(true), loadTaskSummary(true)];
+            if (includeSlots === true || refreshTick % SLOT_REFRESH_EVERY === 0) {
+                calls.push(loadSlotUsage(true), loadSlots(true));
+            }
+
+            Promise.allSettled(calls).then(results => {
+                isRefreshing = false;
+                setRefreshStatus(refreshHadError || results.some(r => r.status === 'rejected'));
+            });
+        }
+
+        function setRefreshStatus(failed) {
+            const el = document.getElementById('refreshStatus');
+            el.textContent = failed ? 'Refresh failed - retrying' : 'Updated ' + new Date().toLocaleTimeString('en-GB');
+            el.classList.toggle('tw:text-error-500', failed);
+        }
+
+        function showLoading(silent) {
+            if (silent) return;
+            Swal.fire({
+                text: 'Please Wait',
+                width: '300px',
+                allowEscapeKey: false,
+                allowOutsideClick: false,
+                showConfirmButton: false,
+            });
+            Swal.showLoading();
+        }
+
+        function notifyError(silent, text) {
+            if (silent) {
+                refreshHadError = true;
+                console.warn(text);
+                return;
+            }
+            swal.fire({
+                icon: 'error',
+                title: "Wait",
+                text: text
+            });
+        }
+
+        //load from db
+        function loadSlotUsage(silent) {
+            return $.ajax({
+                url: "/Slot/GetSlotUsage/",
+                type: "GET",
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () { showLoading(silent); },
+                success: function (result) {
+                    if (!silent) swal.close();
+                    if (result.success == false) {
+                        notifyError(silent, result.errMessage);
+                    }
+                    else
+                    {
+                        renderChart(result.data);
+                    }
+                },
+                error: function () {
+                    notifyError(silent, 'Unable to load slot capacity.');
+                }
+            });
+        }
+
+        function loadSlots(silent) {
+            return $.ajax({
+                url: "/Slot/GetSlotList/",
+                type: "GET",
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () { showLoading(silent); },
+                success: function (result) {
+                    if (!silent) swal.close();
+                    if (result.success == true) {
+                        groupedSlots = result.data;
+                        renderAttention();
+                        // re-apply the current Left/Right choice and filters 
+                        applyFilter();
+                    } else {
+                        notifyError(silent, result.errMessage);
+                    }
+                },
+                error: function () {
+                    notifyError(silent, 'Unable to load slots.');
+                }
+            });
+        }
+
+        function loadCurrentTask(silent) {
+            return $.ajax({
+                url: "/Rack/GetRackJob/",
+                type: "GET",
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    if (!silent) swal.close();
+                    const data = result.success ? result.data : null;
+
+                    if (data) {
+                        const taskName = taskTypeMap[data.currentJobType];
+                        document.getElementById("currentTitle").textContent = taskName || data.currentJobType || "-";
+                        if (data.lastUpdatedTime)
+                        {
+                            const date = new Date(data.lastUpdatedTime);
+                            const datetime = date.toLocaleString("en-GB", {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false
+                            });
+                            document.getElementById("lastUpdated").textContent = datetime;
+                        }
+
+                        currentTaskQueueId = data.rackJobQueue_Id;
+                        currentDocType = taskName;
+                        currentEqId = data.currentJobType === "Loader" ? data.loader_Id : data.trolley_Id;
+                    } else {
+                        // nothing is running (or the lookup failed): clear the current-task state
+                        currentTaskQueueId = 0;
+                        currentDocType = null;
+                        currentEqId = null;
+                        document.getElementById("currentTitle").textContent = "-";
+                        document.getElementById("lastUpdated").textContent = "-";
+                    }
+
+                    loadUpcomingTask(silent);
+                    if (!data)
+                    {
+                        showNoActiveUsage();
+                    }
+                    //determine is column or trolley usage
+                    else if (currentDocType == "Unloading Process")
+                    {
+                        loadColumnUsage(silent);
+                    }
+                    else
+                    {
+                        loadTrolleyUsage(silent);
+                    }
+                },
+                error: function () {
+                    notifyError(silent, 'Unable to load the current task.');
+                }
+            });
+        }
+
+        function loadUpcomingTask(silent) {
+            return $.ajax({
+                url: "/RackJobQueue/GetQueueList/",
+                type: "GET",
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    if (!silent) swal.close();
+                    if (result.success) {
+                        let tasks;
+
+                        if (currentTaskQueueId > 0) {
+                            tasks = result.data.filter(task => task.rackJobQueue_Id !== currentTaskQueueId);
+                        } else {
+                            tasks = result.data;
+                        }
+
+                        //assign count for pending tasks where exclude the current task
+                        document.getElementById("pendingCount").textContent = tasks.length;
+
+                        const filteredTasks = tasks.slice(0, 2);
+                        ["1", "2"].forEach((i, index) => {
+                            const task = filteredTasks[index];
+                            const name = document.getElementById(`upcomingName${i}`);
+                            const doc = document.getElementById(`docNo${i}`);
+
+                            if (task) {
+                                const displayName = taskTypeMap[task.docType] || "-";
+                                name.textContent = displayName;
+                                doc.textContent = "Doc No: " + (task.docNo || "-");
+                            }
+                            else {
+                                name.textContent = "-";
+                                doc.textContent = "-";
+                            }
+                        });
+                    }
+                    else {
+                        notifyError(silent, result.errMessage);
+                    }
+                },
+                error: function () {
+                    notifyError(silent, 'Unable to load the task queue.');
+                }
+            });
+        }
+
+        function loadTaskSummary(silent) {
+            return $.ajax({
+                url: "/Rack/GetTaskSummary/",
+                type: "GET",
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    if (result.success && result.data) {
+                        document.getElementById("runningCount").textContent = result.data.runningCount;
+                        document.getElementById("completedCount").textContent = result.data.completedTodayCount;
+                    } else {
+                        notifyError(silent, result.errMessage);
+                    }
+                },
+                error: function () {
+                    notifyError(silent, 'Unable to load the task summary.');
+                }
+            });
+        }
+
+        // ---- usage panel helpers (Tailwind class strings live here so the row markup stays in one place) ----
+        const USAGE_GRID_LOADER = 'tw:grid-cols-[60px_90px_1fr_50px]';
+        const USAGE_GRID_TROLLEY = 'tw:grid-cols-[40px_70px_80px_1fr]';
+        const USAGE_ROW = 'tw:grid tw:h-10 tw:items-center tw:gap-3 tw:border-b tw:border-gray-100 tw:pl-2 tw:text-sm tw:text-gray-700 tw:dark:border-gray-800 tw:dark:text-gray-300';
+
+        // 'loader' = Column / Reel Qty / Usage, 'trolley' = Side / Column / Reel Qty / Usage
+        function setUsageMode(mode) {
+            const header = document.getElementById("colHeader");
+            header.classList.remove(USAGE_GRID_LOADER, USAGE_GRID_TROLLEY);
+            header.classList.add(mode === 'trolley' ? USAGE_GRID_TROLLEY : USAGE_GRID_LOADER);
+            document.getElementById("sideCol").classList.toggle("tw:hidden", mode !== 'trolley');
+        }
+
+        function setUsageOverlay(show) {
+            const el = document.getElementById("usageOverlay");
+            el.classList.toggle("tw:hidden", !show);
+            el.classList.toggle("tw:flex", show);
+        }
+
+        function usageBar(percent, fillClass) {
+            return `<div class="tw:h-1.5 tw:min-w-[80px] tw:flex-1 tw:overflow-hidden tw:rounded-full tw:bg-gray-100 tw:dark:bg-white/10">
+                        <div class="tw:h-full tw:rounded-full ${fillClass}" style="width: ${percent}%;"></div>
+                    </div>`;
+        }
+
+        // loader row: colNo | reel qty | bar | percent
+        function loaderUsageRow(colNo, reelText, percent) {
+            const has = percent !== null;
+            return `<div class="${USAGE_ROW} ${USAGE_GRID_LOADER}">
+                        <span>${colNo}</span>
+                        <span class="tw:text-gray-500 tw:dark:text-gray-400">${reelText}</span>
+                        ${usageBar(has ? percent : 0, has ? 'tw:bg-success-500' : 'tw:bg-gray-400')}
+                        <span class="${has ? 'tw:text-success-600 tw:dark:text-success-500' : 'tw:text-gray-400'}">${has ? percent + '%' : '-'}</span>
+                    </div>`;
+        }
+
+        // trolley row: side | colNo | reel qty | bar + percent
+        function trolleyUsageRow(item) {
+            return `<div class="${USAGE_ROW} ${USAGE_GRID_TROLLEY}">
+                        <span>${item.side}</span>
+                        <span>${item.colNo}</span>
+                        <span class="tw:text-gray-500 tw:dark:text-gray-400">${item.reelQty} Reels</span>
+                        <div class="tw:flex tw:items-center tw:gap-3">
+                            ${usageBar(item.percentage, 'tw:bg-success-500')}
+                            <span class="tw:text-success-600 tw:dark:text-success-500">${item.percentage}%</span>
+                        </div>
+                    </div>`;
+        }
+
+        function placeholderUsageRows() {
+            return [1, 2, 3, 4].map(i => loaderUsageRow(i, '-', null)).join("");
+        }
+
+        // nothing running (or no data): placeholder rows, overlay on, progress ring at 0
+        function showNoActiveUsage() {
+            document.getElementById("usageTitle").textContent = "Related Equipment Usage";
+            setUsageMode('loader');
+            document.getElementById("usageContainer").innerHTML = placeholderUsageRows();
+            setUsageOverlay(true);
+            setProgress(0);
+        }
+
+        function loadColumnUsage(silent) {
+            setUsageMode('loader');
+
+            if (currentTaskQueueId == null)
+            {
+                showNoActiveUsage();
+                return;
+            }
+
+            return $.ajax({
+                url: "/Loader/GetLoaderColumn/",
+                type: "POST",
+                data: JSON.stringify(currentEqId),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    if (result.success && result.data && result.data.length > 0)
+                    {
+                        document.getElementById("usageTitle").textContent = "Auto Loader Column Usage";
+                        document.getElementById("usageContainer").innerHTML = result.data.map(item => loaderUsageRow(item.colNo, item.reelQty + " Reels", item.usagePercentage)).join("");
+
+                        setUsageOverlay(false);
+                        setProgress(result.data[0].totalProgressPercentage);
+                    }
+                    else
+                    {
+                        showNoActiveUsage();
+                    }
+                },
+                error: function () {
+                    notifyError(silent, 'Unable to load the column usage.');
+                }
+            });
+        }
+
+        function loadTrolleyUsage(silent) {
+            return $.ajax({
+                url: "/Trolley/GetTrolleyColumnUsage/",
+                type: "POST",
+                data: JSON.stringify(currentEqId),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    if (result.success && result.data && result.data.length > 0)
+                    {
+                        document.getElementById("usageTitle").textContent = "Trolley Column Usage";
+                        setUsageMode('trolley');
+                        document.getElementById("usageContainer").innerHTML = result.data.map(item => trolleyUsageRow(item)).join("");
+
+                        setUsageOverlay(false);
+                        setProgress(0);
+                    }
+                    else
+                    {
+                        showNoActiveUsage();
+                    }
+                },
+                error: function () {
+                    notifyError(silent, 'Unable to load the trolley usage.');
+                }
+            });
+        }
+
+        //render slot capacity data
+        function renderChart(data) {
+            const colorMap = {
+                "Occupied with Reel": "#424874",
+                "Occupied with Empty Drawer": "#A6B1E1",
+                "Available": "#DCD6F7",
+                "Inactive Slot": "#F04438", //red-F04438 //F4EEFF
+            };
+
+            const chartData = data.filter(d => d.slotQty > 0 && d.title !== "Error Slot") 
+                .map(d => ({
+                    name: d.title,
+                    value: d.slotQty,
+                    color: colorMap[d.title], //|| "#ccc"
+                    percent: d.percentage,
+                }));
+
+            const totalSlots = chartData.reduce((sum, d) => sum + d.value, 0);
+            const radius = 100;
+            // redraw from scratch: this also runs on every slot refresh
+            d3.select("#donutChart").selectAll("*").remove();
+            const svg = d3.select("#donutChart")
+                        .append("g")
+                        .attr("transform", `translate(100,100)`);
+
+            const pie = d3.pie().value(d => d.value);
+            const arc = d3.arc()
+                        .innerRadius(60)
+                        .outerRadius(radius);
+
+            svg.selectAll("path")
+               .data(pie(chartData))
+               .enter()
+               .append("path")
+               .attr("d", arc)
+               .attr("fill", d => d.data.color);
+
+            svg.append("text")
+              .attr("class", "label tw:fill-gray-800 tw:dark:fill-white/90 tw:text-2xl tw:font-semibold")
+              .attr("text-anchor", "middle")
+              .attr("dy", "-0.3em")
+              .text(totalSlots);
+
+            svg.append("text")
+              .attr("class", "label tw:fill-gray-500 tw:dark:fill-gray-400 tw:text-xs")
+              .attr("text-anchor", "middle")
+              .attr("dy", "1.6em")
+              .text("Total Slots");
+
+            //progress bar of each slots category
+            const idMap = {
+                "Occupied with Reel": "reel",
+                "Occupied with Empty Drawer": "drawer",
+                "Available": "available",
+                "Inactive Slot": "inactive"
+            };
+
+            // categories with no slots were filtered out above, so clear their rows first (they may hold old numbers)
+            Object.values(idMap).forEach(key => {
+                document.getElementById(`percent-${key}`).textContent = '0% ( 0 )';
+                document.getElementById(`bar-${key}`).style.width = '0%';
+            });
+
+            chartData.forEach(d => {
+                const key = idMap[d.name];
+                if (!key) return;
+
+                document.getElementById(`percent-${key}`).textContent = `${d.percent}% ( ${d.value} )`;
+                document.getElementById(`bar-${key}`).style.width = `${d.percent}%`;
+                document.getElementById(`bar-${key}`).style.background = d.color;
+                document.getElementById(`dot-${key}`).style.background = d.color;
+            });
+        }
+
+        //render attention listing
+        function renderAttention() {
+            const warningSlots = groupedSlots.filter(s => s.needCheck);
+            const container = document.getElementById("attentionList");
+            container.innerHTML = "";
+            document.getElementById("attentionQty").textContent = `(${warningSlots.length})`;
+            if (warningSlots.length === 0) {
+                container.innerHTML = '<div class="tw:mt-3 tw:text-sm tw:text-gray-500 tw:dark:text-gray-400">No pending checks needed</div>';
+            }
+            else {
+                warningSlots.forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = 'tw:mt-3 tw:flex tw:flex-wrap tw:items-start tw:gap-3';
+
+                    const iconBox = document.createElement('div');
+                    iconBox.className = 'tw:flex tw:h-10 tw:w-10 tw:shrink-0 tw:items-center tw:justify-center tw:rounded-md tw:bg-error-50 tw:dark:bg-error-500/15';
+                    iconBox.innerHTML = `<i class="bi bi-exclamation-circle tw:text-error-500"></i>`;
+                    row.appendChild(iconBox);
+
+                    const slotInfo = document.createElement("div");
+                    slotInfo.className = "tw:min-w-0 tw:flex-1";
+
+                    const slotCode = document.createElement('span');
+                    slotCode.className = 'slotcode tw:text-[15px] tw:text-gray-800 tw:dark:text-white/90';
+                    slotCode.textContent = `Slot Code: ${item.slotCode}`;
+                    slotInfo.appendChild(slotCode);
+
+                    const slotDetail = document.createElement("div");
+                    slotDetail.className = "slot-info tw:text-xs tw:text-gray-500 tw:dark:text-gray-400";
+                    slotDetail.textContent = `Column: ${item.colNo} Row: ${item.rowNo} (${item.isLeft ? "Left Racking" : "Right Racking"})`;
+                    slotInfo.appendChild(slotDetail);
+
+                    //if has remarks
+                    if (item.checkRemark) {
+                        const remark = document.createElement("div");
+                        remark.className = "tw:text-xs tw:text-error-500";
+                        remark.textContent = item.checkRemark;
+                        slotInfo.appendChild(remark);
+                    }
+
+                    row.appendChild(slotInfo);
+
+                    const btnDiv = document.createElement("div");
+                    btnDiv.className = "tw:ml-auto";
+
+                    const btn = document.createElement("button");
+                    btn.className = "tw:inline-flex tw:h-10 tw:items-center tw:rounded-lg tw:border-0 tw:bg-amber-50 tw:px-4 tw:text-xs tw:font-medium tw:text-amber-600 tw:transition-colors tw:hover:bg-amber-100 tw:dark:bg-amber-500/15 tw:dark:text-amber-400 tw:dark:hover:bg-amber-500/25";
+                    btn.dataset.id = item.slot_Id;
+                    btn.textContent = "Update";
+
+                    btn.addEventListener("click", function() {
+                        const modal = document.getElementById('updateSlotModal');
+                        modal.dataset.slotId = item.slot_Id;
+                        $('#updateSlotModal').modal("show");
+                    });
+
+                    btnDiv.appendChild(btn);
+                    row.appendChild(btnDiv);
+
+                    container.appendChild(row);
+                });
+            }
+        }
+
+        //update a warning slot: clears its "need check" flag and stores the remark
+        function saveUpdateSlot() {
+            const modal = document.getElementById('updateSlotModal');
+            const data = {
+                Slot_Id: parseInt(modal.dataset.slotId),
+                CheckRemark: $('#txtCheckRemark').val(),
+            }
+
+            $.ajax({
+                url: "/Slot/UpdateWarningSlot/",
+                type: "POST",
+                data: JSON.stringify(data),
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () { showLoading(false); },
+                success: function (result) {
+                    swal.close();
+                    if (result.success == true) {
+                        $('#updateSlotModal').modal("hide");
+                        swal.fire({
+                            icon: 'success',
+                            title: "Success Update",
+                            text: "",
+                            didClose: () => {
+                                loadSlotUsage(true);
+                                loadSlots(true);
+                            }
+                        });
+                    }
+                    else {
+                        notifyError(false, result.errMessage);
+                    }
+                },
+                error: function () {
+                    notifyError(false, 'Unable to update the slot.');
+                }
+            });
+        }
+
+        document.getElementById('updateSlotModal').addEventListener('hidden.bs.modal', function () {
+            document.getElementById('txtCheckRemark').value = '';
+        });
+
+
+        //render current progress chart
+        function setProgress(percentage) {
+            if (percentage < 0 || percentage > 100) return;
+            const circle = document.getElementById('circle');
+            const text = document.querySelector('.percentage');
+
+            const radius = 15.9155;
+            const circumference = 2 * Math.PI * radius;
+
+            circle.style.strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`;
+            text.textContent = `${percentage}%`;
+        }
+
+        //render slot
+        function renderSlotViewGrid(slots, isLeft) {
+            const container = document.getElementById("slotContainer");
+            container.innerHTML = '';
+
+            const SLOT_BASE = 'slot tw:my-0.5 tw:h-2 tw:cursor-pointer tw:rounded-sm tw:hover:z-10 tw:hover:ring-2 tw:hover:ring-brand-500 ' +
+                'tw:after:absolute tw:after:hidden tw:after:translate-x-2.5 tw:after:-translate-y-2.5 tw:after:rounded tw:after:bg-gray-800 tw:after:px-1.5 tw:after:py-0.5 tw:after:text-[10px] tw:after:text-white ' +
+                'tw:hover:after:block tw:hover:after:content-[attr(data-code)]';
+            const SLOT_NORMAL = 'tw:bg-gray-100 tw:dark:bg-white/10';
+            const SLOT_WARNING = 'tw:bg-warning-500';
+            const SLOT_INACTIVE = 'tw:bg-error-400';
+
+            const loadSlot = slots.filter(s => s.isLeft === isLeft && (s.visible ?? true));
+            const grouped = loadSlot.reduce((acc, slot) => {
+                (acc[slot.colNo] = acc[slot.colNo] || []).push(slot);
+                return acc;
+            }, {});
+
+            Object.keys(grouped).sort((a, b) => a-b).forEach(colNo => {
+                const colDiv = document.createElement('div');
+                colDiv.className = 'slot-column tw:flex tw:flex-col tw:overflow-hidden tw:rounded-lg tw:border tw:border-gray-200 tw:dark:border-gray-800';
+                colDiv.innerHTML = `<div class="column-title tw:bg-gray-50 tw:py-1.5 tw:text-center tw:text-sm tw:font-semibold tw:text-gray-700 tw:dark:bg-white/5 tw:dark:text-gray-300">Column ${colNo}</div><div class="slots tw:flex-1 tw:overflow-y-auto tw:p-1"></div>`;
+                container.appendChild(colDiv);
+
+                grouped[colNo].sort((a,b) => a.rowNo-b.rowNo).forEach(slot => {
+                    const div = document.createElement('div');
+                    div.className = `${SLOT_BASE} ${slot.needCheck ? "needCheck " + SLOT_WARNING : (slot.isActive ? "active " + SLOT_NORMAL : "inactive " + SLOT_INACTIVE)}`;
+                    div.dataset.code = slot.slotCode;
+
+                    if (slot.highlight) {
+                        div.style.backgroundColor = slot.highlight.bg;
+                        div.style.color = slot.highlight;
+                    } else {
+                        div.style.backgroundColor = "";
+                        div.style.color= "";
+                    }
+
+                    colDiv.querySelector('.slots').appendChild(div);
+                });
+            });
+        }
+
+        //left || right racking
+        document.querySelectorAll('input[name="filter"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                applyFilter();
+            });
+        });
+
+        //selectall function for checkbox in filter
+        const selectAll = document.getElementById("selectAll");
+        const checkboxes = document.querySelectorAll('#filterMenu input[type="checkbox"]:not(#selectAll)');
+        selectAll.addEventListener("change", function() {
+            checkboxes.forEach(box => box.checked = this.checked);
+        });
+
+        checkboxes.forEach(box => {
+            box.addEventListener("change", () => {
+                const checkedCount = [...checkboxes].filter(c => c.checked).length;
+                selectAll.checked = checkedCount === checkboxes.length;
+                selectAll.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+            });
+        });
+
+        function getSlotType(slot) {
+            if (!slot.isActive) return "Inactive Slot";
+            if (slot.hasReel) return "Occupied with Reel";
+            if (!slot.hasReel && slot.hasEmptyTray) return "Occupied with Empty Drawer";
+            return "Available";
+        }
+
+        function getSlotCounts(slots, isLeft) {
+            const counts = {};
+
+            slots.filter(s => s.isLeft === isLeft)
+                .forEach(slot => {
+                    const type = getSlotType(slot);
+                    counts[type] = (counts[type] || 0) + 1;
+                });
+            return counts;
+        }
+
+        function applyFilter() {
+            const container  = document.getElementById("selectedFilters");
+            container.innerHTML = "";
+
+            const checked = document.querySelectorAll('#filterMenu input[type="checkbox"]:checked:not(#selectAll)');
+            const selectedValues = Array.from(checked).map(box => box.value);
+            const isLeft = document.getElementById("leftS").checked;
+            const counts = getSlotCounts(groupedSlots, isLeft);
+
+            //quick lookup for color mapping (value => color)
+            const filterMap = {};
+            checked.forEach(box => {
+                filterMap[box.value] = {
+                    bg: box.dataset.color,
+                    text: box.dataset.textcolor || "#000000"
+                };
+            });
+
+            //render filter tags
+            checked.forEach(box => {
+                const tag = document.createElement("button");
+                tag.type = "button";
+                const bgColor = box.dataset.color;
+                const textColor = box.dataset.textcolor || "#000000";
+
+                tag.className = "tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:border-0 tw:px-3 tw:py-1.5 tw:text-xs tw:font-medium";
+                tag.style.backgroundColor = bgColor;
+                tag.style.borderColor = bgColor;
+                tag.style.color = textColor;
+
+                const count = counts[box.value] || 0;
+
+                tag.innerHTML = `
+                    <span>${box.value} (${count})</span>
+                    <i class="bi bi-x-lg tw:text-[10px]"></i>
+                `;
+
+                tag.onclick = () => removeFilter(box.value);
+                container.appendChild(tag);
+            });
+
+            const filteredSlots = groupedSlots.map(slot => {
+                const type = getSlotType(slot);
+                return {
+                    ...slot,
+                    // visible: selectedValues.length === 0 || selectedValues.includes(type),
+                    highlight: selectedValues.includes(type) ? filterMap[type] : null
+                };
+            });
+
+            renderSlotViewGrid(filteredSlots, isLeft);
+        }
+
+        function removeFilter(value) {
+            const checkbox = document.querySelector(`#filterMenu input[value="${value}"]`);
+            if (checkbox) checkbox.checked = false;
+
+            //re-apply the filters outside dropdown
+            applyFilter();
+            //sync selectall checkbox with new changes
+            const allCheckbox = document.querySelectorAll('#filterMenu input[type="checkbox"]:not(#selectAll)');
+            const checkedCount = [...allCheckbox].filter(c => c.checked).length;
+            const selectAll = document.getElementById("selectAll");
+
+            selectAll.checked = checkedCount === allCheckbox.length;
+            selectAll.indeterminate = checkedCount > 0 && checkedCount < allCheckbox.length;
+        }
+
+    </script>
 }
