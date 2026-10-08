@@ -84,11 +84,12 @@
                         const designClass = 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6';
 
                         $('#listTable').DataTable({
-                           data: result.data,
+                           data: result.data.sort((a, b) => b.jobOrderEmergency_Id - a.jobOrderEmergency_Id), // newest first
                            paging: true,
                            searching: true,
                            "info": true,
                            "bDestroy": true,
+                           order: [],
                            columns: [
                               { data: 'docNo', className: cellClass },
                               {

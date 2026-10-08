@@ -69,7 +69,7 @@
 <div class="modal fade" id="loaderModal" role="dialog">
     <div class="modal-dialog">
 
-        <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+        <div class="modal-content tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
             <div class="tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
                 <h4 class="tw:text-base tw:font-semibold tw:text-gray-800 tw:mb-0 tw:dark:text-white/90">Add Loader</h4>
             </div>
@@ -114,7 +114,7 @@
 <div class="modal fade" id="joModal" role="dialog">
     <div class="modal-dialog">
 
-        <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+        <div class="modal-content tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
             <div class="tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
                 <h4 class="tw:text-base tw:font-semibold tw:text-gray-800 tw:mb-0 tw:dark:text-white/90">Add Job Order</h4>
             </div>
@@ -138,8 +138,10 @@
                             <template x-for="opt in options" :key="opt.value">
                                 <div @@click="select(opt)"
                                     class="tw:cursor-pointer tw:px-4 tw:py-2 tw:text-sm tw:hover:bg-brand-50 tw:dark:hover:bg-brand-500/15"
-                                    :class="opt.value === selectedValue ? 'tw:bg-brand-50 tw:font-medium tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:text-gray-700 tw:dark:text-gray-300'"
-                                    x-text="opt.text"></div>
+                                    :class="opt.value === selectedValue ? 'tw:bg-brand-50 tw:font-medium tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:text-gray-700 tw:dark:text-gray-300'">
+                                    <div x-text="opt.text"></div>
+                                    <div x-show="opt.desc" x-text="opt.desc" class="tw:break-words tw:text-xs tw:font-normal tw:text-gray-500 tw:dark:text-gray-400"></div>
+                                </div>
                             </template>
                         </div>
                     </div>
@@ -159,7 +161,7 @@
 <div class="modal fade" id="emModal" role="dialog">
     <div class="modal-dialog">
 
-        <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+        <div class="modal-content tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
             <div class="tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
                 <h4 class="tw:text-base tw:font-semibold tw:text-gray-800 tw:mb-0 tw:dark:text-white/90">Add Emergency Order</h4>
             </div>
@@ -183,8 +185,10 @@
                             <template x-for="opt in options" :key="opt.value">
                                 <div @@click="select(opt)"
                                     class="tw:cursor-pointer tw:px-4 tw:py-2 tw:text-sm tw:hover:bg-brand-50 tw:dark:hover:bg-brand-500/15"
-                                    :class="opt.value === selectedValue ? 'tw:bg-brand-50 tw:font-medium tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:text-gray-700 tw:dark:text-gray-300'"
-                                    x-text="opt.text"></div>
+                                    :class="opt.value === selectedValue ? 'tw:bg-brand-50 tw:font-medium tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:text-gray-700 tw:dark:text-gray-300'">
+                                    <div x-text="opt.text"></div>
+                                    <div x-show="opt.desc" x-text="opt.desc" class="tw:break-words tw:text-xs tw:font-normal tw:text-gray-500 tw:dark:text-gray-400"></div>
+                                </div>
                             </template>
                         </div>
                     </div>
@@ -204,7 +208,7 @@
 <div class="modal fade" id="trolleyModal" role="dialog">
     <div class="modal-dialog">
 
-        <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+        <div class="modal-content tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
             <div class="tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
                 <h4 class="tw:text-base tw:font-semibold tw:text-gray-800 tw:mb-0 tw:dark:text-white/90">Add Trolley</h4>
             </div>
@@ -341,7 +345,8 @@
                 syncOptions() {
                     const sel = document.getElementById(selectId);
                     if (!sel) return;
-                    this.options = Array.from(sel.options).map(o => ({ value: o.value, text: o.textContent.trim() }));
+                    // data-desc (optional) is an extra description line shown under the option text
+                    this.options = Array.from(sel.options).map(o => ({ value: o.value, text: o.textContent.trim(), desc: o.dataset.desc || '' }));
                     this.selectedValue = sel.value;
                     const selectedOpt = sel.options[sel.selectedIndex];
                     this.selectedLabel = selectedOpt ? selectedOpt.textContent.trim() : '';
@@ -556,6 +561,7 @@
                             const el = document.createElement("option");
                             el.textContent = opt.docNo;
                             el.value = opt.jobOrder_Id;
+                            el.dataset.desc = opt.description || '';
                             selJO.appendChild(el);
                         }
                         refreshCustomSelect('selJO');
@@ -604,6 +610,7 @@
                             const el = document.createElement("option");
                             el.textContent = opt.docNo;
                             el.value = opt.jobOrderEmergency_Id;
+                            el.dataset.desc = opt.description || '';
                             selEmergency.appendChild(el);
                         }
                         refreshCustomSelect('selEmergency');

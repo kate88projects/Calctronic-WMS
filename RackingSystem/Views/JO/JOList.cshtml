@@ -120,11 +120,12 @@
                         const cellClass = 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6 tw:text-theme-sm tw:text-gray-700 tw:dark:text-gray-300';
 
                         $('#listTable').DataTable( {
-                            data: result.data,
+                            data: result.data.sort((a, b) => b.jobOrder_Id - a.jobOrder_Id), // newest first
                             paging: true,
                             searching: true,
                             "info": true,
                             "bDestroy": true,
+                            order: [], 
                             columns: [
                                 // { data: 'jobOrder_Id' },
                                 { data: 'docNo', className: cellClass },
