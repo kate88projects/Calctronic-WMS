@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RackingSystem.Data;
 using RackingSystem.Data.JO;
+using RackingSystem.General;
 using RackingSystem.Models;
 using RackingSystem.Models.RackJobQueue;
 using RackingSystem.Services.RackJobQueueServices;
@@ -71,6 +72,49 @@ namespace RackingSystem.Controllers
         public async Task<IActionResult> ChangeQueue([FromBody] QReqDTO req)
         {
             ServiceResponseModel<QReqDTO> result = await _qService.ChangeQueue(req);
+            return new JsonResult(result);
+        }
+
+        [HttpPost]
+        public IActionResult ClearRackJobInfo()
+        {
+            ServiceResponseModel<bool> result = new ServiceResponseModel<bool>();
+            result.data = false;
+
+            var uacClaim = User.FindFirst("UACIdList")?.Value ?? "";
+            if (!uacClaim.Split(',').Contains(((int)EnumUAC.Q_ClearRackJobInfo).ToString()))
+            {
+                return new JsonResult(result);
+            }
+
+            try
+            {
+                var srms = _context.RackJob.FirstOrDefault();
+                if (srms == null)
+                {
+                    result.errMessage = "SRMS record not found.";
+                    return new JsonResult(result);
+                }
+
+                srms.StartDate = DateTime.Now;
+                srms.CurrentJobType = "";
+                srms.Loader_Id = 0;
+                srms.Trolley_Id = 0;
+                srms.RackJobQueue_Id = 0;
+                srms.LoginIP = "";
+                srms.Json = "";
+                srms.TotalCount = 0;
+                _context.SaveChanges();
+
+                result.success = true;
+                result.data = true;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
             return new JsonResult(result);
         }
 

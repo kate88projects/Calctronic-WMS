@@ -395,6 +395,14 @@
         function buildRowLabels(side) {
             const container = document.getElementById(`side${side}-rows`);
             container.innerHTML = '';
+            //
+            const lbl = document.createElement('div');
+            lbl.style.height = '16px';
+            lbl.style.display = 'flex';
+            lbl.style.alignItems = 'center';
+            lbl.textContent = '';
+            container.appendChild(lbl);
+            //
             for (let row = 50; row >= 1; row--) {
                 const lbl = document.createElement('div');
                 lbl.style.height = '16px';

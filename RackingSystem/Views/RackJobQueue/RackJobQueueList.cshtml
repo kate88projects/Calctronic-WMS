@@ -3,7 +3,7 @@
     <header class="d-flex align-items-center justify-content-between w-100">
         <h2 class="pageTitle">Queue Management</h2>
         <div class="d-flex gap-2">
-            <button type="button" class="btn btn-secondary" onclick="resetQueue()" @(ViewBag.PermissionList.Contains(91) ? "" : "hidden")>
+            <button type="button" class="btn btn-secondary" onclick="clearRackJobInfo()" @(ViewBag.PermissionList.Contains(91) ? "" : "hidden")>
                 Reset Queue
             </button>
             <button type="button" class="btn btn-success" onclick="newTrolleyForm()">
@@ -23,10 +23,18 @@
 } *@
 
 <div class="tw:flex tw:w-full tw:items-center tw:justify-between tw:gap-4">
-    <h2 class="tw:mb-0 tw:ml-2 tw:shrink-0 tw:text-lg tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Queue Management</h2>
+    @if (ViewBag.PermissionList.Contains(91))
+    {
+        <h2 class="tw:mb-0 tw:ml-2 tw:shrink-0 tw:cursor-pointer tw:select-none tw:text-lg tw:font-semibold tw:text-gray-800 tw:dark:text-white/90"
+            onclick="clearRackJobInfo()" title="Clear Rack Job Info">Queue Management</h2>
+    }
+    else
+    {
+        <h2 class="tw:mb-0 tw:ml-2 tw:shrink-0 tw:text-lg tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Queue Management</h2>
+    }
     <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-end tw:gap-2">
         @* <button type="button" class="tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:border-0 tw:bg-zinc-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:transition tw:hover:bg-zinc-600"
-                onclick="resetQueue()" @(ViewBag.PermissionList.Contains(91) ? "" : "hidden")>
+                onclick="clearRackJobInfo()" @(ViewBag.PermissionList.Contains(91) ? "" : "hidden")>
             Reset Queue
         </button> *@
         <button type="button" class="tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:border-0 tw:bg-success-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:transition tw:hover:bg-success-600"
@@ -284,20 +292,20 @@
     </div>
 </div>
 
-<div class="modal fade" id="resetQueueModal" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog">
+<div class="modal fade" id="clearRackJobInfoModal" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog">
     <div class="modal-dialog modal-dialog-centered tw:max-w-sm">
         <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
             <div class="tw:p-6 tw:text-center">
                 <div class="tw:mx-auto tw:mb-4 tw:flex tw:h-14 tw:w-14 tw:items-center tw:justify-center tw:rounded-full tw:bg-warning-50 tw:text-warning-500 tw:dark:bg-warning-500/15">
                     <i class="bi bi-exclamation-triangle tw:text-2xl"></i>
                 </div>
-                <h4 class="tw:mb-2 tw:text-base tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Are you sure want to reset the queue?</h4>
+                <h4 class="tw:mb-2 tw:text-base tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Are you sure want to clear the Rack Job info?</h4>
                 <p class="tw:text-sm tw:text-gray-500 tw:dark:text-gray-400">You will not be able to recover this record!</p>
             </div>
             <div class="tw:flex tw:justify-center tw:gap-3 tw:border-t tw:border-gray-100 tw:px-6 tw:py-3 tw:dark:border-gray-800">
-                <button type="button" class="save-btn tw:border-0 tw:rounded-lg tw:bg-error-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:shadow-theme-xs tw:hover:bg-error-600" onclick="confirmResetQueue()">Yes</button>
+                <button type="button" class="save-btn tw:border-0 tw:rounded-lg tw:bg-error-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:shadow-theme-xs tw:hover:bg-error-600" onclick="confirmClearRackJobInfo()">Yes</button>
                 <button type="button" class="cancel-btn tw:bg-transparent tw:rounded-lg tw:border tw:border-gray-300 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-700 tw:hover:bg-gray-100
-                    tw:dark:border-gray-700 tw:dark:text-gray-400 tw:dark:hover:bg-white/5" onclick="cancelResetQueueForm()">
+                    tw:dark:border-gray-700 tw:dark:text-gray-400 tw:dark:hover:bg-white/5" onclick="cancelClearRackJobInfoForm()">
                     No
                 </button>
             </div>
@@ -1251,16 +1259,63 @@
             }
         });
 
-        function resetQueue() {
-            $("#resetQueueModal").modal("show");
+        function clearRackJobInfo() {
+            $("#clearRackJobInfoModal").modal("show");
         }
 
-        function cancelResetQueueForm() {
-            $("#resetQueueModal").modal("hide");
+        function cancelClearRackJobInfoForm() {
+            $("#clearRackJobInfoModal").modal("hide");
         }
 
-        function confirmResetQueue() {
-            $("#resetQueueModal").modal("hide");
+        function confirmClearRackJobInfo() {
+            $("#clearRackJobInfoModal").modal("hide");
+
+            $.ajax({
+                url: '/RackJobQueue/ClearRackJobInfo',
+                type: 'POST',
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: "Success Cleared",
+                            text: "",
+                            didClose: () => {
+                              window.location.reload();
+                            }
+                        });
+                    }
+                    else if (!result.errMessage) {
+                        // no permission, do nothing
+                        Swal.close();
+                    }
+                    else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
         }
 
     </script>

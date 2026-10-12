@@ -1078,10 +1078,12 @@ namespace RackingSystem.Controllers.API
 
                 srms.StartDate = DateTime.Now;
                 srms.CurrentJobType = "";
-                srms.RackJobQueue_Id = 0;
                 srms.Loader_Id = 0;
                 srms.Trolley_Id = 0;
+                srms.RackJobQueue_Id = 0;
                 srms.LoginIP = "";
+                srms.Json = "";
+                srms.TotalCount = 0;
                 _dbContext.SaveChanges();
 
                 result.success = true;

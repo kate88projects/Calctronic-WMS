@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="tailwind-src\**" />
+    <Content Remove="tailwind-src\**" />
+    <EmbeddedResource Remove="tailwind-src\**" />
+    <None Remove="tailwind-src\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="Controllers\API\SlotController.cs" />
   </ItemGroup>
 

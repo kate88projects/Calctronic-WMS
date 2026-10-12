@@ -25,6 +25,7 @@
         JO_Emergency_MENU = 81,
 
         Q_List_MENU = 90,
+        Q_ClearRackJobInfo = 91,
 
         RACKING_AvailableReelList_MENU = 100,
         //RACKING_RackingStatus_MENU = 101,
