@@ -14,6 +14,7 @@ using RackingSystem.Models.GRN;
 using RackingSystem.Models.Item;
 using RackingSystem.Models.Loader;
 using RackingSystem.Models.Slot;
+using RackingSystem.Models.Trolley;
 using System.Drawing;
 using System.Drawing.Printing;
 
@@ -174,6 +175,194 @@ namespace RackingSystem.Services.GRNServices
 
             return result;
         }
+
+        public async Task<ServiceResponseModel<List<GRNDtlDTO>>> SaveExcelGRN(List<GRNDtlDTO> req)
+        {
+            ServiceResponseModel<List<GRNDtlDTO>> result = new ServiceResponseModel<List<GRNDtlDTO>>();
+
+            try
+            {
+                if (req == null || req.Count == 0)
+                {
+                    result.errMessage = "No data to import.";
+                    return result;
+                }
+
+                var codes = req.Select(x => (x.ReelCode ?? "").Trim()).ToList();
+                var messages = req.Select(_ => new List<string>()).ToList();
+                var fields = req.Select(_ => new List<string>()).ToList();
+
+                void AddError(int i, string field, string message)
+                {
+                    messages[i].Add(message);
+                    if (!fields[i].Contains(field)) fields[i].Add(field);
+                }
+
+                //check reelcode existence in uploaded data list
+                for (int i = 0; i < codes.Count; i++)
+                {
+                    if (codes[i] == "")
+                    {
+                        AddError(i, "ReelCode", "Reel code is empty");
+                    }
+                    else if (!ReelCodeFormat.IsMatch(codes[i]))
+                    {
+                        string shown = codes[i].Length > 30 ? codes[i].Substring(0, 30) + "..." : codes[i];
+                        AddError(i, "ReelCode", $"Reel code [{shown}] is in the wrong format, it must be ! followed by 7 digits (e.g. !0000123), or ! followed by a letter A-Z and 6 digits (e.g. !A000123)");
+                    }
+                }
+
+                var repeatedCodes = codes.Select((code, i) => (code, i)).Where(x => x.code != "")
+                    .GroupBy(x => x.code, StringComparer.OrdinalIgnoreCase).Where(g => g.Count() > 1);
+                foreach (var group in repeatedCodes)
+                {
+                    string rowList = string.Join(", ", group.Select(x => x.i + 2));
+                    foreach (var x in group)
+                    {
+                        AddError(x.i, "ReelCode", $"Reel code appears more than once in the file (rows {rowList})");
+                    }
+                }
+
+                //check reelcode existence in database
+                var codesToCheck = codes.Where(c => c != "").Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+                var existingCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                existingCodes.UnionWith(await _dbContext.Reel.Where(x => codesToCheck.Contains(x.ReelCode)).Select(x => x.ReelCode).ToListAsync());
+                existingCodes.UnionWith(await _dbContext.GRNDetail.Where(x => codesToCheck.Contains(x.ReelCode)).Select(x => x.ReelCode).ToListAsync());
+                for (int i = 0; i < codes.Count; i++)
+                {
+                    if (codes[i] != "" && existingCodes.Contains(codes[i]))
+                    {
+                        AddError(i, "ReelCode", "Reel code already exists");
+                    }
+                }
+
+                var itemIds = req.Select(x => x.Item_Id).Distinct().ToList();
+                var items = await _dbContext.Item.Where(x => itemIds.Contains(x.Item_Id)).ToDictionaryAsync(x => x.Item_Id);
+
+                for (int i = 0; i < req.Count; i++)
+                {
+                    var row = req[i];
+                    if (!items.ContainsKey(row.Item_Id))
+                    {
+                        string itemCode = (row.ItemCode ?? "").Trim();
+                        AddError(i, "ItemCode", itemCode == "" ? "Item code is empty" : $"Item [{itemCode}] not found");
+                    }
+                    if (row.Qty <= 0)
+                    {
+                        AddError(i, "Qty", "Please insert Qty");
+                    }
+                    if (row.ExpiryDate == null)
+                    {
+                        AddError(i, "ExpiryDate", "Please set Expiry Date");
+                    }
+
+                    string supplierName = (row.SupplierName ?? "").Trim();
+                    if (supplierName == "")
+                    {
+                        AddError(i, "SupplierName", "Supplier name is empty");
+                    }
+                    else if (supplierName.Length > 255)
+                    {
+                        AddError(i, "SupplierName", "Supplier name is longer than 255 characters");
+                    }
+
+                    string supplierRefNo = (row.SupplierRefNo ?? "").Trim();
+                    if (supplierRefNo == "")
+                    {
+                        AddError(i, "SupplierRefNo", "Supplier ref no is empty");
+                    }
+                    else if (supplierRefNo.Length > 50)
+                    {
+                        AddError(i, "SupplierRefNo", "Supplier ref no is longer than 50 characters");
+                    }
+                }
+
+                int errorRows = 0;
+                for (int i = 0; i < req.Count; i++)
+                {
+                    req[i].ErrorMsg = string.Join("; ", messages[i]);
+                    req[i].ErrorFields = fields[i];
+                    if (messages[i].Count > 0) errorRows++;
+                }
+                if (errorRows > 0)
+                {
+                    result.errMessage = $"{errorRows} row(s) have errors, nothing was imported.";
+                    result.data = req;
+                    return result;
+                }
+
+                var reels = new List<Reel>();
+                var grnDetails = new List<GRNDetail>();
+                DateTime now = DateTime.Now;
+
+                for (int i = 0; i < req.Count; i++)
+                {
+                    var row = req[i];
+                    var item = items[row.Item_Id];
+
+                    var reel = new Reel
+                    {
+                        Reel_Id = Guid.NewGuid(),
+                        ReelCode = codes[i],
+                        Item_Id = row.Item_Id,
+                        ItemCode = item.ItemCode,
+                        Qty = row.Qty,
+                        ExpiryDate = row.ExpiryDate!.Value,
+                        IsReady = true,
+                        StatusIdx = (int)EnumReelStatus.WaitingLoader,
+                        Status = EnumReelStatus.WaitingLoader.ToString(),
+                        ActualHeight = 0,
+                        CreatedDate = now,
+                    };
+                    reels.Add(reel);
+
+                    grnDetails.Add(new GRNDetail
+                    {
+                        GRNDetail_Id = Guid.NewGuid(),
+                        GRNBatchNo = row.GRNBatchNo ?? "",
+                        SupplierName = (row.SupplierName ?? "").Trim(),
+                        SupplierRefNo = (row.SupplierRefNo ?? "").Trim(),
+                        Item_Id = row.Item_Id,
+                        Qty = row.Qty,
+                        ExpiryDate = row.ExpiryDate!.Value,
+                        Reel_Id = reel.Reel_Id.ToString(),
+                        ReelCode = codes[i],
+                        Remark = row.Remark ?? "",
+                        CreatedDate = now,
+                        UpdatedDate = now,
+                    });
+                }
+
+                //Save everything in one SaveChanges, which EF runs as a single transaction: all rows or none.
+                _dbContext.Reel.AddRange(reels);
+                _dbContext.GRNDetail.AddRange(grnDetails);
+                await _dbContext.SaveChangesAsync();
+
+                for (int i = 0; i < req.Count; i++)
+                {
+                    req[i].GRNDetail_Id = grnDetails[i].GRNDetail_Id;
+                    req[i].Reel_Id = reels[i].Reel_Id.ToString();
+                    req[i].ReelCode = codes[i];
+                    req[i].ItemCode = reels[i].ItemCode;
+                    req[i].ItemDesc = items[req[i].Item_Id].Description;
+                }
+
+                result.success = true;
+                result.data = req;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+            return result;
+        }
+
+
+        //reel code format that GetNextReelCode produces: "!" + 7 digits (!0000001), and once those are used up
+        // "!" + a letter A-Z + 6 digits (!A000001 ... !Z999999). Digits are 0-9 only and the letter must be uppercase.
+        private static readonly System.Text.RegularExpressions.Regex ReelCodeFormat =
+            new System.Text.RegularExpressions.Regex(@"^!([0-9]{7}|[A-Z][0-9]{6})\z", System.Text.RegularExpressions.RegexOptions.Compiled);
 
         public async Task<ServiceResponseModel<GRNDtlDTO>> DeleteGRNDtl(GRNDtlDTO req)
         {

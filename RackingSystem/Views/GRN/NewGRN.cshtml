@@ -981,7 +981,11 @@
                 return;
             }
 
-            const printWindow = window.open('', '_blank', 'width=300,height=300');
+            // Big enough for the browser's print preview (it is shown inside this window), and centered on the screen.
+            const winWidth = 900, winHeight = 700;
+            const winLeft = Math.max(0, Math.round((window.screen.width - winWidth) / 2));
+            const winTop = Math.max(0, Math.round((window.screen.height - winHeight) / 2));
+            const printWindow = window.open('', '_blank', `width=${winWidth},height=${winHeight},left=${winLeft},top=${winTop}`);
             if (!printWindow) {
                 Swal.fire({
                     icon: 'error',
