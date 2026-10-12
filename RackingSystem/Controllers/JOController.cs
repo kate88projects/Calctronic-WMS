@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RackingSystem.Data;
+using RackingSystem.General;
+using RackingSystem.Helpers;
 using RackingSystem.Models;
 using RackingSystem.Models.JO;
 using RackingSystem.Services.JOServices;
@@ -43,7 +45,7 @@ namespace RackingSystem.Controllers
             ViewData["Title"] = "JO List";
             return View();
         }
-        public IActionResult JODetails(int id, string mode)
+        public async Task<IActionResult> JODetails(int id, string mode)
         {
             ViewBag.PermissionList = new List<int>();
             //string s = HttpContext.Session.GetString("xSession") ?? "";
@@ -75,6 +77,15 @@ namespace RackingSystem.Controllers
                 jo.Wait();
                 var joHeader = jo.Result;
                 joData = joHeader.data ?? new JOListDTO();
+            }
+            else
+            {
+                //show the document no for new job
+                var nextDocNo = await DocFormatHelper.Instance.get_NextDocumentNo(_context, EnumConfiguration.DocFormat_JO, DateTime.Now, false);
+                if (nextDocNo.success)
+                {
+                    joData.DocNo = nextDocNo.data ?? "";
+                }
             }
 
             return View(joData);
@@ -218,7 +229,7 @@ namespace RackingSystem.Controllers
             ViewData["Title"] = "JO Emergency List";
             return View();
         }
-        public IActionResult JOEmergencyDetails(int id, string mode)
+        public async Task<IActionResult> JOEmergencyDetails(int id, string mode)
         {
             ViewBag.PermissionList = new List<int>();
             //string s = HttpContext.Session.GetString("xSession") ?? "";
@@ -250,6 +261,15 @@ namespace RackingSystem.Controllers
                 joE.Wait();
                 var joEHeader = joE.Result;
                 joEData = joEHeader.data ?? new JOEmergencyReqDTO();
+            }
+            else
+            {
+                //show document no for new emergency job
+                var nextDocNo = await DocFormatHelper.Instance.get_NextDocumentNo(_context, EnumConfiguration.DocFormat_EmergencyJO, DateTime.Now, false);
+                if (nextDocNo.success)
+                {
+                    joEData.DocNo = nextDocNo.data ?? "";
+                }
             }
 
             return View(joEData);

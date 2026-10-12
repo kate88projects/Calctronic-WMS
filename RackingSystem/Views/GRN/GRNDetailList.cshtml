@@ -4,10 +4,23 @@
     }
 </style>
 
+@{
+    string menuItemClass = "tw:block tw:rounded-lg tw:px-3 tw:py-2 tw:text-sm tw:text-gray-700 tw:no-underline tw:hover:bg-gray-100 tw:dark:text-gray-300 tw:dark:hover:bg-white/5";
+}
 <div x-data="{ filtersOpen: true }">
     <div class="tw:flex tw:w-full tw:items-center tw:justify-between">
         <h2 class="tw:text-lg tw:mb-0 tw:ml-2 tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">GRN List</h2>
         <div class="tw:flex tw:items-center tw:gap-2">
+            <div class="tw:relative" x-data="{ importOpen: false }" @@click.outside="importOpen = false">
+                <button type="button" class="tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:border-0 tw:bg-yellow-400 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:hover:bg-yellow-500" @@click="importOpen = !importOpen">
+                    Import
+                    <i class="bi bi-chevron-down tw:text-xs"></i>
+                </button>
+                <div x-show="importOpen" x-cloak class="tw:shadow-theme-lg tw:absolute tw:right-0 tw:z-10 tw:mt-2 tw:w-64 tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:p-2 tw:dark:border-gray-800 tw:dark:bg-gray-900">
+                    <a href="#" class="@menuItemClass" id="dTemp" onclick="downloadTemp()" @@click="importOpen = false">Download GRN Template</a>
+                    <a href="#" class="@menuItemClass" onclick="triggerFileInput()" @@click="importOpen = false">Import GRN By Excel</a>
+                </div>
+            </div>
             <button type="button" class="tw:inline-flex tw:items-center tw:justify-center tw:rounded-lg tw:border-0 tw:px-3.5 tw:py-2"
                     :class="filtersOpen ? 'tw:bg-brand-50 tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:bg-gray-100 tw:text-gray-500 tw:hover:bg-gray-200 tw:dark:bg-white/5 tw:dark:text-gray-400 tw:dark:hover:bg-white/10'"
                     @@click="filtersOpen = !filtersOpen" title="Toggle Filters">
@@ -182,6 +195,33 @@
 </div>
 
 
+<input type="file" id="fileInput" accept=".xlsx, .xls, .csv" class="tw:hidden" onchange="handleFileUpload(event)">
+
+<div class="modal fade" id="columnMatchingModal" data-bs-backdrop="static" data-bs-focus="false">
+  <div class="modal-dialog modal-dialog-centered tw:max-w-2xl">
+    <div class="modal-content tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+      <div class="tw:flex tw:items-center tw:justify-between tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
+        <h5 class="tw:text-base tw:font-medium tw:text-gray-800 tw:dark:text-white/90 tw:mb-0" id="columnMatchingLabel">Map File Columns to GRN Columns</h5>
+        <button type="button" class="tw:flex tw:h-8 tw:w-8 tw:appearance-none tw:items-center tw:justify-center tw:rounded-full tw:border-0 tw:bg-gray-100 tw:text-gray-400 tw:outline-none tw:hover:bg-gray-200 tw:hover:text-gray-600 tw:dark:bg-white/5 tw:dark:text-gray-400 tw:dark:hover:bg-white/[0.07] tw:dark:hover:text-gray-300" data-bs-dismiss="modal" aria-label="Close">
+            <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="tw:px-8 tw:py-3 tw:pt-4">
+          <div class="tw:mb-4">
+              <label class="@labelClass" for="txtImportGRN">GRN Batch No</label>
+              <input id="txtImportGRN" type="text" class="@fieldClass" maxlength="50" oninput="removeErrMsg(this.id)" />
+              <div id="txtImportGRNError" class="error-message"></div>
+          </div>
+          @* <p class="tw:mb-4 tw:text-sm tw:text-gray-500 tw:dark:text-gray-400">Reel Code, Item Code, Quantity, Expiry Date, Supplier Name and Supplier Ref No must each be matched to a file column.</p> *@
+          <div id="csvColumnContent"></div>
+      </div>
+      <div class="tw:flex tw:justify-center tw:border-t tw:border-gray-100 tw:px-6 tw:py-3 tw:dark:border-gray-800">
+        <button type="button" class="tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:border-0 tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:hover:bg-brand-600" onclick="processAndSubmitData()">Submit<i class="bi bi-upload"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @section Scripts
 {
     <link rel="stylesheet" href="~/css/sweetalert2.min.css">
@@ -189,7 +229,11 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="../js/dataTables.js"></script>
+    @* <script src="../js/qrcode.js"></script> *@
     <script src="~/js/sweetalert2.all.min.js"></script>
+    <script src="../js/xlsx.full.min.js"></script>
+    <script src="../js/exceljs.min.js"></script>
+
 
     <script type="text/javascript">
 
@@ -210,6 +254,17 @@
             loadList(1);
             loadItemList();
         });
+
+        function formatDisplayDateTime(value) {
+            if (value === undefined || value === null || value === '') return '';
+
+            const d = new Date(value);
+            if (isNaN(d)) return '';
+
+            const pad = n => String(n).padStart(2, '0');
+            const hours = d.getHours();
+            return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(hours % 12 || 12)}:${pad(d.getMinutes())} ${hours >= 12 ? 'PM' : 'AM'}`;
+        }
 
         function prevPage() {
             var curPage = $("#txtCurPage").val();
@@ -255,6 +310,7 @@
                     const cellClass = 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6 tw:text-theme-sm tw:text-gray-700 tw:dark:text-gray-300';
 
                     if (result.success == true) {
+                        activeItems = result.data;
 
                         $('#itemTable').DataTable( {
                             ordering: false,
@@ -395,7 +451,8 @@
                                         //     return '<p style="margin:0;"><span>' + row.updatedDateDisplay + '</span><br/>' +
                                         //     '<span style="font-size:13px;color:grey;">' + row.createdDateDisplay + '</span></p>';
                                         // }
-                                        return row.createdDateDisplay ;
+                                        // The stored procedure's createdDateDisplay is month-first (MM/dd/yyyy), format the date here.
+                                        return type === 'display' ? (formatDisplayDateTime(row.createdDate) || row.createdDateDisplay) : row.createdDate;
                                     }
                                 },
                                 {
@@ -409,6 +466,12 @@
                                                 tw:transition-colors tw:hover:bg-amber-100 tw:dark:bg-amber-500/15 tw:dark:text-amber-400 tw:dark:hover:bg-amber-500/25" data-row="${rowData}">
                                                 <i class="bi bi-pencil-square"></i>
                                                 Edit
+                                            </button>
+                                            <button class="tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-brand-50 tw:font-medium tw:text-brand-600
+                                                tw:transition-colors tw:hover:bg-brand-100 tw:dark:bg-brand-500/15 tw:dark:text-brand-400 tw:dark:hover:bg-brand-500/25" id="printQR"
+                                                data-reelcode="${row.reelCode}" onclick="printQR(this)" data-bs-toggle="tooltip" title="Print QR">
+                                                <i class="bi bi-printer"></i>
+                                                QR
                                             </button>
                                             <button class="delete-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-error-50 tw:font-medium tw:text-error-600
                                                 tw:transition-colors tw:hover:bg-error-100 tw:dark:bg-error-500/15 tw:dark:text-error-400 tw:dark:hover:bg-error-500/25" data-row="${rowData}" data-id="${row.grnDetail_Id}" data-code="${row.reelCode}">
@@ -705,6 +768,598 @@
             });
 
             // console.log(id);
+        }
+
+        const TEMPLATE_MAX_ROWS = 1000;
+
+        function downloadTemp() {
+            $.ajax({
+                url: "/Item/GetActiveItemList/",
+                type: "GET",
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading();
+                },
+                success: async function (result) {
+                    if (result.success != true) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                        return;
+                    }
+
+                    try {
+                        const workbook = createGRNTemplateWorkbook(result.data);
+                        const buffer = await workbook.xlsx.writeBuffer();
+                        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = 'GRNTemplate.xlsx';
+                        document.body.appendChild(link);
+                        link.click();
+                        link.remove();
+                        URL.revokeObjectURL(url);
+                        Swal.close();
+                    } catch (err) {
+                        console.error(err);
+                        Swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: 'Failed to create the template.'
+                        });
+                    }
+                },
+                error: function (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: 'Failed to load the item list.'
+                    });
+                }
+            });
+        }
+
+        function createGRNTemplateWorkbook(items) {
+            const workbook = new ExcelJS.Workbook();
+            workbook.creator = "Flex Software Consulting Sdn Bhd";
+            workbook.title = "Import GRN Template";
+            workbook.subject = "GRN";
+            workbook.created = new Date();
+
+            const sheet = workbook.addWorksheet("Sheet1");
+            sheet.columns = [
+                { header: 'Reel Code', width: 16 },
+                { header: 'Item Code', width: 22 },
+                { header: 'Quantity', width: 10 },
+                { header: 'Expiry Date', width: 16 },
+                { header: 'Supplier Name', width: 20 },
+                { header: 'Supplier Ref No', width: 20 }
+            ];
+            sheet.getRow(1).font = { bold: true };
+
+            // The item list sits on its own hidden sheet and the dropdown points at that range
+            const itemSheet = workbook.addWorksheet("Items", { state: 'hidden' });
+            itemSheet.columns = [{ header: 'Item Code', width: 22 }, { header: 'Description', width: 40 }];
+            items.forEach(i => itemSheet.addRow([i.itemCode, i.description]));
+
+            if (items.length > 0) {
+                const itemRange = `Items!$A$2:$A$${items.length + 1}`;
+                sheet.dataValidations.add(`B2:B${TEMPLATE_MAX_ROWS + 1}`, {
+                    type: 'list',
+                    allowBlank: true,
+                    formulae: [itemRange],
+                    showErrorMessage: true,
+                    errorStyle: 'stop',
+                    errorTitle: 'Invalid Item Code',
+                    error: 'Please select an Item Code from the list.'
+                });
+            }
+
+            return workbook;
+        }
+
+        // ---- Import GRN by Excel ----
+        const GRN_IMPORT_FIELDS = ['Reel Code', 'Item Code', 'Quantity', 'Expiry Date', 'Supplier Name', 'Supplier Ref No'];
+        let uploadedFileContent = null;
+        let uploadedFileExtension = '';
+        let activeItems = [];  // active Item Code from db
+
+        function customSelect(selectId) {
+            return {
+                open: false,
+                dropUp: false,
+                options: [],
+                selectedValue: '',
+                selectedLabel: '',
+                hasError: false,
+                init() {
+                    this.syncOptions();
+                    const sel = document.getElementById(selectId);
+                    if (!sel) return;
+                    this.hasError = sel.classList.contains('is-invalid');
+                    new MutationObserver(() => {
+                        this.hasError = sel.classList.contains('is-invalid');
+                    }).observe(sel, { attributes: true, attributeFilter: ['class'] });
+                },
+                toggle() {
+                    this.open = !this.open;
+                    if (this.open) {
+                        this.syncOptions();
+                        const rect = this.$el.getBoundingClientRect();
+                        const spaceBelow = window.innerHeight - rect.bottom;
+                        this.dropUp = spaceBelow < 240 && rect.top > spaceBelow;
+                    }
+                },
+                syncOptions() {
+                    const sel = document.getElementById(selectId);
+                    if (!sel) return;
+                    this.options = Array.from(sel.options).map(o => ({ value: o.value, text: o.textContent.trim() }));
+                    this.selectedValue = sel.value;
+                    const selectedOpt = sel.options[sel.selectedIndex];
+                    this.selectedLabel = selectedOpt ? selectedOpt.textContent.trim() : '';
+                },
+                select(opt) {
+                    const sel = document.getElementById(selectId);
+                    sel.value = opt.value;
+                    this.selectedValue = opt.value;
+                    this.selectedLabel = opt.text;
+                    this.open = false;
+                    sel.dispatchEvent(new Event('change'));
+                }
+            };
+        }
+
+        function triggerFileInput() {
+            const input = document.getElementById('fileInput');
+            input.value = "";
+            input.click();
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+            if (fileExtension !== 'csv' && fileExtension !== 'xlsx' && fileExtension !== 'xls') {
+                Swal.fire({
+                    icon: 'error',
+                    title: "Wait",
+                    text: "Only CSV, XLSX, and XLS files are supported."
+                });
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                processFileContent(e.target.result, fileExtension);
+            };
+
+            if (fileExtension === 'csv') {
+                reader.readAsText(file);
+            } else {
+                reader.readAsArrayBuffer(file);
+            }
+        }
+
+        //Row 0 is the header row.
+        function readSheetRows(content, fileExtension) {
+            const workbook = fileExtension === 'csv'
+                ? XLSX.read(content, { type: 'string', codepage: 65001 })
+                : XLSX.read(content, { type: 'array' });
+            return XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 });
+        }
+
+        function processFileContent(content, fileExtension) {
+            try {
+                const data = readSheetRows(content, fileExtension);
+
+                if (!data || data.length === 0) {
+                    Swal.fire({ icon: 'error', title: "Wait", text: "The uploaded file appears to be empty or malformed." });
+                    return;
+                }
+
+                const columns = data[0];
+                if (!columns || columns.length === 0) {
+                    Swal.fire({ icon: 'error', title: "Wait", text: "No headers found in the file." });
+                    return;
+                }
+
+                if (data.length < 2) {
+                    Swal.fire({ icon: 'error', title: "Wait", text: "The file has no data rows." });
+                    return;
+                }
+
+                uploadedFileContent = content;
+                uploadedFileExtension = fileExtension;
+                showColumnMapping(columns);
+
+            } catch (error) {
+                console.error("Error processing the file:", error);
+                Swal.fire({ icon: 'error', title: "Wait", text: "Failed to process the uploaded file." });
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        function defaultGRNBatchNo() {
+            const d = new Date();
+            const pad = n => n.toString().padStart(2, '0');
+            return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}${pad(d.getHours())}${pad(d.getMinutes())}`;
+        }
+
+        function showColumnMapping(columns) {
+            let columnDropdowns = '';
+
+            const isMatch = (col1, col2) => {
+                const col1Str = String(col1).toLowerCase().replace(/\s+/g, '');
+                const col2Str = String(col2).toLowerCase().replace(/\s+/g, '');
+                return col1Str === col2Str;
+            };
+
+            columns.forEach((column, index) => {
+                const matchedField = GRN_IMPORT_FIELDS.find(field => isMatch(field, column));
+
+                columnDropdowns += `
+                <div class="tw:mb-3 tw:grid tw:grid-cols-2 tw:items-center">
+                    <label class="tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400">File Column: ${escapeHtml(column)}</label>
+                    <div class="tw:relative" x-data="customSelect('column${index}')" x-init="init()">
+                        <select class="column-mapping tw:hidden" data-index="${index}" id="column${index}">
+                            <option value="">Select Matching Column</option>
+                            ${GRN_IMPORT_FIELDS.map(field => `
+                                <option value="${field}" ${matchedField === field ? 'selected' : ''}>${field}</option>
+                            `).join('')}
+                        </select>
+                        <button type="button" @@click="toggle()" @@click.outside="open = false"
+                            class="tw:flex tw:w-full tw:items-center tw:justify-between tw:gap-2 tw:rounded-lg tw:border tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-left tw:text-sm tw:text-gray-800 tw:dark:bg-gray-900 tw:dark:text-white/90"
+                            :class="hasError ? 'tw:border-error-500' : (open ? 'tw:border-brand-300 tw:ring-3 tw:ring-brand-500/10' : 'tw:border-gray-300 tw:dark:border-gray-700')">
+                            <span x-text="selectedLabel || 'Select...'" :class="selectedLabel ? '' : 'tw:text-gray-400 tw:dark:text-white/30'"></span>
+                            <i class="bi bi-chevron-down tw:text-xs tw:text-gray-500 tw:transition-transform tw:dark:text-gray-400" :class="open ? 'tw:rotate-180' : ''"></i>
+                        </button>
+                        <div x-show="open" x-transition
+                            class="custom-select-scroll tw:absolute tw:z-50 tw:max-h-60 tw:w-full tw:overflow-y-auto tw:rounded-lg tw:border tw:border-gray-200 tw:bg-white tw:py-1 tw:shadow-theme-lg tw:dark:border-gray-700 tw:dark:bg-gray-900"
+                            :class="dropUp ? 'tw:bottom-full tw:mb-1' : 'tw:top-full tw:mt-1'">
+                            <template x-if="options.length === 0">
+                                <div class="tw:px-4 tw:py-2 tw:text-sm tw:text-gray-400 tw:dark:text-white/30">No options</div>
+                            </template>
+                            <template x-for="opt in options" :key="opt.value">
+                                <div @@click="select(opt)"
+                                    class="tw:cursor-pointer tw:px-4 tw:py-2 tw:text-sm tw:hover:bg-brand-50 tw:dark:hover:bg-brand-500/15"
+                                    :class="opt.value === selectedValue ? 'tw:bg-brand-50 tw:font-medium tw:text-brand-600 tw:dark:bg-brand-500/15 tw:dark:text-brand-400' : 'tw:text-gray-700 tw:dark:text-gray-300'"
+                                    x-text="opt.text"></div>
+                            </template>
+                        </div>
+                    </div>
+                </div>`;
+            });
+
+            $('#txtImportGRN').val(defaultGRNBatchNo());
+            removeErrMsg('txtImportGRN');
+
+            document.getElementById('csvColumnContent').innerHTML = columnDropdowns;
+            if (window.Alpine) {
+                Alpine.initTree(document.getElementById('csvColumnContent'));
+            }
+            $('#columnMatchingModal').modal("show");
+        }
+
+        function captureUserMappings() {
+            const fieldToIndex = {};
+            const duplicates = [];
+            document.querySelectorAll('.column-mapping').forEach(selectElement => {
+                const field = selectElement.value;
+                if (!field) return;
+
+                if (fieldToIndex[field] !== undefined) {
+                    if (!duplicates.includes(field)) duplicates.push(field);
+                } else {
+                    fieldToIndex[field] = Number(selectElement.dataset.index);
+                }
+            });
+            return { fieldToIndex, duplicates };
+        }
+
+        function cleanText(value) {
+            return value === undefined || value === null ? '' : String(value).trim();
+        }
+
+        function parseImportQty(value) {
+            const n = Number(cleanText(value).replace(/,/g, ''));
+            return Number.isInteger(n) && n > 0 ? n : 0;
+        }
+
+        function parseImportDate(value) {
+            if (value === undefined || value === null || value === '') return null;
+
+            let y, m, d, parts;
+            if (value instanceof Date) {
+                y = value.getFullYear(); m = value.getMonth() + 1; d = value.getDate();
+            } else if (typeof value === 'number') {
+                const p = XLSX.SSF.parse_date_code(value);
+                if (!p) return null;
+                y = p.y; m = p.m; d = p.d;
+            } else {
+                const s = String(value).trim();
+                if ((parts = s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/))) {
+                    y = +parts[1]; m = +parts[2]; d = +parts[3];
+                } else if ((parts = s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})$/))) {
+                    d = +parts[1]; m = +parts[2]; y = +parts[3];
+                } else {
+                    return null;
+                }
+            }
+
+            const check = new Date(y, m - 1, d);
+            if (check.getFullYear() !== y || check.getMonth() !== m - 1 || check.getDate() !== d) return null;
+            return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        }
+
+        function processAndSubmitData() {
+            const grnBatchNo = cleanText($('#txtImportGRN').val());
+            if (grnBatchNo === '') {
+                showError('txtImportGRN', 'Please enter GRN Batch No.');
+                return;
+            }
+
+            const { fieldToIndex, duplicates } = captureUserMappings();
+            const missing = GRN_IMPORT_FIELDS.filter(field => fieldToIndex[field] === undefined);
+            if (missing.length > 0) {
+                Swal.fire({ icon: 'error', title: "Wait", text: `Please select a column for: ${missing.join(', ')}.` });
+                return;
+            }
+            if (duplicates.length > 0) {
+                Swal.fire({ icon: 'error', title: "Wait", text: `More than one file column is mapped to: ${duplicates.join(', ')}.` });
+                return;
+            }
+
+            let headers, rows;
+            try {
+                const data = readSheetRows(uploadedFileContent, uploadedFileExtension);
+                headers = data[0];
+                rows = data.slice(1);
+            } catch (error) {
+                console.error("Error processing the file:", error);
+                Swal.fire({ icon: 'error', title: "Wait", text: "Failed to process the uploaded file." });
+                return;
+            }
+
+            const cell = (row, field) => fieldToIndex[field] === undefined ? '' : cleanText(row[fieldToIndex[field]]);
+
+            // Blank rows at the end of the sheet are ignored. A blank row in the middle is kept, so the row
+            // numbers in the error file still match the rows in Excel.
+            const isBlankRow = row => GRN_IMPORT_FIELDS.every(field => cell(row, field) === '');
+            while (rows.length > 0 && isBlankRow(rows[rows.length - 1])) {
+                rows.pop();
+            }
+            if (rows.length === 0) {
+                Swal.fire({ icon: 'error', title: "Wait", text: "The file has no data rows." });
+                return;
+            }
+
+            if (activeItems.length === 0) {
+                Swal.fire({ icon: 'error', title: "Wait", text: "The item list is not available, please refresh the page and try again." });
+                return;
+            }
+
+            const itemByCode = new Map(activeItems.map(item => [item.itemCode.toLowerCase(), item]));
+
+            const grnData = rows.map(row => {
+                const itemCode = cell(row, 'Item Code');
+                const item = itemByCode.get(itemCode.toLowerCase());
+
+                return {
+                    GRNBatchNo: grnBatchNo,
+                    ReelCode: cell(row, 'Reel Code'),
+                    ItemCode: itemCode,
+                    Item_Id: item ? item.item_Id : 0,
+                    Qty: parseImportQty(row[fieldToIndex['Quantity']]),
+                    ExpiryDate: parseImportDate(row[fieldToIndex['Expiry Date']]),
+                    SupplierName: cell(row, 'Supplier Name'),
+                    SupplierRefNo: cell(row, 'Supplier Ref No')
+                };
+            });
+
+            saveExcelGRN(grnData, { headers, rows, fieldToIndex });
+        }
+
+        function saveExcelGRN(grnData, importContext) {
+            $.ajax({
+                url: '/GRN/SaveExcelGRN',
+                type: 'POST',
+                data: JSON.stringify(grnData),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: async function (response) {
+                    $('#columnMatchingModal').modal("hide");
+
+                    if (response.success == true) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: "Success Import",
+                            text: `${grnData.length} reel(s) imported.`,
+                            didClose: () => {
+                                window.location.reload();
+                            }
+                        });
+                    } else if (Array.isArray(response.data) && response.data.some(r => r.errorMsg)) {
+                        try {
+                            await downloadImportErrorFile(response.data, importContext);
+                            Swal.fire({
+                                icon: 'warning',
+                                title: "Validation Issues Found",
+                                text: `${response.errMessage} The error file ${IMPORT_ERROR_FILE_NAME} has been downloaded, please fix the highlighted cells and import again.`
+                            });
+                        } catch (error) {
+                            console.error("Error creating the error file:", error);
+                            Swal.fire({
+                                icon: 'warning',
+                                title: "Validation Issues Found",
+                                text: `${response.errMessage} The error file could not be created.`
+                            });
+                        }
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: response.errMessage
+                        });
+                    }
+                },
+                error: function () {
+                    Swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: "Failed to import the file."
+                    });
+                }
+            });
+        }
+
+        const IMPORT_ERROR_FILE_NAME = 'GRNImport_Errors.xlsx';
+        const IMPORT_ERROR_FIELD_COLUMNS = { ReelCode: 'Reel Code', ItemCode: 'Item Code', Qty: 'Quantity', ExpiryDate: 'Expiry Date', SupplierName: 'Supplier Name', SupplierRefNo: 'Supplier Ref No' };
+
+        async function downloadImportErrorFile(errorRows, importContext) {
+            const { headers, rows, fieldToIndex } = importContext;
+            const colCount = rows.reduce((max, row) => Math.max(max, row.length), headers.length);
+            const errorCol = colCount + 1;
+            const expiryIndex = fieldToIndex['Expiry Date'];
+
+            const workbook = new ExcelJS.Workbook();
+            const sheet = workbook.addWorksheet("Sheet1");
+
+            const headerValues = [];
+            for (let c = 0; c < colCount; c++) {
+                headerValues.push(cleanText(headers[c]));
+            }
+            headerValues.push('Error');
+            sheet.addRow(headerValues).font = { bold: true };
+
+            const markWrong = (excelCell) => {
+                excelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFC7CE' } };
+            };
+
+            rows.forEach((row, i) => {
+                const values = [];
+                for (let c = 0; c < colCount; c++) {
+                    let value = row[c];
+                    if (c === expiryIndex) {
+                        const isoDate = parseImportDate(value);
+                        if (isoDate) value = isoDate;
+                    }
+                    values.push(value === undefined || value === null ? '' : value);
+                }
+
+                const errorRow = errorRows[i];
+                values.push(errorRow ? errorRow.errorMsg : '');
+                const excelRow = sheet.addRow(values);
+
+                if (errorRow && errorRow.errorMsg) {
+                    (errorRow.errorFields || []).forEach(field => {
+                        const index = fieldToIndex[IMPORT_ERROR_FIELD_COLUMNS[field]];
+                        if (index !== undefined) markWrong(excelRow.getCell(index + 1));
+                    });
+                    const errorCell = excelRow.getCell(errorCol);
+                    markWrong(errorCell);
+                    errorCell.font = { color: { argb: 'FF9C0006' } };
+                    errorCell.alignment = { wrapText: true, vertical: 'top' };
+                }
+            });
+
+            for (let c = 1; c <= colCount; c++) {
+                sheet.getColumn(c).width = 18;
+            }
+            sheet.getColumn(errorCol).width = 70;
+
+            const buffer = await workbook.xlsx.writeBuffer();
+            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = IMPORT_ERROR_FILE_NAME;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        function printQR(source) {
+            const reelCode = (typeof source === 'string') ? source : $(source).data('reelcode');
+            if (!reelCode) {
+                return;
+            }
+
+            let qrDataUrl;
+            try {
+                const qr = qrcode(0, 'M');
+                qr.addData(String(reelCode));
+                qr.make();
+                qrDataUrl = qr.createDataURL(6, 8);
+            }
+            catch (e) {
+                // console.log(e);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Print Failed',
+                    text: 'Unable to generate QR code.'
+                });
+                return;
+            }
+
+            // Big enough for the browser's print preview (it is shown inside this window), and centered on the screen.
+            const winWidth = 900, winHeight = 700;
+            const winLeft = Math.max(0, Math.round((window.screen.width - winWidth) / 2));
+            const winTop = Math.max(0, Math.round((window.screen.height - winHeight) / 2));
+            const printWindow = window.open('', '_blank', `width=${winWidth},height=${winHeight},left=${winLeft},top=${winTop}`);
+            if (!printWindow) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Print Failed',
+                    text: 'Please allow pop-ups for this site to print labels.'
+                });
+                return;
+            }
+
+            printWindow.document.write(
+                '<html><head><title>Reel Label</title><style>'
+                + 'body { text-align:center; font-family:Arial, sans-serif; margin:0; padding:10px; }'
+                + 'img { width:150px; height:150px; }'
+                + '.code { font-size:14px; margin-top:5px; }'
+                + '<\/style></head><body>'
+                + '<img src="' + qrDataUrl + '" />'
+                + '<div class="code">' + reelCode + '<\/div>'
+                + '<\/body><\/html>'
+            );
+            printWindow.document.close();
+
+            printWindow.onload = function () {
+                printWindow.focus();
+                printWindow.print();
+            };
+            printWindow.onafterprint = function () {
+                printWindow.close();
+            };
         }
 
         $('#listTable').on('click', '.delete-btn', function() {

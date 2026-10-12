@@ -31,5 +31,8 @@ namespace RackingSystem.Models.GRN
         public string CreatedDateDisplay { get; set; } = "";
 
         public string UpdatedDateDisplay { get; set; } = "";
+        public string ErrorMsg { get; set; } = "";
+
+        public List<string> ErrorFields { get; set; } = new List<string>();
     }
 }

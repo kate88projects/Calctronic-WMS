@@ -57,6 +57,13 @@ namespace RackingSystem.Controllers
             return result;
         }
 
+        [HttpPost]
+        public async Task<IActionResult> SaveExcelGRN([FromBody] List<GRNDtlDTO> req)
+        {
+            ServiceResponseModel<List<GRNDtlDTO>> result = await _grnService.SaveExcelGRN(req);
+            return new JsonResult(result);
+        }
+
         [HttpDelete]
         public async Task<IActionResult> DeleteGRNDtl([FromBody] GRNDtlDTO req)
         {
