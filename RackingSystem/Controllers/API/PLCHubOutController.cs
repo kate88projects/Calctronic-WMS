@@ -35,6 +35,10 @@ namespace RackingSystem.Controllers.API
         private readonly ITrolleyService _trolleyService;
         private readonly IMapper _mapper;
         private readonly IDbContextFactory<AppDbContext> _contextFactory;
+        private readonly IConfiguration _config;
+
+        // AppMode in appsettings.json: "Testing" or "Live"
+        private bool IsTestingMode => string.Equals(_config["AppMode"], "Testing", StringComparison.OrdinalIgnoreCase);
 
         internal string getDecimalText(int input)
         {
@@ -59,8 +63,9 @@ namespace RackingSystem.Controllers.API
             return "";
         }
 
-        public PLCHubOutController(AppDbContext dbContext, ILoaderService loaderService, ISlotService slotService, ITrolleyService trolleyService, IMapper mapper, IDbContextFactory<AppDbContext> contextFactory)
+        public PLCHubOutController(AppDbContext dbContext, ILoaderService loaderService, ISlotService slotService, ITrolleyService trolleyService, IMapper mapper, IDbContextFactory<AppDbContext> contextFactory, IConfiguration config)
         {
+            _config = config;
             _dbContext = dbContext;
             _loaderService = loaderService;
             _slotService = slotService;
@@ -393,23 +398,45 @@ namespace RackingSystem.Controllers.API
                 }
 
                 //// is testing code need change to FIFO
-                //var reel = _dbContext.Reel.Where(x => x.Reel_Id == rack.Reel_Id).FirstOrDefault();
-                var reel = _dbContext.Reel.Where(x => x.Item_Id == item.Item_Id && x.IsReady == true && x.ExpiryDate > DateTime.Today).OrderBy(x => x.ExpiryDate).FirstOrDefault();
-                if (reel == null)
+                Slot? rack = null;
+                Reel? reel = null;
+                if (IsTestingMode)
                 {
-                    MarkRetrieveFailed(rackJob.DocType, item.Detail_Id);
-                    result.success = false;
-                    result.errMessage = "No Reel for item [" + item.ItemCode + "] need to take.";
-                    return result;
+                    rack = _dbContext.Slot.Where(x => x.IsActive == true && x.NeedCheck == false && x.HasReel == true).FirstOrDefault();
+                    if (rack == null)
+                    {
+                        MarkRetrieveFailed(rackJob.DocType, item.Detail_Id);
+                        result.success = false;
+                        result.errMessage = "No Slot for item [" + item.ItemCode + "] need to take.";
+                        return result;
+                    }
+                    reel = _dbContext.Reel.Where(x => x.Reel_Id == rack.Reel_Id).FirstOrDefault();
+                    if (reel == null)
+                    {
+                        MarkRetrieveFailed(rackJob.DocType, item.Detail_Id);
+                        result.success = false;
+                        result.errMessage = "No Reel for item [" + item.ItemCode + "] need to take.";
+                        return result;
+                    }
                 }
-                //var rack = _dbContext.Slot.Where(x => x.IsActive == true && x.NeedCheck == false && x.HasReel == true).FirstOrDefault();
-                var rack = _dbContext.Slot.Where(x => x.IsActive == true && x.NeedCheck == false && x.HasReel == true && x.Reel_Id == reel.Reel_Id).FirstOrDefault();
-                if (rack == null)
+                else
                 {
-                    MarkRetrieveFailed(rackJob.DocType, item.Detail_Id);
-                    result.success = false;
-                    result.errMessage = "No Slot for item [" + item.ItemCode + "] need to take.";
-                    return result;
+                    reel = _dbContext.Reel.Where(x => x.Item_Id == item.Item_Id && x.IsReady == true && x.ExpiryDate > DateTime.Today).OrderBy(x => x.ExpiryDate).FirstOrDefault();
+                    if (reel == null)
+                    {
+                        MarkRetrieveFailed(rackJob.DocType, item.Detail_Id);
+                        result.success = false;
+                        result.errMessage = "No Reel for item [" + item.ItemCode + "] need to take.";
+                        return result;
+                    }
+                    rack = _dbContext.Slot.Where(x => x.IsActive == true && x.NeedCheck == false && x.HasReel == true && x.Reel_Id == reel.Reel_Id).FirstOrDefault();
+                    if (rack == null)
+                    {
+                        MarkRetrieveFailed(rackJob.DocType, item.Detail_Id);
+                        result.success = false;
+                        result.errMessage = "No Slot for item [" + item.ItemCode + "] need to take.";
+                        return result;
+                    }
                 }
 
                 // *** special checking in trolley really have at least 1 free slot
