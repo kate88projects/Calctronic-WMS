@@ -38,7 +38,7 @@ namespace RackingSystem.Controllers.API
         private readonly IConfiguration _config;
 
         // AppMode in appsettings.json: "Testing" or "Live"
-        private bool IsTestingMode => string.Equals(_config["AppMode"], "Testing", StringComparison.OrdinalIgnoreCase);
+        private bool IsTestingMode => AppModeHelper.IsTesting(_config);
 
         internal string getDecimalText(int input)
         {

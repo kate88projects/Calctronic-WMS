@@ -76,45 +76,15 @@ namespace RackingSystem.Controllers
         }
 
         [HttpPost]
-        public IActionResult ClearRackJobInfo()
+        public async Task<IActionResult> ClearRackJobInfo()
         {
-            ServiceResponseModel<bool> result = new ServiceResponseModel<bool>();
-            result.data = false;
-
             var uacClaim = User.FindFirst("UACIdList")?.Value ?? "";
             if (!uacClaim.Split(',').Contains(((int)EnumUAC.Q_ClearRackJobInfo).ToString()))
             {
-                return new JsonResult(result);
+                return new JsonResult(new ServiceResponseModel<bool>());
             }
 
-            try
-            {
-                var srms = _context.RackJob.FirstOrDefault();
-                if (srms == null)
-                {
-                    result.errMessage = "SRMS record not found.";
-                    return new JsonResult(result);
-                }
-
-                srms.StartDate = DateTime.Now;
-                srms.CurrentJobType = "";
-                srms.Loader_Id = 0;
-                srms.Trolley_Id = 0;
-                srms.RackJobQueue_Id = 0;
-                srms.LoginIP = "";
-                srms.Json = "";
-                srms.TotalCount = 0;
-                _context.SaveChanges();
-
-                result.success = true;
-                result.data = true;
-            }
-            catch (Exception ex)
-            {
-                result.errMessage = ex.Message;
-                result.errStackTrace = ex.StackTrace ?? "";
-            }
-
+            ServiceResponseModel<bool> result = await _qService.ClearRackJobInfo();
             return new JsonResult(result);
         }
 

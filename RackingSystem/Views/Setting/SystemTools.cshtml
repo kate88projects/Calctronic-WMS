@@ -1,0 +1,133 @@
+<div class="tw:flex tw:w-full tw:items-center tw:justify-between">
+    <h2 class="tw:text-lg tw:mb-0 tw:ml-2 tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">System Tools</h2>
+</div>
+
+<div class="tw:mt-3 tw:space-y-4">
+    @if (ViewBag.IsTestingMode == true)
+    {
+        <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-4 tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:p-5 tw:dark:border-gray-800 tw:dark:bg-white/[0.03]">
+            <div>
+                <h4 class="tw:mb-1 tw:text-base tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">
+                    Initialize Testing DB
+                    <span class="tw:ml-2 tw:rounded-full tw:bg-warning-50 tw:px-2 tw:py-0.5 tw:text-xs tw:font-medium tw:text-warning-500 tw:dark:bg-warning-500/15">Testing only</span>
+                </h4>
+                <p class="tw:mb-0 tw:text-sm tw:text-gray-500 tw:dark:text-gray-400">Reset the database to the initial testing state. All current data will be lost.</p>
+            </div>
+            <button type="button" class="tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:border-0 tw:bg-red-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:transition tw:hover:bg-red-600"
+                    onclick="initializeTestingDB()">
+                <i class="bi bi-database-exclamation"></i>
+                Initialize Testing DB
+            </button>
+        </div>
+    }
+
+    <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-between tw:gap-4 tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:p-5 tw:dark:border-gray-800 tw:dark:bg-white/[0.03]">
+        <div>
+            <h4 class="tw:mb-1 tw:text-base tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Clear Rack Job Cache</h4>
+            <p class="tw:mb-0 tw:text-sm tw:text-gray-500 tw:dark:text-gray-400">Clear the current SRMS job info (job type, loader, trolley, queue, JSON and count).</p>
+        </div>
+        <button type="button" class="tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:border-0 tw:bg-amber-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:transition tw:hover:bg-amber-600"
+                onclick="clearRackJobCache()">
+            <i class="bi bi-eraser"></i>
+            Clear Rack Job Cache
+        </button>
+    </div>
+</div>
+
+@section Scripts
+{
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/sweetalert2.all.min.js"></script>
+
+    <script type="text/javascript">
+
+        function postSystemTool(url, successTitle) {
+            $.ajax({
+                url: url,
+                type: 'POST',
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: successTitle,
+                            text: ""
+                        });
+                    }
+                    else if (!result.errMessage) {
+                        // no permission, do nothing
+                        Swal.close();
+                    }
+                    else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: "Wait",
+                            text: result.errMessage
+                        });
+                    }
+                },
+                error: function (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: error.val
+                    });
+                }
+            });
+        }
+
+        function initializeTestingDB() {
+            Swal.fire({
+                title: "Initialize Testing DB?",
+                html: "All current data will be lost!<br/>Type <b>INIT</b> to confirm.",
+                icon: 'warning',
+                input: 'text',
+                showCancelButton: true,
+                confirmButtonText: 'Initialize',
+                cancelButtonText: 'Cancel',
+                allowOutsideClick: false,
+                preConfirm: (value) => {
+                    if (value !== 'INIT') {
+                        Swal.showValidationMessage('Please type INIT to confirm.');
+                        return false;
+                    }
+                    return true;
+                }
+            }).then(function (r) {
+                if (r.isConfirmed == true) {
+                    postSystemTool('/Setting/InitializeTestingDB', "Success Initialized");
+                }
+            });
+        }
+
+        function clearRackJobCache() {
+            Swal.fire({
+                title: "Are you sure want to clear the Rack Job cache?",
+                text: "Current SRMS job info will be cleared.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'Cancel',
+                allowOutsideClick: false
+            }).then(function (r) {
+                if (r.isConfirmed == true) {
+                    postSystemTool('/Setting/ClearRackJobCache', "Success Cleared");
+                }
+            });
+        }
+
+    </script>
+}

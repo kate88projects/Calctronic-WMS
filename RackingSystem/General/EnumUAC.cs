@@ -51,5 +51,6 @@
         SETTINGS_SlotCalculation_MENU = 124,
         SETTINGS_SlotColumn_MENU = 125,
         SETTINGS_GlobalSetting_MENU = 126,
+        SETTINGS_SystemTools_MENU = 127,
     }
 }

@@ -23,15 +23,16 @@
 } *@
 
 <div class="tw:flex tw:w-full tw:items-center tw:justify-between tw:gap-4">
+    @* temporary hide: click title to Clear Rack Job Info (use Setting > System Tools instead)
     @if (ViewBag.PermissionList.Contains(91))
     {
         <h2 class="tw:mb-0 tw:ml-2 tw:shrink-0 tw:cursor-pointer tw:select-none tw:text-lg tw:font-semibold tw:text-gray-800 tw:dark:text-white/90"
             onclick="clearRackJobInfo()" title="Clear Rack Job Info">Queue Management</h2>
     }
     else
-    {
+    { *@
         <h2 class="tw:mb-0 tw:ml-2 tw:shrink-0 tw:text-lg tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Queue Management</h2>
-    }
+    @* } *@
     <div class="tw:flex tw:flex-wrap tw:items-center tw:justify-end tw:gap-2">
         @* <button type="button" class="tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:border-0 tw:bg-zinc-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:transition tw:hover:bg-zinc-600"
                 onclick="clearRackJobInfo()" @(ViewBag.PermissionList.Contains(91) ? "" : "hidden")>

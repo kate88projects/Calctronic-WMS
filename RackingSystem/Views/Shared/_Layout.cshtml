@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>@ViewData["Title"] - WMS</title>
+    <title>@RackingSystem.General.AppModeHelper.TitlePrefix(AppConfig)@ViewData["Title"] - WMS</title>
 
     <!-- Theme Color -->
     <meta name="color-scheme" content="light" />
@@ -91,7 +91,7 @@
                    class="tw:flex tw:items-center tw:gap-2 tw:text-lg tw:font-semibold tw:text-gray-800 tw:no-underline tw:hover:text-gray-800 tw:dark:text-white"
                    :class="sidebarToggle ? 'tw:xl:hidden' : ''">
                     <i class="bi bi-hdd-rack tw:text-xl tw:text-brand-500"></i>
-                    <span>WMS</span>
+                    <span>@RackingSystem.General.AppModeHelper.TitlePrefix(AppConfig)WMS</span>
                 </a>
                 <i class="bi bi-hdd-rack tw:hidden tw:text-xl tw:text-brand-500" :class="sidebarToggle ? 'tw:xl:block' : ''"></i>
             </div>
@@ -578,7 +578,8 @@
                         }
 
                         @if (ViewBag.PermissionList.Contains(121) || ViewBag.PermissionList.Contains(122) || ViewBag.PermissionList.Contains(123) ||
-                        ViewBag.PermissionList.Contains(124) || ViewBag.PermissionList.Contains(125) || ViewBag.PermissionList.Contains(126))
+                        ViewBag.PermissionList.Contains(124) || ViewBag.PermissionList.Contains(125) || ViewBag.PermissionList.Contains(126) ||
+                        ViewBag.PermissionList.Contains(127))
                         {
                             <li>
                                 <a href="javascript:void(0)" @@click.prevent="selected = (selected === 'grpSETTINGS' ? '' : 'grpSETTINGS')"
@@ -644,6 +645,15 @@
                                                 </a>
                                             </li>
                                         }
+                                        @if (ViewBag.PermissionList.Contains(127) == true)
+                                        {
+                                            <li>
+                                                <a asp-action="SystemTools" asp-controller="Setting"
+                                                   class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "SystemTools" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    System Tools
+                                                </a>
+                                            </li>
+                                        }
                                     </ul>
                                 </div>
                             </li>
@@ -685,7 +695,7 @@
                         <a asp-action="Dashboard" asp-controller="Dashboard"
                            class="tw:flex tw:items-center tw:gap-2 tw:text-lg tw:font-semibold tw:text-gray-800 tw:no-underline tw:xl:hidden tw:dark:text-white">
                             <i class="bi bi-hdd-rack tw:text-xl tw:text-brand-500"></i>
-                            <span>WMS</span>
+                            <span>@RackingSystem.General.AppModeHelper.TitlePrefix(AppConfig)WMS</span>
                         </a>
 
                         <!-- Application menu toggle: collapses the right-hand cluster

@@ -4,7 +4,7 @@
         ("txtLoaderList", "1", "Loader List"),
         ("txtLoaderColList", "7", "Loader Column List"),
         ("txtSlotList", "4", "Slot List"),
-        ("txtSlotPulses", "8", "Slot Pulses"),
+        ("txtSlotPulses", "5", "Slot Pulses"),
         ("txtTrolleyList", "2", "Trolley List"),
         ("txtTrolleySlotList", "3", "Trolley Slot List"),
         ("txtTrolleyPulses", "8", "Trolley Pulses"),
@@ -37,9 +37,12 @@
         ("txtTrolleyDtl", "105", "Trolley Dtl List"),
         ("txtSRMSCol", "106", "SRMS Col Status"),
         ("txtTrolleyCol", "107", "Trolley Col Status"),
-        ("txtHubInLog", "109", "Hub In Log"),
-        ("txtHubOutLog", "110", "Hub Out Log"),
-        ("txtPAEmptyDrawerLog", "111", "PA Empty Drawer"),
+        // ("txtHubInLog", "109", "Hub In Log"),
+        // ("txtHubOutLog", "110", "Hub Out Log"),
+        // ("txtPAEmptyDrawerLog", "111", "PA Empty Drawer"),
+        ("txtTrolleyReelOut", "108", "Trolley Reel Out"),
+        ("txtSearchSlot", "112", "Search Slot"),
+        ("txtStockAging", "113", "Stock Aging"),
     };
 
     (string Id, string Value, string Label)[] settingItems = {
@@ -49,6 +52,7 @@
         ("txtSlotCalculation", "124", "Slot Usage"),
         ("txtSlotColumn", "125", "Slot Column"),
         ("txtGlobalSet", "126", "Global Setting"),
+        ("txtSystemTools", "127", "System Tools"),
     };
 
     var permissionGroups = new (string GroupDivId, string ParentId, string ParentName, string ParentLabel, string ChildClass, (string Id, string Value, string Label)[] Items)[]

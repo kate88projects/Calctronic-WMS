@@ -338,7 +338,41 @@ namespace RackingSystem.Services.RackJobQueueServices
             return result;
         }
 
+        public async Task<ServiceResponseModel<bool>> ClearRackJobInfo()
+        {
+            ServiceResponseModel<bool> result = new ServiceResponseModel<bool>();
+            result.data = false;
 
+            try
+            {
+                var srms = await _dbContext.RackJob.FirstOrDefaultAsync();
+                if (srms == null)
+                {
+                    result.errMessage = "SRMS record not found.";
+                    return result;
+                }
+
+                srms.StartDate = DateTime.Now;
+                srms.CurrentJobType = "";
+                srms.Loader_Id = 0;
+                srms.Trolley_Id = 0;
+                srms.RackJobQueue_Id = 0;
+                srms.LoginIP = "";
+                srms.Json = "";
+                srms.TotalCount = 0;
+                await _dbContext.SaveChangesAsync();
+
+                result.success = true;
+                result.data = true;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
 
     }
 }

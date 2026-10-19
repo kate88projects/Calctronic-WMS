@@ -13,5 +13,7 @@ namespace RackingSystem.Services.RackJobQueueServices
 
         public Task<ServiceResponseModel<List<JobOrder>>> GetJOList_PendingToQueue();
 
+        public Task<ServiceResponseModel<bool>> ClearRackJobInfo();
+
     }
 }
