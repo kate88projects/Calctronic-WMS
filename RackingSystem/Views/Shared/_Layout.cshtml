@@ -71,6 +71,7 @@
     var grpQOpen = ViewData["ActiveGroup"]?.ToString() == "grpQ";
     var grpRACKINGOpen = ViewData["ActiveGroup"]?.ToString() == "grpRACKING";
     var grpSETTINGSOpen = ViewData["ActiveGroup"]?.ToString() == "grpSETTINGS";
+    var updateProcessIcon = "bi bi-star-fill";
 }
 
 <body class="tw:bg-gray-50 tw:dark:bg-gray-900"
@@ -180,6 +181,7 @@
                                             <li>
                                                 <a asp-action="SlotUpdatePulse" asp-controller="Slot"
                                                    class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "SlotUpdatePulse" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    <i class="@updateProcessIcon"></i>
                                                     SRMS Update QR Pulses
                                                 </a>
                                             </li>
@@ -189,6 +191,7 @@
                                             <li>
                                                 <a asp-action="TrolleyUpdatePulse" asp-controller="Trolley"
                                                    class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "TrolleyUpdatePulse" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    <i class="@updateProcessIcon"></i>
                                                     Trolley Update QR Pulses
                                                 </a>
                                             </li>
@@ -303,6 +306,7 @@
                                             <li>
                                                 <a asp-action="NewAutoLoaderTask" asp-controller="GRN"
                                                    class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "NewAutoLoaderTask" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    <i class="@updateProcessIcon"></i>
                                                     New Auto Loader Task
                                                 </a>
                                             </li>
@@ -524,6 +528,7 @@
                                             <li>
                                                 <a asp-action="TrolleyReelOut" asp-controller="Rack"
                                                    class="tw:menu-dropdown-item tw:group @(ViewData["ActiveTab"]?.ToString() == "TrolleyReelOut" ? "tw:menu-dropdown-item-active" : "tw:menu-dropdown-item-inactive")">
+                                                    <i class="@updateProcessIcon"></i>
                                                     Trolley Reel Out
                                                 </a>
                                             </li>
