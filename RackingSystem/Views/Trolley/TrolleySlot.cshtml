@@ -1097,35 +1097,55 @@
                 });
             }
         }
+        
+        function downloadTemplateFile(fileName, subject, headers, widthsPx, requiredHeaders = []) {
+            const workbook = new ExcelJS.Workbook();
+            workbook.creator = "Flex Software Consulting Sdn Bhd";
+            workbook.created = new Date();
+            workbook.properties.title = "Template";
+            workbook.properties.subject = subject;
+
+            const sheet = workbook.addWorksheet("Sheet1");
+            const headerRow = sheet.addRow(headers);
+            headerRow.font = { name: 'Arial', size: 11, bold: true };
+            headers.forEach((header, i) => {
+                if (requiredHeaders.includes(header)) {
+                    headerRow.getCell(i + 1).value = { richText: [
+                        { text: header, font: { name: 'Arial', size: 11, bold: true } },
+                        { text: ' *', font: { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFF0000' } } }
+                    ] };
+                }
+                sheet.getColumn(i + 1).width = Math.max(Math.round((widthsPx[i] || 0) / 7), header.length + 3);
+            });
+
+            workbook.xlsx.writeBuffer().then(function (buffer) {
+                const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = fileName;
+                link.click();
+                URL.revokeObjectURL(link.href);
+            }).catch(function (err) {
+                console.error("Error creating the template:", err);
+            });
+        }
 
         function downloadTemp(type) {
-            var book = XLSX.utils.book_new();
-            book.Props = {
-                Title: "Template",
-                Subject: type === "slots" ? "Slot List" : "Pulses",
-                Author: "Flex Software Consulting Sdn Bhd",
-                CreatedDate: new Date()
-            };
+            const headers = type === "slots"
+                ? ['Trolley Code', 'Trolley Slot Code', 'Column No', 'Row No', 'Is Active', 'Is Left', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
+                   'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6']
+                : ['Trolley Slot Code', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
+                   'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6'];
 
-            var book_header = type === "slots" ? [
-                ['Trolley Code', 'Trolley Slot Code', 'Column No', 'Row No', 'Is Active', 'Is Left', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse', 
-                'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6']
-            ] : [
-                ['Trolley Slot Code', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse', 
-                'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6']
-            ];
+            const widths = type === "slots"
+                ? [70, 100, 60, 50, 50, 50, 50, 50, 60, 60, 100, 100, 100, 100, 100, 100]
+                : [100, 50, 50, 60, 60, 100, 100, 100, 100, 100, 100];
 
-            var booksheet = XLSX.utils.aoa_to_sheet(book_header);
-            // const bs = XLSX.utils.json_to_sheet(book_header);
-            booksheet['!cols'] = type === "slots" ? [
-                {wpx: 70}, {wpx: 100}, {wpx: 60}, {wpx: 50}, {wpx: 50}, {wpx: 50}, {wpx: 50}, {wpx: 50}, 
-                {wpx: 60}, {wpx: 60}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}
-            ] : [
-                {wpx: 100}, {wpx: 50}, {wpx: 50}, {wpx: 60}, {wpx: 60},
-                {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}
-            ]
-            XLSX.utils.book_append_sheet(book, booksheet, "Sheet1");
-            XLSX.writeFile(book, type === "slots" ? "TrolleySlotListTemplate.xlsx" : "TrolleySlotPulsesTemplate.xlsx");
+            downloadTemplateFile(
+                type === "slots" ? "TrolleySlotListTemplate.xlsx" : "TrolleySlotPulsesTemplate.xlsx",
+                type === "slots" ? "Slot List" : "Pulses",
+                headers, widths,
+                type === "slots" ? ['Trolley Code', 'Trolley Slot Code', 'Column No', 'Row No'] : ['Trolley Slot Code']);
         }
 
         function triggerFileInput(source) {
@@ -1212,8 +1232,9 @@
             let columnDropdowns = '';
     
             const isMatch = (col1, col2) => {
-                const col1Str = String(col1).toLowerCase().replace(/\s+/g, '');
-                const col2Str = String(col2).toLowerCase().replace(/\s+/g, '');
+                // a trailing * marks a compulsory column in the template, it is not part of the name
+                const col1Str = String(col1).toLowerCase().replace(/[\s*]+/g, '');
+                const col2Str = String(col2).toLowerCase().replace(/[\s*]+/g, '');
                 return col1Str === col2Str;
             };
 
@@ -1274,6 +1295,10 @@
             return mappings;
         }
 
+        function cleanText(val) {
+            return val === undefined || val === null ? '' : String(val).trim();
+        }
+
         function processAndSubmitData() {
             let workbook;
             let slotsData;
@@ -1292,79 +1317,112 @@
                 const sheet = workbook.Sheets[workbook.SheetNames[0]];
                 const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-                const columns = data[0]; 
+                const columns = data[0];
                 const colIndex = {};
+
+                const fieldNames = updateType === "slots"
+                    ? ['Trolley Code', 'Trolley Slot Code', 'Column No', 'Row No', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
+                       'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6',
+                       'Is Active', 'Is Left']
+                    : ['Trolley Slot Code', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
+                       'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6',
+                       'Is Active', 'Is Left'];
+
+                fieldNames.forEach(field => {
+                    const fileColumn = Object.keys(userMappings).find(name => userMappings[name] === field);
+                    colIndex[field] = fileColumn === undefined ? -1 : columns.findIndex(c => String(c) === fileColumn);
+                });
+
+                const dataRows = data.slice(1).map((row, i) => ({ row, excelRow: i + 2 }));
+                while (dataRows.length > 0 && fieldNames.every(field => cleanText(dataRows[dataRows.length - 1].row[colIndex[field]]) === '')) {
+                    dataRows.pop();
+                }
+                if (dataRows.length === 0) {
+                    alert("The file has no data rows.");
+                    return;
+                }
+
+                if (updateType === "slots" && trolleyCodeList.length === 0) {
+                    Swal.fire({ icon: 'error', title: "Wait", text: "The trolley list is not available, please refresh the page and try again." });
+                    return;
+                }
+
+                const errors = [];
+                const numberOf = (row, excelRow, field) => {
+                    const text = cleanText(row[colIndex[field]]).replace(/,/g, '');
+                    if (text === '') return undefined;
+                    const n = Number(text);
+                    if (!Number.isInteger(n)) {
+                        errors.push(`Row ${excelRow}: ${field} [${text}] must be a whole number`);
+                        return undefined;
+                    }
+                    return n;
+                };
+                const textOf = (row, field) => cleanText(row[colIndex[field]]) || undefined;
 
                 if (updateType === "slots")
                 {
-                    const fieldNames = [
-                        'Trolley Code', 'Trolley Slot Code', 'Column No', 'Row No', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
-                        'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6',
-                        'Is Active', 'Is Left'
                     ];
-                    fieldNames.forEach(field => {
-                        colIndex[field] = columns.indexOf(normalizeString(userMappings, field));
-                    });
-
                     const parseBool = val =>
                         val === true || val === 1 || val === '1' || val === 'true' || val === 'TRUE';
 
-                    slotsData = data.slice(1).map(row => {
-                        var trolley = trolleyCodeList.find(x => x.trolleyCode == row[0]);
+                    slotsData = dataRows.map(({ row, excelRow }) => {
+                        const trolleyCode = cleanText(row[colIndex['Trolley Code']]);
+                        const trolley = trolleyCodeList.find(x => x.trolleyCode === trolleyCode);
+                        if (!trolley) {
+                            errors.push(trolleyCode === '' ? `Row ${excelRow}: trolley code is empty` : `Row ${excelRow}: trolley [${trolleyCode}] not found or not active`);
+                        }
 
                         return {
-                            Trolley_Id: trolley.trolleyId,
-                            TrolleySlotCode: row[colIndex['Trolley Slot Code']],
-                            ColNo: row[colIndex['Column No']],
-                            RowNo: row[colIndex['Row No']],
-                            XPulse: row[colIndex['X Pulse']],
-                            YPulse: row[colIndex['Z Pulse']],
-                            QRXPulse: row[colIndex['QR-X Pulse']],
-                            QRYPulse: row[colIndex['QR-Z Pulse']],
-                            Add1Pulse: row[colIndex['Additional Pulse 1']],
-                            Add2Pulse: row[colIndex['Additional Pulse 2']],
-                            Add3Pulse: row[colIndex['Additional Pulse 3']],
-                            Add4Pulse: row[colIndex['Additional Pulse 4']],
-                            Add5Pulse: row[colIndex['Additional Pulse 5']],
-                            Add6Pulse: row[colIndex['Additional Pulse 6']],
+                            Trolley_Id: trolley ? trolley.trolleyId : 0,
+                            ExcelRow: excelRow,
+                            TrolleySlotCode: textOf(row, 'Trolley Slot Code'),
+                            ColNo: numberOf(row, excelRow, 'Column No'),
+                            RowNo: numberOf(row, excelRow, 'Row No'),
+                            XPulse: numberOf(row, excelRow, 'X Pulse'),
+                            YPulse: numberOf(row, excelRow, 'Z Pulse'),
+                            QRXPulse: numberOf(row, excelRow, 'QR-X Pulse'),
+                            QRYPulse: numberOf(row, excelRow, 'QR-Z Pulse'),
+                            Add1Pulse: numberOf(row, excelRow, 'Additional Pulse 1'),
+                            Add2Pulse: numberOf(row, excelRow, 'Additional Pulse 2'),
+                            Add3Pulse: numberOf(row, excelRow, 'Additional Pulse 3'),
+                            Add4Pulse: numberOf(row, excelRow, 'Additional Pulse 4'),
+                            Add5Pulse: numberOf(row, excelRow, 'Additional Pulse 5'),
+                            Add6Pulse: numberOf(row, excelRow, 'Additional Pulse 6'),
                             IsActive: parseBool(row[colIndex['Is Active']]),
                             IsLeft: parseBool(row[colIndex['Is Left']]),
                         };
                     });
                 }
                 else {
-                    const fieldNames = [
-                        'Trolley Slot Code','X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
-                        'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6',
-                        'Is Active', 'Is Left'
-                    ];
-                    fieldNames.forEach(field => {
-                        colIndex[field] = columns.indexOf(normalizeString(userMappings, field));
-                    });
-
-                    // const parseBool = val =>
-                    //     val === true || val === 1 || val === '1' || val === 'true' || val === 'TRUE';
-
-                    slotsData = data.slice(1).map(row => {
+                    slotsData = dataRows.map(({ row, excelRow }) => {
                         return {
-                            TrolleySlotCode: row[colIndex['Trolley Slot Code']],
-                            XPulse: row[colIndex['X Pulse']],
-                            YPulse: row[colIndex['Z Pulse']],
-                            QRXPulse: row[colIndex['QR-X Pulse']],
-                            QRYPulse: row[colIndex['QR-Z Pulse']],
-                            Add1Pulse: row[colIndex['Additional Pulse 1']],
-                            Add2Pulse: row[colIndex['Additional Pulse 2']],
-                            Add3Pulse: row[colIndex['Additional Pulse 3']],
-                            Add4Pulse: row[colIndex['Additional Pulse 4']],
-                            Add5Pulse: row[colIndex['Additional Pulse 5']],
-                            Add6Pulse: row[colIndex['Additional Pulse 6']],
-                            // IsActive: parseBool(row[colIndex['Is Active']]),
-                            // IsLeft: parseBool(row[colIndex['Is Left']]),
+                            ExcelRow: excelRow,
+                            TrolleySlotCode: textOf(row, 'Trolley Slot Code'),
+                            XPulse: numberOf(row, excelRow, 'X Pulse'),
+                            YPulse: numberOf(row, excelRow, 'Z Pulse'),
+                            QRXPulse: numberOf(row, excelRow, 'QR-X Pulse'),
+                            QRYPulse: numberOf(row, excelRow, 'QR-Z Pulse'),
+                            Add1Pulse: numberOf(row, excelRow, 'Additional Pulse 1'),
+                            Add2Pulse: numberOf(row, excelRow, 'Additional Pulse 2'),
+                            Add3Pulse: numberOf(row, excelRow, 'Additional Pulse 3'),
+                            Add4Pulse: numberOf(row, excelRow, 'Additional Pulse 4'),
+                            Add5Pulse: numberOf(row, excelRow, 'Additional Pulse 5'),
+                            Add6Pulse: numberOf(row, excelRow, 'Additional Pulse 6'),
                         };
                     });
                 }
 
-                saveExcelSlots(slotsData, content, updateType); 
+                if (errors.length > 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: errors.slice(0, 10).join('; ') + (errors.length > 10 ? ` ... and ${errors.length - 10} more` : '')
+                    });
+                    return;
+                }
+
+                saveExcelSlots(slotsData, { headers: columns, dataRows, fieldToIndex: colIndex }, updateType);
 
             } catch (error) {
                 console.error("Error processing the file:", error);
@@ -1372,18 +1430,7 @@
             }
         }
 
-        function normalizeString(userMappings, str) {
-            var rValue = str;
-
-            if (userMappings != null)
-            {
-                rValue = userMappings[str];
-            }
-
-            return rValue;
-        }
-
-        function saveExcelSlots(slotsData, bookBuffer, source) {
+        function saveExcelSlots(slotsData, importContext, source) {
             const url = source == "slots" ? '/Trolley/SaveExcelTrolleySlot' : '/Trolley/UpdateExcelTSPulses';
             if (slotsData != null)
             {
@@ -1415,7 +1462,7 @@
                             });
                         } else {
                            if (response.data && response.data.length > 0) {
-                               markErrorsInSheet(bookBuffer, response.data, source);
+                               markErrorsInSheet(importContext, response.data, source);
                                Swal.fire({
                                   icon: 'warning',
                                   title: "Validation Issues Found",
@@ -1432,75 +1479,101 @@
                            }
                         }
                     },
-                    error: function(xhr, status, error) {
+                    error: function(xhr) {
+                        const detail = xhr && xhr.responseJSON && xhr.responseJSON.errors ? Object.values(xhr.responseJSON.errors).flat()[0] : '';
                         Swal.fire({
                             icon: 'error',
                             title: "Wait",
-                            text: error.val
+                            text: detail ? `The server could not read the file: ${detail}` : 'Failed to import the file.'
                         });
                     }
                 });
             }
         }
 
-        async function markErrorsInSheet(bookBuffer, errorRows, updateType) {
-              const workbook = new ExcelJS.Workbook();
-              await workbook.xlsx.load(bookBuffer);
-              const worksheet = workbook.getWorksheet(1); 
-              const columnsToHighlight = updateType === "slots" ? [2, 3, 4, 17] : [1, 12];
+        const IMPORT_ERROR_FIELD_COLUMNS = {
+            TrolleySlotCode: 'Trolley Slot Code', ColNo: 'Column No', RowNo: 'Row No', IsLeft: 'Is Left',
+            XPulse: 'X Pulse', YPulse: 'Z Pulse', QRXPulse: 'QR-X Pulse', QRYPulse: 'QR-Z Pulse',
+            Add1Pulse: 'Additional Pulse 1', Add2Pulse: 'Additional Pulse 2', Add3Pulse: 'Additional Pulse 3',
+            Add4Pulse: 'Additional Pulse 4', Add5Pulse: 'Additional Pulse 5', Add6Pulse: 'Additional Pulse 6'
+        };
 
-              // let colorIndex = 0;
-              // const highlightColors = [
-              //     'FFCCCC', 
-              //     'FFE5CC', 
-              //     'FFFFCC', 
-              //   ];
+        async function markErrorsInSheet(importContext, errorRows, updateType) {
+            const { headers, dataRows, fieldToIndex } = importContext;
+            const colCount = dataRows.reduce((max, r) => Math.max(max, r.row.length), headers.length);
+            const errorCol = colCount + 1;
 
-              // Add "Error" header 
-              const headerRow = worksheet.getRow(1);
-              const errIdx = updateType === "slots" ? 17 : 12;
-              headerRow.getCell(errIdx).value = 'Error';
-              headerRow.commit();
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet("Sheet1");
 
-              worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
-                if (rowNumber === 1) return; 
-                const errorRow = errorRows[rowNumber - 2];
+            const headerValues = [];
+            for (let c = 0; c < colCount; c++) {
+                headerValues.push(cleanText(headers[c]));
+            }
+            headerValues.push('Error');
+            const titleRow = worksheet.addRow(headerValues);
+            titleRow.font = { name: 'Arial', size: 11, bold: true };
+            // the asterisk of a compulsory column stays red, like in the template
+            titleRow.eachCell(cell => {
+                const parts = /^(.*?)\s*\*$/.exec(String(cell.value));
+                if (parts) {
+                    cell.value = { richText: [
+                        { text: parts[1], font: { name: 'Arial', size: 11, bold: true } },
+                        { text: ' *', font: { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFF0000' } } }
+                    ] };
+                }
+            });
 
-                  // const fillColor = highlightColors[colorIndex % highlightColors.length];
-                  // colorIndex++;
-                  //console.log("error index" , errIdx);
-                  //console.log(columnsToHighlight);
+            const errorByRow = new Map();
+            errorRows.forEach(e => {
+                if (e.errorMsg) errorByRow.set(e.excelRow, e);
+            });
 
-                  if (errorRow && errorRow.errorMsg != "")
-                  {
-                      columnsToHighlight.forEach(colNum => {
-                            const cell = row.getCell(colNum);
-                            cell.fill = { 
-                                type: 'pattern',
-                                pattern: 'solid',
-                                fgColor: { argb: 'FFCCCC' }
-                            };
-                        });
-                     row.getCell(errIdx).value = errorRow.errorMsg;
-                  }
-              });
+            const markWrong = cell => {
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFC7CE' } };
+            };
 
-              // Export updated file
-              const updatedBuffer = await workbook.xlsx.writeBuffer();
-              const blob = new Blob([updatedBuffer], {
+            dataRows.forEach(({ row, excelRow }) => {
+                const values = [];
+                for (let c = 0; c < colCount; c++) {
+                    values.push(cleanText(row[c]) === '' ? null : row[c]);
+                }
+
+                const errorRow = errorByRow.get(excelRow);
+                values.push(errorRow ? errorRow.errorMsg : null);
+                const sheetRow = worksheet.addRow(values);
+
+                if (errorRow) {
+                    (errorRow.errorFields || []).forEach(field => {
+                        const index = fieldToIndex[IMPORT_ERROR_FIELD_COLUMNS[field]];
+                        if (index !== undefined && index >= 0) markWrong(sheetRow.getCell(index + 1));
+                    });
+                    const errorCell = sheetRow.getCell(errorCol);
+                    markWrong(errorCell);
+                    errorCell.font = { color: { argb: 'FF9C0006' } };
+                }
+            });
+
+            for (let c = 1; c <= colCount; c++) {
+                worksheet.getColumn(c).width = 18;
+            }
+            worksheet.getColumn(errorCol).width = 60;
+
+            const updatedBuffer = await workbook.xlsx.writeBuffer();
+            const blob = new Blob([updatedBuffer], {
                 type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-              });
+            });
 
-              const link = document.createElement("a");
-              link.href = URL.createObjectURL(blob);
-              link.download = "TrolleySlotList_Errors.xlsx";
-              link.click();
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = updateType === "slots" ? "TrolleySlotList_Errors.xlsx" : "TrolleySlotPulses_Errors.xlsx";
+            link.click();
 
-              Swal.fire({
+            Swal.fire({
                 icon: 'warning',
                 title: "Validation Issues Found",
                 text: "Review on returned file and fix errors."
-              });
+            });
         }
 	</script>
 }

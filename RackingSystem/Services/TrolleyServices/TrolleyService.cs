@@ -224,8 +224,8 @@ namespace RackingSystem.Services.TrolleyServices
                     _trolley.IPAdd3 = trolley.IPAdd3;
                     _trolley.IPAdd1AColNo = trolley.IPAdd1AColNo;
                     _trolley.IPAdd1BColNo = trolley.IPAdd1BColNo;
-                    _trolley.IPAdd1BColNo = trolley.IPAdd1BColNo;
                     _trolley.IPAdd2AColNo = trolley.IPAdd2AColNo;
+                    _trolley.IPAdd2BColNo = trolley.IPAdd2BColNo;
                     _trolley.IPAdd3AColNo = trolley.IPAdd3AColNo;
                     _trolley.IPAdd3BColNo = trolley.IPAdd3BColNo;
                     _trolley.Remark = trolley.Remark;
@@ -627,6 +627,51 @@ namespace RackingSystem.Services.TrolleyServices
             return slotcode;
         }
 
+        private static void AddErrorFields(TrolleySlotDTO ts, params string[] fields)
+        {
+            foreach (var field in fields)
+            {
+                if (!ts.ErrorFields.Contains(field)) ts.ErrorFields.Add(field);
+            }
+        }
+
+        private static HashSet<TrolleySlotDTO> FlagRepeatedRows(List<TrolleySlotDTO> rows, List<TrolleySlotDTO> errorsLine, bool checkPosition)
+        {
+            HashSet<TrolleySlotDTO> repeatedRows = new HashSet<TrolleySlotDTO>();
+
+            foreach (var ts in rows)
+            {
+                if (string.IsNullOrWhiteSpace(ts.TrolleySlotCode))
+                {
+                    continue;
+                }
+
+                var sameCode = rows.Where(x => (x.TrolleySlotCode ?? "").Trim().ToLower() == ts.TrolleySlotCode.Trim().ToLower()).ToList();
+                if (sameCode.Count > 1)
+                {
+                    ts.ErrorMsg = $"Trolley Slot code: {ts.TrolleySlotCode.Trim()} is repeated in the file (rows {string.Join(", ", sameCode.Select(x => x.ExcelRow))}).";
+                    AddErrorFields(ts, "TrolleySlotCode");
+                    repeatedRows.Add(ts);
+                    errorsLine.Add(ts);
+                    continue;
+                }
+
+                if (checkPosition && ts.ColNo > 0 && ts.RowNo > 0)
+                {
+                    var samePosition = rows.Where(x => x.Trolley_Id == ts.Trolley_Id && x.ColNo == ts.ColNo && x.RowNo == ts.RowNo).ToList();
+                    if (samePosition.Count > 1)
+                    {
+                        ts.ErrorMsg = $"Column No {ts.ColNo} and Row No {ts.RowNo} are repeated in the file (rows {string.Join(", ", samePosition.Select(x => x.ExcelRow))}).";
+                        AddErrorFields(ts, "ColNo", "RowNo");
+                        repeatedRows.Add(ts);
+                        errorsLine.Add(ts);
+                    }
+                }
+            }
+
+            return repeatedRows;
+        }
+
         public async Task<ServiceResponseModel<List<TrolleySlotDTO>>> SaveExcelTrolleySlot(List<TrolleySlotDTO> trolleySlot)
         {
             ServiceResponseModel<List<TrolleySlotDTO>> result = new ServiceResponseModel<List<TrolleySlotDTO>>();
@@ -634,11 +679,44 @@ namespace RackingSystem.Services.TrolleyServices
 
             try
             {
+                if (trolleySlot == null || trolleySlot.Count == 0)
+                {
+                    result.errMessage = "The file could not be read. Please check that the number columns only contain whole numbers.";
+                    return result;
+                }
+
                 if (trolleySlot != null)
                 {
+                    var repeatedRows = FlagRepeatedRows(trolleySlot, errorsLine, true);
+
                     foreach (var ts in trolleySlot)
                     {
                         bool isError = false;
+
+                        if (repeatedRows.Contains(ts))
+                        {
+                            continue;
+                        }
+
+                        if (string.IsNullOrWhiteSpace(ts.TrolleySlotCode))
+                        {
+                            ts.ErrorMsg = "Trolley Slot Code is empty.";
+                            AddErrorFields(ts, "TrolleySlotCode");
+                            errorsLine.Add(ts);
+                            continue;
+                        }
+
+                        if (ts.ColNo <= 0 || ts.RowNo <= 0)
+                        {
+                            if (ts.ColNo <= 0) AddErrorFields(ts, "ColNo");
+                            if (ts.RowNo <= 0) AddErrorFields(ts, "RowNo");
+                            ts.ErrorMsg = ts.ColNo <= 0 && ts.RowNo <= 0
+                                ? "Column No and Row No are required and must be more than 0."
+                                : (ts.ColNo <= 0 ? "Column No is required and must be more than 0." : "Row No is required and must be more than 0.");
+                            result.errMessage = ts.ErrorMsg;
+                            errorsLine.Add(ts);
+                            continue;
+                        }
 
                         TrolleySlot? slotExist = _dbContext.TrolleySlot.FirstOrDefault(x => x.TrolleySlotCode == ts.TrolleySlotCode);
                         TrolleySlot? slotExist2 = _dbContext.TrolleySlot.FirstOrDefault(x => x.ColNo == ts.ColNo && x.RowNo == ts.RowNo && x.TrolleySlot_Id != 0);
@@ -647,16 +725,33 @@ namespace RackingSystem.Services.TrolleyServices
                         {
                             result.errMessage = $"Trolley Slot code: {ts.TrolleySlotCode} has been used";
                             ts.ErrorMsg = result.errMessage;
+                            AddErrorFields(ts, "TrolleySlotCode");
                             isError = true;
                         }
                         else if (slotExist2 != null)
                         {
                             result.errMessage = $"Trolley Slot Code: {ts.TrolleySlotCode} Column No {ts.ColNo} and Row No {ts.RowNo} have been used.";
                             ts.ErrorMsg = result.errMessage;
+                            AddErrorFields(ts, "TrolleySlotCode", "ColNo", "RowNo");
                             isError = true;
                         }
 
-                        if (!isError)
+                        var match = Regex.Match(ts.TrolleySlotCode, @"^(\w+)c(\d+)r(\d+)$", RegexOptions.IgnoreCase);
+                        if (match.Success)
+                        {
+                            int colNoInput = int.Parse(match.Groups[2].Value);
+                            int rowNoInput = int.Parse(match.Groups[3].Value);
+
+                            if (ts.ColNo != colNoInput || ts.RowNo != rowNoInput)
+                            {
+                                result.errMessage = "The Trolley Slot Code does not match the Column No and Row No.";
+                                ts.ErrorMsg = result.errMessage;
+                                AddErrorFields(ts, "TrolleySlotCode");
+                                isError = true;
+                            }
+                        }
+
+                        if (!isError) 
                         {
                             TrolleySlot _ts = new TrolleySlot()
                             {
@@ -681,14 +776,11 @@ namespace RackingSystem.Services.TrolleyServices
                             };
                             _dbContext.TrolleySlot.Add(_ts);
                             ts.ErrorMsg = "";
-                            //errorsLine.Add();
                         }
                         else
                         {
                             errorsLine.Add(ts);
                         }
-                        //errorsLine.Add(ts);
-
                     }
 
                     if (errorsLine.Any())
@@ -720,9 +812,17 @@ namespace RackingSystem.Services.TrolleyServices
 
             try
             {
+                if (tsPulses == null || tsPulses.Count == 0)
+                {
+                    result.errMessage = "The file could not be read. Please check that the number columns only contain whole numbers.";
+                    return result;
+                }
+
+                var repeatedRows = FlagRepeatedRows(tsPulses, errorsLine, false);
+
                 foreach (var ts in tsPulses)
                 {
-                    if (ts.TrolleySlotCode == null)
+                    if (ts.TrolleySlotCode == null || repeatedRows.Contains(ts))
                     {
                         continue;
                     }
@@ -730,26 +830,27 @@ namespace RackingSystem.Services.TrolleyServices
                     bool isError = false;
 
                     //validation
-                    var validatefield = new List<(int? value, string fieldName)>
+                    var validatefield = new List<(int? value, string fieldName, string key)>
                     {
-                        (ts.XPulse, "X Pulse"),
-                        (ts.YPulse, "Y Pulse"),
-                        (ts.QRXPulse, "Qr-X Pulse"),
-                        (ts.QRYPulse, "Qr-Y Pulse"),
-                        (ts.Add1Pulse, "Additional Pulse 1"),
-                        (ts.Add2Pulse, "Additional Pulse 2"),
-                        (ts.Add3Pulse, "Additional Pulse 3"),
-                        (ts.Add4Pulse, "Additional Pulse 4"),
-                        (ts.Add5Pulse, "Additional Pulse 5"),
-                        (ts.Add6Pulse, "Additional Pulse 6"),
+                        (ts.XPulse, "X Pulse", "XPulse"),
+                        (ts.YPulse, "Y Pulse", "YPulse"),
+                        (ts.QRXPulse, "Qr-X Pulse", "QRXPulse"),
+                        (ts.QRYPulse, "Qr-Y Pulse", "QRYPulse"),
+                        (ts.Add1Pulse, "Additional Pulse 1", "Add1Pulse"),
+                        (ts.Add2Pulse, "Additional Pulse 2", "Add2Pulse"),
+                        (ts.Add3Pulse, "Additional Pulse 3", "Add3Pulse"),
+                        (ts.Add4Pulse, "Additional Pulse 4", "Add4Pulse"),
+                        (ts.Add5Pulse, "Additional Pulse 5", "Add5Pulse"),
+                        (ts.Add6Pulse, "Additional Pulse 6", "Add6Pulse"),
                     };
 
-                    foreach (var (value, fieldName) in validatefield)
+                    foreach (var (value, fieldName, key) in validatefield)
                     {
                         if (!value.HasValue || value < 0)
                         {
                             result.errMessage = $"Please enter a valid value for {fieldName}. Negative values are not allowed.";
                             ts.ErrorMsg = result.errMessage;
+                            AddErrorFields(ts, key);
                             errorsLine?.Add(ts);
                             break;
                         }
@@ -762,6 +863,7 @@ namespace RackingSystem.Services.TrolleyServices
                     {
                         result.errMessage = $"Slot code: {ts.TrolleySlotCode} did not exist.";
                         ts.ErrorMsg = result.errMessage;
+                        AddErrorFields(ts, "TrolleySlotCode");
                         isError = true;
                     }
                     else
@@ -771,7 +873,7 @@ namespace RackingSystem.Services.TrolleyServices
 
                     if (!isError)
                     {
-                        if (errorsLine != null && errorsLine.Count != 0) break;
+                        if (errorsLine != null && errorsLine.Count != 0) continue;
 
                         TrolleySlot? _ts = _dbContext.TrolleySlot.Find(slotId);
                         if (_ts == null)

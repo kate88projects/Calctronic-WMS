@@ -347,13 +347,18 @@ namespace RackingSystem.Services.BOMServices
             }
             return result;
         }
+        private static void AddDtlError(BOMExcelDtlDTO dtl, string message)
+        {
+            dtl.DtlErrorMsg = string.IsNullOrEmpty(dtl.DtlErrorMsg) ? message : dtl.DtlErrorMsg + " " + message;
+        }
+
         public async Task<ServiceResponseModel<BOMExcelReqDTO>> SaveExcelBOM(BOMExcelReqDTO boms)
         {
             ServiceResponseModel<BOMExcelReqDTO> result = new ServiceResponseModel<BOMExcelReqDTO>();
 
             try
             {
-                if (boms != null)
+                if (boms != null && !string.IsNullOrWhiteSpace(boms.FinishedGoods) && boms.SubItems != null && boms.SubItems.Count > 0)
                 {
                     bool isError = false;
 
@@ -370,7 +375,7 @@ namespace RackingSystem.Services.BOMServices
 
                         if (!isError)
                         {
-                            BOM? bomExist = _dbContext.BOM.FirstOrDefault(b => b.Item_Id == itemExist.Item_Id && b.IsActive == true && b.Description == boms.Description);
+                            BOM? bomExist = _dbContext.BOM.FirstOrDefault(b => b.Item_Id == itemExist.Item_Id);
                             if (bomExist == null)
                             {
                                 BOM b = new BOM()
@@ -384,18 +389,36 @@ namespace RackingSystem.Services.BOMServices
 
                                 foreach (var dtl in boms.SubItems)
                                 {
-                                    var subItemCode = dtl.ItemCode.Trim();
-                                    Item? subItemExist = _dbContext.Item.FirstOrDefault(i => i.ItemCode == subItemCode && i.IsActive);
-                                    if (subItemExist == null)
+                                    var subItemCode = (dtl.ItemCode ?? "").Trim();
+                                    Item? subItemExist = null;
+
+                                    if (subItemCode == "")
                                     {
-                                        dtl.DtlErrorMsg = $"Sub Item Code: {subItemCode} not found.";
+                                        AddDtlError(dtl, "Sub Item is required.");
+                                    }
+                                    else
+                                    {
+                                        subItemExist = _dbContext.Item.FirstOrDefault(i => i.ItemCode == subItemCode && i.IsActive);
+                                        if (subItemExist == null)
+                                        {
+                                            AddDtlError(dtl, $"Sub Item Code: {subItemCode} not found.");
+                                        }
+                                    }
+
+                                    if (dtl.Quantity <= 0)
+                                    {
+                                        AddDtlError(dtl, "Qty is required and must be more than 0.");
+                                    }
+
+                                    if (!string.IsNullOrEmpty(dtl.DtlErrorMsg))
+                                    {
                                         continue;
                                     }
 
                                     validDetails.Add(new BOMDetail
                                     {
                                         BOM_Id = 0,
-                                        Item_Id = subItemExist.Item_Id,
+                                        Item_Id = subItemExist!.Item_Id,
                                         Qty = dtl.Quantity,
                                         Remark = dtl.Remark,
                                         CreatedBy = "Import by Excel",
@@ -431,13 +454,19 @@ namespace RackingSystem.Services.BOMServices
                             }
                             else
                             {
-                                boms.ErrorMsg = "This BOM Item Code with same description already exist.";
+                                boms.ErrorMsg = $"Finished Goods Item Code: {itemCode} already has a BOM.";
                                 result.success = false;
                                 result.data = boms;
                                 return result;
                             }
                         }
                     }
+                }
+                else
+                {
+                    result.errMessage = boms == null
+                        ? "The file could not be read. Please check that the Qty column only contains whole numbers."
+                        : (string.IsNullOrWhiteSpace(boms.FinishedGoods) ? "Finished Goods is required." : "Sub Item is required.");
                 }
             }
             catch (Exception ex)

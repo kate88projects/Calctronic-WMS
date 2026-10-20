@@ -131,52 +131,62 @@
 
 </div>
 
-<div class="modal fade" id="myModal" role="dialog">
+<div class="modal fade" data-bs-backdrop="static" data-bs-focus="false" id="myModal" role="dialog">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Update Slot</h4>
+        <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
+            <div class="tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
+                <h4 class="tw:text-base tw:font-semibold tw:text-gray-800 tw:mb-0 tw:dark:text-white/90">Update Slot</h4>
             </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label" for="txtRowNo">Row No</label>
-                    <input type="text" class="form-control" name="RowNo" id="txtRowNo" aria-describedby="Row No" disabled>
+            <div class="tw:space-y-4 tw:px-6 tw:py-4">
+                <div>
+                    <label class="tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400" for="txtRowNo">Row No</label>
+                    <input type="text" class="tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-gray-100 tw:px-4 tw:py-2.5 tw:text-sm tw:text-gray-500 tw:placeholder:text-gray-400 
+                           tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-white/5 tw:dark:text-gray-400 
+                           tw:dark:placeholder:text-white/30 tw:dark:focus:border-brand-800" name="RowNo" id="txtRowNo" aria-describedby="Row No" disabled>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtPriority">Priority</label>
-                    <input type="number" class="form-control" name="Priority" id="txtPriority" aria-describedby="Priority">
+                <div>
+                    <label class="tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400" for="txtPriority">Priority</label>
+                    <input type="number" class="tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-sm tw:text-gray-800 tw:placeholder:text-gray-400 
+                           tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90 
+                           tw:dark:placeholder:text-white/30 tw:dark:focus:border-brand-800" name="Priority" id="txtPriority" aria-describedby="Priority">
                 </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkIsActive">
-                    <label class="form-check-label" for="chkIsActive">Is Active</label>
+                <div class="tw:flex tw:items-center tw:gap-2">
+                    <input type="checkbox" class="tw:h-4 tw:w-4 tw:accent-brand-500" id="chkIsActive">
+                    <label class="tw:text-sm tw:text-gray-700 tw:dark:text-gray-400" for="chkIsActive">Is Active</label>
                 </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkHasEmptyTray">
-                    <label class="form-check-label" for="chkHasEmptyTray">Has Empty Tray</label>
+                <div class="tw:flex tw:items-center tw:gap-2">
+                    <input type="checkbox" class="tw:h-4 tw:w-4 tw:accent-brand-500" id="chkHasEmptyTray">
+                    <label class="tw:text-sm tw:text-gray-700 tw:dark:text-gray-400" for="chkHasEmptyTray">Has Empty Tray</label>
                 </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkHasReel">
-                    <label class="form-check-label" for="chkHasReel">Has Reel</label>
+                <div class="tw:flex tw:items-center tw:gap-2">
+                    <input type="checkbox" class="tw:h-4 tw:w-4 tw:accent-brand-500" id="chkHasReel">
+                    <label class="tw:text-sm tw:text-gray-700 tw:dark:text-gray-400" for="chkHasReel">Has Reel</label>
                 </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="chkNeedChk">
-                    <label class="form-check-label" for="chkNeedChk">Need Check</label>
+                <div class="tw:flex tw:items-center tw:gap-2">
+                    <input type="checkbox" class="tw:h-4 tw:w-4 tw:accent-brand-500" id="chkNeedChk">
+                    <label class="tw:text-sm tw:text-gray-700 tw:dark:text-gray-400" for="chkNeedChk">Need Check</label>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtReelNo">Reel No</label>
-                    <input type="number" class="form-control" name="ReelNo" id="txtReelNo" aria-describedby="Reel No">
+                <div>
+                    <label class="tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400" for="txtReelNo">Reel No</label>
+                    <input type="number" class="tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-sm tw:text-gray-800 tw:placeholder:text-gray-400 
+                           tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90 
+                           tw:dark:placeholder:text-white/30 tw:dark:focus:border-brand-800" name="ReelNo" id="txtReelNo" aria-describedby="Reel No">
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="txtReelCode">Reel Code</label>
-                    <input type="text" class="form-control" name="txtReelCode" id="txtReelCode" aria-describedby="Reel Code">
+                <div>
+                    <label class="tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:text-gray-700 tw:dark:text-gray-400" for="txtReelCode">Reel Code</label>
+                    <input type="text" class="tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-sm tw:text-gray-800 tw:placeholder:text-gray-400 
+                           tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90 
+                           tw:dark:placeholder:text-white/30 tw:dark:focus:border-brand-800" name="txtReelCode" id="txtReelCode" aria-describedby="Reel Code">
                 </div>
 
                 <input type="hidden" id="txtId">
 
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="updateSlotStatus()">Update</button>
-                <button type="button" class="btn btn-outline-secondary" onclick="cancelForm()">Cancel</button>
+            <div class="tw:flex tw:justify-end tw:gap-3 tw:border-t tw:border-gray-100 tw:px-6 tw:py-3 tw:dark:border-gray-800">
+                <button type="button" class="save-btn tw:border-0 tw:rounded-lg tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:shadow-theme-xs
+                    tw:hover:bg-brand-600" onclick="updateSlotStatus()">Update</button>
+                <button type="button" class="cancel-btn tw:bg-transparent tw:rounded-lg tw:border tw:border-gray-300 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-700 tw:hover:bg-gray-100
+                    tw:dark:border-gray-700 tw:dark:text-gray-400 tw:dark:hover:bg-white/5" onclick="cancelForm()">Cancel</button>
             </div>
         </div>
     </div>

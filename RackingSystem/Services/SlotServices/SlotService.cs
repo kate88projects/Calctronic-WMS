@@ -339,19 +339,94 @@ namespace RackingSystem.Services.SlotServices
             return result;
         }
 
+        private static void AddErrorFields(SlotListDTO slot, params string[] fields)
+        {
+            foreach (var field in fields)
+            {
+                if (!slot.ErrorFields.Contains(field)) slot.ErrorFields.Add(field);
+            }
+        }
+
+        private static HashSet<SlotListDTO> FlagRepeatedRows(List<SlotListDTO> rows, List<SlotListDTO> errorsLine, bool checkPosition)
+        {
+            HashSet<SlotListDTO> repeatedRows = new HashSet<SlotListDTO>();
+
+            foreach (var slot in rows)
+            {
+                if (string.IsNullOrWhiteSpace(slot.SlotCode))
+                {
+                    continue;
+                }
+
+                var sameCode = rows.Where(x => (x.SlotCode ?? "").Trim().ToLower() == slot.SlotCode.Trim().ToLower()).ToList();
+                if (sameCode.Count > 1)
+                {
+                    slot.ErrorMsg = $"Slot code: {slot.SlotCode.Trim()} is repeated in the file (rows {string.Join(", ", sameCode.Select(x => x.ExcelRow))}).";
+                    AddErrorFields(slot, "SlotCode");
+                    repeatedRows.Add(slot);
+                    errorsLine.Add(slot);
+                    continue;
+                }
+
+                if (checkPosition && slot.ColNo > 0 && slot.RowNo > 0)
+                {
+                    var samePosition = rows.Where(x => x.ColNo == slot.ColNo && x.RowNo == slot.RowNo).ToList();
+                    if (samePosition.Count > 1)
+                    {
+                        slot.ErrorMsg = $"Column No {slot.ColNo} and Row No {slot.RowNo} are repeated in the file (rows {string.Join(", ", samePosition.Select(x => x.ExcelRow))}).";
+                        AddErrorFields(slot, "ColNo", "RowNo");
+                        repeatedRows.Add(slot);
+                        errorsLine.Add(slot);
+                    }
+                }
+            }
+
+            return repeatedRows;
+        }
+
         public async Task<ServiceResponseModel<List<SlotListDTO>>> SaveExcelSlot(List<SlotListDTO> slots)
         {
             ServiceResponseModel<List<SlotListDTO>> result = new ServiceResponseModel<List<SlotListDTO>>();
-            List<SlotListDTO> errorsLine = new List<SlotListDTO>(); // Change List<object> to List<SlotListDTO>
+            List<SlotListDTO> errorsLine = new List<SlotListDTO>();
             List<SlotColumnSetting> slotColumns = new List<SlotColumnSetting>();
 
             try
             {
-                if (slots != null)
+                if (slots != null && slots.Count > 0)
                 {
+                    var repeatedRows = FlagRepeatedRows(slots, errorsLine, true);
+
                     foreach (var slot in slots)
                     {
                         bool isError = false;
+
+                        if (repeatedRows.Contains(slot))
+                        {
+                            continue;
+                        }
+
+                        slot.SlotCode = (slot.SlotCode ?? "").Trim();
+
+                        if (slot.SlotCode == "")
+                        {
+                            result.errMessage = "Slot Code is required.";
+                            slot.ErrorMsg = result.errMessage;
+                            AddErrorFields(slot, "SlotCode");
+                            errorsLine.Add(slot);
+                            continue;
+                        }
+
+                        if (slot.ColNo <= 0 || slot.RowNo <= 0)
+                        {
+                            if (slot.ColNo <= 0) AddErrorFields(slot, "ColNo");
+                            if (slot.RowNo <= 0) AddErrorFields(slot, "RowNo");
+                            result.errMessage = slot.ColNo <= 0 && slot.RowNo <= 0
+                                ? "Column No and Row No are required and must be more than 0."
+                                : (slot.ColNo <= 0 ? "Column No is required and must be more than 0." : "Row No is required and must be more than 0.");
+                            slot.ErrorMsg = result.errMessage;
+                            errorsLine.Add(slot);
+                            continue;
+                        }
 
                         Slot? slotExist = _dbContext.Slot.FirstOrDefault(x => x.SlotCode == slot.SlotCode);
                         Slot? slotExist2 = _dbContext.Slot.FirstOrDefault(x => x.ColNo == slot.ColNo && x.RowNo == slot.RowNo && x.Slot_Id != 0);
@@ -360,12 +435,14 @@ namespace RackingSystem.Services.SlotServices
                         {
                             result.errMessage = $"Slot code: {slot.SlotCode} has been used";
                             slot.ErrorMsg = result.errMessage;
+                            AddErrorFields(slot, "SlotCode");
                             isError = true;
                         }
                         else if (slotExist2 != null)
                         {
                             result.errMessage = $"Slot Code: {slot.SlotCode} Column No {slot.ColNo} and Row No {slot.RowNo} have been used.";
                             slot.ErrorMsg = result.errMessage;
+                            AddErrorFields(slot, "SlotCode", "ColNo", "RowNo");
                             isError = true;
                         }
 
@@ -379,6 +456,7 @@ namespace RackingSystem.Services.SlotServices
                             {
                                 result.errMessage = "The Slot Code does not match the Column No and Row No.";
                                 slot.ErrorMsg = result.errMessage;
+                                AddErrorFields(slot, "SlotCode", "ColNo", "RowNo");
                                 isError = true;
                             }
                         }
@@ -393,7 +471,7 @@ namespace RackingSystem.Services.SlotServices
                                 IsActive = slot.IsActive,
                                 IsLeft = slot.IsLeft,
                                 HasEmptyTray = false,
-                                HasReel = slot.HasReel,
+                                HasReel = false,
                                 XPulse = slot.XPulse,
                                 YPulse = slot.YPulse,
                                 QRXPulse = slot.QRXPulse,
@@ -443,6 +521,10 @@ namespace RackingSystem.Services.SlotServices
                         await _dbContext.SaveChangesAsync();
                         result.success = true;
                     }
+                }
+                else
+                {
+                    result.errMessage = "No slot data was received.";
                 }
             }
             catch (Exception ex)
@@ -777,9 +859,11 @@ namespace RackingSystem.Services.SlotServices
 
             try
             {
+                var repeatedRows = FlagRepeatedRows(slotPulses, errorsLine, false);
+
                 foreach (var slot in slotPulses)
                 {
-                    if (slot.SlotCode == null)
+                    if (slot.SlotCode == null || repeatedRows.Contains(slot))
                     {
                         continue;
                     }
@@ -787,26 +871,27 @@ namespace RackingSystem.Services.SlotServices
                     bool isError = false;
 
                     //validation
-                    var validatefield = new List<(int? value, string fieldName)>
+                    var validatefield = new List<(int? value, string fieldName, string key)>
                     {
-                        (slot.XPulse, "X Pulse"),
-                        (slot.YPulse, "Y Pulse"),
-                        (slot.QRXPulse, "Qr-X Pulse"),
-                        (slot.QRYPulse, "Qr-Y Pulse"),
-                        (slot.Add1Pulse, "Additional Pulse 1"),
-                        (slot.Add2Pulse, "Additional Pulse 2"),
-                        (slot.Add3Pulse, "Additional Pulse 3"),
-                        (slot.Add4Pulse, "Additional Pulse 4"),
-                        (slot.Add5Pulse, "Additional Pulse 5"),
-                        (slot.Add6Pulse, "Additional Pulse 6"),
+                        (slot.XPulse, "X Pulse", "XPulse"),
+                        (slot.YPulse, "Y Pulse", "YPulse"),
+                        (slot.QRXPulse, "Qr-X Pulse", "QRXPulse"),
+                        (slot.QRYPulse, "Qr-Y Pulse", "QRYPulse"),
+                        (slot.Add1Pulse, "Additional Pulse 1", "Add1Pulse"),
+                        (slot.Add2Pulse, "Additional Pulse 2", "Add2Pulse"),
+                        (slot.Add3Pulse, "Additional Pulse 3", "Add3Pulse"),
+                        (slot.Add4Pulse, "Additional Pulse 4", "Add4Pulse"),
+                        (slot.Add5Pulse, "Additional Pulse 5", "Add5Pulse"),
+                        (slot.Add6Pulse, "Additional Pulse 6", "Add6Pulse"),
                     };
 
-                    foreach (var (value, fieldName) in validatefield)
+                    foreach (var (value, fieldName, key) in validatefield)
                     {
                         if (!value.HasValue || value < 0)
                         {
                             result.errMessage = $"Please insert {fieldName}. Negative values are not allowed.";
                             slot.ErrorMsg = result.errMessage;
+                            AddErrorFields(slot, key);
                             errorsLine?.Add(slot);
                             break;
                         }
@@ -819,6 +904,7 @@ namespace RackingSystem.Services.SlotServices
                     {
                         result.errMessage = $"Slot code: {slot.SlotCode} did not exist.";
                         slot.ErrorMsg = result.errMessage;
+                        AddErrorFields(slot, "SlotCode");
                         isError = true;
                     }
                     else
@@ -828,7 +914,7 @@ namespace RackingSystem.Services.SlotServices
 
                     if (!isError)
                     {
-                        if (errorsLine != null && errorsLine.Count != 0) break;
+                        if (errorsLine != null && errorsLine.Count != 0) continue;
 
                         Slot? _slot = _dbContext.Slot.Find(slotId);
                         if (_slot == null)
@@ -885,9 +971,11 @@ namespace RackingSystem.Services.SlotServices
 
             try
             {
+                var repeatedRows = FlagRepeatedRows(slots, errorsLine, false);
+
                 foreach (var slot in slots)
                 {
-                    if (slot.SlotCode == null)
+                    if (slot.SlotCode == null || repeatedRows.Contains(slot))
                     {
                         continue;
                     }
@@ -898,6 +986,7 @@ namespace RackingSystem.Services.SlotServices
                     {
                         result.errMessage = "Please insert Reel In Priority. Negative values are not allowed.";
                         slot.ErrorMsg = result.errMessage;
+                        AddErrorFields(slot, "Priority");
                         isError = true;
                     }
 
@@ -906,6 +995,7 @@ namespace RackingSystem.Services.SlotServices
                     {
                         result.errMessage = $"Slot code: {slot.SlotCode} did not exist.";
                         slot.ErrorMsg = result.errMessage;
+                        AddErrorFields(slot, "SlotCode");
                         isError = true;
                     }
 

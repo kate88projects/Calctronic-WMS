@@ -674,8 +674,11 @@
                 "Inactive Slot": "inactive"
             };
 
-            // categories with no slots were filtered out above, so clear their rows first (they may hold old numbers)
-            Object.values(idMap).forEach(key => {
+            // Categories with no slots were filtered out of chartData above, so set every row from the colour map first:
+            // the dot and bar colour must show even when a category is empty, and the numbers are reset to 0 (they may hold old values).
+            Object.entries(idMap).forEach(([title, key]) => {
+                document.getElementById(`dot-${key}`).style.background = colorMap[title];
+                document.getElementById(`bar-${key}`).style.background = colorMap[title];
                 document.getElementById(`percent-${key}`).textContent = '0% ( 0 )';
                 document.getElementById(`bar-${key}`).style.width = '0%';
             });
@@ -686,8 +689,6 @@
 
                 document.getElementById(`percent-${key}`).textContent = `${d.percent}% ( ${d.value} )`;
                 document.getElementById(`bar-${key}`).style.width = `${d.percent}%`;
-                document.getElementById(`bar-${key}`).style.background = d.color;
-                document.getElementById(`dot-${key}`).style.background = d.color;
             });
         }
 

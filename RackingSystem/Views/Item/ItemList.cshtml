@@ -783,11 +783,11 @@
                 showError(txt.id, `Please enter UOM.`);
                 isValid = false;
             }
-            txt = document.getElementById("txtDesc");
-            if (txt.value.trim() == "") {
-                showError(txt.id, `Please enter Description.`);
-                isValid = false;
-            }
+            // txt = document.getElementById("txtDesc");
+            // if (txt.value.trim() == "") {
+            //     showError(txt.id, `Please enter Description.`);
+            //     isValid = false;
+            // }
             txt = document.getElementById("selItemGroup");
             if (txt.value == "") {
                 showError(txt.id, `Please select Item Group.`);
@@ -948,24 +948,42 @@
 
         }
 
-        //download template method
+        function downloadTemplateFile(fileName, subject, headers, widthsPx, requiredHeaders = []) {
+            const workbook = new ExcelJS.Workbook();
+            workbook.creator = "Flex Software Consulting Sdn Bhd";
+            workbook.created = new Date();
+            workbook.properties.title = "Template";
+            workbook.properties.subject = subject;
+
+            const sheet = workbook.addWorksheet("Sheet1");
+            const headerRow = sheet.addRow(headers);
+            headerRow.font = { name: 'Arial', size: 11, bold: true };
+            headers.forEach((header, i) => {
+                if (requiredHeaders.includes(header)) {
+                    headerRow.getCell(i + 1).value = { richText: [
+                        { text: header, font: { name: 'Arial', size: 11, bold: true } },
+                        { text: ' *', font: { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFF0000' } } }
+                    ] };
+                }
+                sheet.getColumn(i + 1).width = Math.max(Math.round((widthsPx[i] || 0) / 7), header.length + 3);
+            });
+
+            workbook.xlsx.writeBuffer().then(function (buffer) {
+                const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = fileName;
+                link.click();
+                URL.revokeObjectURL(link.href);
+            }).catch(function (err) {
+                console.error("Error creating the template:", err);
+            });
+        }
         function downloadTemp() {
-            var book = XLSX.utils.book_new();
-            book.Props = {
-                Title: "Template",
-                Subject: "Item",
-                Author: "Flex Software Consulting Sdn Bhd",
-                CreatedDate: new Date()
-            };
-
-            var book_header = [
-                ['Item Code', 'UOM', 'Description', 'Description 2', 'Item Group Code',
-                'Is Active', 'Is Finish Good', 'Reel Thickness', 'Reel Width', 'Alarm Over Max Thickness' ]
-            ];
-
-            var booksheet = XLSX.utils.aoa_to_sheet(book_header);
-            XLSX.utils.book_append_sheet(book, booksheet, "Sheet1");
-            XLSX.writeFile(book, "ImportItemTemplate.xlsx");
+            downloadTemplateFile("ImportItemTemplate.xlsx", "Item", [
+                'Item Code', 'UOM', 'Description', 'Description 2', 'Item Group Code',
+                'Is Active', 'Is Finish Good', 'Reel Thickness', 'Reel Width', 'Alarm Over Max Thickness'
+            ], [], ['Item Code', 'UOM', 'Item Group Code', 'Reel Thickness', 'Reel Width']);
         }
 
         //import excel method
@@ -1046,8 +1064,9 @@
             let columnDropdowns = '';
 
             const isMatch = (col1, col2) => {
-                const col1Str = String(col1).toLowerCase().replace(/\s+/g, '');
-                const col2Str = String(col2).toLowerCase().replace(/\s+/g, '');
+                // a trailing * marks a compulsory column in the template, it is not part of the name
+                const col1Str = String(col1).toLowerCase().replace(/[\s*]+/g, '');
+                const col2Str = String(col2).toLowerCase().replace(/[\s*]+/g, '');
                 return col1Str === col2Str;
             };
 
@@ -1108,6 +1127,24 @@
             return mappings;
         }
 
+        function cleanText(val) {
+            return val === undefined || val === null ? '' : String(val).trim();
+        }
+
+        function parseBool(val) {
+            const text = cleanText(val).toLowerCase();
+            if (text === 'true' || text === '1') return true;
+            if (text === 'false' || text === '0' || text === '') return false;
+            return null;
+        }
+
+        function parseWholeNumber(val) {
+            const text = cleanText(val).replace(/,/g, '');
+            if (text === '') return 0;
+            const n = Number(text);
+            return Number.isInteger(n) ? n : null;
+        }
+
         function processAndSubmitData() {
             let workbook;
             let itemsData;
@@ -1133,31 +1170,61 @@
                     'Is Active', 'Is Finish Good', 'Reel Thickness', 'Reel Width', 'Alarm Over Max Thickness'
                 ];
                 fieldNames.forEach(field => {
-                    colIndex[field] = columns.indexOf(normalizeString(userMappings, field));
+                    const fileColumn = Object.keys(userMappings).find(name => userMappings[name] === field);
+                    colIndex[field] = fileColumn === undefined ? -1 : columns.findIndex(c => String(c) === fileColumn);
                 });
 
-                const parseBool = val =>
-                    val === true || val === 1 || val === '1' || val === 'true' || val === 'TRUE';
+                const dataRows = data.slice(1)
+                    .map((row, i) => ({ row, excelRow: i + 2 }))
+                    .filter(r => fieldNames.some(field => cleanText(r.row[colIndex[field]]) !== ''));
 
-                itemsData = data.slice(1).map(row => {
+                if (dataRows.length === 0) {
+                    alert("The file has no data rows.");
+                    return;
+                }
+
+                const errors = [];
+
+                itemsData = dataRows.map(({ row, excelRow }) => {
+                    const boolOf = field => {
+                        const value = parseBool(row[colIndex[field]]);
+                        if (value === null) errors.push(`Row ${excelRow}: ${field} [${cleanText(row[colIndex[field]])}] must be true/false or 1/0`);
+                        return value === true;
+                    };
+                    const wholeNumber = field => {
+                        const value = parseWholeNumber(row[colIndex[field]]);
+                        if (value === null) errors.push(`Row ${excelRow}: ${field} [${cleanText(row[colIndex[field]])}] must be a whole number`);
+                        return value ?? 0;
+                    };
+
                     return {
                         Item_Id: 0,
-                        ItemCode: row[colIndex['Item Code']],
-                        UOM: row[colIndex['UOM']],
-                        Description: row[colIndex['Description']],
-                        Desc2: row[colIndex['Description 2']],
+                        ExcelRow: excelRow,
+                        ItemCode: cleanText(row[colIndex['Item Code']]),
+                        UOM: cleanText(row[colIndex['UOM']]),
+                        Description: cleanText(row[colIndex['Description']]),
+                        Desc2: cleanText(row[colIndex['Description 2']]),
 
-                        ItemGroupCode: row[colIndex['Item Group Code']],
-                        Thickness: row[colIndex['Reel Thickness']],
-                        Width: row[colIndex['Reel Width']],
+                        ItemGroupCode: cleanText(row[colIndex['Item Group Code']]),
+                        Thickness: wholeNumber('Reel Thickness'),
+                        Width: wholeNumber('Reel Width'),
 
-                        IsActive: parseBool(row[colIndex['Is Active']]),
-                        IsFinishGood: parseBool(row[colIndex['Is Finish Good']]),
-                        AlarmOverMaxThickness: parseBool(row[colIndex['Alarm Over Max Thickness']]),
-                        }
+                        IsActive: boolOf('Is Active'),
+                        IsFinishGood: boolOf('Is Finish Good'),
+                        AlarmOverMaxThickness: boolOf('Alarm Over Max Thickness'),
+                    };
                 });
 
-                saveExcelItems(itemsData, content);
+                if (errors.length > 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: errors.slice(0, 10).join('; ') + (errors.length > 10 ? ` ... and ${errors.length - 10} more` : '')
+                    });
+                    return;
+                }
+
+                saveExcelItems(itemsData, { headers: columns, dataRows, fieldToIndex: colIndex });
 
             } catch (error) {
                 console.error("Error processing the file:", error);
@@ -1165,18 +1232,7 @@
             }
         }
 
-        function normalizeString(userMappings, str) {
-            var rValue = str;
-
-            if (userMappings != null)
-            {
-                rValue = userMappings[str];
-            }
-
-            return rValue;
-        }
-
-        function saveExcelItems(data, bookBuffer) {
+        function saveExcelItems(data, importContext) {
             const url = '/Item/SaveExcelItem';
             if (data != null)
             {
@@ -1209,7 +1265,7 @@
                             });
                         } else {
                             if (response.data && response.data.length > 0) {
-                                markErrorsInSheet(bookBuffer, response.data);
+                                markErrorsInSheet(importContext, response.data);
                                 Swal.fire({
                                     icon: 'warning',
                                     title: "Validation Issues Found",
@@ -1237,59 +1293,70 @@
             }
         }
 
-        async function markErrorsInSheet(bookBuffer, errorRows) {
+        const IMPORT_ERROR_FIELD_COLUMNS = {
+            ItemCode: 'Item Code', UOM: 'UOM', ItemGroupCode: 'Item Group Code',
+            Thickness: 'Reel Thickness', Width: 'Reel Width'
+        };
+
+        async function markErrorsInSheet(importContext, errorRows) {
+            const { headers, dataRows, fieldToIndex } = importContext;
+            const colCount = dataRows.reduce((max, r) => Math.max(max, r.row.length), headers.length);
+            const errorCol = colCount + 1;
+
             const workbook = new ExcelJS.Workbook();
-            await workbook.xlsx.load(bookBuffer);
-            const worksheet = workbook.getWorksheet(1);
-            const columnsToHighlight = [1, 2, 5, 8, 9];
+            const worksheet = workbook.addWorksheet("Sheet1");
 
-            // const fieldNames = [
-            //     'Item Code', 'UOM', 'Description', 'Description 2', 'Item Group Code',
-            //     'Is Active', 'Is Finish Good', 'Reel Thickness', 'Alarm Over Max Thickness'
-            // ];
-            // let colorIndex = 0;
-            // const highlightColors = [
-            //     'FFCCCC',
-            //     'FFE5CC',
-            //     'FFFFCC',
-            //   ];
-
-            // Add "Error" header
-            const headerRow = worksheet.getRow(1);
-            const errIdx = 11;
-            headerRow.getCell(errIdx).value = 'Error';
-            headerRow.commit();
-
-            const errorMap = new Map();
-            errorRows.forEach(e => errorMap.set(e.itemCode, e.errorMsg));
-            // console.log(errorRows);
-
-            worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
-                if (rowNumber === 1) return; //skip header row
-
-                const itemCode = row.getCell(1).value;
-
-                if (errorMap.has(itemCode)) {
-                    const errorMsg = errorMap.get(itemCode);
-
-                    // const fillColor = highlightColors[colorIndex % highlightColors.length];
-                    // colorIndex++;
-                    // console.log("error index" , errIdx);
-                    // console.log(columnsToHighlight);
-
-                    columnsToHighlight.forEach(colNum => {
-                        const cell = row.getCell(colNum);
-                        // console.log("colNumber:", colNum);
-                        cell.fill = {
-                            type: 'pattern',
-                            pattern: 'solid',
-                            fgColor: { argb: 'FFCCCC' }
-                        };
-                    });
-
-                    row.getCell(errIdx).value = errorMsg;
+            const headerValues = [];
+            for (let c = 0; c < colCount; c++) {
+                headerValues.push(cleanText(headers[c]));
+            }
+            headerValues.push('Error');
+            const titleRow = worksheet.addRow(headerValues);
+            titleRow.font = { name: 'Arial', size: 11, bold: true };
+            titleRow.eachCell(cell => {
+                const parts = /^(.*?)\s*\*$/.exec(String(cell.value));
+                if (parts) {
+                    cell.value = { richText: [
+                        { text: parts[1], font: { name: 'Arial', size: 11, bold: true } },
+                        { text: ' *', font: { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFF0000' } } }
+                    ] };
                 }
             });
+
+            const errorByRow = new Map();
+            errorRows.forEach(e => {
+                if (e.errorMsg) errorByRow.set(e.excelRow, e);
+            });
+
+            const markWrong = cell => {
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFC7CE' } };
+            };
+
+            dataRows.forEach(({ row, excelRow }) => {
+                const values = [];
+                for (let c = 0; c < colCount; c++) {
+                    values.push(cleanText(row[c]) === '' ? null : row[c]);
+                }
+
+                const errorRow = errorByRow.get(excelRow);
+                values.push(errorRow ? errorRow.errorMsg : null);
+                const sheetRow = worksheet.addRow(values);
+
+                if (errorRow) {
+                    (errorRow.errorFields || []).forEach(field => {
+                        const index = fieldToIndex[IMPORT_ERROR_FIELD_COLUMNS[field]];
+                        if (index !== undefined && index >= 0) markWrong(sheetRow.getCell(index + 1));
+                    });
+                    const errorCell = sheetRow.getCell(errorCol);
+                    markWrong(errorCell);
+                    errorCell.font = { color: { argb: 'FF9C0006' } };
+                }
+            });
+
+            for (let c = 1; c <= colCount; c++) {
+                worksheet.getColumn(c).width = 18;
+            }
+            worksheet.getColumn(errorCol).width = 60;
 
             // Export updated file
             const updatedBuffer = await workbook.xlsx.writeBuffer();

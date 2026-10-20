@@ -301,31 +301,16 @@ namespace RackingSystem.Services.ItemServices
                     result.errMessage = "Please insert UOM.";
                     return result;
                 }
-                if (itemReq.Description == null)
-                {
-                    result.errMessage = "Please insert Description.";
-                    return result;
-                }
+                //if (itemReq.Description == null)
+                //{
+                //    result.errMessage = "Please insert Description.";
+                //    return result;
+                //}
                 if (itemReq.ReelDimension_Id == 0)
                 {
                     result.errMessage = "Please select Reel Dimension.";
                     return result;
                 }
-                //if (itemReq.Thickness == null)
-                //{
-                //    result.errMessage = "Please insert Thickness.";
-                //    return result;
-                //}
-                //if (itemReq.Width == null)
-                //{
-                //    result.errMessage = "Please insert Width.";
-                //    return result;
-                //}
-                //if (itemReq.MaxThickness == null)
-                //{
-                //    result.errMessage = "Please insert Max Thickness.";
-                //    return result;
-                //}
                 if (itemReq.Item_Id == 0)
                 {
                     Item? iExist = _dbContext.Item.FirstOrDefault(x => x.ItemCode == itemReq.ItemCode);
@@ -352,7 +337,7 @@ namespace RackingSystem.Services.ItemServices
                     {
                         ItemCode = itemReq.ItemCode,
                         UOM = itemReq.UOM,
-                        Description = itemReq.Description,
+                        Description = itemReq.Description ?? "",
                         Desc2 = itemReq.Desc2 ?? "",
                         IsActive = itemReq.IsActive,
                         IsFinishGood = itemReq.IsFinishGood,
@@ -375,7 +360,7 @@ namespace RackingSystem.Services.ItemServices
                     }
                     _item.ItemCode = itemReq.ItemCode;
                     _item.UOM = itemReq.UOM;
-                    _item.Description = itemReq.Description;
+                    _item.Description = itemReq.Description ?? "";
                     _item.Desc2 = itemReq.Desc2 ?? "";
                     _item.IsActive = itemReq.IsActive;
                     _item.IsFinishGood = itemReq.IsFinishGood;
@@ -468,18 +453,52 @@ namespace RackingSystem.Services.ItemServices
             return result;
         }
 
+        private static void AddItemError(ItemExcelReqDTO itm, string message, params string[] fields)
+        {
+            itm.ErrorMsg = itm.ErrorMsg == "" ? message : itm.ErrorMsg + " " + message;
+
+            foreach (var field in fields)
+            {
+                if (!itm.ErrorFields.Contains(field)) itm.ErrorFields.Add(field);
+            }
+        }
+
+        private static HashSet<ItemExcelReqDTO> FlagRepeatedItems(List<ItemExcelReqDTO> rows)
+        {
+            HashSet<ItemExcelReqDTO> repeatedRows = new HashSet<ItemExcelReqDTO>();
+
+            foreach (var itm in rows)
+            {
+                if (string.IsNullOrWhiteSpace(itm.ItemCode))
+                {
+                    continue;
+                }
+
+                var sameCode = rows.Where(x => (x.ItemCode ?? "").Trim().ToLower() == itm.ItemCode.Trim().ToLower()).ToList();
+                if (sameCode.Count > 1)
+                {
+                    AddItemError(itm, $"Item code: {itm.ItemCode.Trim()} is repeated in the file (rows {string.Join(", ", sameCode.Select(x => x.ExcelRow))}).", "ItemCode");
+                    repeatedRows.Add(itm);
+                }
+            }
+
+            return repeatedRows;
+        }
+
         public async Task<ServiceResponseModel<List<ItemExcelReqDTO>>> SaveExcelItem(List<ItemExcelReqDTO> items)
         {
             ServiceResponseModel<List<ItemExcelReqDTO>> result = new ServiceResponseModel<List<ItemExcelReqDTO>>();
-            List<ItemExcelReqDTO> errorsLine = new List<ItemExcelReqDTO>(); // Change List<object> to List<SlotListDTO>
+            List<ItemExcelReqDTO> errorsLine = new List<ItemExcelReqDTO>(); 
 
             try
             {
                 if (items != null)
                 {
+                    var repeatedRows = FlagRepeatedItems(items);
+
                     foreach (var itm in items)
                     {
-                        bool isError = false;
+                        bool isError = repeatedRows.Contains(itm);
 
                         Item? iExist = _dbContext.Item.FirstOrDefault(x => x.ItemCode == itm.ItemCode);
                         ItemGroup? igExist = null;
@@ -489,37 +508,39 @@ namespace RackingSystem.Services.ItemServices
                         }
                         ReelDimension? rExist = _dbContext.ReelDimension.FirstOrDefault(x => x.Thickness == itm.Thickness && x.Width == itm.Width);
 
-                        if (iExist != null)
-                        {
-                            result.errMessage = $"Item code: {itm.ItemCode} has been used";
-                            itm.ErrorMsg = result.errMessage;
-                            isError = true;
-                        }
                         if (string.IsNullOrEmpty(itm.ItemCode))
                         {
-                            result.errMessage = $"Item Code cannot be empty.";
-                            itm.ErrorMsg = result.errMessage;
+                            AddItemError(itm, "Item Code cannot be empty.", "ItemCode");
+                            isError = true;
+                        }
+                        else if (iExist != null)
+                        {
+                            AddItemError(itm, $"Item code: {itm.ItemCode} has been used.", "ItemCode");
                             isError = true;
                         }
                         if (string.IsNullOrEmpty(itm.UOM))
                         {
-                            result.errMessage = $"UOM cannot be empty.";
-                            itm.ErrorMsg = result.errMessage;
+                            AddItemError(itm, "UOM cannot be empty.", "UOM");
                             isError = true;
                         }
-                        if (!string.IsNullOrEmpty(itm.ItemGroupCode))
+                        if (string.IsNullOrEmpty(itm.ItemGroupCode))
                         {
-                            if (igExist == null)
-                            {
-                                result.errMessage = $"Item Code: {itm.ItemCode} Item Group {itm.ItemGroupCode} has not found.";
-                                itm.ErrorMsg = result.errMessage;
-                                isError = true;
-                            }
+                            AddItemError(itm, "Item Group Code cannot be empty.", "ItemGroupCode");
+                            isError = true;
+                        }
+                        else if (igExist == null)
+                        {
+                            AddItemError(itm, $"Item Code: {itm.ItemCode} Item Group {itm.ItemGroupCode} has not found.", "ItemGroupCode");
+                            isError = true;
+                        }
+                        else if (!igExist.IsActive)
+                        {
+                            AddItemError(itm, $"Item Code: {itm.ItemCode} Item Group {itm.ItemGroupCode} is not active.", "ItemGroupCode");
+                            isError = true;
                         }
                         if (rExist == null)
                         {
-                            result.errMessage = $"Item Code: {itm.ItemCode} Thickness {itm.Thickness} with Width {itm.Width} has not found.";
-                            itm.ErrorMsg = result.errMessage;
+                            AddItemError(itm, $"Item Code: {itm.ItemCode} Thickness {itm.Thickness} with Width {itm.Width} has not found.", "Thickness", "Width");
                             isError = true;
                         }
 
@@ -534,12 +555,9 @@ namespace RackingSystem.Services.ItemServices
                                 IsActive = itm.IsActive,
                                 IsFinishGood = itm.IsFinishGood,
                                 AlarmOverMaxThickness = itm.AlarmOverMaxThickness,
-                                ReelDimension_Id = rExist.ReelDimension_Id,
+                                ItemGroup_Id = igExist!.ItemGroup_Id,
+                                ReelDimension_Id = rExist!.ReelDimension_Id,
                             };
-                            if (!string.IsNullOrEmpty(itm.ItemGroupCode))
-                            {
-                                _item.ItemGroup_Id = igExist.ItemGroup_Id;
-                            }
                             _dbContext.Item.Add(_item);
                         }
                         else
@@ -559,6 +577,10 @@ namespace RackingSystem.Services.ItemServices
                         await _dbContext.SaveChangesAsync();
                         result.success = true;
                     }
+                }
+                else
+                {
+                    result.errMessage = "The file could not be read. Please check that the number columns only contain whole numbers.";
                 }
             }
             catch (Exception ex)

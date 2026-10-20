@@ -34,5 +34,9 @@
         public int page { get; set; } = 1;
 
         public string ErrorMsg { get; set; } = "";
+
+        public int ExcelRow { get; set; } = 0;
+
+        public List<string> ErrorFields { get; set; } = new List<string>();
     }
 }

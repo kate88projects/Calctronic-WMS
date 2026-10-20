@@ -33,6 +33,8 @@ namespace RackingSystem.Models.Trolley
         public int Add6Pulse { get; set; } = 0;
 
         public string? ErrorMsg { get; set; }
+        public int ExcelRow { get; set; } = 0;
+        public List<string> ErrorFields { get; set; } = new List<string>();
 
         public Guid Reel_Id { get; set; }
         public string ReelCode { get; set; } = "";

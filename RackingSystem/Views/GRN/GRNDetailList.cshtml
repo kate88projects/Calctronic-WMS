@@ -43,11 +43,11 @@
                     <input id="txtGRN" name="GRNBatchNo" type="text" class="@fieldClass" placeholder="GRN No" />
                 </div>
                 <div>
-                    <label class="@labelClass" for="txtItemCode">Item</label>
+                    <label class="@labelClass" for="txtItemCode">Item Code</label>
                     <input id="txtItemCode" name="ItemCode" type="text" class="@fieldClass" placeholder="Item Code" />
                 </div>
                 <div>
-                    <label class="@labelClass" for="txtReelCode">Item</label>
+                    <label class="@labelClass" for="txtReelCode">Reel Code</label>
                     <input id="txtReelCode" name="ReelCode" type="text" class="@fieldClass" placeholder="Reel Code" />
                 </div>
                 <div>
@@ -846,9 +846,14 @@
                 { header: 'Supplier Name', width: 20 },
                 { header: 'Supplier Ref No', width: 20 }
             ];
-            sheet.getRow(1).font = { bold: true };
+            sheet.getRow(1).font = { name: 'Arial', size: 11, bold: true };
+            sheet.columns.forEach((column, i) => {
+                sheet.getCell(1, i + 1).value = { richText: [
+                    { text: column.header, font: { name: 'Arial', size: 11, bold: true } },
+                    { text: ' *', font: { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFF0000' } } }
+                ] };
+            });
 
-            // The item list sits on its own hidden sheet and the dropdown points at that range
             const itemSheet = workbook.addWorksheet("Items", { state: 'hidden' });
             itemSheet.columns = [{ header: 'Item Code', width: 22 }, { header: 'Description', width: 40 }];
             items.forEach(i => itemSheet.addRow([i.itemCode, i.description]));
@@ -1004,8 +1009,8 @@
             let columnDropdowns = '';
 
             const isMatch = (col1, col2) => {
-                const col1Str = String(col1).toLowerCase().replace(/\s+/g, '');
-                const col2Str = String(col2).toLowerCase().replace(/\s+/g, '');
+                const col1Str = String(col1).toLowerCase().replace(/[\s*]+/g, '');
+                const col2Str = String(col2).toLowerCase().replace(/[\s*]+/g, '');
                 return col1Str === col2Str;
             };
 
@@ -1136,9 +1141,6 @@
             }
 
             const cell = (row, field) => fieldToIndex[field] === undefined ? '' : cleanText(row[fieldToIndex[field]]);
-
-            // Blank rows at the end of the sheet are ignored. A blank row in the middle is kept, so the row
-            // numbers in the error file still match the rows in Excel.
             const isBlankRow = row => GRN_IMPORT_FIELDS.every(field => cell(row, field) === '');
             while (rows.length > 0 && isBlankRow(rows[rows.length - 1])) {
                 rows.pop();
@@ -1209,7 +1211,7 @@
                             Swal.fire({
                                 icon: 'warning',
                                 title: "Validation Issues Found",
-                                text: `${response.errMessage} The error file ${IMPORT_ERROR_FILE_NAME} has been downloaded, please fix the highlighted cells and import again.`
+                                text: "Review on returned file and fix errors."
                             });
                         } catch (error) {
                             console.error("Error creating the error file:", error);
@@ -1254,7 +1256,17 @@
                 headerValues.push(cleanText(headers[c]));
             }
             headerValues.push('Error');
-            sheet.addRow(headerValues).font = { bold: true };
+            const titleRow = sheet.addRow(headerValues);
+            titleRow.font = { name: 'Arial', size: 11, bold: true };
+            titleRow.eachCell(cell => {
+                const parts = /^(.*?)\s*\*$/.exec(String(cell.value));
+                if (parts) {
+                    cell.value = { richText: [
+                        { text: parts[1], font: { name: 'Arial', size: 11, bold: true } },
+                        { text: ' *', font: { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFF0000' } } }
+                    ] };
+                }
+            });
 
             const markWrong = (excelCell) => {
                 excelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFC7CE' } };
@@ -1268,7 +1280,7 @@
                         const isoDate = parseImportDate(value);
                         if (isoDate) value = isoDate;
                     }
-                    values.push(value === undefined || value === null ? '' : value);
+                    values.push(cleanText(value) === '' ? null : value);
                 }
 
                 const errorRow = errorRows[i];

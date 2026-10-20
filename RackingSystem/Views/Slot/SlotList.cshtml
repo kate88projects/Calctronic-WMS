@@ -30,7 +30,9 @@
             <div x-show="importOpen" x-cloak class="tw:shadow-theme-lg tw:absolute tw:left-0 tw:z-10 tw:mt-2 tw:w-64 tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:p-2 tw:dark:border-gray-800 tw:dark:bg-gray-900">
                 <a href="#" class="@menuItemClass" id="dTemp" onclick="downloadTemp('slots')" @@click="importOpen = false">Download Slot List Template</a>
                 <a href="#" class="@menuItemClass" id="dTemp" onclick="downloadTemp('pulses')" @@click="importOpen = false">Download Update Pulses Template</a>
+                <a href="#" class="@menuItemClass" id="dTemp" onclick="downloadTemp('priority')" @@click="importOpen = false">Download Update Slot Priority Template</a>
                 <a href="#" class="@menuItemClass" onclick="triggerFileInput('importSlot')" @@click="importOpen = false">Import Slot from Excel</a>
+                <a href="#" class="@menuItemClass" onclick="triggerFileInput('importPriority')" @@click="importOpen = false">Import Slot Priority from Excel</a>
             </div>
         </div>
         <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" class="tw:hidden" onchange="handleFileUpload(event)">
@@ -947,41 +949,58 @@
 
         }
 
-        //download template method
+        function downloadTemplateFile(fileName, subject, headers, widthsPx, requiredHeaders = []) {
+            const workbook = new ExcelJS.Workbook();
+            workbook.creator = "Flex Software Consulting Sdn Bhd";
+            workbook.created = new Date();
+            workbook.properties.title = "Template";
+            workbook.properties.subject = subject;
+
+            const sheet = workbook.addWorksheet("Sheet1");
+            const headerRow = sheet.addRow(headers);
+            headerRow.font = { name: 'Arial', size: 11, bold: true };
+            headers.forEach((header, i) => {
+                if (requiredHeaders.includes(header)) {
+                    headerRow.getCell(i + 1).value = { richText: [
+                        { text: header, font: { name: 'Arial', size: 11, bold: true } },
+                        { text: ' *', font: { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFF0000' } } }
+                    ] };
+                }
+                sheet.getColumn(i + 1).width = Math.max(Math.round((widthsPx[i] || 0) / 7), header.length + 3);
+            });
+
+            workbook.xlsx.writeBuffer().then(function (buffer) {
+                const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = fileName;
+                link.click();
+                URL.revokeObjectURL(link.href);
+            }).catch(function (err) {
+                console.error("Error creating the template:", err);
+            });
+        }
+
         function downloadTemp(type) {
-            var book = XLSX.utils.book_new();
-            book.Props = {
-                Title: "Template",
-                Subject: type === "slots" ? "Slot List" : (type === "pulses" ? "Pulses" : "Slot Priority"),
-                Author: "Flex Software Consulting Sdn Bhd",
-                CreatedDate: new Date()
-            };
+            const headers = type === "slots"
+                ? ['Slot Code', 'Column No', 'Row No', 'Is Active', 'Is Left', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
+                   'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6', 'Priority']
+                : type === "pulses"
+                    ? ['Slot Code', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
+                       'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6']
+                    : ['Slot No', 'Reel In Priority'];
 
-            var book_header = type === "slots" ? [
-                ['Slot Code', 'Column No', 'Row No', 'Is Active', 'Is Left', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
-                'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6', 'Priority']
-            ]
-            : type === "pulses" ? [
-                ['Slot Code', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
-                'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6']
-            ]
-            : [
-                ['Slot No', 'Reel In Priority']
-            ];
+            const widths = type === "slots"
+                ? [90, 60, 50, 50, 50, 50, 50, 60, 60, 100, 100, 100, 100, 100, 100, 100]
+                : type === "pulses"
+                    ? [90, 50, 50, 60, 60, 100, 100, 100, 100, 100, 100]
+                    : [90, 120];
 
-            // var booksheet = XLSX.utils.aoa_to_sheet(book_header);
-            var booksheet = XLSX.utils.aoa_to_sheet(book_header);
-            booksheet['!cols'] = type === "slots" ? [
-                {wpx: 90}, {wpx: 60}, {wpx: 50}, {wpx: 50}, {wpx: 50}, {wpx: 50}, {wpx: 50},
-                {wpx: 60}, {wpx: 60}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}
-            ] : type === "pulses" ? [
-                {wpx: 90}, {wpx: 50}, {wpx: 50}, {wpx: 60}, {wpx: 60},
-                {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}, {wpx: 100}
-            ] : [
-                {wpx: 90}, {wpx: 120}
-            ]
-            XLSX.utils.book_append_sheet(book, booksheet, "Sheet1");
-            XLSX.writeFile(book, type === "slots" ? "SlotListTemplate.xlsx" : (type === "pulses" ? "PulsesTemplate.xlsx" : "SlotPriorityTemplate.xlsx"));
+            downloadTemplateFile(
+                type === "slots" ? "SlotListTemplate.xlsx" : (type === "pulses" ? "PulsesTemplate.xlsx" : "SlotPriorityTemplate.xlsx"),
+                type === "slots" ? "Slot List" : (type === "pulses" ? "Pulses" : "Slot Priority"),
+                headers, widths,
+                type === "slots" ? ['Slot Code', 'Column No', 'Row No'] : (type === "pulses" ? ['Slot Code'] : ['Slot No', 'Reel In Priority']));
         }
 
         //import excel method
@@ -1076,8 +1095,8 @@
             let columnDropdowns = '';
 
             const isMatch = (col1, col2) => {
-                const col1Str = String(col1).toLowerCase().replace(/\s+/g, '');
-                const col2Str = String(col2).toLowerCase().replace(/\s+/g, '');
+                const col1Str = String(col1).toLowerCase().replace(/[\s*]+/g, '');
+                const col2Str = String(col2).toLowerCase().replace(/[\s*]+/g, '');
                 return col1Str === col2Str;
             };
 
@@ -1126,15 +1145,26 @@
 
         function captureUserMappings() {
             const mappings = {};
-            document.querySelectorAll('.column-mapping').forEach(select => {
-                const systemColumn = select.dataset.system;
-                const excelColumn = select.value;
-
-                if (excelColumn) {
-                    mappings[systemColumn] = excelColumn;
+            document.querySelectorAll('.column-mapping').forEach(selectElement => {
+                const selectedValue = selectElement.value;
+                const columnName = selectElement.getAttribute('data-col');
+                if (selectedValue) {
+                    mappings[columnName] = selectedValue;
                 }
             });
             return mappings;
+        }
+
+        function cleanText(val) {
+            return val === undefined || val === null ? '' : String(val).trim();
+        }
+
+        // true/false or 1/0, an empty cell is false, anything else returns null
+        function parseBool(val) {
+            const text = cleanText(val).toLowerCase();
+            if (text === 'true' || text === '1') return true;
+            if (text === 'false' || text === '0' || text === '') return false;
+            return null;
         }
 
         function processAndSubmitData() {
@@ -1158,96 +1188,133 @@
                 const columns = data[0];
                 const colIndex = {};
 
+                const fieldNames = updateType === "slots"
+                    ? ['Slot Code', 'Column No', 'Row No', 'Is Active', 'Is Left', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
+                       'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6', 'Priority']
+                    : (updateType === "priority"
+                        ? ['Slot No', 'Reel In Priority']
+                        : ['Slot Code', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
+                           'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6']);
+                const codeField = updateType === "priority" ? 'Slot No' : 'Slot Code';
+                const requiredFields = updateType === "slots" ? ['Slot Code', 'Column No', 'Row No'] : (updateType === "priority" ? ['Slot No', 'Reel In Priority'] : ['Slot Code']);
+
+                const duplicates = [];
+                fieldNames.forEach(field => {
+                    const fileColumns = Object.keys(userMappings).filter(name => userMappings[name] === field);
+                    if (fileColumns.length > 1) duplicates.push(field);
+                    colIndex[field] = fileColumns.length === 0 ? -1 : columns.findIndex(c => String(c) === fileColumns[0]);
+                });
+
+                const unmapped = requiredFields.filter(field => colIndex[field] < 0);
+                if (unmapped.length > 0) {
+                    Swal.fire({ icon: 'error', title: "Wait", text: `Please map a file column to: ${unmapped.join(', ')}.` });
+                    return;
+                }
+                if (duplicates.length > 0) {
+                    Swal.fire({ icon: 'error', title: "Wait", text: `More than one file column is mapped to: ${duplicates.join(', ')}.` });
+                    return;
+                }
+
+                const dataRows = data.slice(1).map((row, i) => ({ row, excelRow: i + 2 }));
+                while (dataRows.length > 0 && fieldNames.every(field => cleanText(dataRows[dataRows.length - 1].row[colIndex[field]]) === '')) {
+                    dataRows.pop();
+                }
+                // Empty rows in the middle are skipped too, they stay in the returned error file only so the row numbers match Excel.
+                const rowsToSend = dataRows.filter(({ row }) => !fieldNames.every(field => cleanText(row[colIndex[field]]) === ''));
+                if (rowsToSend.length === 0) {
+                    alert("The file has no data rows.");
+                    return;
+                }
+
+                const errors = [];
+                const numberOf = (row, excelRow, field) => {
+                    const text = cleanText(row[colIndex[field]]).replace(/,/g, '');
+                    if (text === '') return undefined;
+                    const n = Number(text);
+                    if (!Number.isInteger(n)) {
+                        errors.push(`Row ${excelRow}: ${field} [${text}] must be a whole number`);
+                        return undefined;
+                    }
+                    return n;
+                };
+                const boolOf = (row, excelRow, field) => {
+                    const value = parseBool(row[colIndex[field]]);
+                    if (value === null) {
+                        errors.push(`Row ${excelRow}: ${field} [${cleanText(row[colIndex[field]])}] must be true/false or 1/0`);
+                        return false;
+                    }
+                    return value;
+                };
+                const slotCodeOf = (row, excelRow) => {
+                    const code = cleanText(row[colIndex[codeField]]);
+                    if (code === '') errors.push(`Row ${excelRow}: ${codeField} is empty`);
+                    return code;
+                };
+
                 if (updateType === "slots")
                 {
-                    const fieldNames = [
-                        'Slot Code', 'Column No', 'Row No', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
-                        'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6',
-                        'Is Active', 'Is Left', 'Priority'
-                    ];
-
-                    fieldNames.forEach(field => {
-                        colIndex[field] = columns.indexOf(userMappings[field]);
-                    });
-
-                    const parseBool = val =>
-                        val === true || val === 1 || val === '1' || val === 'true' || val === 'TRUE';
-
-                    slotsData = data.slice(1).map(row => {
+                    slotsData = rowsToSend.map(({ row, excelRow }) => {
                         return {
                             Slot_Id: 0,
-                            SlotCode: row[colIndex['Slot Code']],
-                            ColNo: row[colIndex['Column No']],
-                            RowNo: row[colIndex['Row No']],
-                            HasEmptyTray: parseBool(row[colIndex['Has Empty Tray']]),
-                            HasReel: parseBool(row[colIndex['Has Reel']]),
-                            XPulse: row[colIndex['X Pulse']],
-                            YPulse: row[colIndex['Z Pulse']],
-                            QRXPulse: row[colIndex['QR-X Pulse']],
-                            QRYPulse: row[colIndex['QR-Z Pulse']],
-                            Add1Pulse: row[colIndex['Additional Pulse 1']],
-                            Add2Pulse: row[colIndex['Additional Pulse 2']],
-                            Add3Pulse: row[colIndex['Additional Pulse 3']],
-                            Add4Pulse: row[colIndex['Additional Pulse 4']],
-                            Add5Pulse: row[colIndex['Additional Pulse 5']],
-                            Add6Pulse: row[colIndex['Additional Pulse 6']],
-                            IsActive: parseBool(row[colIndex['Is Active']]),
-                            IsLeft: parseBool(row[colIndex['Is Left']]),
-                            Priority: row[colIndex['Priority']],
+                            ExcelRow: excelRow,
+                            SlotCode: slotCodeOf(row, excelRow),
+                            ColNo: numberOf(row, excelRow, 'Column No'),
+                            RowNo: numberOf(row, excelRow, 'Row No'),
+                            XPulse: numberOf(row, excelRow, 'X Pulse'),
+                            YPulse: numberOf(row, excelRow, 'Z Pulse'),
+                            QRXPulse: numberOf(row, excelRow, 'QR-X Pulse'),
+                            QRYPulse: numberOf(row, excelRow, 'QR-Z Pulse'),
+                            Add1Pulse: numberOf(row, excelRow, 'Additional Pulse 1'),
+                            Add2Pulse: numberOf(row, excelRow, 'Additional Pulse 2'),
+                            Add3Pulse: numberOf(row, excelRow, 'Additional Pulse 3'),
+                            Add4Pulse: numberOf(row, excelRow, 'Additional Pulse 4'),
+                            Add5Pulse: numberOf(row, excelRow, 'Additional Pulse 5'),
+                            Add6Pulse: numberOf(row, excelRow, 'Additional Pulse 6'),
+                            IsActive: boolOf(row, excelRow, 'Is Active'),
+                            IsLeft: boolOf(row, excelRow, 'Is Left'),
+                            Priority: numberOf(row, excelRow, 'Priority'),
                         };
                     });
                 }
                 else if (updateType === "priority")
                 {
-                    const fieldNames = [
-                        'Slot No', 'Reel In Priority'
-                    ];
-
-                    fieldNames.forEach(field => {
-                        colIndex[field] = columns.indexOf(userMappings[field]);
-                    });
-
-                    slotsData = data.slice(1).map(row => {
+                    slotsData = rowsToSend.map(({ row, excelRow }) => {
                         return {
-                            SlotCode: row[colIndex['Slot No']],
-                            Priority: row[colIndex['Reel In Priority']],
+                            ExcelRow: excelRow,
+                            SlotCode: slotCodeOf(row, excelRow),
+                            Priority: numberOf(row, excelRow, 'Reel In Priority'),
                         };
                     });
                 }
                 else {
-                    const fieldNames = [
-                        'Slot Code','X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
-                        'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6',
-                        'Is Active', 'Is Left'
-                    ];
-
-                    fieldNames.forEach(field => {
-                        colIndex[field] = columns.indexOf(userMappings[field]);
-                    });
-
-                    // const parseBool = val =>
-                    //     val === true || val === 1 || val === '1' || val === 'true' || val === 'TRUE';
-
-                    slotsData = data.slice(1).map(row => {
+                    slotsData = rowsToSend.map(({ row, excelRow }) => {
                         return {
-                            // SlotId: 0,
-                            SlotCode: row[colIndex['Slot Code']],
-                            XPulse: row[colIndex['X Pulse']],
-                            YPulse: row[colIndex['Z Pulse']],
-                            QRXPulse: row[colIndex['QR-X Pulse']],
-                            QRYPulse: row[colIndex['QR-Z Pulse']],
-                            Add1Pulse: row[colIndex['Additional Pulse 1']],
-                            Add2Pulse: row[colIndex['Additional Pulse 2']],
-                            Add3Pulse: row[colIndex['Additional Pulse 3']],
-                            Add4Pulse: row[colIndex['Additional Pulse 4']],
-                            Add5Pulse: row[colIndex['Additional Pulse 5']],
-                            Add6Pulse: row[colIndex['Additional Pulse 6']],
-                            // IsActive: parseBool(row[colIndex['Is Active']]),
-                            // IsLeft: parseBool(row[colIndex['Is Left']]),
+                            ExcelRow: excelRow,
+                            SlotCode: slotCodeOf(row, excelRow),
+                            XPulse: numberOf(row, excelRow, 'X Pulse'),
+                            YPulse: numberOf(row, excelRow, 'Z Pulse'),
+                            QRXPulse: numberOf(row, excelRow, 'QR-X Pulse'),
+                            QRYPulse: numberOf(row, excelRow, 'QR-Z Pulse'),
+                            Add1Pulse: numberOf(row, excelRow, 'Additional Pulse 1'),
+                            Add2Pulse: numberOf(row, excelRow, 'Additional Pulse 2'),
+                            Add3Pulse: numberOf(row, excelRow, 'Additional Pulse 3'),
+                            Add4Pulse: numberOf(row, excelRow, 'Additional Pulse 4'),
+                            Add5Pulse: numberOf(row, excelRow, 'Additional Pulse 5'),
+                            Add6Pulse: numberOf(row, excelRow, 'Additional Pulse 6'),
                         };
                     });
                 }
-                saveExcelSlots(slotsData, content, updateType);
+
+                if (errors.length > 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: errors.slice(0, 10).join('; ') + (errors.length > 10 ? ` ... and ${errors.length - 10} more` : '')
+                    });
+                    return;
+                }
+
+                saveExcelSlots(slotsData, { headers: columns, dataRows, fieldToIndex: colIndex }, updateType);
 
             } catch (error) {
                 //console.error("Error processing the file:", error);
@@ -1266,7 +1333,7 @@
         //     return rValue;
         // }
 
-        function saveExcelSlots(slotsData, bookBuffer, source) {
+        function saveExcelSlots(slotsData, importContext, source) {
             const url = source == "slots" ? '/Slot/SaveExcelSlot' : (source == "priority" ? '/Slot/UpdateExcelPriority' : '/Slot/UpdateExcelPulses');
             //console.log(JSON.stringify(slotsData));
 
@@ -1301,7 +1368,7 @@
                             });
                         } else {
                             if (response.data && response.data.length > 0) {
-                                markErrorsInSheet(bookBuffer, response.data, source);
+                                markErrorsInSheet(importContext, response.data, source);
                                 Swal.fire({
                                     icon: 'warning',
                                     title: "Validation Issues Found",
@@ -1318,63 +1385,94 @@
                             }
                         }
                     },
-                    error: function(xhr, status, error) {
+                    error: function(xhr) {
+                        const detail = xhr && xhr.responseJSON && xhr.responseJSON.errors ? Object.values(xhr.responseJSON.errors).flat()[0] : '';
                         Swal.fire({
                             icon: 'error',
                             title: "Wait",
-                            text: error.val
+                            text: detail ? `The server could not read the file: ${detail}` : 'Failed to import the file.'
                         });
                     }
                 });
             }
         }
 
-        async function markErrorsInSheet(bookBuffer, errorRows, updateType) {
+        const IMPORT_ERROR_FIELD_COLUMNS = {
+            SlotCode: 'Slot Code', ColNo: 'Column No', RowNo: 'Row No',
+            XPulse: 'X Pulse', YPulse: 'Z Pulse', QRXPulse: 'QR-X Pulse', QRYPulse: 'QR-Z Pulse',
+            Add1Pulse: 'Additional Pulse 1', Add2Pulse: 'Additional Pulse 2', Add3Pulse: 'Additional Pulse 3',
+            Add4Pulse: 'Additional Pulse 4', Add5Pulse: 'Additional Pulse 5', Add6Pulse: 'Additional Pulse 6',
+            Priority: 'Priority'
+        };
+
+        function errorFieldColumn(field, updateType) {
+            if (updateType === "priority") {
+                if (field === 'SlotCode') return 'Slot No';
+                if (field === 'Priority') return 'Reel In Priority';
+            }
+            return IMPORT_ERROR_FIELD_COLUMNS[field];
+        }
+
+        async function markErrorsInSheet(importContext, errorRows, updateType) {
+            const { headers, dataRows, fieldToIndex } = importContext;
+            const colCount = dataRows.reduce((max, r) => Math.max(max, r.row.length), headers.length);
+            const errorCol = colCount + 1;
+
             const workbook = new ExcelJS.Workbook();
-            await workbook.xlsx.load(bookBuffer);
-            const worksheet = workbook.getWorksheet(1);
-            const columnsToHighlight = updateType === "slots" ? [1, 2, 3, 16] : (updateType === "priority" ? [1, 3] : [1, 12]);
+            const worksheet = workbook.addWorksheet("Sheet1");
 
-            // let colorIndex = 0;
-            // const highlightColors = [
-            //     'FFCCCC',
-            //     'FFE5CC',
-            //     'FFFFCC',
-            //   ];
-
-            // Add "Error" header
-            const headerRow = worksheet.getRow(1);
-            const errIdx = updateType === "slots" ? 16 : (updateType === "priority" ? 3 : 12);
-            headerRow.getCell(errIdx).value = 'Error';
-            headerRow.commit();
-
-            const errorMap = new Map();
-            errorRows.forEach(e => errorMap.set(e.slotCode, e.errorMsg));
-
-            worksheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
-                if (rowNumber === 1) return; //skip header row
-
-                const rowKey = row.getCell(1).value;
-
-                if (errorMap.has(rowKey)) {
-                    const errorMsg = errorMap.get(rowKey);
-
-                    // const fillColor = highlightColors[colorIndex % highlightColors.length];
-                    // colorIndex++;
-
-                    columnsToHighlight.forEach(colNum => {
-                        const cell = row.getCell(colNum);
-                        cell.fill = {
-                            type: 'pattern',
-                            pattern: 'solid',
-                            fgColor: { argb: 'FFCCCC' }
-                        };
-                    });
-                    row.getCell(errIdx).value = errorMsg;
+            const headerValues = [];
+            for (let c = 0; c < colCount; c++) {
+                headerValues.push(cleanText(headers[c]));
+            }
+            headerValues.push('Error');
+            const titleRow = worksheet.addRow(headerValues);
+            titleRow.font = { name: 'Arial', size: 11, bold: true };
+            titleRow.eachCell(cell => {
+                const parts = /^(.*?)\s*\*$/.exec(String(cell.value));
+                if (parts) {
+                    cell.value = { richText: [
+                        { text: parts[1], font: { name: 'Arial', size: 11, bold: true } },
+                        { text: ' *', font: { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFF0000' } } }
+                    ] };
                 }
             });
 
-                // Export updated file
+            const errorByRow = new Map();
+            errorRows.forEach(e => {
+                if (e.errorMsg) errorByRow.set(e.excelRow, e);
+            });
+
+            const markWrong = cell => {
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFC7CE' } };
+            };
+
+            dataRows.forEach(({ row, excelRow }) => {
+                const values = [];
+                for (let c = 0; c < colCount; c++) {
+                    values.push(cleanText(row[c]) === '' ? null : row[c]);
+                }
+
+                const errorRow = errorByRow.get(excelRow);
+                values.push(errorRow ? errorRow.errorMsg : null);
+                const sheetRow = worksheet.addRow(values);
+
+                if (errorRow) {
+                    (errorRow.errorFields || []).forEach(field => {
+                        const index = fieldToIndex[errorFieldColumn(field, updateType)];
+                        if (index !== undefined && index >= 0) markWrong(sheetRow.getCell(index + 1));
+                    });
+                    const errorCell = sheetRow.getCell(errorCol);
+                    markWrong(errorCell);
+                    errorCell.font = { color: { argb: 'FF9C0006' } };
+                }
+            });
+
+            for (let c = 1; c <= colCount; c++) {
+                worksheet.getColumn(c).width = 18;
+            }
+            worksheet.getColumn(errorCol).width = 60;
+
             const updatedBuffer = await workbook.xlsx.writeBuffer();
             const blob = new Blob([updatedBuffer], {
                 type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1382,7 +1480,7 @@
 
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = "SlotList_Errors.xlsx";
+            link.download = updateType === "slots" ? "SlotList_Errors.xlsx" : (updateType === "priority" ? "SlotPriority_Errors.xlsx" : "SlotPulses_Errors.xlsx");
             link.click();
 
             Swal.fire({

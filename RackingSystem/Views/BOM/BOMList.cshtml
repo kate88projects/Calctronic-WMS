@@ -505,13 +505,21 @@
                 worksheet.addRow(row);
             });
             worksheet.columns = [
-                { width: 15 },
+                { width: 20 },
                 { width: 15 },
                 { width: 15 }
             ];
 
-            // worksheet.getRow(1).font = { bold: true };
-            // worksheet.getRow(4).font = { bold: true };
+            worksheet.getRow(1).font = { name: 'Arial', size: 11, bold: true };
+            worksheet.getRow(4).font = { name: 'Arial', size: 11, bold: true };
+
+            const starred = title => ({ richText: [
+                { text: title, font: { name: 'Arial', size: 11, bold: true } },
+                { text: ' *', font: { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFF0000' } } }
+            ] });
+            worksheet.getCell('A1').value = starred('Finished Goods');
+            worksheet.getCell('A4').value = starred('Sub Item');
+            worksheet.getCell('B4').value = starred('Qty');
 
             workbook.xlsx.writeBuffer().then(function(buffer) {
                 var blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
@@ -551,7 +559,7 @@
                 originalFileContent = content;
                 processFileContent(content, source)
                     .then((excelData) => {
-                        saveExcelBOM(excelData);
+                        if (excelData) saveExcelBOM(excelData);
                     })
                     .catch((err) => {
                         console.error("Error processing the file:", err);
@@ -561,6 +569,21 @@
                     });
             };
             reader.readAsArrayBuffer(file);
+        }
+
+        function cellText(cell) {
+            const v = cell.value;
+            if (v === null || v === undefined) return "";
+            if (typeof v === "object") {
+                if (v.richText) return v.richText.map(t => t.text).join("").trim();
+                if (v.result !== undefined && v.result !== null) return String(v.result).trim();
+                if (v.text !== undefined) return String(v.text).trim();
+            }
+            return String(v).trim();
+        }
+
+        function headerText(cell) {
+            return cellText(cell).replace(/\*/g, "").trim().toLowerCase();
         }
 
         function processFileContent(arraybuffer, source) {
@@ -573,8 +596,8 @@
                     return;
                 }
 
-                const finishedGood = worksheet.getRow(2).getCell(1).value || "";
-                const description = worksheet.getRow(2).getCell(2).value || "";
+                const finishedGood = cellText(worksheet.getRow(2).getCell(1));
+                const description = cellText(worksheet.getRow(2).getCell(2));
 
                 if (!finishedGood) {
                     alert("Finished Good is missing.");
@@ -583,8 +606,7 @@
 
                 let headerRow = -1;
                 for (let r = 1; r <= 50; r++) {
-                    const cellVal = worksheet.getRow(r).getCell(1).value;
-                    if (cellVal && String(cellVal).toLowerCase().trim() === "sub item") {
+                    if (headerText(worksheet.getRow(r).getCell(1)) === "sub item") {
                         headerRow = r;
                         break;
                     }
@@ -596,15 +618,33 @@
                 }
 
                 const subItems = [];
-                let rowNum = headerRow + 1;
-                while (worksheet.getRow(rowNum).getCell(1).value) {
-                    subItems.push({
-                        ExcelRowNo: rowNum,
-                        ItemCode: worksheet.getRow(rowNum).getCell(1).value || "",
-                        Quantity: Number(worksheet.getRow(rowNum).getCell(2).value || 0),
-                        Remark: String(worksheet.getRow(rowNum).getCell(3).value || "")
+                const errors = [];
+                for (let rowNum = headerRow + 1; rowNum <= worksheet.rowCount; rowNum++) {
+                    const row = worksheet.getRow(rowNum);
+                    const itemCode = cellText(row.getCell(1));
+                    const qtyText = cellText(row.getCell(2)).replace(/,/g, "");
+                    const remark = cellText(row.getCell(3));
+                    if (itemCode === "" && qtyText === "" && remark === "") continue;
+
+                    let qty = 0;
+                    if (qtyText !== "") {
+                        qty = Number(qtyText);
+                        if (!Number.isInteger(qty)) {
+                            errors.push(`Row ${rowNum}: Qty [${qtyText}] must be a whole number`);
+                            qty = 0;
+                        }
+                    }
+
+                    subItems.push({ ExcelRowNo: rowNum, ItemCode: itemCode, Quantity: qty, Remark: remark });
+                }
+
+                if (errors.length > 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: errors.slice(0, 10).join('; ') + (errors.length > 10 ? ` ... and ${errors.length - 10} more` : '')
                     });
-                    rowNum++;
+                    return;
                 }
 
                 if (subItems.length === 0) {
@@ -692,8 +732,7 @@
                 var worksheet = workbook.worksheets[0];
                 var headerRowNumber = -1;
                 for (let r = 1; r <= 50; r++) {
-                    const cellValue = worksheet.getCell(`A${r}`).value;
-                    if (cellValue && cellValue.toString().toLowerCase().trim() === "sub item") {
+                    if (headerText(worksheet.getCell(`A${r}`)) === "sub item") {
                         headerRowNumber = r;
                         break;
                     }
@@ -706,7 +745,7 @@
 
                 const headerCell = worksheet.getCell(`D${headerRowNumber}`);
                 headerCell.value = "Error Message";
-                headerCell.font = { bold: true };
+                headerCell.font = { name: 'Arial', size: 11, bold: true };
 
                 const errorFill = {
                     type: "pattern",
