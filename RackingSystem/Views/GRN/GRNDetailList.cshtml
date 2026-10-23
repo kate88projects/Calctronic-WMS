@@ -229,7 +229,7 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="../js/dataTables.js"></script>
-    @* <script src="../js/qrcode.js"></script> *@
+    <script src="../js/qrcode.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
     <script src="../js/xlsx.full.min.js"></script>
     <script src="../js/exceljs.min.js"></script>
@@ -1322,19 +1322,20 @@
                 return;
             }
 
-            let qrDataUrl;
+            let qrSvg;
             try {
                 const qr = qrcode(0, 'M');
                 qr.addData(String(reelCode));
                 qr.make();
-                qrDataUrl = qr.createDataURL(6, 8);
+                qrSvg = qr.createSvgTag({ cellSize: 1, margin: 1, scalable: true });
             }
             catch (e) {
-                // console.log(e);
+                console.error('Print QR failed:', e);
+                reportClientError('Print QR', e);
                 Swal.fire({
                     icon: 'error',
                     title: 'Print Failed',
-                    text: 'Unable to generate QR code.'
+                    text: 'Unable to generate QR code' + (e && e.message ? ': ' + e.message : '.')
                 });
                 return;
             }
@@ -1353,13 +1354,17 @@
                 return;
             }
 
+            // sticker and QR size in mm
+            const labelWidth = 15, labelHeight = 20, qrSize = 10;
             printWindow.document.write(
                 '<html><head><title>Reel Label</title><style>'
-                + 'body { text-align:center; font-family:Arial, sans-serif; margin:0; padding:10px; }'
-                + 'img { width:150px; height:150px; }'
-                + '.code { font-size:14px; margin-top:5px; }'
+                + '@@page { size: ' + labelWidth + 'mm ' + labelHeight + 'mm; margin: 0; }'
+                + 'html, body { margin:0; padding:0; width:' + labelWidth + 'mm; height:' + (labelHeight - 0.1) + 'mm; overflow:hidden; }'
+                + 'body { display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:Arial, sans-serif; }'
+                + 'svg { width:' + qrSize + 'mm; height:' + qrSize + 'mm; display:block; }'
+                + '.code { font-size:7pt; font-weight:bold; line-height:1; margin-top:1mm; white-space:nowrap; }'
                 + '<\/style></head><body>'
-                + '<img src="' + qrDataUrl + '" />'
+                + qrSvg
                 + '<div class="code">' + reelCode + '<\/div>'
                 + '<\/body><\/html>'
             );

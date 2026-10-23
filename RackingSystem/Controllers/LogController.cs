@@ -1,165 +1,61 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using RackingSystem.Data;
-using RackingSystem.Models.Item;
-using RackingSystem.Models;
-using RackingSystem.Models.User;
-using RackingSystem.Services.ItemServices;
-using RackingSystem.Data.Log;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace RackingSystem.Controllers
 {
+    [Authorize(AuthenticationSchemes = "MyAuthCookie")]
     public class LogController : Controller
     {
-        private readonly AppDbContext _context;
+        private static readonly object Gate = new object();
 
-        public LogController(AppDbContext context)
+        private readonly ILogger<LogController> _logger;
+        private readonly IMemoryCache _cache;
+
+        public LogController(ILogger<LogController> logger, IMemoryCache cache)
         {
-            _context = context;
-        }
-
-        public IActionResult HubInLogView()
-        {
-            ViewBag.PermissionList = new List<int>();
-            //string s = HttpContext.Session.GetString("xSession") ?? "";
-            //if (s != "")
-            //{
-            //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
-            //    ViewBag.PermissionList = data.UACIdList;
-            //}
-
-            if (User.Identity?.IsAuthenticated ?? false)
-            {
-                var uacClaim = User.FindFirst("UACIdList")?.Value;
-                if (uacClaim != null)
-                {
-                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
-                    ViewBag.PermissionList = uacIdList;
-                }
-            }
-
-            ViewData["ActiveGroup"] = "grpRACKING";
-            ViewData["ActiveTab"] = "HubInLogView";
-            ViewData["Title"] = "Hub In Log";
-            return View();
+            _logger = logger;
+            _cache = cache;
         }
 
         [HttpPost]
-        public async Task<ServiceResponseModel<List<PLCHubInLog>>> GetHubInLog([FromBody] ItemSearchReqDTO req)
+        public IActionResult ClientError([FromForm] string? source, [FromForm] string? message, [FromForm] string? stack, [FromForm] string? page)
         {
-            if (req == null)
-            {
-                ServiceResponseModel<List<PLCHubInLog>> rErr = new ServiceResponseModel<List<PLCHubInLog>>();
-                rErr.errMessage = "Empty parameter.";
-                return rErr;
-            }
-            int ttl = -1;
-            if (req.page == 1)
-            {
-                ttl = _context.PLCHubInLog.Count();
-            }
-            ServiceResponseModel<List<PLCHubInLog>> result = new ServiceResponseModel<List<PLCHubInLog>>();
-            result.success = true;
-            result.data = await _context.PLCHubInLog.OrderByDescending(x => x.CreatedDate).Skip((req.page - 1) * req.pageSize).Take(req.pageSize).ToListAsync();
-            result.totalRecords = ttl;
-            return result;
-        }
+            source = OneLine(source, 100);
+            message = OneLine(message, 500);
+            page = OneLine(page, 200);
+            stack = Cut(stack, 2000);
 
-        public IActionResult HubOutLogView()
-        {
-            ViewBag.PermissionList = new List<int>();
-            //string s = HttpContext.Session.GetString("xSession") ?? "";
-            //if (s != "")
-            //{
-            //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
-            //    ViewBag.PermissionList = data.UACIdList;
-            //}
-
-            if (User.Identity?.IsAuthenticated ?? false)
+            // the same error is written once a minute, so a repeated click cannot fill the file
+            string key = $"clienterror|{source}|{page}|{message}";
+            lock (Gate)
             {
-                var uacClaim = User.FindFirst("UACIdList")?.Value;
-                if (uacClaim != null)
+                if (_cache.TryGetValue(key, out _))
                 {
-                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
-                    ViewBag.PermissionList = uacIdList;
+                    return Ok();
                 }
+                _cache.Set(key, true, TimeSpan.FromMinutes(1));
             }
 
-            ViewData["ActiveGroup"] = "grpRACKING";
-            ViewData["ActiveTab"] = "HubOutLogView";
-            ViewData["Title"] = "Hub Out Log";
-            return View();
+            string user = User.Identity?.Name ?? "unknown";
+            string agent = OneLine(Request.Headers.UserAgent.ToString(), 200);
+            string detail = stack == "" ? "" : Environment.NewLine + stack;
+            _logger.LogError("ClientError [{Source}] page={Page} user={User} browser={Agent}: {Message}{Detail}",
+                source, page, user, agent, message, detail);
+
+            return Ok();
         }
 
-        [HttpPost]
-        public async Task<ServiceResponseModel<List<PLCHubOutLog>>> GetHubOutLog([FromBody] ItemSearchReqDTO req)
+        private static string Cut(string? value, int max)
         {
-            if (req == null)
-            {
-                ServiceResponseModel<List<PLCHubOutLog>> rErr = new ServiceResponseModel<List<PLCHubOutLog>>();
-                rErr.errMessage = "Empty parameter.";
-                return rErr;
-            }
-            int ttl = -1;
-            if (req.page == 1)
-            {
-                ttl = _context.PLCHubOutLog.Count();
-            }
-            ServiceResponseModel<List<PLCHubOutLog>> result = new ServiceResponseModel<List<PLCHubOutLog>>();
-            result.success = true;
-            result.data = await _context.PLCHubOutLog.OrderByDescending(x => x.CreatedDate).Skip((req.page - 1) * req.pageSize).Take(req.pageSize).ToListAsync();
-            result.totalRecords = ttl;
-            return result;
+            value ??= "";
+            return value.Length > max ? value.Substring(0, max) : value;
         }
 
-        public IActionResult DrawerInView()
+        // no line breaks, so one report cannot look like several log lines
+        private static string OneLine(string? value, int max)
         {
-            ViewBag.PermissionList = new List<int>();
-            //string s = HttpContext.Session.GetString("xSession") ?? "";
-            //if (s != "")
-            //{
-            //    UserSessionDTO data = JsonConvert.DeserializeObject<UserSessionDTO>(s) ?? new UserSessionDTO();
-            //    ViewBag.PermissionList = data.UACIdList;
-            //}
-
-            if (User.Identity?.IsAuthenticated ?? false)
-            {
-                var uacClaim = User.FindFirst("UACIdList")?.Value;
-                if (uacClaim != null)
-                {
-                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
-                    ViewBag.PermissionList = uacIdList;
-                }
-            }
-
-            ViewData["ActiveGroup"] = "grpRACKING";
-            ViewData["ActiveTab"] = "DrawerInView";
-            ViewData["Title"] = "Drawer In Log";
-            return View();
+            return Cut(value, max).Replace("\r", " ").Replace("\n", " ");
         }
-
-        [HttpPost]
-        public async Task<ServiceResponseModel<List<PLCTrolleyLog>>> GetDrawerInLog([FromBody] ItemSearchReqDTO req)
-        {
-            if (req == null)
-            {
-                ServiceResponseModel<List<PLCTrolleyLog>> rErr = new ServiceResponseModel<List<PLCTrolleyLog>>();
-                rErr.errMessage = "Empty parameter.";
-                return rErr;
-            }
-            int ttl = -1;
-            if (req.page == 1)
-            {
-                ttl = _context.PLCTrolleyLog.Count();
-            }
-            ServiceResponseModel<List<PLCTrolleyLog>> result = new ServiceResponseModel<List<PLCTrolleyLog>>();
-            result.success = true;
-            result.data = await _context.PLCTrolleyLog.OrderByDescending(x => x.CreatedDate).Skip((req.page - 1) * req.pageSize).Take(req.pageSize).ToListAsync();
-            result.totalRecords = ttl;
-            return result;
-        }
-
-
     }
 }

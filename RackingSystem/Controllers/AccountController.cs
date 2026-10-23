@@ -90,7 +90,12 @@ namespace RackingSystem.Controllers
 
                 await HttpContext.SignInAsync(
                     "MyAuthCookie",
-                    new ClaimsPrincipal(identity)
+                    new ClaimsPrincipal(identity),
+                    new AuthenticationProperties
+                    {
+                        IsPersistent = true,
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1)
+                    }
                 );
                 var principal = new ClaimsPrincipal(identity);
                 var uacIds = principal.FindFirst("UACIdList")?.Value;

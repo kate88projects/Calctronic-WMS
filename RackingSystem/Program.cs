@@ -16,9 +16,20 @@ using RackingSystem.Services.ReelServices;
 using RackingSystem.Services.SettingServices;
 using RackingSystem.Services.SlotServices;
 using RackingSystem.Services.TrolleyServices;
+using Serilog;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// a relative log path is kept inside the site folder (C:\inetpub\SRMS\Logs on the server), an absolute path is used as it is
+var logPath = builder.Configuration["Serilog:WriteTo:0:Args:path"];
+if (!string.IsNullOrEmpty(logPath))
+{
+    builder.Configuration["Serilog:WriteTo:0:Args:path"] = Path.Combine(builder.Environment.ContentRootPath, logPath);
+}
+
+builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
+builder.Services.AddMemoryCache();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -44,7 +55,7 @@ builder.Services.AddAuthentication(options =>
     options.LoginPath = "/Account/Login";
     options.LogoutPath = "/Account/Logout";
 
-    options.ExpireTimeSpan = TimeSpan.FromHours(12);
+    options.ExpireTimeSpan = TimeSpan.FromDays(1);
     options.SlidingExpiration = true;
     options.Cookie.HttpOnly = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;

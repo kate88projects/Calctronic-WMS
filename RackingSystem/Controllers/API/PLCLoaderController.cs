@@ -522,7 +522,9 @@ namespace RackingSystem.Controllers.API
                     if ((DateTime.Now - dtRun).TotalMinutes > 1)
                     {
                         result.errMessage = "Timeout. Cannot get Fork value.";
-                        exit = true;
+                        result.success = false;
+                        return result;
+                        //exit = true;
                     }
                 }
 
