@@ -1532,7 +1532,7 @@ namespace RackingSystem.Controllers.API
                         exit = true;
                         PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress}: {value}", "", false);
                     }
-                    if ((DateTime.Now - dtRun).TotalSeconds > 15)
+                    if ((DateTime.Now - dtRun).TotalSeconds > 30) // > 15)
                     {
                         result.errMessage = "Timeout. Cannot get Empty Tray Status.";
                         exit = true;
