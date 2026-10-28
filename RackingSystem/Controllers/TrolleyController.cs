@@ -393,14 +393,14 @@ namespace RackingSystem.Controllers
         }
 
         [HttpGet]
-        public async Task<ServiceResponseModel<List<SlotPulsesExcelDTO>>> GetTrolleySlotPulsesExcel(int colNo)
+        public async Task<ServiceResponseModel<List<SlotPulsesExcelDTO>>> GetTrolleySlotPulsesExcel(int colNo, bool isLeft)
         {
             ServiceResponseModel<List<SlotPulsesExcelDTO>> result = new ServiceResponseModel<List<SlotPulsesExcelDTO>>();
             result.data = new List<SlotPulsesExcelDTO>();
 
             try
             {
-                var slotList = await _context.TrolleySlot.Where(x => x.ColNo == colNo).OrderBy(x => x.RowNo).ToListAsync();
+                var slotList = await _context.TrolleySlot.Where(x => x.ColNo == colNo && x.IsLeft == isLeft).OrderBy(x => x.RowNo).ToListAsync();
                 foreach (var s in slotList)
                 {
                     result.data.Add(new SlotPulsesExcelDTO

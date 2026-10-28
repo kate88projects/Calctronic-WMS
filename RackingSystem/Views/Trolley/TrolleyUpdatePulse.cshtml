@@ -770,8 +770,9 @@
         function exportLogFile() {
 
             var col = Number($('#txtCol').val());
+            var isLeft = $('#txtSide').val() === 'A';
             $.ajax({
-                url: "/Trolley/GetTrolleySlotPulsesExcel?colNo=" + col,
+                url: "/Trolley/GetTrolleySlotPulsesExcel?colNo=" + col + "&isLeft=" + isLeft,
                 type: "GET",
                 headers: {
                     'Authorization': 'Bearer ' + token

@@ -1331,7 +1331,6 @@
             }
             catch (e) {
                 console.error('Print QR failed:', e);
-                reportClientError('Print QR', e);
                 Swal.fire({
                     icon: 'error',
                     title: 'Print Failed',
