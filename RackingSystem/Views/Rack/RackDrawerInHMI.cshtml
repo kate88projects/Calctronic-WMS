@@ -2382,6 +2382,13 @@
 
 
         }
+
+        //prevent user close/refresh page while the system is running
+        window.addEventListener("beforeunload", function (e) {
+            if (!sharedDrawerState.systemRunning) return;
+            e.preventDefault();
+            e.returnValue = "";
+        });
     </script>
 
 }

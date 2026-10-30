@@ -1209,9 +1209,9 @@
                     // check is column correct, else need call turn
                     var realCol = await loadPLCGetCurrentColumn(loaderId);
 
-                    if (realCol == 0) {
+                    if (realCol == 0) {  //currently be 0 or false
                         $('#btnRetry2').removeClass('tw:hidden');
-                        if (realCol !== false)
+                        if (realCol !== false) //double confirm sure is value 0
                         {
                             $('#colStatus2').text('');
                             $('#errCol2').text('Invalid Column Number');
@@ -2245,12 +2245,11 @@
         }
         
         //prevent user close/refresh page
-        // window.addEventListener("beforeunload", function (e) {
-        //     e.preventDefault();
-        //     e.returnValue = "";
-        //     const loader = document.getElementById("txtLoaderId").value;
-        //     localStorage.setItem("loaderId", loader);
-        // });
+        window.addEventListener("beforeunload", function (e) {
+            if (!taskLoad) return;
+            e.preventDefault();
+            e.returnValue = "";
+        });
 
         // window.addEventListener("unload", function() {
         //     if (taskLoad) { //is task is loading state, send end task for loader
