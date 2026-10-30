@@ -619,6 +619,8 @@ namespace RackingSystem.Controllers.API
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
                 PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", valueToWrite, methodName, false);
 
+                await Task.Delay(500);
+
                 // step Last :
                 registerAddress = 4297;
                 valueToWrite = 2;
@@ -852,7 +854,7 @@ namespace RackingSystem.Controllers.API
         }
 
         [HttpGet("PutAway/{slotCode}/{slotReserve}")]
-        public ServiceResponseModel<int> PutAway(string slotCode, int slotReserve)
+        public async Task<ServiceResponseModel<int>> PutAway(string slotCode, int slotReserve)
         {
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
             string methodName = "PutAway";
@@ -948,11 +950,14 @@ namespace RackingSystem.Controllers.API
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
                 PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", valueToWrite, methodName, false);
 
+                await Task.Delay(500);
+
                 // step Last :
                 registerAddress = 4297;
                 valueToWrite = 1;
                 modbusClient.WriteSingleRegister(registerAddress, valueToWrite);
                 PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, registerAddress, "Write", valueToWrite, methodName, false);
+
 
 
                 result.success = true;

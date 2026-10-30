@@ -1480,7 +1480,7 @@ namespace RackingSystem.Controllers.API
         }
 
         [HttpGet("GetRetrieveTrayStatus")]
-        public ServiceResponseModel<RackJobSlotInfo> GetRetrieveTrayStatus()
+        public async Task<ServiceResponseModel<RackJobSlotInfo>> GetRetrieveTrayStatus()
         {
             ServiceResponseModel<RackJobSlotInfo> result = new ServiceResponseModel<RackJobSlotInfo>();
             result.data = new RackJobSlotInfo();
@@ -1532,7 +1532,7 @@ namespace RackingSystem.Controllers.API
                         exit = true;
                         PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress}: {value}", "", false);
                     }
-                    if ((DateTime.Now - dtRun).TotalSeconds > 30) // > 15)
+                    if ((DateTime.Now - dtRun).TotalSeconds > 15)
                     {
                         result.errMessage = "Timeout. Cannot get Empty Tray Status.";
                         exit = true;
@@ -1578,6 +1578,7 @@ namespace RackingSystem.Controllers.API
                         try
                         {
                             exit = false;
+                            dtRun = DateTime.Now;
                             //modbusClient.Connect();
 
                             PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
@@ -1598,7 +1599,7 @@ namespace RackingSystem.Controllers.API
                                     exit = true;
                                     PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress}: {value}", "", false);
                                 }
-                                if ((DateTime.Now - dtRun).TotalSeconds > 15)
+                                if ((DateTime.Now - dtRun).TotalSeconds > 30) //  > 15)
                                 {
                                     result.errMessage = "Timeout. Cannot get Empty Tray Status.";
                                     exit = true;
@@ -1635,23 +1636,22 @@ namespace RackingSystem.Controllers.API
             }
 
 
-            //// double check slot_id
-            //string slotCode = GetSlotIDByIP(configRack.ConfigValue);
-            //var slotChk = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
-            //if (slotChk == null)
-            //{
-            //    result.errMessage = "Cannot find Slot Retrieve [" + slotCode + "]. ";
-            //}
-            //else
-            //{
-            //    var pulses = ReadPulseByIP(configRack.ConfigValue, slotCode);
-            //    result.data.SlotCode = slotCode;
-            //    result.data.QRXPulse = pulses[0];
-            //    result.data.QRYPulse = pulses[1];
-            //    result.data.QRXPulseDiffer = pulses[2];
-            //    result.data.QRXPulseDiffer = pulses[3];
-            //}
-
+            // double check slot_id
+            string slotCode = await GetSlotIDByIP(configRack.ConfigValue);
+            var slotChk = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
+            if (slotChk == null)
+            {
+                result.errMessage = "Cannot find Slot Retrieve [" + slotCode + "]. ";
+            }
+            else
+            {
+                var pulses = await ReadPulseByIP(configRack.ConfigValue, slotCode);
+                result.data.SlotCode = slotCode;
+                result.data.QRXPulse = pulses[0];
+                result.data.QRYPulse = pulses[1];
+                result.data.QRXPulseDiffer = pulses[2];
+                result.data.QRXPulseDiffer = pulses[3];
+            }
 
             result.success = value == 1;
             result.data.data = value.ToString();
@@ -2254,22 +2254,22 @@ namespace RackingSystem.Controllers.API
                 PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Disconnected.", "", false);
             }
 
-            //// double check slot_id
-            //string slotCode = await GetSlotIDByIP(configRack.ConfigValue);
-            //var slotChk = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
-            //if (slotChk == null)
-            //{
-            //    result.errMessage = "Cannot find Slot Retrieve [" + slotCode + "]. ";
-            //}
-            //else
-            //{
-            //    var pulses = await ReadPulseByIP(configRack.ConfigValue, slotCode);
-            //    result.data.SlotCode = slotCode;
-            //    result.data.QRXPulse = pulses[0];
-            //    result.data.QRYPulse = pulses[1];
-            //    result.data.QRXPulseDiffer = pulses[2];
-            //    result.data.QRXPulseDiffer = pulses[3];
-            //}
+            // double check slot_id
+            string slotCode = await GetSlotIDByIP(configRack.ConfigValue);
+            var slotChk = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
+            if (slotChk == null)
+            {
+                result.errMessage = "Cannot find Slot Retrieve [" + slotCode + "]. ";
+            }
+            else
+            {
+                var pulses = await ReadPulseByIP(configRack.ConfigValue, slotCode);
+                result.data.SlotCode = slotCode;
+                result.data.QRXPulse = pulses[0];
+                result.data.QRYPulse = pulses[1];
+                result.data.QRXPulseDiffer = pulses[2];
+                result.data.QRXPulseDiffer = pulses[3];
+            }
 
             //// get sensor measurement
             //var r = await GetHeightMeasReelSlot(slotCode, 2);

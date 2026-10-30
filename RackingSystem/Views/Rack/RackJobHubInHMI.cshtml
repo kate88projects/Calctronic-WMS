@@ -2036,23 +2036,15 @@
         }
 
         // ----------- PLC Address Response Log
-        let addressLogInterval = null;
-
         function showAddressResponseLog() {
             document.getElementById('addressLogOverlay').classList.remove('hidden');
             document.getElementById('addressLogPanel').style.right = '0px';
             loadAddressResponseLog();
-            if (addressLogInterval) { clearInterval(addressLogInterval); }
-            addressLogInterval = setInterval(loadAddressResponseLog, 3000);
         }
 
         function hideAddressResponseLog() {
             document.getElementById('addressLogOverlay').classList.add('hidden');
             document.getElementById('addressLogPanel').style.right = '-420px';
-            if (addressLogInterval) {
-                clearInterval(addressLogInterval);
-                addressLogInterval = null;
-            }
         }
 
         async function loadAddressResponseLog() {
@@ -3085,6 +3077,10 @@
                         $("#txtCol4TotalReels").val(result.data.loaderInfo.col4TotalReels);
 
                         log('Loader :: Done check ' + code, 'info');
+                        
+                        totalPending = result.data.loaderInfo.col1TotalReels + result.data.loaderInfo.col2TotalReels + result.data.loaderInfo.col3TotalReels + result.data.loaderInfo.col4TotalReels;
+                        updateDash();
+
                     }
                     else {
                         updateColumnStatus(1, 0);
@@ -3989,6 +3985,10 @@
                         fResult = true;
                         log('Put Away Status :: Done ', 'info');
                         putawayMoveDone();
+
+                        totalPending = totalPending - 1;
+                        totalCompleted = totalCompleted + 1;
+                        updateDash();
                     }
                     else {
                         log('Put Away Status :: ' + result.errMessage, 'alert');
