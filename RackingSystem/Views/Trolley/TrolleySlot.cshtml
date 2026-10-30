@@ -740,7 +740,7 @@
                 { id: 'txtAddPulse4', name: 'Additional Pulse 4', required: true, numeric: true, min: 0, allowEmpty: true },
                 { id: 'txtAddPulse5', name: 'Additional Pulse 5', required: true, numeric: true, min: 0, allowEmpty: true },
                 { id: 'txtAddPulse6', name: 'Additional Pulse 6', required: true, numeric: true, min: 0, allowEmpty: true },
-                { id: 'txtPriority', name: 'Priority', required: true, numeric: true, min:0 }
+                { id: 'txtPriority', name: 'Priority', required: true, numeric: true, min:0 },
             ];
           
             if (validateColModal(fields)) {
@@ -1132,13 +1132,13 @@
 
         function downloadTemp(type) {
             const headers = type === "slots"
-                ? ['Trolley Code', 'Trolley Slot Code', 'Column No', 'Row No', 'Is Active', 'Is Left', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
+                ? ['Trolley Code', 'Trolley Slot Code', 'Column No', 'Row No', 'Is Active', 'Is Left', 'Priority','X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
                    'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6']
                 : ['Trolley Slot Code', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
                    'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6'];
 
             const widths = type === "slots"
-                ? [70, 100, 60, 50, 50, 50, 50, 50, 60, 60, 100, 100, 100, 100, 100, 100]
+                ? [70, 100, 60, 50, 50, 50, 50, 50, 50, 60, 60, 100, 100, 100, 100, 100, 100]
                 : [100, 50, 50, 60, 60, 100, 100, 100, 100, 100, 100];
 
             downloadTemplateFile(
@@ -1219,7 +1219,7 @@
             let dataTableColumns;
 
             if (source == "importSlot") {
-                dataTableColumns = ['Trolley Code', 'Trolley Slot Code', 'Column No', 'Row No', 'Is Active', 'Is Left', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
+                dataTableColumns = ['Trolley Code', 'Trolley Slot Code', 'Column No', 'Row No', 'Is Active', 'Is Left', 'Priority', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
                                      'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6'];
                 $('#updateType').val("slots");
             }
@@ -1321,7 +1321,7 @@
                 const colIndex = {};
 
                 const fieldNames = updateType === "slots"
-                    ? ['Trolley Code', 'Trolley Slot Code', 'Column No', 'Row No', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
+                    ? ['Trolley Code', 'Trolley Slot Code', 'Column No', 'Row No', 'Priority', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
                        'Additional Pulse 1', 'Additional Pulse 2', 'Additional Pulse 3', 'Additional Pulse 4', 'Additional Pulse 5', 'Additional Pulse 6',
                        'Is Active', 'Is Left']
                     : ['Trolley Slot Code', 'X Pulse', 'Z Pulse', 'QR-X Pulse', 'QR-Z Pulse',
@@ -1378,6 +1378,7 @@
                             TrolleySlotCode: textOf(row, 'Trolley Slot Code'),
                             ColNo: numberOf(row, excelRow, 'Column No'),
                             RowNo: numberOf(row, excelRow, 'Row No'),
+                            Priority: numberOf(row, excelRow, 'Priority'),
                             XPulse: numberOf(row, excelRow, 'X Pulse'),
                             YPulse: numberOf(row, excelRow, 'Z Pulse'),
                             QRXPulse: numberOf(row, excelRow, 'QR-X Pulse'),

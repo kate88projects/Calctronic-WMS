@@ -773,6 +773,7 @@ namespace RackingSystem.Services.TrolleyServices
                                 Add4Pulse = ts.Add4Pulse,
                                 Add5Pulse = ts.Add5Pulse,
                                 Add6Pulse = ts.Add6Pulse,
+                                Priority = ts.Priority,
                             };
                             _dbContext.TrolleySlot.Add(_ts);
                             ts.ErrorMsg = "";
