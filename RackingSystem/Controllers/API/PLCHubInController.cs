@@ -576,49 +576,71 @@ namespace RackingSystem.Controllers.API
             // 2. check AudoLoader Position = Scan Position
             if (beginning)
             {
-                ModbusClient modbusClient2 = new ModbusClient(_loader.IPAddr, port);
-                try
+                string errBefore = result.errMessage;
+                string errStackBefore = result.errStackTrace;
+
+                // retry up to 5 times
+                for (int attempt = 1; attempt <= 5 && val2 != "16"; attempt++)
                 {
-                    modbusClient2.Connect();
-
-                    PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
-
-                    while (!exit)
+                    if (attempt > 1)
                     {
-                        int startAddress = 4225;
-                        int numRegisters = 1;
-                        int[] registers = modbusClient2.ReadHoldingRegisters(startAddress, numRegisters);
-                        for (int i = 0; i < registers.Length; i++)
-                        {
-                            val2 = registers[i].ToString();
-                        }
-                        PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress, "Read", registers[0], methodName, false);
-
-
-                        if (val2 == "16")
-                        {
-                            exit = true;
-                            PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress}: {val2}", "", false);
-                        }
-                        if ((DateTime.Now - dtRun).TotalSeconds > 30)
-                        {
-                            result.errMessage = "Timeout. Cannot get Reel ID.";
-                            exit = true;
-                            PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress}: {val2}", "", false);
-                        }
+                        PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Retry attempt {attempt}.", "", false);
+                        await Task.Delay(1000);
                     }
+                    exit = false;
+                    DateTime dtAttempt = DateTime.Now;
 
+                    ModbusClient modbusClient2 = new ModbusClient(_loader.IPAddr, port);
+                    try
+                    {
+                        modbusClient2.Connect();
+
+                        PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
+
+                        while (!exit)
+                        {
+                            int startAddress = 4225;
+                            int numRegisters = 1;
+                            int[] registers = modbusClient2.ReadHoldingRegisters(startAddress, numRegisters);
+                            for (int i = 0; i < registers.Length; i++)
+                            {
+                                val2 = registers[i].ToString();
+                            }
+                            PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress, "Read", registers[0], methodName, false);
+
+
+                            if (val2 == "16")
+                            {
+                                exit = true;
+                                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress}: {val2}", "", false);
+                            }
+                            else if ((DateTime.Now - dtAttempt).TotalSeconds > 30)
+                            {
+                                result.errMessage = "Timeout. Cannot get Reel ID.";
+                                exit = true;
+                                PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, $"Register {startAddress}: {val2}", "", false);
+                            }
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "", true);
+                        result.errMessage = ex.Message;
+                        result.errStackTrace = ex.StackTrace ?? "";
+                    }
+                    finally
+                    {
+                        modbusClient2.Disconnect();
+                        PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Disconnected.", "", false);
+                    }
                 }
-                catch (Exception ex)
+
+                // clear errors from failed attempts once the loader is ready
+                if (val2 == "16")
                 {
-                    PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Error: " + ex.Message, "", true);
-                    result.errMessage = ex.Message;
-                    result.errStackTrace = ex.StackTrace ?? "";
-                }
-                finally
-                {
-                    modbusClient2.Disconnect();
-                    PLCLogHelper.Instance.InsertPLCHubInLog(_dbContext, 0, methodName, "Disconnected.", "", false);
+                    result.errMessage = errBefore;
+                    result.errStackTrace = errStackBefore;
                 }
             }
             else
@@ -3649,6 +3671,50 @@ namespace RackingSystem.Controllers.API
 
             result.success = value == 2 && valueSlot > 0;
             result.data = value.ToString() + "," + valueSlot.ToString() + "," + newHeight.ToString();
+
+            return result;
+        }
+
+        [HttpGet("GetQRPulses/{slotCode}")]
+        public async Task<ServiceResponseModel<List<int>>> GetQRPulses(string slotCode)
+        {
+            ServiceResponseModel<List<int>> result = new ServiceResponseModel<List<int>>();
+            result.data = new List<int>();
+            result.data.Add(0);
+            result.data.Add(0);
+            result.data.Add(0);
+            result.data.Add(0);
+            result.data.Add(0);
+            result.data.Add(0);
+
+            try
+            {
+                var configRack = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking1.ToString()).FirstOrDefault();
+                if (configRack == null)
+                {
+                    result.errMessage = "Please set IP Address. ";
+                    return result;
+                }
+
+                var slot = await _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefaultAsync();
+                if (slot == null)
+                {
+                    result.errMessage = "Cannot find Slot Code [" + slotCode + "].";
+                    return result;
+                }
+
+                // [0] PLC X, [1] PLC Y, [2] diff X, [3] diff Y, [4] slot X, [5] slot Y
+                var pulses = await ReadPulseByIP(configRack.ConfigValue, slotCode);
+                pulses.Add(slot.QRXPulse);
+                pulses.Add(slot.QRYPulse);
+                result.data = pulses;
+                result.success = true;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
 
             return result;
         }

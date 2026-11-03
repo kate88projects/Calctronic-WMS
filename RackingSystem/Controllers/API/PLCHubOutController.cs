@@ -562,7 +562,7 @@ namespace RackingSystem.Controllers.API
             {
                 modbusClient.Connect();
 
-                //PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "");
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Connected to Delta PLC.", slotCode, false);
 
                 // step 1 : left or right
                 int registerAddress = 4298;
@@ -629,15 +629,48 @@ namespace RackingSystem.Controllers.API
 
                 result.success = true;
                 result.data = 1;
-
-                var _slotOList = _dbContext.Slot.Where(x => x.Reel_Id == slot.Reel_Id).ToList();
-                foreach (var _so in _slotOList)
+                
+                // only clear related slots when this slot has a reel, else empty Guid will match all empty slots
+                if (slot.Reel_Id != Guid.Empty)
                 {
-                    _so.Reel_Id = new Guid("00000000-0000-0000-0000-000000000000");
-                    _so.ReelNo = "0";
-                    _so.HasReel = false;
-                    _so.HasEmptyTray = false;
-                    await _dbContext.SaveChangesAsync();
+                    var reel = _dbContext.Reel.Where(x => x.Reel_Id == slot.Reel_Id).FirstOrDefault();
+                    decimal actHeight = reel == null ? 0 : reel.ActualHeight;
+
+                    //calculate slot
+                    var slotUsage = _dbContext.SlotCalculation.Where(x => x.MaxThickness >= actHeight).OrderBy(x => x.MaxThickness).FirstOrDefault();
+                    if (slotUsage == null || actHeight == 0)
+                    {
+                        var _slotOList = _dbContext.Slot.Where(x => x.Reel_Id == slot.Reel_Id).ToList();
+                        foreach (var _so in _slotOList)
+                        {
+                            _so.Reel_Id = new Guid("00000000-0000-0000-0000-000000000000");
+                            _so.ReelNo = "0";
+                            _so.HasReel = false;
+                            _so.HasEmptyTray = false;
+                            await _dbContext.SaveChangesAsync();
+                        }
+                    }
+                    else
+                    {
+                        if (slotUsage.ReserveSlot > 1)
+                        {
+                            for (int iR = 1; iR < slotUsage.ReserveSlot; iR++)
+                            {
+                                var _slotO = _dbContext.Slot.Where(x => x.IsLeft == slot.IsLeft && x.ColNo == slot.ColNo && x.RowNo == (slot.RowNo + iR)).FirstOrDefault();
+                                if (_slotO != null)
+                                {
+                                    if (_slotO.Reel_Id == slot.Reel_Id)
+                                    {
+                                        _slotO.Reel_Id = new Guid("00000000-0000-0000-0000-000000000000");
+                                        _slotO.ReelNo = "0";
+                                        _slotO.HasReel = false;
+                                        _slotO.HasEmptyTray = false;
+                                        await _dbContext.SaveChangesAsync();
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
                 slot.Reel_Id = new Guid("00000000-0000-0000-0000-000000000000");
@@ -648,9 +681,9 @@ namespace RackingSystem.Controllers.API
             }
             catch (Exception ex)
             {
-                //PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Error: " + ex.Message, "");
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Error: " + ex.Message, "", true);
             }
             finally
             {
@@ -735,22 +768,22 @@ namespace RackingSystem.Controllers.API
                 PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Disconnected.", "", false);
             }
 
-            //// double check slot_id
-            //string slotCode = GetSlotIDByIP(configRack.ConfigValue);
-            //var slotChk = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
-            //if (slotChk == null)
-            //{
-            //    result.errMessage = "Cannot find Slot Retrieved [" + slotCode + "]. ";
-            //}
-            //else
-            //{
-            //    var pulses = ReadPulseByIP(configRack.ConfigValue, slotCode);
-            //    result.data.SlotCode = slotCode;
-            //    result.data.QRXPulse = pulses[0];
-            //    result.data.QRYPulse = pulses[1];
-            //    result.data.QRXPulseDiffer = pulses[2];
-            //    result.data.QRXPulseDiffer = pulses[3];
-            //}
+            // double check slot_id
+            string slotCode = GetSlotIDByIP(configRack.ConfigValue);
+            var slotChk = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
+            if (slotChk == null)
+            {
+                result.errMessage = "Cannot find Slot Retrieved [" + slotCode + "]. ";
+            }
+            else
+            {
+                var pulses = ReadPulseByIP(configRack.ConfigValue, slotCode);
+                result.data.SlotCode = slotCode;
+                result.data.QRXPulse = pulses[0];
+                result.data.QRYPulse = pulses[1];
+                result.data.QRXPulseDiffer = pulses[2];
+                result.data.QRXPulseDiffer = pulses[3];
+            }
 
 
             result.success = value == 1;
@@ -893,7 +926,7 @@ namespace RackingSystem.Controllers.API
             {
                 modbusClient.Connect();
 
-                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
+                PLCLogHelper.Instance.InsertPLCHubOutLog(_dbContext, 0, methodName, "Connected to Delta PLC.", slotCode, false);
 
                 // step 1 : left or right
                 int registerAddress = 4298;
@@ -1052,22 +1085,22 @@ namespace RackingSystem.Controllers.API
                     }
                 }
 
-                //// double check slot_id
-                //string slotCode = GetSlotIDByIP(configRack.ConfigValue);
-                //var slotChk = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
-                //if (slotChk == null)
-                //{
-                //    result.errMessage = "Cannot find Slot Put Away [" + slotCode + "]. ";
-                //}
-                //else
-                //{
-                //    var pulses = ReadTrolleyPulseByIP(configRack.ConfigValue, trolleyId, slotCode);
-                //    result.data.SlotCode = slotCode;
-                //    result.data.QRXPulse = pulses[0];
-                //    result.data.QRYPulse = pulses[1];
-                //    result.data.QRXPulseDiffer = pulses[2];
-                //    result.data.QRXPulseDiffer = pulses[3];
-                //}
+                // double check slot_id
+                string slotCode = GetSlotIDByIP(configRack.ConfigValue);
+                var slotChk = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
+                if (slotChk == null)
+                {
+                    result.errMessage = "Cannot find Slot Put Away [" + slotCode + "]. ";
+                }
+                else
+                {
+                    var pulses = ReadTrolleyPulseByIP(configRack.ConfigValue, trolleyId, slotCode);
+                    result.data.SlotCode = slotCode;
+                    result.data.QRXPulse = pulses[0];
+                    result.data.QRYPulse = pulses[1];
+                    result.data.QRXPulseDiffer = pulses[2];
+                    result.data.QRXPulseDiffer = pulses[3];
+                }
 
                 //result.success = value == 0;
                 result.data.data = value.ToString();
@@ -1127,12 +1160,13 @@ namespace RackingSystem.Controllers.API
                 // temp hide
                 // 1.1 update reel status
                 _reel.StatusIdx = (int)EnumReelStatus.InTrolley;
-                _reel.Status = EnumReelStatus.Out.ToString();
+                _reel.Status = EnumReelStatus.InTrolley.ToString();
+                _reel.TrolleyCreatedDate = DateTime.Now;
                 await _dbContext.SaveChangesAsync();
 
                 // 2. update detail tables
                 if (rackJob.DocType == EnumQueueDocType.JO.ToString())
-                {
+                { 
                     var itmFirst = _dbContext.JobOrderRaws.Where(x => x.JobOrderRaws_Id.ToString() == dtlId).OrderBy(x => x.JobOrderDetail_Id).FirstOrDefault();
                     if (itmFirst != null)
                     {
@@ -2309,6 +2343,49 @@ namespace RackingSystem.Controllers.API
             return result;
         }
 
+        [HttpGet("GetQRPulses/{slotCode}")]
+        public ServiceResponseModel<List<int>> GetQRPulses(string slotCode)
+        {
+            ServiceResponseModel<List<int>> result = new ServiceResponseModel<List<int>>();
+            result.data = new List<int>();
+            result.data.Add(0);
+            result.data.Add(0);
+            result.data.Add(0);
+            result.data.Add(0);
+            result.data.Add(0);
+            result.data.Add(0);
+
+            try
+            {
+                var configRack = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking1.ToString()).FirstOrDefault();
+                if (configRack == null)
+                {
+                    result.errMessage = "Please set IP Address. ";
+                    return result;
+                }
+
+                var slot = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
+                if (slot == null)
+                {
+                    result.errMessage = "Cannot find Slot Code [" + slotCode + "].";
+                    return result;
+                }
+
+                // [0] PLC X, [1] PLC Y, [2] diff X, [3] diff Y, [4] slot X, [5] slot Y
+                var pulses = ReadPulseByIP(configRack.ConfigValue, slotCode);
+                pulses.Add(slot.QRXPulse);
+                pulses.Add(slot.QRYPulse);
+                result.data = pulses;
+                result.success = true;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
 
     }
 }

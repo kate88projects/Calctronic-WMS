@@ -738,7 +738,7 @@ namespace RackingSystem.Controllers.API
 
                         //slotChg.IsActive = false;
                         slotChg.NeedCheck = true;
-                        slotChg.CheckRemark = "Cannot put Reel.";
+                        slotChg.CheckRemark = "Cannot put Empty Drawer to SRMS.";
                         _dbContext.SaveChanges();
                     }
                 }
@@ -1361,6 +1361,7 @@ namespace RackingSystem.Controllers.API
 
                         modbusClient.WriteSingleCoil(dtl.RowNo - 1, on);
                         PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, dtl.RowNo - 1, "Write", on ? 1 : 0, methodName, false);
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {(dtl.RowNo - 1)} : {(on ? 1 : 0)}", plcIp + " :: " + port, false);
                     }
                     catch (Exception ex)
                     {
@@ -1868,6 +1869,8 @@ namespace RackingSystem.Controllers.API
 
                     result[0] = qrX;
                     result[1] = qrY;
+                    result[2] = qrX - slot.QRXPulse;
+                    result[3] = qrY - slot.QRYPulse;
                 }
 
             }

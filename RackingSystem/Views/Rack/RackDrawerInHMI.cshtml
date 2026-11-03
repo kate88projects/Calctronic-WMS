@@ -333,7 +333,7 @@
                 <i class="bi-building-add" style="width:20px;height:20px;color:#fff;"></i>
             </div>
             <div>
-                <h1 id="pageTitle" class="text-lg font-bold" style="color:#1f2937;">SRMS</h1>
+                <h1 id="pageTitle" class="text-lg font-bold" style="color:#1f2937;cursor:pointer;" title="Show variables" onclick="showVariables()">SRMS</h1>
                 <p id="statusLabel" class="text-xs mono" style="color:#6b7280;">Put away empty drawer from Trolley to SRMS</p>
             </div>
         </div>
@@ -608,6 +608,28 @@
     </div>
 </div>
 
+<div class="modal fade" id="variablesModal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Variables</h5>
+                <div class="flex items-center gap-2">
+                    <button class="px-2 py-1 rounded text-xs font-semibold" style="background:#f3f4f6;color:#374151;" onclick="loadVariables()">
+                        <i class="bi-arrow-clockwise" style="width:12px;height:12px;"></i> Refresh
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <table class="w-full text-xs mono">
+                    <tbody id="variablesBody"></tbody>
+                </table>
+                <p class="text-xs mt-2" id="variablesTime" style="color:#6b7280;"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- PLC Address Response Log Side Panel -->
 <div id="addressLogOverlay" class="hidden" style="position:fixed;inset:0;background:rgba(15,23,42,0.35);z-index:1040;" onclick="hideAddressResponseLog()"></div>
 <div id="addressLogPanel" style="position:fixed;top:0;right:-420px;width:420px;height:100vh;background:#fff;box-shadow:-8px 0 24px rgba(0,0,0,0.12);z-index:1050;transition:right 0.3s ease;display:flex;flex-direction:column;">
@@ -755,6 +777,53 @@
            await putawayMoveDone();
         }
 
+
+        function showVariables() {
+            loadVariables();
+            $('#variablesModal').modal("show");
+        }
+
+        function loadVariables() {
+            var groups = [
+                ['Drawer State', {
+                    'sharedDrawerState.drawerStatus': sharedDrawerState.drawerStatus,
+                    'sharedDrawerState.cartesianRobotState': sharedDrawerState.cartesianRobotState,
+                    'sharedDrawerState.cartesianLocation': sharedDrawerState.cartesianLocation,
+                    'sharedDrawerState.systemRunning': sharedDrawerState.systemRunning,
+                    'sharedDrawerState.trolleyLocation': sharedDrawerState.trolleyLocation,
+                    robotUIState,
+                }],
+                ['Moves', {
+                    inRetrieveMove, inPutAwayMove,
+                    halfRetrieveMoveStep, halfPlaceMoveStep,
+                }],
+                ['Attempts', {
+                    attemptsRetrieve, attemptsPutAway,
+                    changeTakeSlot, changePutSlot,
+                }],
+                ['Job', {
+                    qId, deviceId, qCont, colNo, endTask, readyToEnd,
+                    totalPending, totalCompleted,
+                    running, phase,
+                    cartesianAutoTimer: cartesianAutoTimer ? 'set' : 'none',
+                    rack: JSON.stringify(rack),
+                    trolley: JSON.stringify(trolley),
+                    heldTray,
+                }],
+            ];
+
+            var html = '';
+            groups.forEach(function (g) {
+                html += `<tr><td colspan="2" class="pt-3 pb-1 font-semibold" style="color:#4b5563;border-bottom:1px solid #e5e7eb;">${g[0]}</td></tr>`;
+                Object.keys(g[1]).forEach(function (k) {
+                    var v = g[1][k];
+                    var color = v === true ? '#16a34a' : (v === false ? '#9ca3af' : '#1f2937');
+                    html += `<tr><td class="py-0.5" style="color:#6b7280;">${k}</td><td class="py-0.5 text-right" style="color:${color};">${$('<div>').text(String(v)).html()}</td></tr>`;
+                });
+            });
+            $('#variablesBody').html(html);
+            $('#variablesTime').text("As of " + new Date().toLocaleTimeString());
+        }
 
         async function showJSONModal() {
 
@@ -1767,6 +1836,9 @@
                 updateJson();
                 return;
             }
+            else if (chkStatus == 0) {
+                halfRetrieveMoveStep = 1;
+            }
 
             attemptsRetrieve = 1;
 
@@ -2149,11 +2221,11 @@
                         retrieveMoveNext();
                     }
 
-                    log('Retrieve Slot Code :: ' + result.data.slotCode, 'info');
-                    log('Retrieve QR X :: ' + result.data.qrxPulse, 'info');
-                    log('Retrieve QR Z :: ' + result.data.qryPulse, 'info');
-                    log('Retrieve QR X Differ :: OK ' + result.data.qrxPulseDiffer, 'info');
-                    log('Retrieve QR Z Differ :: OK ' + result.data.qryPulseDiffer, 'info');
+                    log('PLC Retrieve Slot Code :: ' + result.data.slotCode, 'info');
+                    log('PLC Retrieve QR X :: ' + result.data.qrxPulse, 'info');
+                    log('PLC Retrieve QR Z :: ' + result.data.qryPulse, 'info');
+                    log('PLC Retrieve QR X Differ :: OK ' + result.data.qrxPulseDiffer, 'info');
+                    log('PLC Retrieve QR Z Differ :: OK ' + result.data.qryPulseDiffer, 'info');
                 },
                 error: function (error) {
                     log('Retrieve Status :: ' + error.val, 'alert');
@@ -2301,11 +2373,11 @@
 
                         log('Put Away Status :: Done ', 'info');
 
-                        log('Retrieve Slot Code :: ' + result.data.slotCode, 'info');
-                        log('Retrieve QR X :: ' + result.data.qrxPulse, 'info');
-                        log('Retrieve QR Z :: ' + result.data.qryPulse, 'info');
-                        log('Retrieve QR X Differ :: OK ' + result.data.qrxPulseDiffer, 'info');
-                        log('Retrieve QR Z Differ :: OK ' + result.data.qryPulseDiffer, 'info');
+                        log('PLC PutAway Slot Code :: ' + result.data.slotCode, 'info');
+                        log('PLC PutAway QR X :: ' + result.data.qrxPulse, 'info');
+                        log('PLC PutAway QR Z :: ' + result.data.qryPulse, 'info');
+                        log('PLC PutAway QR X Differ :: OK ' + result.data.qrxPulseDiffer, 'info');
+                        log('PLC PutAway QR Z Differ :: OK ' + result.data.qryPulseDiffer, 'info');
 
                         const dot2 = document.getElementById('pDot3');
                         dot2.className = 'step-dot done mt-1';

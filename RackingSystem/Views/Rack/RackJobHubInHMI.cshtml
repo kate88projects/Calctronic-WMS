@@ -352,7 +352,7 @@
         margin-top: 5px;
         font-size: 0.9em;
         font-weight: bold;
-        color: var(--text-color);
+        /* color: var(--text-color); */
     }
 
     .reel-count[data-count="0"] {
@@ -666,13 +666,16 @@
                 <i class="bi-building-add" style="width:20px;height:20px;color:#fff;"></i>
             </div>
             <div>
-                <h1 id="pageTitle" class="text-lg font-bold" style="color:#1f2937;">SRMS</h1>
+                <h1 id="pageTitle" class="text-lg font-bold" style="color:#1f2937;cursor:pointer;" title="Show variables" onclick="showVariables()">SRMS</h1>
                 <p id="statusLabel" class="text-xs mono" style="color:#6b7280;">Put away reels from Auto Loader to SRMS</p>
             </div>
         </div>
         <div class="flex items-center gap-3">
             <button id="addressLogBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;" onclick="showAddressResponseLog()">
                 <i class="bi-cpu" style="width:12px;height:12px;"></i> PLC Address Log
+            </button>
+            <button id="btnCurrentPulses" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;" onclick="showCurrentPulses()">
+                <i class="bi-crosshair" style="width:12px;height:12px;"></i> Current Pulses
             </button>
             <div id="statusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mono" style="background:#f3f4f6;color:#6b7280;">
                 <span id="statusDot" class="w-2 h-2 rounded-full" style="background:#6b7280;"></span> <span id="statusText">IDLE</span>
@@ -699,7 +702,7 @@
                     <h4>Auto Loader</h4>
                     <div class="loader-viewport">
                         <!-- The inner track that moves left or right -->
-                        <div class="loader-track picking-dim">
+                        <div class="loader-track">  @* picking-dim *@
                             <div class="col" id="col-1" data-status="full"><span class="col-label">C1</span><div class="reel"></div><span class="reel-count" data-count="0">- left</span></div>
                             <div class="col" id="col-2" data-status="full"><span class="col-label">C2</span><div class="reel"></div><span class="reel-count" data-count="0">- left</span></div>
                             <div class="col" id="col-3" data-status="full"><span class="col-label">C3</span><div class="reel"></div><span class="reel-count" data-count="0">- left</span></div>
@@ -954,7 +957,7 @@
                                         <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
                                     </button>
                                 </div>
-                                <div class="step-line relative flex items-start gap-3 py-1">
+                                <div class=" relative flex items-start gap-3 py-1">
                                     <div class="step-dot waiting mt-1" id="rDot7"></div>
                                     <div>
                                         <p class="text-sm font-semibold" style="color:#0f172a;">PC → Gantry</p>
@@ -964,13 +967,13 @@
                                         <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
                                     </button>
                                 </div>
-                                <div class="step-line relative flex items-start gap-3 py-1">
+                                <div class=" relative flex items-start gap-3 py-1">
                                     <div class="step-dot waiting mt-1" id="rDot8"></div>
                                     <div>
                                         <p class="text-sm font-semibold" style="color:#0f172a;">PC → Auto Loader</p>
-                                        <p class="text-xs" style="color:#64748b;">* All Empty *</p>
+                                        <p class="text-xs" style="color:#64748b;">* All Empty [End Task, don't use this] *</p>
                                     </div>
-                                    <button onclick="loadPLCEndTask()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnPlace3">
+                                    <button onclick="manualEndTask()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#fff; color:#ef4444;" id="btnPlace3">
                                         <i class="bi-wrench-adjustable" style="width:12px;height:12px; display:inline; margin-right:4px;"></i>
                                     </button>
                                 </div>
@@ -981,9 +984,9 @@
                     <div class="rounded-xl p-6 w-1/2" style="background:#fff;border:1px solid #e5e7eb; width: 49%;">
                         <div class="pb-2 mb-4 border-b" style="border-color:#e2e8f0;">
                             <div class="flex flex-grid items-start gap-3 py-1">
-                                <input type="text" id="txtRetrieveSlot" placeholder="Reel Id" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="width: 40%;">
-                                <input type="text" id="txtPutSlot" placeholder="Reel Code" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="width: 40%;">
-                                <input type="number" id="txtPutSlotTake" placeholder="Actual Height" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="width: 20%;">
+                                <input type="text" id="txtRetrieveSlot" placeholder="Retrieve Slot" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="width: 40%;">
+                                <input type="text" id="txtPutSlot" placeholder="Put Slot" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="width: 40%;">
+                                <input type="number" id="txtPutSlotTake" placeholder="Slot Take" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="width: 20%;">
                             </div>
                             <div class="flex flex-grid items-start gap-3 py-1">
                                 <input type="text" id="txtReelIdC" placeholder="Reel Id" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="width: 20%;">
@@ -1141,6 +1144,72 @@
     </div>
 </div>
 
+<div class="modal fade" id="variablesModal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Variables</h5>
+                <div class="flex items-center gap-2">
+                    <button class="px-2 py-1 rounded text-xs font-semibold" style="background:#f3f4f6;color:#374151;" onclick="loadVariables()">
+                        <i class="bi-arrow-clockwise" style="width:12px;height:12px;"></i> Refresh
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <table class="w-full text-xs mono">
+                    <tbody id="variablesBody"></tbody>
+                </table>
+                <p class="text-xs mt-2" id="variablesTime" style="color:#6b7280;"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="pulsesModal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Current Pulses</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="flex items-center gap-2 mb-3">
+                    <input type="text" id="txtPulseSlot" placeholder="Slot Code" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="width: 40%;">
+                    <button class="px-2 py-1 rounded text-xs font-semibold" style="background:#3b82f6;color:#fff;" onclick="loadCurrentPulses()">
+                        <i class="bi-arrow-clockwise" style="width:12px;height:12px;"></i> Read
+                    </button>
+                </div>
+                <table class="w-full text-xs mono">
+                    <thead>
+                        <tr style="color:#6b7280;border-bottom:1px solid #e5e7eb;">
+                            <th class="text-left py-1"></th>
+                            <th class="text-right py-1">PLC (Current)</th>
+                            <th class="text-right py-1">Slot (DB)</th>
+                            <th class="text-right py-1">Difference</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="py-1 font-semibold">X</td>
+                            <td class="text-right py-1" id="pulsePlcX">-</td>
+                            <td class="text-right py-1" id="pulseSlotX">-</td>
+                            <td class="text-right py-1 font-semibold" id="pulseDiffX">-</td>
+                        </tr>
+                        <tr>
+                            <td class="py-1 font-semibold">Y</td>
+                            <td class="text-right py-1" id="pulsePlcY">-</td>
+                            <td class="text-right py-1" id="pulseSlotY">-</td>
+                            <td class="text-right py-1 font-semibold" id="pulseDiffY">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="text-xs mt-2" id="pulseMsg" style="color:#ef4444;"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- PLC Address Response Log Side Panel -->
 <div id="addressLogOverlay" class="hidden" style="position:fixed;inset:0;background:rgba(15,23,42,0.35);z-index:1040;" onclick="hideAddressResponseLog()"></div>
 <div id="addressLogPanel" style="position:fixed;top:0;right:-420px;width:420px;height:100vh;background:#fff;box-shadow:-8px 0 24px rgba(0,0,0,0.12);z-index:1050;transition:right 0.3s ease;display:flex;flex-direction:column;">
@@ -1263,6 +1332,105 @@
             }
 
         });
+
+        function showVariables() {
+            loadVariables();
+            $('#variablesModal').modal("show");
+        }
+
+        function loadVariables() {
+            var groups = [
+                ['Drawer State', {
+                    'sharedDrawerState.drawerStatus': sharedDrawerState.drawerStatus,
+                    'sharedDrawerState.cartesianRobotState': sharedDrawerState.cartesianRobotState,
+                    'sharedDrawerState.cartesianLocation': sharedDrawerState.cartesianLocation,
+                    'sharedDrawerState.systemRunning': sharedDrawerState.systemRunning,
+                    'sharedDrawerState.gantrySequenceState': sharedDrawerState.gantrySequenceState,
+                }],
+                ['Moves', {
+                    inPickMove, inPlaceMove, inRetrieveMove, inPutAwayMove,
+                    halfPickMove, halfPlaceMove, halfRetrieveMove, halfPutAwayMove,
+                    halfPickMoveStep, halfPlaceMoveStep, halfRetrieveMoveStep, halfPutAwayMoveStep,
+                }],
+                ['Attempts', {
+                    attemptsPick, attemptsPlace, attemptsRetrieve, attemptsPutAway,
+                    changeTakeSlot, changePutSlot,
+                }],
+                ['Job', {
+                    qId, deviceId, qCont, colNum, begining, useInches,
+                    totalPending, totalCompleted,
+                    running, phase, readyToEnd, endTaskPending, processEnd,
+                    gantryAutoTimer: gantryAutoTimer ? 'set' : 'none',
+                    cartesianAutoTimer: cartesianAutoTimer ? 'set' : 'none',
+                    rack: JSON.stringify(rack),
+                    trolley: JSON.stringify(trolley),
+                    heldTray,
+                }],
+            ];
+
+            var html = '';
+            groups.forEach(function (g) {
+                html += `<tr><td colspan="2" class="pt-3 pb-1 font-semibold" style="color:#4b5563;border-bottom:1px solid #e5e7eb;">${g[0]}</td></tr>`;
+                Object.keys(g[1]).forEach(function (k) {
+                    var v = g[1][k];
+                    var color = v === true ? '#16a34a' : (v === false ? '#9ca3af' : '#1f2937');
+                    html += `<tr><td class="py-0.5" style="color:#6b7280;">${k}</td><td class="py-0.5 text-right" style="color:${color};">${$('<div>').text(String(v)).html()}</td></tr>`;
+                });
+            });
+            $('#variablesBody').html(html);
+            $('#variablesTime').text("As of " + new Date().toLocaleTimeString());
+        }
+
+        function showCurrentPulses() {
+            // PLC keeps the last pulses, so default to the slot of the current move
+            var slot = inPutAwayMove
+                ? $("#txtPutSlot").val()
+                : $("#txtRetrieveSlot").val();
+            $("#txtPulseSlot").val(slot);
+            $('#pulsesModal').modal("show");
+            loadCurrentPulses();
+        }
+
+        async function loadCurrentPulses() {
+            var slot = ($("#txtPulseSlot").val() || "").trim();
+            $("#pulsePlcX, #pulsePlcY, #pulseSlotX, #pulseSlotY, #pulseDiffX, #pulseDiffY").text("-");
+            if (slot == "") {
+                $("#pulseMsg").css("color", "#ef4444").text("Please enter Slot Code.");
+                return;
+            }
+            $("#pulseMsg").css("color", "#6b7280").text("Reading...");
+
+            await $.ajax({
+                url: '/api/PLCHubIn/GetQRPulses/' + encodeURIComponent(slot),
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    if (!result.success) {
+                        $("#pulseMsg").css("color", "#ef4444").text(result.errMessage || "Failed to get pulses.");
+                        return;
+                    }
+                    var d = result.data;
+                    $("#pulsePlcX").text(d[0]);
+                    $("#pulsePlcY").text(d[1]);
+                    $("#pulseSlotX").text(d[4]);
+                    $("#pulseSlotY").text(d[5]);
+                    $("#pulseDiffX").text(d[2]);
+                    $("#pulseDiffY").text(d[3]);
+                    if (d[0] == 0 && d[1] == 0) {
+                        $("#pulseMsg").css("color", "#ef4444").text("PLC returned 0. Read may have failed, check PLC connection.");
+                    } else {
+                        $("#pulseMsg").css("color", "#6b7280").text("Read at " + new Date().toLocaleTimeString());
+                    }
+                },
+                error: function (error) {
+                    $("#pulseMsg").css("color", "#ef4444").text("Failed to get pulses.");
+                }
+            });
+        }
 
         async function showJSONModal() {
 
@@ -1629,6 +1797,49 @@
                     }
                 }, 500);
             });
+        }
+        
+        // Manual emergency end task
+        async function manualEndTask() {
+
+            let timerInterval;
+            const swalResult = await swal.fire({
+                title: `End Task?`,
+                text: `You won't be able to revert this.`,
+                icon: "warning",
+                showCancelButton: true,
+                allowOutsideClick: false,
+                confirmButtonText: "Yes",
+                html: `
+                  <div>Confirm end task? Auto-cancel in <span id="countdown">3</span>s.</div>
+                  <div style="margin-top:10px; background:#eee; width:100%; height:8px;">
+                      <div id="bar" style="width:100%; height:8px; background:#f66; transition:width 1s linear;"></div>
+                  </div>
+                `,
+                didOpen: () => {
+                    const content = Swal.getHtmlContainer().querySelector('#countdown');
+                    const bar = Swal.getHtmlContainer().querySelector('#bar');
+                    let timeLeft = 3;
+                    timerInterval = setInterval(() => {
+                        timeLeft--;
+                        bar.style.width = (timeLeft / 3 * 100) + '%';
+
+                        if (content) content.textContent = timeLeft;
+                        if (timeLeft <= 0) {
+                            clearInterval(timerInterval);
+                            Swal.close();
+                        }
+                    }, 1000);
+                },
+                willClose: () => {
+                    clearInterval(timerInterval);
+                }
+            });
+
+            if (swalResult.isConfirmed) {
+                var rEnd = await loadPLCEndTask();
+            }
+
         }
 
         // async function systemForceStop() {
@@ -2857,7 +3068,7 @@
             var reelCode = $("#txtReelCode").val();
             var fResult = -1;
 
-            if (reelId == '') { return 0; }
+            if (reelCode == '') { return 0; }
 
             // step 4 : scan item
             await $.ajax({
@@ -3733,6 +3944,9 @@
                 chkSlot = $("#txtRetrieveSlot").val();
                 attemptsRetrieve += 1;
             }
+            if (chkSlot == null || chkSlot.trim() == "") {
+                chkSlot = '-';
+            }
 
             // step 2 : scan item
             await $.ajax({
@@ -3844,11 +4058,11 @@
                         retrieveMoveNext();
                     }
 
-                    log('Retrieve Slot Code :: ' + result.data.slotCode, 'info');
-                    log('Retrieve QR X :: ' + result.data.qrxPulse, 'info');
-                    log('Retrieve QR Z :: ' + result.data.qryPulse, 'info');
-                    log('Retrieve QR X Differ :: ' + result.data.qrxPulseDiffer, 'info');
-                    log('Retrieve QR Z Differ :: ' + result.data.qryPulseDiffer, 'info');
+                    log('PLC Retrieve Slot Code :: ' + result.data.slotCode, 'info');
+                    log('PLC Retrieve QR X :: ' + result.data.qrxPulse, 'info');
+                    log('PLC Retrieve QR Z :: ' + result.data.qryPulse, 'info');
+                    log('PLC Retrieve QR X Differ :: ' + result.data.qrxPulseDiffer, 'info');
+                    log('PLC Retrieve QR Z Differ :: ' + result.data.qryPulseDiffer, 'info');
 
                 },
                 error: function (error) {
@@ -3872,6 +4086,9 @@
                     chkSlot = $("#txtPutSlot").val();
                     attemptsPutAway += 1;
                 }
+            }
+            if (chkSlot == null || chkSlot.trim() == "") {
+                chkSlot = '-';
             }
 
             var reelDimensionId = $('#inch-select').val() || 0;
@@ -3994,11 +4211,11 @@
                         log('Put Away Status :: ' + result.errMessage, 'alert');
                     }
 
-                    log('Retrieve Slot Code :: ' + result.data.slotCode, 'info');
-                    log('Retrieve QR X :: ' + result.data.qrxPulse, 'info');
-                    log('Retrieve QR Z :: ' + result.data.qryPulse, 'info');
-                    log('Retrieve QR X Differ :: ' + result.data.qrxPulseDiffer, 'info');
-                    log('Retrieve QR Z Differ :: ' + result.data.qryPulseDiffer, 'info');
+                    log('PLC PutAway Slot Code :: ' + result.data.slotCode, 'info');
+                    log('PLC PutAway QR X :: ' + result.data.qrxPulse, 'info');
+                    log('PLC PutAway QR Z :: ' + result.data.qryPulse, 'info');
+                    log('PLC PutAway QR X Differ :: ' + result.data.qrxPulseDiffer, 'info');
+                    log('PLC PutAway QR Z Differ :: ' + result.data.qryPulseDiffer, 'info');
 
                 },
                 error: function (error) {

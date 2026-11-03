@@ -357,13 +357,16 @@
                 <i class="bi-building-add" style="width:20px;height:20px;color:#fff;"></i>
             </div>
             <div>
-                <h1 id="pageTitle" class="text-lg font-bold" style="color:#1f2937;">SRMS</h1>
+                <h1 id="pageTitle" class="text-lg font-bold" style="color:#1f2937;cursor:pointer;" title="Show variables" onclick="showVariables()">SRMS</h1>
                 <p id="statusLabel" class="text-xs mono" style="color:#6b7280;">Put away reels from SRMS to Trolley</p>
             </div>
         </div>
         <div class="flex items-center gap-3">
             <button id="addressLogBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;" onclick="showAddressResponseLog()">
                 <i class="bi-cpu" style="width:12px;height:12px;"></i> PLC Address Log
+            </button>
+            <button id="btnCurrentPulses" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;" onclick="showCurrentPulses()">
+                <i class="bi-crosshair" style="width:12px;height:12px;"></i> Current Pulses
             </button>
             <div id="statusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mono" style="background:#f3f4f6;color:#6b7280;">
                 <span id="statusDot" class="w-2 h-2 rounded-full" style="background:#6b7280;"></span> <span id="statusText">IDLE</span>
@@ -711,6 +714,72 @@
     </div>
 </div>
 
+<div class="modal fade" id="variablesModal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Variables</h5>
+                <div class="flex items-center gap-2">
+                    <button class="px-2 py-1 rounded text-xs font-semibold" style="background:#f3f4f6;color:#374151;" onclick="loadVariables()">
+                        <i class="bi-arrow-clockwise" style="width:12px;height:12px;"></i> Refresh
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <table class="w-full text-xs mono">
+                    <tbody id="variablesBody"></tbody>
+                </table>
+                <p class="text-xs mt-2" id="variablesTime" style="color:#6b7280;"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="pulsesModal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Current Pulses</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="flex items-center gap-2 mb-3">
+                    <input type="text" id="txtPulseSlot" placeholder="Slot Code" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="width: 40%;">
+                    <button class="px-2 py-1 rounded text-xs font-semibold" style="background:#3b82f6;color:#fff;" onclick="loadCurrentPulses()">
+                        <i class="bi-arrow-clockwise" style="width:12px;height:12px;"></i> Read
+                    </button>
+                </div>
+                <table class="w-full text-xs mono">
+                    <thead>
+                        <tr style="color:#6b7280;border-bottom:1px solid #e5e7eb;">
+                            <th class="text-left py-1"></th>
+                            <th class="text-right py-1">PLC (Current)</th>
+                            <th class="text-right py-1">Slot (DB)</th>
+                            <th class="text-right py-1">Difference</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="py-1 font-semibold">X</td>
+                            <td class="text-right py-1" id="pulsePlcX">-</td>
+                            <td class="text-right py-1" id="pulseSlotX">-</td>
+                            <td class="text-right py-1 font-semibold" id="pulseDiffX">-</td>
+                        </tr>
+                        <tr>
+                            <td class="py-1 font-semibold">Y</td>
+                            <td class="text-right py-1" id="pulsePlcY">-</td>
+                            <td class="text-right py-1" id="pulseSlotY">-</td>
+                            <td class="text-right py-1 font-semibold" id="pulseDiffY">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="text-xs mt-2" id="pulseMsg" style="color:#ef4444;"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- PLC Address Response Log Side Panel -->
 <div id="addressLogOverlay" class="hidden" style="position:fixed;inset:0;background:rgba(15,23,42,0.35);z-index:1040;" onclick="hideAddressResponseLog()"></div>
 <div id="addressLogPanel" style="position:fixed;top:0;right:-420px;width:420px;height:100vh;background:#fff;box-shadow:-8px 0 24px rgba(0,0,0,0.12);z-index:1050;transition:right 0.3s ease;display:flex;flex-direction:column;">
@@ -815,6 +884,104 @@
                 readyContinuos();
             }
         });
+
+        function showVariables() {
+            loadVariables();
+            $('#variablesModal').modal("show");
+        }
+
+        function loadVariables() {
+            var groups = [
+                ['Drawer State', {
+                    'sharedDrawerState.drawerStatus': sharedDrawerState.drawerStatus,
+                    'sharedDrawerState.cartesianRobotState': sharedDrawerState.cartesianRobotState,
+                    'sharedDrawerState.cartesianLocation': sharedDrawerState.cartesianLocation,
+                    'sharedDrawerState.systemRunning': sharedDrawerState.systemRunning,
+                    'sharedDrawerState.trolleyLocation': sharedDrawerState.trolleyLocation,
+                }],
+                ['Moves', {
+                    inRetrieveMove, inPutAwayMove,
+                }],
+                ['Attempts', {
+                    attemptsRetrieve, attemptsPutAway,
+                    changeTakeSlot, changePutSlot,
+                }],
+                ['Job', {
+                    qId, deviceId, qCont, endTask, readyToEnd,
+                    totalReels, totalCompleted, totalInsufficient,
+                    lastItemCount, lastItemId,
+                    tray1Val, tray2Val, tray3Val,
+                    running, phase,
+                    cartesianAutoTimer: cartesianAutoTimer ? 'set' : 'none',
+                    rack: JSON.stringify(rack),
+                    trolley: JSON.stringify(trolley),
+                    heldTray,
+                }],
+            ];
+
+            var html = '';
+            groups.forEach(function (g) {
+                html += `<tr><td colspan="2" class="pt-3 pb-1 font-semibold" style="color:#4b5563;border-bottom:1px solid #e5e7eb;">${g[0]}</td></tr>`;
+                Object.keys(g[1]).forEach(function (k) {
+                    var v = g[1][k];
+                    var color = v === true ? '#16a34a' : (v === false ? '#9ca3af' : '#1f2937');
+                    html += `<tr><td class="py-0.5" style="color:#6b7280;">${k}</td><td class="py-0.5 text-right" style="color:${color};">${$('<div>').text(String(v)).html()}</td></tr>`;
+                });
+            });
+            $('#variablesBody').html(html);
+            $('#variablesTime').text("As of " + new Date().toLocaleTimeString());
+        }
+
+        function showCurrentPulses() {
+            // PLC keeps the last pulses, so default to the slot of the current move
+            var slot = inPutAwayMove
+                ? ($("#txtPutSlot").val() || $("#txtRetrieveSlot").val())
+                : ($("#txtRetrieveSlot").val() || $("#txtPutSlot").val());
+            $("#txtPulseSlot").val(slot);
+            $('#pulsesModal').modal("show");
+            loadCurrentPulses();
+        }
+
+        async function loadCurrentPulses() {
+            var slot = ($("#txtPulseSlot").val() || "").trim();
+            $("#pulsePlcX, #pulsePlcY, #pulseSlotX, #pulseSlotY, #pulseDiffX, #pulseDiffY").text("-");
+            if (slot == "") {
+                $("#pulseMsg").css("color", "#ef4444").text("Please enter Slot Code.");
+                return;
+            }
+            $("#pulseMsg").css("color", "#6b7280").text("Reading...");
+
+            await $.ajax({
+                url: '/api/PLCHubOut/GetQRPulses/' + encodeURIComponent(slot),
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    if (!result.success) {
+                        $("#pulseMsg").css("color", "#ef4444").text(result.errMessage || "Failed to get pulses.");
+                        return;
+                    }
+                    var d = result.data;
+                    $("#pulsePlcX").text(d[0]);
+                    $("#pulsePlcY").text(d[1]);
+                    $("#pulseSlotX").text(d[4]);
+                    $("#pulseSlotY").text(d[5]);
+                    $("#pulseDiffX").text(d[2]);
+                    $("#pulseDiffY").text(d[3]);
+                    if (d[0] == 0 && d[1] == 0) {
+                        $("#pulseMsg").css("color", "#ef4444").text("PLC returned 0. Read may have failed, check PLC connection.");
+                    } else {
+                        $("#pulseMsg").css("color", "#6b7280").text("Read at " + new Date().toLocaleTimeString());
+                    }
+                },
+                error: function (error) {
+                    $("#pulseMsg").css("color", "#ef4444").text("Failed to get pulses.");
+                }
+            });
+        }
 
         async function showJSONModal() {
 
@@ -2120,6 +2287,9 @@
                 chkSlot = $("#txtRetrieveSlot").val();
                 attemptsRetrieve += 1;
             }
+            if (chkSlot == null || chkSlot.trim() == "") {
+                chkSlot = '-';
+            }
 
             // Process UI
             const dot = document.getElementById('rDot1');
@@ -2265,11 +2435,11 @@
                         retrieveMoveNext();
                     }
 
-                    log('Retrieve Slot Code :: ' + result.data.slotCode, 'info');
-                    log('Retrieve QR X :: ' + result.data.qrxPulse, 'info');
-                    log('Retrieve QR Z :: ' + result.data.qryPulse, 'info');
-                    log('Retrieve QR X Differ :: ' + result.data.qrxPulseDiffer, 'info');
-                    log('Retrieve QR Z Differ :: ' + result.data.qryPulseDiffer, 'info');
+                    log('PLC Retrieve Slot Code :: ' + result.data.slotCode, 'info');
+                    log('PLC Retrieve QR X :: ' + result.data.qrxPulse, 'info');
+                    log('PLC Retrieve QR Z :: ' + result.data.qryPulse, 'info');
+                    log('PLC Retrieve QR X Differ :: ' + result.data.qrxPulseDiffer, 'info');
+                    log('PLC Retrieve QR Z Differ :: ' + result.data.qryPulseDiffer, 'info');
                 },
                 error: function (error) {
                     log('Retrieve Status :: ' + error.val, 'alert');
@@ -2288,6 +2458,9 @@
             if (changePutSlot == true) {
                 chkSlot = $("#txtPutSlot").val();
                 attemptsPutAway += 1;
+            }
+            if (chkSlot == null || chkSlot.trim() == "") {
+                chkSlot = '-';
             }
 
             var actH = $("#txtActHeight").val();
@@ -2428,11 +2601,11 @@
                         log('Put Away Status :: ' + result.errMessage, 'alert');
                     }
 
-                    log('Put Away Slot Code :: ' + result.data.slotCode, 'info');
-                    log('Put Away QR X :: ' + result.data.qrxPulse, 'info');
-                    log('Put Away QR Z :: ' + result.data.qryPulse, 'info');
-                    log('Put Away QR X Differ :: ' + result.data.qrxPulseDiffer, 'info');
-                    log('Put Away QR Z Differ :: ' + result.data.qryPulseDiffer, 'info');
+                    log('PLC PutAway Slot Code :: ' + result.data.slotCode, 'info');
+                    log('PLC PutAway QR X :: ' + result.data.qrxPulse, 'info');
+                    log('PLC PutAway QR Z :: ' + result.data.qryPulse, 'info');
+                    log('PLC PutAway QR X Differ :: ' + result.data.qrxPulseDiffer, 'info');
+                    log('PLC PutAway QR Z Differ :: ' + result.data.qryPulseDiffer, 'info');
 
 
                     const dot2 = document.getElementById('pDot3');

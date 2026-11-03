@@ -53,6 +53,8 @@ namespace RackingSystem.Data.Maintenances
         [MaxLength(100)]
         public string CheckRemark { get; set; } = "";
 
+        public DateTime? TrolleyCreatedDate { get; set; }
+
 
     }
 }
