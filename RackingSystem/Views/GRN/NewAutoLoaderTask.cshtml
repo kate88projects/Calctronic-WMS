@@ -404,6 +404,7 @@
         <div class="tw:mb-3 tw:rounded-lg tw:bg-gray-50 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-800 tw:dark:bg-white/5 tw:dark:text-white/90" id="txtHExtH">-</div>
         <p class="tw:text-sm tw:text-gray-500 tw:dark:text-gray-400">Act. Height</p>
         <div class="tw:rounded-lg tw:bg-gray-50 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-gray-800 tw:dark:bg-white/5 tw:dark:text-white/90" id="txtHActH">-</div>
+        <p class="tw:mt-2 tw:hidden tw:text-xs tw:text-error-500" id="txtHActHNote"></p>
     </div>
 </div>
 
@@ -421,7 +422,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="putModal" role="dialog" data-bs-backdrop="static">
+@* <div class="modal fade" id="putModal" role="dialog" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content tw:rounded-2xl tw:border-0 tw:bg-white tw:p-8 tw:dark:bg-gray-900">
             <div class="tw:grid tw:grid-cols-2 tw:items-center tw:gap-6">
@@ -436,7 +437,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> *@
 
 <div class="modal fade" id="holdStopModal" role="dialog" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -653,6 +654,8 @@
             //#loadProcess4
             $('#reelIdentity, #reelHeight, #itemStatus, #heightStatus4, #loadCol4').text(''); //, #loadConfirm4
             $('#txtHReelID, #txtHItem, #txtHExtH, #txtHActH').text('-');
+            $('#txtHActH').css('color', '');
+            $('#txtHActHNote').text('').addClass('tw:hidden');
             $('#exclamIcon').addClass('tw:hidden');
             $("#waiting2, #waiting3, #waiting4, #waitingLast").removeClass("tw:hidden");
             $('#badgeTitle').text('N/A');
@@ -1140,7 +1143,7 @@
                             $('#exclamIcon').css('color', 'green');
                             $('#exclamIcon').removeClass("tw:hidden");
 
-                            $('#errActHeight').text("Column turned successfully. Please try again on reel height measurement.").css('color', 'green');
+                            $('#errActHeight').text("Column ready. Click 'Retry' and wait for the beep before inserting the reel.").css('color', 'green');
                             $('#loadCol4').text(iCol);
                             $('#btnRetry4').removeClass("tw:hidden");
 
@@ -1294,7 +1297,8 @@
                 var callStart = await loadPLCStartPutReel(loaderId);
                 if (callStart == true) {
                     $('#btnRetryStart').addClass("tw:hidden");
-                    $("#putModal").modal("show"); 
+                    // $("#putModal").modal("show"); 
+                    loadPLC(5);
                 }
                 return; 
             }
@@ -1310,20 +1314,33 @@
                 }
                 $('#loadCol4').text('');
                 $('#heightStatus4').text('');
+                $('#errActHeight').text('');
+                $('#txtHActH').css('color', '');
+                $('#txtHActHNote').text('').addClass('tw:hidden');
                 $('#loadingBlk').addClass('tw:hidden');
+                $('#btnRetry4').addClass("tw:hidden");
+
                 resetColorPLCForm(5);
-                if ($('#putModal').hasClass('show')) {
-                    $('#putModal').modal('toggle');
+                // if ($('#putModal').hasClass('show')) {
+                //     $('#putModal').modal('toggle');
+                // }
+                
+                //check on height measurement status
+                var chkMeasure = await loadPLCMesaureHeightStatus(loaderId);
+                if (chkMeasure) {
+                    // await delay(3000);
+                    var chkAct = await loadPLCActHeight(loaderId, reelCode, iCol);
+                    if (chkAct == "99") {
+                        //get reel height success
+                        // $('#btnNext4').removeClass("tw:hidden");
+                        loadPLC(6);
+                    }
                 }
-                
-                await delay(3000);
-                var chkAct = await loadPLCActHeight(loaderId, reelCode, iCol);
-                // console.log('R4::' + chkAct);
-                
-                if (chkAct == "99") {
-                    // is success
-                    $('#btnNext4').removeClass("tw:hidden");
-                    $('#btnRetry4').addClass("tw:hidden");
+                else {
+                    $('#btnRetry4').removeClass("tw:hidden");
+                    $('#errActHeight').removeClass("tw:hidden");
+                    $('#errActHeight').text('Failed to get loader height measure status. Please try again.');
+
                 }
                 return;
             }
@@ -1346,7 +1363,6 @@
 
                 resetColorPLCForm(6);
                 var chkLast = await loadPLCUpdateDB(loaderId, reelCode, iCol);
-                // console.log('R5::' + chkLast);
                 if (chkLast == false) {
                     $('#pTextLast').text('Failed to update info. Please try again.').css('color', 'red');
                     $('#btnRetryLast').removeClass("tw:hidden");
@@ -1365,10 +1381,7 @@
                     // If user stopped, wait for cancel/confirm
                     const userCancelled = await waitForDecision();
                     if (userCancelled === false) {
-                      // console.log('User canceled stop — continue.');
                       continueNextStep2('');
-                    // } else {
-                      // console.log('User confirmed stop — half.');
                     }
 
                 }
@@ -1402,7 +1415,6 @@
                 },
                 success: function (result) {
                     // console.log('1::' + JSON.stringify(result));
-                    // Swal.close();
                     if (result.success == true) {
                         $('#loadStatus1').text(result.data);
                         $('#loaderName').text(result.data);
@@ -1531,8 +1543,6 @@
                     $('#errCol2').text('All column is full. Please change loader.');
                 }
             }
-
-            // console.log('3::' + fResult);
             return fResult;
         }
 
@@ -1666,10 +1676,13 @@
                         dataAttr.dataset.decHeight = result.data[2];
 
                         fResult = 99;
-
                         if (result.errMessage != null)
                         {
                             $('#errActHeight').text(result.errMessage);
+                        }
+                        if (result.errMessage) {
+                            $('#txtHActH').css('color', 'red');
+                            $('#txtHActHNote').text(result.errMessage).removeClass('tw:hidden');
                         }
                     }
                     else {
@@ -1820,9 +1833,9 @@
                         success: function (result) {
                             if (result.success == false) {
                                 //if fail to start, retry for twice but start from third will force them to start from step1
-                                if ($('#putModal').hasClass("show")) {
-                                    $('#putModal').modal('toggle');
-                                }
+                                // if ($('#putModal').hasClass("show")) {
+                                //     $('#putModal').modal('toggle');
+                                // }
                                 $('#btnRetryStart').removeClass('tw:hidden');
                                 $('#loadProcess4').text(`Failed to Start... ${result.errMessage.charAt(0).toUpperCase() + result.errMessage.slice(1)}`);
                                 $('#loadProcess4').addClass("error-message");
@@ -2080,6 +2093,33 @@
             });
             return fResult;
         }
+
+        async function loadPLCMesaureHeightStatus(loaderId) {
+            var fResult = false;
+            await $.ajax({
+                url: "/api/PLCLoader/GetMeasureStatus/" + loaderId,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    if (result.success == true && result.data == 1) {
+                        fResult = true;
+                    }
+                },
+                error: function (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: "Failed to get loader height measure status. Please try again.",
+                    });
+                }
+            });
+            return fResult;
+        }
+
         
         function initialGaugeSetup(
             gaugeElementId,

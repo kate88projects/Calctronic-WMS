@@ -321,7 +321,7 @@
                                             cell2.innerHTML = '<img src="../assets/img/tray_full_icon_138077.png" class="tw:mx-auto tw:h-[20px]" />';
                                         }
                                         else {
-                                            cell2.innerHTML = '<span class="tw:mx-auto tw:block tw:text-center tw:text-[15px] tw:text-gray-700 tw:dark:text-gray-300">2</span>';
+                                            cell2.innerHTML = '<span class="tw:mx-auto tw:block tw:text-center tw:text-[15px] tw:text-gray-700 tw:dark:text-gray-300">' + (Number(result.data[idx - 1].reelNo) + 1) + '</span>';
                                         }
                                     }
                                     else {

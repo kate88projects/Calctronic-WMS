@@ -286,6 +286,7 @@ namespace RackingSystem.Controllers.API
                 }
                 return result;
 
+                /*
                 // 2. check plc is quandrant actual height
                 int plcActualHeight = 0;
                 string plcIp = _loader.IPAddr;
@@ -332,6 +333,7 @@ namespace RackingSystem.Controllers.API
 
                 modbusClient.Disconnect();
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "", false);
+                */
 
             }
             catch (Exception ex)
@@ -349,7 +351,7 @@ namespace RackingSystem.Controllers.API
         {
             ServiceResponseModel<List<int>> result = new ServiceResponseModel<List<int>>();
             result.data = new List<int>();
-            string methodName = "CheckColumnHeight";
+            string methodName = "GetAvailableColumnByHeight";
 
             try
             {
@@ -476,7 +478,7 @@ namespace RackingSystem.Controllers.API
         public ServiceResponseModel<int> GetForkReady(long loaderId, int colNo)
         {
             ServiceResponseModel<int> result = new ServiceResponseModel<int>();
-            string methodName = "GetColumnReady";
+            string methodName = "GetForkReady";
 
             try
             {
@@ -523,6 +525,8 @@ namespace RackingSystem.Controllers.API
                     {
                         result.errMessage = "Timeout. Cannot get Fork value.";
                         result.success = false;
+                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Timeout. Cannot get Fork value.", "", false);
+
                         return result;
                         //exit = true;
                     }
@@ -547,7 +551,7 @@ namespace RackingSystem.Controllers.API
         {
             ServiceResponseModel<List<double>> result = new ServiceResponseModel<List<double>>();
             result.data = new List<double>();
-            string methodName = "GetReelHeight";
+            string methodName = "GetReelActualHeight";
 
             try
             {
@@ -604,10 +608,9 @@ namespace RackingSystem.Controllers.API
 
                 float value = BitConverter.ToSingle(floatBytes, 0);
                 float rounded = (float)Math.Round(value, 3);
-                height = ((int)rounded) + 1;
-
+                bool readingError = float.IsNaN(rounded) || float.IsInfinity(rounded) || rounded <= 0;
                 // if reading error, get the highest max thickness in slot usage setting
-                if (height <= 0)
+                if (readingError)
                 {
                     var maxThick = _dbContext.SlotCalculation.OrderByDescending(x => x.MaxThickness).FirstOrDefault();
                     if (maxThick != null)
@@ -617,6 +620,10 @@ namespace RackingSystem.Controllers.API
                         result.errMessage = "Reading error. Auto-assigning maximum thickness for this reel.";
                     }
                 }
+                else
+                {
+                    height = ((int)rounded) + 1;
+                }
 
                 result.success = _loaderCol.BalanceHeight >= height;
                 result.data.Add(_loaderCol.BalanceHeight >= height ? 0 : 2);
@@ -624,7 +631,7 @@ namespace RackingSystem.Controllers.API
                 result.data.Add(rounded);
                 if (_loaderCol.BalanceHeight < height)
                 {
-                    result.errMessage = "Reel Height exceeds Column [" + colNo + "] limit.";
+                    result.errMessage += " Reel Height exceeds Column [" + colNo + "] limit.";
                 }
 
                 modbusClient.Disconnect();
@@ -865,6 +872,76 @@ namespace RackingSystem.Controllers.API
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "", false);
                 result.data = value;
                 result.success = true;
+            }
+            catch (Exception ex)
+            {
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Error: " + ex.Message, "", true);
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+            return result;
+        }
+
+        [HttpGet("GetMeasureStatus/{loaderId}")]
+        public ServiceResponseModel<int> GetMeasureStatus(long loaderId)
+        {
+            ServiceResponseModel<int> result = new ServiceResponseModel<int>();
+            string methodName = "GetMeasureStatus";
+
+            //testing
+            //result.success = true;
+            //result.data = 1;
+            //return result;
+
+            try
+            {
+                var _loader = _dbContext.Loader.Find(loaderId);
+                if (_loader == null)
+                {
+                    result.errMessage = "Loader is not found.";
+                    result.data = 0;
+                    return result;
+                }
+
+                int value = 0;
+                int port = 502;
+                string plcIp = _loader.IPAddr;
+                DateTime dtRun = DateTime.Now;
+                bool exit = false;
+
+                ModbusClient modbusClient = new ModbusClient(plcIp, port);
+                modbusClient.Connect();
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
+
+                int startAddress = 4231;
+                int numRegisters = 1;
+
+                while (!exit)
+                {
+                    int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                    value = registers[0];
+
+                    if (value == 1) //value == 1 means finish measure, 0 means not finish
+                    {
+                        exit = true;
+                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Register {startAddress}: {value}", "", false);
+                    }
+
+                    if ((DateTime.Now - dtRun).TotalMinutes > 1)
+                    {
+                        result.errMessage = "Timeout. Cannot get height measurement status.";
+                        result.success = false;
+                        PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Timeout. Cannot get height measurement status.", "", false);
+
+                        return result;
+                    }
+                }
+                
+                result.data = value;
+                result.success = true;
+
+                modbusClient.Disconnect();
+                PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "", false);
             }
             catch (Exception ex)
             {
