@@ -3246,8 +3246,6 @@ namespace RackingSystem.Controllers.API
 
                     PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Get Reel ID {slotID}", "", false);
 
-                    // *** testing
-                    //slotID = "A00000018";
                     result = slotID;
                 }
 

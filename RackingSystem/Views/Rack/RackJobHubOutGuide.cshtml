@@ -1,0 +1,219 @@
+@{
+    Layout = "~/Views/Shared/_LayoutEmpty.cshtml";
+}
+
+<link href="~/css/jetbrains.css" rel="stylesheet" />
+<link href="~/css/hmi-guide.css" rel="stylesheet" asp-append-version="true" />
+
+<div class="dg">
+    <div class="dg-sheet">
+        <div class="dg-header">
+            <div>
+                <div class="dg-eyebrow">SRMS · Hub Out screen</div>
+                <h1>Hub Out Operator Guide</h1>
+            </div>
+            <div class="dg-legend">
+                <span class="tag pc">PC = screen / database</span>
+                <span class="tag plc">PLC = robot / machine</span>
+                <span class="tag ok">Finished</span>
+                <span class="tag wait">Wait</span>
+                <button type="button" class="dg-close" onclick="window.close()">Close</button>
+            </div>
+        </div>
+
+        <div class="dg-rule">
+            <p><strong>The screen does not move the robot by itself.</strong> It sends one command to the PLC, then keeps reading the PLC until the PLC says the job is done.</p>
+            <p>A reel is <strong>only finished</strong> when the log shows <span class="log">Update DB Rack :: Done</span>. That is the moment the system records the reel in the trolley. Messages like <span class="log">Retrieve :: Done</span> or <span class="log">Put Away :: Done</span> only mean the command was sent.</p>
+        </div>
+
+        <div class="dg-lanes">
+            <section class="dg-lane">
+                <h2>Retrieve <small>take reel from rack</small></h2>
+                <ol class="dg-steps">
+                    <li>
+                        <div class="dg-step">
+                            <div class="dg-step-head">Find the next reel <span class="tag pc">PC</span></div>
+                            <p>Log: <span class="log">Get Reel Slot :: Done</span></p>
+                            <p class="dg-note">Database only. Picks the next reel for this job and the rack slot it is in.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="dg-step">
+                            <div class="dg-step-head">Send retrieve command <span class="tag pc">PC</span> → <span class="tag plc">PLC</span></div>
+                            <p>Log: <span class="log">Retrieve :: Done</span> means the command reached the PLC. <strong>The robot starts moving now.</strong></p>
+                            <p class="dg-note">The system marks the rack slot as empty at this point.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="dg-step">
+                            <div class="dg-step-head">Robot takes the tray <span class="tag plc">PLC</span> <span class="tag wait">Wait</span></div>
+                            <p>The screen keeps asking the PLC for the result.</p>
+                        </div>
+                    </li>
+                </ol>
+                <div class="dg-done">Step done when <span class="log">Retrieve Status :: OK</span></div>
+                <div class="dg-timing">Screen waits about 35 s in total (5 s, then up to 30 s)</div>
+            </section>
+
+            <section class="dg-lane">
+                <h2>Put Away <small>put reel into trolley</small></h2>
+                <ol class="dg-steps">
+                    <li>
+                        <div class="dg-step">
+                            <div class="dg-step-head">Pick a trolley slot <span class="tag pc">PC</span></div>
+                            <p>Log: <span class="log">Get Put Away Slot :: Done</span></p>
+                            <p class="dg-note">Database only. If the trolley is full, the screen stops and asks for another trolley.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="dg-step">
+                            <div class="dg-step-head">Measure reel height <span class="tag plc">PLC</span> <span class="tag wait">Wait</span></div>
+                            <p class="dg-note">Only when <strong>Sensor</strong> is ticked. If the reel needs more space, the screen picks another trolley slot.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="dg-step">
+                            <div class="dg-step-head">Send put away command <span class="tag pc">PC</span> → <span class="tag plc">PLC</span></div>
+                            <p>Log: <span class="log">Put Away :: Done</span> means the command was sent. The robot moves to the trolley.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="dg-step">
+                            <div class="dg-step-head">Robot places the tray <span class="tag plc">PLC</span> <span class="tag wait">Wait</span></div>
+                            <p>Log: <span class="log">Put Away Status :: Done</span></p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="dg-step">
+                            <div class="dg-step-head">Record reel in trolley <span class="tag pc">PC</span></div>
+                            <p>Log: <span class="log">Update DB Rack :: Done</span></p>
+                        </div>
+                    </li>
+                </ol>
+                <div class="dg-done">Reel finished when <span class="log">Update DB Rack :: Done</span></div>
+                <div class="dg-timing">Robot step: screen waits about 35 s (5 s, then up to 30 s)</div>
+            </section>
+        </div>
+
+        <section class="dg-lookup">
+            <h2>What the log message means</h2>
+            <p class="dg-intro">Find the message in the log panel, then check the side shown.</p>
+            <div class="dg-table-wrap">
+                <table class="dg-table">
+                    <thead>
+                        <tr><th>Log message</th><th>What it means</th><th>Check</th><th>What to do</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="log">Update DB Rack :: Done</span></td>
+                            <td>The reel is in the trolley and recorded in the system.</td>
+                            <td><span class="tag ok">Finished</span></td>
+                            <td>Nothing. The next reel starts.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="log">Retrieve Status :: OK</span><br /><span class="log">Put Away Status :: Done</span></td>
+                            <td>The robot finished that move.</td>
+                            <td><span class="tag ok">Finished</span></td>
+                            <td>Nothing. The next step starts.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="log">Retrieve :: Done</span><br /><span class="log">Put Away :: Done</span></td>
+                            <td>Command sent. The robot is still moving.</td>
+                            <td><span class="tag wait">Wait</span></td>
+                            <td>Wait for the Status line.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="log">Get Reel Slot :: No Reel for item […] need to take.</span><br /><span class="log">Get Reel Slot :: No Slot for item […] need to take.</span></td>
+                            <td>No stock found for that item in the rack.</td>
+                            <td><span class="tag pc">PC</span></td>
+                            <td>No action. The item goes on the Insufficient list and the screen moves to the next item.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="log">Get Reel Slot :: No Reel need to take.</span></td>
+                            <td>All items of this job are done.</td>
+                            <td><span class="tag ok">Finished</span></td>
+                            <td>Close the job. Use Insufficient List to download the missing items.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="log">Get Put Away Slot :: No empty slot is ready.</span><br /><span class="log">Get Reel Slot :: Trolley no empty slot is ready.</span></td>
+                            <td>The trolley is full.</td>
+                            <td><span class="tag pc">PC</span></td>
+                            <td>Change to an empty trolley, then continue.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="log">Retrieve :: …</span> or <span class="log">Put Away :: …</span> error right after the command (IP address, slot not found, connection)</td>
+                            <td>The command never reached the robot.</td>
+                            <td><span class="tag pc">PC</span> → <span class="tag plc">PLC</span></td>
+                            <td>Check the PLC is powered and on the network. The robot did not move.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="log">Retrieve Status :: Timeout. Cannot get Empty Tray Status.</span></td>
+                            <td>The robot did not report finished within about 35 s.</td>
+                            <td><span class="tag plc">PLC</span></td>
+                            <td>Look at the robot before retrying. The rack slot is already marked empty, so tell support the slot code if the tray is still in the rack.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="log">Put Away Status :: Have Tray, try another slot.</span></td>
+                            <td>That trolley slot already has a tray.</td>
+                            <td><span class="tag plc">PLC</span></td>
+                            <td>No action. The screen picks another trolley slot.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="log">Put Away Status :: Timeout. Cannot get Reel ID.</span></td>
+                            <td>The robot did not finish placing within about 35 s. The message wording is misleading: it is a put away timeout.</td>
+                            <td><span class="tag plc">PLC</span></td>
+                            <td>Look at the robot before retrying.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="log">Height Measure Status :: Failed : …</span></td>
+                            <td>The height sensor did not finish measuring.</td>
+                            <td><span class="tag plc">PLC</span></td>
+                            <td>Check the sensor. Untick Sensor to continue without measuring.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="log">Update DB Rack :: …</span> with an error</td>
+                            <td>The reel is physically in the trolley but the system did not record it.</td>
+                            <td><span class="tag pc">PC</span></td>
+                            <td><strong>Stop and tell support</strong> with the reel code and trolley slot. The screen continues by itself, so the record must be fixed by hand.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="log">… :: Tried 3, auto stop now.</span></td>
+                            <td>The same step failed 3 times. Auto Run is now off.</td>
+                            <td><span class="tag plc">PLC</span></td>
+                            <td>Find the cause on the robot first, then turn Auto Run back on.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="log">PLC Retrieve / PutAway Slot Code, QR X, QR Z, Differ</span></td>
+                            <td>Where the robot's QR reader says it stopped, and how far that is from the saved slot position.</td>
+                            <td><span class="tag plc">PLC</span></td>
+                            <td>If the slot code is not the one you expected, or the difference is large, the robot is misaligned. Use Current Pulses.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <div class="dg-footer">
+            <section class="dg-box warn">
+                <h2>Before you press Retry</h2>
+                <ol>
+                    <li>Look at the robot. If it is still moving, <strong>wait</strong>. Retrying while it moves sends a second command.</li>
+                    <li>Check whether the robot is holding a tray.</li>
+                    <li>Check the PLC panel for an alarm and clear it first.</li>
+                    <li>Only then press Retry on the screen.</li>
+                </ol>
+            </section>
+
+            <section class="dg-box">
+                <h2>Buttons that help</h2>
+                <ul>
+                    <li><strong>Current Pulses</strong> shows where the robot is now, the saved slot position, and the difference. Use it when the robot hangs or stops at the wrong row.</li>
+                    <li><strong>PLC Address Log</strong> shows every value the screen sent to and read from the PLC. Press Refresh to update it.</li>
+                    <li><strong>SRMS title</strong> (click it) shows the screen's current state, for support staff.</li>
+                    <li><strong>Insufficient List</strong> (when the job is done) downloads the items that could not be found.</li>
+                </ul>
+                <p class="dg-fine">For the PLC team: retrieve start writes 4297 = 2 and waits for 4212 = 1. Put away start writes 4297 = 1 and reads result from 4196 (2 = done, 3 = slot has tray). Height measure reads 4322 (2 = done).</p>
+            </section>
+        </div>
+    </div>
+</div>

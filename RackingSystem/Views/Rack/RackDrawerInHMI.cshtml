@@ -341,6 +341,12 @@
             <button id="addressLogBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;" onclick="showAddressResponseLog()">
                 <i class="bi-cpu" style="width:12px;height:12px;"></i> PLC Address Log
             </button>
+            <button id="btnCurrentPulses" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;" onclick="showCurrentPulses()">
+                <i class="bi-crosshair" style="width:12px;height:12px;"></i> Current Pulses
+            </button>
+            <a id="btnGuide" href="@Url.Action("RackDrawerInGuide", "Rack")" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;text-decoration:none;">
+                <i class="bi-question-circle" style="width:12px;height:12px;"></i> Guide
+            </a>
             <div id="statusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mono" style="background:#f3f4f6;color:#6b7280;">
                 <span id="statusDot" class="w-2 h-2 rounded-full" style="background:#6b7280;"></span> <span id="statusText">IDLE</span>
             </div>
@@ -630,6 +636,50 @@
     </div>
 </div>
 
+<div class="modal fade" id="pulsesModal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Current Pulses</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="flex items-center gap-2 mb-3">
+                    <input type="text" id="txtPulseSlot" placeholder="Slot Code" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="width: 40%;">
+                    <button class="px-2 py-1 rounded text-xs font-semibold" style="background:#3b82f6;color:#fff;" onclick="loadCurrentPulses()">
+                        <i class="bi-arrow-clockwise" style="width:12px;height:12px;"></i> Read
+                    </button>
+                </div>
+                <table class="w-full text-xs mono">
+                    <thead>
+                        <tr style="color:#6b7280;border-bottom:1px solid #e5e7eb;">
+                            <th class="text-left py-1"></th>
+                            <th class="text-right py-1">PLC (Current)</th>
+                            <th class="text-right py-1">Slot (DB)</th>
+                            <th class="text-right py-1">Difference</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="py-1 font-semibold">X</td>
+                            <td class="text-right py-1" id="pulsePlcX">-</td>
+                            <td class="text-right py-1" id="pulseSlotX">-</td>
+                            <td class="text-right py-1 font-semibold" id="pulseDiffX">-</td>
+                        </tr>
+                        <tr>
+                            <td class="py-1 font-semibold">Y</td>
+                            <td class="text-right py-1" id="pulsePlcY">-</td>
+                            <td class="text-right py-1" id="pulseSlotY">-</td>
+                            <td class="text-right py-1 font-semibold" id="pulseDiffY">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="text-xs mt-2" id="pulseMsg" style="color:#ef4444;"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- PLC Address Response Log Side Panel -->
 <div id="addressLogOverlay" class="hidden" style="position:fixed;inset:0;background:rgba(15,23,42,0.35);z-index:1040;" onclick="hideAddressResponseLog()"></div>
 <div id="addressLogPanel" style="position:fixed;top:0;right:-420px;width:420px;height:100vh;background:#fff;box-shadow:-8px 0 24px rgba(0,0,0,0.12);z-index:1050;transition:right 0.3s ease;display:flex;flex-direction:column;">
@@ -777,6 +827,59 @@
            await putawayMoveDone();
         }
 
+
+        function showCurrentPulses() {
+            // PLC keeps the last pulses, so default to the slot of the current move
+            // retrieve is from trolley slot, put away is to rack slot
+            var slot = inPutAwayMove
+                ? ($("#txtPutSlot").val() || $("#txtRetrieveSlot").val())
+                : ($("#txtRetrieveSlot").val() || $("#txtPutSlot").val());
+            $("#txtPulseSlot").val(slot);
+            $('#pulsesModal').modal("show");
+            loadCurrentPulses();
+        }
+
+        async function loadCurrentPulses() {
+            var slot = ($("#txtPulseSlot").val() || "").trim();
+            var trolleyId = Number($("#txtTrolleyId").val() || 0);
+            $("#pulsePlcX, #pulsePlcY, #pulseSlotX, #pulseSlotY, #pulseDiffX, #pulseDiffY").text("-");
+            if (slot == "") {
+                $("#pulseMsg").css("color", "#ef4444").text("Please enter Slot Code.");
+                return;
+            }
+            $("#pulseMsg").css("color", "#6b7280").text("Reading...");
+
+            await $.ajax({
+                url: '/api/PLCTrolley/GetQRPulses/' + encodeURIComponent(slot) + '/' + trolleyId,
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    if (!result.success) {
+                        $("#pulseMsg").css("color", "#ef4444").text(result.errMessage || "Failed to get pulses.");
+                        return;
+                    }
+                    var d = result.data;
+                    $("#pulsePlcX").text(d[0]);
+                    $("#pulsePlcY").text(d[1]);
+                    $("#pulseSlotX").text(d[4]);
+                    $("#pulseSlotY").text(d[5]);
+                    $("#pulseDiffX").text(d[2]);
+                    $("#pulseDiffY").text(d[3]);
+                    if (d[0] == 0 && d[1] == 0) {
+                        $("#pulseMsg").css("color", "#ef4444").text("PLC returned 0. Read may have failed, check PLC connection.");
+                    } else {
+                        $("#pulseMsg").css("color", "#6b7280").text("Read at " + new Date().toLocaleTimeString());
+                    }
+                },
+                error: function (error) {
+                    $("#pulseMsg").css("color", "#ef4444").text("Failed to get pulses.");
+                }
+            });
+        }
 
         function showVariables() {
             loadVariables();
@@ -1344,23 +1447,15 @@
         }
 
         // ----------- PLC Address Response Log
-        let addressLogInterval = null;
-
         function showAddressResponseLog() {
             document.getElementById('addressLogOverlay').classList.remove('hidden');
             document.getElementById('addressLogPanel').style.right = '0px';
             loadAddressResponseLog();
-            if (addressLogInterval) { clearInterval(addressLogInterval); }
-            addressLogInterval = setInterval(loadAddressResponseLog, 3000);
         }
 
         function hideAddressResponseLog() {
             document.getElementById('addressLogOverlay').classList.add('hidden');
             document.getElementById('addressLogPanel').style.right = '-420px';
-            if (addressLogInterval) {
-                clearInterval(addressLogInterval);
-                addressLogInterval = null;
-            }
         }
 
         async function loadAddressResponseLog() {

@@ -55,6 +55,8 @@ namespace RackingSystem.Data.Maintenances
 
         public DateTime? TrolleyCreatedDate { get; set; }
 
+        public DateTime? LoaderCreatedDate { get; set; }
+
 
     }
 }

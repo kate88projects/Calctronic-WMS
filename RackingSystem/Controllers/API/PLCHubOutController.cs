@@ -397,6 +397,12 @@ namespace RackingSystem.Controllers.API
                     }
                 }
 
+                var i = _dbContext.Item.Where(x => x.Item_Id == item.Item_Id).FirstOrDefault();
+                if (i != null)
+                {
+                    item.ItemCode = i.ItemCode;
+                }
+
                 //// is testing code need change to FIFO
                 Slot? rack = null;
                 Reel? reel = null;
@@ -629,8 +635,10 @@ namespace RackingSystem.Controllers.API
 
                 result.success = true;
                 result.data = 1;
-                
+
+                // 20261102 their plc retrieve failure, then i skip check status, so it cannot turn slot into warning.  
                 // only clear related slots when this slot has a reel, else empty Guid will match all empty slots
+                // this part enhance is due clear 2 reels in db, but physical remain 1 reel. and this is caus from when save hubin, it using coming reel
                 if (slot.Reel_Id != Guid.Empty)
                 {
                     var reel = _dbContext.Reel.Where(x => x.Reel_Id == slot.Reel_Id).FirstOrDefault();
@@ -1506,6 +1514,55 @@ namespace RackingSystem.Controllers.API
             return result;
         }
 
+        [HttpGet("GetInsufficientList/{docType}/{docId}")]
+        public async Task<ServiceResponseModel<List<object>>> GetInsufficientList(string docType, long docId)
+        {
+            ServiceResponseModel<List<object>> result = new ServiceResponseModel<List<object>>();
+            result.data = new List<object>();
+
+            try
+            {
+                if (docType == EnumQueueDocType.JO.ToString())
+                {
+                    result.data = await (from r in _dbContext.JobOrderRaws
+                                         join i in _dbContext.Item on r.Item_Id equals i.Item_Id into gi
+                                         from i in gi.DefaultIfEmpty()
+                                         where r.JobOrder_Id == docId && r.RetrieveFailed
+                                         orderby r.CreatedDate
+                                         select (object)new
+                                         {
+                                             ItemCode = i == null ? "" : i.ItemCode,
+                                             Description = i == null ? "" : i.Description,
+                                             Qty = r.Qty,
+                                             BalQty = r.BalQty,
+                                         }).ToListAsync();
+                }
+                else
+                {
+                    result.data = await (from r in _dbContext.JobOrderEmergencyDetail
+                                         join i in _dbContext.Item on r.Item_Id equals i.Item_Id into gi
+                                         from i in gi.DefaultIfEmpty()
+                                         where r.JobOrderEmergency_Id == docId && r.RetrieveFailed
+                                         orderby r.CreatedDate
+                                         select (object)new
+                                         {
+                                             ItemCode = i == null ? "" : i.ItemCode,
+                                             Description = i == null ? "" : i.Description,
+                                             Qty = r.Qty,
+                                             BalQty = r.BalQty,
+                                         }).ToListAsync();
+                }
+                result.success = true;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
         [HttpGet("GetErrorLog/{qId}")]
         public async Task<ServiceResponseModel<List<LogDTO>>> GetErrorLog(long qId)
         {
@@ -1984,8 +2041,6 @@ namespace RackingSystem.Controllers.API
 
                     PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, $"Get Reel ID {slotID}", "", false);
 
-                    // *** testing
-                    //slotID = "A00000018";
                     result = slotID;
                 }
 
@@ -2343,8 +2398,9 @@ namespace RackingSystem.Controllers.API
             return result;
         }
 
-        [HttpGet("GetQRPulses/{slotCode}")]
-        public ServiceResponseModel<List<int>> GetQRPulses(string slotCode)
+        // check rack slot code first, if not found then check trolley slot code
+        [HttpGet("GetQRPulses/{slotCode}/{trolleyId?}")]
+        public ServiceResponseModel<List<int>> GetQRPulses(string slotCode, long trolleyId = 0)
         {
             ServiceResponseModel<List<int>> result = new ServiceResponseModel<List<int>>();
             result.data = new List<int>();
@@ -2365,18 +2421,30 @@ namespace RackingSystem.Controllers.API
                 }
 
                 var slot = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
-                if (slot == null)
+                var tslot = _dbContext.TrolleySlot.Where(x => x.TrolleySlotCode == slotCode && (trolleyId <= 0 || x.Trolley_Id == trolleyId)).FirstOrDefault();
+                if (slot == null && tslot == null)
                 {
                     result.errMessage = "Cannot find Slot Code [" + slotCode + "].";
                     return result;
                 }
 
                 // [0] PLC X, [1] PLC Y, [2] diff X, [3] diff Y, [4] slot X, [5] slot Y
-                var pulses = ReadPulseByIP(configRack.ConfigValue, slotCode);
-                pulses.Add(slot.QRXPulse);
-                pulses.Add(slot.QRYPulse);
-                result.data = pulses;
-                result.success = true;
+                if (slot != null)
+                {
+                    var pulses = ReadPulseByIP(configRack.ConfigValue, slotCode);
+                    pulses.Add(slot.QRXPulse);
+                    pulses.Add(slot.QRYPulse);
+                    result.data = pulses;
+                    result.success = true;
+                }
+                else
+                {
+                    var pulses = ReadTrolleyPulseByIP(configRack.ConfigValue, tslot.Trolley_Id, slotCode);
+                    pulses.Add(tslot.QRXPulse);
+                    pulses.Add(tslot.QRYPulse);
+                    result.data = pulses;
+                    result.success = true;
+                }
             }
             catch (Exception ex)
             {

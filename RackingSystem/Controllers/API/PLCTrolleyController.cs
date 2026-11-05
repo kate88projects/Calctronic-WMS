@@ -689,7 +689,7 @@ namespace RackingSystem.Controllers.API
                 var slotChk = _dbContext.TrolleySlot.Where(x => x.TrolleySlotCode == slotCode).FirstOrDefault();
                 if (slotChk == null)
                 {
-                    result.errMessage = "Cannot find Slot Retrieve [" + slotCode + "]. ";
+                    result.errMessage = "Cannot find Trolley Slot Retrieve [" + slotCode + "]. ";
                 }
                 else
                 {
@@ -1026,7 +1026,7 @@ namespace RackingSystem.Controllers.API
                 var slotChk = _dbContext.Slot.Where(x => x.SlotCode == slotCodeRead).FirstOrDefault();
                 if (slotChk == null)
                 {
-                    result.errMessage = "Cannot find Slot Retrieve [" + slotCodeRead + "]. ";
+                    result.errMessage = "Cannot find Slot Put Away [" + slotCodeRead + "]. ";
                 }
                 else
                 {
@@ -1539,8 +1539,6 @@ namespace RackingSystem.Controllers.API
 
                     PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Get Slot ID {slotID}", "", false);
 
-                    // *** testing
-                    //slotID = "A00000018";
                     result = slotID;
                 }
 
@@ -1724,6 +1722,64 @@ namespace RackingSystem.Controllers.API
             {
                 modbusClient.Disconnect();
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Disconnected.", "", false);
+            }
+
+            return result;
+        }
+
+        // check rack slot code first, if not found then check trolley slot code
+        [HttpGet("GetQRPulses/{slotCode}/{trolleyId?}")]
+        public ServiceResponseModel<List<int>> GetQRPulses(string slotCode, long trolleyId = 0)
+        {
+            ServiceResponseModel<List<int>> result = new ServiceResponseModel<List<int>>();
+            result.data = new List<int>();
+            result.data.Add(0);
+            result.data.Add(0);
+            result.data.Add(0);
+            result.data.Add(0);
+
+            try
+            {
+                var configRack = _dbContext.Configuration.Where(x => x.ConfigTitle == EnumConfiguration.PLC_IPAddr_Racking1.ToString()).FirstOrDefault();
+                if (configRack == null)
+                {
+                    result.errMessage = "Please set IP Address. ";
+                    return result;
+                }
+
+                int slotX = 0;
+                int slotY = 0;
+                List<int> pulses;
+                var slot = _dbContext.Slot.Where(x => x.SlotCode == slotCode).FirstOrDefault();
+                if (slot != null)
+                {
+                    slotX = slot.QRXPulse;
+                    slotY = slot.QRYPulse;
+                    pulses = ReadPulseByIP(configRack.ConfigValue, slotCode);
+                }
+                else
+                {
+                    var tSlot = _dbContext.TrolleySlot.Where(x => x.TrolleySlotCode == slotCode && (trolleyId <= 0 || x.Trolley_Id == trolleyId)).FirstOrDefault();
+                    if (tSlot == null)
+                    {
+                        result.errMessage = "Cannot find Slot Code or Trolley Slot Code [" + slotCode + "].";
+                        return result;
+                    }
+                    slotX = tSlot.QRXPulse;
+                    slotY = tSlot.QRYPulse;
+                    pulses = ReadTrolleyPulseByIP(configRack.ConfigValue, tSlot.Trolley_Id, slotCode);
+                }
+
+                // [0] PLC X, [1] PLC Y, [2] diff X, [3] diff Y, [4] slot X, [5] slot Y
+                pulses.Add(slotX);
+                pulses.Add(slotY);
+                result.data = pulses;
+                result.success = true;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
             }
 
             return result;

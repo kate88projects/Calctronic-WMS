@@ -346,6 +346,9 @@
 <input type="hidden" id="xQId" value="@ViewBag.QId" autocomplete="off">
 <input type="hidden" id="xDeviceId" value="@ViewBag.DeviceId" autocomplete="off">
 <input type="hidden" id="xQContinuos" value="@ViewBag.QContinuos" autocomplete="off">
+<input type="hidden" id="xDocType" value="@ViewBag.DocType" autocomplete="off">
+<input type="hidden" id="xDocId" value="@ViewBag.DocId" autocomplete="off">
+<input type="hidden" id="xQNo" value="@ViewBag.QNo" autocomplete="off">
 <input type="hidden" id="txtTrolleyId" autocomplete="off">
 <input type="hidden" id="txtDtlId" autocomplete="off">
 
@@ -368,6 +371,9 @@
             <button id="btnCurrentPulses" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;" onclick="showCurrentPulses()">
                 <i class="bi-crosshair" style="width:12px;height:12px;"></i> Current Pulses
             </button>
+            <a id="btnGuide" href="@Url.Action("RackJobHubOutGuide", "Rack")" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;text-decoration:none;">
+                <i class="bi-question-circle" style="width:12px;height:12px;"></i> Guide
+            </a>
             <div id="statusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mono" style="background:#f3f4f6;color:#6b7280;">
                 <span id="statusDot" class="w-2 h-2 rounded-full" style="background:#6b7280;"></span> <span id="statusText">IDLE</span>
             </div>
@@ -669,7 +675,10 @@
                     <div class="col-6">
                         <p style="font-size:2em;">Job is done. Click the 'Close' button to Close this window.</p>
                         <button class="btn btn-success w-100" style="height: 100px;" onclick="closeTab()">Close</button>
-                        <button class="btn btn-secondary w-100" style="height: 100px;" onclick="exportLogFile()">Export Log</button>
+                        <div class="d-flex gap-2 mt-2">
+                            <button class="btn btn-secondary flex-fill" style="height: 50px;" onclick="exportLogFile()">Export Log</button>
+                            <button class="btn btn-warning flex-fill" style="height: 50px;" onclick="exportInsufficient()">Insufficient List</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -883,6 +892,7 @@
                 $('#start-btn').addClass('hidden');
                 readyContinuos();
             }
+
         });
 
         function showVariables() {
@@ -952,7 +962,7 @@
             $("#pulseMsg").css("color", "#6b7280").text("Reading...");
 
             await $.ajax({
-                url: '/api/PLCHubOut/GetQRPulses/' + encodeURIComponent(slot),
+                url: '/api/PLCHubOut/GetQRPulses/' + encodeURIComponent(slot) + '/' + Number($("#txtTrolleyId").val() || 0),
                 type: 'GET',
                 headers: {
                     'Authorization': 'Bearer ' + token
@@ -1105,23 +1115,15 @@
         }
 
         // ----------- PLC Address Response Log
-        let addressLogInterval = null;
-
         function showAddressResponseLog() {
             document.getElementById('addressLogOverlay').classList.remove('hidden');
             document.getElementById('addressLogPanel').style.right = '0px';
             loadAddressResponseLog();
-            if (addressLogInterval) { clearInterval(addressLogInterval); }
-            addressLogInterval = setInterval(loadAddressResponseLog, 3000);
         }
 
         function hideAddressResponseLog() {
             document.getElementById('addressLogOverlay').classList.add('hidden');
             document.getElementById('addressLogPanel').style.right = '-420px';
-            if (addressLogInterval) {
-                clearInterval(addressLogInterval);
-                addressLogInterval = null;
-            }
         }
 
         async function loadAddressResponseLog() {
@@ -1280,10 +1282,10 @@
             if (sharedDrawerState.trolleyLocation === 'left') {
                 document.querySelector('#trolley-1').classList.add('empty-selected');
                 document.querySelector('#tray-1').classList.add('empty-selected');
-            } else if (sharedDrawerState.trolleyLocation === 'right') {
+            } else if (sharedDrawerState.trolleyLocation === 'center') {
                 document.querySelector('#trolley-2').classList.add('empty-selected');
                 document.querySelector('#tray-2').classList.add('empty-selected');
-            } else if (sharedDrawerState.trolleyLocation === 'center') {
+            } else if (sharedDrawerState.trolleyLocation === 'right') {
                 document.querySelector('#trolley-3').classList.add('empty-selected');
                 document.querySelector('#tray-3').classList.add('empty-selected');
             } else {
@@ -2676,6 +2678,63 @@
             });
 
 
+        }
+
+        function exportInsufficient() {
+
+            var docType = $('#xDocType').val();
+            var docId = $('#xDocId').val();
+            if (!docType || !docId) {
+                swal.fire({ icon: 'warning', text: 'Cannot find Job Order for this job.' });
+                return;
+            }
+
+            $.ajax({
+                url: "/api/PLCHubOut/GetInsufficientList/" + docType + "/" + docId,
+                type: "GET",
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                },
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    if (result.success == true) {
+                        if (result.data.length == 0) {
+                            swal.fire({ icon: 'info', text: 'No insufficient items.' });
+                            return;
+                        }
+
+                        const rows = result.data.map(function (r) {
+                            return {
+                                'Item Code': r.itemCode,
+                                'Description': r.description,
+                                'Qty': r.qty,
+                                'Bal Qty': r.balQty,
+                            };
+                        });
+
+                        const wb = XLSX.utils.book_new();
+                        wb.Props = {
+                            Title: "Insufficient List",
+                            Subject: "Rack Job Hub Out Task",
+                            Author: "Flex Software Consulting Sdn Bhd",
+                            CreatedDate: new Date()
+                        }
+
+                        const ws = XLSX.utils.json_to_sheet(rows);
+                        XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+
+                        var docNo = $('#xQNo').val();
+                        XLSX.writeFile(wb, "HubOut Insufficient" + (docNo ? " " + docNo : "") + ".xlsx");
+                    }
+                    else {
+                        swal.fire({ icon: 'error', text: result.errMessage || 'Failed to get insufficient list.' });
+                    }
+                },
+                error: function (error) {
+                    console.log('Export Insufficient Err::' + error.val);
+                }
+            });
         }
 
         // ----------- Put Away :: Height Measurement

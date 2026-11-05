@@ -564,6 +564,10 @@ namespace RackingSystem.Controllers
                     var q = _context.RackJobQueue.Where(x => x.RackJobQueue_Id == qId).FirstOrDefault();
                     if (q != null)
                     {
+                        // keep doc info on page, queue is removed when job end
+                        ViewBag.DocType = q.DocType;
+                        ViewBag.DocId = q.Doc_Id;
+
                         if (q.DocType == EnumQueueDocType.Loader.ToString())
                         {
                             var doc = _context.Loader.Where(x => x.Loader_Id == q.Doc_Id).FirstOrDefault();
@@ -684,6 +688,18 @@ namespace RackingSystem.Controllers
             ViewData["ActiveGroup"] = "grpRACKING";
             ViewData["ActiveTab"] = "RackJob";
             ViewData["Title"] = "Rack Job Hub Out - Viewer";
+            return View();
+        }
+
+        public IActionResult RackDrawerInGuide()
+        {
+            ViewData["Title"] = "Drawer In Operator Guide";
+            return View();
+        }
+
+        public IActionResult RackJobHubOutGuide()
+        {
+            ViewData["Title"] = "Hub Out Operator Guide";
             return View();
         }
 

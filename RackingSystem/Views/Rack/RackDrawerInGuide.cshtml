@@ -1,0 +1,189 @@
+@{
+    Layout = "~/Views/Shared/_LayoutEmpty.cshtml";
+}
+
+<link href="~/css/jetbrains.css" rel="stylesheet" />
+<link href="~/css/hmi-guide.css" rel="stylesheet" asp-append-version="true" />
+
+
+<div class="dg">
+    <div class="dg-sheet">
+        <div class="dg-header">
+            <div>
+                <div class="dg-eyebrow">SRMS · Drawer In screen</div>
+                <h1>Drawer In Operator Guide</h1>
+            </div>
+            <div class="dg-legend">
+                <span class="tag pc">PC = screen / database</span>
+                <span class="tag plc">PLC = robot / machine</span>
+                <span class="tag ok">Finished</span>
+                <span class="tag wait">Wait</span>
+                <button type="button" class="dg-close" onclick="window.close()">Close</button>
+            </div>
+        </div>
+
+        <div class="dg-rule">
+            <p><strong>The screen does not move the robot by itself.</strong> It sends one command to the PLC, then keeps reading the PLC until the PLC says the job is done.</p>
+            <p>A step is <strong>only finished</strong> when the log shows <span class="log">Retrieve Status :: OK</span> or <span class="log">Put Away Status :: Done</span>. A message like <span class="log">Retrieve :: Done</span> only means the command was sent.</p>
+        </div>
+
+        <div class="dg-lanes">
+            <section class="dg-lane">
+                <h2>Retrieve <small>take drawer from trolley</small></h2>
+                <ol class="dg-steps">
+                    <li>
+                        <div class="dg-step">
+                            <div class="dg-step-head">Check trolley slot <span class="tag pc">PC</span></div>
+                            <p>Log: <span class="log">Check Slot :: Col x Row y</span></p>
+                            <p class="dg-note">Database check only. If the slot is inactive, marked for checking or already has a reel, the screen skips to the next row by itself.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="dg-step">
+                            <div class="dg-step-head">Send retrieve command <span class="tag pc">PC</span> → <span class="tag plc">PLC</span></div>
+                            <p>Log: <span class="log">Retrieve :: Done</span> means the command reached the PLC. <strong>The robot starts moving now.</strong></p>
+                            <p class="dg-note">An error here means the screen could not talk to the PLC.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="dg-step">
+                            <div class="dg-step-head">Robot takes the drawer <span class="tag plc">PLC</span> <span class="tag wait">Wait</span></div>
+                            <p>The screen keeps asking the PLC for the result.</p>
+                        </div>
+                    </li>
+                </ol>
+                <div class="dg-done">Finished when <span class="log">Retrieve Status :: OK</span></div>
+                <div class="dg-timing">Screen waits about 17 s in total (2 s, then up to 15 s)</div>
+            </section>
+
+            <section class="dg-lane">
+                <h2>Put Away <small>put drawer into rack</small></h2>
+                <ol class="dg-steps">
+                    <li>
+                        <div class="dg-step">
+                            <div class="dg-step-head">Pick an empty rack slot <span class="tag pc">PC</span></div>
+                            <p class="dg-note">Database only. If no empty slot is found, the log says so and nothing is sent to the robot.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="dg-step">
+                            <div class="dg-step-head">Send put away command <span class="tag pc">PC</span> → <span class="tag plc">PLC</span></div>
+                            <p>The robot starts moving to the rack slot.</p>
+                            <p class="dg-note">An error here means the screen could not talk to the PLC.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="dg-step">
+                            <div class="dg-step-head">Robot places the drawer <span class="tag plc">PLC</span> <span class="tag wait">Wait</span></div>
+                            <p>The screen keeps asking the PLC for the result.</p>
+                        </div>
+                    </li>
+                </ol>
+                <div class="dg-done">Finished when <span class="log">Put Away Status :: Done</span></div>
+                <div class="dg-timing">Screen waits about 33 s in total (3 s, then up to 30 s)</div>
+            </section>
+        </div>
+
+        <section class="dg-lookup">
+            <h2>What the log message means</h2>
+            <p class="dg-intro">Find the message in the log panel, then check the side shown.</p>
+            <div class="dg-table-wrap">
+                <table class="dg-table">
+                    <thead>
+                        <tr><th>Log message</th><th>What it means</th><th>Check</th><th>What to do</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="log">Retrieve Status :: OK</span><br /><span class="log">Put Away Status :: Done</span></td>
+                            <td>The robot finished the step.</td>
+                            <td><span class="tag ok">Finished</span></td>
+                            <td>Nothing. The next step starts.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="log">Retrieve :: Done</span></td>
+                            <td>Command sent. The robot is still moving.</td>
+                            <td><span class="tag wait">Wait</span></td>
+                            <td>Wait for the Retrieve Status line.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="log">Check Slot :: …</span> with a reason</td>
+                            <td>That trolley slot is not usable in the database.</td>
+                            <td><span class="tag pc">PC</span></td>
+                            <td>No action. The screen moves to the next row. Fix the slot setting later if needed.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="log">Retrieve :: …</span> or <span class="log">Put Away :: …</span> error right after the command (IP address, slot not found, connection)</td>
+                            <td>The command never reached the robot.</td>
+                            <td><span class="tag pc">PC</span> → <span class="tag plc">PLC</span></td>
+                            <td>Check the PLC is powered and on the network. The robot did not move.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="log">Retrieve Status :: No Drawer to take.</span></td>
+                            <td>The PLC reports no drawer at that row.</td>
+                            <td><span class="tag plc">PLC</span></td>
+                            <td>The screen moves to the next row. If there really is a drawer there, check the PLC alarm or sensor.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="log">Retrieve Status :: 0</span></td>
+                            <td>The screen stopped waiting. The robot did not report finished within about 17 s.</td>
+                            <td><span class="tag plc">PLC</span></td>
+                            <td>Look at the robot before retrying. It may still be moving or stopped on an alarm.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="log">Retrieve Status :: 5</span> or any other number</td>
+                            <td>The number is a PLC error code.<span class="dg-reg">PLC register 4231</span></td>
+                            <td><span class="tag plc">PLC</span></td>
+                            <td>Write down the number and check the PLC alarm list or call the PLC team.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="log">Put Away Status :: Have Tray, try another slot.</span></td>
+                            <td>The rack slot already has a tray.</td>
+                            <td><span class="tag plc">PLC</span></td>
+                            <td>No action. The screen picks another slot. Mark the slot for checking if this repeats.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="log">Put Away Status :: Timeout. Cannot get Put Away Status.</span></td>
+                            <td>The robot did not report finished within about 33 s.</td>
+                            <td><span class="tag plc">PLC</span></td>
+                            <td>Look at the robot before retrying.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="log">… :: Tried 3, auto stop now.</span></td>
+                            <td>The same step failed 3 times. Auto Run is now off.</td>
+                            <td><span class="tag plc">PLC</span></td>
+                            <td>Find the cause on the robot first, then turn Auto Run back on.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="log">PLC Retrieve Slot Code / QR X / QR Z / Differ</span></td>
+                            <td>Where the robot's QR reader says it stopped, and how far that is from the saved slot position.</td>
+                            <td><span class="tag plc">PLC</span></td>
+                            <td>If the slot code is not the one you expected, or the difference is large, the robot is misaligned. Use Current Pulses.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <div class="dg-footer">
+            <section class="dg-box warn">
+                <h2>Before you press Retry</h2>
+                <ol>
+                    <li>Look at the robot. If it is still moving, <strong>wait</strong>. Retrying while it moves sends a second command.</li>
+                    <li>Check whether the robot is holding a drawer.</li>
+                    <li>Check the PLC panel for an alarm and clear it first.</li>
+                    <li>Only then press Retry on the screen.</li>
+                </ol>
+            </section>
+
+            <section class="dg-box">
+                <h2>Buttons that help</h2>
+                <ul>
+                    <li><strong>Current Pulses</strong> shows where the robot is now, the saved slot position, and the difference. Use it when the robot hangs or stops at the wrong row.</li>
+                    <li><strong>PLC Address Log</strong> shows every value the screen sent to and read from the PLC. Press Refresh to update it.</li>
+                    <li><strong>SRMS title</strong> (click it) shows the screen's current state, for support staff.</li>
+                </ul>
+                <p class="dg-fine">For the PLC team: retrieve start writes 4297 = 2 and reads result from 4222. Put away start writes 4297 = 1 and reads result from 4196 (2 = done, 3 = slot has tray).</p>
+            </section>
+        </div>
+    </div>
+</div>

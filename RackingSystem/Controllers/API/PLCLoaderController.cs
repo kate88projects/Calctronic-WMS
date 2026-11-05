@@ -688,6 +688,7 @@ namespace RackingSystem.Controllers.API
 
                 _reel.StatusIdx = (int)EnumReelStatus.InLoader;
                 _reel.Status = EnumReelStatus.InLoader.ToString();
+                _reel.LoaderCreatedDate = DateTime.Now;
                 _reel.ActualHeight = actHeight;
                 _reel.ActualHeightDec = (decimal)Math.Round(actHieghtDec, 3);
 
