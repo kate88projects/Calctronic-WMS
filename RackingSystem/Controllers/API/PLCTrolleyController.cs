@@ -20,6 +20,7 @@ using Newtonsoft.Json.Linq;
 using System.Reflection;
 using RackingSystem.Models.Log;
 using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace RackingSystem.Controllers.API
 {
@@ -1351,17 +1352,21 @@ namespace RackingSystem.Controllers.API
 
                     string plcIp = tr.IPAdd1;
                     if (dtl.ColNo == 2) { plcIp = tr.IPAdd2; }
-                    if (dtl.ColNo == 3) { plcIp = tr.IPAdd3; }
+                    if (dtl.ColNo == 3 && dtl.IsLeft) { plcIp = tr.IPAdd3; }
+
+                    int rowNo = 0;
+                    if (!dtl.IsLeft) { rowNo += 50; }
+                    rowNo += dtl.RowNo -1; 
+
                     ModbusClient modbusClient = new ModbusClient(plcIp, port);
                     try
                     {
                         modbusClient.Connect();
-
                         PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
 
-                        modbusClient.WriteSingleCoil(dtl.RowNo - 1, on);
-                        PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, dtl.RowNo - 1, "Write", on ? 1 : 0, methodName, false);
-                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {(dtl.RowNo - 1)} : {(on ? 1 : 0)}", plcIp + " :: " + port, false);
+                        modbusClient.WriteSingleCoil(rowNo, on);
+                        PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, rowNo, "Write", on ? 1 : 0, methodName, false);
+                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {(rowNo)} : {(on ? 1 : 0)}", plcIp + " :: " + port, false);
                     }
                     catch (Exception ex)
                     {
