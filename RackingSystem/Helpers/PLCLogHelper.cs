@@ -112,6 +112,30 @@ namespace RackingSystem.Helpers
 
         }
 
+        public void InsertPLCCalibrationLog(AppDbContext _dbContext, long id, string evt, string r1, string r2, bool isErr)
+        {
+            //var logExist = isErr ? null : _dbContext.PLCTrolleyLog.Where(x => x.Loader_Id == id && x.EventName == evt && x.Remark1 == r1 && x.Remark2 == r2).FirstOrDefault();
+            //if (logExist != null)
+            //{
+            //    logExist.CreatedDate = DateTime.Now;
+            //}
+            //else
+            //{
+            PLCCalibrationLog log = new PLCCalibrationLog()
+            {
+                Loader_Id = id,
+                EventName = evt,
+                Remark1 = r1,
+                Remark2 = r2,
+                CreatedDate = DateTime.Now,
+                IsErr = isErr,
+            };
+            _dbContext.PLCCalibrationLog.Add(log);
+            //}
+            _dbContext.SaveChanges();
+
+        }
+
         public void InsertPLCAddressResponse(AppDbContext _dbContext, int address, string action, int value, string methodName, bool isErr)
         {
             // Only one job runs at a time - the singleton RackJob row tracks which

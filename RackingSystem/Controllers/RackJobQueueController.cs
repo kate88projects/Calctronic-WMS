@@ -47,6 +47,34 @@ namespace RackingSystem.Controllers
             return View();
         }
 
+        public IActionResult CalibrationSRMS()
+        {
+            ViewBag.PermissionList = new List<int>();
+            ViewBag.xToken = "";
+            ViewBag.DeviceId = "";
+            if (User.Identity?.IsAuthenticated ?? false)
+            {
+                var uacClaim = User.FindFirst("UACIdList")?.Value;
+
+                if (uacClaim != null)
+                {
+                    List<int> uacIdList = uacClaim.Split(',').Select(int.Parse).ToList();
+                    ViewBag.PermissionList = uacIdList;
+                    ViewBag.xToken = User.FindFirst("Token")?.Value;
+                    ViewBag.DeviceId = User.FindFirst("DeviceId")?.Value;
+                }
+            }
+            else
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            ViewData["ActiveGroup"] = "grpQ";
+            ViewData["ActiveTab"] = "CalibrationSRMS";
+            ViewData["Title"] = "Calibration SRMS";
+            return View();
+        }
+
         [HttpGet]
         public async Task<ServiceResponseModel<List<QListDTO>>> GetQueueList()
         {

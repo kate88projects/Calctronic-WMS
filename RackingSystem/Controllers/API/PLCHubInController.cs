@@ -1198,6 +1198,14 @@ namespace RackingSystem.Controllers.API
                     Item? item = await _dbContext.Item.FirstOrDefaultAsync(x => x.Item_Id == reel.Item_Id);
                     if (item != null)
                     {
+                        // 261106 double check maybe is previous reel id so need to stop
+                        var s = await _dbContext.Slot.Where(x => x.Reel_Id == reel.Reel_Id).FirstOrDefaultAsync();
+                        if (s != null)
+                        {
+                            result.data.errMessageReel = "Wrong Reel ID [" + r2b.data + "]. This reel is already in SRMS.";
+                            return result;
+                        }
+
                         result.data.successReel = true;
                         result.data.Reel_Id = reel.Reel_Id;
                         result.data.ReelCode = reel.ReelCode;
@@ -1225,7 +1233,7 @@ namespace RackingSystem.Controllers.API
             {
                 result.data.errMessageScan = r2b.errMessage;
             }
-                return result;
+            return result;
         }
 
         internal async Task<ServiceResponseModel<string>> GetReelIDByIP(string ipAddr)
