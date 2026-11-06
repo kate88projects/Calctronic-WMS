@@ -270,6 +270,12 @@
         border-color: darkgray !important;
         cursor: not-allowed;
     }
+
+    .phase-btn:disabled {
+        color: darkgray !important;
+        border-color: #e5e7eb !important;
+        cursor: not-allowed;
+    }
 </style>
 
 <input type="hidden" id="xToken" value="@ViewBag.xToken" autocomplete="off">
@@ -527,6 +533,10 @@
         ];
         // wait for the robot to move before reading its status
         const MOVE_DELAY = { 0: 2000, 2: 5000, 5: 5000, 7: 5000 };
+        // manual buttons :: move = send command again, status = read status again, read = read QR again
+        const STEP_KIND = ['move', 'status', 'move', 'status', 'read', 'move', 'status', 'move', 'status'];
+        // where the drawer must be before a move can be sent
+        const MOVE_FROM = { 0: 'trolley', 2: 'robot', 5: 'rack', 7: 'robot' };
 
         // where the drawer is :: 'trolley', 'robot', 'rack' (inside slot)
         let drawerAt = 'trolley';
@@ -711,6 +721,14 @@
             renderResults();
         }
 
+        // manual step button allowed? moves only when the drawer is where that move expects it
+        function canManual(i) {
+            if (running) return false;
+            if (cycle == null) return i == 0 && curIdx >= 0;
+            if (STEP_KIND[i] != 'move') return true;
+            return drawerAt == MOVE_FROM[i];
+        }
+
         function renderSteps() {
             const p = cycle != null ? cycle.phase : -1;
             let html = '';
@@ -724,7 +742,12 @@
                     if (!running && !lastError) style = 'background:#f59e0b;border-color:#f59e0b;';
                 }
                 const color = i == p ? '#1f2937' : '#64748b';
-                html += `<div class="flex items-center gap-2"><div class="step-dot ${cls}" style="${style}"></div><span class="text-xs flex-1" style="color:${color};${i == p ? 'font-weight:600;' : ''}">${i + 1}. ${label}</span></div>`;
+                const btnText = { move: 'Send again', status: 'Check again', read: 'Read again' }[STEP_KIND[i]];
+                html += `<div class="flex items-center gap-2">
+                    <div class="step-dot ${cls}" style="${style}"></div>
+                    <span class="text-xs flex-1" style="color:${color};${i == p ? 'font-weight:600;' : ''}">${i + 1}. ${label}</span>
+                    <button onclick="manualStep(${i})" class="phase-btn px-3 py-1 rounded text-xs font-semibold" style="background:#fff;color:#ef4444;border:1px solid #fecaca;" ${canManual(i) ? '' : 'disabled'}>${btnText}</button>
+                </div>`;
             });
             document.getElementById('stepList').innerHTML = html;
         }
@@ -751,8 +774,8 @@
             let hint = '';
             if (running && stopNow) hint = 'Stopping after the current robot step...';
             else if (running && stopAfter) hint = 'Will stop when the drawer is back in the trolley.';
-            else if (running) hint = mode == 'one' ? 'Reading one slot.' : 'Reading every row down the column.';
-            else if (cycle != null) hint = `Stopped at step ${cycle.phase + 1}. Read One / Continue Read carries on from this step.`;
+            else if (running) hint = { one: 'Reading one slot.', continue: 'Reading every row down the column.', manual: 'Running one step.' }[mode];
+            else if (cycle != null) hint = `Stopped at step ${cycle.phase + 1}. Read One / Continue Read carries on from this step, or use a step button to retry one action.`;
             else if (slots.length == 0) hint = 'Select a SRMS column.';
             else if (curIdx < 0) hint = 'No more slot to read. Change Start Row to read again.';
             else hint = `Next: ${slots[curIdx].slotCode} (row ${slots[curIdx].rowNo}).`;
@@ -832,13 +855,62 @@
                 if (MOVE_DELAY[p] && cycle.phase == p + 1) { await wait(MOVE_DELAY[p]); }
             }
 
-            log(`Cycle :: ${s.slotCode} done, drawer is back in the trolley`, 'ok');
+            completeCycle();
+            return true;
+        }
+
+        // drawer is back in the trolley :: move pointer to the next readable row
+        function completeCycle() {
+            log(`Cycle :: ${slots[cycle.idx].slotCode} done, drawer is back in the trolley`, 'ok');
             const next = nextReadable(cycle.idx + 1);
             cycle = null;
             setPointer(next);
             renderResults();
             updateUI();
-            return true;
+        }
+
+        // manual :: run one step of the current cycle, then stop
+        async function manualStep(p) {
+            if (!canManual(p)) { return; }
+            const label = `step ${p + 1} (${STEPS[p]})`;
+
+            // sending a move again is only safe when the PLC really did not get the first one
+            if (STEP_KIND[p] == 'move') {
+                const c = await Swal.fire({
+                    icon: 'warning',
+                    title: 'Send command again?',
+                    html: `This tells the robot to do <b>${STEPS[p]}</b>.<br>Only do this if the robot is <b>not moving</b> and did not start the first command.`,
+                    showCancelButton: true,
+                    confirmButtonText: 'Send',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#e74c3c'
+                });
+                if (!c.isConfirmed || !canManual(p)) { return; }
+            }
+
+            if (cycle == null) {
+                const t = readTrolley();
+                if (!t) { return; }
+                newCycle(t);
+            }
+
+            mode = 'manual';
+            running = true;
+            stopNow = false;
+            stopAfter = false;
+            lastError = false;
+            setStatus('MANUAL STEP', '#f59e0b');
+            log(`Manual :: ${slots[cycle.idx].slotCode} :: ${label}`, 'info');
+            updateUI();
+
+            const res = await runStep(p);
+            if (res == 'fail') { return stopOnError(); }
+            if (cycle.phase >= STEPS.length) {
+                completeCycle();
+                return finishRun('IDLE', '#6b7280');
+            }
+            log(`Manual :: done. Next is step ${cycle.phase + 1} (${STEPS[cycle.phase]}).`, 'info');
+            finishRun('MANUAL', '#f59e0b');
         }
 
         // run one step of the current cycle. 'ok' moves cycle.phase on, 'fail' keeps it so it can be retried.
