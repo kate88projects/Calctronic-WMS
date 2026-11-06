@@ -264,64 +264,10 @@
         background: rgba(16, 185, 129, 0.08);
     }
 
-    #start-btn:disabled {
+    .ctl-btn:disabled {
         background-color: darkgray !important;
-        cursor: not-allowed;
-    }
-
-    #stop-btn:disabled {
-        background-color: darkgray !important;
-        cursor: not-allowed;
-    }
-
-    #cont-btn:disabled {
-        background-color: darkgray !important;
-        cursor: not-allowed;
-    }
-
-    #btnRetrieveStart:disabled {
-        background-color: darkgray !important;
-        cursor: not-allowed;
-    }
-
-    #btnPutawayStart:disabled {
-        background-color: darkgray !important;
-        cursor: not-allowed;
-    }
-
-    #btnR1:disabled {
-        color: darkgray !important;
-        cursor: not-allowed;
-    }
-    #btnR2:disabled {
-        color: darkgray !important;
-        cursor: not-allowed;
-    }
-
-    #btnR3:disabled {
-        color: darkgray !important;
-        cursor: not-allowed;
-    }
-
-    #btnPA1:disabled {
-        color: darkgray !important;
-        cursor: not-allowed;
-    }
-
-    #btnPA2:disabled {
-        color: darkgray !important;
-        cursor: not-allowed;
-    }
-
-    #btnPA3:disabled {
-        color: darkgray !important;
-        cursor: not-allowed;
-    }
-    .phase-btn:disabled,
-    #btnTakeStatus:disabled,
-    #btnReturnStatus:disabled {
-        color: darkgray !important;
-        border-color: #e5e7eb !important;
+        color: #fff !important;
+        border-color: darkgray !important;
         cursor: not-allowed;
     }
 </style>
@@ -338,7 +284,7 @@
             </div>
             <div>
                 <h1 id="pageTitle" class="text-lg font-bold" style="color:#1f2937;">Calibration SRMS</h1>
-                <p id="statusLabel" class="text-xs mono" style="color:#6b7280;">Put away and retrieve a drawer at every slot of one SRMS column</p>
+                <p id="statusLabel" class="text-xs mono" style="color:#6b7280;">Take a drawer from the trolley, put away and retrieve it at each row of one SRMS column, return it to the trolley</p>
             </div>
         </div>
         <div class="flex items-center gap-3">
@@ -361,19 +307,19 @@
     <div class="p-6">
         <div class="grid gap-4" style="grid-template-columns: minmax(320px, 2fr) 3fr;">
 
-            <!-- Left: Steps -->
+            <!-- Left: Setup + Control -->
             <div class="flex flex-col gap-4" style="min-width:0;">
 
                 <!-- Drawer location -->
                 <div class="rounded-xl px-6 py-3 flex items-center justify-between" style="background:#fff;border:1px solid #e5e7eb;">
                     <span class="text-xs font-semibold" style="color:#4b5563;">Drawer is at</span>
-                    <span id="drawerAtText" class="text-sm font-bold mono" style="color:#6b7280;">Trolley (not taken)</span>
+                    <span id="drawerAtText" class="text-sm font-bold mono" style="color:#6b7280;">Trolley</span>
                 </div>
 
-                <!-- Step 1 -->
+                <!-- Setup -->
                 <div class="rounded-xl p-6" style="background:#fff;border:1px solid #e5e7eb;">
                     <h2 class="text-xs font-semibold mb-3 flex items-center gap-2" style="color:#4b5563;">
-                        <i class="bi-1-circle" style="width:14px;height:14px;"></i> Take drawer from trolley
+                        <i class="bi-gear" style="width:14px;height:14px;"></i> Setup
                     </h2>
                     <div class="grid gap-2" style="grid-template-columns: auto 1fr;">
                         <label for="selTrolley" class="text-xs font-semibold" style="color:#4b5563;align-self:center;">Trolley</label>
@@ -394,82 +340,50 @@
 
                         <label for="txtTrolleyRow" class="text-xs font-semibold" style="color:#4b5563;align-self:center;">Trolley Row</label>
                         <input type="number" id="txtTrolleyRow" min="1" value="1" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;">
-                    </div>
-                    <div class="flex gap-2 mt-3">
-                        <button id="btnTake" onclick="takeDrawer()" class="px-3 py-1.5 rounded-lg text-xs font-semibold" style="background:#16a34a;color:#fff;">
-                            <i class="bi-box-arrow-in-down" style="width:12px;height:12px;"></i> Take Drawer
-                        </button>
-                        <button id="btnTakeStatus" onclick="checkTakeStatus()" class="px-3 py-1.5 rounded-lg text-xs font-semibold" style="background:#fff;color:#ef4444;border:1px solid #fecaca;" disabled>
-                            <i class="bi-arrow-repeat" style="width:12px;height:12px;"></i> Check Status
-                        </button>
-                    </div>
-                </div>
 
-                <!-- Step 2 -->
-                <div class="rounded-xl p-6" style="background:#fff;border:1px solid #e5e7eb;">
-                    <h2 class="text-xs font-semibold mb-3 flex items-center gap-2" style="color:#4b5563;">
-                        <i class="bi-2-circle" style="width:14px;height:14px;"></i> Check SRMS column
-                    </h2>
-                    <div class="grid gap-2" style="grid-template-columns: auto 1fr;">
-                        <label for="selColumn" class="text-xs font-semibold" style="color:#4b5563;align-self:center;">Column</label>
+                        <div style="grid-column: 1 / -1;border-top:1px solid #e2e8f0;margin:4px 0;"></div>
+
+                        <label for="selColumn" class="text-xs font-semibold" style="color:#4b5563;align-self:center;">SRMS Column</label>
                         <select id="selColumn" class="px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;" onchange="loadColumn()"></select>
 
-                        <label for="txtRowFrom" class="text-xs font-semibold" style="color:#4b5563;align-self:center;">Row from / to</label>
-                        <div class="flex gap-2">
-                            <input type="number" id="txtRowFrom" min="1" placeholder="First" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;width:50%;">
-                            <input type="number" id="txtRowTo" min="1" placeholder="Last" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;width:50%;">
-                        </div>
+                        <label for="txtStartRow" class="text-xs font-semibold" style="color:#4b5563;align-self:center;">Start Row</label>
+                        <input type="number" id="txtStartRow" min="1" placeholder="Row" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;" onchange="setStartRow()">
 
                         <label for="txtDiffLimit" class="text-xs font-semibold" style="color:#4b5563;align-self:center;">Highlight diff ≥</label>
                         <input type="number" id="txtDiffLimit" min="0" value="10" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;" onchange="renderResults()">
                     </div>
-                    <p class="text-xs mt-2" style="color:#6b7280;">Slots that are inactive or already have a reel or tray are skipped.</p>
-                    <div class="flex flex-wrap gap-2 mt-3">
-                        <button id="btnStart" onclick="startCheck()" class="px-3 py-1.5 rounded-lg text-xs font-semibold" style="background:#16a34a;color:#fff;">
-                            <i class="bi-play-fill" style="width:12px;height:12px;"></i> Start Check
-                        </button>
-                        <button id="btnContinue" onclick="continueCheck()" class="px-3 py-1.5 rounded-lg text-xs font-semibold hidden" style="background:#f59e0b;color:#fff;">
-                            <i class="bi-arrow-repeat" style="width:12px;height:12px;"></i> Continue
-                        </button>
-                        <button id="btnStop" onclick="requestStop()" class="px-3 py-1.5 rounded-lg text-xs font-semibold" style="background:#e74c3c;color:#fff;" disabled>
-                            <i class="bi-stop-fill" style="width:12px;height:12px;"></i> Stop after this slot
-                        </button>
-                    </div>
-
-                    <!-- current slot progress -->
-                    <div class="mt-4 pt-3" style="border-top:1px solid #e2e8f0;">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs font-semibold" style="color:#4b5563;">Current slot</span>
-                            <span id="txtCurSlot" class="text-xs font-bold mono" style="color:#1f2937;">-</span>
-                        </div>
-                        <div class="flex items-center gap-2 mb-3">
-                            <label for="txtManualRow" class="text-xs" style="color:#6b7280;white-space:nowrap;">Manual: Column above, Row</label>
-                            <input type="number" id="txtManualRow" min="1" placeholder="Row" autocomplete="off" class="px-2.5 py-1 rounded-lg text-xs border" style="border-color:#e5e7eb;width:80px;">
-                            <button id="btnSetSlot" onclick="setManualSlot()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;" disabled>Set slot</button>
-                        </div>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex items-center gap-2"><div class="step-dot waiting" id="pDot0"></div><span class="text-xs flex-1" style="color:#64748b;">Put drawer into slot</span><button id="btnPhase0" onclick="manualPhase(0)" class="phase-btn px-3 py-1 rounded text-xs font-semibold" style="background:#fff;color:#ef4444;border:1px solid #fecaca;" disabled>Send again</button></div>
-                            <div class="flex items-center gap-2"><div class="step-dot waiting" id="pDot1"></div><span class="text-xs flex-1" style="color:#64748b;">* Put Away Status *</span><button id="btnPhase1" onclick="manualPhase(1)" class="phase-btn px-3 py-1 rounded text-xs font-semibold" style="background:#fff;color:#ef4444;border:1px solid #fecaca;" disabled>Check again</button></div>
-                            <div class="flex items-center gap-2"><div class="step-dot waiting" id="pDot2"></div><span class="text-xs flex-1" style="color:#64748b;">Read QR pulses</span><button id="btnPhase2" onclick="manualPhase(2)" class="phase-btn px-3 py-1 rounded text-xs font-semibold" style="background:#fff;color:#ef4444;border:1px solid #fecaca;" disabled>Read again</button></div>
-                            <div class="flex items-center gap-2"><div class="step-dot waiting" id="pDot3"></div><span class="text-xs flex-1" style="color:#64748b;">Take drawer back</span><button id="btnPhase3" onclick="manualPhase(3)" class="phase-btn px-3 py-1 rounded text-xs font-semibold" style="background:#fff;color:#ef4444;border:1px solid #fecaca;" disabled>Send again</button></div>
-                            <div class="flex items-center gap-2"><div class="step-dot waiting" id="pDot4"></div><span class="text-xs flex-1" style="color:#64748b;">* Retrieve Status *</span><button id="btnPhase4" onclick="manualPhase(4)" class="phase-btn px-3 py-1 rounded text-xs font-semibold" style="background:#fff;color:#ef4444;border:1px solid #fecaca;" disabled>Check again</button></div>
-                        </div>
-                        <p class="text-xs mt-2" style="color:#6b7280;">Buttons redo one step for the current slot only. Press Continue to go back to automatic.</p>
-                    </div>
+                    <p class="text-xs mt-2" style="color:#6b7280;">The drawer comes from this trolley slot for every row. Slots that are inactive or already have a reel or tray are skipped.</p>
                 </div>
 
-                <!-- Step 3 -->
+                <!-- Control -->
                 <div class="rounded-xl p-6" style="background:#fff;border:1px solid #e5e7eb;">
-                    <h2 class="text-xs font-semibold mb-3 flex items-center gap-2" style="color:#4b5563;">
-                        <i class="bi-3-circle" style="width:14px;height:14px;"></i> Return drawer to trolley
-                    </h2>
-                    <p class="text-xs" style="color:#6b7280;">Runs by itself when the column is finished or stopped. Use the button only if it did not.</p>
-                    <div class="flex gap-2 mt-3">
-                        <button id="btnReturn" onclick="returnDrawer()" class="px-3 py-1.5 rounded-lg text-xs font-semibold" style="background:#3b82f6;color:#fff;" disabled>
-                            <i class="bi-box-arrow-up" style="width:12px;height:12px;"></i> Return Drawer
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-xs font-semibold flex items-center gap-2" style="color:#4b5563;">
+                            <i class="bi-joystick" style="width:14px;height:14px;"></i> Control
+                        </h2>
+                        <span id="txtCurSlot" class="text-xs font-bold mono" style="color:#1f2937;">-</span>
+                    </div>
+                    <div class="grid gap-2" style="grid-template-columns: 1fr 1fr;">
+                        <button id="btnReadOne" onclick="startRead('one')" class="ctl-btn px-3 py-2 rounded-lg text-xs font-semibold" style="background:#16a34a;color:#fff;">
+                            <i class="bi-play-fill" style="width:12px;height:12px;"></i> Read One
                         </button>
-                        <button id="btnReturnStatus" onclick="checkReturnStatus()" class="px-3 py-1.5 rounded-lg text-xs font-semibold" style="background:#fff;color:#ef4444;border:1px solid #fecaca;" disabled>
-                            <i class="bi-arrow-repeat" style="width:12px;height:12px;"></i> Check Status
+                        <button id="btnContinue" onclick="startRead('continue')" class="ctl-btn px-3 py-2 rounded-lg text-xs font-semibold" style="background:#f59e0b;color:#fff;">
+                            <i class="bi-fast-forward-fill" style="width:12px;height:12px;"></i> Continue Read
+                        </button>
+                        <button id="btnStopNow" onclick="requestStopNow()" class="ctl-btn px-3 py-2 rounded-lg text-xs font-semibold" style="background:#e74c3c;color:#fff;" disabled>
+                            <i class="bi-stop-fill" style="width:12px;height:12px;"></i> Stop Now
+                        </button>
+                        <button id="btnStopAfter" onclick="requestStopAfter()" class="ctl-btn px-3 py-2 rounded-lg text-xs font-semibold" style="background:#fff;color:#e74c3c;border:1px solid #fecaca;" disabled>
+                            <i class="bi-skip-end-fill" style="width:12px;height:12px;"></i> Stop After Cycle
+                        </button>
+                    </div>
+                    <p id="txtHint" class="text-xs mt-2" style="color:#6b7280;"></p>
+
+                    <!-- cycle progress -->
+                    <div class="mt-3 pt-3" style="border-top:1px solid #e2e8f0;">
+                        <div id="stepList" class="flex flex-col gap-1.5"></div>
+                        <button id="btnReset" onclick="resetCycle()" class="mt-3 px-3 py-1 rounded text-xs font-semibold hidden" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;">
+                            <i class="bi-arrow-counterclockwise" style="width:12px;height:12px;"></i> Reset cycle
                         </button>
                     </div>
                 </div>
@@ -599,29 +513,44 @@
 
         let token = '';
 
-        // where the drawer is :: 'trolley' (not taken / returned), 'robot', 'rack' (inside slot)
+        // one cycle = one SRMS slot, drawer goes trolley -> slot -> trolley
+        const STEPS = [
+            'Retrieve drawer from trolley',
+            '* Retrieve Status *',
+            'Put away to SRMS slot',
+            '* Put Away Status *',
+            'Read QR X, Z',
+            'Retrieve from SRMS slot',
+            '* Retrieve Status *',
+            'Put away back to trolley',
+            '* Put Away Status *'
+        ];
+        // wait for the robot to move before reading its status
+        const MOVE_DELAY = { 0: 2000, 2: 5000, 5: 5000, 7: 5000 };
+
+        // where the drawer is :: 'trolley', 'robot', 'rack' (inside slot)
         let drawerAt = 'trolley';
         let drawerSlot = '';
-        let takenFrom = null;   // { trolleyId, trolleyCode, side, col, row }
-        let pendingTake = null; // take command sent, status not yet OK
-        let pendingReturn = false; // return command sent, status not yet OK
 
         let slots = [];         // column slots with result
-        let queue = [];         // indexes of slots to check
-        let qIdx = 0;
-        let phase = 0;          // 0 put, 1 put status, 2 read QR, 3 retrieve, 4 retrieve status
+        let curIdx = -1;        // next slot to read
+        let cycle = null;       // { idx, t: { trolleyId, trolleyCode, side, col, row }, phase } while a cycle is not finished
+        let mode = '';          // 'one' or 'continue'
         let running = false;
-        let stopRequested = false;
+        let stopNow = false;
+        let stopAfter = false;
+        let lastError = false;
 
         $(document).ready(async function () {
             token = $('#xToken').val();
             await loadTrolleys();
             await loadColumns();
+            renderSteps();
             updateUI();
         });
 
         window.addEventListener('beforeunload', function (e) {
-            if (drawerAt != 'trolley' || running) {
+            if (drawerAt != 'trolley' || running || cycle != null) {
                 e.preventDefault();
                 e.returnValue = '';
             }
@@ -629,6 +558,12 @@
 
         function delay(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // delay that ends early when Stop Now is pressed
+        async function wait(ms) {
+            const end = Date.now() + ms;
+            while (Date.now() < end && !stopNow) { await delay(200); }
         }
 
         async function api(url) {
@@ -681,12 +616,11 @@
         }
 
         async function loadColumn() {
-            if (running) { return; }
+            if (running || cycle != null) { return; }
             const col = $('#selColumn').val();
             slots = [];
-            queue = [];
-            qIdx = 0;
-            phase = 0;
+            curIdx = -1;
+            $('#txtStartRow').val('');
             if (!col) { renderResults(); updateUI(); return; }
 
             const r = await api('/api/PLCCalibration/GetColumnSlots/' + col);
@@ -699,10 +633,33 @@
                 else if (s.hasEmptyTray) skip = 'Skipped: has tray';
                 return { ...s, result: skip || 'Pending', state: skip ? 'skip' : 'pending', plcX: null, plcZ: null, dbX: s.qrxPulse, dbZ: s.qryPulse, diffX: null, diffZ: null };
             });
-            if (slots.length > 0) {
-                $('#txtRowFrom').val(slots[0].rowNo);
-                $('#txtRowTo').val(slots[slots.length - 1].rowNo);
+            setPointer(nextReadable(0));
+            renderResults();
+            updateUI();
+        }
+
+        function nextReadable(from) {
+            for (let i = Math.max(from, 0); i < slots.length; i++) {
+                if (slots[i].state != 'skip') return i;
             }
+            return -1;
+        }
+
+        function setPointer(idx) {
+            curIdx = idx;
+            $('#txtStartRow').val(idx >= 0 ? slots[idx].rowNo : '');
+        }
+
+        // user typed a start row :: next read starts from that row (or the first readable row after it)
+        function setStartRow() {
+            if (running || cycle != null) { return; }
+            const row = Number($('#txtStartRow').val() || 0);
+            const idx = slots.findIndex(s => s.rowNo >= row);
+            const next = nextReadable(idx);
+            if (idx >= 0 && next != idx) {
+                log(`Start Row :: row ${row} is skipped (${slots[idx].result}), next readable row is used`, 'info');
+            }
+            setPointer(next);
             renderResults();
             updateUI();
         }
@@ -716,11 +673,11 @@
                 return;
             }
             const limit = Number($('#txtDiffLimit').val() || 0);
-            const curIdx = queue.length > 0 && qIdx < queue.length ? queue[qIdx] : -1;
+            const hiIdx = cycle != null ? cycle.idx : curIdx;
             let html = '';
             slots.forEach((s, i) => {
                 const colors = { pending: '#9ca3af', skip: '#9ca3af', ok: '#059669', warn: '#b45309', fail: '#e74c3c', busy: '#2563eb' };
-                const bg = i == curIdx ? '#eff6ff' : 'transparent';
+                const bg = i == hiIdx ? '#eff6ff' : 'transparent';
                 const big = v => v != null && limit > 0 && Math.abs(v) >= limit;
                 const cell = v => v == null ? '-' : v;
                 html += `<tr id="res${i}" style="border-bottom:1px solid #f1f5f9;background:${bg};">
@@ -742,8 +699,8 @@
             const skip = slots.filter(s => s.state == 'skip').length;
             $('#txtSummary').text(`${done} checked · ${fail} failed · ${skip} skipped · ${slots.length} slots`);
 
-            if (curIdx >= 0) {
-                const row = document.getElementById('res' + curIdx);
+            if (hiIdx >= 0) {
+                const row = document.getElementById('res' + hiIdx);
                 if (row) row.scrollIntoView({ block: 'nearest' });
             }
         }
@@ -754,53 +711,57 @@
             renderResults();
         }
 
-        function setPhaseDots(p, failed) {
-            for (let i = 0; i <= 4; i++) {
-                const dot = document.getElementById('pDot' + i);
-                if (p < 0) dot.className = 'step-dot waiting';
-                else if (i < p) dot.className = 'step-dot done';
-                else if (i == p) dot.className = failed ? 'step-dot waiting' : 'step-dot active';
-                else dot.className = 'step-dot waiting';
-                if (i == p && failed) dot.style.background = '#e74c3c'; else dot.style.background = '';
-            }
+        function renderSteps() {
+            const p = cycle != null ? cycle.phase : -1;
+            let html = '';
+            STEPS.forEach((label, i) => {
+                let cls = 'waiting';
+                let style = '';
+                if (p >= 0 && i < p) cls = 'done';
+                else if (i == p) {
+                    if (lastError) style = 'background:#e74c3c;border-color:#e74c3c;';
+                    else cls = running ? 'active' : 'done';
+                    if (!running && !lastError) style = 'background:#f59e0b;border-color:#f59e0b;';
+                }
+                const color = i == p ? '#1f2937' : '#64748b';
+                html += `<div class="flex items-center gap-2"><div class="step-dot ${cls}" style="${style}"></div><span class="text-xs flex-1" style="color:${color};${i == p ? 'font-weight:600;' : ''}">${i + 1}. ${label}</span></div>`;
+            });
+            document.getElementById('stepList').innerHTML = html;
         }
 
         // ----------- UI state
         function updateUI() {
             const atText = { trolley: 'Trolley', robot: 'Robot (holding)', rack: 'Rack slot ' + drawerSlot }[drawerAt];
             const atColor = { trolley: '#6b7280', robot: '#2563eb', rack: '#b45309' }[drawerAt];
-            $('#drawerAtText').text(drawerAt == 'trolley' && !takenFrom ? 'Trolley (not taken)' : atText).css('color', atColor);
+            $('#drawerAtText').text(atText).css('color', atColor);
 
-            const locked = drawerAt != 'trolley' || running;
-            $('#selTrolley, #selSide, #selTrolleyCol, #txtTrolleyRow').prop('disabled', locked);
-            $('#btnTake').prop('disabled', locked);
-            // column cannot change while the drawer is inside a slot of it
-            $('#selColumn').prop('disabled', running || drawerAt == 'rack');
-            $('#txtRowFrom, #txtRowTo').prop('disabled', running);
-            $('#txtManualRow, #btnSetSlot').prop('disabled', running || drawerAt == 'rack' || slots.length == 0);
+            // setup is locked while a cycle is not finished, the drawer must go back to the same trolley slot
+            const locked = running || cycle != null;
+            $('#selTrolley, #selSide, #selTrolleyCol, #txtTrolleyRow, #selColumn, #txtStartRow').prop('disabled', locked);
 
-            const canResume = !running && queue.length > 0 && qIdx < queue.length && (phase > 0 || qIdx > 0);
-            $('#btnStart').prop('disabled', running || drawerAt != 'robot' || slots.length == 0);
-            // resume at step 1 of a slot needs the drawer on the robot; later steps continue with the drawer in the slot
-            $('#btnContinue').toggleClass('hidden', !canResume).prop('disabled', phase == 0 && drawerAt != 'robot');
-            $('#btnStop').prop('disabled', !running);
-            $('#btnReturn').prop('disabled', running || drawerAt != 'robot' || !takenFrom);
+            const canRead = !running && (cycle != null || curIdx >= 0);
+            $('#btnReadOne, #btnContinue').prop('disabled', !canRead);
+            $('#btnStopNow').prop('disabled', !running || stopNow);
+            $('#btnStopAfter').prop('disabled', !running || stopNow || stopAfter);
+            $('#btnReset').toggleClass('hidden', running || cycle == null);
 
-            $('#btnTakeStatus').prop('disabled', running || !pendingTake);
-            $('#btnReturnStatus').prop('disabled', running || !pendingReturn);
+            const idx = cycle != null ? cycle.idx : curIdx;
+            $('#txtCurSlot').text(idx >= 0 ? `${slots[idx].slotCode} (row ${slots[idx].rowNo})` : '-');
 
-            // manual step buttons :: only for the current slot, only when not running
-            const hasSlot = !running && queue.length > 0 && qIdx < queue.length;
-            $('#btnPhase0').prop('disabled', !hasSlot || drawerAt != 'robot');
-            $('#btnPhase1').prop('disabled', !hasSlot);
-            $('#btnPhase2').prop('disabled', !hasSlot);
-            $('#btnPhase3').prop('disabled', !hasSlot || drawerAt == 'trolley');
-            $('#btnPhase4').prop('disabled', !hasSlot);
+            let hint = '';
+            if (running && stopNow) hint = 'Stopping after the current robot step...';
+            else if (running && stopAfter) hint = 'Will stop when the drawer is back in the trolley.';
+            else if (running) hint = mode == 'one' ? 'Reading one slot.' : 'Reading every row down the column.';
+            else if (cycle != null) hint = `Stopped at step ${cycle.phase + 1}. Read One / Continue Read carries on from this step.`;
+            else if (slots.length == 0) hint = 'Select a SRMS column.';
+            else if (curIdx < 0) hint = 'No more slot to read. Change Start Row to read again.';
+            else hint = `Next: ${slots[curIdx].slotCode} (row ${slots[curIdx].rowNo}).`;
+            $('#txtHint').text(hint);
+
+            renderSteps();
         }
 
-        // ----------- Step 1 :: take drawer from trolley
-        async function takeDrawer() {
-            if (running || drawerAt != 'trolley') { return; }
+        function readTrolley() {
             const t = {
                 trolleyId: $('#selTrolley').val(),
                 trolleyCode: $('#selTrolley option:selected').text(),
@@ -808,335 +769,259 @@
                 col: Number($('#selTrolleyCol').val()),
                 row: Number($('#txtTrolleyRow').val())
             };
-            if (!t.trolleyId || !t.row) { log('Take Drawer :: Select trolley and row.', 'alert'); return; }
-
-            running = true;
-            updateUI();
-            setStatus('TAKING DRAWER', '#f59e0b');
-            log(`Take Drawer :: ${t.trolleyCode} side ${t.side} col ${t.col} row ${t.row}`, 'info');
-
-            let r = await api(`/api/PLCCalibration/RetrieveTrolley/${t.trolleyId}/${t.side}/${t.col}/${t.row}`);
-            if (!r.success) {
-                log('Take Drawer :: ' + r.errMessage, 'alert');
-                return finishRun('ERROR', '#e74c3c');
-            }
-            log('Take Drawer :: command sent', 'info');
-            pendingTake = t;
-            await delay(2000);
-            await takeStatus();
+            if (!t.trolleyId || !t.row) { log('Select trolley and trolley row.', 'alert'); return null; }
+            return t;
         }
 
-        // re-check take status only, without sending the command again
-        async function checkTakeStatus() {
-            if (running || !pendingTake) { return; }
-            running = true;
-            updateUI();
-            setStatus('TAKING DRAWER', '#f59e0b');
-            await takeStatus();
+        function newCycle(t) {
+            const s = slots[curIdx];
+            s.plcX = s.plcZ = s.diffX = s.diffZ = null;
+            setSlot(curIdx, 'busy', 'Reading');
+            cycle = { idx: curIdx, t: t, phase: 0 };
+            log(`Cycle :: ${s.slotCode} (row ${s.rowNo}) with ${t.trolleyCode} side ${t.side} col ${t.col} row ${t.row}`, 'info');
         }
 
-        async function takeStatus() {
-            log('Reading Drawer Status :: start reading ... ', 'info');
-            const r = await api('/api/PLCCalibration/GetRetrieveTrolleyStatus');
-            if (!r.success) {
-                log('Take Drawer Status :: ' + r.errMessage + ' (register ' + r.data + '). Press Check Status to read again.', 'alert');
-                return finishRun('ERROR', '#e74c3c');
-            }
-            takenFrom = pendingTake;
-            pendingTake = null;
-            drawerAt = 'robot';
-            log('Take Drawer Status :: OK, robot is holding the drawer', 'ok');
-            finishRun('HOLDING', '#2563eb');
-        }
-
-        // ----------- Step 2 :: check column
-        function startCheck() {
-            if (running || drawerAt != 'robot') { return; }
-            const from = Number($('#txtRowFrom').val() || 0);
-            const to = Number($('#txtRowTo').val() || 999999);
-            queue = [];
-            slots.forEach((s, i) => {
-                if (s.rowNo < from || s.rowNo > to) { return; }
-                if (s.state != 'skip') {
-                    s.state = 'pending'; s.result = 'Pending';
-                    s.plcX = s.plcZ = s.diffX = s.diffZ = null;
-                }
-                queue.push(i);
-            });
-            if (queue.length == 0) { log('Start Check :: No slot in that row range.', 'alert'); return; }
-            qIdx = 0;
-            phase = 0;
-            log(`Start Check :: Col ${$('#selColumn').val()}, rows ${from} - ${to}, ${queue.length} slots`, 'info');
-            runCheck();
-        }
-
-        function continueCheck() {
+        // ----------- Read One / Continue Read
+        async function startRead(m) {
             if (running) { return; }
-            if (phase == 0 && drawerAt != 'robot') { log('Continue :: Take a drawer first.', 'alert'); return; }
-            log('Continue :: from slot ' + slots[queue[qIdx]].slotCode + ', step ' + (phase + 1), 'info');
-            runCheck();
-        }
+            if (cycle == null) {
+                if (curIdx < 0) { log('No more slot to read in this column. Change Start Row.', 'alert'); return; }
+                const t = readTrolley();
+                if (!t) { return; }
+                newCycle(t);
+            } else {
+                log(`Resume :: ${slots[cycle.idx].slotCode} from step ${cycle.phase + 1} (${STEPS[cycle.phase]})`, 'info');
+            }
 
-        function requestStop() {
-            stopRequested = true;
-            log('Stop :: will stop after the current slot', 'info');
-            $('#btnStop').prop('disabled', true);
-        }
-
-        async function runCheck() {
+            mode = m;
             running = true;
-            stopRequested = false;
+            stopNow = false;
+            stopAfter = false;
+            lastError = false;
+            setStatus(m == 'one' ? 'READ ONE' : 'CONTINUE READ', '#22c55e');
             updateUI();
-            setStatus('CHECKING', '#22c55e');
 
-            while (qIdx < queue.length) {
-                const i = queue[qIdx];
-                const s = slots[i];
+            while (true) {
+                const t = cycle.t;
+                const done = await runCycle();
+                if (!done) { return; } // stopped now or error, already handled
 
-                if (s.state == 'skip') { qIdx++; phase = 0; continue; }
-                if (phase == 0 && stopRequested) { break; }
-
-                $('#txtCurSlot').text(`${s.slotCode} (row ${s.rowNo})`);
-
-                const p = phase;
-                const res = await runPhase(p);
-                if (res == 'fail') { return stopOnError(); }
-                // wait for the robot to move before reading its status
-                if (res == 'ok' && (p == 0 || p == 3)) { await delay(5000); }
+                if (curIdx < 0) { log('Column finished', 'ok'); break; }
+                if (mode == 'one') { break; }
+                if (stopAfter) { log('Stopped after cycle. Drawer is back in the trolley.', 'info'); break; }
+                if (stopNow) { log('Stopped. Drawer is back in the trolley.', 'info'); break; }
+                newCycle(t);
+                updateUI();
             }
-
-            setPhaseDots(-1, false);
-            $('#txtCurSlot').text('-');
-            const finished = qIdx >= queue.length;
-            log(finished ? 'Check :: Column finished' : 'Check :: Stopped', 'info');
-            if (finished) { queue = []; qIdx = 0; }
-
-            running = false;
-            updateUI();
-            await returnDrawer();
+            finishRun('IDLE', '#6b7280');
         }
 
-        // run one step for the current slot. 'ok' moves to the next step (or next slot after step 4),
-        // 'next' skips to the next slot, 'fail' keeps the same step so it can be retried.
-        async function runPhase(p) {
-            const i = queue[qIdx];
-            const s = slots[i];
-            phase = p;
-            setPhaseDots(p, false);
-
-            // 0 :: put drawer into slot
-            if (p == 0) {
-                setSlot(i, 'busy', 'Putting away');
-                const r = await api('/api/PLCCalibration/PutAwayRack/' + encodeURIComponent(s.slotCode));
-                if (!r.success) {
-                    setSlot(i, 'fail', 'Put away not sent');
-                    log(`Put Away :: ${s.slotCode} :: ${r.errMessage}`, 'alert');
-                    return 'fail';
+        // runs the current cycle from its phase to the end. true when the drawer is back in the trolley.
+        async function runCycle() {
+            const s = slots[cycle.idx];
+            while (cycle.phase < STEPS.length) {
+                if (stopNow) {
+                    log(`Stop Now :: stopped at step ${cycle.phase + 1} (${STEPS[cycle.phase]}) of ${s.slotCode}. Drawer is at ${drawerAt == 'rack' ? 'slot ' + drawerSlot : drawerAt}.`, 'alert');
+                    finishRun('STOPPED', '#e74c3c');
+                    return false;
                 }
-                log(`Put Away :: ${s.slotCode} :: command sent`, 'info');
-                phase = 1;
-            }
-
-            // 1 :: put away status
-            else if (p == 1) {
-                const r = await api('/api/PLCCalibration/GetPutAwayStatus');
-                if (!r.success) {
-                    if (r.data == '3') {
-                        // slot occupied, robot still holding drawer, go to next slot
-                        setSlot(i, 'fail', 'Has tray (PLC)');
-                        log(`Put Away Status :: ${s.slotCode} :: ${r.errMessage}`, 'alert');
-                        qIdx++;
-                        phase = 0;
-                        setPhaseDots(-1, false);
-                        return 'next';
-                    }
-                    setSlot(i, 'fail', 'Put away status failed');
-                    log(`Put Away Status :: ${s.slotCode} :: ${r.errMessage} (register ${r.data}). Check the robot.`, 'alert');
-                    return 'fail';
-                }
-                drawerAt = 'rack';
-                drawerSlot = s.slotCode;
-                log(`Put Away Status :: ${s.slotCode} :: OK`, 'ok');
-                phase = 2;
-            }
-
-            // 2 :: read QR pulses (not fatal)
-            else if (p == 2) {
-                const r = await api('/api/PLCTrolley/GetQRPulses/' + encodeURIComponent(s.slotCode));
-                if (r.success && r.data) {
-                    const d = r.data;
-                    s.plcX = d[0]; s.plcZ = d[1]; s.diffX = d[2]; s.diffZ = d[3]; s.dbX = d[4]; s.dbZ = d[5];
-                    if (d[0] == 0 && d[1] == 0) {
-                        log(`Read QR :: ${s.slotCode} :: PLC returned 0, read may have failed`, 'alert');
-                    } else {
-                        log(`Read QR :: ${s.slotCode} :: X ${d[0]} Z ${d[1]} (diff ${d[2]} / ${d[3]})`, 'info');
-                    }
-                } else {
-                    log(`Read QR :: ${s.slotCode} :: ${r.errMessage}`, 'alert');
-                }
-                setSlot(i, 'busy', 'Taking back');
-                phase = 3;
-            }
-
-            // 3 :: take drawer back from slot
-            else if (p == 3) {
-                const r = await api('/api/PLCCalibration/RetrieveRack/' + encodeURIComponent(s.slotCode));
-                if (!r.success) {
-                    setSlot(i, 'fail', 'Retrieve not sent');
-                    log(`Retrieve :: ${s.slotCode} :: ${r.errMessage}. Drawer is still in the slot.`, 'alert');
-                    return 'fail';
-                }
-                log(`Retrieve :: ${s.slotCode} :: command sent`, 'info');
-                phase = 4;
-            }
-
-            // 4 :: retrieve status
-            else if (p == 4) {
-                const r = await api('/api/PLCCalibration/GetRetrieveRackStatus');
-                if (!r.success) {
-                    setSlot(i, 'fail', 'Retrieve status failed');
-                    log(`Retrieve Status :: ${s.slotCode} :: ${r.errMessage} (register ${r.data}). Check whether the drawer is still in the slot.`, 'alert');
-                    return 'fail';
-                }
-                drawerAt = 'robot';
-                drawerSlot = '';
-                const limit = Number($('#txtDiffLimit').val() || 0);
-                const big = limit > 0 && s.diffX != null && (Math.abs(s.diffX) >= limit || Math.abs(s.diffZ) >= limit);
-                setSlot(i, big ? 'warn' : 'ok', big ? 'OK, check diff' : 'OK');
-                log(`Retrieve Status :: ${s.slotCode} :: OK`, 'ok');
-                qIdx++;
-                phase = 0;
-                setPhaseDots(-1, false);
+                const p = cycle.phase;
                 updateUI();
-                return 'ok';
+                const res = await runStep(p);
+                if (res == 'fail') { stopOnError(); return false; }
+                if (MOVE_DELAY[p] && cycle.phase == p + 1) { await wait(MOVE_DELAY[p]); }
             }
 
-            setPhaseDots(phase, false);
+            log(`Cycle :: ${s.slotCode} done, drawer is back in the trolley`, 'ok');
+            const next = nextReadable(cycle.idx + 1);
+            cycle = null;
+            setPointer(next);
+            renderResults();
             updateUI();
+            return true;
+        }
+
+        // run one step of the current cycle. 'ok' moves cycle.phase on, 'fail' keeps it so it can be retried.
+        async function runStep(p) {
+            const i = cycle.idx;
+            const s = slots[i];
+            const t = cycle.t;
+            const tUrl = `${t.trolleyId}/${t.side}/${t.col}/${t.row}`;
+            let r;
+
+            switch (p) {
+                // 1 :: trolley -> robot
+                case 0:
+                    r = await api('/api/PLCCalibration/RetrieveTrolley/' + tUrl);
+                    if (!r.success) { log('Retrieve Trolley :: ' + r.errMessage, 'alert'); return 'fail'; }
+                    log('Retrieve Trolley :: command sent', 'info');
+                    break;
+
+                // 2 :: retrieve trolley status
+                case 1:
+                    r = await api('/api/PLCCalibration/GetRetrieveTrolleyStatus');
+                    if (!r.success) {
+                        if (r.data == '3') {
+                            // no drawer, robot did not take anything, next try sends retrieve again
+                            cycle.phase = 0;
+                            log(`Retrieve Trolley Status :: ${r.errMessage} Put a drawer at ${t.trolleyCode} side ${t.side} col ${t.col} row ${t.row}.`, 'alert');
+                        } else {
+                            log(`Retrieve Trolley Status :: ${r.errMessage} (register ${r.data}). Check the robot.`, 'alert');
+                        }
+                        return 'fail';
+                    }
+                    drawerAt = 'robot';
+                    log('Retrieve Trolley Status :: OK, robot is holding the drawer', 'ok');
+                    break;
+
+                // 3 :: robot -> slot
+                case 2:
+                    setSlot(i, 'busy', 'Putting away');
+                    r = await api('/api/PLCCalibration/PutAwayRack/' + encodeURIComponent(s.slotCode));
+                    if (!r.success) { log(`Put Away :: ${s.slotCode} :: ${r.errMessage}`, 'alert'); return 'fail'; }
+                    log(`Put Away :: ${s.slotCode} :: command sent`, 'info');
+                    break;
+
+                // 4 :: put away status
+                case 3:
+                    r = await api('/api/PLCCalibration/GetPutAwayStatus');
+                    if (!r.success) {
+                        if (r.data == '3') {
+                            // slot occupied, robot still holding the drawer :: skip reading, bring drawer back to trolley
+                            setSlot(i, 'fail', 'Has tray (PLC)');
+                            log(`Put Away Status :: ${s.slotCode} :: ${r.errMessage} Drawer goes back to the trolley.`, 'alert');
+                            cycle.phase = 7;
+                            return 'ok';
+                        }
+                        log(`Put Away Status :: ${s.slotCode} :: ${r.errMessage} (register ${r.data}). Check the robot.`, 'alert');
+                        return 'fail';
+                    }
+                    drawerAt = 'rack';
+                    drawerSlot = s.slotCode;
+                    log(`Put Away Status :: ${s.slotCode} :: OK`, 'ok');
+                    break;
+
+                // 5 :: read QR pulses (not fatal)
+                case 4:
+                    r = await api('/api/PLCTrolley/GetQRPulses/' + encodeURIComponent(s.slotCode));
+                    if (r.success && r.data) {
+                        const d = r.data;
+                        s.plcX = d[0]; s.plcZ = d[1]; s.diffX = d[2]; s.diffZ = d[3]; s.dbX = d[4]; s.dbZ = d[5];
+                        if (d[0] == 0 && d[1] == 0) {
+                            log(`Read QR :: ${s.slotCode} :: PLC returned 0, read may have failed`, 'alert');
+                        } else {
+                            log(`Read QR :: ${s.slotCode} :: X ${d[0]} Z ${d[1]} (diff ${d[2]} / ${d[3]})`, 'info');
+                        }
+                    } else {
+                        log(`Read QR :: ${s.slotCode} :: ${r.errMessage}`, 'alert');
+                    }
+                    setSlot(i, 'busy', 'Taking back');
+                    break;
+
+                // 6 :: slot -> robot
+                case 5:
+                    r = await api('/api/PLCCalibration/RetrieveRack/' + encodeURIComponent(s.slotCode));
+                    if (!r.success) { log(`Retrieve :: ${s.slotCode} :: ${r.errMessage}. Drawer is still in the slot.`, 'alert'); return 'fail'; }
+                    log(`Retrieve :: ${s.slotCode} :: command sent`, 'info');
+                    break;
+
+                // 7 :: retrieve status
+                case 6: {
+                    r = await api('/api/PLCCalibration/GetRetrieveRackStatus');
+                    if (!r.success) {
+                        log(`Retrieve Status :: ${s.slotCode} :: ${r.errMessage} (register ${r.data}). Check whether the drawer is still in the slot.`, 'alert');
+                        return 'fail';
+                    }
+                    drawerAt = 'robot';
+                    drawerSlot = '';
+                    const limit = Number($('#txtDiffLimit').val() || 0);
+                    const big = limit > 0 && s.diffX != null && (Math.abs(s.diffX) >= limit || Math.abs(s.diffZ) >= limit);
+                    setSlot(i, big ? 'warn' : 'ok', big ? 'OK, check diff' : 'OK');
+                    log(`Retrieve Status :: ${s.slotCode} :: OK`, 'ok');
+                    break;
+                }
+
+                // 8 :: robot -> trolley
+                case 7:
+                    r = await api('/api/PLCCalibration/PutAwayTrolley/' + tUrl);
+                    if (!r.success) { log('Put Away Trolley :: ' + r.errMessage, 'alert'); return 'fail'; }
+                    log('Put Away Trolley :: command sent', 'info');
+                    break;
+
+                // 9 :: put away trolley status
+                case 8:
+                    r = await api('/api/PLCCalibration/GetPutAwayStatus');
+                    if (!r.success) {
+                        if (r.data == '3') {
+                            // trolley slot occupied, robot still holding the drawer, next try sends put away again
+                            cycle.phase = 7;
+                            log(`Put Away Trolley Status :: ${r.errMessage} Clear ${t.trolleyCode} side ${t.side} col ${t.col} row ${t.row}.`, 'alert');
+                        } else {
+                            log(`Put Away Trolley Status :: ${r.errMessage} (register ${r.data}). Check the robot.`, 'alert');
+                        }
+                        return 'fail';
+                    }
+                    drawerAt = 'trolley';
+                    log('Put Away Trolley Status :: OK', 'ok');
+                    break;
+            }
+
+            cycle.phase = p + 1;
             return 'ok';
         }
 
-        // manual :: choose the slot the step buttons work on (column from the Column list, row typed in)
-        function setManualSlot() {
-            if (running) { return; }
-            if (drawerAt == 'rack') {
-                log(`Set slot :: Drawer is still in ${drawerSlot}. Take it back first.`, 'alert');
-                return;
-            }
-            const col = $('#selColumn').val();
-            const row = Number($('#txtManualRow').val());
-            if (!col || !row) { log('Set slot :: Select a column and enter a row.', 'alert'); return; }
-
-            const idx = slots.findIndex(s => s.rowNo == row);
-            if (idx < 0) { log(`Set slot :: Row ${row} is not in column ${col}.`, 'alert'); return; }
-            const s = slots[idx];
-            if (s.state == 'skip') { log(`Set slot :: ${s.slotCode} :: ${s.result}`, 'alert'); return; }
-
-            // keep the auto queue if the slot is in it, so Continue carries on from here
-            const pos = queue.indexOf(idx);
-            if (pos >= 0) { qIdx = pos; }
-            else { queue = [idx]; qIdx = 0; }
-            phase = 0;
-            s.state = 'pending';
-            s.result = 'Pending';
-
-            $('#txtCurSlot').text(`${s.slotCode} (row ${s.rowNo})`);
-            setPhaseDots(-1, false);
-            renderResults();
+        function requestStopNow() {
+            if (!running) { return; }
+            stopNow = true;
+            log('Stop Now :: no more command will be sent after the current robot step', 'alert');
             updateUI();
-            log(`Set slot :: ${s.slotCode} (col ${col} row ${row}) is now the current slot`, 'info');
         }
 
-        // manual :: redo one step for the current slot, then stop
-        async function manualPhase(p) {
-            if (running || queue.length == 0 || qIdx >= queue.length) { return; }
-            const s = slots[queue[qIdx]];
-
-            // sending a move again is only safe when the PLC really did not get the first one
-            if (p == 0 || p == 3) {
-                const what = p == 0 ? `put the drawer into ${s.slotCode}` : `take the drawer back from ${s.slotCode}`;
-                const c = await Swal.fire({
-                    icon: 'warning',
-                    title: 'Send command again?',
-                    html: `This tells the robot to ${what} again.<br>Only do this if the robot is <b>not moving</b> and did not start the first command.`,
-                    showCancelButton: true,
-                    confirmButtonText: 'Send again',
-                    cancelButtonText: 'Cancel',
-                    confirmButtonColor: '#e74c3c'
-                });
-                if (!c.isConfirmed) { return; }
-            }
-
-            running = true;
+        function requestStopAfter() {
+            if (!running) { return; }
+            stopAfter = true;
+            log('Stop After Cycle :: will stop when the drawer is back in the trolley', 'info');
             updateUI();
-            setStatus('MANUAL STEP', '#f59e0b');
-            $('#txtCurSlot').text(`${s.slotCode} (row ${s.rowNo})`);
-            log(`Manual :: ${s.slotCode} :: step ${p + 1}`, 'info');
-
-            const res = await runPhase(p);
-            if (res == 'fail') { return stopOnError(); }
-            finishRun(qIdx < queue.length ? 'MANUAL' : 'IDLE', qIdx < queue.length ? '#f59e0b' : '#6b7280');
-            if (qIdx >= queue.length) {
-                queue = [];
-                qIdx = 0;
-                log('Check :: Column finished. Press Return Drawer.', 'info');
-                updateUI();
-            }
         }
 
         function stopOnError() {
-            setPhaseDots(phase, true);
-            log('Stopped on error. Fix the cause, then press the red step button to redo that step, or Continue to retry it automatically.', 'alert');
+            lastError = true;
+            log(`Stopped on error at step ${cycle.phase + 1} (${STEPS[cycle.phase]}). Fix the cause, then press Read One or Continue Read to retry this step.`, 'alert');
             finishRun('ERROR', '#e74c3c');
         }
 
         function finishRun(text, color) {
             running = false;
-            stopRequested = false;
+            stopNow = false;
+            stopAfter = false;
             setStatus(text, color);
             renderResults();
             updateUI();
         }
 
-        // ----------- Step 3 :: return drawer to trolley
-        async function returnDrawer() {
-            if (running || drawerAt != 'robot' || !takenFrom) { return; }
-            const t = takenFrom;
-            running = true;
-            updateUI();
-            setStatus('RETURNING', '#3b82f6');
-            log(`Return Drawer :: ${t.trolleyCode} side ${t.side} col ${t.col} row ${t.row}`, 'info');
+        // drop an unfinished cycle after the drawer has been put back by hand
+        async function resetCycle() {
+            if (running || cycle == null) { return; }
+            const t = cycle.t;
+            const c = await Swal.fire({
+                icon: 'warning',
+                title: 'Reset cycle?',
+                html: `Only do this when the drawer is back in <b>${$('<div>').text(t.trolleyCode).html()} side ${t.side} col ${t.col} row ${t.row}</b> and the robot is not holding anything.`,
+                showCancelButton: true,
+                confirmButtonText: 'Reset',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#e74c3c'
+            });
+            if (!c.isConfirmed) { return; }
 
-            let r = await api(`/api/PLCCalibration/PutAwayTrolley/${t.trolleyId}/${t.side}/${t.col}/${t.row}`);
-            if (!r.success) {
-                log('Return Drawer :: ' + r.errMessage, 'alert');
-                return finishRun('ERROR', '#e74c3c');
-            }
-            log('Return Drawer :: command sent', 'info');
-            pendingReturn = true;
-            await delay(5000);
-            await returnStatus();
-        }
-
-        // re-check return status only, without sending the command again
-        async function checkReturnStatus() {
-            if (running || !pendingReturn) { return; }
-            running = true;
-            updateUI();
-            setStatus('RETURNING', '#3b82f6');
-            await returnStatus();
-        }
-
-        async function returnStatus() {
-            const r = await api('/api/PLCCalibration/GetPutAwayStatus');
-            if (!r.success) {
-                log('Return Drawer Status :: ' + r.errMessage + ' (register ' + r.data + '). Check the robot, then press Check Status.', 'alert');
-                return finishRun('ERROR', '#e74c3c');
-            }
-            pendingReturn = false;
+            const s = slots[cycle.idx];
+            if (s.state == 'busy') { setSlot(cycle.idx, 'pending', 'Pending'); }
+            log(`Reset cycle :: ${s.slotCode} cleared at step ${cycle.phase + 1}`, 'info');
+            setPointer(cycle.idx);
+            cycle = null;
+            lastError = false;
             drawerAt = 'trolley';
-            takenFrom = null;
-            log('Return Drawer Status :: OK, drawer is back in the trolley', 'ok');
+            drawerSlot = '';
             finishRun('IDLE', '#6b7280');
         }
 
@@ -1162,7 +1047,8 @@
 
         // ----------- Current Pulses
         function showCurrentPulses() {
-            $("#txtPulseSlot").val(drawerSlot || (queue.length > 0 && qIdx < queue.length ? slots[queue[qIdx]].slotCode : ''));
+            const idx = cycle != null ? cycle.idx : curIdx;
+            $("#txtPulseSlot").val(drawerSlot || (idx >= 0 ? slots[idx].slotCode : ''));
             $('#pulsesModal').modal("show");
             loadCurrentPulses();
         }
@@ -1175,7 +1061,7 @@
                 return;
             }
             $("#pulseMsg").css("color", "#6b7280").text("Reading...");
-            const r = await api('/api/PLCTrolley/GetQRPulses/' + encodeURIComponent(slot) + '/' + (takenFrom ? takenFrom.trolleyId : 0));
+            const r = await api('/api/PLCTrolley/GetQRPulses/' + encodeURIComponent(slot) + '/' + (cycle != null ? cycle.t.trolleyId : 0));
             if (!r.success) {
                 $("#pulseMsg").css("color", "#ef4444").text(r.errMessage || "Failed to get pulses.");
                 return;
