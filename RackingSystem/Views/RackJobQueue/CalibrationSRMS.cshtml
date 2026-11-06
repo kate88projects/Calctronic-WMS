@@ -538,8 +538,6 @@
         const MOVE_DELAY = { 0: 2000, 2: 5000, 5: 5000, 7: 5000 };
         // manual buttons :: move = send command again, status = read status again, read = read QR again
         const STEP_KIND = ['move', 'status', 'move', 'status', 'read', 'move', 'status', 'move', 'status'];
-        // where the drawer must be before a move can be sent
-        const MOVE_FROM = { 0: 'trolley', 2: 'robot', 5: 'rack', 7: 'robot' };
         // one cycle :: take from trolley, read at SRMS slot, return to trolley. finished only after step 9.
         const STEP_GROUP = { 0: 'TAKE FROM TROLLEY', 2: 'SRMS SLOT', 7: 'RETURN TO TROLLEY' };
 
@@ -758,12 +756,11 @@
             renderResults();
         }
 
-        // manual step button allowed? moves only when the drawer is where that move expects it
+        // manual step buttons are open for every step when nothing is running.
+        // the PLC can be moved by hand, so the user may only need to read a status, any step, any time.
         function canManual(i) {
             if (running) return false;
-            if (cycle == null) return i == 0 && curIdx >= 0;
-            if (STEP_KIND[i] != 'move') return true;
-            return drawerAt == MOVE_FROM[i];
+            return cycle != null || curIdx >= 0;
         }
 
         function renderSteps() {
@@ -922,7 +919,7 @@
                 const c = await Swal.fire({
                     icon: 'warning',
                     title: 'Send command again?',
-                    html: `This tells the robot to do <b>${STEPS[p]}</b>.<br>Only do this if the robot is <b>not moving</b> and did not start the first command.`,
+                    html: `This tells the robot to do <b>${STEPS[p]}</b>.<br>Page shows drawer is at: <b>${$('#drawerAtText').text()}</b><br>Only do this if the robot is <b>not moving</b> and the drawer is really where this move expects it.`,
                     showCancelButton: true,
                     confirmButtonText: 'Send',
                     cancelButtonText: 'Cancel',
