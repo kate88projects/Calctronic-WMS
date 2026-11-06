@@ -537,6 +537,8 @@
         const STEP_KIND = ['move', 'status', 'move', 'status', 'read', 'move', 'status', 'move', 'status'];
         // where the drawer must be before a move can be sent
         const MOVE_FROM = { 0: 'trolley', 2: 'robot', 5: 'rack', 7: 'robot' };
+        // one cycle :: take from trolley, read at SRMS slot, return to trolley. finished only after step 9.
+        const STEP_GROUP = { 0: 'TAKE FROM TROLLEY', 2: 'SRMS SLOT', 7: 'RETURN TO TROLLEY' };
 
         // where the drawer is :: 'trolley', 'robot', 'rack' (inside slot)
         let drawerAt = 'trolley';
@@ -743,6 +745,9 @@
                 }
                 const color = i == p ? '#1f2937' : '#64748b';
                 const btnText = { move: 'Send again', status: 'Check again', read: 'Read again' }[STEP_KIND[i]];
+                if (STEP_GROUP[i]) {
+                    html += `<div class="text-xs font-semibold mono ${i > 0 ? 'mt-1.5' : ''}" style="color:#9ca3af;">${STEP_GROUP[i]}</div>`;
+                }
                 html += `<div class="flex items-center gap-2">
                     <div class="step-dot ${cls}" style="${style}"></div>
                     <span class="text-xs flex-1" style="color:${color};${i == p ? 'font-weight:600;' : ''}">${i + 1}. ${label}</span>
@@ -799,8 +804,8 @@
         function newCycle(t) {
             const s = slots[curIdx];
             s.plcX = s.plcZ = s.diffX = s.diffZ = null;
-            setSlot(curIdx, 'busy', 'Reading');
-            cycle = { idx: curIdx, t: t, phase: 0 };
+            setSlot(curIdx, 'busy', 'Taking from trolley');
+            cycle = { idx: curIdx, t: t, phase: 0, result: null };
             log(`Cycle :: ${s.slotCode} (row ${s.rowNo}) with ${t.trolleyCode} side ${t.side} col ${t.col} row ${t.row}`, 'info');
         }
 
@@ -960,7 +965,8 @@
                     if (!r.success) {
                         if (r.data == '3') {
                             // slot occupied, robot still holding the drawer :: skip reading, bring drawer back to trolley
-                            setSlot(i, 'fail', 'Has tray (PLC)');
+                            cycle.result = { state: 'fail', text: 'Has tray (PLC)' };
+                            setSlot(i, 'busy', 'Has tray, returning to trolley');
                             log(`Put Away Status :: ${s.slotCode} :: ${r.errMessage} Drawer goes back to the trolley.`, 'alert');
                             cycle.phase = 7;
                             return 'ok';
@@ -1008,7 +1014,9 @@
                     drawerSlot = '';
                     const limit = Number($('#txtDiffLimit').val() || 0);
                     const big = limit > 0 && s.diffX != null && (Math.abs(s.diffX) >= limit || Math.abs(s.diffZ) >= limit);
-                    setSlot(i, big ? 'warn' : 'ok', big ? 'OK, check diff' : 'OK');
+                    // result is final only when the drawer is back in the trolley (step 9)
+                    cycle.result = big ? { state: 'warn', text: 'OK, check diff' } : { state: 'ok', text: 'OK' };
+                    setSlot(i, 'busy', 'Returning to trolley');
                     log(`Retrieve Status :: ${s.slotCode} :: OK`, 'ok');
                     break;
                 }
@@ -1021,7 +1029,7 @@
                     break;
 
                 // 9 :: put away trolley status
-                case 8:
+                case 8: {
                     r = await api('/api/PLCCalibration/GetPutAwayStatus');
                     if (!r.success) {
                         if (r.data == '3') {
@@ -1034,8 +1042,11 @@
                         return 'fail';
                     }
                     drawerAt = 'trolley';
+                    const res = cycle.result || { state: 'fail', text: 'No reading' };
+                    setSlot(i, res.state, res.text);
                     log('Put Away Trolley Status :: OK', 'ok');
                     break;
+                }
             }
 
             cycle.phase = p + 1;
