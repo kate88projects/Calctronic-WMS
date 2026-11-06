@@ -1599,36 +1599,37 @@ namespace RackingSystem.Controllers.API
 
                 PLCLogHelper.Instance.InsertPLCLoaderLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
 
-                int startAddress = 4223;
+                // 261105 - hide
+                //int startAddress = 4223;
+                //int numRegisters = 1;
+
+                //while (!exit)
+                //{
+                //    int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
+                //    for (int i = 0; i < registers.Length; i++)
+                //    {
+                //        value = registers[i];
+                //    }
+                //    PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress, "Read", value, methodName, false);
+
+                //    if (value > 0)
+                //    {
+                //        exit = true;
+                //        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
+                //    }
+                //    if ((DateTime.Now - dtRun).TotalSeconds > 3)
+                //    {
+                //        //result.errMessage = "Timeout. Cannot get Status.";
+                //        exit = true;
+                //        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
+                //    }
+                //}
+
+                //if (value > 0)
+                //{
+                // first addr
+                int startAddress = 4208;
                 int numRegisters = 1;
-
-                while (!exit)
-                {
-                    int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
-                    for (int i = 0; i < registers.Length; i++)
-                    {
-                        value = registers[i];
-                    }
-                    PLCLogHelper.Instance.InsertPLCAddressResponse(_dbContext, startAddress, "Read", value, methodName, false);
-
-                    if (value > 0)
-                    {
-                        exit = true;
-                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
-                    }
-                    if ((DateTime.Now - dtRun).TotalSeconds > 3)
-                    {
-                        //result.errMessage = "Timeout. Cannot get Status.";
-                        exit = true;
-                        PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, $"Register {startAddress} : {value}", "", false);
-                    }
-                }
-
-                if (value > 0)
-                {
-                    // first addr
-                    startAddress = 4208;
-                    numRegisters = 1;
                     int[] registers = modbusClient.ReadHoldingRegisters(startAddress, numRegisters);
                     for (int i = 0; i < registers.Length; i++)
                     {
@@ -1709,7 +1710,7 @@ namespace RackingSystem.Controllers.API
 
                     }
 
-                }
+                //}
 
             }
             catch (Exception ex)
@@ -1826,6 +1827,7 @@ namespace RackingSystem.Controllers.API
 
                 PLCLogHelper.Instance.InsertPLCTrolleyLog(_dbContext, 0, methodName, "Connected to Delta PLC.", "", false);
 
+                // 261105 - hide
                 //int startAddress = 4223;
                 //int numRegisters = 1;
 

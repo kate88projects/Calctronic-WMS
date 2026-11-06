@@ -1,0 +1,1258 @@
+@{
+    Layout = "~/Views/Shared/_LayoutEmpty.cshtml";
+}
+
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Outfit', sans-serif;
+        margin: 0;
+    }
+
+    .tray {
+        width: 56px;
+        height: 18px;
+        border-radius: 3px;
+        border: 1.5px solid rgba(0,0,0,0.15);
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .arm {
+      transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .gripper {
+      transition: all 0.3s ease;
+    }
+
+    @@keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 8px rgba(34,197,94,0.3); }
+      50% { box-shadow: 0 0 20px rgba(34,197,94,0.6); }
+    }
+
+    .status-active {
+      animation: pulse-glow 1.5s ease-in-out infinite;
+    }
+
+    @@keyframes slideIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .log-entry {
+        animation: slideIn 0.3s ease;
+    }
+
+    .mono {
+        font-family: 'JetBrains Mono', monospace;
+    }
+
+    /*.rack-slot {
+        width: 62px;
+        height: 22px;
+        border: 1.5px dashed rgba(0,0,0,0.1);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .rack-slot:hover {
+        border-color: #3b82f6;
+        box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+    }
+
+    .rack-slot.rack-selected {
+        border-color: #10b981;
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+        background: rgba(16, 185, 129, 0.08);
+    } */
+
+    .rack-selected {
+        border-color: #10b981;
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+        background: rgba(16, 185, 129, 0.08);
+    }
+
+    .trolley-slot {
+        width: 62px;
+        height: 22px;
+        border: 1.5px dashed rgba(0,0,0,0.1);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .trolley-slot:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+        }
+
+        .trolley-slot.empty-selected {
+            border-color: #10b981;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+            background: rgba(16, 185, 129, 0.08);
+        }
+
+    .tray.empty-selected {
+        background-color: #10b981;
+    }
+
+    .scene-container {
+        position: relative;
+        width: 100%;
+        height: 280px;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .rack-section, .trolley-column {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5px;
+        align-items: center;
+    }
+
+    .trolley-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5px;
+        padding: 8px;
+        background: rgba(243, 244, 246, 0.6);
+        border-radius: 8px;
+        width: fit-content;
+    }
+
+    .rack-selector, .trolley-target {
+        cursor: pointer;
+        border: 2px solid transparent;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        padding: 8px;
+    }
+
+        .rack-selector:hover {
+            border-color: #d1d5db;
+            background: rgba(209, 213, 219, 0.15);
+        }
+
+        .rack-selector.selected {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+        }
+
+    .trolley-target {
+        position: relative;
+    }
+
+        .trolley-target::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .trolley-target:hover::after {
+            border-color: #3b82f6;
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.2);
+        }
+
+        .trolley-target.target-selected::after {
+            border-color: #10b981;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+            background: rgba(16, 185, 129, 0.08);
+        }
+
+    .step-line::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 32px;
+        bottom: -8px;
+        width: 2px;
+        background: lightgrey; /* #1e293b; */
+    }
+
+    .step-line:last-child::before {
+        display: none;
+    }
+
+    .step-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid lightgrey; /* #334155; */
+        background: lightgrey; /* #0f172a; */
+        flex-shrink: 0;
+        transition: all 0.3s;
+        position: relative;
+        z-index: 2;
+    }
+
+        .step-dot.active {
+            border-color: #22c55e;
+            background: #22c55e;
+            box-shadow: 0 0 10px rgba(34,197,94,0.5);
+        }
+
+        .step-dot.done {
+            border-color: #22c55e;
+            background: #22c55e;
+        }
+
+        .step-dot.waiting {
+            border-color: lightgrey; /* #475569; */
+            background: lightgrey; /* #1e293b; */
+        }
+
+    .status-badge {
+        font-size: 10px;
+        padding: 2px 8px;
+        border-radius: 9999px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .badge-idle {
+        background: #1e293b;
+        color: #64748b;
+    }
+
+    .badge-running {
+        background: #052e16;
+        color: #4ade80;
+    }
+
+    .badge-done {
+        background: #022c22;
+        color: #34d399;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .fade-out {
+        opacity: 0;
+        /* This transition duration should match the delay in the JavaScript setTimeout */
+        transition: opacity 0.5s ease-out;
+    }
+
+    .trolley-selected {
+        border-color: #10b981;
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+        background: rgba(16, 185, 129, 0.08);
+    }
+
+    .selected {
+        border-color: #10b981;
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+        background: rgba(16, 185, 129, 0.08);
+    }
+
+    #start-btn:disabled {
+        background-color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #stop-btn:disabled {
+        background-color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #cont-btn:disabled {
+        background-color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnRetrieveStart:disabled {
+        background-color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnPutawayStart:disabled {
+        background-color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnR1:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+    #btnR2:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnR3:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnPA1:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnPA2:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+
+    #btnPA3:disabled {
+        color: darkgray !important;
+        cursor: not-allowed;
+    }
+    .phase-btn:disabled,
+    #btnTakeStatus:disabled,
+    #btnReturnStatus:disabled {
+        color: darkgray !important;
+        border-color: #e5e7eb !important;
+        cursor: not-allowed;
+    }
+</style>
+
+<input type="hidden" id="xToken" value="@ViewBag.xToken" autocomplete="off">
+<input type="hidden" id="xDeviceId" value="@ViewBag.DeviceId" autocomplete="off">
+
+<div id="app" class="h-full w-full overflow-auto" style="background: #f8f9fa;">
+    <!-- Title -->
+    <header class="px-6 py-4 flex items-center justify-between border-b" style="border-color: #e5e7eb;">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: #6366f1;">
+                <i class="bi-rulers" style="width:20px;height:20px;color:#fff;"></i>
+            </div>
+            <div>
+                <h1 id="pageTitle" class="text-lg font-bold" style="color:#1f2937;">Calibration SRMS</h1>
+                <p id="statusLabel" class="text-xs mono" style="color:#6b7280;">Put away and retrieve a drawer at every slot of one SRMS column</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="@Url.Action("RackJobQueueList", "RackJobQueue")" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;text-decoration:none;">
+                <i class="bi-arrow-left" style="width:12px;height:12px;"></i> Queue
+            </a>
+            <button id="addressLogBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;" onclick="showAddressResponseLog()">
+                <i class="bi-cpu" style="width:12px;height:12px;"></i> PLC Address Log
+            </button>
+            <button id="btnCurrentPulses" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;" onclick="showCurrentPulses()">
+                <i class="bi-crosshair" style="width:12px;height:12px;"></i> Current Pulses
+            </button>
+            <div id="statusBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mono" style="background:#f3f4f6;color:#6b7280;">
+                <span id="statusDot" class="w-2 h-2 rounded-full" style="background:#6b7280;"></span> <span id="statusText">IDLE</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Body -->
+    <div class="p-6">
+        <div class="grid gap-4" style="grid-template-columns: minmax(320px, 2fr) 3fr;">
+
+            <!-- Left: Steps -->
+            <div class="flex flex-col gap-4" style="min-width:0;">
+
+                <!-- Drawer location -->
+                <div class="rounded-xl px-6 py-3 flex items-center justify-between" style="background:#fff;border:1px solid #e5e7eb;">
+                    <span class="text-xs font-semibold" style="color:#4b5563;">Drawer is at</span>
+                    <span id="drawerAtText" class="text-sm font-bold mono" style="color:#6b7280;">Trolley (not taken)</span>
+                </div>
+
+                <!-- Step 1 -->
+                <div class="rounded-xl p-6" style="background:#fff;border:1px solid #e5e7eb;">
+                    <h2 class="text-xs font-semibold mb-3 flex items-center gap-2" style="color:#4b5563;">
+                        <i class="bi-1-circle" style="width:14px;height:14px;"></i> Take drawer from trolley
+                    </h2>
+                    <div class="grid gap-2" style="grid-template-columns: auto 1fr;">
+                        <label for="selTrolley" class="text-xs font-semibold" style="color:#4b5563;align-self:center;">Trolley</label>
+                        <select id="selTrolley" class="px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;"></select>
+
+                        <label for="selSide" class="text-xs font-semibold" style="color:#4b5563;align-self:center;">Side</label>
+                        <select id="selSide" class="px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;">
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                        </select>
+
+                        <label for="selTrolleyCol" class="text-xs font-semibold" style="color:#4b5563;align-self:center;">Trolley Col</label>
+                        <select id="selTrolleyCol" class="px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;">
+                            <option value="1">1 - Left</option>
+                            <option value="2">2 - Center</option>
+                            <option value="3">3 - Right</option>
+                        </select>
+
+                        <label for="txtTrolleyRow" class="text-xs font-semibold" style="color:#4b5563;align-self:center;">Trolley Row</label>
+                        <input type="number" id="txtTrolleyRow" min="1" value="1" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;">
+                    </div>
+                    <div class="flex gap-2 mt-3">
+                        <button id="btnTake" onclick="takeDrawer()" class="px-3 py-1.5 rounded-lg text-xs font-semibold" style="background:#16a34a;color:#fff;">
+                            <i class="bi-box-arrow-in-down" style="width:12px;height:12px;"></i> Take Drawer
+                        </button>
+                        <button id="btnTakeStatus" onclick="checkTakeStatus()" class="px-3 py-1.5 rounded-lg text-xs font-semibold" style="background:#fff;color:#ef4444;border:1px solid #fecaca;" disabled>
+                            <i class="bi-arrow-repeat" style="width:12px;height:12px;"></i> Check Status
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="rounded-xl p-6" style="background:#fff;border:1px solid #e5e7eb;">
+                    <h2 class="text-xs font-semibold mb-3 flex items-center gap-2" style="color:#4b5563;">
+                        <i class="bi-2-circle" style="width:14px;height:14px;"></i> Check SRMS column
+                    </h2>
+                    <div class="grid gap-2" style="grid-template-columns: auto 1fr;">
+                        <label for="selColumn" class="text-xs font-semibold" style="color:#4b5563;align-self:center;">Column</label>
+                        <select id="selColumn" class="px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;" onchange="loadColumn()"></select>
+
+                        <label for="txtRowFrom" class="text-xs font-semibold" style="color:#4b5563;align-self:center;">Row from / to</label>
+                        <div class="flex gap-2">
+                            <input type="number" id="txtRowFrom" min="1" placeholder="First" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;width:50%;">
+                            <input type="number" id="txtRowTo" min="1" placeholder="Last" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;width:50%;">
+                        </div>
+
+                        <label for="txtDiffLimit" class="text-xs font-semibold" style="color:#4b5563;align-self:center;">Highlight diff ≥</label>
+                        <input type="number" id="txtDiffLimit" min="0" value="10" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;" onchange="renderResults()">
+                    </div>
+                    <p class="text-xs mt-2" style="color:#6b7280;">Slots that are inactive or already have a reel or tray are skipped.</p>
+                    <div class="flex flex-wrap gap-2 mt-3">
+                        <button id="btnStart" onclick="startCheck()" class="px-3 py-1.5 rounded-lg text-xs font-semibold" style="background:#16a34a;color:#fff;">
+                            <i class="bi-play-fill" style="width:12px;height:12px;"></i> Start Check
+                        </button>
+                        <button id="btnContinue" onclick="continueCheck()" class="px-3 py-1.5 rounded-lg text-xs font-semibold hidden" style="background:#f59e0b;color:#fff;">
+                            <i class="bi-arrow-repeat" style="width:12px;height:12px;"></i> Continue
+                        </button>
+                        <button id="btnStop" onclick="requestStop()" class="px-3 py-1.5 rounded-lg text-xs font-semibold" style="background:#e74c3c;color:#fff;" disabled>
+                            <i class="bi-stop-fill" style="width:12px;height:12px;"></i> Stop after this slot
+                        </button>
+                    </div>
+
+                    <!-- current slot progress -->
+                    <div class="mt-4 pt-3" style="border-top:1px solid #e2e8f0;">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-semibold" style="color:#4b5563;">Current slot</span>
+                            <span id="txtCurSlot" class="text-xs font-bold mono" style="color:#1f2937;">-</span>
+                        </div>
+                        <div class="flex items-center gap-2 mb-3">
+                            <label for="txtManualRow" class="text-xs" style="color:#6b7280;white-space:nowrap;">Manual: Column above, Row</label>
+                            <input type="number" id="txtManualRow" min="1" placeholder="Row" autocomplete="off" class="px-2.5 py-1 rounded-lg text-xs border" style="border-color:#e5e7eb;width:80px;">
+                            <button id="btnSetSlot" onclick="setManualSlot()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;" disabled>Set slot</button>
+                        </div>
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex items-center gap-2"><div class="step-dot waiting" id="pDot0"></div><span class="text-xs flex-1" style="color:#64748b;">Put drawer into slot</span><button id="btnPhase0" onclick="manualPhase(0)" class="phase-btn px-3 py-1 rounded text-xs font-semibold" style="background:#fff;color:#ef4444;border:1px solid #fecaca;" disabled>Send again</button></div>
+                            <div class="flex items-center gap-2"><div class="step-dot waiting" id="pDot1"></div><span class="text-xs flex-1" style="color:#64748b;">* Put Away Status *</span><button id="btnPhase1" onclick="manualPhase(1)" class="phase-btn px-3 py-1 rounded text-xs font-semibold" style="background:#fff;color:#ef4444;border:1px solid #fecaca;" disabled>Check again</button></div>
+                            <div class="flex items-center gap-2"><div class="step-dot waiting" id="pDot2"></div><span class="text-xs flex-1" style="color:#64748b;">Read QR pulses</span><button id="btnPhase2" onclick="manualPhase(2)" class="phase-btn px-3 py-1 rounded text-xs font-semibold" style="background:#fff;color:#ef4444;border:1px solid #fecaca;" disabled>Read again</button></div>
+                            <div class="flex items-center gap-2"><div class="step-dot waiting" id="pDot3"></div><span class="text-xs flex-1" style="color:#64748b;">Take drawer back</span><button id="btnPhase3" onclick="manualPhase(3)" class="phase-btn px-3 py-1 rounded text-xs font-semibold" style="background:#fff;color:#ef4444;border:1px solid #fecaca;" disabled>Send again</button></div>
+                            <div class="flex items-center gap-2"><div class="step-dot waiting" id="pDot4"></div><span class="text-xs flex-1" style="color:#64748b;">* Retrieve Status *</span><button id="btnPhase4" onclick="manualPhase(4)" class="phase-btn px-3 py-1 rounded text-xs font-semibold" style="background:#fff;color:#ef4444;border:1px solid #fecaca;" disabled>Check again</button></div>
+                        </div>
+                        <p class="text-xs mt-2" style="color:#6b7280;">Buttons redo one step for the current slot only. Press Continue to go back to automatic.</p>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="rounded-xl p-6" style="background:#fff;border:1px solid #e5e7eb;">
+                    <h2 class="text-xs font-semibold mb-3 flex items-center gap-2" style="color:#4b5563;">
+                        <i class="bi-3-circle" style="width:14px;height:14px;"></i> Return drawer to trolley
+                    </h2>
+                    <p class="text-xs" style="color:#6b7280;">Runs by itself when the column is finished or stopped. Use the button only if it did not.</p>
+                    <div class="flex gap-2 mt-3">
+                        <button id="btnReturn" onclick="returnDrawer()" class="px-3 py-1.5 rounded-lg text-xs font-semibold" style="background:#3b82f6;color:#fff;" disabled>
+                            <i class="bi-box-arrow-up" style="width:12px;height:12px;"></i> Return Drawer
+                        </button>
+                        <button id="btnReturnStatus" onclick="checkReturnStatus()" class="px-3 py-1.5 rounded-lg text-xs font-semibold" style="background:#fff;color:#ef4444;border:1px solid #fecaca;" disabled>
+                            <i class="bi-arrow-repeat" style="width:12px;height:12px;"></i> Check Status
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Results + Log -->
+            <div class="flex flex-col gap-4" style="min-width:0;">
+                <div class="rounded-xl p-6" style="background:#fff;border:1px solid #e5e7eb;">
+                    <div class="flex items-center justify-between mb-2">
+                        <h2 class="text-xs font-semibold flex items-center gap-2" style="color:#4b5563;">
+                            <i class="bi-table" style="width:14px;height:14px;"></i> Results <span id="txtSummary" class="mono" style="color:#9ca3af;font-weight:400;"></span>
+                        </h2>
+                        <button onclick="exportResults()" class="px-2 py-1 rounded text-xs font-semibold" style="background:#f3f4f6;color:#374151;">
+                            <i class="bi-download" style="width:12px;height:12px;"></i> Export
+                        </button>
+                    </div>
+                    <div style="overflow:auto;max-height:28rem;">
+                        <table class="w-full text-xs mono" style="border-collapse:collapse;">
+                            <thead style="position:sticky;top:0;background:#fff;">
+                                <tr style="color:#6b7280;border-bottom:1px solid #e5e7eb;">
+                                    <th class="text-left py-1 pr-2">Row</th>
+                                    <th class="text-left py-1 pr-2">Slot</th>
+                                    <th class="text-left py-1 pr-2">Result</th>
+                                    <th class="text-right py-1 pr-2">PLC X</th>
+                                    <th class="text-right py-1 pr-2">PLC Z</th>
+                                    <th class="text-right py-1 pr-2">DB X</th>
+                                    <th class="text-right py-1 pr-2">DB Z</th>
+                                    <th class="text-right py-1 pr-2">Diff X</th>
+                                    <th class="text-right py-1">Diff Z</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultBody">
+                                <tr><td colspan="9" class="py-2" style="color:#9ca3af;">Select a column.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="rounded-xl p-6 flex flex-col" style="background:#fff;border:1px solid #e5e7eb;">
+                    <h2 class="text-xs font-semibold mb-2 flex items-center gap-2" style="color:#4b5563;"><i class="bi-terminal" style="width:14px;height:14px;"></i> Activity Log</h2>
+                    <div id="logList" class="space-y-1 overflow-y-auto text-xs mono" style="max-height: 18rem;">
+                        <div class="log-entry text-xs" style="color:#64748b;">[System ready]</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="pulsesModal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Current Pulses</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="flex items-center gap-2 mb-3">
+                    <input type="text" id="txtPulseSlot" placeholder="Slot Code" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="width: 40%;">
+                    <button class="px-2 py-1 rounded text-xs font-semibold" style="background:#3b82f6;color:#fff;" onclick="loadCurrentPulses()">
+                        <i class="bi-arrow-clockwise" style="width:12px;height:12px;"></i> Read
+                    </button>
+                </div>
+                <table class="w-full text-xs mono">
+                    <thead>
+                        <tr style="color:#6b7280;border-bottom:1px solid #e5e7eb;">
+                            <th class="text-left py-1"></th>
+                            <th class="text-right py-1">PLC (Current)</th>
+                            <th class="text-right py-1">Slot (DB)</th>
+                            <th class="text-right py-1">Difference</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="py-1 font-semibold">X</td>
+                            <td class="text-right py-1" id="pulsePlcX">-</td>
+                            <td class="text-right py-1" id="pulseSlotX">-</td>
+                            <td class="text-right py-1 font-semibold" id="pulseDiffX">-</td>
+                        </tr>
+                        <tr>
+                            <td class="py-1 font-semibold">Y</td>
+                            <td class="text-right py-1" id="pulsePlcY">-</td>
+                            <td class="text-right py-1" id="pulseSlotY">-</td>
+                            <td class="text-right py-1 font-semibold" id="pulseDiffY">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="text-xs mt-2" id="pulseMsg" style="color:#ef4444;"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PLC Address Response Log Side Panel -->
+<div id="addressLogOverlay" class="hidden" style="position:fixed;inset:0;background:rgba(15,23,42,0.35);z-index:1040;" onclick="hideAddressResponseLog()"></div>
+<div id="addressLogPanel" style="position:fixed;top:0;right:-420px;width:420px;height:100vh;background:#fff;box-shadow:-8px 0 24px rgba(0,0,0,0.12);z-index:1050;transition:right 0.3s ease;display:flex;flex-direction:column;">
+    <div class="px-4 py-3 flex items-center justify-between border-b" style="border-color:#e5e7eb;">
+        <h2 class="text-sm font-bold flex items-center gap-2" style="color:#1f2937;">
+            <i class="bi-cpu" style="width:14px;height:14px;"></i> PLC Address Response Log
+        </h2>
+        <div class="flex items-center gap-2">
+            <button class="px-2 py-1 rounded text-xs font-semibold" style="background:#f3f4f6;color:#374151;" onclick="loadAddressResponseLog()">
+                <i class="bi-arrow-clockwise" style="width:12px;height:12px;"></i> Refresh
+            </button>
+            <button class="btn-close" aria-label="Close" onclick="hideAddressResponseLog()"></button>
+        </div>
+    </div>
+    <div class="px-4 py-2 text-xs mono" style="color:#9ca3af;border-bottom:1px solid #e5e7eb;">
+        Sorted by most recent reading. Rows updated in the last 5s are highlighted.
+    </div>
+    <div id="addressLogList" class="flex-1" style="overflow-y:auto;padding:8px 12px;">
+        <div class="text-xs" style="color:#9ca3af;">Loading...</div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script src="../js/lucide.min.js"></script>
+    <link href="../css/jetbrains.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/sweetalert2.min.css">
+
+    <script src="../lib/jquery/dist/jquery.min.js"></script>
+    <script src="../js/sweetalert2.all.min.js"></script>
+    <script src="~/js/xlsx.full.min.js"></script>
+
+    <script type="text/javascript">
+
+        let token = '';
+
+        // where the drawer is :: 'trolley' (not taken / returned), 'robot', 'rack' (inside slot)
+        let drawerAt = 'trolley';
+        let drawerSlot = '';
+        let takenFrom = null;   // { trolleyId, trolleyCode, side, col, row }
+        let pendingTake = null; // take command sent, status not yet OK
+        let pendingReturn = false; // return command sent, status not yet OK
+
+        let slots = [];         // column slots with result
+        let queue = [];         // indexes of slots to check
+        let qIdx = 0;
+        let phase = 0;          // 0 put, 1 put status, 2 read QR, 3 retrieve, 4 retrieve status
+        let running = false;
+        let stopRequested = false;
+
+        $(document).ready(async function () {
+            token = $('#xToken').val();
+            await loadTrolleys();
+            await loadColumns();
+            updateUI();
+        });
+
+        window.addEventListener('beforeunload', function (e) {
+            if (drawerAt != 'trolley' || running) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function api(url) {
+            try {
+                return await $.ajax({
+                    url: url,
+                    type: 'GET',
+                    headers: { 'Authorization': 'Bearer ' + token },
+                    dataType: 'JSON',
+                    contentType: 'application/json; charset=utf-8'
+                });
+            }
+            catch (error) {
+                return { success: false, errMessage: 'Request failed (' + (error.status || 'network') + ').', data: null };
+            }
+        }
+
+        function log(msg, typ) {
+            const list = document.getElementById('logList');
+            const d = document.createElement('div');
+            d.className = 'log-entry';
+            const ts = new Date().toLocaleTimeString('en', { hour12: false });
+            const color = typ == 'alert' ? '#e74c3c' : (typ == 'ok' ? '#059669' : '#374151');
+            d.innerHTML = `<span style="color:#475569">[${ts}]</span> <span style="color:${color}">${$('<div>').text(msg).html()}</span>`;
+            list.prepend(d);
+            if (list.children.length > 200) list.lastChild.remove();
+        }
+
+        function setStatus(text, color) {
+            document.getElementById('statusText').textContent = text;
+            document.getElementById('statusDot').style.background = color;
+        }
+
+        // ----------- Load lists
+        async function loadTrolleys() {
+            const r = await api('/api/PLCCalibration/GetTrolleys');
+            const sel = $('#selTrolley').empty();
+            if (r.success) {
+                r.data.forEach(t => sel.append(`<option value="${t.trolley_Id}">${$('<div>').text(t.trolleyCode).html()}</option>`));
+            }
+        }
+
+        async function loadColumns() {
+            const r = await api('/api/PLCCalibration/GetColumns');
+            const sel = $('#selColumn').empty();
+            sel.append('<option value="">-- Select --</option>');
+            if (r.success) {
+                r.data.forEach(c => sel.append(`<option value="${c.colNo}">Col ${c.colNo} (${c.isLeft ? 'Left' : 'Right'}, ${c.totalSlot} slots)</option>`));
+            }
+        }
+
+        async function loadColumn() {
+            if (running) { return; }
+            const col = $('#selColumn').val();
+            slots = [];
+            queue = [];
+            qIdx = 0;
+            phase = 0;
+            if (!col) { renderResults(); updateUI(); return; }
+
+            const r = await api('/api/PLCCalibration/GetColumnSlots/' + col);
+            if (!r.success) { log('Load column :: ' + r.errMessage, 'alert'); return; }
+
+            slots = r.data.map(s => {
+                let skip = '';
+                if (!s.isActive) skip = 'Skipped: inactive';
+                else if (s.hasReel) skip = 'Skipped: has reel';
+                else if (s.hasEmptyTray) skip = 'Skipped: has tray';
+                return { ...s, result: skip || 'Pending', state: skip ? 'skip' : 'pending', plcX: null, plcZ: null, dbX: s.qrxPulse, dbZ: s.qryPulse, diffX: null, diffZ: null };
+            });
+            if (slots.length > 0) {
+                $('#txtRowFrom').val(slots[0].rowNo);
+                $('#txtRowTo').val(slots[slots.length - 1].rowNo);
+            }
+            renderResults();
+            updateUI();
+        }
+
+        // ----------- Results
+        function renderResults() {
+            const body = document.getElementById('resultBody');
+            if (slots.length == 0) {
+                body.innerHTML = '<tr><td colspan="9" class="py-2" style="color:#9ca3af;">Select a column.</td></tr>';
+                $('#txtSummary').text('');
+                return;
+            }
+            const limit = Number($('#txtDiffLimit').val() || 0);
+            const curIdx = queue.length > 0 && qIdx < queue.length ? queue[qIdx] : -1;
+            let html = '';
+            slots.forEach((s, i) => {
+                const colors = { pending: '#9ca3af', skip: '#9ca3af', ok: '#059669', warn: '#b45309', fail: '#e74c3c', busy: '#2563eb' };
+                const bg = i == curIdx ? '#eff6ff' : 'transparent';
+                const big = v => v != null && limit > 0 && Math.abs(v) >= limit;
+                const cell = v => v == null ? '-' : v;
+                html += `<tr id="res${i}" style="border-bottom:1px solid #f1f5f9;background:${bg};">
+                    <td class="py-1 pr-2">${s.rowNo}</td>
+                    <td class="py-1 pr-2">${$('<div>').text(s.slotCode).html()}</td>
+                    <td class="py-1 pr-2" style="color:${colors[s.state]};">${$('<div>').text(s.result).html()}</td>
+                    <td class="py-1 pr-2 text-right">${cell(s.plcX)}</td>
+                    <td class="py-1 pr-2 text-right">${cell(s.plcZ)}</td>
+                    <td class="py-1 pr-2 text-right">${cell(s.dbX)}</td>
+                    <td class="py-1 pr-2 text-right">${cell(s.dbZ)}</td>
+                    <td class="py-1 pr-2 text-right" style="${big(s.diffX) ? 'color:#b45309;font-weight:700;' : ''}">${cell(s.diffX)}</td>
+                    <td class="py-1 text-right" style="${big(s.diffZ) ? 'color:#b45309;font-weight:700;' : ''}">${cell(s.diffZ)}</td>
+                </tr>`;
+            });
+            body.innerHTML = html;
+
+            const done = slots.filter(s => s.state == 'ok' || s.state == 'warn').length;
+            const fail = slots.filter(s => s.state == 'fail').length;
+            const skip = slots.filter(s => s.state == 'skip').length;
+            $('#txtSummary').text(`${done} checked · ${fail} failed · ${skip} skipped · ${slots.length} slots`);
+
+            if (curIdx >= 0) {
+                const row = document.getElementById('res' + curIdx);
+                if (row) row.scrollIntoView({ block: 'nearest' });
+            }
+        }
+
+        function setSlot(i, state, result) {
+            slots[i].state = state;
+            slots[i].result = result;
+            renderResults();
+        }
+
+        function setPhaseDots(p, failed) {
+            for (let i = 0; i <= 4; i++) {
+                const dot = document.getElementById('pDot' + i);
+                if (p < 0) dot.className = 'step-dot waiting';
+                else if (i < p) dot.className = 'step-dot done';
+                else if (i == p) dot.className = failed ? 'step-dot waiting' : 'step-dot active';
+                else dot.className = 'step-dot waiting';
+                if (i == p && failed) dot.style.background = '#e74c3c'; else dot.style.background = '';
+            }
+        }
+
+        // ----------- UI state
+        function updateUI() {
+            const atText = { trolley: 'Trolley', robot: 'Robot (holding)', rack: 'Rack slot ' + drawerSlot }[drawerAt];
+            const atColor = { trolley: '#6b7280', robot: '#2563eb', rack: '#b45309' }[drawerAt];
+            $('#drawerAtText').text(drawerAt == 'trolley' && !takenFrom ? 'Trolley (not taken)' : atText).css('color', atColor);
+
+            const locked = drawerAt != 'trolley' || running;
+            $('#selTrolley, #selSide, #selTrolleyCol, #txtTrolleyRow').prop('disabled', locked);
+            $('#btnTake').prop('disabled', locked);
+            // column cannot change while the drawer is inside a slot of it
+            $('#selColumn').prop('disabled', running || drawerAt == 'rack');
+            $('#txtRowFrom, #txtRowTo').prop('disabled', running);
+            $('#txtManualRow, #btnSetSlot').prop('disabled', running || drawerAt == 'rack' || slots.length == 0);
+
+            const canResume = !running && queue.length > 0 && qIdx < queue.length && (phase > 0 || qIdx > 0);
+            $('#btnStart').prop('disabled', running || drawerAt != 'robot' || slots.length == 0);
+            // resume at step 1 of a slot needs the drawer on the robot; later steps continue with the drawer in the slot
+            $('#btnContinue').toggleClass('hidden', !canResume).prop('disabled', phase == 0 && drawerAt != 'robot');
+            $('#btnStop').prop('disabled', !running);
+            $('#btnReturn').prop('disabled', running || drawerAt != 'robot' || !takenFrom);
+
+            $('#btnTakeStatus').prop('disabled', running || !pendingTake);
+            $('#btnReturnStatus').prop('disabled', running || !pendingReturn);
+
+            // manual step buttons :: only for the current slot, only when not running
+            const hasSlot = !running && queue.length > 0 && qIdx < queue.length;
+            $('#btnPhase0').prop('disabled', !hasSlot || drawerAt != 'robot');
+            $('#btnPhase1').prop('disabled', !hasSlot);
+            $('#btnPhase2').prop('disabled', !hasSlot);
+            $('#btnPhase3').prop('disabled', !hasSlot || drawerAt == 'trolley');
+            $('#btnPhase4').prop('disabled', !hasSlot);
+        }
+
+        // ----------- Step 1 :: take drawer from trolley
+        async function takeDrawer() {
+            if (running || drawerAt != 'trolley') { return; }
+            const t = {
+                trolleyId: $('#selTrolley').val(),
+                trolleyCode: $('#selTrolley option:selected').text(),
+                side: $('#selSide').val(),
+                col: Number($('#selTrolleyCol').val()),
+                row: Number($('#txtTrolleyRow').val())
+            };
+            if (!t.trolleyId || !t.row) { log('Take Drawer :: Select trolley and row.', 'alert'); return; }
+
+            running = true;
+            updateUI();
+            setStatus('TAKING DRAWER', '#f59e0b');
+            log(`Take Drawer :: ${t.trolleyCode} side ${t.side} col ${t.col} row ${t.row}`, 'info');
+
+            let r = await api(`/api/PLCCalibration/RetrieveTrolley/${t.trolleyId}/${t.side}/${t.col}/${t.row}`);
+            if (!r.success) {
+                log('Take Drawer :: ' + r.errMessage, 'alert');
+                return finishRun('ERROR', '#e74c3c');
+            }
+            log('Take Drawer :: command sent', 'info');
+            pendingTake = t;
+            await delay(2000);
+            await takeStatus();
+        }
+
+        // re-check take status only, without sending the command again
+        async function checkTakeStatus() {
+            if (running || !pendingTake) { return; }
+            running = true;
+            updateUI();
+            setStatus('TAKING DRAWER', '#f59e0b');
+            await takeStatus();
+        }
+
+        async function takeStatus() {
+            log('Reading Drawer Status :: start reading ... ', 'info');
+            const r = await api('/api/PLCCalibration/GetRetrieveTrolleyStatus');
+            if (!r.success) {
+                log('Take Drawer Status :: ' + r.errMessage + ' (register ' + r.data + '). Press Check Status to read again.', 'alert');
+                return finishRun('ERROR', '#e74c3c');
+            }
+            takenFrom = pendingTake;
+            pendingTake = null;
+            drawerAt = 'robot';
+            log('Take Drawer Status :: OK, robot is holding the drawer', 'ok');
+            finishRun('HOLDING', '#2563eb');
+        }
+
+        // ----------- Step 2 :: check column
+        function startCheck() {
+            if (running || drawerAt != 'robot') { return; }
+            const from = Number($('#txtRowFrom').val() || 0);
+            const to = Number($('#txtRowTo').val() || 999999);
+            queue = [];
+            slots.forEach((s, i) => {
+                if (s.rowNo < from || s.rowNo > to) { return; }
+                if (s.state != 'skip') {
+                    s.state = 'pending'; s.result = 'Pending';
+                    s.plcX = s.plcZ = s.diffX = s.diffZ = null;
+                }
+                queue.push(i);
+            });
+            if (queue.length == 0) { log('Start Check :: No slot in that row range.', 'alert'); return; }
+            qIdx = 0;
+            phase = 0;
+            log(`Start Check :: Col ${$('#selColumn').val()}, rows ${from} - ${to}, ${queue.length} slots`, 'info');
+            runCheck();
+        }
+
+        function continueCheck() {
+            if (running) { return; }
+            if (phase == 0 && drawerAt != 'robot') { log('Continue :: Take a drawer first.', 'alert'); return; }
+            log('Continue :: from slot ' + slots[queue[qIdx]].slotCode + ', step ' + (phase + 1), 'info');
+            runCheck();
+        }
+
+        function requestStop() {
+            stopRequested = true;
+            log('Stop :: will stop after the current slot', 'info');
+            $('#btnStop').prop('disabled', true);
+        }
+
+        async function runCheck() {
+            running = true;
+            stopRequested = false;
+            updateUI();
+            setStatus('CHECKING', '#22c55e');
+
+            while (qIdx < queue.length) {
+                const i = queue[qIdx];
+                const s = slots[i];
+
+                if (s.state == 'skip') { qIdx++; phase = 0; continue; }
+                if (phase == 0 && stopRequested) { break; }
+
+                $('#txtCurSlot').text(`${s.slotCode} (row ${s.rowNo})`);
+
+                const p = phase;
+                const res = await runPhase(p);
+                if (res == 'fail') { return stopOnError(); }
+                // wait for the robot to move before reading its status
+                if (res == 'ok' && (p == 0 || p == 3)) { await delay(5000); }
+            }
+
+            setPhaseDots(-1, false);
+            $('#txtCurSlot').text('-');
+            const finished = qIdx >= queue.length;
+            log(finished ? 'Check :: Column finished' : 'Check :: Stopped', 'info');
+            if (finished) { queue = []; qIdx = 0; }
+
+            running = false;
+            updateUI();
+            await returnDrawer();
+        }
+
+        // run one step for the current slot. 'ok' moves to the next step (or next slot after step 4),
+        // 'next' skips to the next slot, 'fail' keeps the same step so it can be retried.
+        async function runPhase(p) {
+            const i = queue[qIdx];
+            const s = slots[i];
+            phase = p;
+            setPhaseDots(p, false);
+
+            // 0 :: put drawer into slot
+            if (p == 0) {
+                setSlot(i, 'busy', 'Putting away');
+                const r = await api('/api/PLCCalibration/PutAwayRack/' + encodeURIComponent(s.slotCode));
+                if (!r.success) {
+                    setSlot(i, 'fail', 'Put away not sent');
+                    log(`Put Away :: ${s.slotCode} :: ${r.errMessage}`, 'alert');
+                    return 'fail';
+                }
+                log(`Put Away :: ${s.slotCode} :: command sent`, 'info');
+                phase = 1;
+            }
+
+            // 1 :: put away status
+            else if (p == 1) {
+                const r = await api('/api/PLCCalibration/GetPutAwayStatus');
+                if (!r.success) {
+                    if (r.data == '3') {
+                        // slot occupied, robot still holding drawer, go to next slot
+                        setSlot(i, 'fail', 'Has tray (PLC)');
+                        log(`Put Away Status :: ${s.slotCode} :: ${r.errMessage}`, 'alert');
+                        qIdx++;
+                        phase = 0;
+                        setPhaseDots(-1, false);
+                        return 'next';
+                    }
+                    setSlot(i, 'fail', 'Put away status failed');
+                    log(`Put Away Status :: ${s.slotCode} :: ${r.errMessage} (register ${r.data}). Check the robot.`, 'alert');
+                    return 'fail';
+                }
+                drawerAt = 'rack';
+                drawerSlot = s.slotCode;
+                log(`Put Away Status :: ${s.slotCode} :: OK`, 'ok');
+                phase = 2;
+            }
+
+            // 2 :: read QR pulses (not fatal)
+            else if (p == 2) {
+                const r = await api('/api/PLCTrolley/GetQRPulses/' + encodeURIComponent(s.slotCode));
+                if (r.success && r.data) {
+                    const d = r.data;
+                    s.plcX = d[0]; s.plcZ = d[1]; s.diffX = d[2]; s.diffZ = d[3]; s.dbX = d[4]; s.dbZ = d[5];
+                    if (d[0] == 0 && d[1] == 0) {
+                        log(`Read QR :: ${s.slotCode} :: PLC returned 0, read may have failed`, 'alert');
+                    } else {
+                        log(`Read QR :: ${s.slotCode} :: X ${d[0]} Z ${d[1]} (diff ${d[2]} / ${d[3]})`, 'info');
+                    }
+                } else {
+                    log(`Read QR :: ${s.slotCode} :: ${r.errMessage}`, 'alert');
+                }
+                setSlot(i, 'busy', 'Taking back');
+                phase = 3;
+            }
+
+            // 3 :: take drawer back from slot
+            else if (p == 3) {
+                const r = await api('/api/PLCCalibration/RetrieveRack/' + encodeURIComponent(s.slotCode));
+                if (!r.success) {
+                    setSlot(i, 'fail', 'Retrieve not sent');
+                    log(`Retrieve :: ${s.slotCode} :: ${r.errMessage}. Drawer is still in the slot.`, 'alert');
+                    return 'fail';
+                }
+                log(`Retrieve :: ${s.slotCode} :: command sent`, 'info');
+                phase = 4;
+            }
+
+            // 4 :: retrieve status
+            else if (p == 4) {
+                const r = await api('/api/PLCCalibration/GetRetrieveRackStatus');
+                if (!r.success) {
+                    setSlot(i, 'fail', 'Retrieve status failed');
+                    log(`Retrieve Status :: ${s.slotCode} :: ${r.errMessage} (register ${r.data}). Check whether the drawer is still in the slot.`, 'alert');
+                    return 'fail';
+                }
+                drawerAt = 'robot';
+                drawerSlot = '';
+                const limit = Number($('#txtDiffLimit').val() || 0);
+                const big = limit > 0 && s.diffX != null && (Math.abs(s.diffX) >= limit || Math.abs(s.diffZ) >= limit);
+                setSlot(i, big ? 'warn' : 'ok', big ? 'OK, check diff' : 'OK');
+                log(`Retrieve Status :: ${s.slotCode} :: OK`, 'ok');
+                qIdx++;
+                phase = 0;
+                setPhaseDots(-1, false);
+                updateUI();
+                return 'ok';
+            }
+
+            setPhaseDots(phase, false);
+            updateUI();
+            return 'ok';
+        }
+
+        // manual :: choose the slot the step buttons work on (column from the Column list, row typed in)
+        function setManualSlot() {
+            if (running) { return; }
+            if (drawerAt == 'rack') {
+                log(`Set slot :: Drawer is still in ${drawerSlot}. Take it back first.`, 'alert');
+                return;
+            }
+            const col = $('#selColumn').val();
+            const row = Number($('#txtManualRow').val());
+            if (!col || !row) { log('Set slot :: Select a column and enter a row.', 'alert'); return; }
+
+            const idx = slots.findIndex(s => s.rowNo == row);
+            if (idx < 0) { log(`Set slot :: Row ${row} is not in column ${col}.`, 'alert'); return; }
+            const s = slots[idx];
+            if (s.state == 'skip') { log(`Set slot :: ${s.slotCode} :: ${s.result}`, 'alert'); return; }
+
+            // keep the auto queue if the slot is in it, so Continue carries on from here
+            const pos = queue.indexOf(idx);
+            if (pos >= 0) { qIdx = pos; }
+            else { queue = [idx]; qIdx = 0; }
+            phase = 0;
+            s.state = 'pending';
+            s.result = 'Pending';
+
+            $('#txtCurSlot').text(`${s.slotCode} (row ${s.rowNo})`);
+            setPhaseDots(-1, false);
+            renderResults();
+            updateUI();
+            log(`Set slot :: ${s.slotCode} (col ${col} row ${row}) is now the current slot`, 'info');
+        }
+
+        // manual :: redo one step for the current slot, then stop
+        async function manualPhase(p) {
+            if (running || queue.length == 0 || qIdx >= queue.length) { return; }
+            const s = slots[queue[qIdx]];
+
+            // sending a move again is only safe when the PLC really did not get the first one
+            if (p == 0 || p == 3) {
+                const what = p == 0 ? `put the drawer into ${s.slotCode}` : `take the drawer back from ${s.slotCode}`;
+                const c = await Swal.fire({
+                    icon: 'warning',
+                    title: 'Send command again?',
+                    html: `This tells the robot to ${what} again.<br>Only do this if the robot is <b>not moving</b> and did not start the first command.`,
+                    showCancelButton: true,
+                    confirmButtonText: 'Send again',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#e74c3c'
+                });
+                if (!c.isConfirmed) { return; }
+            }
+
+            running = true;
+            updateUI();
+            setStatus('MANUAL STEP', '#f59e0b');
+            $('#txtCurSlot').text(`${s.slotCode} (row ${s.rowNo})`);
+            log(`Manual :: ${s.slotCode} :: step ${p + 1}`, 'info');
+
+            const res = await runPhase(p);
+            if (res == 'fail') { return stopOnError(); }
+            finishRun(qIdx < queue.length ? 'MANUAL' : 'IDLE', qIdx < queue.length ? '#f59e0b' : '#6b7280');
+            if (qIdx >= queue.length) {
+                queue = [];
+                qIdx = 0;
+                log('Check :: Column finished. Press Return Drawer.', 'info');
+                updateUI();
+            }
+        }
+
+        function stopOnError() {
+            setPhaseDots(phase, true);
+            log('Stopped on error. Fix the cause, then press the red step button to redo that step, or Continue to retry it automatically.', 'alert');
+            finishRun('ERROR', '#e74c3c');
+        }
+
+        function finishRun(text, color) {
+            running = false;
+            stopRequested = false;
+            setStatus(text, color);
+            renderResults();
+            updateUI();
+        }
+
+        // ----------- Step 3 :: return drawer to trolley
+        async function returnDrawer() {
+            if (running || drawerAt != 'robot' || !takenFrom) { return; }
+            const t = takenFrom;
+            running = true;
+            updateUI();
+            setStatus('RETURNING', '#3b82f6');
+            log(`Return Drawer :: ${t.trolleyCode} side ${t.side} col ${t.col} row ${t.row}`, 'info');
+
+            let r = await api(`/api/PLCCalibration/PutAwayTrolley/${t.trolleyId}/${t.side}/${t.col}/${t.row}`);
+            if (!r.success) {
+                log('Return Drawer :: ' + r.errMessage, 'alert');
+                return finishRun('ERROR', '#e74c3c');
+            }
+            log('Return Drawer :: command sent', 'info');
+            pendingReturn = true;
+            await delay(5000);
+            await returnStatus();
+        }
+
+        // re-check return status only, without sending the command again
+        async function checkReturnStatus() {
+            if (running || !pendingReturn) { return; }
+            running = true;
+            updateUI();
+            setStatus('RETURNING', '#3b82f6');
+            await returnStatus();
+        }
+
+        async function returnStatus() {
+            const r = await api('/api/PLCCalibration/GetPutAwayStatus');
+            if (!r.success) {
+                log('Return Drawer Status :: ' + r.errMessage + ' (register ' + r.data + '). Check the robot, then press Check Status.', 'alert');
+                return finishRun('ERROR', '#e74c3c');
+            }
+            pendingReturn = false;
+            drawerAt = 'trolley';
+            takenFrom = null;
+            log('Return Drawer Status :: OK, drawer is back in the trolley', 'ok');
+            finishRun('IDLE', '#6b7280');
+        }
+
+        // ----------- Export
+        function exportResults() {
+            if (slots.length == 0) { return; }
+            const rows = slots.map(s => ({
+                'Row': s.rowNo,
+                'Slot': s.slotCode,
+                'Result': s.result,
+                'PLC X': s.plcX,
+                'PLC Z': s.plcZ,
+                'DB X': s.dbX,
+                'DB Z': s.dbZ,
+                'Diff X': s.diffX,
+                'Diff Z': s.diffZ,
+            }));
+            const wb = XLSX.utils.book_new();
+            wb.Props = { Title: "Calibration SRMS", Subject: "Calibration SRMS", Author: "Flex Software Consulting Sdn Bhd", CreatedDate: new Date() };
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "Sheet1");
+            XLSX.writeFile(wb, "Calibration SRMS Col " + $('#selColumn').val() + ".xlsx");
+        }
+
+        // ----------- Current Pulses
+        function showCurrentPulses() {
+            $("#txtPulseSlot").val(drawerSlot || (queue.length > 0 && qIdx < queue.length ? slots[queue[qIdx]].slotCode : ''));
+            $('#pulsesModal').modal("show");
+            loadCurrentPulses();
+        }
+
+        async function loadCurrentPulses() {
+            const slot = ($("#txtPulseSlot").val() || "").trim();
+            $("#pulsePlcX, #pulsePlcY, #pulseSlotX, #pulseSlotY, #pulseDiffX, #pulseDiffY").text("-");
+            if (slot == "") {
+                $("#pulseMsg").css("color", "#ef4444").text("Please enter Slot Code.");
+                return;
+            }
+            $("#pulseMsg").css("color", "#6b7280").text("Reading...");
+            const r = await api('/api/PLCTrolley/GetQRPulses/' + encodeURIComponent(slot) + '/' + (takenFrom ? takenFrom.trolleyId : 0));
+            if (!r.success) {
+                $("#pulseMsg").css("color", "#ef4444").text(r.errMessage || "Failed to get pulses.");
+                return;
+            }
+            const d = r.data;
+            $("#pulsePlcX").text(d[0]);
+            $("#pulsePlcY").text(d[1]);
+            $("#pulseSlotX").text(d[4]);
+            $("#pulseSlotY").text(d[5]);
+            $("#pulseDiffX").text(d[2]);
+            $("#pulseDiffY").text(d[3]);
+            if (d[0] == 0 && d[1] == 0) {
+                $("#pulseMsg").css("color", "#ef4444").text("PLC returned 0. Read may have failed, check PLC connection.");
+            } else {
+                $("#pulseMsg").css("color", "#6b7280").text("Read at " + new Date().toLocaleTimeString());
+            }
+        }
+
+        // ----------- PLC Address Response Log
+        function showAddressResponseLog() {
+            document.getElementById('addressLogOverlay').classList.remove('hidden');
+            document.getElementById('addressLogPanel').style.right = '0px';
+            loadAddressResponseLog();
+        }
+
+        function hideAddressResponseLog() {
+            document.getElementById('addressLogOverlay').classList.add('hidden');
+            document.getElementById('addressLogPanel').style.right = '-420px';
+        }
+
+        async function loadAddressResponseLog() {
+            const r = await api('/api/PLCTrolley/GetAddressResponseLog');
+            if (r.success == true) {
+                renderAddressResponseLog(r.data);
+            }
+        }
+
+        function renderAddressResponseLog(list) {
+            const container = document.getElementById('addressLogList');
+            if (!list || list.length === 0) {
+                container.innerHTML = '<div class="text-xs" style="color:#9ca3af;">No address response yet.</div>';
+                return;
+            }
+
+            // sort by last reading datetime, most recent first
+            list.sort((a, b) => new Date(b.createdDate) - new Date(a.createdDate));
+
+            const now = new Date();
+            let html = '';
+            list.forEach(item => {
+                const dt = new Date(item.createdDate);
+                const ageSec = (now - dt) / 1000;
+                const isFresh = ageSec <= 5;
+                const isErr = item.isErr === true;
+
+                let bg = '#fff';
+                let border = '#e5e7eb';
+                if (isErr) { bg = '#fef2f2'; border = '#fecaca'; }
+                else if (isFresh) { bg = '#ecfdf5'; border = '#6ee7b7'; }
+
+                html += `
+                    <div class="log-entry rounded-lg mb-1.5 px-3 py-2" style="background:${bg};border:1px solid ${border};">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold mono" style="color:#1f2937;">Addr ${item.address}</span>
+                            <span class="text-xs font-semibold mono" style="color:${isErr ? '#b91c1c' : '#059669'};">
+                                ${isFresh ? '<i class="bi-broadcast" style="width:10px;height:10px;"></i> ' : ''}${item.action}
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between mt-0.5">
+                            <span class="text-xs mono" style="color:#4b5563;">Value: <b>${item.value}</b></span>
+                            <span class="text-xs mono" style="color:#9ca3af;">${dt.toLocaleTimeString()}</span>
+                        </div>
+                        <div class="text-xs mono" style="color:#9ca3af;">${item.methodName}</div>
+                    </div>`;
+            });
+
+            container.innerHTML = html;
+        }
+    </script>
+}
