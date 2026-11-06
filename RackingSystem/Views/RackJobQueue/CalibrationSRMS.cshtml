@@ -355,6 +355,9 @@
                         <label for="txtStartRow" class="text-xs font-semibold" style="color:#4b5563;align-self:center;">Start Row</label>
                         <input type="number" id="txtStartRow" min="1" placeholder="Row" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;" onchange="setStartRow()">
 
+                        <label for="txtEndRow" class="text-xs font-semibold" style="color:#4b5563;align-self:center;">End Row</label>
+                        <input type="number" id="txtEndRow" min="1" placeholder="Last row" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;" onchange="setEndRow()">
+
                         <label for="txtDiffLimit" class="text-xs font-semibold" style="color:#4b5563;align-self:center;">Highlight diff ≥</label>
                         <input type="number" id="txtDiffLimit" min="0" value="10" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;" onchange="renderResults()">
                     </div>
@@ -632,7 +635,7 @@
             const col = $('#selColumn').val();
             slots = [];
             curIdx = -1;
-            $('#txtStartRow').val('');
+            $('#txtStartRow, #txtEndRow').val('');
             if (!col) { renderResults(); updateUI(); return; }
 
             const r = await api('/api/PLCCalibration/GetColumnSlots/' + col);
@@ -645,13 +648,24 @@
                 else if (s.hasEmptyTray) skip = 'Skipped: has tray';
                 return { ...s, result: skip || 'Pending', state: skip ? 'skip' : 'pending', plcX: null, plcZ: null, dbX: s.qrxPulse, dbZ: s.qryPulse, diffX: null, diffZ: null };
             });
+            if (slots.length > 0) { $('#txtEndRow').val(slots[slots.length - 1].rowNo); }
             setPointer(nextReadable(0));
             renderResults();
             updateUI();
         }
 
+        // last row to read, empty = end of column
+        function endRow() {
+            const v = Number($('#txtEndRow').val() || 0);
+            return v > 0 ? v : Infinity;
+        }
+
+        // next readable slot from index, not past End Row. -1 when none.
         function nextReadable(from) {
-            for (let i = Math.max(from, 0); i < slots.length; i++) {
+            if (from < 0) return -1;
+            const end = endRow();
+            for (let i = from; i < slots.length; i++) {
+                if (slots[i].rowNo > end) return -1;
                 if (slots[i].state != 'skip') return i;
             }
             return -1;
@@ -663,16 +677,37 @@
         }
 
         // user typed a start row :: next read starts from that row (or the first readable row after it)
-        function setStartRow() {
+        function setStartRow(quiet) {
             if (running || cycle != null) { return; }
             const row = Number($('#txtStartRow').val() || 0);
+            if (row > endRow() && !quiet) {
+                log(`Start Row :: row ${row} is after End Row ${endRow()}.`, 'alert');
+            }
             const idx = slots.findIndex(s => s.rowNo >= row);
             const next = nextReadable(idx);
-            if (idx >= 0 && next != idx) {
+            if (idx >= 0 && next >= 0 && next != idx) {
                 log(`Start Row :: row ${row} is skipped (${slots[idx].result}), next readable row is used`, 'info');
             }
             setPointer(next);
+            if (next < 0) { $('#txtStartRow').val(row || ''); }
             renderResults();
+            updateUI();
+        }
+
+        // End Row can change any time, also during Continue Read (takes effect when the current cycle finishes)
+        function setEndRow() {
+            const end = endRow();
+            const start = Number($('#txtStartRow').val() || 0);
+            if (end != Infinity && start > end) {
+                log(`End Row :: row ${end} is before Start Row ${start}.`, 'alert');
+            } else {
+                log(end == Infinity ? 'End Row :: end of column' : `End Row :: ${end}`, 'info');
+            }
+            if (!running && cycle == null) {
+                // re-pick the next slot from the Start Row with the new end
+                setStartRow(true);
+                return;
+            }
             updateUI();
         }
 
@@ -782,7 +817,7 @@
             else if (running) hint = { one: 'Reading one slot.', continue: 'Reading every row down the column.', manual: 'Running one step.' }[mode];
             else if (cycle != null) hint = `Stopped at step ${cycle.phase + 1}. Read One / Continue Read carries on from this step, or use a step button to retry one action.`;
             else if (slots.length == 0) hint = 'Select a SRMS column.';
-            else if (curIdx < 0) hint = 'No more slot to read. Change Start Row to read again.';
+            else if (curIdx < 0) hint = 'No more slot to read up to End Row. Change Start Row / End Row to read again.';
             else hint = `Next: ${slots[curIdx].slotCode} (row ${slots[curIdx].rowNo}).`;
             $('#txtHint').text(hint);
 
@@ -813,7 +848,7 @@
         async function startRead(m) {
             if (running) { return; }
             if (cycle == null) {
-                if (curIdx < 0) { log('No more slot to read in this column. Change Start Row.', 'alert'); return; }
+                if (curIdx < 0) { log('No more slot to read up to End Row. Change Start Row / End Row.', 'alert'); return; }
                 const t = readTrolley();
                 if (!t) { return; }
                 newCycle(t);
@@ -834,7 +869,7 @@
                 const done = await runCycle();
                 if (!done) { return; } // stopped now or error, already handled
 
-                if (curIdx < 0) { log('Column finished', 'ok'); break; }
+                if (curIdx < 0) { log(endRow() == Infinity ? 'Column finished' : `Finished :: reached End Row ${endRow()}`, 'ok'); break; }
                 if (mode == 'one') { break; }
                 if (stopAfter) { log('Stopped after cycle. Drawer is back in the trolley.', 'info'); break; }
                 if (stopNow) { log('Stopped. Drawer is back in the trolley.', 'info'); break; }
@@ -868,8 +903,11 @@
         function completeCycle() {
             log(`Cycle :: ${slots[cycle.idx].slotCode} done, drawer is back in the trolley`, 'ok');
             const next = nextReadable(cycle.idx + 1);
+            const doneRow = slots[cycle.idx].rowNo;
             cycle = null;
             setPointer(next);
+            // reached End Row :: keep Start Row after the last read row, so a larger End Row carries on from here
+            if (next < 0) { $('#txtStartRow').val(doneRow + 1); }
             renderResults();
             updateUI();
         }
