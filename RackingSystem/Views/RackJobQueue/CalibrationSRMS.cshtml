@@ -317,9 +317,7 @@
         color: darkgray !important;
         cursor: not-allowed;
     }
-    .phase-btn:disabled,
-    #btnTakeStatus:disabled,
-    #btnReturnStatus:disabled {
+    .phase-btn:disabled {
         color: darkgray !important;
         border-color: #e5e7eb !important;
         cursor: not-allowed;
@@ -338,7 +336,7 @@
             </div>
             <div>
                 <h1 id="pageTitle" class="text-lg font-bold" style="color:#1f2937;">Calibration SRMS</h1>
-                <p id="statusLabel" class="text-xs mono" style="color:#6b7280;">Put away and retrieve a drawer at every slot of one SRMS column</p>
+                <p id="statusLabel" class="text-xs mono" style="color:#6b7280;">For each SRMS slot: take drawer from 1 trolley slot, put away, read QR, retrieve, return to trolley</p>
             </div>
         </div>
         <div class="flex items-center gap-3">
@@ -367,13 +365,13 @@
                 <!-- Drawer location -->
                 <div class="rounded-xl px-6 py-3 flex items-center justify-between" style="background:#fff;border:1px solid #e5e7eb;">
                     <span class="text-xs font-semibold" style="color:#4b5563;">Drawer is at</span>
-                    <span id="drawerAtText" class="text-sm font-bold mono" style="color:#6b7280;">Trolley (not taken)</span>
+                    <span id="drawerAtText" class="text-sm font-bold mono" style="color:#6b7280;">Trolley</span>
                 </div>
 
                 <!-- Step 1 -->
                 <div class="rounded-xl p-6" style="background:#fff;border:1px solid #e5e7eb;">
                     <h2 class="text-xs font-semibold mb-3 flex items-center gap-2" style="color:#4b5563;">
-                        <i class="bi-1-circle" style="width:14px;height:14px;"></i> Take drawer from trolley
+                        <i class="bi-1-circle" style="width:14px;height:14px;"></i> Trolley slot (drawer source)
                     </h2>
                     <div class="grid gap-2" style="grid-template-columns: auto 1fr;">
                         <label for="selTrolley" class="text-xs font-semibold" style="color:#4b5563;align-self:center;">Trolley</label>
@@ -395,14 +393,7 @@
                         <label for="txtTrolleyRow" class="text-xs font-semibold" style="color:#4b5563;align-self:center;">Trolley Row</label>
                         <input type="number" id="txtTrolleyRow" min="1" value="1" autocomplete="off" class="px-2.5 py-1.5 rounded-lg text-xs border" style="border-color:#e5e7eb;">
                     </div>
-                    <div class="flex gap-2 mt-3">
-                        <button id="btnTake" onclick="takeDrawer()" class="px-3 py-1.5 rounded-lg text-xs font-semibold" style="background:#16a34a;color:#fff;">
-                            <i class="bi-box-arrow-in-down" style="width:12px;height:12px;"></i> Take Drawer
-                        </button>
-                        <button id="btnTakeStatus" onclick="checkTakeStatus()" class="px-3 py-1.5 rounded-lg text-xs font-semibold" style="background:#fff;color:#ef4444;border:1px solid #fecaca;" disabled>
-                            <i class="bi-arrow-repeat" style="width:12px;height:12px;"></i> Check Status
-                        </button>
-                    </div>
+                    <p class="text-xs mt-2" style="color:#6b7280;">For every SRMS slot the robot takes the drawer from this trolley slot and returns it here after the QR read. Locked while a slot is in progress.</p>
                 </div>
 
                 <!-- Step 2 -->
@@ -447,30 +438,8 @@
                             <input type="number" id="txtManualRow" min="1" placeholder="Row" autocomplete="off" class="px-2.5 py-1 rounded-lg text-xs border" style="border-color:#e5e7eb;width:80px;">
                             <button id="btnSetSlot" onclick="setManualSlot()" class="px-3 py-1 rounded text-xs font-semibold" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;" disabled>Set slot</button>
                         </div>
-                        <div class="flex flex-col gap-1.5">
-                            <div class="flex items-center gap-2"><div class="step-dot waiting" id="pDot0"></div><span class="text-xs flex-1" style="color:#64748b;">Put drawer into slot</span><button id="btnPhase0" onclick="manualPhase(0)" class="phase-btn px-3 py-1 rounded text-xs font-semibold" style="background:#fff;color:#ef4444;border:1px solid #fecaca;" disabled>Send again</button></div>
-                            <div class="flex items-center gap-2"><div class="step-dot waiting" id="pDot1"></div><span class="text-xs flex-1" style="color:#64748b;">* Put Away Status *</span><button id="btnPhase1" onclick="manualPhase(1)" class="phase-btn px-3 py-1 rounded text-xs font-semibold" style="background:#fff;color:#ef4444;border:1px solid #fecaca;" disabled>Check again</button></div>
-                            <div class="flex items-center gap-2"><div class="step-dot waiting" id="pDot2"></div><span class="text-xs flex-1" style="color:#64748b;">Read QR pulses</span><button id="btnPhase2" onclick="manualPhase(2)" class="phase-btn px-3 py-1 rounded text-xs font-semibold" style="background:#fff;color:#ef4444;border:1px solid #fecaca;" disabled>Read again</button></div>
-                            <div class="flex items-center gap-2"><div class="step-dot waiting" id="pDot3"></div><span class="text-xs flex-1" style="color:#64748b;">Take drawer back</span><button id="btnPhase3" onclick="manualPhase(3)" class="phase-btn px-3 py-1 rounded text-xs font-semibold" style="background:#fff;color:#ef4444;border:1px solid #fecaca;" disabled>Send again</button></div>
-                            <div class="flex items-center gap-2"><div class="step-dot waiting" id="pDot4"></div><span class="text-xs flex-1" style="color:#64748b;">* Retrieve Status *</span><button id="btnPhase4" onclick="manualPhase(4)" class="phase-btn px-3 py-1 rounded text-xs font-semibold" style="background:#fff;color:#ef4444;border:1px solid #fecaca;" disabled>Check again</button></div>
-                        </div>
+                        <div id="phaseList" class="flex flex-col gap-1.5"></div>
                         <p class="text-xs mt-2" style="color:#6b7280;">Buttons redo one step for the current slot only. Press Continue to go back to automatic.</p>
-                    </div>
-                </div>
-
-                <!-- Step 3 -->
-                <div class="rounded-xl p-6" style="background:#fff;border:1px solid #e5e7eb;">
-                    <h2 class="text-xs font-semibold mb-3 flex items-center gap-2" style="color:#4b5563;">
-                        <i class="bi-3-circle" style="width:14px;height:14px;"></i> Return drawer to trolley
-                    </h2>
-                    <p class="text-xs" style="color:#6b7280;">Runs by itself when the column is finished or stopped. Use the button only if it did not.</p>
-                    <div class="flex gap-2 mt-3">
-                        <button id="btnReturn" onclick="returnDrawer()" class="px-3 py-1.5 rounded-lg text-xs font-semibold" style="background:#3b82f6;color:#fff;" disabled>
-                            <i class="bi-box-arrow-up" style="width:12px;height:12px;"></i> Return Drawer
-                        </button>
-                        <button id="btnReturnStatus" onclick="checkReturnStatus()" class="px-3 py-1.5 rounded-lg text-xs font-semibold" style="background:#fff;color:#ef4444;border:1px solid #fecaca;" disabled>
-                            <i class="bi-arrow-repeat" style="width:12px;height:12px;"></i> Check Status
-                        </button>
                     </div>
                 </div>
             </div>
@@ -599,22 +568,35 @@
 
         let token = '';
 
-        // where the drawer is :: 'trolley' (not taken / returned), 'robot', 'rack' (inside slot)
+        // where the drawer is :: 'trolley' (in the trolley slot), 'robot' (holding), 'rack' (inside SRMS slot)
         let drawerAt = 'trolley';
         let drawerSlot = '';
-        let takenFrom = null;   // { trolleyId, trolleyCode, side, col, row }
-        let pendingTake = null; // take command sent, status not yet OK
-        let pendingReturn = false; // return command sent, status not yet OK
+        let trolley = null;     // { trolleyId, trolleyCode, side, col, row } :: the one trolley slot used for every SRMS slot
 
         let slots = [];         // column slots with result
         let queue = [];         // indexes of slots to check
         let qIdx = 0;
-        let phase = 0;          // 0 put, 1 put status, 2 read QR, 3 retrieve, 4 retrieve status
+        let phase = 0;          // see PHASES
         let running = false;
         let stopRequested = false;
 
+        // one cycle per SRMS slot. send :: moves the robot (confirm before re-send), wait :: ms before the next step
+        const PHASES = [
+            { text: 'Take drawer from trolley', btn: 'Send again', send: true, wait: 2000 },
+            { text: '* Take Drawer Status *', btn: 'Check again' },
+            { text: 'Put drawer into slot', btn: 'Send again', send: true, wait: 5000 },
+            { text: '* Put Away Status *', btn: 'Check again' },
+            { text: 'Read QR pulses', btn: 'Read again' },
+            { text: 'Take drawer back from slot', btn: 'Send again', send: true, wait: 5000 },
+            { text: '* Retrieve Status *', btn: 'Check again' },
+            { text: 'Return drawer to trolley', btn: 'Send again', send: true, wait: 5000 },
+            { text: '* Return Drawer Status *', btn: 'Check again' },
+        ];
+        const P_TAKE = 0, P_TAKE_ST = 1, P_PUT = 2, P_PUT_ST = 3, P_QR = 4, P_RET = 5, P_RET_ST = 6, P_BACK = 7, P_BACK_ST = 8;
+
         $(document).ready(async function () {
             token = $('#xToken').val();
+            renderPhaseList();
             await loadTrolleys();
             await loadColumns();
             updateUI();
@@ -662,6 +644,18 @@
             document.getElementById('statusDot').style.background = color;
         }
 
+        function renderPhaseList() {
+            let html = '';
+            PHASES.forEach((p, i) => {
+                html += `<div class="flex items-center gap-2"><div class="step-dot waiting" id="pDot${i}"></div><span class="text-xs flex-1" style="color:#64748b;">${p.text}</span><button id="btnPhase${i}" onclick="manualPhase(${i})" class="phase-btn px-3 py-1 rounded text-xs font-semibold" style="background:#fff;color:#ef4444;border:1px solid #fecaca;" disabled>${p.btn}</button></div>`;
+            });
+            document.getElementById('phaseList').innerHTML = html;
+        }
+
+        function trolleyText(t) {
+            return `${t.trolleyCode} side ${t.side} col ${t.col} row ${t.row}`;
+        }
+
         // ----------- Load lists
         async function loadTrolleys() {
             const r = await api('/api/PLCCalibration/GetTrolleys');
@@ -681,7 +675,7 @@
         }
 
         async function loadColumn() {
-            if (running) { return; }
+            if (running || drawerAt != 'trolley') { return; }
             const col = $('#selColumn').val();
             slots = [];
             queue = [];
@@ -697,7 +691,7 @@
                 if (!s.isActive) skip = 'Skipped: inactive';
                 else if (s.hasReel) skip = 'Skipped: has reel';
                 else if (s.hasEmptyTray) skip = 'Skipped: has tray';
-                return { ...s, result: skip || 'Pending', state: skip ? 'skip' : 'pending', plcX: null, plcZ: null, dbX: s.qrxPulse, dbZ: s.qryPulse, diffX: null, diffZ: null };
+                return { ...s, result: skip || 'Pending', state: skip ? 'skip' : 'pending', plcX: null, plcZ: null, dbX: s.qrxPulse, dbZ: s.qryPulse, diffX: null, diffZ: null, final: null };
             });
             if (slots.length > 0) {
                 $('#txtRowFrom').val(slots[0].rowNo);
@@ -755,7 +749,7 @@
         }
 
         function setPhaseDots(p, failed) {
-            for (let i = 0; i <= 4; i++) {
+            for (let i = 0; i < PHASES.length; i++) {
                 const dot = document.getElementById('pDot' + i);
                 if (p < 0) dot.className = 'step-dot waiting';
                 else if (i < p) dot.className = 'step-dot done';
@@ -769,38 +763,39 @@
         function updateUI() {
             const atText = { trolley: 'Trolley', robot: 'Robot (holding)', rack: 'Rack slot ' + drawerSlot }[drawerAt];
             const atColor = { trolley: '#6b7280', robot: '#2563eb', rack: '#b45309' }[drawerAt];
-            $('#drawerAtText').text(drawerAt == 'trolley' && !takenFrom ? 'Trolley (not taken)' : atText).css('color', atColor);
+            $('#drawerAtText').text(drawerAt == 'trolley' && trolley ? 'Trolley ' + trolleyText(trolley) : atText).css('color', atColor);
 
-            const locked = drawerAt != 'trolley' || running;
-            $('#selTrolley, #selSide, #selTrolleyCol, #txtTrolleyRow').prop('disabled', locked);
-            $('#btnTake').prop('disabled', locked);
-            // column cannot change while the drawer is inside a slot of it
-            $('#selColumn').prop('disabled', running || drawerAt == 'rack');
+            // a slot cycle is in progress :: drawer is out of the trolley, or the cycle stopped half way
+            const midCycle = drawerAt != 'trolley' || (queue.length > 0 && qIdx < queue.length && phase > 0);
+
+            // trolley slot cannot change while the drawer is out of it
+            $('#selTrolley, #selSide, #selTrolleyCol, #txtTrolleyRow').prop('disabled', running || midCycle);
+            // column cannot change while the drawer is out of the trolley
+            $('#selColumn').prop('disabled', running || midCycle);
             $('#txtRowFrom, #txtRowTo').prop('disabled', running);
-            $('#txtManualRow, #btnSetSlot').prop('disabled', running || drawerAt == 'rack' || slots.length == 0);
+            $('#txtManualRow, #btnSetSlot').prop('disabled', running || midCycle || slots.length == 0);
 
             const canResume = !running && queue.length > 0 && qIdx < queue.length && (phase > 0 || qIdx > 0);
-            $('#btnStart').prop('disabled', running || drawerAt != 'robot' || slots.length == 0);
-            // resume at step 1 of a slot needs the drawer on the robot; later steps continue with the drawer in the slot
-            $('#btnContinue').toggleClass('hidden', !canResume).prop('disabled', phase == 0 && drawerAt != 'robot');
+            $('#btnStart').prop('disabled', running || midCycle || slots.length == 0);
+            $('#btnContinue').toggleClass('hidden', !canResume).prop('disabled', false);
             $('#btnStop').prop('disabled', !running);
-            $('#btnReturn').prop('disabled', running || drawerAt != 'robot' || !takenFrom);
-
-            $('#btnTakeStatus').prop('disabled', running || !pendingTake);
-            $('#btnReturnStatus').prop('disabled', running || !pendingReturn);
 
             // manual step buttons :: only for the current slot, only when not running
             const hasSlot = !running && queue.length > 0 && qIdx < queue.length;
-            $('#btnPhase0').prop('disabled', !hasSlot || drawerAt != 'robot');
-            $('#btnPhase1').prop('disabled', !hasSlot);
-            $('#btnPhase2').prop('disabled', !hasSlot);
-            $('#btnPhase3').prop('disabled', !hasSlot || drawerAt == 'trolley');
-            $('#btnPhase4').prop('disabled', !hasSlot);
+            $('#btnPhase' + P_TAKE).prop('disabled', !hasSlot || drawerAt != 'trolley');
+            $('#btnPhase' + P_TAKE_ST).prop('disabled', !hasSlot);
+            $('#btnPhase' + P_PUT).prop('disabled', !hasSlot || drawerAt != 'robot');
+            $('#btnPhase' + P_PUT_ST).prop('disabled', !hasSlot);
+            $('#btnPhase' + P_QR).prop('disabled', !hasSlot);
+            $('#btnPhase' + P_RET).prop('disabled', !hasSlot || drawerAt == 'trolley');
+            $('#btnPhase' + P_RET_ST).prop('disabled', !hasSlot);
+            $('#btnPhase' + P_BACK).prop('disabled', !hasSlot || drawerAt != 'robot');
+            $('#btnPhase' + P_BACK_ST).prop('disabled', !hasSlot);
         }
 
-        // ----------- Step 1 :: take drawer from trolley
-        async function takeDrawer() {
-            if (running || drawerAt != 'trolley') { return; }
+        // read the trolley slot from the inputs. only when the drawer is home and no cycle is half way.
+        function readTrolley() {
+            if (drawerAt != 'trolley' || phase != P_TAKE) { return !!trolley; }
             const t = {
                 trolleyId: $('#selTrolley').val(),
                 trolleyCode: $('#selTrolley option:selected').text(),
@@ -808,78 +803,43 @@
                 col: Number($('#selTrolleyCol').val()),
                 row: Number($('#txtTrolleyRow').val())
             };
-            if (!t.trolleyId || !t.row) { log('Take Drawer :: Select trolley and row.', 'alert'); return; }
-
-            running = true;
-            updateUI();
-            setStatus('TAKING DRAWER', '#f59e0b');
-            log(`Take Drawer :: ${t.trolleyCode} side ${t.side} col ${t.col} row ${t.row}`, 'info');
-
-            let r = await api(`/api/PLCCalibration/RetrieveTrolley/${t.trolleyId}/${t.side}/${t.col}/${t.row}`);
-            if (!r.success) {
-                log('Take Drawer :: ' + r.errMessage, 'alert');
-                return finishRun('ERROR', '#e74c3c');
-            }
-            log('Take Drawer :: command sent', 'info');
-            pendingTake = t;
-            await delay(2000);
-            await takeStatus();
+            if (!t.trolleyId || !t.row) { log('Trolley slot :: Select trolley and row.', 'alert'); return false; }
+            trolley = t;
+            return true;
         }
 
-        // re-check take status only, without sending the command again
-        async function checkTakeStatus() {
-            if (running || !pendingTake) { return; }
-            running = true;
-            updateUI();
-            setStatus('TAKING DRAWER', '#f59e0b');
-            await takeStatus();
-        }
-
-        async function takeStatus() {
-            log('Reading Drawer Status :: start reading ... ', 'info');
-            const r = await api('/api/PLCCalibration/GetRetrieveTrolleyStatus');
-            if (!r.success) {
-                log('Take Drawer Status :: ' + r.errMessage + ' (register ' + r.data + '). Press Check Status to read again.', 'alert');
-                return finishRun('ERROR', '#e74c3c');
-            }
-            takenFrom = pendingTake;
-            pendingTake = null;
-            drawerAt = 'robot';
-            log('Take Drawer Status :: OK, robot is holding the drawer', 'ok');
-            finishRun('HOLDING', '#2563eb');
-        }
-
-        // ----------- Step 2 :: check column
+        // ----------- Check column
         function startCheck() {
-            if (running || drawerAt != 'robot') { return; }
+            if (running || drawerAt != 'trolley') { return; }
+            phase = P_TAKE;
+            if (!readTrolley()) { return; }
             const from = Number($('#txtRowFrom').val() || 0);
             const to = Number($('#txtRowTo').val() || 999999);
             queue = [];
             slots.forEach((s, i) => {
                 if (s.rowNo < from || s.rowNo > to) { return; }
                 if (s.state != 'skip') {
-                    s.state = 'pending'; s.result = 'Pending';
+                    s.state = 'pending'; s.result = 'Pending'; s.final = null;
                     s.plcX = s.plcZ = s.diffX = s.diffZ = null;
                 }
                 queue.push(i);
             });
             if (queue.length == 0) { log('Start Check :: No slot in that row range.', 'alert'); return; }
             qIdx = 0;
-            phase = 0;
-            log(`Start Check :: Col ${$('#selColumn').val()}, rows ${from} - ${to}, ${queue.length} slots`, 'info');
+            log(`Start Check :: Col ${$('#selColumn').val()}, rows ${from} - ${to}, ${queue.length} slots, trolley ${trolleyText(trolley)}`, 'info');
             runCheck();
         }
 
         function continueCheck() {
             if (running) { return; }
-            if (phase == 0 && drawerAt != 'robot') { log('Continue :: Take a drawer first.', 'alert'); return; }
+            if (!readTrolley()) { return; }
             log('Continue :: from slot ' + slots[queue[qIdx]].slotCode + ', step ' + (phase + 1), 'info');
             runCheck();
         }
 
         function requestStop() {
             stopRequested = true;
-            log('Stop :: will stop after the current slot', 'info');
+            log('Stop :: will stop after the drawer is back in the trolley', 'info');
             $('#btnStop').prop('disabled', true);
         }
 
@@ -893,8 +853,9 @@
                 const i = queue[qIdx];
                 const s = slots[i];
 
-                if (s.state == 'skip') { qIdx++; phase = 0; continue; }
-                if (phase == 0 && stopRequested) { break; }
+                if (s.state == 'skip') { qIdx++; phase = P_TAKE; continue; }
+                // stop only between slots, when the drawer is back in the trolley
+                if (phase == P_TAKE && stopRequested) { break; }
 
                 $('#txtCurSlot').text(`${s.slotCode} (row ${s.rowNo})`);
 
@@ -902,7 +863,7 @@
                 const res = await runPhase(p);
                 if (res == 'fail') { return stopOnError(); }
                 // wait for the robot to move before reading its status
-                if (res == 'ok' && (p == 0 || p == 3)) { await delay(5000); }
+                if (res == 'ok' && PHASES[p].wait) { await delay(PHASES[p].wait); }
             }
 
             setPhaseDots(-1, false);
@@ -910,22 +871,45 @@
             const finished = qIdx >= queue.length;
             log(finished ? 'Check :: Column finished' : 'Check :: Stopped', 'info');
             if (finished) { queue = []; qIdx = 0; }
-
-            running = false;
-            updateUI();
-            await returnDrawer();
+            finishRun(finished ? 'DONE' : 'STOPPED', '#6b7280');
         }
 
-        // run one step for the current slot. 'ok' moves to the next step (or next slot after step 4),
-        // 'next' skips to the next slot, 'fail' keeps the same step so it can be retried.
+        // run one step for the current slot. 'ok' moves to the next step (or next slot after the last step),
+        // 'fail' keeps the same step so it can be retried.
         async function runPhase(p) {
             const i = queue[qIdx];
             const s = slots[i];
+            const t = trolley;
             phase = p;
             setPhaseDots(p, false);
 
-            // 0 :: put drawer into slot
-            if (p == 0) {
+            // take drawer from trolley slot
+            if (p == P_TAKE) {
+                setSlot(i, 'busy', 'Taking from trolley');
+                const r = await api(`/api/PLCCalibration/RetrieveTrolley/${t.trolleyId}/${t.side}/${t.col}/${t.row}`);
+                if (!r.success) {
+                    setSlot(i, 'fail', 'Take not sent');
+                    log(`Take Drawer :: ${trolleyText(t)} :: ${r.errMessage}`, 'alert');
+                    return 'fail';
+                }
+                log(`Take Drawer :: ${trolleyText(t)} :: command sent`, 'info');
+                phase = P_TAKE_ST;
+            }
+
+            else if (p == P_TAKE_ST) {
+                const r = await api('/api/PLCCalibration/GetRetrieveTrolleyStatus');
+                if (!r.success) {
+                    setSlot(i, 'fail', 'Take status failed');
+                    log(`Take Drawer Status :: ${r.errMessage} (register ${r.data}). Check the trolley slot and robot.`, 'alert');
+                    return 'fail';
+                }
+                drawerAt = 'robot';
+                log('Take Drawer Status :: OK, robot is holding the drawer', 'ok');
+                phase = P_PUT;
+            }
+
+            // put drawer into SRMS slot
+            else if (p == P_PUT) {
                 setSlot(i, 'busy', 'Putting away');
                 const r = await api('/api/PLCCalibration/PutAwayRack/' + encodeURIComponent(s.slotCode));
                 if (!r.success) {
@@ -934,21 +918,21 @@
                     return 'fail';
                 }
                 log(`Put Away :: ${s.slotCode} :: command sent`, 'info');
-                phase = 1;
+                phase = P_PUT_ST;
             }
 
-            // 1 :: put away status
-            else if (p == 1) {
+            else if (p == P_PUT_ST) {
                 const r = await api('/api/PLCCalibration/GetPutAwayStatus');
                 if (!r.success) {
                     if (r.data == '3') {
-                        // slot occupied, robot still holding drawer, go to next slot
-                        setSlot(i, 'fail', 'Has tray (PLC)');
-                        log(`Put Away Status :: ${s.slotCode} :: ${r.errMessage}`, 'alert');
-                        qIdx++;
-                        phase = 0;
-                        setPhaseDots(-1, false);
-                        return 'next';
+                        // slot occupied, robot still holding drawer :: return it to the trolley, then next slot
+                        s.final = { state: 'fail', result: 'Has tray (PLC)' };
+                        setSlot(i, 'fail', 'Has tray (PLC), returning');
+                        log(`Put Away Status :: ${s.slotCode} :: ${r.errMessage} Returning drawer to trolley.`, 'alert');
+                        phase = P_BACK;
+                        setPhaseDots(phase, false);
+                        updateUI();
+                        return 'ok';
                     }
                     setSlot(i, 'fail', 'Put away status failed');
                     log(`Put Away Status :: ${s.slotCode} :: ${r.errMessage} (register ${r.data}). Check the robot.`, 'alert');
@@ -957,11 +941,11 @@
                 drawerAt = 'rack';
                 drawerSlot = s.slotCode;
                 log(`Put Away Status :: ${s.slotCode} :: OK`, 'ok');
-                phase = 2;
+                phase = P_QR;
             }
 
-            // 2 :: read QR pulses (not fatal)
-            else if (p == 2) {
+            // read QR pulses (not fatal)
+            else if (p == P_QR) {
                 const r = await api('/api/PLCTrolley/GetQRPulses/' + encodeURIComponent(s.slotCode));
                 if (r.success && r.data) {
                     const d = r.data;
@@ -975,11 +959,11 @@
                     log(`Read QR :: ${s.slotCode} :: ${r.errMessage}`, 'alert');
                 }
                 setSlot(i, 'busy', 'Taking back');
-                phase = 3;
+                phase = P_RET;
             }
 
-            // 3 :: take drawer back from slot
-            else if (p == 3) {
+            // take drawer back from SRMS slot
+            else if (p == P_RET) {
                 const r = await api('/api/PLCCalibration/RetrieveRack/' + encodeURIComponent(s.slotCode));
                 if (!r.success) {
                     setSlot(i, 'fail', 'Retrieve not sent');
@@ -987,11 +971,10 @@
                     return 'fail';
                 }
                 log(`Retrieve :: ${s.slotCode} :: command sent`, 'info');
-                phase = 4;
+                phase = P_RET_ST;
             }
 
-            // 4 :: retrieve status
-            else if (p == 4) {
+            else if (p == P_RET_ST) {
                 const r = await api('/api/PLCCalibration/GetRetrieveRackStatus');
                 if (!r.success) {
                     setSlot(i, 'fail', 'Retrieve status failed');
@@ -1002,10 +985,37 @@
                 drawerSlot = '';
                 const limit = Number($('#txtDiffLimit').val() || 0);
                 const big = limit > 0 && s.diffX != null && (Math.abs(s.diffX) >= limit || Math.abs(s.diffZ) >= limit);
-                setSlot(i, big ? 'warn' : 'ok', big ? 'OK, check diff' : 'OK');
+                s.final = { state: big ? 'warn' : 'ok', result: big ? 'OK, check diff' : 'OK' };
+                setSlot(i, 'busy', 'Returning to trolley');
                 log(`Retrieve Status :: ${s.slotCode} :: OK`, 'ok');
+                phase = P_BACK;
+            }
+
+            // return drawer to trolley slot
+            else if (p == P_BACK) {
+                const r = await api(`/api/PLCCalibration/PutAwayTrolley/${t.trolleyId}/${t.side}/${t.col}/${t.row}`);
+                if (!r.success) {
+                    setSlot(i, 'fail', 'Return not sent');
+                    log(`Return Drawer :: ${trolleyText(t)} :: ${r.errMessage}`, 'alert');
+                    return 'fail';
+                }
+                log(`Return Drawer :: ${trolleyText(t)} :: command sent`, 'info');
+                phase = P_BACK_ST;
+            }
+
+            else if (p == P_BACK_ST) {
+                const r = await api('/api/PLCCalibration/GetPutAwayStatus');
+                if (!r.success) {
+                    setSlot(i, 'fail', 'Return status failed');
+                    log(`Return Drawer Status :: ${r.errMessage} (register ${r.data}). Check the robot and trolley slot.`, 'alert');
+                    return 'fail';
+                }
+                drawerAt = 'trolley';
+                const f = s.final || { state: 'ok', result: 'OK' };
+                setSlot(i, f.state, f.result);
+                log(`Return Drawer Status :: OK, drawer is back in the trolley. ${s.slotCode} done.`, 'ok');
                 qIdx++;
-                phase = 0;
+                phase = P_TAKE;
                 setPhaseDots(-1, false);
                 updateUI();
                 return 'ok';
@@ -1019,8 +1029,8 @@
         // manual :: choose the slot the step buttons work on (column from the Column list, row typed in)
         function setManualSlot() {
             if (running) { return; }
-            if (drawerAt == 'rack') {
-                log(`Set slot :: Drawer is still in ${drawerSlot}. Take it back first.`, 'alert');
+            if (drawerAt != 'trolley') {
+                log(`Set slot :: Drawer is not in the trolley. Finish the current slot first.`, 'alert');
                 return;
             }
             const col = $('#selColumn').val();
@@ -1036,9 +1046,10 @@
             const pos = queue.indexOf(idx);
             if (pos >= 0) { qIdx = pos; }
             else { queue = [idx]; qIdx = 0; }
-            phase = 0;
+            phase = P_TAKE;
             s.state = 'pending';
             s.result = 'Pending';
+            s.final = null;
 
             $('#txtCurSlot').text(`${s.slotCode} (row ${s.rowNo})`);
             setPhaseDots(-1, false);
@@ -1051,14 +1062,21 @@
         async function manualPhase(p) {
             if (running || queue.length == 0 || qIdx >= queue.length) { return; }
             const s = slots[queue[qIdx]];
+            if (p == P_TAKE) { phase = P_TAKE; }
+            if (!readTrolley()) { return; }
 
             // sending a move again is only safe when the PLC really did not get the first one
-            if (p == 0 || p == 3) {
-                const what = p == 0 ? `put the drawer into ${s.slotCode}` : `take the drawer back from ${s.slotCode}`;
+            if (PHASES[p].send) {
+                const what = {
+                    [P_TAKE]: `take the drawer from trolley ${trolleyText(trolley)}`,
+                    [P_PUT]: `put the drawer into ${s.slotCode}`,
+                    [P_RET]: `take the drawer back from ${s.slotCode}`,
+                    [P_BACK]: `return the drawer to trolley ${trolleyText(trolley)}`,
+                }[p];
                 const c = await Swal.fire({
                     icon: 'warning',
                     title: 'Send command again?',
-                    html: `This tells the robot to ${what} again.<br>Only do this if the robot is <b>not moving</b> and did not start the first command.`,
+                    html: `This tells the robot to ${$('<div>').text(what).html()} again.<br>Only do this if the robot is <b>not moving</b> and did not start the first command.`,
                     showCancelButton: true,
                     confirmButtonText: 'Send again',
                     cancelButtonText: 'Cancel',
@@ -1079,7 +1097,7 @@
             if (qIdx >= queue.length) {
                 queue = [];
                 qIdx = 0;
-                log('Check :: Column finished. Press Return Drawer.', 'info');
+                log('Check :: Column finished.', 'info');
                 updateUI();
             }
         }
@@ -1098,52 +1116,11 @@
             updateUI();
         }
 
-        // ----------- Step 3 :: return drawer to trolley
-        async function returnDrawer() {
-            if (running || drawerAt != 'robot' || !takenFrom) { return; }
-            const t = takenFrom;
-            running = true;
-            updateUI();
-            setStatus('RETURNING', '#3b82f6');
-            log(`Return Drawer :: ${t.trolleyCode} side ${t.side} col ${t.col} row ${t.row}`, 'info');
-
-            let r = await api(`/api/PLCCalibration/PutAwayTrolley/${t.trolleyId}/${t.side}/${t.col}/${t.row}`);
-            if (!r.success) {
-                log('Return Drawer :: ' + r.errMessage, 'alert');
-                return finishRun('ERROR', '#e74c3c');
-            }
-            log('Return Drawer :: command sent', 'info');
-            pendingReturn = true;
-            await delay(5000);
-            await returnStatus();
-        }
-
-        // re-check return status only, without sending the command again
-        async function checkReturnStatus() {
-            if (running || !pendingReturn) { return; }
-            running = true;
-            updateUI();
-            setStatus('RETURNING', '#3b82f6');
-            await returnStatus();
-        }
-
-        async function returnStatus() {
-            const r = await api('/api/PLCCalibration/GetPutAwayStatus');
-            if (!r.success) {
-                log('Return Drawer Status :: ' + r.errMessage + ' (register ' + r.data + '). Check the robot, then press Check Status.', 'alert');
-                return finishRun('ERROR', '#e74c3c');
-            }
-            pendingReturn = false;
-            drawerAt = 'trolley';
-            takenFrom = null;
-            log('Return Drawer Status :: OK, drawer is back in the trolley', 'ok');
-            finishRun('IDLE', '#6b7280');
-        }
-
         // ----------- Export
         function exportResults() {
             if (slots.length == 0) { return; }
             const rows = slots.map(s => ({
+                'Trolley Slot': trolley ? trolleyText(trolley) : '',
                 'Row': s.rowNo,
                 'Slot': s.slotCode,
                 'Result': s.result,
@@ -1175,7 +1152,7 @@
                 return;
             }
             $("#pulseMsg").css("color", "#6b7280").text("Reading...");
-            const r = await api('/api/PLCTrolley/GetQRPulses/' + encodeURIComponent(slot) + '/' + (takenFrom ? takenFrom.trolleyId : 0));
+            const r = await api('/api/PLCTrolley/GetQRPulses/' + encodeURIComponent(slot) + '/' + (trolley ? trolley.trolleyId : 0));
             if (!r.success) {
                 $("#pulseMsg").css("color", "#ef4444").text(r.errMessage || "Failed to get pulses.");
                 return;

@@ -7,7 +7,8 @@ using RackingSystem.Models;
 
 namespace RackingSystem.Controllers.API
 {
-    // Calibration SRMS :: take a drawer from trolley, put away + retrieve at each slot of a column, return drawer.
+    // Calibration SRMS :: for each slot of a column, take a drawer from one trolley slot, put away, read QR,
+    // retrieve from the same slot, return drawer to the same trolley slot. The cycle is driven by CalibrationSRMS.cshtml.
     // Only moves the robot and reads status. No change to Slot / TrolleySlot / Reel data.
     [ApiController]
     [Route("api/[controller]")]
