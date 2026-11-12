@@ -1,6 +1,4 @@
-﻿using RackingSystem.Data.JO;
-
-namespace RackingSystem.Models.JO
+﻿namespace RackingSystem.Models.JO
 {
     public class JOEmergencyReqDTO
     {
@@ -8,9 +6,10 @@ namespace RackingSystem.Models.JO
         public string DocNo { get; set; } = "";
         public DateTime DocDate { get; set; } = new DateTime();
         public string Description { get; set; } = "";
+        public string Remark { get; set; } = "";
         public string Status { get; set; } = "";
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         public string CreatedBy { get; set; } = "";
-        public List<JobOrderEmergencyDetail> EmergencyDetails { get; set; }
+        public List<JOEmergencyDetailReqDTO> EmergencyDetails { get; set; }
     }
 }

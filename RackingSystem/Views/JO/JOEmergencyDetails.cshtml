@@ -151,6 +151,15 @@
                     <div id="txtdescError" class="error-message"></div>
                 </div>
             </div>
+
+            <div class="tw:pt-1">
+                <label class="tw:mb-1.5 tw:block tw:text-sm tw:font-medium tw:tracking-wide tw:text-gray-500 tw:dark:text-gray-400" for="txtRemark">Remark</label>
+                <input type="text" class="tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-4 tw:py-2.5 tw:text-sm tw:text-gray-800 tw:placeholder:text-gray-400 tw:placeholder:italic
+                        tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:disabled:bg-gray-50 tw:disabled:text-gray-500
+                        tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90 tw:dark:placeholder:text-white/30 tw:dark:focus:border-brand-800 tw:dark:disabled:bg-white/5 tw:dark:disabled:text-gray-400"
+                           id="txtRemark" placeholder="No remark" value="@Model.Remark" @(mode == "view" ? "disabled" : "")>
+                    <div id="txtRemarkError" class="error-message"></div>
+            </div>
         </div>
 
         <div class="tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:px-6 tw:py-4 tw:dark:border-gray-800 tw:dark:bg-white/[0.03]">
@@ -163,16 +172,17 @@
             </div>
 
             <div class="tw:flex tw:items-center tw:gap-3 tw:py-2 tw:px-4 tw:border-b tw:border-gray-100 tw:dark:border-gray-800">
-                <span class="tw:w-1/20 tw:text-sm tw:font-medium tw:tracking-wide tw:text-gray-400">#</span>
-                <span class="tw:w-15/20 tw:text-sm tw:font-medium tw:tracking-wide tw:text-gray-400">Product</span>
-                <span class="tw:w-3/20 tw:text-sm tw:font-medium tw:tracking-wide tw:text-gray-400">Quantity</span>
-                <span class="tw:w-1/20"></span>
+                <span class="tw:w-1/20 tw:shrink-0 tw:text-sm tw:font-medium tw:tracking-wide tw:text-gray-400">#</span>
+                <span class="tw:min-w-0 tw:flex-1 tw:text-sm tw:font-medium tw:tracking-wide tw:text-gray-400">Product</span>
+                <span class="tw:w-2/20 tw:shrink-0 tw:text-sm tw:font-medium tw:tracking-wide tw:text-gray-400">Quantity</span>
+                <span class="tw:w-2/20 tw:shrink-0 tw:text-sm tw:font-medium tw:tracking-wide tw:text-gray-400">Buffer Quantity</span>
+                <span class="tw:w-1/20 tw:shrink-0"></span>
             </div>
 
             <div id="itemContainer">
                 <div class="item tw:flex tw:gap-3 tw:border-b tw:border-gray-100 tw:px-4 tw:py-2 tw:dark:border-gray-800" data-index="1">
                     <div class="item-index tw:w-1/20 tw:flex tw:items-center tw:shrink-0 tw:text-sm tw:text-gray-400">1</div>
-                    <div class="tw:w-15/20">
+                    <div class="tw:min-w-0 tw:flex-1">
                         <div class="item-view tw:flex tw:items-center tw:gap-3" @(mode == "view" ? "" : "hidden")>
                             <div class="tw:flex tw:h-9 tw:w-9 tw:shrink-0 tw:items-center tw:justify-center tw:rounded-lg tw:bg-gray-100 tw:text-gray-500 tw:dark:bg-white/5 tw:dark:text-gray-400">
                                 <i class="bi bi-box-seam"></i>
@@ -210,7 +220,7 @@
                         <div id="subItem1Error" class="error-message"></div>
                     </div>
 
-                    <div class="tw:w-3/20">
+                    <div class="tw:w-2/20 tw:shrink-0">
                         <input type="number" class="tw:box-border tw:h-[40px] tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-3 tw:text-center tw:text-sm tw:font-medium tw:text-gray-800
                             tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:disabled:border-transparent tw:disabled:bg-gray-100
                             tw:disabled:font-medium tw:disabled:text-gray-700 tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90 tw:dark:disabled:bg-white/5 tw:dark:disabled:text-gray-300"
@@ -218,7 +228,15 @@
                         <div id="txtQty1Error" class="error-message"></div>
                     </div>
 
-                    <div class="tw:w-1/20">
+                    <div class="tw:w-2/20 tw:shrink-0">
+                        <input type="number" class="tw:box-border tw:h-[40px] tw:w-full tw:rounded-lg tw:border tw:border-gray-300 tw:bg-transparent tw:px-3 tw:text-center tw:text-sm tw:font-medium tw:text-gray-800
+                            tw:focus:border-brand-300 tw:focus:ring-3 tw:focus:ring-brand-500/10 tw:focus:outline-hidden tw:disabled:border-transparent tw:disabled:bg-gray-100
+                            tw:disabled:font-medium tw:disabled:text-gray-700 tw:dark:border-gray-700 tw:dark:bg-gray-900 tw:dark:text-white/90 tw:dark:disabled:bg-white/5 tw:dark:disabled:text-gray-300"
+                               id="txtBufferQty1" data-field="buffer" placeholder="0" @(mode == "view" ? "disabled" : "") required oninput="removeErrMsg(this.id)">
+                        <div id="txtBufferQty1Error" class="error-message"></div>
+                    </div>
+
+                    <div class="tw:w-1/20 tw:shrink-0">
                         <button class="remove-item-btn tw:box-border tw:inline-flex tw:h-[40px] tw:w-[40px] tw:items-center tw:justify-center tw:rounded-lg tw:border tw:border-gray-200 tw:bg-white tw:text-gray-400 tw:transition-colors
                             tw:hover:border-error-200 tw:hover:bg-error-50 tw:hover:text-error-600 tw:dark:border-gray-700 tw:dark:bg-white/[0.03]"
                                 type="button" onclick="removeItem(this)" title="Remove" @(mode == "view" ? "hidden" : "")>
@@ -418,6 +436,7 @@
                                 jobOrderEmergencyDetail_Id: i.jobOrderEmergencyDetail_Id,
                                 itemId: i.item_Id,
                                 qty: i.qty,
+                                bufferQty: i.bufferQty,
                             };
                         });
 
@@ -434,6 +453,7 @@
 
                                 select.value = dtl.itemId;
                                 qtyInput.value = dtl.qty;
+                                firstItem.querySelector('input[data-field="buffer"]').value = dtl.bufferQty ?? 0;
                                 detailId.value = dtl.jobOrderEmergencyDetail_Id;
                                 setItemViewLabel(firstItem, dtl.itemId);
                                 refreshCustomSelect(select.id);
@@ -489,15 +509,18 @@
 
             const select = newItem.querySelector("select");
             const qtyInput = newItem.querySelector('input[type="number"]');
+            const bufferInput = newItem.querySelector('input[data-field="buffer"]');
             const detailId = newItem.querySelector('input[type="hidden"]');
 
             const newItemIndex = index;
             select.id = `subItem${newItemIndex}`;
             qtyInput.id = `txtQty${newItemIndex}`;
+            bufferInput.id = `txtBufferQty${newItemIndex}`;
             detailId.id = `txtJobEDtlId${newItemIndex}`;
 
             select.value = isEditing == true ? dtl.itemId : "";
             qtyInput.value = isEditing == true ? dtl.qty : "";
+            bufferInput.value = isEditing == true ? (dtl.bufferQty ?? 0) : "";
             detailId.value = isEditing == true ? dtl.jobOrderEmergencyDetail_Id : "";
             if (isEditing == true) {
                 setItemViewLabel(newItem, dtl.itemId);
@@ -507,9 +530,11 @@
             errBlock1.id = `subItem${newItemIndex}Error`;
             const errBlock2 = newItem.querySelector(`#txtQty${dataIdx}Error`);
             errBlock2.id = `txtQty${newItemIndex}Error`;
+            const errBlock3 = newItem.querySelector(`#txtBufferQty${dataIdx}Error`);
+            errBlock3.id = `txtBufferQty${newItemIndex}Error`;
 
             container.appendChild(newItem);
-            removeErrMsg([`subItem${newItemIndex}`, `txtQty${newItemIndex}`]);
+            removeErrMsg([`subItem${newItemIndex}`, `txtQty${newItemIndex}`, `txtBufferQty${newItemIndex}`]);
 
         };
 
@@ -567,9 +592,11 @@
             let isValid = true;
 
             items.forEach(item => {
-                removeErrMsg([item.querySelector("select").id, item.querySelector('input[type="number"]').id]);
+                const bufferInput = item.querySelector('input[data-field="buffer"]');
+                removeErrMsg([item.querySelector("select").id, item.querySelector('input[type="number"]').id, bufferInput.id]);
                 const subitem = item.querySelector("select").value;
                 const qty = item.querySelector('input[type="number"]').value;
+                const bufferQty = bufferInput.value;
                 const jobEDtlId = item.querySelector('input[type="hidden"]').value;
 
                 if (!subitem) {
@@ -580,12 +607,17 @@
                     isValid = false;
                     showError(item.querySelector('input[type="number"]').id, "Please enter a valid quantity (number >= 1)");
                 }
+                if (bufferQty !== '' && (isNaN(bufferQty) || bufferQty < 0)) {
+                    isValid = false;
+                    showError(bufferInput.id, "Please enter a valid buffer quantity (number >= 0)");
+                }
 
                 formData.push({
                     jobOrderEmergencyDetail_Id: parseInt(jobEDtlId) || 0,
                     jobOrderEmergency_Id: parseInt(@Model.JobOrderEmergency_Id) || 0,
                     Item_Id: parseInt(subitem),
-                    Qty: parseInt(qty)
+                    Qty: parseInt(qty),
+                    BufferQty: parseInt(bufferQty) || 0,
                 });
             });
 
@@ -593,6 +625,7 @@
                var jobData = {
                     JobOrderEmergency_Id: parseInt(@Model.JobOrderEmergency_Id) || 0,
                     Description: $('#txtdesc').val(),
+                    Remark: $('#txtRemark').val(),
                     EmergencyDetails: formData,
                 };
 

@@ -369,6 +369,26 @@ namespace RackingSystem.Services.JOServices
             return result;
         }
 
+        public async Task<ServiceResponseModel<List<JOEmergencyReqDTO>>> GetJOEList_PendingToQueue()
+        {
+            ServiceResponseModel<List<JOEmergencyReqDTO>> result = new ServiceResponseModel<List<JOEmergencyReqDTO>>();
+
+            try
+            {
+                var jomListEmergency = await _dbContext.JobOrderEmergency.Where(x => x.Status == EnumJobOrderStatus.Draft.ToString()).OrderBy(x => x.JobOrderEmergency_Id).ToListAsync();
+                var jomListEmergencyDTO = _mapper.Map<List<JOEmergencyReqDTO>>(jomListEmergency);
+
+                result.success = true;
+                result.data = jomListEmergencyDTO;
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+            return result;
+        }
+
         public async Task<ServiceResponseModel<List<JOEmergencyDetailReqDTO>>> GetJOEmergencyDetail(long jobEId)
         {
             ServiceResponseModel<List<JOEmergencyDetailReqDTO>> result = new ServiceResponseModel<List<JOEmergencyDetailReqDTO>>();
@@ -410,15 +430,16 @@ namespace RackingSystem.Services.JOServices
                     index++;
                 }
 
-                var aggregatedSubItems = jobEmergency.EmergencyDetails
-                    .GroupBy(x => x.Item_Id)
-                    .Select(g => new
-                    {
-                        Item_Id = g.Key,
-                        Qty = g.Sum(x => x.Qty),
-                        JobOrderEmergencyDetail_Id = g.First().JobOrderEmergencyDetail_Id,
-                        JobOrderEmergency_Id = g.First().JobOrderEmergency_Id,
-                    }).ToList();
+                //var aggregatedSubItems = jobEmergency.EmergencyDetails
+                //    .GroupBy(x => x.Item_Id)
+                //    .Select(g => new
+                //    {
+                //        Item_Id = g.Key,
+                //        Qty = g.Sum(x => x.Qty),
+                //        BufferQty = g.Sum(x => x.Qty),
+                //        JobOrderEmergencyDetail_Id = g.First().JobOrderEmergencyDetail_Id,
+                //        JobOrderEmergency_Id = g.First().JobOrderEmergency_Id,
+                //    }).ToList();
 
                 if (jobEmergency.JobOrderEmergency_Id == 0)
                 {
@@ -433,6 +454,7 @@ namespace RackingSystem.Services.JOServices
                     {
                         DocNo = jobOrderEmergency.data,
                         Description = string.IsNullOrEmpty(jobEmergency.Description) ? "" : jobEmergency.Description,
+                        Remark = string.IsNullOrEmpty(jobEmergency.Remark) ? "" : jobEmergency.Remark,
                         Status = EnumJobOrderStatus.Draft.ToString(),
                         DocDate = DateTime.Now,
                         CreatedBy = jobEmergency.CreatedBy,
@@ -441,14 +463,15 @@ namespace RackingSystem.Services.JOServices
                     _dbContext.JobOrderEmergency.Add(_jobE);
                     await _dbContext.SaveChangesAsync();
 
-                    foreach (var dtl in aggregatedSubItems)
+                    foreach (var dtl in jobEmergency.EmergencyDetails)
                     {
                         JobOrderEmergencyDetail _jobEDtl = new JobOrderEmergencyDetail()
                         {
                             JobOrderEmergency_Id = _jobE.JobOrderEmergency_Id,
                             Item_Id = dtl.Item_Id,
                             Qty = dtl.Qty,
-                            BalQty = dtl.Qty,
+                            BufferQty = dtl.BufferQty,
+                            BalQty = dtl.Qty + dtl.BufferQty,
                         };
                         _dbContext.JobOrderEmergencyDetail.Add(_jobEDtl);
                     }
@@ -472,6 +495,7 @@ namespace RackingSystem.Services.JOServices
                     }
 
                     _jobE.Description = string.IsNullOrEmpty(jobEmergency.Description) ? "" : jobEmergency.Description;
+                    _jobE.Remark = string.IsNullOrEmpty(jobEmergency.Remark) ? "" : jobEmergency.Remark;
                     _jobE.CreatedBy = jobEmergency.CreatedBy;
                     _dbContext.JobOrderEmergency.Update(_jobE);
 
@@ -487,7 +511,7 @@ namespace RackingSystem.Services.JOServices
                     }
 
                     //update the latest detail
-                    foreach (var dtl in aggregatedSubItems)
+                    foreach (var dtl in jobEmergency.EmergencyDetails)
                     {
                         if (dtl.JobOrderEmergencyDetail_Id == 0)
                         {
@@ -496,7 +520,8 @@ namespace RackingSystem.Services.JOServices
                                 JobOrderEmergency_Id = _jobE.JobOrderEmergency_Id,
                                 Item_Id = dtl.Item_Id,
                                 Qty = dtl.Qty,
-                                BalQty = dtl.Qty,
+                                BufferQty = dtl.BufferQty,
+                                BalQty = dtl.Qty + dtl.BufferQty,
                             };
                             _dbContext.JobOrderEmergencyDetail.Add(_jobEDtl);
                         }
@@ -511,7 +536,8 @@ namespace RackingSystem.Services.JOServices
 
                             _jobEDtl.Item_Id = dtl.Item_Id;
                             _jobEDtl.Qty = dtl.Qty;
-                            _jobEDtl.BalQty = dtl.Qty;
+                            _jobEDtl.BufferQty = dtl.BufferQty;
+                            _jobEDtl.BalQty = dtl.Qty + dtl.BufferQty;
                             _dbContext.JobOrderEmergencyDetail.Update(_jobEDtl);
                         }
                     }
@@ -531,6 +557,147 @@ namespace RackingSystem.Services.JOServices
                 result.errMessage = ex.Message;
                 result.errStackTrace = ex.StackTrace ?? "";
             }
+            return result;
+        }
+
+        private static void AddEmergencyDtlError(JOEmergencyDetailReqDTO dtl, string message, params string[] fields)
+        {
+            dtl.ErrorMsg = dtl.ErrorMsg == "" ? message : dtl.ErrorMsg + " " + message;
+
+            foreach (var field in fields)
+            {
+                if (!dtl.ErrorFields.Contains(field)) dtl.ErrorFields.Add(field);
+            }
+        }
+
+        public async Task<ServiceResponseModel<JOEmergencyReqDTO>> SaveExcelEmergency(JOEmergencyReqDTO jobEmergency)
+        {
+            ServiceResponseModel<JOEmergencyReqDTO> result = new ServiceResponseModel<JOEmergencyReqDTO>();
+            List<JOEmergencyDetailReqDTO> errorsLine = new List<JOEmergencyDetailReqDTO>();
+
+            try
+            {
+                if (jobEmergency != null && jobEmergency.EmergencyDetails != null && jobEmergency.EmergencyDetails.Count > 0)
+                {
+                    string description = (jobEmergency.Description ?? "").Trim();
+                    if (description.Length > 255)
+                    {
+                        result.errMessage = "Description cannot exceed 255 characters.";
+                        return result;
+                    }
+                    string remark = (jobEmergency.Remark ?? "").Trim();
+                    if (remark.Length > 255)
+                    {
+                        result.errMessage = "Remark cannot exceed 255 characters.";
+                        return result;
+                    }
+
+                    List<JobOrderEmergencyDetail> validDetails = new List<JobOrderEmergencyDetail>();
+
+                    foreach (var dtl in jobEmergency.EmergencyDetails)
+                    {
+                        bool isError = false;
+
+                        string itemCode = (dtl.ItemCode ?? "").Trim();
+                        Item? iExist = null;
+                        if (itemCode != "")
+                        {
+                            iExist = _dbContext.Item.FirstOrDefault(x => x.ItemCode == itemCode);
+                        }
+
+                        if (itemCode == "")
+                        {
+                            AddEmergencyDtlError(dtl, "Item Code cannot be empty.", "ItemCode");
+                            isError = true;
+                        }
+                        else if (iExist == null)
+                        {
+                            AddEmergencyDtlError(dtl, $"Item Code: {itemCode} not found.", "ItemCode");
+                            isError = true;
+                        }
+                        else if (!iExist.IsActive)
+                        {
+                            AddEmergencyDtlError(dtl, $"Item Code: {itemCode} is not active.", "ItemCode");
+                            isError = true;
+                        }
+                        else if (iExist.IsFinishGood)
+                        {
+                            AddEmergencyDtlError(dtl, $"Item Code: {itemCode} is a finished good, only raw items are allowed.", "ItemCode");
+                            isError = true;
+                        }
+                        if (dtl.Qty <= 0)
+                        {
+                            AddEmergencyDtlError(dtl, "Qty must be more than 0.", "Qty");
+                            isError = true;
+                        }
+
+                        if (!isError)
+                        {
+                            JobOrderEmergencyDetail _jobEDtl = new JobOrderEmergencyDetail()
+                            {
+                                Item_Id = iExist!.Item_Id,
+                                Qty = dtl.Qty,
+                                BufferQty = dtl.BufferQty,
+                                BalQty = dtl.Qty + dtl.BufferQty,
+                            };
+                            validDetails.Add(_jobEDtl);
+                        }
+                        else
+                        {
+                            errorsLine.Add(dtl);
+                        }
+                    }
+
+                    if (errorsLine.Any())
+                    {
+                        jobEmergency.EmergencyDetails = errorsLine;
+                        result.success = false;
+                        result.errMessage = "Some rows failed validation.";
+                        result.data = jobEmergency;
+                    }
+                    else
+                    {
+                        var jobOrderEmergency = await DocFormatHelper.Instance.get_NextDocumentNo(_dbContext, General.EnumConfiguration.DocFormat_EmergencyJO, DateTime.Now, true);
+                        if (jobOrderEmergency.success == false || string.IsNullOrEmpty(jobOrderEmergency.data))
+                        {
+                            result.errMessage = string.IsNullOrEmpty(jobOrderEmergency.errMessage) ? "Please check on Configuration > Doc Format." : jobOrderEmergency.errMessage;
+                            return result;
+                        }
+
+                        JobOrderEmergency _jobE = new JobOrderEmergency()
+                        {
+                            DocNo = jobOrderEmergency.data,
+                            Description = description,
+                            Remark = remark,
+                            Status = EnumJobOrderStatus.Draft.ToString(),
+                            DocDate = DateTime.Now,
+                            CreatedBy = "Import by Excel",
+                            CreatedDate = DateTime.Now,
+                        };
+                        _dbContext.JobOrderEmergency.Add(_jobE);
+                        await _dbContext.SaveChangesAsync();
+
+                        foreach (var detail in validDetails)
+                        {
+                            detail.JobOrderEmergency_Id = _jobE.JobOrderEmergency_Id;
+                        }
+                        _dbContext.JobOrderEmergencyDetail.AddRange(validDetails);
+                        await _dbContext.SaveChangesAsync();
+
+                        result.success = true;
+                    }
+                }
+                else
+                {
+                    result.errMessage = "The file could not be read. Please check that the Qty column only contains whole numbers.";
+                }
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
             return result;
         }
 

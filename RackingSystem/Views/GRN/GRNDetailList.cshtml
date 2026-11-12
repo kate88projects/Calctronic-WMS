@@ -444,14 +444,6 @@
                                     data: null,
                                     className: cellClass, 
                                     render: function (data, type, row, meta) {
-                                        // if (row.createdDateDisplay == row.updatedDateDisplay) {
-                                        //     return `<p style="margin:0;">${row.createdDateDisplay}</p>`;
-                                        // }
-                                        // else {
-                                        //     return '<p style="margin:0;"><span>' + row.updatedDateDisplay + '</span><br/>' +
-                                        //     '<span style="font-size:13px;color:grey;">' + row.createdDateDisplay + '</span></p>';
-                                        // }
-                                        // The stored procedure's createdDateDisplay is month-first (MM/dd/yyyy), format the date here.
                                         return type === 'display' ? (formatDisplayDateTime(row.createdDate) || row.createdDateDisplay) : row.createdDate;
                                     }
                                 },
@@ -459,14 +451,14 @@
                                     data: null,
                                     className: 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6',
                                     render: function (data, type, row, meta) {
-                                        // console.log(row);
                                         const rowData = JSON.stringify(row).replace(/"/g, "&quot;");
-                                        return ` <div class="tw:flex tw:items-center tw:gap-2">
+                                        const editBtn = row.reelStatus === 'WaitingLoader' ? `
                                             <button class="edit-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-amber-50 tw:font-medium tw:text-amber-600
                                                 tw:transition-colors tw:hover:bg-amber-100 tw:dark:bg-amber-500/15 tw:dark:text-amber-400 tw:dark:hover:bg-amber-500/25" data-row="${rowData}">
                                                 <i class="bi bi-pencil-square"></i>
                                                 Edit
-                                            </button>
+                                            </button>` : '';
+                                        return ` <div class="tw:flex tw:items-center tw:gap-2">${editBtn}
                                             <button class="tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-brand-50 tw:font-medium tw:text-brand-600
                                                 tw:transition-colors tw:hover:bg-brand-100 tw:dark:bg-brand-500/15 tw:dark:text-brand-400 tw:dark:hover:bg-brand-500/25" id="printQR"
                                                 data-reelcode="${row.reelCode}" onclick="printQR(this)" data-bs-toggle="tooltip" title="Print QR">

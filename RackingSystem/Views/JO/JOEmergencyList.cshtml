@@ -17,9 +17,24 @@
     </header>
 } *@
 
+@{
+    string menuItemClass = "tw:block tw:rounded-lg tw:px-3 tw:py-2 tw:text-sm tw:text-gray-700 tw:no-underline tw:hover:bg-gray-100 tw:dark:text-gray-300 tw:dark:hover:bg-white/5";
+}
+
 <div class="tw:flex tw:w-full tw:items-center tw:justify-between">
     <h2 class="tw:text-lg tw:mb-0 tw:ml-2 tw:font-semibold tw:text-gray-800 tw:dark:text-white/90">Emergency JOB Order List</h2>
-    <div class="tw:flex">
+    <div class="tw:flex tw:items-center tw:gap-2">
+        <div class="tw:relative" x-data="{ importOpen: false }" @@click.outside="importOpen = false">
+            <button type="button" class="tw:rounded-lg tw:border-0 tw:bg-yellow-400 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:hover:bg-yellow-500" @@click="importOpen = !importOpen">
+                Import
+                <i class="bi bi-chevron-down tw:text-xs"></i>
+            </button>
+            <div x-show="importOpen" x-cloak class="tw:shadow-theme-lg tw:absolute tw:right-0 tw:z-10 tw:mt-2 tw:w-64 tw:rounded-xl tw:border tw:border-gray-200 tw:bg-white tw:p-2 tw:dark:border-gray-800 tw:dark:bg-gray-900">
+                <a href="#" class="@menuItemClass" id="dTemp" onclick="downloadTemp()" @@click="importOpen = false">Download Template</a>
+                <a href="#" class="@menuItemClass" onclick="triggerFileInput()" @@click="importOpen = false">Import Emergency JO by Excel</a>
+            </div>
+        </div>
+        <input type="file" id="fileInput" accept=".xlsx" class="tw:hidden" onchange="handleFileUpload(event)">
         <button type="button" class="tw:border-0 tw:inline-flex tw:items-center tw:gap-2 tw:rounded-lg tw:bg-brand-500 tw:px-4 tw:py-2.5 tw:text-sm tw:font-medium tw:text-white tw:transition
             tw:hover:bg-brand-600" onclick="navigateToNew('new')">
             Add New Emergency JOB
@@ -53,9 +68,11 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="../js/dataTables.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
+    <script src="../js/exceljs.min.js"></script>
 
     <script type="text/javascript">
         let gridInstance = null;
+        let originalFileContent = null;
 
         $(document).ready(function() {
             loadList();
@@ -285,6 +302,306 @@
                 } else {
                     return;
                 }
+            });
+        }
+
+        function downloadTemp() {
+            var workbook = new ExcelJS.Workbook();
+            workbook.creator = "Flex Software Consulting Sdn Bhd";
+            workbook.created = new Date();
+            workbook.properties.title = "Template";
+            workbook.properties.subject = "Import Emergency JO";
+
+            var worksheet = workbook.addWorksheet("Sheet1");
+            var jo_header = [
+                ["Description", "Remark"],
+                [],
+                [],
+                ["Item Code", "Qty", "Buffer Qty"]
+            ];
+
+            jo_header.forEach(function(row) {
+                worksheet.addRow(row);
+            });
+            worksheet.columns = [
+                { width: 30 },
+                { width: 15 }
+            ];
+
+            worksheet.getRow(1).font = { name: 'Calibri', size: 11, bold: true };
+            worksheet.getRow(4).font = { name: 'Calibri', size: 11, bold: true };
+
+            const starred = title => ({ richText: [
+                { text: title, font: { name: 'Calibri', size: 11, bold: true } },
+                { text: ' *', font: { name: 'Calibri', size: 11, bold: true, color: { argb: 'FFFF0000' } } }
+            ] });
+
+            worksheet.getCell('A4').value = starred('Item Code');
+            worksheet.getCell('B4').value = starred('Qty');
+
+            workbook.xlsx.writeBuffer().then(function(buffer) {
+                var blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+                var link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = "EmergencyJO_Template.xlsx";
+                link.click();
+                URL.revokeObjectURL(link.href);
+            }).catch(function(err) {
+                console.error("Error creating Excel file:", err);
+            });
+        }
+
+        function triggerFileInput() {
+            document.getElementById('fileInput').click();
+        }
+
+        function handleFileUpload(event) {
+            const input = event.target;
+            const file = input.files[0];
+
+            if (!file) return;
+
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+            if (fileExtension !== 'xlsx') {
+                alert("Only XLSX files are supported.");
+                input.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                originalFileContent = content;
+                processFileContent(content)
+                    .then((excelData) => {
+                        if (excelData)
+                            saveExcelEmergency(excelData);
+                    })
+                    .catch((err) => {
+                        console.error("Error processing the file:", err);
+                    })
+                    .finally(function() {
+                        input.value = '';
+                    });
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function cellText(cell) {
+            const v = cell.value;
+            if (v === null || v === undefined) return "";
+            if (typeof v === "object") {
+                if (v.richText) 
+                    return v.richText.map(t => t.text).join("").trim();
+                if (v.result !== undefined && v.result !== null) 
+                    return String(v.result).trim();
+                if (v.text !== undefined) 
+                    return String(v.text).trim();
+            }
+            return String(v).trim();
+        }
+
+        function headerText(cell) {
+            return cellText(cell).replace(/\*/g, "").trim().toLowerCase();
+        }
+
+        function processFileContent(arraybuffer) {
+            const workbook = new ExcelJS.Workbook();
+            return workbook.xlsx.load(arraybuffer).then(function() {
+                const worksheet = workbook.worksheets[0];
+
+                if (!worksheet) {
+                    alert("The upload file appears to be empty.");
+                    return;
+                }
+
+                const description = cellText(worksheet.getRow(2).getCell(1));
+                const remark = cellText(worksheet.getRow(2).getCell(2));
+
+                let headerRow = -1;
+                for (let r = 1; r <= 50; r++) {
+                    if (headerText(worksheet.getRow(r).getCell(1)) === "item code") {
+                        headerRow = r;
+                        break;
+                    }
+                }
+
+                if (headerRow === -1) {
+                    alert("Invalid template: 'Item Code' header not found.");
+                    return;
+                }
+
+                const details = [];
+                const errors = [];
+                for (let rowNum = headerRow + 1; rowNum <= worksheet.rowCount; rowNum++) {
+                    const row = worksheet.getRow(rowNum);
+                    const itemCode = cellText(row.getCell(1));
+                    const qtyText = cellText(row.getCell(2)).replace(/,/g, "");
+                    const bufferText = cellText(row.getCell(3)).replace(/,/g, "");
+
+                    if (itemCode === "" && qtyText === "") continue;
+
+                    let qty = 0;
+                    if (qtyText !== "") {
+                        qty = Number(qtyText);
+                        if (!Number.isInteger(qty)) {
+                            errors.push(`Row ${rowNum}: Qty [${qtyText}] must be a whole number`);
+                            qty = 0;
+                        }
+                    }
+                    let bufferQty = 0;
+                    if (bufferText !== "") {
+                        bufferQty = Number(bufferText);
+                        if (!Number.isInteger(bufferQty)) {
+                            errors.push(`Row ${rowNum}: Qty [${bufferText}] must be a whole number`);
+                            bufferQty = 0;
+                        }
+                    }
+
+                    details.push({ ExcelRow: rowNum, ItemCode: itemCode, Qty: qty, BufferQty: bufferQty });
+                }
+
+                if (errors.length > 0) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: errors.slice(0, 10).join('; ') + (errors.length > 10 ? ` ... and ${errors.length - 10} more` : '')
+                    });
+                    return;
+                }
+
+                if (details.length === 0) {
+                    alert("No items found.");
+                    return;
+                }
+
+                return {
+                    Description: description,
+                    Remark: remark,
+                    EmergencyDetails: details
+                };
+            });
+        }
+
+        function saveExcelEmergency(excelData) {
+            $.ajax({
+                url: '/JO/SaveExcelEmergency',
+                type: 'POST',
+                data: JSON.stringify(excelData),
+                dataType: 'JSON',
+                contentType: 'application/json; charset=utf-8',
+                beforeSend: function () {
+                    Swal.fire({
+                        text: 'Please Wait',
+                        width: '300px',
+                        allowEscapeKey: false,
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                    });
+                    Swal.showLoading()
+                },
+                success: function (result) {
+                    if (result.success == true) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: "Success Import",
+                            text: "",
+                            didClose: () => {
+                                window.location.reload();
+                            }
+                        });
+                    }
+                    else {
+                        if (result.data && result.data.emergencyDetails && result.data.emergencyDetails.length > 0) {
+                            generateErrorExcelFile(originalFileContent, result.data);
+                            Swal.fire({
+                                icon: 'warning',
+                                title: "Validation Issues Found",
+                                text: "Review on returned file and fix errors."
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: "Wait",
+                                text: result.errMessage
+                            });
+                        }
+                    }
+                },
+                error: function (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: "Wait",
+                        text: "Failed to import the file. Please try again."
+                    });
+                }
+            });
+        }
+
+        function generateErrorExcelFile(buffer, errorData) {
+            const workbook = new ExcelJS.Workbook();
+            workbook.xlsx.load(buffer).then(() => {
+                var worksheet = workbook.worksheets[0];
+                var headerRowNumber = -1;
+                for (let r = 1; r <= 50; r++) {
+                    if (headerText(worksheet.getCell(`A${r}`)) === "item code") {
+                        headerRowNumber = r;
+                        break;
+                    }
+                }
+
+                if (headerRowNumber === -1) {
+                    alert("Header 'item code' not found");
+                    return;
+                }
+
+                let lastCol = 1;
+                for (let c = 1; c <= 20; c++) {
+                    const h = headerText(worksheet.getRow(headerRowNumber).getCell(c));
+                    if (h !== "" && h !== "error message") lastCol = c;
+                }
+                const errCol = lastCol + 1;
+
+                const headerCell = worksheet.getCell(headerRowNumber, errCol);
+                headerCell.value = "Error Message";
+                headerCell.font = { name: 'Calibri', size: 11, bold: true };
+
+                const errorFill = {
+                    type: "pattern",
+                    pattern: "solid",
+                    fgColor: { argb: "FFFFC7CE" }
+                };
+                const errorFont = { name: 'Calibri', size: 10, color: { argb: "FF9C0006" } };
+
+                errorData.emergencyDetails.forEach(dtl => {
+                    if (dtl.errorMsg) {
+                        const rowNumber = dtl.excelRow;
+                        const cell = worksheet.getCell(rowNumber, errCol);
+                        cell.value = dtl.errorMsg;
+                        cell.fill = errorFill;
+                        cell.font = errorFont;
+
+                        (dtl.errorFields || []).forEach(field => {
+                            const col = field === "Qty" ? "B" : "A";
+                            worksheet.getCell(`${col}${rowNumber}`).fill = errorFill;
+                        });
+                    }
+                });
+
+                worksheet.getColumn(errCol).width = 60;
+
+                workbook.xlsx.writeBuffer().then(function(buffer) {
+                    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `EmergencyJO_Errors_${new Date().toISOString().slice(0,10)}.xlsx`;
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                });
+
+            }).catch(err => {
+                console.error("Error loading workbook:", err);
             });
         }
     </script>

@@ -116,6 +116,7 @@ namespace RackingSystem.Controllers
         public async Task<IActionResult> Logout()
         {
             //await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync("MyAuthCookie");
             await _signInManager.SignOutAsync();
             return RedirectToAction("Login", "Account");
         }

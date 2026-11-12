@@ -13,8 +13,10 @@ namespace RackingSystem.Services.JOServices
 
         public Task<ServiceResponseModel<JOEmergencyReqDTO>> GetJOEmergency(long id);
         public Task<ServiceResponseModel<List<JOEmergencyReqDTO>>> GetJOEmergencyList();
+        public Task<ServiceResponseModel<List<JOEmergencyReqDTO>>> GetJOEList_PendingToQueue();
         public Task<ServiceResponseModel<List<JOEmergencyDetailReqDTO>>> GetJOEmergencyDetail(long jobEId);
         public Task<ServiceResponseModel<JOEmergencyReqDTO>> SaveEmergency(JOEmergencyReqDTO jobEmergency);
+        public Task<ServiceResponseModel<JOEmergencyReqDTO>> SaveExcelEmergency(JOEmergencyReqDTO jobEmergency);
         public Task<ServiceResponseModel<JOEmergencyReqDTO>> DeleteEmergency(JOEmergencyReqDTO jobEmergency);
 
         public Task<ServiceResponseModel<List<JORawMaterialStockCheckDTO>>> CheckJORawMaterialStock(long jobOrderId, bool includeQueue = true, bool includeEmergency = true, bool includeLoader = true);

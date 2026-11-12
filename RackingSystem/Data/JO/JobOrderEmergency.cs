@@ -20,6 +20,9 @@ namespace RackingSystem.Data.JO
         [MaxLength(255)]
         public string Description { get; set; } = "";
 
+        [MaxLength(255)]
+        public string Remark { get; set; } = "";
+
         [MaxLength(20)]
         public string Status { get; set; } = "";
 

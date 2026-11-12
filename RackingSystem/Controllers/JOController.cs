@@ -289,6 +289,13 @@ namespace RackingSystem.Controllers
             return result;
         }
 
+        [HttpGet]
+        public async Task<ServiceResponseModel<List<JOEmergencyReqDTO>>> GetJOEList_PendingToQueue()
+        {
+            ServiceResponseModel<List<JOEmergencyReqDTO>> result = await _joService.GetJOEList_PendingToQueue();
+            return result;
+        }
+
         [HttpPost]
         public async Task<ServiceResponseModel<List<JOEmergencyDetailReqDTO>>> GetJOEmergencyDetail([FromBody] long joEId)
         {
@@ -300,6 +307,13 @@ namespace RackingSystem.Controllers
         public async Task<IActionResult> SaveEmergency([FromBody] JOEmergencyReqDTO jobEmergency)
         {
             ServiceResponseModel<JOEmergencyReqDTO> result = await _joService.SaveEmergency(jobEmergency);
+            return new JsonResult(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveExcelEmergency([FromBody] JOEmergencyReqDTO jobEmergency)
+        {
+            ServiceResponseModel<JOEmergencyReqDTO> result = await _joService.SaveExcelEmergency(jobEmergency);
             return new JsonResult(result);
         }
 
