@@ -171,6 +171,11 @@
                                   render: function (data, type, row, meta) {
                                       const rawData = JSON.stringify(row).replace(/"/g, "&quot;");
                                       return `<div class="tw:flex tw:items-center tw:gap-2">
+                                          <button class="view-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-taupe-200 tw:font-medium tw:text-taupe-600
+                                              tw:transition-colors tw:hover:bg-taupe-300 tw:dark:bg-taupe-500/15 tw:dark:text-taupe-400 tw:dark:hover:bg-taupe-500/25" data-row='${rawData}' onclick="navigateToSimulate(${row.jobOrderEmergency_Id})">
+                                              <i class="bi bi-boxes"></i>
+                                              Simulate
+                                          </button>
                                           <button class="view-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-brand-50 tw:font-medium tw:text-brand-600
                                               tw:transition-colors tw:hover:bg-brand-100 tw:dark:bg-brand-500/15 tw:dark:text-brand-400 tw:dark:hover:bg-brand-500/25" data-row='${rawData}' onclick="navigateToView(${row.jobOrderEmergency_Id}, 'view')">
                                               <i class="bi bi-eye"></i> 

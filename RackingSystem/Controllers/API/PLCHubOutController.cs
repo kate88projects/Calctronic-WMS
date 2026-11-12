@@ -427,7 +427,7 @@ namespace RackingSystem.Controllers.API
                 }
                 else
                 {
-                    reel = _dbContext.Reel.Where(x => x.Item_Id == item.Item_Id && x.IsReady == true && x.ExpiryDate > DateTime.Today).OrderBy(x => x.ExpiryDate).FirstOrDefault();
+                    reel = _dbContext.Reel.Where(x => x.Item_Id == item.Item_Id && x.IsReady == true && x.ExpiryDate > DateTime.Today && x.Qty >= item.Qty).OrderBy(x => x.ExpiryDate).FirstOrDefault();
                     if (reel == null)
                     {
                         MarkRetrieveFailed(rackJob.DocType, item.Detail_Id);
@@ -1183,7 +1183,8 @@ namespace RackingSystem.Controllers.API
                 }
                 else
                 {
-                    var itmFirst = _dbContext.JobOrderEmergencyDetail.Where(x => x.JobOrderEmergency_Id == Convert.ToInt64(dtlId)).FirstOrDefault();
+                    long _dtlid = Convert.ToInt64(dtlId);
+                    var itmFirst = _dbContext.JobOrderEmergencyDetail.Where(x => x.JobOrderEmergencyDetail_Id == _dtlid).FirstOrDefault();
                     if (itmFirst != null)
                     {
                         itmFirst.BalQty = 0;
