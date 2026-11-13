@@ -455,14 +455,7 @@
                             qty = 0;
                         }
                     }
-                    let bufferQty = 0;
-                    if (bufferText !== "") {
-                        bufferQty = Number(bufferText);
-                        if (!Number.isInteger(bufferQty)) {
-                            errors.push(`Row ${rowNum}: Qty [${bufferText}] must be a whole number`);
-                            bufferQty = 0;
-                        }
-                    }
+                    const bufferQty = Math.max(0, parseInt(bufferText, 10) || 0);
 
                     details.push({ ExcelRow: rowNum, ItemCode: itemCode, Qty: qty, BufferQty: bufferQty });
                 }
@@ -568,9 +561,13 @@
                 }
                 const errCol = lastCol + 1;
 
+                const setStyle = (cell, props) => {
+                    cell.style = Object.assign({}, cell.style, props);
+                };
+
                 const headerCell = worksheet.getCell(headerRowNumber, errCol);
                 headerCell.value = "Error Message";
-                headerCell.font = { name: 'Calibri', size: 11, bold: true };
+                setStyle(headerCell, { font: { name: 'Calibri', size: 11, bold: true } });
 
                 const errorFill = {
                     type: "pattern",
@@ -584,12 +581,11 @@
                         const rowNumber = dtl.excelRow;
                         const cell = worksheet.getCell(rowNumber, errCol);
                         cell.value = dtl.errorMsg;
-                        cell.fill = errorFill;
-                        cell.font = errorFont;
+                        setStyle(cell, { fill: errorFill, font: errorFont });
 
                         (dtl.errorFields || []).forEach(field => {
                             const col = field === "Qty" ? "B" : "A";
-                            worksheet.getCell(`${col}${rowNumber}`).fill = errorFill;
+                            setStyle(worksheet.getCell(`${col}${rowNumber}`), { fill: errorFill });
                         });
                     }
                 });

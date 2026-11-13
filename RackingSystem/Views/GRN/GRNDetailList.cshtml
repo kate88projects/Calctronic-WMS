@@ -113,7 +113,7 @@
     </div>
 </div>
 
-<div class="modal fade" data-bs-backdrop="static" id="myEditModal" role="dialog">
+<div class="modal fade" data-bs-backdrop="static" data-bs-focus="false" id="myEditModal" role="dialog">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content tw:overflow-hidden tw:rounded-2xl tw:border-0 tw:bg-white tw:text-gray-700 tw:shadow-theme-lg tw:dark:bg-gray-900 tw:dark:text-gray-300">
             <div class="tw:border-b tw:border-gray-100 tw:px-6 tw:py-4 tw:dark:border-gray-800">
@@ -313,6 +313,8 @@
                         activeItems = result.data;
 
                         $('#itemTable').DataTable( {
+                            searching: true,
+                            responsive: true, 
                             ordering: false,
                             data: result.data,
                             paging: true,
@@ -603,6 +605,11 @@
             $('#txtItemStatus').val(mode);
             $('#itemModal').modal("show");
         }
+
+        document.getElementById('itemModal').addEventListener('shown.bs.modal', function () {
+            const search = document.querySelector('#itemModal input[type="search"]');
+            if (search) search.focus();
+        });
 
         $('#itemTable').on('click', '.addItem-btn', function() {
             const row = JSON.parse($(this).attr('data-row'));

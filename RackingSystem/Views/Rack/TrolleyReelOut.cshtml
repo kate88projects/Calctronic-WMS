@@ -660,14 +660,24 @@
                 else {
                   colResults.forEach(r => {
                     const btn = document.createElement('button');
-                    btn.className = 'w-full text-left px-3 py-3 mb-3 bg-gray-200 ' + hoverColorClass + ' text-gray-900 hover:text-white text-sm font-medium rounded-lg transition-colors truncate active:scale-95';
+                    btn.className = 'w-full text-left px-3 py-3 mb-1 bg-gray-200 ' + hoverColorClass + ' text-gray-900 hover:text-white text-sm font-medium rounded-lg transition-colors truncate active:scale-95';
                     btn.style.minHeight = '80px';
                     btn.style.touchAction = 'manipulation';
                     btn.title = `Col ${r.col} | Row ${String(r.row).padStart(2, '0')} — ${r.item.itemCode}`;
-                    btn.textContent = 'Row ' + r.row;
+                    // btn.textContent = "Row " + r.row + "\n" + r.item.itemCode;
+
+                    const rowLine = document.createElement('span');
+                    rowLine.className = 'block';
+                    rowLine.textContent = 'Row ' + r.row;
+                    const codeLine = document.createElement('span');
+                    codeLine.className = 'text-xs text-pretty';
+                    codeLine.textContent = r.item.itemCode;
+                    btn.append(rowLine, codeLine);
+
                     btn.addEventListener('click', () => {
                       selectRowToRemove(r, results, searchTerm);
                     });
+
                     colWrapper.appendChild(btn);
                   });
                 }

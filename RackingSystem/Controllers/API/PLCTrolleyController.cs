@@ -1355,7 +1355,7 @@ namespace RackingSystem.Controllers.API
                     if (dtl.ColNo == 3 && dtl.IsLeft) { plcIp = tr.IPAdd3; }
 
                     int rowNo = 0;
-                    if (!dtl.IsLeft) { rowNo += 50; }
+                    if (dtl.IsLeft) { rowNo += 50; }
                     rowNo += dtl.RowNo -1; 
 
                     ModbusClient modbusClient = new ModbusClient(plcIp, port);

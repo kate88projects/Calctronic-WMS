@@ -637,8 +637,8 @@ namespace RackingSystem.Services.JOServices
                             {
                                 Item_Id = iExist!.Item_Id,
                                 Qty = dtl.Qty,
-                                BufferQty = dtl.BufferQty,
-                                BalQty = dtl.Qty + dtl.BufferQty,
+                                BufferQty = Math.Max(0, dtl.BufferQty),
+                                BalQty = dtl.Qty + Math.Max(0, dtl.BufferQty),
                             };
                             validDetails.Add(_jobEDtl);
                         }
