@@ -183,6 +183,13 @@ namespace RackingSystem.Controllers
             return result;
         }
 
+        [HttpGet]
+        public async Task<ServiceResponseModel<List<JOInsufficientDTO>>> GetJOInsufficientList(long jobId)
+        {
+            ServiceResponseModel<List<JOInsufficientDTO>> result = await _joService.GetJOInsufficientList(jobId);
+            return result;
+        }
+
         [HttpPost]
         public async Task<ServiceResponseModel<List<JODetailReqDTO>>> GetJODetail([FromBody] long jobId)
         {
@@ -279,6 +286,13 @@ namespace RackingSystem.Controllers
         public async Task<ServiceResponseModel<JOEmergencyReqDTO>> GetJOEmergency(long Id)
         {
             ServiceResponseModel<JOEmergencyReqDTO> result = await _joService.GetJOEmergency(Id);
+            return result;
+        }
+
+        [HttpGet]
+        public async Task<ServiceResponseModel<List<JOInsufficientDTO>>> GetJOEInsufficientList(long jobEId)
+        {
+            ServiceResponseModel<List<JOInsufficientDTO>> result = await _joService.GetJOEInsufficientList(jobEId);
             return result;
         }
 

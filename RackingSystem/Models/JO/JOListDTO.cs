@@ -30,6 +30,8 @@ namespace RackingSystem.Models.JO
 
         public bool Backorder { get; set; } = false;
 
+        public bool HasInsufficient { get; set; } = false;
+
         public int totalRecord { get; set; } = 0;
 
         public int page { get; set; } = 1;

@@ -1325,7 +1325,7 @@ namespace RackingSystem.Controllers.API
                     }
                     else
                     {
-                        bool allDone = !_dbContext.JobOrderEmergencyDetail.Any(x => x.JobOrderEmergency_Id == q.Doc_Id && x.BalQty > 0);
+                        bool allDone = !_dbContext.JobOrderEmergencyDetail.Any(x => x.JobOrderEmergency_Id == q.Doc_Id && x.BalQty > 0 && !x.RetrieveFailed);
                         if (allDone)
                         {
                             var jobEmergency = _dbContext.JobOrderEmergency.Where(x => x.JobOrderEmergency_Id == q.Doc_Id).FirstOrDefault();

@@ -34,6 +34,7 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="../js/dataTables.js"></script>
     <script src="~/js/sweetalert2.all.min.js"></script>
+    <script src="~/js/exceljs.min.js"></script>
 
     <script type="text/javascript">
         let itemIndex = 1;
@@ -192,7 +193,17 @@
                                     className: 'tw:px-5 tw:py-4 tw:whitespace-nowrap sm:tw:px-6',
                                     render: function (data, type, row, meta) {
                                         const rawData = JSON.stringify(row).replace(/"/g, "&quot;");
+                                        const insufficientBtn = (row.status === 'Done' && row.hasInsufficient)
+                                            ? `<button class="insufficient-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-orange-50 tw:font-medium tw:text-orange-600
+                                                    tw:transition-colors tw:hover:bg-orange-100 tw:dark:bg-orange-500/15 tw:dark:text-orange-400 tw:dark:hover:bg-orange-500/25" 
+                                                    style="height: 33px;padding: 5px 12px;font-size: 13px;border: none;" 
+                                                    data-id="${row.jobOrder_Id}" data-docno="${row.docNo}">
+                                                <i class="bi bi-exclamation-triangle"></i>
+                                                Report
+                                            </button>`
+                                            : '';
                                         return `<div class="tw:flex tw:items-center tw:gap-2">
+                                            ${insufficientBtn}
                                             <button class="view-btn tw:inline-flex tw:items-center tw:gap-1.5 tw:rounded-lg tw:bg-taupe-200 tw:font-medium tw:text-taupe-600
                                                 tw:transition-colors tw:hover:bg-taupe-300 tw:dark:bg-taupe-500/15 tw:dark:text-taupe-400 tw:dark:hover:bg-taupe-500/25" data-row='${rawData}' onclick="navigateToSimulate(${row.jobOrder_Id})">
                                                 <i class="bi bi-boxes"></i>
@@ -262,6 +273,108 @@
 
             // Open the compiled link in a new tab
             window.open(finalUrl, '_blank');
+        }
+
+        $('#listTable').on('click', '.insufficient-btn', function () {
+            showInsufficientList($(this).attr('data-id'), $(this).attr('data-docno'));
+        });
+
+        function escapeHtml(s) {
+            return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        function downloadInsufficientExcel(docNo, data) {
+            const workbook = new ExcelJS.Workbook();
+            workbook.created = new Date();
+            workbook.properties.title = 'Insufficient List';
+            const ws = workbook.addWorksheet('Insufficient List');
+
+            ws.addRow(['JO No', docNo]);
+            ws.addRow(['Generated', new Date().toLocaleString('en-GB')]);
+            ws.addRow([]);
+            const header = ws.addRow(['No', 'Item Code', 'Description', 'Qty', 'Bal Qty']);
+            header.font = { name: 'Calibri', size: 11, bold: true };
+            header.eachCell(c => {
+                c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F4F7' } };
+                c.border = { bottom: { style: 'thin' } };
+            });
+            ws.getRow(1).font = { bold: true };
+            ws.getRow(2).font = { bold: true };
+
+            data.forEach((r, idx) => {
+                ws.addRow([idx + 1, r.itemCode, r.description, r.qty, r.balQty]);
+            });
+
+            ws.columns = [{ width: 6 }, { width: 22 }, { width: 45 }, { width: 10 }, { width: 10 }];
+
+            workbook.xlsx.writeBuffer().then(function (buffer) {
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `InsufficientList_${String(docNo).replace(/[\\/:*?"<>|]/g, '_')}.xlsx`;
+                link.click();
+                URL.revokeObjectURL(link.href);
+            }).catch(function (err) {
+                console.error('Error creating Excel file:', err);
+            });
+        }
+
+        function showInsufficientList(id, docNo) {
+            $.ajax({
+                url: '/JO/GetJOInsufficientList?jobId=' + encodeURIComponent(id),
+                type: 'GET',
+                dataType: 'JSON',
+                beforeSend: function () {
+                    Swal.fire({ text: 'Please Wait', width: '300px', allowEscapeKey: false, allowOutsideClick: false, showConfirmButton: false });
+                    Swal.showLoading();
+                },
+                success: function (result) {
+                    if (result.success != true) {
+                        Swal.fire({ icon: 'error', title: 'Wait', text: result.errMessage });
+                        return;
+                    }
+                    const data = result.data || [];
+                    const rows = data.map(function (r, idx) {
+                        return `<tr>
+                            <td style="padding:6px 8px;border-bottom:1px solid #eee;">${idx + 1}</td>
+                            <td style="padding:6px 8px;border-bottom:1px solid #eee;">${escapeHtml(r.itemCode)}</td>
+                            <td style="padding:6px 8px;border-bottom:1px solid #eee;">${escapeHtml(r.description)}</td>
+                            <td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:right;">${r.qty}</td>
+                            <td style="padding:6px 8px;border-bottom:1px solid #eee;text-align:right;color:#d92d20;font-weight:600;">${r.balQty}</td>
+                        </tr>`;
+                    }).join('');
+                    const html = rows
+                        ? `<div style="max-height:60vh;overflow:auto;">
+                            <table style="width:100%;border-collapse:collapse;font-size:14px;text-align:left;">
+                                <thead><tr style="background:#f9fafb;">
+                                    <th style="padding:6px 8px;">#</th>
+                                    <th style="padding:6px 8px;">Item Code</th>
+                                    <th style="padding:6px 8px;">Description</th>
+                                    <th style="padding:6px 8px;text-align:right;">Qty</th>
+                                    <th style="padding:6px 8px;text-align:right;">Bal Qty</th>
+                                </tr></thead>
+                                <tbody>${rows}</tbody>
+                            </table>
+                           </div>`
+                        : 'No insufficient items.';
+                    Swal.fire({
+                        title: 'Insufficient List - ' + escapeHtml(docNo),
+                        html: html,
+                        width: '800px',
+                        confirmButtonText: 'Close',
+                        showDenyButton: data.length > 0,
+                        denyButtonText: '<i class="bi bi-file-earmark-excel"></i> Download Excel',
+                        denyButtonColor: '#16a34a',
+                        preDeny: function () {
+                            downloadInsufficientExcel(docNo, data);
+                            return false; // keep the popup open
+                        }
+                    });
+                },
+                error: function (error) {
+                    Swal.fire({ icon: 'error', title: 'Wait', text: error.statusText });
+                }
+            });
         }
 
         $('#listTable').on('click', '.delete-btn', function () {

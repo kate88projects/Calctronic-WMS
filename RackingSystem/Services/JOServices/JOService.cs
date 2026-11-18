@@ -116,6 +116,20 @@ namespace RackingSystem.Services.JOServices
 
                 var jomList = await _dbContext.JobOrder.OrderBy(x => x.JobOrder_Id).ToListAsync();
                 var jomListDTO = _mapper.Map<List<JOListDTO>>(jomList);
+
+                // Flag Done jobs that still have raw lines with balance (insufficient / failed retrieve)
+                var doneStatus = EnumJobOrderStatus.Done.ToString();
+                var insufficientJobIds = (await _dbContext.JobOrderRaws
+                    .Where(r => r.BalQty > 0)
+                    .Join(_dbContext.JobOrder.Where(j => j.Status == doneStatus),
+                        r => r.JobOrder_Id, j => j.JobOrder_Id, (r, j) => r.JobOrder_Id)
+                    .Distinct()
+                    .ToListAsync()).ToHashSet();
+                foreach (var jo in jomListDTO)
+                {
+                    jo.HasInsufficient = insufficientJobIds.Contains(jo.JobOrder_Id);
+                }
+
                 result.success = true;
                 result.data = jomListDTO;
 
@@ -127,6 +141,81 @@ namespace RackingSystem.Services.JOServices
             }
 
             return result;
+        }
+
+        public async Task<ServiceResponseModel<List<JOInsufficientDTO>>> GetJOInsufficientList(long jobId)
+        {
+            ServiceResponseModel<List<JOInsufficientDTO>> result = new ServiceResponseModel<List<JOInsufficientDTO>>();
+
+            try
+            {
+                var lines = await _dbContext.JobOrderRaws
+                    .Where(r => r.JobOrder_Id == jobId && r.BalQty > 0 && r.RetrieveFailed)
+                    .Select(r => new InsufficientLine(r.Item_Id, r.Qty, 0, r.BalQty, r.RetrieveFailed))
+                    .ToListAsync();
+
+                result.success = true;
+                result.data = await BuildInsufficientList(lines);
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceResponseModel<List<JOInsufficientDTO>>> GetJOEInsufficientList(long jobEId)
+        {
+            ServiceResponseModel<List<JOInsufficientDTO>> result = new ServiceResponseModel<List<JOInsufficientDTO>>();
+
+            try
+            {
+                var lines = await _dbContext.JobOrderEmergencyDetail
+                    .Where(d => d.JobOrderEmergency_Id == jobEId && d.BalQty > 0 && d.RetrieveFailed)
+                    .Select(d => new InsufficientLine(d.Item_Id, d.Qty, d.BufferQty, d.BalQty, d.RetrieveFailed))
+                    .ToListAsync();
+
+                result.success = true;
+                result.data = await BuildInsufficientList(lines);
+            }
+            catch (Exception ex)
+            {
+                result.errMessage = ex.Message;
+                result.errStackTrace = ex.StackTrace ?? "";
+            }
+
+            return result;
+        }
+
+        private record InsufficientLine(long Item_Id, int Qty, int BufferQty, int BalQty, bool RetrieveFailed);
+
+        private async Task<List<JOInsufficientDTO>> BuildInsufficientList(List<InsufficientLine> lines)
+        {
+            var itemIds = lines.Select(r => r.Item_Id).Distinct().ToList();
+            var items = await _dbContext.Item
+                .Where(i => itemIds.Contains(i.Item_Id))
+                .ToDictionaryAsync(i => i.Item_Id);
+
+            return lines
+                .GroupBy(r => r.Item_Id)
+                .Select(g =>
+                {
+                    items.TryGetValue(g.Key, out var itm);
+                    return new JOInsufficientDTO
+                    {
+                        Item_Id = g.Key,
+                        ItemCode = itm?.ItemCode ?? "",
+                        Description = itm?.Description ?? "",
+                        Qty = g.Sum(x => x.Qty),
+                        BufferQty = g.Sum(x => x.BufferQty),
+                        BalQty = g.Sum(x => x.BalQty),
+                        RetrieveFailed = g.Any(x => x.RetrieveFailed),
+                    };
+                })
+                .OrderBy(x => x.ItemCode)
+                .ToList();
         }
 
         public async Task<ServiceResponseModel<List<JODetailReqDTO>>> GetJODetail(long jobId)
@@ -357,6 +446,20 @@ namespace RackingSystem.Services.JOServices
             {
                 var jomListEmergency = await _dbContext.JobOrderEmergency.OrderBy(x => x.JobOrderEmergency_Id).ToListAsync();
                 var jomListEmergencyDTO = _mapper.Map<List<JOEmergencyReqDTO>>(jomListEmergency);
+
+                // Flag Done emergency jobs that still have failed lines with balance
+                var doneStatus = EnumJobOrderStatus.Done.ToString();
+                var insufficientIds = (await _dbContext.JobOrderEmergencyDetail
+                    .Where(d => d.BalQty > 0 && d.RetrieveFailed)
+                    .Join(_dbContext.JobOrderEmergency.Where(j => j.Status == doneStatus),
+                        d => d.JobOrderEmergency_Id, j => j.JobOrderEmergency_Id, (d, j) => d.JobOrderEmergency_Id)
+                    .Distinct()
+                    .ToListAsync()).ToHashSet();
+                foreach (var joe in jomListEmergencyDTO)
+                {
+                    joe.HasInsufficient = insufficientIds.Contains(joe.JobOrderEmergency_Id);
+                }
+
                 result.success = true;
                 result.data = jomListEmergencyDTO;
 

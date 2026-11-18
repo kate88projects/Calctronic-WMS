@@ -10,6 +10,7 @@
         public string Status { get; set; } = "";
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         public string CreatedBy { get; set; } = "";
+        public bool HasInsufficient { get; set; } = false;
         public List<JOEmergencyDetailReqDTO> EmergencyDetails { get; set; }
     }
 }
